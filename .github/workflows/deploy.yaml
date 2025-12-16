@@ -43,6 +43,8 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
+            --set-env-vars "ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}" \
             --set-env-vars "NODE_ENV=production"
 
       # ===========================
@@ -51,8 +53,8 @@ jobs:
       - name: Build & push front image
         run: |
           gcloud builds submit ./front \
-            --tag "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/front:latest"
-
+            --tag "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/front:latest" \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.BACKEND_BASE_URL }}
       - name: Deploy front to Cloud Run
         run: |
           gcloud run deploy engineer-quest-front \
