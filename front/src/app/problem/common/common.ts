@@ -4,7 +4,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 
 export const navigateWithUpdateUsageTime = async (user: User | null | undefined, router: AppRouterInstance, targetUrl: string, startTime: Date, method: "push" | "replace") => {
     const apiBaseUrl = getApiBaseUrl();
-    console.log("学習時間を追加")
     //ユーザを認識できない場合処理をしない(改善するかも 2025-11-21 記載)
     if (!user) {
         return;
