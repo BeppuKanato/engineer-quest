@@ -469,7 +469,6 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
         console.log("試験結果保存時にエラー");
         return res.status(500).json({ error: "試験結果保存時にエラーが発生しました" });
     }
-    console.log(aiJudge);
 
     const responseData: {
         score: number,
