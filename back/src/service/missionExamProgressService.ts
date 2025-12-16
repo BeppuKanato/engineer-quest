@@ -41,7 +41,6 @@ import { prisma } from "../lib/prisma"
  * @returns 
  */
 export const createMissionExamProgress = async (examId: string, userId: string, progressId: string, result: {score: number, isPassed: boolean, good: string[], bad: string[], feedback: string | null}, judgeType: JudgeType) => {
-    console.log("ミッション試験の進捗を追加")
     try {
         const progress = await prisma.missionExamProgress.create({
             data: {
