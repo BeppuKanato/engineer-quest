@@ -21,7 +21,6 @@ export default function Login() {
       const token = await signInUser.user.getIdToken();
 
       setMessage("ユーザ情報確認中");
-      console.log(apiBaseUrl);
       const res = await fetch(`${apiBaseUrl}/auth/ensure`, {
         method: "POST",
         headers: {
