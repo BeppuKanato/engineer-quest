@@ -13,7 +13,6 @@ export const navigateWithUpdateUsageTime = async (user: User | null | undefined,
         token: await user.getIdToken(),
         useTime: elapsed,
     }
-    console.log(data);
     const blob = new Blob([JSON.stringify(data)], {type: "application/json"})
     navigator.sendBeacon(`${apiBaseUrl}/usage/upsert`, blob);
     if (method === "push") {
