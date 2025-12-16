@@ -75,8 +75,6 @@ export default function ResultPage() {
   useEffect(() => {
     if (!user) return;
 
-    console.log(user.uid);
-
     const fetchData = async() => {
       const res = await fetchWithUserId(user, "/problem/missionResult", {
         method: "POST", 
