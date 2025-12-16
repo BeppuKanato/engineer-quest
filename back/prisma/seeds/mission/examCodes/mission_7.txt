@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <title>メモアプリ</title>
+    </head>
+    <body>
+        <h2>📝 メモアプリ</h2>
+
+        <input id="memoInput" type="text" placeholder="メモを入力" />
+        <button id="addBtn">追加</button>
+        <button id="saveBtn" style="display: none;">保存</button>
+
+        <ul id="memoList"></ul>
+
+        <script>
+            const memoInput = document.getElementById("memoInput");
+            const addBtn = document.getElementById("addBtn");
+            const saveBtn = document.getElementById("saveBtn");
+            const memoList = document.getElementById("memoList");
+
+            let editIndex = null;
+
+            // メモを追加
+            addBtn.addEventListener("click", () => {
+            const text = memoInput.value.trim();
+            if (text === "") return;
+
+            const li = document.createElement("li");
+            li.textContent = text;
+
+            const editBtn = document.createElement("button");
+            editBtn.textContent = "編集";
+            editBtn.addEventListener("click", () => {
+                memoInput.value = text;
+                editIndex = Array.from(memoList.children).indexOf(li);
+                addBtn.style.display = "none";
+                saveBtn.style.display = "inline";
+            });
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "削除";
+            deleteBtn.addEventListener("click", () => {
+                memoList.removeChild(li);
+            });
+
+            li.appendChild(editBtn);
+            li.appendChild(deleteBtn);
+            memoList.appendChild(li);
+
+            memoInput.value = "";
+            });
+
+            // メモを保存（編集モード）
+            saveBtn.addEventListener("click", () => {
+            const text = memoInput.value.trim();
+            if (editIndex === null || text === "") return;
+
+            const li = memoList.children[editIndex];
+            li.firstChild.textContent = text;
+
+            memoInput.value = "";
+            editIndex = null;
+            addBtn.style.display = "inline";
+            saveBtn.style.display = "none";
+            });
+        </script>
+    </body>
+</html>

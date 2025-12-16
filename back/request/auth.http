@@ -1,0 +1,6 @@
+POST http://localhost:3001/auth/ensure
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+}

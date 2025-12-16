@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>入力フォームの例</title>
+  </head>
+  <body>
+    <h1>入力フォームの作成</h1>
+    <form>
+      <label>名前: <input type="text" name="name" /></label><br/>
+      <label>メール: <input type="email" name="email" /></label><br/>
+      <label>部署:
+        <select name="department">
+          <option value="sales">営業</option>
+          <option value="dev">開発</option>
+          <option value="general">総務</option>
+        </select>
+      </label><br/>
+      <button type="submit">送信</button>
+    </form>
+  </body>
+</html>

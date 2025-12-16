@@ -1,0 +1,17 @@
+POST http://localhost:3001/usage/update
+Content-Type: application/json
+
+{
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5",
+    "useTime": 200
+}
+
+###
+
+POST http://localhost:3001/usage/get
+Content-Type: application/json
+
+{
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5",
+    "period": "day"
+}

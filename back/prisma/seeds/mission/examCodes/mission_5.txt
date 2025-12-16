@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mission 5</title>
+    <style>
+      #title {
+        color: black;
+        transition: color 0.3s;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 id="title">最初のタイトル</h2>
+    <button id="btn">クリックしてみよう</button>
+
+    <script>
+      const title = document.getElementById("title");
+      const btn = document.getElementById("btn");
+
+      btn.addEventListener("click", function () {
+        const colors = ["red", "blue", "green", "orange"];
+        const random = Math.floor(Math.random() * colors.length);
+        title.style.color = colors[random];
+        title.textContent = "クリックされました！";
+      });
+    </script>
+  </body>
+</html>

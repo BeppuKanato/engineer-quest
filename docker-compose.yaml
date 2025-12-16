@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: engineer-quest-front
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      NEXT_PUBLIC_API_BASE_URL: http://back:8080
+    ports:
+      - "3000:8080"
+    depends_on:
+      - back
+
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: engineer-quest-back
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: ${DATABASE_URL}
+      GEMINI_API_KEY: ${GEMINI_API_KEY} 
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001"
+    ports:
+      - "4000:8080"

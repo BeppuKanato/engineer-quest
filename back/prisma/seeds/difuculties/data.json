@@ -1,0 +1,14 @@
+[
+    {
+        "name": "初級",
+        "slug": "shokyu"
+    },
+    {
+        "name": "中級",
+        "slug": "chukyu"
+    },
+    {
+        "name": "上級",
+        "slug": "jokyu"
+    }
+]

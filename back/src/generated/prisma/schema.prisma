@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JudgeType {
+  WITH_FEEDBACK
+  WITHOUT_FEEDBACK
+}
+
+enum MissionExamLanguages {
+  HTML
+  CSS
+  JavaScript
+}
+
+enum MissionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum MissionType {
+  PROMOTION
+  MAIN
+  SUB
+}
+
+enum ExamType {
+  REPRODUCTION
+  FREE_CREATION
+  HYBRID
+}
+
+model Character {
+  id        String @id @default(uuid())
+  name      String
+  slug      String @unique
+  imagePath String
+
+  clientMissions         Mission[]               @relation("MissionClient")
+  supportExplanations    Explain[]               @relation("ExplainSupporter")
+  supportStepExams       StepExam[]              @relation("StepExamSupporter")
+  missionBeforeSentences MissionBeforeSentence[] @relation("MissionBeforeSpeaker")
+  missionAfterSentences  MissionAfterSentence[]  @relation("MissionAfterSpeaker")
+}
+
+model User {
+  id         String @id
+  rankId     String
+  name       String
+  level      Int
+  experience Int
+
+  levelRequirement    LevelupRequirement    @relation(fields: [level], references: [level])
+  rank                Rank                  @relation(fields: [rankId], references: [id])
+  missionExamProgress MissionExamProgress[]
+  userAchievements    UserAchievement[]
+  missionProgresses   MissionProgress[]
+  usageTimes          UsageTime[]
+  experienceLogs      ExperienceLog[]
+}
+
+model Difficulty {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique
+  missions Mission[]
+}
+
+model Mission {
+  id           String      @id @default(uuid())
+  difficultyId String
+  clientId     String
+  title        String
+  detail       String
+  component    String
+  experience   Int
+  type         MissionType
+  slug         String      @unique
+
+  difficulty          Difficulty                   @relation(fields: [difficultyId], references: [id])
+  client              Character                    @relation("MissionClient", fields: [clientId], references: [id])
+  steps               Step[]
+  exam                MissionExam?
+  unlockByRank        MissionUnlockByRank[]
+  unlockByLevel       MissionUnlockByLevel[]
+  unlockByMission     MissionUnlockByMission[]     @relation("MissionUnlockByMission")
+  requiredMission     MissionUnlockByMission[]     @relation("RequiredMission")
+  unlockByAchievement MissionUnlockByAchievement[]
+  beforeSentences     MissionBeforeSentence[]      @relation("MissionBeforeSentence")
+  afterSentences      MissionAfterSentence[]       @relation("MissionAfterSentence")
+  rank                Rank?                        @relation("UpdateRankByMission")
+  missionProgresses   MissionProgress[]            @relation("MissionProgress")
+}
+
+model Step {
+  id        String @id @default(uuid())
+  missionId String
+  order     Int
+  title     String
+  detail    String
+
+  mission   Mission    @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  explains  Explain[]
+  stepExams StepExam[]
+}
+
+model Explain {
+  id            String  @id @default(uuid())
+  stepId        String
+  supporterId   String
+  order         Int
+  content       String
+  highlight     String?
+  componentType String?
+  code          String?
+
+  step      Step      @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  supporter Character @relation("ExplainSupporter", fields: [supporterId], references: [id])
+}
+
+model MissionExam {
+  id           String                 @id @default(uuid())
+  missionId    String                 @unique
+  criteria     Json
+  type         ExamType?
+  instructions String[]
+  component    String?
+  exampleCode  Json?
+  language     MissionExamLanguages[]
+
+  mission  Mission               @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  progress MissionExamProgress[]
+}
+
+model StepExam {
+  id            String  @id @default(uuid())
+  stepId        String
+  supporterId   String
+  content       String
+  answer        String
+  highlight     String?
+  componentType String?
+
+  step      Step      @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  supporter Character @relation("StepExamSupporter", fields: [supporterId], references: [id])
+}
+
+model MissionExamProgress {
+  id         String    @id @default(uuid())
+  examId     String
+  userId     String
+  progressId String
+  point      Int
+  isPassed   Boolean
+  good       String[]
+  bad        String[]
+  feedback   String?   @db.Text
+  judgeType  JudgeType
+  createdAt  DateTime  @default(now())
+
+  progress MissionProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  exam     MissionExam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id])
+}
+
+model MissionUnlockByRank {
+  id        String @id @default(uuid())
+  missionId String
+  rankId    String
+
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  rank    Rank    @relation(fields: [rankId], references: [id])
+}
+
+model MissionUnlockByLevel {
+  id        String @id @default(uuid())
+  missionId String
+  level     Int
+
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model MissionUnlockByMission {
+  id         String @id @default(uuid())
+  missionId  String
+  requiredId String
+
+  mission  Mission @relation("MissionUnlockByMission", fields: [missionId], references: [id], onDelete: Cascade)
+  required Mission @relation("RequiredMission", fields: [requiredId], references: [id], onDelete: Cascade)
+}
+
+model MissionUnlockByAchievement {
+  id         String @id @default(uuid())
+  missionId  String
+  requiredId String
+
+  mission  Mission     @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  required Achievement @relation(fields: [requiredId], references: [id], onDelete: Cascade)
+}
+
+model Rank {
+  id         String  @id @default(uuid())
+  name       String
+  order      Int
+  slug       String  @unique
+  requiredId String? @unique
+
+  required         Mission?              @relation("UpdateRankByMission", fields: [requiredId], references: [id])
+  unlockedMissions MissionUnlockByRank[]
+  user             User[]
+}
+
+model MissionBeforeSentence {
+  id        String @id @default(uuid())
+  missionId String
+  speakerId String
+  sentence  String
+  order     Int
+
+  mission Mission   @relation("MissionBeforeSentence", fields: [missionId], references: [id], onDelete: Cascade)
+  speaker Character @relation("MissionBeforeSpeaker", fields: [speakerId], references: [id])
+}
+
+model MissionAfterSentence {
+  id        String @id @default(uuid())
+  missionId String
+  speakerId String
+  sentence  String
+  order     Int
+
+  mission Mission   @relation("MissionAfterSentence", fields: [missionId], references: [id], onDelete: Cascade)
+  speaker Character @relation("MissionAfterSpeaker", fields: [speakerId], references: [id])
+}
+
+model MissionProgress {
+  id          String        @id @default(uuid())
+  missionId   String
+  userId      String
+  status      MissionStatus
+  currentStep Int
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+
+  mission Mission @relation("MissionProgress", fields: [missionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  examProgress   MissionExamProgress[]
+  experienceLogs ExperienceLog[]
+}
+
+model Achievement {
+  id               String                       @id @default(uuid())
+  name             String
+  detail           String
+  slug             String                       @unique
+  type             String
+  conditions       AchievementCondition[]
+  userAchievements UserAchievement[]
+  unlockedMissions MissionUnlockByAchievement[]
+}
+
+model AchievementCondition {
+  id              String @id @default(uuid())
+  achievementId   String
+  stringCondition String
+  intCondition    Int
+  type            String
+
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  createdAt     DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+}
+
+model LevelupRequirement {
+  level              Int    @unique
+  requiredExperience Int
+  users              User[]
+}
+
+model UsageTime {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime
+  usageTime Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model ExperienceLog {
+  id                String   @id @default(uuid())
+  missionProgressId String
+  userId            String
+  experience        Int
+  createdAt         DateTime @default(now())
+
+  missionProgress MissionProgress @relation(fields: [missionProgressId], references: [id])
+  user            User            @relation(fields: [userId], references: [id])
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            タイトル
+        </title>
+    </head>
+    <body>
+        <h1>自己紹介ページ</h1>
+        <p>こんにちは、新入社員です</p>
+        <p>私の好きな食べ物を紹介します!</p>
+        <ul>
+            <li>ラーメン</li>
+            <li>寿司</li>
+            <li>カレー</li>
+        </ul>
+        <img src="image.png" alt="食べ物" />
+    </body>
+</html>

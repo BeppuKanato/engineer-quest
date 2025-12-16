@@ -1,0 +1,65 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main   # main に push されたら自動デプロイ
+
+env:
+  REGION: asia-northeast1
+  REPO_NAME: engineer-quest   # Artifact Registry のリポジトリ名
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # ===========================
+      # back: Build & Deploy
+      # ===========================
+      - name: Build & push back image
+        run: |
+          gcloud builds submit ./back \
+            --tag "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/back:latest"
+
+      - name: Deploy back to Cloud Run
+        run: |
+          gcloud run deploy engineer-quest-back \
+            --image "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/back:latest" \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+            --set-env-vars "NODE_ENV=production"
+
+      # ===========================
+      # front: Build & Deploy
+      # ===========================
+      - name: Build & push front image
+        run: |
+          gcloud builds submit ./front \
+            --tag "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/front:latest"
+
+      - name: Deploy front to Cloud Run
+        run: |
+          gcloud run deploy engineer-quest-front \
+            --image "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/front:latest" \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars "NEXT_PUBLIC_API_BASE_URL=${{ secrets.BACKEND_BASE_URL }}" \
+            --set-env-vars "INTERNAL_API_BASE_URL=${{ secrets.BACKEND_INTERNAL_URL }}" \
+            --set-env-vars "NODE_ENV=production"

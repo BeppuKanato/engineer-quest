@@ -1,0 +1,63 @@
+POST http://localhost:3001/problem/missionSelect
+Content-Type: application/json
+
+{
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5"
+}
+
+###
+
+POST http://localhost:3001/problem/missionConfirm
+Content-Type: application/json
+
+{
+    "missionId": "5862f1d2-5664-4534-962a-5c0d58f51ae6"
+}
+
+###
+POST http://localhost:3001/problem/stepExplain
+Content-Type: application/json
+
+{
+    "stepId": "f27ffab9-a1cd-408c-a0ad-8ac077f10089"
+}
+
+###
+POST http://localhost:3001/problem/stepExam
+Content-Type: application/json
+
+{
+    "stepId": "f27ffab9-a1cd-408c-a0ad-8ac077f10089"
+}
+
+###
+POST http://localhost:3001/problem/missionExam
+Content-Type: application/json
+
+{
+    "missionId": "368845ff-fc9c-4634-9f6f-6de3cf463d06"
+}
+
+###
+POST http://localhost:3001/problem/missionExamAIJudge
+Content-Type: application/json
+
+{
+    "missionId": "5f9262f5-0404-4691-bd4e-cba320d5be45",
+    "examId": "9cf3428b-4452-4d81-840e-92ca879d9170",
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5",
+    "userCode": {
+        "HTML": "<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>ToDoリスト</title>\n  </head>\n  <body>\n    <h2>🧩 ToDoリスト</h2>\n    <input id=\"taskInput\" type=\"text\" placeholder=\"タスクを入力\" />\n    <button id=\"addBtn\">追加</button>\n    <ul id=\"taskList\"></ul>\n  </body>\n</html>",
+        "JavaScript": "const taskInput = document.getElementById(\"taskInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst taskList = document.getElementById(\"taskList\");\n\naddBtn.addEventListener(\"click\", () => {\n  const text = taskInput.value.trim();\n  if (text === \"\") return;\n  const li = document.createElement(\"li\");\n  li.textContent = text;\n  const deleteBtn = document.createElement(\"button\");\n  deleteBtn.textContent = \"削除\";\n  deleteBtn.addEventListener(\"click\", () => {\n    taskList.removeChild(li);\n  });\n  li.appendChild(deleteBtn);\n  taskList.appendChild(li);\n  taskInput.value = \"\";\n});"
+    }
+}
+
+###
+
+POST http://localhost:3001/problem/missionResult
+Content-Type: application/json
+
+{
+    "missionId": "5f9262f5-0404-4691-bd4e-cba320d5be45",
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5"
+}

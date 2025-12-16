@@ -1,0 +1,16 @@
+function omokuji(index) {
+    const fortunes = ["大吉", "中吉", "小吉", "凶"];
+
+    const result = fortunes[index];
+
+    return result;
+}
+
+for (let i = 3; i > 0; i--) {
+    console.log(i);
+}
+
+const name = "山田太郎";
+const result = omikuji();
+
+console.log(name + "さんの今日の運勢は" + result + "です!");

@@ -1,0 +1,16 @@
+POST http://localhost:3001/home
+Content-Type: application/json
+
+{
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5"
+}
+
+###
+
+POST http://localhost:3001/home/acceptMission
+Content-Type: application/json
+
+{
+    "missionId": "42002e17-525a-41c8-a5ef-240146327eba",
+    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5"
+}

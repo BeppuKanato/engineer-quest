@@ -1,0 +1,8 @@
+[
+  { "missionSlug": "mission-2", "requiredSlug": "mission-1" },
+  { "missionSlug": "mission-3", "requiredSlug": "mission-2" },
+  { "missionSlug": "mission-4", "requiredSlug": "mission-3" },
+  { "missionSlug": "mission-5", "requiredSlug": "mission-4" },
+  { "missionSlug": "mission-6", "requiredSlug": "mission-5" },
+  { "missionSlug": "mission-7", "requiredSlug": "mission-6"}
+]

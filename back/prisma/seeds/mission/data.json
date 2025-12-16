@@ -1,0 +1,1175 @@
+[
+  {
+    "slug": "mission-1",
+    "title": "Webページの骨組みを作ろう",
+    "detail": "HTMLの基本タグを使って、自己紹介ページの骨組みを作ります。",
+    "type": "MAIN",
+    "component": "Mission_1",
+    "experience": 100,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+
+    "beforeSentences": [
+      { "speakerSlug": "yamada-senpai", "sentence": "ここから本格的にWebの世界に入っていくよ。まずはページの『骨組み』から始めよう。", "order": 1 },
+      { "speakerSlug": "yamada-senpai", "sentence": "最初はタグの種類が多く見えるかもしれないけど、ひとつずつ一緒に確認していこう。", "order": 2 }
+    ],
+
+    "afterSentences": [
+      { "speakerSlug": "yamada-senpai", "sentence": "いいね！ちゃんとページの骨組みが作れているよ。", "order": 1 },
+      { "speakerSlug": "yamada-senpai", "sentence": "これで『自分のHTMLページを1枚作れる』状態になったね。立派な一歩だよ。", "order": 2 },
+      { "speakerSlug": "yamada-senpai", "sentence": "次は入力フォームを作って、ユーザーから情報を受け取れるページにしていこう。", "order": 3 }
+    ],
+
+    "steps": [
+      {
+        "order": 1,
+        "title": "HTML文書の基本構造を押さえよう",
+        "detail": "<!DOCTYPE html> 〜 <html> / <head> / <body> の構造を確認します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "HTMLはブラウザに『これはWebページだよ』と伝えるための言語だよ。まずはページの土台となるタグから覚えよう。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```html\n<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>タイトル</title>\n  </head>\n  <body>\n    ここに画面に表示したい内容を書きます。\n  </body>\n</html>\n```"
+          },
+          {
+            "order": 2,
+            "content": "<head> には『ページの設定』、<body> には『画面に表示する内容』を書くよ。そして <title> は『タブに表示されるページ名』、<meta charset=\"UTF-8\"> は『日本語を正しく表示するための設定』だよ。細かい使い方はもっと学んでいくけれど、最初はこの2つだけ覚えておけばOKだよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```html\n<title>ページのタイトル</title>\n<meta charset=\"UTF-8\" />\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "最小限のHTML文書を自分で書いてみよう。",
+            "instructions": [
+              "DOCTYPE を正しく書く",
+              "<html> / <head> / <body> を適切に配置する",
+              "<title> にページ名を入れる（練習）",
+              "<meta charset=\"UTF-8\"> を追加する",
+              "本文に 1 行の文章を書く"
+            ],
+            "answer": "```html\n<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>練習</title>\n  </head>\n  <body>\n    練習用ページです。\n  </body>\n</html>\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+
+      {
+        "order": 2,
+        "title": "見出し・段落・リスト・画像を使ってみよう",
+        "detail": "<h1> や <p>、<ul><li>、<img> を使って自己紹介ページを作ります。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "見出しは <h1>〜<h3> のようにレベルがあるよ。1ページに1つの大きなタイトルは <h1> を使うのが基本だね。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```html\n<h1>自己紹介</h1>\n<p>こんにちは、新入社員の○○です。</p>\n```"
+          },
+          {
+            "order": 2,
+            "content": "箇条書きは <ul>（順不同リスト） と <li>（リストの1項目）をセットで使うよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```html\n<ul>\n  <li>ラーメン</li>\n  <li>カレー</li>\n</ul>\n```"
+          },
+          {
+            "order": 3,
+            "content": "<img> タグは『閉じタグがいらない』少し特殊なタグだよ。alt 属性は画像が表示できないときの説明文として使われるんだ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```html\n<img src=\"profile.png\" alt=\"プロフィール画像\" />\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "見出し＋本文＋リストを作ってみよう。",
+            "instructions": [
+              "h1 タグで見出しを書く（「好きな食べ物」）",
+              "p タグで紹介文を書く（「私の好きな食べ物を紹介します」）",
+              "ul / li を使って「ラーメン」「寿司」を並べる"
+            ],
+            "answer": "```html\n<h1>好きな食べ物</h1>\n<p>私の好きな食べ物を紹介します。</p>\n<ul>\n  <li>ラーメン</li>\n  <li>寿司</li>\n</ul>\n```",
+            "supporterSlug": "yamada-senpai"
+          },
+          {
+            "order": 2,
+            "content": "alt 属性を使った img タグを書いてみよう。",
+            "instructions": [
+              "img タグを書く",
+              "src 属性にはファイル名を入れる（food.png）",
+              "alt 属性に『好きな食べ物の写真』と書く"
+            ],
+            "answer": "```html\n<img src=\"food.png\" alt=\"好きな食べ物の写真\" />\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "自己紹介ページとしてまとめよう",
+        "detail": "これまで学んだタグを組み合わせて、1つのページとして完成させます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "ここまでで、タイトル・本文・リスト・画像を組み合わせた簡単なページを作れるようになったよ。今度はそれらを1つにまとめてみよう。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "これまでのタグを組み合わせて、自己紹介ページを完成させよう。",
+            "componentType": "",
+            "instructions": [
+              "DOCTYPE / html / head / body を正しく書く",
+              "h1 でページタイトルを書く（『自己紹介ページ』）",
+              "p を 2 つ書く（あいさつ文・説明文）",
+              "ul/li で好きな食べ物を 3 つ書く（ラーメン・寿司・カレー）",
+              "img タグで画像を 1 つ追加する（alt 属性必須）"
+            ],
+            "answer": "```html<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>自己紹介</title>\n  </head>\n  <body>\n    <h1>自己紹介ページ</h1>\n    <p>こんにちは、新入社員です。</p>\n    <p>私の好きな食べ物を紹介します！</p>\n    <ul>\n      <li>ラーメン</li>\n      <li>寿司</li>\n      <li>カレー</li>\n    </ul>\n    <img src=\"image.png\" alt=\"好きな食べ物\" />\n  </body>\n</html>```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "h1 を使ったページタイトルが含まれている：最大20点",
+            "p タグによる文章が1つ以上書かれている：最大20点",
+            "ul/li または img のどちらかが正しく使われている：最大20点"
+          ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+          "自分だけの『自己紹介ページ』をHTMLで作りましょう。",
+          "ページタイトル（<h1>）を1つ入れる",
+          "あいさつ・紹介文（<p>）を書く",
+          "リスト（<ul><li>） もしくは 画像（<img>）のどちらかを使う",
+          "好きな内容や文章を自由に作ってOKです"
+        ],
+        "exampleCode": {
+          "HTML": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>自己紹介ページ</title>\n  </head>\n  <body>\n    <h1>自己紹介ページ</h1>\n    <p>こんにちは</p>\n    <p>私の使用技術を紹介します</p>\n    <ul>\n      <li>c</li>\n      <li>java</li>\n      <li>python</li>\n    </ul>\n    <img src=\"code.png\" alt=\"プログラミング画像\" />\n  </body>\n</html>"
+        },
+        "language": ["HTML"]
+      }
+    ]
+  }
+  ,
+  {
+    "slug": "mission-2",
+    "title": "フォームで情報を入力してもらおう",
+    "detail": "HTML の form、input、select、radio などを使って、基本的な入力フォームを作ります。",
+    "type": "MAIN",
+    "component": "Mission_2",
+    "experience": 120,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+
+    "beforeSentences": [
+      {
+        "order": 1,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は、ユーザーから情報を入力してもらうフォームを作ってみよう！"
+      },
+      {
+        "order": 2,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "フォームは Web アプリの基本中の基本だから、ここでしっかり押さえておこうね。"
+      }
+    ],
+
+    "afterSentences": [
+      {
+        "order": 1,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね！しっかりフォームの基本が押さえられているよ。"
+      },
+      {
+        "order": 2,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はいよいよ、このフォームをもっと便利にしていくステップに進むよ！"
+      }
+    ],
+
+    "steps": [
+      {
+        "order": 1,
+        "title": "form と入力欄を使ってみよう",
+        "detail": "<form> と <input> の役割を理解しよう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "<form> は『入力された内容を送信するための枠』だよ。フォームの中に入力欄を入れていくんだ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1-1",
+            "code": "```html\n<form>\n  <input type=\"text\" />\n</form>\n```"
+          },
+          {
+            "order": 2,
+            "content": "<input> は『ユーザーが入力する場所』だよ。type=\"text\" や type=\"email\" などのように、入力欄の種類を type 属性で指定するよ。placeholder は薄く表示される説明文だね。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1-2",
+            "code": "```html\n<input type=\"text\" placeholder=\"名前\" />\n<input type=\"email\" placeholder=\"メール\" />\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "名前とメールアドレスを入力する欄を作ってみよう。",
+            "instructions": [
+              "<form> を使う",
+              "名前入力欄（type=\"text\"）を作る",
+              "メール入力欄（type=\"email\"）を作る",
+              "2つの input は <form> の中に配置する"
+            ],
+            "answer": "```html\n<form>\n  <input type=\"text\" placeholder=\"名前\" />\n  <input type=\"email\" placeholder=\"メール\" />\n</form>\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+
+      {
+        "order": 2,
+        "title": "ラジオボタンを使ってみよう",
+        "detail": "選択肢の中から1つだけ選んでもらう UI を作ろう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "ラジオボタンは type=\"radio\" を使うよ。『丸いボタンの中から1つ選んでほしいとき』に使われる UI だね。同じ name をつけることでグループ化できるよ。value には『その選択肢が選ばれたときに送られる値』を入れるよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2-1",
+            "code": "```html\n<input type=\"radio\" name=\"gender\" value=\"man\" /> 男\n<input type=\"radio\" name=\"gender\" value=\"woman\" /> 女\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "男女を選ぶラジオボタンを作ってみよう。",
+            "instructions": [
+              "男 と 女 の2つのラジオボタンを作る",
+              "どちらも name=\"gender\" にする（同じグループにするため）",
+              "value 属性も適切に設定する"
+            ],
+            "answer": "```html\n<input type=\"radio\" name=\"gender\" value=\"man\" /> 男\n<input type=\"radio\" name=\"gender\" value=\"woman\" /> 女\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+
+      {
+        "order": 3,
+        "title": "プルダウンメニューを使ってみよう",
+        "detail": "<select> と <option> を使って、選択式の UI を作ってみよう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "<select> は『複数の候補から1つ選ぶ』ときの UI だよ。<option> とセットで使うんだ。ここでも value 属性は radio のときと同じく『選ばれたときに送られる値』を表すよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-3-1",
+            "code": "```html\n<select>\n  <option value=\"dev\">開発</option>\n  <option value=\"sales\">営業</option>\n</select>\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "部署を選ぶセレクトボックスを作ってみよう。",
+            "instructions": [
+              "<select> タグを使う",
+              "開発（dev）、営業（sales）、総務（general）の3つの項目を作る",
+              "value 属性を正しく設定する"
+            ],
+            "answer": "```html\n<select>\n  <option value=\"sales\">営業</option>\n  <option value=\"dev\">開発</option>\n  <option value=\"general\">総務</option>\n</select>\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+
+      {
+        "order": 4,
+        "title": "送信ボタンを追加しよう",
+        "detail": "フォームの入力内容を送信するためのボタンを作ろう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "<button> はボタンを作るタグだよ。type=\"submit\" にすると『フォームの中身を送信するボタン』になるよ。送信というのは“フォームに入力されたデータをサーバーなどに送る動作”のことだよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-4-1",
+            "code": "```html\n<button type=\"submit\">送信</button>\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "送信ボタンを作ってみよう。",
+            "instructions": [
+              "<button> タグを使う",
+              "type=\"submit\" にする",
+              "ボタンの中身は『送信』と書く"
+            ],
+            "answer": "```html\n<button type=\"submit\">送信</button>\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "入力欄（text / email）が正しく作られている：最大15点",
+            "ラジオボタンが正しく動作している：最大15点",
+            "プルダウンメニューが正しく作られている：最大15点",
+            "送信ボタンが含まれている：最大15点"
+          ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+          "自分だけの『ユーザー情報入力フォーム』を作ってみましょう。",
+          "名前（text）、メール（email）の入力欄を作る",
+          "男女を選ぶラジオボタンを作る",
+          "部署を選ぶ select を作る（開発/営業/総務）",
+          "フォームの最後に送信ボタンをつける",
+          "フォーム内の配置や文章は自由に作ってOKです"
+        ],
+        "exampleCode": {
+          "HTML": "<form>\n  <label>名前: <input type=\"text\" name=\"name\" /></label><br/>\n  <label>メール: <input type=\"email\" name=\"email\" /></label><br/>\n  <label>部署:\n    <select name=\"department\">\n      <option value=\"sales\">営業</option>\n      <option value=\"dev\">開発</option>\n      <option value=\"general\">総務</option>\n    </select>\n  </label><br/>\n  <button type=\"submit\">送信</button>\n</form>"
+        },
+        "language": ["HTML"]
+      }
+    ]
+  },
+  {
+    "slug": "mission-3",
+    "title": "ページの見た目を整えよう（CSS入門）",
+    "detail": "CSSを使ってWebページの見た目を整えます。文字の色やサイズ、余白の調整、背景色など基本的なスタイルを学びましょう。",
+    "type": "MAIN",
+    "component": "Mission_3",
+    "experience": 100,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "steps": [
+      {
+        "order": 1,
+        "title": "CSSの基本を理解しよう",
+        "detail": "CSSの書き方と基本構造、セレクタの種類を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "CSSはHTMLの見た目を整えるための言語です。文字の色やサイズ、余白などを指定できます。",
+            "supporterSlug": "yamada-senpai"
+          },
+          {
+            "order": 2,
+            "content": "セレクタで対象のHTML要素を指定し、{ } の中にスタイル（プロパティと値）を書きます。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\nh1 {\n  color: red;\n  font-size: 24px;\n}\n```"
+          },
+          {
+            "order": 3,
+            "content": "CSSはHTMLの中に直接書く方法（styleタグ）と、外部ファイルとして読み込む方法があります。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n<!-- HTML内に直接書く場合 -->\n<style>\n  p {\n    color: blue;\n  }\n</style>\n\n<!-- 外部CSSファイルを読み込む場合 -->\n<link rel=\"stylesheet\" href=\"style.css\" />\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "外部CSSファイル「style.css」を読み込むHTMLを書いてみましょう。",
+            "answer": "```css\n<link rel=\"stylesheet\" href=\"style.css\" />\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "文字のスタイルを変更しよう",
+        "detail": "文字の色・サイズ・フォントを変更して見やすくします。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "文字色は `color`、サイズは `font-size` で指定します。",
+            "componentType": "step-2-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\np {\n  color: red;\n  font-size: 28px;\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "フォントの種類は `font-family` で指定します。代表的なフォントをいくつか紹介します。",
+            "componentType": "step-2-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n#p1 {\n  font-family: \"serif\";\n}\n#p2 {\n  font-family: \"sans-serif\";\n}\n#p3 {\n  font-family: \"Comic Sans MS\";\n}\n#p4 {\n  font-family: \"monospace\";\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "h1タグの文字色を赤、フォントサイズを24pxにしてみましょう。",
+            "answer": "```css\nh1 {\n  color: red;\n  font-size: 24px;\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "余白や背景色を整えよう",
+        "detail": "マージンやパディングを調整して要素を整列させ、背景色を設定します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "`margin` は外側の余白、`padding` は内側の余白を指定します。",
+            "componentType": "step-3-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n#margin {\n  margin: 20px;\n}\n#padding {\n  padding: 20px;\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "`margin` や `padding` は、上下左右を個別に指定することもできます。\n\n指定の順番は **上 → 右 → 下 → 左** です。",
+            "componentType": "step-3-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n#box1 {\n  margin: 0 0 0 0;\n}\n\n/* 例: 上だけ10px、左右は5px、下は0 */\n#box2 {\n  margin: 10px 5px 0px 5px;\n}\n```"
+          },
+          {
+            "order": 3,
+            "content": "背景色は `background-color` で指定します。",
+            "componentType": "step-3-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n#bgColor {\n  background-color: purple;\n}\n```"
+          },
+          {
+            "order": 4,
+            "content": "CSSのボックスモデルでは、margin（外側の余白）、padding（内側の余白）、border（枠線）などを使って要素の間隔を調整します。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\ndiv {\n  margin: 10px;\n  padding: 10px;\n  border: 1px solid black;\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "pタグに上下10pxの外側の余白をつけ、背景色を黄色にしてみましょう。",
+            "answer": "```css\np {\n  margin: 10px 0 10px 0;\n  background-color: yellow;\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "クラスやIDを使ってスタイルを当てよう",
+        "detail": "特定の要素にスタイルを当てるための class と id の使い方を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "`class` は複数の要素に同じスタイルを当てるときに使います。HTMLでは `class=\"highlight\"` のように指定します。",
+            "componentType": "step-4-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n.highlight {\n  color: green;\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "`id` はページ内で1つだけの要素にスタイルを当てるときに使います。HTMLでは `id=\"special\"` のように指定します。",
+            "componentType": "step-4-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```css\n#special {\n  color: orange;\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "クラス名「highlight」が付いた要素の文字色を青にしてみましょう。",
+            "answer": "```css\n.highlight {\n  color: blue;\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "h1 の文字色が赤に設定されている：最大15点", 
+            ".blue クラスの文字色が青に設定されている：最大15点", 
+            "#y-24 の文字色が黄に設定されている：最大10点", 
+            "#y-24 のフォントサイズが 24px に設定されている：最大10点", 
+            ".box の背景色が水色に設定されている：最大20点", 
+            ".box の padding が 20px に設定されている：最大15点", 
+            ".box の margin が 10px 15px 10px 15px に設定されている：最大15点"
+          ]
+        },
+        "type": "HYBRID",
+        "instructions": [
+          "h1タグの文字色を赤色にする。",
+          "「blue」クラスの文字色を青色に設定する。",
+          "「y-24」IDの文字色を黄色、フォントサイズを24pxに設定する。",
+          "「box」クラスの背景色を水色、内側の余白を20pxに設定する。\n外側の余白を上:10px、右:15px、下:10px、左:15pxに設定する。"
+        ],
+        "component": "Mission_3_Exam",
+        "exampleCode": {
+          "CSS": "h1 {\n    color: red;\n}\n.blue {\n    color: blue;\n}\n#y-24 {\n    color: yeloow;\n    font-size: 24px;\n}\n.box {\n    background-color: lightblule;\n    padding: 20px;\n    margin: 10px 15px 10px 15px;\n}"
+        },
+        "language": ["CSS"]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今回はページの見た目を整えるCSSを学びます。色や余白を変えて、見やすいページにしましょう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "基本を押さえて、自分の作ったHTMLページにスタイルを追加してみましょう。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "見た目が整いましたね！ページがぐっと見やすくなりました。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はJavaScriptを使ってページに動きをつけるステップです。準備はいいですか？",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "slug": "mission-4",
+    "title": "JavaScriptの文法を学ぼう（基礎編）",
+    "detail": "JavaScriptの基本文法を学びます。変数・型・条件分岐・繰り返し・関数など、Webページに動きをつけるための基礎を押さえましょう。",
+    "type": "MAIN",
+    "component": "Mission_4",
+    "experience": 120,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "steps": [
+      {
+        "order": 1,
+        "title": "変数とデータ型を理解しよう",
+        "detail": "変数の宣言や数値・文字列・配列など基本的なデータ型を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "JavaScriptでは var, let, const で変数を作ることができます。最近の書き方では、主に let と const を使います。",
+            "componentType": "step-1-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nlet name;\nconst age = 20;\n```"
+          },
+          {
+            "order": 2,
+            "content": "それぞれの使い方には少し違いがあります。\n\n- var：昔の書き方。今はあまり使いません。\n- let：あとで中身を変えたいときに使います。\n- const：中身を変えたくないときに使います（固定したい値など）。",
+            "componentType": "step-1-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nvar name = \"太郎\";\nlet age = 25;\nconst country = \"日本\";\n```"
+          },
+          {
+            "order": 3,
+            "content": "データ型には文字列(String)、数値(Number)、真偽値(Boolean)、配列(Array)などがあります。JavaScriptでは型を宣言しなくても使えます。",
+            "componentType": "step-1-3",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nlet message = \"こんにちは\";\nlet score = 90;\nlet isPassed = true;\nlet fruits = [\"りんご\", \"バナナ\"];\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "名前を文字列、年齢を数値として変数に代入してみましょう。",
+            "answer": "```js\nlet name = \"山田太郎\";\nlet age = 25;\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1-exam"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "条件分岐を使おう",
+        "detail": "if文や比較演算子を使って条件による処理を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "if文を使うと条件によって処理を分けられます。",
+            "componentType": "step-2-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nif (score >= 80) {\n  console.log(\"合格\");\n} else {\n  console.log(\"不合格\");\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "比較演算子には ==, ===, >, < などがあります。== は値が同じかどうかを比較し、型が違っても自動的に変換して比較します。一方、=== は値と型の両方が同じ場合のみ true になります。",
+            "componentType": "step-2-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nif (a === b) {\n  console.log(\"同じです\");\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "年齢が20以上なら「成人」、未満なら「未成年」と表示してみましょう。\n変数は宣言済みの age を使ってください。",
+            "answer": "```js\nif (age >= 20) {\n  console.log(\"成人\");\n} else {\n  console.log(\"未成年\");\n}\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2-exam"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "繰り返し処理を学ぼう",
+        "detail": "for文やwhile文で繰り返し処理を行う方法を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "for文を使うと決まった回数の繰り返し処理が書けます。",
+            "componentType": "step-3",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nfor (let i = 0; i < 10; i++) {\n  console.log(i);\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "while文を使うと条件が真の間、繰り返し処理が実行されます。",
+            "componentType": "step-3",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nlet count = 0;\nwhile (count < 5) {\n  console.log(count);\n  count++;\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "1から5までの数字を順にコンソールに表示してみましょう。",
+            "answer": "```js\nfor (let i = 1; i <= 5; i++) {\n  console.log(i);\n}\n```",
+            "supporterSlug": "yamada-senpai",
+            "highlight": "step-3"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "関数を作ってみよう",
+        "detail": "処理をまとめるための関数を学びます。引数や戻り値も理解します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "関数は function キーワードで定義します。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nfunction greet() {\n  console.log(\"こんにちは\");\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "引数を渡したり、return で値を返すことができます。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nfunction add(a, b) {\n  return a + b;\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "2つの数値を足す関数を作って、結果を表示してみましょう。関数がreturnした値をコンソールに表示してください。関数には「3, 4」を渡してください。",
+            "answer": "```js\nfunction add(a, b) {\n  return a + b;\n}\nconsole.log(add(3, 4));\n```",
+            "supporterSlug": "yamada-senpai",
+            "highlight": "step-4"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "変数とデータ型を正しく使用している：最大10点", 
+            "条件分岐（if 等）が正しく書けている：最大15点", 
+            "繰り返し処理（for 等）が正しく書けている：最大15点", 
+            "関数が正しく定義・呼び出しできている：最大20点", 
+            "出力の順序と結果が正しい：最大20点", 
+            "コードの可読性が保たれている：最大10点",
+            "文法理解が総合的にできている：最大10点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": "Mission_4_Exam",
+        "instructions": [
+          "「カウントダウン付きおみくじ」プログラムを作成しましょう。",
+          "1 関数「omikuji(index)」を作る",
+          "1.1配列に \"大吉\", \"中吉\", \"小吉\", \"凶\" を代入する。",
+          "1.2配列の引数(index)番目の要素をreturnする",
+          "2. 結果を表示する前に「3秒カウントダウン」を表示する",
+          "2.1 for文を使って「3」, 「2」, 「1」と順番に出力する",
+          "3. 関数の結果を表示する",
+          "4. 関数の結果が「凶」の場合、「どんまい! 明日はきっといいことあるよ」と表示する"
+        ],
+        "exampleCode": {
+          "JavaScript": "function omikuji(index) {\n    const fortunes = [\"大吉\", \"中吉\", \"小吉\", \"凶\"];\n    const result = fortunes[index];\n    return result;\n}\nfor (let i = 3; i > 0; i--) {\n    console.log(i);\n}\nconst result = omikuji(0);\nconsole.log(result);\nif (result === \"凶\") {\n    console.log(\"どんまい! 明日はきっといいことあるよ\");\n}"
+        },
+        "language": ["JavaScript"]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今回はJavaScriptの基礎文法を学ぶよ。HTMLやCSSで作ったページを動かす力を身につけよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "焦らず、まずは文法を理解することが大事だ。少しずつコードを書いてみよう。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "お疲れ様!これでJavaScriptの基本文法が身についたね。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はこの知識を使ってページに動きをつけよう。",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "slug": "mission-5",
+    "title": "動きをつけよう（JavaScript DOM編）",
+    "detail": "JavaScriptでHTMLの要素を操作して、ページに動きを加えます。ボタンを押したら文字が変わる、色が変わるなど、動的な処理を体験しましょう。",
+    "type": "MAIN",
+    "component": "Mission_5",
+    "experience": 150,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "chukyu",
+    "steps": [
+      {
+        "order": 1,
+        "title": "DOMを理解しよう",
+        "detail": "DOMとは、HTMLをJavaScriptから操作するための仕組みです。まずは考え方を学びましょう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "DOM（Document Object Model）は、HTMLをツリー構造としてJavaScriptで操作できる仕組みです。",
+            "supporterSlug": "yamada-senpai"
+          },
+          {
+            "order": 2,
+            "content": "要素を取得するには document.querySelector() や document.getElementById() を使います。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nlet doc = document.querySelector(\"#title\");\nlet getDoc = document.getElementById(\"title\");\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "idが「title」の要素を取得して、変数に代入してみましょう。",
+            "answer": "```js\nconst title = document.getElementById(\"title\");\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "テキストやスタイルを変更してみよう",
+        "detail": "取得した要素の中身を変更したり、スタイルを変える方法を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "要素のテキストを変更するには、`innerText` と `textContent` のどちらかを使います。それぞれ少し挙動が違うので使い分けを理解しましょう。",
+            "componentType": "step-2-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\n// 要素を取得\nconst title = document.getElementById(\"title\");\n\n// innerText: 画面に見えているテキストだけを変更\ntitle.innerText = \"こんにちは！\";\n\n// textContent: 非表示のテキストも含め、要素内の全テキストを変更\ntitle.textContent = \"こんにちは！\";\n```"
+          },
+          {
+            "order": 2,
+            "content": "innerHTMLを使うと、要素の中身をHTMLとして書き換えることができます。表示を初期化する際にも使います。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\ndocument.getElementById(\"taskList\").innerHTML = \"\";\n```"
+          },
+          {
+            "order": 3,
+            "content": "CSSのスタイルを変更するには style.プロパティ を使います。",
+            "componentType": "step-2-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst title = document.getElementById(\"title\");\ntitle.style.color = \"blue\";\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "IDが「title」の文字を「こんにちは！」に変更し、文字色を青にしてみましょう。",
+            "answer": "```js\nconst title = document.getElementById(\"title\");\ntitle.innerText = \"こんにちは！\";\ntitle.style.color = \"blue\";\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "イベントを使ってみよう",
+        "detail": "クリックや入力など、ユーザーの操作に反応して処理を行うイベントを学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "addEventListener() を使うと、クリックや入力に反応する処理を登録できます。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst button = document.getElementById(\"btn\");\nbutton.addEventListener(\"click\", () => {\n  console.log(\"クリックされました\");\n});\n```"
+          },
+          {
+            "order": 2,
+            "content": "クリックイベントは 'click'、入力イベントは 'input' を指定します。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nbutton.addEventListener(\"click\", () => {});\nbutton.addEventListener(\"input\", () => {});\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "ボタンをクリックしたらメッセージが表示されるようにしてみましょう。",
+            "answer": "```js\nconst button = document.getElementById(\"btn\");\nbutton.addEventListener(\"click\", () => {\n  alert(\"ボタンがクリックされました！\");\n});\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-3-exam"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "ページを動かしてみよう",
+        "detail": "取得・変更・イベントを組み合わせて、動きのあるページを作ってみましょう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "ボタンを押したら文字が変わる、色が変わるなど、要素操作とイベントを組み合わせるとインタラクティブなページが作れます。",
+            "componentType": "step-4-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst btn = document.getElementById(\"btn\");\nbtn.addEventListener(\"click\", () => {\n  btn.style.color = \"red\";\n});\n```"
+          },
+          {
+            "order": 2,
+            "content": "この仕組みを応用すれば、フォームの確認画面や動的なリスト更新もできるようになります。",
+            "supporterSlug": "yamada-senpai"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "ボタンを押すとタイトルの色が赤色に変わるようにしてみましょう。",
+            "answer": "```js\nconst btn = document.getElementById(\"btn\");\nconst title = document.getElementById(\"title\");\nbtn.addEventListener(\"click\", () => {\n  title.style.color = \"red\";\n});\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-4-exam"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor":[
+            "DOM 要素の取得が正しくできている：最大15点", 
+            "テキストやスタイルの変更が正しく行えている：最大15点", 
+            "イベント（click 等）を適切に扱えている：最大15点", 
+            "DOM 操作を組み合わせた処理が実装できている：最大15点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": "Mission_5_Exam",
+        "instructions": [
+          "ボタンを押す度にタイトル(id = title)が赤➝青➝緑➝黄の順番で変化する。",
+          "ボタンを押したらタイトル(id = title)の文字が「クリックされました!」になる"
+        ],
+      "exampleCode": {
+        "HTML": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Mission 5</title>\n  </head>\n  <body>\n    <h2 id=\"title\">最初のタイトル</h2>\n    <button id=\"btn\">クリックしてみよう</button>\n  </body>\n</html>",
+        "JavaScript": "const title = document.getElementById(\"title\");\nconst btn = document.getElementById(\"btn\");\nlet colorNum = 0;\nbtn.addEventListener(\"click\", function () {\n  const colors = [\"red\", \"blue\", \"green\", \"yellow\"];\n  title.style.color = colors[colorNum];\n  title.textContent = \"クリックされました！\";\n  colorNum++;\n  if (colorNum > 3) {\n    colorNum = 0;\n  }\n});"
+      },
+  "language": ["HTML", "JavaScript"]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "さて、ここからはいよいよページに『動き』をつける段階だ！",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "JavaScriptでHTMLの要素を操作すれば、ボタンや入力に反応するページが作れるようになるぞ。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "おっ、ちゃんと動いたね！これで静的なページから一歩進んで、インタラクティブなページが作れるようになった。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "この調子で次は『アプリ』を作るステップに進もうか。",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "slug": "mission-6",
+    "title": "ToDoリストを作ろう（JavaScript応用）",
+    "detail": "JavaScriptの配列とDOM操作を組み合わせて、タスクを追加・削除できるToDoリストを作ります。小さなアプリを通して、実践的なコード構成を学びましょう。",
+    "type": "MAIN",
+    "component": "Mission_6",
+    "experience": 200,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "chukyu",
+    "steps": [
+      {
+        "order": 1,
+        "title": "配列を使ってデータを管理しよう",
+        "detail": "ToDoリストでは『タスクの一覧』を配列で管理します。まずはデータの入れ方・取り出し方を確認しましょう。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "今回のToDOリストではタスクを配列で管理します。配列は複数の値をまとめて扱うためのデータ構造です。`const tasks = []` のように宣言します。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst tasks = [];\n```"
+          },
+          {
+            "order": 2,
+            "content": "タスクを追加するには `tasks.push(\"新しいタスク\")`、削除するには `tasks.splice(番号, 1)` を使います。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\ntasks.push(\"掃除\");\ntasks.splice(0, 1); // 0番目の要素を1つ削除\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "空の配列 `tasks` を作り、『掃除』『買い物』というタスクを追加してみましょう。",
+            "answer": "```js\nconst tasks = [];\ntasks.push(\"掃除\");\ntasks.push(\"買い物\");\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "タスクを画面に表示しよう",
+        "detail": "配列に入っているタスクを、HTML上に表示してみます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "タスクを表示するには、`forEach` を使って配列をループし、`<li>` 要素を生成して画面に追加します。forEach は、配列の 各要素に対して順番に処理を実行するメソッドで、要素数の分だけコールバック関数が呼び出されます。",
+            "componentType": "step-2-1",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\ntasks.forEach(task => {\n  const li = document.createElement(\"li\");\n  li.innerText = task;\n  document.getElementById(\"taskList\").appendChild(li);\n});\n```"
+          },
+          {
+            "order": 2,
+            "content": "DOM操作では `document.createElement()` と `appendChild()` を使って要素を作成・追加します。",
+            "componentType": "step-2-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst ul = document.getElementById(\"taskList\");\nconst li = document.createElement(\"li\");\nli.innerText = \"タスク名\";\nul.appendChild(li);\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "配列 `tasks` にあるタスクを `<ul id=\"taskList\">` に表示してみましょう。\ngetElementById で取得した<ul>要素に対して、forEach を使ってタスクを追加してください。",
+            "answer": "```js\nconst taskList = document.getElementById(\"taskList\");\ntasks.forEach(task => {\n  const li = document.createElement(\"li\");\n  li.innerText = task;\n  taskList.appendChild(li);\n});\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2-exam"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "タスクを追加できるようにしよう",
+        "detail": "ボタンを押したときに入力欄の内容をタスクとして追加し、画面に反映させます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "フォームの値は `document.getElementById(\"inputId\").value` で取得できます。",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst value = document.getElementById(\"inputId\").value;\n```"
+          },
+          {
+            "order": 2,
+            "content": "ボタンのクリックを検知して処理を動かすには `addEventListener(\"click\", ...)` を使います。",
+            "componentType": "step-3-2",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst button = document.getElementById(\"btn\");\nbutton.addEventListener(\"click\", () => {\n  // 処理を書く\n});\n```"
+          },
+          {
+            "order": 3,
+            "content": "ボタンが押されたとき、入力フォームの値を読み込み配列に追加することでタスクの追加ができます。",
+            "componentType": "step-3-3",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\nconst tasks = [];\nconst btn = document.getElementById(\"btn\");\nbtn.addEventListener(\"click\", () => {\n  const value = document.getElementById(\"inputId\").value;\n  tasks.push(value);\n});\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "ボタンを押すと、入力欄の内容を配列tasksに追加するようにしてみましょう。",
+            "answer": "```js\nconst input = document.getElementById(\"taskInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst tasks = [];\n\naddBtn.addEventListener(\"click\", () => {\n  const task = input.value;\n  tasks.push(task);\n  input.value = \"\";\n});\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-3-3"
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "タスクを削除できるようにしよう",
+        "detail": "追加したタスクを削除する仕組みを実装します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "削除ボタンを各タスクに追加し、クリック時に対応する要素と配列のデータを削除します。",
+            "componentType": "step-4",
+            "supporterSlug": "yamada-senpai"
+          },
+          {
+            "order": 2,
+            "content": "`removeChild()` や `splice()` を使うと、DOMと配列の両方を整理できます。",
+            "componentType": "step-4",
+            "supporterSlug": "yamada-senpai",
+            "code": "```js\ntaskList.removeChild(li);\ntasks.splice(index, 1);\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "content": "定義済みの配列 tasks を forEach で順番に処理し、各要素に対応する <li> 要素を生成して画面に表示する関数render()を作成しましょう。\nさらに、各タスク用に削除ボタン（<button>）を作成し、そのボタンが押されたときに該当するタスクを tasks 配列から削除してください。、tasks配列から要素を削除した場合、render() を呼び出して一覧を更新するようにしてください。作成した削除ボタンは、そのタスクの <li> の子要素として追加します。",
+            "answer": "```js\nconst render = () => {\n  taskList.innerHTML = '';\n  tasks.forEach((task, index) => {\n    const li = document.createElement('li');\n    li.innerText = task;\n    const delBtn = document.createElement('button');\n    delBtn.innerText = '削除';\n    delBtn.addEventListener('click', () => {\n      tasks.splice(index, 1);\n      render();\n    });\n    li.appendChild(delBtn);\n    taskList.appendChild(li);\n  });\n};\n```",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-4-exam"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "配列でタスク管理が正しく行えている：最大20点", 
+            "タスク表示処理（render）が正しく実装されている：最大25点", 
+            "追加機能が正しく動作している：最大25点", 
+            "削除機能が正しく動作している：最大25点", 
+            "コードの可読性が保たれている：最大5点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": "Mission_6_Exam",
+        "instructions": [
+          "タスクを追加できる",
+          "タスクを削除できる"
+        ],
+        "exampleCode": {
+          "HTML": "<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>ToDoリスト</title>\n  </head>\n  <body>\n    <h2>🧩 ToDoリスト</h2>\n    <input id=\"taskInput\" type=\"text\" placeholder=\"タスクを入力\" />\n    <button id=\"addBtn\">追加</button>\n    <ul id=\"taskList\"></ul>\n  </body>\n</html>",
+          "JavaScript": "const taskInput = document.getElementById(\"taskInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst taskList = document.getElementById(\"taskList\");\n\nconst tasks = [];\n\nconst render = () => {\n  taskList.innerHTML = \"\";\n  tasks.forEach((task, index) => {\n    const li = document.createElement(\"li\");\n    li.textContent = task;\n\n    const deleteBtn = document.createElement(\"button\");\n    deleteBtn.textContent = \"削除\";\n    deleteBtn.addEventListener(\"click\", () => {\n      tasks.splice(index, 1);\n      render();\n    });\n\n    li.appendChild(deleteBtn);\n    taskList.appendChild(li);\n  });\n};\n\naddBtn.addEventListener(\"click\", () => {\n  const text = taskInput.value.trim();\n  if (text === \"\") return;\n  tasks.push(text);\n  taskInput.value = \"\";\n  render();\n});"
+        },
+        "language": ["HTML", "JavaScript"]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここからはいよいよアプリ開発の第一歩だ。ToDoリストを作ってみよう！",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "これまで学んだDOM操作やイベント処理を組み合わせれば、小さなアプリが作れるぞ。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "おおっ、ちゃんとタスクが追加・削除できるようになったね！",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "これでJavaScriptを使った簡単なアプリが作れるようになった。次はもっと実践的なアプリに挑戦してみよう！",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "slug": "mission-7",
+    "title": "メモアプリを作成しよう",
+    "detail": "これまで学習した知識を使ってメモアプリの作成に取り組みます。",
+    "type": "PROMOTION",
+    "component": "Mission_7",
+    "experience": 300,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "chukyu",
+    "steps": [],
+    "exams": [
+      {
+        "criteria": {
+          "score": 80,
+          "factor":[
+            "メモの追加機能が正しく動作している：最大25点",
+            "メモの削除機能が正しく動作している：最大25点", 
+            "メモの編集（編集→保存）が正しく動作している：最大25点", 
+            "DOM 操作（表示・要素生成）が正しく実装されている：最大20点", 
+            "CSS による見た目の調整（任意）：最大5点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": "Mission_7",
+        "instructions": [
+          "メモを追加できる",
+          "メモを削除できる",
+          "メモ内容を編集できる",
+          "追加したメモが一覧で表示される",
+          "入力欄が空のときはメモを追加できない",
+          "cssで見た目を整えてみましょう(任意)"
+        ],
+        "exampleCode": {
+          "HTML": "<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>メモアプリ</title>\n  </head>\n  <body>\n    <h2>📝 メモアプリ</h2>\n    <input id=\"memoInput\" type=\"text\" placeholder=\"メモを入力\" />\n    <button id=\"addBtn\">追加</button>\n    <button id=\"saveBtn\" style=\"display: none;\">保存</button>\n    <ul id=\"memoList\"></ul>\n  </body>\n</html>",
+          "JavaScript": "const memoInput = document.getElementById(\"memoInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst saveBtn = document.getElementById(\"saveBtn\");\nconst memoList = document.getElementById(\"memoList\");\nlet editIndex = null;\n\naddBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (text === \"\") return;\n\n  const li = document.createElement(\"li\");\n  li.textContent = text;\n\n  const editBtn = document.createElement(\"button\");\n  editBtn.textContent = \"編集\";\n  editBtn.addEventListener(\"click\", () => {\n    memoInput.value = li.firstChild.textContent; // 修正ポイント\n    editIndex = Array.from(memoList.children).indexOf(li);\n    addBtn.style.display = \"none\";\n    saveBtn.style.display = \"inline\";\n  });\n\n  const deleteBtn = document.createElement(\"button\");\n  deleteBtn.textContent = \"削除\";\n  deleteBtn.addEventListener(\"click\", () => {\n    memoList.removeChild(li);\n  });\n\n  li.appendChild(editBtn);\n  li.appendChild(deleteBtn);\n  memoList.appendChild(li);\n  memoInput.value = \"\";\n});\n\nsaveBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (editIndex === null || text === \"\") return;\n\n  const li = memoList.children[editIndex];\n  li.firstChild.textContent = text;\n\n  memoInput.value = \"\";\n  editIndex = null;\n  addBtn.style.display = \"inline\";\n  saveBtn.style.display = \"none\";\n});"       
+        },
+        "language": ["HTML", "CSS", "JavaScript"]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "よーし、ここまでの経験を振り返りながら、まずは肩の力を抜いて取り組もう！",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今回は君のスキルを試すチャンス。焦らず、落ち着いてやれば大丈夫だよ。",
+        "order": 2
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "このミッションをクリアすれば、次のステップに一歩近づけるからね。",
+        "order": 3
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "分からないところはあっても大丈夫。まずは自分のやれることを見せてみよう。",
+        "order": 4
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "お疲れさま！よく頑張ったね、少し休憩して振り返ろう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "できたところは自信にして、もう少し改善できそうなところは次回の目標にしよう。",
+        "order": 2
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今回の経験は君の成長の証。これを次のミッションに活かしていこう。",
+        "order": 3
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "さあ、次のステップも楽しみにしてるよ！",
+        "order": 4
+      }
+    ]
+  }
+]
