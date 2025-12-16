@@ -76,7 +76,6 @@ export default function StepExamPage() {
 
   if (!responseData) return <div className="bg-indigo-50 min-h-screen w-full p-6">{renderSkeleton()}</div>;
 
-  console.log(responseData);
   const currentStep = responseData.mission.steps.find((s) => s.id === responseData.id);
   const currentOrder = currentStep?.order ?? 0;
   const isLastStep = currentOrder === responseData.mission.steps.length;
