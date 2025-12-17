@@ -54,6 +54,7 @@ jobs:
         run: |
           gcloud builds submit ./front \
             --tag "$REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/$REPO_NAME/front:latest" \
+            --substitutions _NEXT_PUBLIC_API_BASE_URL=${{ secrets.BACKEND_BASE_URL }}
 
       - name: Deploy front to Cloud Run
         run: |
