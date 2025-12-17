@@ -53,7 +53,7 @@ jobs:
       - name: Build & push front image
         run: |
           gcloud builds submit ./front \
-            --config cloudbuild.yaml \
+            --config ./front/cloudbuild.yaml \
             --substitutions _NEXT_PUBLIC_API_BASE_URL=${{ secrets.BACKEND_BASE_URL }}
 
 
