@@ -1,0 +1,12 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -t
+      - asia-northeast1-docker.pkg.dev/$PROJECT_ID/engineer-quest/front:latest
+      - --build-arg
+      - NEXT_PUBLIC_API_BASE_URL=$_NEXT_PUBLIC_API_BASE_URL
+      - .
+images:
+  - asia-northeast1-docker.pkg.dev/$PROJECT_ID/engineer-quest/front:latest
+
