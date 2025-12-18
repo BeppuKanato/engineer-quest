@@ -4,5 +4,12 @@
   { "missionSlug": "mission-4", "requiredSlug": "mission-3" },
   { "missionSlug": "mission-5", "requiredSlug": "mission-4" },
   { "missionSlug": "mission-6", "requiredSlug": "mission-5" },
-  { "missionSlug": "mission-7", "requiredSlug": "mission-6"}
+  { "missionSlug": "mission-7", "requiredSlug": "mission-6"},
+
+  { "missionSlug": "java-mission-2", "requiredSlug": "java-mission-1" },
+  { "missionSlug": "java-mission-3", "requiredSlug": "java-mission-2" },
+  { "missionSlug": "java-mission-4", "requiredSlug": "java-mission-3" },
+  { "missionSlug": "java-mission-5", "requiredSlug": "java-mission-4" },
+  { "missionSlug": "java-mission-6", "requiredSlug": "java-mission-5" },
+  { "missionSlug": "java-mission-7", "requiredSlug": "java-mission-6"}
 ]
