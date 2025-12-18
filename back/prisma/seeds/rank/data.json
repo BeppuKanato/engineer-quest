@@ -1,0 +1,14 @@
+[
+  {
+    "name": "新入社員",
+    "order": 1,
+    "slug": "rank-1",
+    "requiredMissionSlug": null
+  },
+  {
+    "name": "若手エンジニア",
+    "order": 2,
+    "slug": "rank-2",
+    "requiredMissionSlug": "java-mission_7"
+  }
+]
