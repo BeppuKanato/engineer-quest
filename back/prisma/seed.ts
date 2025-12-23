@@ -11,7 +11,7 @@ async function main() {
   // await seedDifficulties(prisma);
   await seedMissions(prisma);
   await seedMissionUnlocks(prisma);
-  await seedRanks(prisma);
+  // await seedRanks(prisma);
   console.log('🌳 All seeding completed!');
 }
 

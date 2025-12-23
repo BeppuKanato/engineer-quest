@@ -23,7 +23,6 @@ export const examJudgeWithFeedbackc = (missionCode: {[key in MissionExamLanguage
                 ・概ね満たす → 最大点の 70%
                 ・一部のみ満たす → 最大点の 40%
                 ・ほぼ満たさない → 0〜20%
-                - CSS や見た目に関する項目（任意）が未実装でも減点しない（実装されていれば加点）。
                 - 実装方法の違いは減点対象にせず、必要機能が満たされていれば満点とする。
                 - タイポは実行に影響がある場合のみ減点対象とする。
 

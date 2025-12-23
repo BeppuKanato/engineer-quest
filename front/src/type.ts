@@ -254,4 +254,5 @@ export type MissionResultResponse = {
             requiredExperience: number,
         }[],
     }
+    updatedRank: string | null;
 }

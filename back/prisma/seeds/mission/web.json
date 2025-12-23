@@ -1,9 +1,9 @@
 [
   {
-    "slug": "mission-1",
+    "slug": "web-mission-1",
     "title": "Webページの骨組みを作ろう",
     "detail": "HTMLの基本タグを使って、自己紹介ページの骨組みを作ります。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_1",
     "experience": 100,
     "clientSlug": "yamada-senpai",
@@ -186,10 +186,10 @@
     ]
   },
   {
-    "slug": "mission-2",
+    "slug": "web-mission-2",
     "title": "フォームで情報を入力してもらおう",
     "detail": "HTML の form、input、select、radio などを使って、基本的な入力フォームを作ります。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_2",
     "experience": 120,
     "clientSlug": "yamada-senpai",
@@ -367,10 +367,10 @@
     ]
   },
   {
-    "slug": "mission-3",
+    "slug": "web-mission-3",
     "title": "CSSで見た目を整えよう",
     "detail": "CSSを使って、文字の見た目や配置を段階的に整えていきます。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_3",
     "experience": 150,
     "clientSlug": "yamada-senpai",
@@ -541,10 +541,10 @@
     ]
   },
   {
-    "slug": "mission-4",
+    "slug": "web-mission-4",
     "title": "JavaScriptの文法を学ぼう（基礎編）",
     "detail": "JavaScriptの基本文法を学びます。変数・型・条件分岐・繰り返し・関数など、Webページに動きをつけるための基礎を押さえましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_4",
     "experience": 120,
     "clientSlug": "yamada-senpai",
@@ -732,10 +732,10 @@
     ]
   },
   {
-    "slug": "mission-5",
+    "slug": "web-mission-5",
     "title": "動きをつけよう（JavaScript DOM編）",
     "detail": "JavaScriptでHTMLの要素を操作して、ページに動きを加えます。ボタンを押したら文字が変わる、色が変わるなど、動的な処理を体験しましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_5",
     "experience": 150,
     "clientSlug": "yamada-senpai",
@@ -908,10 +908,10 @@
     ]
   },
   {
-    "slug": "mission-6",
+    "slug": "web-mission-6",
     "title": "ToDoリストを作ろう（JavaScript応用）",
     "detail": "JavaScriptの配列とDOM操作を組み合わせて、タスクを追加・削除できるToDoリストを作ります。小さなアプリを通して、実践的なコード構成を学びましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_6",
     "experience": 200,
     "clientSlug": "yamada-senpai",
@@ -1090,10 +1090,10 @@
     ]
   },
   {
-    "slug": "mission-7",
+    "slug": "web-mission-7",
     "title": "メモアプリを作成しよう",
     "detail": "これまで学習した知識を使ってメモアプリの作成に取り組みます。",
-    "type": "PROMOTION",
+    "type": "SUB",
     "component": "Mission_7",
     "experience": 300,
     "clientSlug": "yamada-senpai",

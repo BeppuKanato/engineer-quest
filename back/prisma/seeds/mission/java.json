@@ -231,7 +231,7 @@
             "content": "printf と format は『整形して出力する』ときに使える。まずは %d（整数）と %s（文字列）だけ覚えよう。",
             "supporterSlug": "yamada-senpai",
             "componentType": "",
-            "code": "```java\nint age = 20;\nString name = \"カナト\";\nSystem.out.printf(\"%sの年齢は%dです\", name, age);\n```"
+            "code": "```java\nint age = 20;\nString name = \"名前\";\nSystem.out.printf(\"%sの年齢は%dです\", name, age);\n```"
           },
           {
             "order": 2,
@@ -251,7 +251,7 @@
               "printf で『nameの点数はscoreです』の形にする",
               "最後に \\n を入れる"
             ],
-            "answer": "```java\npublic class PrintfPractice {\n  public static void main(String[] args) {\n    String name = \"カナト\";\n    int score = 85;\n    System.out.printf(\"%sの点数は%dです\\n\", name, score);\n  }\n}\n```",
+            "answer": "```java\npublic class PrintfPractice {\n  public static void main(String[] args) {\n    String name = \"名前\";\n    int score = 85;\n    System.out.printf(\"%sの点数は%dです\\n\", name, score);\n  }\n}\n```",
             "supporterSlug": "yamada-senpai"
           }
         ]
@@ -360,7 +360,7 @@
           },
           {
             "order": 2,
-            "content": "まずは『何をしているか』より、『なぜそれをしているか』を書くと強い。",
+            "content": "まずは『何をしているか』より、『なぜそれをしているか』を書くといいよ。",
             "supporterSlug": "yamada-senpai",
             "componentType": "",
             "code": ""

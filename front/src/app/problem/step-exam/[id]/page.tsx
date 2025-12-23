@@ -91,6 +91,8 @@ export default function StepExamPage() {
         .replace(/```html/g, "") // Markdownの開始タグ除去
         .replace(/```css/g, "")     // Markdownの開始タグ除去
         .replace(/```js/g, "") // Markdownの開始タグ除去
+        .replace(/```java/g, "") // Markdownの開始タグ除去
+        .replace(/```text/g, "") // Markdownの開始タグ除去
         .replace(/```/g, "")     // Markdownの終了タグ除去
         .replace(/\s+/g, "")     // 余分な空白・改行除去
         .trim(); // 全ての空白・改行を削除してトリム

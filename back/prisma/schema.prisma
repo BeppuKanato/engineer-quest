@@ -17,6 +17,7 @@ enum MissionExamLanguages {
   HTML
   CSS
   JavaScript
+  Java
 }
 
 enum MissionStatus {
