@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // JSONファイルからデータを読み込みます。
-const unlockDataPath = path.join(__dirname, 'web.json');
+const unlockDataPath = path.join(__dirname, 'java.json');
 const unlockData = JSON.parse(
     fs.readFileSync(unlockDataPath, 'utf-8')
 );

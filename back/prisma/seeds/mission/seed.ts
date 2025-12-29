@@ -4,7 +4,7 @@ import path from "path";
 import { title } from "process";
 
 // JSONファイルからデータを読み込み
-const missionDataPath = path.join(__dirname, 'web.json');
+const missionDataPath = path.join(__dirname, 'java.json');
 const missionData = JSON.parse(
   fs.readFileSync(missionDataPath, "utf-8")
 );
