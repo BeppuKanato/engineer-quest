@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="font-medium">{responseData.user.rank.name}</p>
-              <p className="text-xs text-gray-500">CodeQuest</p>
+              <p className="text-xs text-gray-500">EngineerQueest</p>
             </div>
           </div>
         ) : (

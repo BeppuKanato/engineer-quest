@@ -31,7 +31,7 @@ export function Header({ loginRouter }: HeaderProps) {
             >
               <Code2 style={{ color: 'white', width: 24, height: 24 }} />
             </Box>
-            <Typography variant="h6">CodeQuest</Typography>
+            <Typography variant="h6">EngineerQuest</Typography>
           </Stack>
 
           {/* Desktop Nav */}

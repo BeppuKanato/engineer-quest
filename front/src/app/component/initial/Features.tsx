@@ -45,7 +45,7 @@ export function Features() {
         {/* Section header */}
         <Box sx={{ textAlign: "center", maxWidth: 600, mx: "auto", mb: 8 }}>
           <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-            CodeQuestの特徴
+            EngineerQuestの特徴
           </Typography>
           <Typography variant="body1" color="text.secondary">
             プログラミング学習を楽しく、効果的に。

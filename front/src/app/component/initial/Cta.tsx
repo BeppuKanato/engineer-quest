@@ -52,7 +52,7 @@ export function Cta({ signupRouter }: CtaProps) {
         </Stack>
 
         <Typography variant="h4" component="h2" sx={{ fontWeight: "bold", mb: 2 }}>
-          CodeQuestで
+          EngineerQuestで
           <br />
           プログラミング学習を始めよう
         </Typography>
