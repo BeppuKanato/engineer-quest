@@ -3,6 +3,8 @@ import { MissionExamLanguages } from "@prisma/client";
 export const examJudgeWithoutFeedback = (missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]): {contents: string, systemInstruction: string} => {
     return {
         contents: `サンプルコードと比較して、ユーザコードを100点満点で採点してください。
+            サンプルコードと同じ動作をするコードであれば高得点となります。
+            サンプルコードはあくまで参考例であり、実装方法が異なっていても問題ありません。
 
             【採点要素（factor）】
             以下の項目ごとに最大点を上限に部分点を付与してください。
