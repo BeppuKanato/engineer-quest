@@ -938,11 +938,11 @@
             ]
         },
         {
-            "slug": "java-sub-b",
+            "slug": "java-sub-1",
             "title": "条件式の読み方トレーニング",
             "detail": "条件式を日本語で理解し、書けるようにします。",
             "type": "SUB",
-            "component": "Java_Sub_B",
+            "component": "Java_Sub_1",
             "experience": 80,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
@@ -1305,11 +1305,11 @@
             ]
         },
         {
-            "slug": "java-sub-c",
+            "slug": "java-sub-2",
             "title": "for文の落とし穴と応用テクニック",
             "detail": "for文でよくあるミスや、少し便利な書き方を整理します。",
             "type": "SUB",
-            "component": "Java_Sub_C",
+            "component": "Java_Sub_2",
             "experience": 120,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
@@ -1458,11 +1458,11 @@
             ]
         },
         {
-            "slug": "java-promotion-a",
+            "slug": "java-promotion-1",
             "title": "制御構文チャレンジ：シンプル判定アプリ",
             "detail": "出力・変数・計算・if・for を組み合わせて、処理を制御するミニアプリを作成します。",
             "type": "PROMOTION",
-            "component": "Java_Promotion_A",
+            "component": "Java_Promotion_1",
             "experience": 350,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
@@ -1796,11 +1796,11 @@
             ]
         },
         {
-            "slug": "java-sub-d",
+            "slug": "java-sub-3",
             "title": "表データを扱おう（多重配列）",
             "detail": "2次元配列を使って、行と列を持つデータを扱います。",
             "type": "SUB",
-            "component": "Java_Sub_D",
+            "component": "Java_Sub_3",
             "experience": 160,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
@@ -2146,11 +2146,11 @@
             ]
         },
         {
-            "slug": "java-promotion-b",
+            "slug": "java-promotion-2",
             "title": "設計前チャレンジ：処理を組み立てるミニアプリ",
             "detail": "変数・配列・if・for・メソッドを使って、処理の流れを自分で設計します。",
             "type": "PROMOTION",
-            "component": "Java_Promotion_B",
+            "component": "Java_Promotion_2",
             "experience": 420,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
@@ -3139,11 +3139,11 @@
             ]
         },
         {
-            "slug": "java-promotion-c",
+            "slug": "java-promotion-3",
             "title": "設計総合チャレンジ：ミニ管理アプリ",
             "detail": "クラス設計から処理の流れまで、Javaの基礎設計力を総合的に試します。",
             "type": "PROMOTION",
-            "component": "Java_Promotion_C",
+            "component": "Java_Promotion_3",
             "experience": 600,
             "clientSlug": "yamada-senpai",
             "difficultySlug": "chukyu",
