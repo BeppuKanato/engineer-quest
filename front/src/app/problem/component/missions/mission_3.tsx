@@ -6,9 +6,9 @@ import {
   Card,
   alpha,
   useTheme,
-  List,
-  ListItem,
-  ListItemText,
+  // List,
+  // ListItem,
+  // ListItemText,
 } from "@mui/material";
 import { MissionComponentProps, isComponentType } from "../common/common";
 
@@ -64,7 +64,7 @@ export const Mission_3 = ({ componentType }: MissionComponentProps) => {
                 class 指定なしのテキスト
               </Typography>
               <Typography className="blue" sx={{ color: "blue" }}>
-                class="blue" が指定されたテキスト
+                class=&quot;blue&quot;が指定されたテキスト
               </Typography>
             </>
           )}
@@ -93,7 +93,7 @@ export const Mission_3 = ({ componentType }: MissionComponentProps) => {
                 id 指定なしのテキスト
               </Typography>
               <Typography id="y-24" sx={{ color: "yellow", fontSize: 24 }}>
-                id="y-24" が指定されたテキスト
+                id=&quot;y-24&quot;が指定されたテキスト
               </Typography>
             </>
           )}
