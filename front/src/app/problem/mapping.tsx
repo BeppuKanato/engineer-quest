@@ -1,81 +1,131 @@
-import { Mission_2 } from "./component/missions/mission_2";
-import { Mission_3 } from "./component/missions/mission_3";
-import { Mission_3_Exam } from "./component/missions/mission_3_exam";
-import { Mission_4 } from "./component/missions/missoin_4";
-import { Mission_1 } from "./component/missions/misson_1";
-import { Mission_4_Exam } from "./component/missions/mission_4_exam";
-import { Mission_5 } from "./component/missions/mission_5";
-import { Mission_5_Exam } from "./component/missions/mission_5_exam";
-import { Mission_6 } from "./component/missions/mission_6";
-import { Mission_6_Exam } from "./component/missions/mission_6_exam";
-import { Mission_7 } from "./component/missions/mission_7";
+import { Web_Mission_2 } from "./component/missions/Web/Web_Mission_2";
+import { Web_Mission_3 } from "./component/missions/Web/Web_Mission_3";
+import { Web_Mission_3_Exam } from "./component/missions/Web/Web_Mission_3_exam";
+import { Web_Mission_4 } from "./component/missions/Web/Web_Missoin_4";
+import { Web_Mission_1 } from "./component/missions/Web/Web_Misson_1";
+import { Web_Mission_4_Exam } from "./component/missions/Web/Web_Mission_4_exam";
+import { Web_Mission_5 } from "./component/missions/Web/Web_Mission_5";
+import { Web_Mission_5_Exam } from "./component/missions/Web/Web_Mission_5_exam";
+import { Web_Mission_6 } from "./component/missions/Web/Web_Mission_6";
+import { Web_Mission_6_Exam } from "./component/missions/Web/Web_Mission_6_exam";
+import { Web_Mission_7 } from "./component/missions/Web/Web_Mission_7";
+import { Java_Mission_1 } from "./component/missions/Java/Java_Mission_1";
+import { Java_Mission_2 } from "./component/missions/Java/Java_Mission_2";
+import { Java_Mission_3 } from "./component/missions/Java/Java_Mission_3";
+import { Java_Mission_4 } from "./component/missions/Java/Java_Mission_4";
+import { Java_Mission_5 } from "./component/missions/Java/Java_Mission_5";
+import { Java_Mission_6 } from "./component/missions/Java/Java_Mission_6";
+import { Java_Mission_7 } from "./component/missions/Java/Java_Mission_7";
 export const getMissionComponent = (componentName: string, highlight: string, componentType: string) => {
+    console.log("getMissionComponent called with:", componentName, highlight, componentType);
     switch (componentName) {
-        case "Mission_1":
+        case "Java_Mission_1":
             return (
-                <Mission_1 
+                <Java_Mission_1 />
+            );
+        case "Java_Mission_2":
+            return(
+                <Java_Mission_2
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_3":
+            return(
+                <Java_Mission_3 
+                />
+            )
+        case "Java_Mission_4":
+            return(
+                <Java_Mission_4
+                />
+            )
+        case "Java_Mission_5":
+            return(
+                <Java_Mission_5
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_6":
+            return(
+                <Java_Mission_6
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_7":
+            return(
+                <Java_Mission_7
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Web_Mission_1":
+            return (
+                <Web_Mission_1 
                     highlight={highlight}
                     componentType={componentType}
                 />
             );
-        case "Mission_2":
+        case "Web_Mission_2":
             return(
-                <Mission_2
+                <Web_Mission_2
                     highlight={highlight}
                     componentType={componentType}
                 />
             )
-        case "Mission_3":
+        case "Web_Mission_3":
             return(
-                <Mission_3
+                <Web_Mission_3
                     highlight={highlight}
                     componentType={componentType}
                 />
             )
-        case "Mission_3_Exam":
+        case "Web_Mission_3_Exam":
             return(
-                <Mission_3_Exam 
+                <Web_Mission_3_Exam 
                 />
             )
-        case "Mission_4":
+        case "Web_Mission_4":
             return(
-                <Mission_4
+                <Web_Mission_4
                     highlight={highlight}
                     componentType={componentType}
                 />
             )
-        case "Mission_4_Exam":
+        case "Web_Mission_4_Exam":
             return(
-                <Mission_4_Exam
+                <Web_Mission_4_Exam
                 />
             )
-        case "Mission_5":
+        case "Web_Mission_5":
             return(
-                <Mission_5
+                <Web_Mission_5
                     highlight={highlight}
                     componentType={componentType}
                 />
             )
-        case "Mission_5_Exam":
+        case "Web_Mission_5_Exam":
             return(
-                <Mission_5_Exam 
+                <Web_Mission_5_Exam 
                 />
             )
-        case "Mission_6":
+        case "Web_Mission_6":
             return(
-                <Mission_6 
+                <Web_Mission_6 
                     highlight={highlight}
                     componentType={componentType}
                 />
             )
-        case "Mission_6_Exam":
+        case "Web_Mission_6_Exam":
             return(
-                <Mission_6_Exam
+                <Web_Mission_6_Exam
                 />
             )
-        case "Mission_7":
+        case "Web_Mission_7":
             return(
-                <Mission_7 
+                <Web_Mission_7 
                 />
             )
         default:

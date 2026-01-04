@@ -1,7 +1,7 @@
 import { Box, Typography, List, ListItem, ListItemText, CardMedia, useTheme, alpha } from "@mui/material";
-import { isHighlight, MissionComponentProps } from "../common/common";
+import { isHighlight, MissionComponentProps } from "../../common/common";
 
-export const Mission_1 = ({ highlight }: MissionComponentProps) => {
+export const Web_Mission_1 = ({ highlight }: MissionComponentProps) => {
   const theme = useTheme();
 
   // ユーティリティ：青いハイライト背景

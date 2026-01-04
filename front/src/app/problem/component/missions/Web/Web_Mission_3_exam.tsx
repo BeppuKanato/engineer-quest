@@ -2,7 +2,7 @@
 
 import { Box, Typography, Card } from "@mui/material";
 
-export const Mission_3_Exam = () => {
+export const Web_Mission_3_Exam = () => {
   return (
     <Box sx={{ p: 3, maxWidth: 700, mx: "auto" }}>
       <Typography variant="h4" sx={{ mb: 2 }}>

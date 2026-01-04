@@ -10,9 +10,9 @@ import {
   // ListItem,
   // ListItemText,
 } from "@mui/material";
-import { MissionComponentProps, isComponentType } from "../common/common";
+import { MissionComponentProps, isComponentType } from "../../common/common";
 
-export const Mission_3 = ({ componentType }: MissionComponentProps) => {
+export const Web_Mission_3 = ({ componentType }: MissionComponentProps) => {
   const theme = useTheme();
 
   return (

@@ -10,16 +10,21 @@
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
         "beforeSentences": [
-            {
+        {
             "speakerSlug": "yamada-senpai",
-            "sentence": "まずは難しい理屈よりも、『動く』を体験しよう。",
+            "sentence": "ようこそ、Java研修へ。今日から一緒に、少しずつ進めていこう。",
             "order": 1
-            },
-            {
+        },
+        {
+            "speakerSlug": "yamada-senpai",
+            "sentence": "まずは難しい理屈よりも、『動く』を体験するところからだ。",
+            "order": 2
+        },
+        {
             "speakerSlug": "yamada-senpai",
             "sentence": "Javaは最初の形さえ押さえれば、あとは積み上げていくだけだよ。",
-            "order": 2
-            }
+            "order": 3
+        }
         ],
         "afterSentences": [
             {
@@ -59,9 +64,10 @@
                 "order": 1,
                 "content": "最小構成のJavaプログラムを書いてみよう。",
                 "instructions": [
-                    "public class を使う",
-                    "main メソッドを書く",
-                    "中身は空でもOK"
+                    "クラス名は Hello にする",
+                    "public class Hello を書く",
+                    "main メソッドを正確に書く",
+                    "main メソッドの中は何も書かない"
                 ],
                 "answer": "```java\npublic class Hello {\n  public static void main(String[] args) {\n  }\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -86,8 +92,10 @@
                 "order": 1,
                 "content": "『ようこそJavaへ！』と1行表示しよう。",
                 "instructions": [
-                    "println を使う",
-                    "文字は \" \" で囲む"
+                    "クラス名は Welcome にする",
+                    "public class Welcome を書く",
+                    "println を1回使う",
+                    "表示する文字列は「ようこそJavaへ！」にする"
                 ],
                 "answer": "```java\npublic class Welcome {\n  public static void main(String[] args) {\n    System.out.println(\"ようこそJavaへ！\");\n  }\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -122,232 +130,250 @@
         ]
     },
     {
-        "slug": "java-mission-2",
-        "title": "print / println を使い分けよう",
-        "detail": "改行の有無をコントロールして、出力を整えます。",
-        "type": "MAIN",
-        "component": "Java_Mission_2",
-        "experience": 120,
-        "clientSlug": "yamada-senpai",
-        "difficultySlug": "shokyu",
-        "beforeSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "出力は『見るため』のもの。見やすさは大事だよ。",
-            "order": 1
-            }
-        ],
-        "afterSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "いいね。これで出力の形を自分で調整できる。",
-            "order": 1
-            },
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "次はコードそのものを読みやすくしていこう。",
-            "order": 2
-            }
-        ],
-        "steps": [
+    "slug": "java-mission-2",
+    "title": "print / println を使い分けよう",
+    "detail": "改行の有無をコントロールして、出力を整えます。",
+    "type": "MAIN",
+    "component": "Java_Mission_2",
+    "experience": 120,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "出力は『見るため』のもの。見やすさはとても大事だ。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今日は改行をコントロールして、出力の形を整えてみよう。",
+        "order": 2
+        }
+    ],
+    "afterSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね。これで出力の形を自分で調整できるようになった。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はコードそのものを読みやすくする話に進もう。",
+        "order": 2
+        }
+    ],
+    "steps": [
+        {
+        "order": 1,
+        "title": "print と println の違い",
+        "detail": "改行の有無を確認します。",
+        "explains": [
             {
             "order": 1,
-            "title": "print と println の違い",
-            "detail": "改行の有無を確認します。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "println は改行あり、print は改行なし。違いはこれだけ。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nSystem.out.print(\"A\");\nSystem.out.println(\"B\");\n```"
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "AとBを同じ行に表示しよう。",
-                "instructions": [
-                    "Aはprint",
-                    "Bはprintln"
-                ],
-                "answer": "```java\npublic class SameLine {\n  public static void main(String[] args) {\n    System.out.print(\"A\");\n    System.out.println(\"B\");\n  }\n}\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
-            },
-            {
-            "order": 2,
-            "title": "出力を組み合わせてみよう",
-            "detail": "ラベル付き出力を作ります。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "『ラベル: 値』の形にすると、ログが一気に読みやすくなる。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nSystem.out.print(\"Level: \");\nSystem.out.println(5);\n```"
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "『Score: 90』を1行で表示しよう。",
-                "instructions": [
-                    "Score: は文字列",
-                    "90 は数値",
-                    "最後は改行する"
-                ],
-                "answer": "```java\npublic class Score {\n  public static void main(String[] args) {\n    System.out.print(\"Score: \");\n    System.out.println(90);\n  }\n}\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "content": "println は改行あり、print は改行なし。この違いだけをまず覚えよう。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1-1",
+            "code": "```java\nSystem.out.print(\"A\");\nSystem.out.println(\"B\");\n```"
             }
         ],
-        "exams": [
+        "stepExams": [
             {
-            "criteria": {
-                "score": 60,
-                "factor": [
-                "print / println を正しく使い分けている：最大60点",
-                "出力が読みやすい形になっている：最大40点"
-                ]
-            },
-            "type": "HYBRID",
-            "component": null,
+            "order": 1,
+            "content": "A と B を同じ行に表示しよう。",
             "instructions": [
-                "『ミニステータス表示』を作りましょう。",
-                "タイトルを1行表示する",
-                "HPとMPを『ラベル: 値』形式で表示する",
-                "print / println を使い分ける"
+                "クラス名は SameLine にする",
+                "public class SameLine を書く",
+                "A は print(\"A\") を使って出力する",
+                "B は println(\"B\") を使って出力する"
             ],
-            "exampleCode": {
-                "Java": "public class Status {\n  public static void main(String[] args) {\n    System.out.println(\"=== STATUS ===\");\n    System.out.print(\"HP: \");\n    System.out.println(30);\n    System.out.print(\"MP: \");\n    System.out.println(12);\n  }\n}\n"
-            },
-            "language": [
-                "Java"
-            ]
+            "answer": "```java\npublic class SameLine {\n  public static void main(String[] args) {\n    System.out.print(\"A\");\n    System.out.println(\"B\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
             }
         ]
+        },
+        {
+        "order": 2,
+        "title": "出力を組み合わせてみよう",
+        "detail": "ラベル付き出力を作ります。",
+        "explains": [
+            {
+            "order": 1,
+            "content": "『ラベル: 値』の形で出力すると、ログがとても読みやすくなる。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2-1",
+            "code": "```java\nSystem.out.print(\"Level: \");\nSystem.out.println(5);\n```"
+            }
+        ],
+        "stepExams": [
+            {
+            "order": 1,
+            "content": "Score: 90 を 1 行で表示しよう。",
+            "instructions": [
+                "クラス名は Score にする",
+                "public class Score を書く",
+                "print(\"Score: \") を使ってラベルを出力する",
+                "println(90) を使って数値を出力する"
+            ],
+            "answer": "```java\npublic class Score {\n  public static void main(String[] args) {\n    System.out.print(\"Score: \");\n    System.out.println(90);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+            }
+        ]
+        }
+    ],
+    "exams": [
+        {
+        "criteria": {
+            "score": 60,
+            "factor": [
+            "print / println を正しく使い分けている：最大60点",
+            "出力が読みやすい形になっている：最大40点"
+            ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+            "『ミニステータス表示』を作りましょう。",
+            "クラス名は Status にする",
+            "タイトルを 1 行表示する（例: === STATUS ===）",
+            "HP と MP を『ラベル: 値』形式で表示する",
+            "print と println を使い分ける"
+        ],
+        "exampleCode": {
+            "Java": "public class Status {\n  public static void main(String[] args) {\n    System.out.println(\"=== STATUS ===\");\n    System.out.print(\"HP: \");\n    System.out.println(30);\n    System.out.print(\"MP: \");\n    System.out.println(12);\n  }\n}\n"
+        },
+        "language": [
+            "Java"
+        ]
+        }
+    ]
     },
     {
-        "slug": "java-mission-3",
-        "title": "読みやすいコードの形を覚えよう",
-        "detail": "コメントとインデントを使って、コードを『読む側』の目線で整えます。",
-        "type": "MAIN",
-        "component": "Java_Mission_3",
-        "experience": 140,
-        "clientSlug": "yamada-senpai",
-        "difficultySlug": "shokyu",
-        "beforeSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "動くコードが書けるようになったら、次は『読めるコード』だ。",
-            "order": 1
-            },
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "これは将来の自分を助ける練習でもあるよ。",
-            "order": 2
-            }
-        ],
-        "afterSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "いいね。コードの見た目が整うと、理解スピードが変わる。",
-            "order": 1
-            },
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "次は『値』そのものを扱っていこう。",
-            "order": 2
-            }
-        ],
-        "steps": [
+    "slug": "java-mission-3",
+    "title": "読みやすいコードの形を覚えよう",
+    "detail": "コメントとインデントを使って、コードを『読む側』の目線で整えます。",
+    "type": "MAIN",
+    "component": "Java_Mission_3",
+    "experience": 140,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "動くコードが書けるようになったら、次は『読めるコード』だ。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今日は中身を変えずに、見た目を整える練習をしよう。",
+        "order": 2
+        }
+    ],
+    "afterSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね。コードの形が整うと、理解するスピードが全然違う。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は『値』を使って、できることを増やしていこう。",
+        "order": 2
+        }
+    ],
+    "steps": [
+        {
+        "order": 1,
+        "title": "コメントを書いてみよう",
+        "detail": "コードにメモを残す方法を学びます。",
+        "explains": [
             {
             "order": 1,
-            "title": "コメントを書いてみよう",
-            "detail": "コードにメモを残す方法を学びます。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "コメントはプログラムの動作に影響しない『メモ』だよ。処理の意図を書くのに使う。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\n// これは1行コメント\nSystem.out.println(\"Hello\");\n```"
-                },
-                {
-                "order": 2,
-                "content": "最初は『何をしているか』より『なぜ書いたか』を書く意識でOK。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "println の上に1行コメントを書いてみよう。",
-                "instructions": [
-                    "// から始める"
-                ],
-                "answer": "```java\n// 出力の練習\nSystem.out.println(\"Hello\");\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "content": "コメントはプログラムの動作に影響しない『メモ』だよ。読む人のために書く。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": "```java\n// これは1行コメント\nSystem.out.println(\"Hello\");\n```"
             },
             {
             "order": 2,
-            "title": "インデントを揃えよう",
-            "detail": "コードの構造を見える形にします。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "インデント（字下げ）は動作に影響しないけど、理解に直結する。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\npublic class Sample {\n  public static void main(String[] args) {\n    System.out.println(\"OK\");\n  }\n}\n```"
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "インデントを揃えたクラスを書いてみよう。",
-                "instructions": [
-                    "classの中を1段下げる",
-                    "mainの中をさらに1段下げる"
-                ],
-                "answer": "```java\npublic class Indent {\n  public static void main(String[] args) {\n    System.out.println(\"indent\");\n  }\n}\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "content": "今回は『何をしているコードか』をそのまま日本語で書けばOK。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": ""
             }
         ],
-        "exams": [
+        "stepExams": [
             {
-            "criteria": {
-                "score": 60,
-                "factor": [
-                "コメントが書けている：最大30点",
-                "インデントが整っている：最大30点",
-                "コードが読みやすい：最大40点"
-                ]
-            },
-            "type": "FREE_CREATION",
-            "component": null,
+            "order": 1,
+            "content": "println の上にコメントを書いたコードを完成させよう。",
             "instructions": [
-                "自分用のJavaテンプレートを書いてみよう。",
-                "class と main を書く",
-                "println を2回以上使う",
-                "コメントを2つ以上入れる",
-                "インデントを揃える"
+                "クラス名は CommentSample にする",
+                "public class CommentSample を書く",
+                "main メソッドを書く",
+                "println(\"Hello\") を1回書く",
+                "println の直前に「// Hello を表示する」というコメントを書く"
             ],
-            "exampleCode": {
-                "Java": "public class Template {\n  public static void main(String[] args) {\n    // 処理開始\n    System.out.println(\"start\");\n    System.out.println(\"end\");\n  }\n}\n"
-            },
-            "language": ["Java"]
+            "answer": "```java\npublic class CommentSample {\n  public static void main(String[] args) {\n    // Hello を表示する\n    System.out.println(\"Hello\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
             }
         ]
+        },
+        {
+        "order": 2,
+        "title": "インデントを揃えよう",
+        "detail": "コードの構造を見える形にします。",
+        "explains": [
+            {
+            "order": 1,
+            "content": "インデント（字下げ）は、どこからどこまでが同じ処理かを示す目印だ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": "```java\npublic class Sample {\n  public static void main(String[] args) {\n    System.out.println(\"OK\");\n  }\n}\n```"
+            }
+        ],
+        "stepExams": [
+            {
+            "order": 1,
+            "content": "インデントを正しく揃えたクラスを書こう。",
+            "instructions": [
+                "クラス名は IndentSample にする",
+                "public class IndentSample を書く",
+                "main メソッドを書く",
+                "println(\"indent\") を1回書く",
+                "class の中は2スペース下げる",
+                "main の中はさらに2スペース下げる"
+            ],
+            "answer": "```java\npublic class IndentSample {\n  public static void main(String[] args) {\n    System.out.println(\"indent\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+            }
+        ]
+        }
+    ],
+    "exams": [
+        {
+        "criteria": {
+            "score": 60,
+            "factor": [
+            "コメントが正しく書けている：最大30点",
+            "インデントが整っている：最大30点",
+            "コード全体が読みやすい：最大40点"
+            ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+            "自分用のJavaテンプレートを作りましょう。",
+            "クラス名は Template にする",
+            "class と main を書く",
+            "println を2回使う",
+            "それぞれの println の上にコメントを書く",
+            "インデントを正しく揃える"
+        ],
+        "exampleCode": {
+            "Java": "public class Template {\n  public static void main(String[] args) {\n    // 処理開始\n    System.out.println(\"start\");\n    // 処理終了\n    System.out.println(\"end\");\n  }\n}\n"
+        },
+        "language": ["Java"]
+        }
+    ]
     },
     {
         "slug": "java-mission-4",
@@ -360,44 +386,61 @@
         "difficultySlug": "shokyu",
         "beforeSentences": [
             {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "ここから『値』をちゃんと扱っていくよ。",
-            "order": 1
+                "speakerSlug": "yamada-senpai",
+                "sentence": "ここからは『値』そのものの話に入るよ。",
+                "order": 1
+            },
+            {
+                "speakerSlug": "yamada-senpai",
+                "sentence": "計算や条件分岐の前に、『どう書くか』を整理しておくのが目的だ。",
+                "order": 2
+            },
+            {
+                "speakerSlug": "yamada-senpai",
+                "sentence": "今回は仕組みよりも、まず目で見て違いを覚えよう。",
+                "order": 3
             }
         ],
         "afterSentences": [
             {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "OK。値の違いが分かると、次は変数が楽になる。",
-            "order": 1
+                "speakerSlug": "yamada-senpai",
+                "sentence": "いいね。値の書き方が整理できた。",
+                "order": 1
+            },
+            {
+                "speakerSlug": "yamada-senpai",
+                "sentence": "次はこの値に『名前』を付けて扱う。いよいよ変数だ。",
+                "order": 2
             }
         ],
         "steps": [
             {
-            "order": 1,
-            "title": "文字と文字列の違い",
-            "detail": "' と \" の違いを知ります。",
-            "explains": [
-                {
                 "order": 1,
-                "content": "1文字は 'A'、文字列は \"Hello\" のように書く。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nSystem.out.println('A');\nSystem.out.println(\"Hello\");\n```"
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "A と Java をそれぞれ正しい形で出力しよう。",
-                "instructions": [
-                    "A は 'A'",
-                    "Java は \"Java\""
+                "title": "文字と文字列の違い",
+                "detail": "' と \" の違いを知ります。",
+                "explains": [
+                    {
+                    "order": 1,
+                    "content": "1文字は 'A'、文字列は \"Hello\" のように書く。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": null,
+                    "code": "```java\nSystem.out.println('A');\nSystem.out.println(\"Hello\");\n```"
+                    }
                 ],
-                "answer": "```java\nSystem.out.println('A');\nSystem.out.println(\"Java\");\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+                "stepExams": [
+                    {
+                        "order": 1,
+                        "content": "A と Java をそれぞれ正しい形で出力しよう。",
+                        "instructions": [
+                        "このステップでは class / main は書かなくてよい",
+                        "System.out.println を直接書く",
+                        "A は 'A'（文字）",
+                        "Java は \"Java\"（文字列）"
+                        ],
+                        "answer": "```java\nSystem.out.println('A');\nSystem.out.println(\"Java\");\n```",
+                        "supporterSlug": "yamada-senpai"
+                    }
+                ]
             },
             {
             "order": 2,
@@ -417,7 +460,9 @@
                 "order": 1,
                 "content": "42、0.5、false を順番に出力しよう。",
                 "instructions": [
-                    "println を3回使う"
+                "このステップでは class / main は書かなくてよい",
+                "println を3回使う",
+                "42 → 0.5 → false の順で出力する"
                 ],
                 "answer": "```java\nSystem.out.println(42);\nSystem.out.println(0.5);\nSystem.out.println(false);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -448,216 +493,216 @@
         ]
     },
     {
-        "slug": "java-mission-5",
-        "title": "値を覚えて計算しよう（変数と演算）",
-        "detail": "変数で値を保存し、演算子で計算します。ここから先の if / for / 配列でも必ず使う基礎です。",
-        "type": "MAIN",
-        "component": "Java_Mission_5",
-        "experience": 200,
-        "clientSlug": "yamada-senpai",
-        "difficultySlug": "shokyu",
-        "beforeSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "ここからが『プログラミングっぽさ』の本番だよ。変数が分かると一気に世界が広がる。",
-            "order": 1
-            },
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "逆に、変数が曖昧だとこの先で詰まりやすい。今日は丁寧にいこう。",
-            "order": 2
-            }
-        ],
-        "afterSentences": [
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "ナイス。値を『覚える』と『計算する』ができたら、次からは処理を自由に組める。",
-            "order": 1
-            },
-            {
-            "speakerSlug": "yamada-senpai",
-            "sentence": "次は条件分岐に進むけど、変数と演算がちゃんと武器になるよ。",
-            "order": 2
-            }
-        ],
-        "steps": [
+    "slug": "java-mission-5",
+    "title": "値を覚えて計算しよう（変数と演算）",
+    "detail": "変数で値を保存し、演算子で計算します。ここから先の if / for / 配列でも必ず使う基礎です。",
+    "type": "MAIN",
+    "component": "Java_Mission_5",
+    "experience": 200,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここからが『プログラミングっぽさ』の本番だよ。変数が分かると一気に世界が広がる。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "逆に、変数が曖昧だとこの先で詰まりやすい。今日は丁寧にいこう。",
+        "order": 2
+        }
+    ],
+    "afterSentences": [
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ナイス。値を『覚える』と『計算する』ができたら、次からは処理を自由に組める。",
+        "order": 1
+        },
+        {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は条件分岐に進むけど、変数と演算がちゃんと武器になるよ。",
+        "order": 2
+        }
+    ],
+    "steps": [
+        {
+        "order": 1,
+        "title": "変数って何？",
+        "detail": "値に名前を付けて、使い回せるようにします。",
+        "explains": [
             {
             "order": 1,
-            "title": "変数って何？（理由を体験する）",
-            "detail": "値に名前を付けて、使い回せるようにします。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "変数は『値に名前を付けて保存する箱』だよ。毎回数字を書かなくてよくなる。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nint hp = 30;\nSystem.out.println(hp);\nSystem.out.println(hp);\n```"
-                },
-                {
-                "order": 2,
-                "content": "もし hp の値を 30 → 50 に変えたくなっても、変数なら 1か所直せば全部反映される。これが超重要。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "int型の変数 hp に 30 を入れて、2回出力しよう。",
-                "instructions": [
-                    "int hp を作る",
-                    "30 を入れる",
-                    "println を2回使う（両方 hp を出す）"
-                ],
-                "answer": "```java\nint hp = 30;\nSystem.out.println(hp);\nSystem.out.println(hp);\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "content": "変数は『値に名前を付けて保存する箱』だよ。毎回数字を書かなくてよくなる。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1",
+            "code": "```java\nint hp = 30;\nSystem.out.println(hp);\n```"
             },
             {
             "order": 2,
-            "title": "代入を理解しよう（= の意味）",
-            "detail": "代入と再代入（値の更新）を体験します。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "Javaの = は『等しい』じゃなくて『代入（右の値を左の変数に入れる）』だよ。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nint x = 10; // xに10を入れる\n```"
-                },
-                {
-                "order": 2,
-                "content": "同じ変数にもう一度入れ直すのが『再代入』。値を更新できるのがプログラムの強み。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nint x = 10;\nx = 20; // xを20に更新\nSystem.out.println(x); // 20\n```"
-                }
+            "content": "もし hp の値を 30 → 50 に変えたくなっても、変数なら 1か所直せば全部反映される。これが超重要。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-1",
+            "code": ""
+            }
+        ],
+        "stepExams": [
+            {
+            "order": 1,
+            "content": "int型の変数 hp を作って、30 を入れて表示しよう。",
+            "instructions": [
+                "※ このステップでは class や main メソッドは書かなくてOK",
+                "int hp = 30; を書く",
+                "println で hp を1回だけ表示する"
             ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "score を 60 で作って、その後 80 に更新して表示しよう。",
-                "instructions": [
-                    "int score = 60;",
-                    "score = 80; で更新する",
-                    "最後に score を出力する"
-                ],
-                "answer": "```java\nint score = 60;\nscore = 80;\nSystem.out.println(score);\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "answer": "```java\nint hp = 30;\nSystem.out.println(hp);\n```",
+            "supporterSlug": "yamada-senpai"
+            }
+        ]
+        },
+        {
+        "order": 2,
+        "title": "代入を理解しよう",
+        "detail": "代入と再代入（値の更新）を体験します。",
+        "explains": [
+            {
+            "order": 1,
+            "content": "Javaの = は『等しい』じゃなくて『代入（右の値を左の変数に入れる）』だよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2",
+            "code": "```java\nint x = 10; // xに10を入れる\n```"
+            },
+            {
+            "order": 2,
+            "content": "同じ変数にもう一度入れ直すのが『再代入』。値を更新できるのがプログラムの強み。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-2",
+            "code": "```java\nint x = 10;\nx = 20; // xを20に更新\nSystem.out.println(x); // 20\n```"
+            }
+        ],
+        "stepExams": [
+            {
+            "order": 1,
+            "content": "変数 score に値を代入し、あとから別の値に更新して表示しよう。",
+            "instructions": [
+                "※ このステップでは class や main メソッドは書かなくてOK",
+                "int score = 60; と書く",
+                "score = 80; で再代入する",
+                "println で score を表示する"
+            ],
+            "answer": "```java\nint score = 60;\nscore = 80;\nSystem.out.println(score);\n```",
+            "supporterSlug": "yamada-senpai"
+            }
+        ]
+        },
+        {
+        "order": 3,
+        "title": "演算子で計算しよう（+ - * /）",
+        "detail": "基本の四則演算と、計算の順序を学びます。",
+        "explains": [
+            {
+            "order": 1,
+            "content": "計算には演算子を使う。+ は足し算、- は引き算、* は掛け算、/ は割り算。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": "```java\nSystem.out.println(10 + 3);\nSystem.out.println(10 - 3);\nSystem.out.println(10 * 3);\nSystem.out.println(10 / 3);\n```"
+            },
+            {
+            "order": 2,
+            "content": "注意：int 同士の / は小数にならず切り捨てになる（10 / 3 は 3）。これは最初の罠ポイント。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": ""
             },
             {
             "order": 3,
-            "title": "演算子で計算しよう（+ - * /）",
-            "detail": "基本の四則演算と、計算の順序を学びます。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "計算には演算子を使う。+ は足し算、- は引き算、* は掛け算、/ は割り算。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nSystem.out.println(10 + 3);\nSystem.out.println(10 - 3);\nSystem.out.println(10 * 3);\nSystem.out.println(10 / 3);\n```"
-                },
-                {
-                "order": 2,
-                "content": "注意：int 同士の / は小数にならず切り捨てになる（10 / 3 は 3）。これは最初の罠ポイント。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
-                },
-                {
-                "order": 3,
-                "content": "計算の順序は、基本は * や / が先。順序を変えたいときは ( ) を使う。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nSystem.out.println(2 + 3 * 4);   // 14\nSystem.out.println((2 + 3) * 4); // 20\n```"
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "次の2つを出力しよう： 2 + 3 * 4 と (2 + 3) * 4",
-                "instructions": [
-                    "println を2回使う",
-                    "1回目は 2 + 3 * 4",
-                    "2回目は (2 + 3) * 4"
-                ],
-                "answer": "```java\nSystem.out.println(2 + 3 * 4);\nSystem.out.println((2 + 3) * 4);\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
-            },
-            {
-            "order": 4,
-            "title": "変数を使って計算しよう（実戦）",
-            "detail": "変数を使うと、計算が『変更に強い』形になります。",
-            "explains": [
-                {
-                "order": 1,
-                "content": "変数を使えば、値を変えても計算式はそのままでOK。これが『使いこなす』感覚だよ。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nint price = 120;\nint count = 3;\nint total = price * count;\nSystem.out.println(total);\n```"
-                },
-                {
-                "order": 2,
-                "content": "ポイント：計算結果も変数に入れると、途中経過をログに出したり再利用しやすい。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
-                }
-            ],
-            "stepExams": [
-                {
-                "order": 1,
-                "content": "price=150、count=2 を用意して total を計算し、total を表示しよう。",
-                "instructions": [
-                    "int price = 150;",
-                    "int count = 2;",
-                    "int total = price * count;",
-                    "println で total を出す"
-                ],
-                "answer": "```java\nint price = 150;\nint count = 2;\nint total = price * count;\nSystem.out.println(total);\n```",
-                "supporterSlug": "yamada-senpai"
-                }
-            ]
+            "content": "計算の順序は、基本は * や / が先。順序を変えたいときは ( ) を使う。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": "```java\nSystem.out.println(2 + 3 * 4);   // 14\nSystem.out.println((2 + 3) * 4); // 20\n```"
             }
         ],
-        "exams": [
+        "stepExams": [
             {
-            "criteria": {
-                "score": 60,
-                "factor": [
-                "変数を正しく宣言・代入できている：最大30点",
-                "再代入（値の更新）を使えている：最大20点",
-                "四則演算（+ - * /）を使って計算できている：最大30点",
-                "( ) を使って意図した順序で計算できている：最大20点"
-                ]
-            },
-            "type": "HYBRID",
-            "component": null,
+            "order": 1,
+            "content": "演算の順序が異なる2つの計算結果を表示しよう。",
             "instructions": [
-                "『割り勘計算ログ』を作りましょう。",
-                "int totalPrice（合計金額）, int people（人数）を用意する",
-                "1人あたりの金額を計算して int perPerson に入れる（/ を使う）",
-                "出力は次の3行：",
-                "1行目: Total: <totalPrice>",
-                "2行目: People: <people>",
-                "3行目: PerPerson: <perPerson>",
-                "( ) を使った計算を1回入れる（例: (totalPrice + 100) / people のようにしてもOK）",
-                "コメントを1つ以上入れる"
+                "※ このステップでは class や main メソッドは書かなくてOK",
+                "println を2回使う",
+                "1回目は 2 + 3 * 4 を計算して表示する",
+                "2回目は (2 + 3) * 4 を計算して表示する"
             ],
-            "exampleCode": {
-                "Java": "public class SplitBill {\n  public static void main(String[] args) {\n    // 割り勘ログ\n    int totalPrice = 1300;\n    int people = 4;\n\n    int perPerson = totalPrice / people;\n    int perPersonWithFee = (totalPrice + 100) / people;\n\n    System.out.println(\"Total: \" + totalPrice);\n    System.out.println(\"People: \" + people);\n    System.out.println(\"PerPerson: \" + perPerson);\n    System.out.println(\"PerPerson(withFee): \" + perPersonWithFee);\n  }\n}\n"
-            },
-            "language": [
-                "Java"
-            ]
+            "answer": "```java\nSystem.out.println(2 + 3 * 4);\nSystem.out.println((2 + 3) * 4);\n```",
+            "supporterSlug": "yamada-senpai"
             }
         ]
+        },
+        {
+        "order": 4,
+        "title": "変数を使って計算しよう",
+        "detail": "変数を使うと、計算が『変更に強い』形になります。",
+        "explains": [
+            {
+            "order": 1,
+            "content": "変数を使えば、値を変えても計算式はそのままでOK。これが『使いこなす』感覚だよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": "```java\nint price = 120;\nint count = 3;\nint total = price * count;\nSystem.out.println(total);\n```"
+            },
+            {
+            "order": 2,
+            "content": "ポイント：計算結果も変数に入れると、途中経過をログに出したり再利用しやすい。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": null,
+            "code": ""
+            }
+        ],
+        "stepExams": [
+            {
+            "order": 1,
+            "content": "変数を使って合計金額を計算し、結果を表示しよう。",
+            "instructions": [
+                "※ このステップでは class や main メソッドは書かなくてOK",
+                "price に 150、count に 2 を代入する",
+                "price と count を使って total を計算する",
+                "println で total を表示する"
+            ],
+            "answer": "```java\nint price = 150;\nint count = 2;\nint total = price * count;\nSystem.out.println(total);\n```",
+            "supporterSlug": "yamada-senpai"
+            }
+        ]
+        }
+    ],
+    "exams": [
+        {
+        "criteria": {
+            "score": 60,
+            "factor": [
+            "変数を正しく宣言・代入できている：最大30点",
+            "再代入（値の更新）を使えている：最大20点",
+            "四則演算（+ - * /）を使って計算できている：最大30点",
+            "( ) を使って意図した順序で計算できている：最大20点"
+            ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+            "『割り勘計算ログ』を作りましょう。",
+            "int totalPrice（合計金額）, int people（人数）を用意する",
+            "1人あたりの金額を計算して int perPerson に入れる（/ を使う）",
+            "出力は次の3行：",
+            "1行目: Total: <totalPrice>",
+            "2行目: People: <people>",
+            "3行目: PerPerson: <perPerson>",
+            "( ) を使った計算を1回入れる",
+            "コメントを1つ以上入れる"
+        ],
+        "exampleCode": {
+            "Java": "public class SplitBill {\n  public static void main(String[] args) {\n    // 割り勘ログ\n    int totalPrice = 1300;\n    int people = 4;\n\n    int perPerson = totalPrice / people;\n    int perPersonWithFee = (totalPrice + 100) / people;\n\n    System.out.println(\"Total: \" + totalPrice);\n    System.out.println(\"People: \" + people);\n    System.out.println(\"PerPerson: \" + perPerson);\n    System.out.println(\"PerPerson(withFee): \" + perPersonWithFee);\n  }\n}\n"
+        },
+        "language": ["Java"]
+        }
+    ]
     },
     {
         "slug": "java-mission-6",
@@ -716,11 +761,13 @@
             "stepExams": [
                 {
                 "order": 1,
-                "content": "score が 60 以上なら「合格！」と表示しよう。",
+                "content": "score が 60 以上のときに「合格！」と表示しよう。",
                 "instructions": [
-                    "int score = 80;",
+                    "※ このステップでは class や main メソッドは書かなくてOK",
+                    "int score = 80; を用意する",
                     "if を使う",
-                    "条件は score >= 60"
+                    "条件は score >= 60",
+                    "条件が true のときだけ「合格！」を表示する"
                 ],
                 "answer": "```java\nint score = 80;\nif (score >= 60) {\n  System.out.println(\"合格！\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -750,10 +797,13 @@
             "stepExams": [
                 {
                 "order": 1,
-                "content": "score が 59 のとき「不合格…」と表示しよう。",
+                "content": "score が 60 以上なら「合格」、60 未満なら「不合格…」と表示しよう。",
                 "instructions": [
-                    "int score = 59;",
-                    "if / else を使う"
+                    "※ このステップでは class や main メソッドは書かなくてOK",
+                    "int score = 59; を用意する",
+                    "if / else を使う",
+                    "60以上のときは「合格」",
+                    "60未満のときは「不合格…」を表示する"
                 ],
                 "answer": "```java\nint score = 59;\nif (score >= 60) {\n  System.out.println(\"合格\");\n} else {\n  System.out.println(\"不合格…\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -776,10 +826,12 @@
             "stepExams": [
                 {
                 "order": 1,
-                "content": "boolean 変数 ok を使って if を書こう。",
+                "content": "boolean 変数 ok を使って、条件が true のときに表示しよう。",
                 "instructions": [
-                    "boolean ok = true;",
-                    "if(ok) を使う"
+                    "※ このステップでは class や main メソッドは書かなくてOK",
+                    "boolean ok = true; を用意する",
+                    "if (ok) を使う",
+                    "条件が true のときに「OK」と表示する"
                 ],
                 "answer": "```java\nboolean ok = true;\nif (ok) {\n  System.out.println(\"OK\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -802,40 +854,43 @@
             "stepExams": [
                 {
                 "order": 1,
-                "content": "score が 60 と等しいかを正しく比較しよう。",
+                "content": "score が 60 と等しいときにメッセージを表示しよう。",
                 "instructions": [
-                    "== を使う"
+                    "※ このステップでは class や main メソッドは書かなくてOK",
+                    "int score = 60; を用意する",
+                    "== を使って比較する",
+                    "条件が true のとき「60点」と表示する"
                 ],
-                "answer": "```java\nif (score == 60) {\n  System.out.println(\"60点\");\n}\n```",
+                "answer": "```java\nint score = 60;\nif (score == 60) {\n  System.out.println(\"60点\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
                 }
             ]
-            }
+        }
+    ],
+    "exams": [
+        {
+        "criteria": {
+            "score": 60,
+            "factor": [
+            "比較演算子で条件を書けている：最大40点",
+            "if / else で正しく分岐できている：最大40点",
+            "指示通り出力できている：最大20点"
+            ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+            "『判定アプリ』を作りましょう。",
+            "int score を用意する",
+            "60以上なら「合格」、それ以外は「不合格」と出力する",
+            "ラベル付きで Score: <score> も表示する"
         ],
-        "exams": [
-            {
-            "criteria": {
-                "score": 60,
-                "factor": [
-                "比較演算子で条件を書けている：最大40点",
-                "if / else で正しく分岐できている：最大40点",
-                "指示通り出力できている：最大20点"
-                ]
-            },
-            "type": "HYBRID",
-            "component": null,
-            "instructions": [
-                "『判定アプリ』を作りましょう。",
-                "int score を用意する",
-                "60以上なら「合格」、それ以外は「不合格」と出力する",
-                "ラベル付きで Score: <score> も表示する"
-            ],
-            "exampleCode": {
-                "Java": "public class Judge {\n  public static void main(String[] args) {\n    int score = 72;\n    System.out.println(\"Score: \" + score);\n    if (score >= 60) {\n      System.out.println(\"合格\");\n    } else {\n      System.out.println(\"不合格\");\n    }\n  }\n}\n"
-            },
-            "language": ["Java"]
-            }
-        ]
+        "exampleCode": {
+            "Java": "public class Judge {\n  public static void main(String[] args) {\n    int score = 72;\n    System.out.println(\"Score: \" + score);\n    if (score >= 60) {\n      System.out.println(\"合格\");\n    } else {\n      System.out.println(\"不合格\");\n    }\n  }\n}\n"
+        },
+        "language": ["Java"]
+        }
+    ]
     },
     {
         "slug": "java-mission-7",
@@ -868,20 +923,37 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "> < >= <= == != は、比較して true / false を返す。",
+                "content": "比較演算子は『左と右を比べて true / false を返す』記号だよ。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
-                "code": "```java\nscore >= 60\nhp <= 0\n```"
+                "code": ""
+                },
+                {
+                "order": 2,
+                "content": "まずは意味を日本語で押さえよう。『左が右より大きい』『左と右が等しい』みたいに読むのがコツ。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": null,
+                "code": ""
+                },
+                {
+                "order": 3,
+                "content": "代表的な比較演算子はこの6つ。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-1",
+                "code": "```text\n>   左が右より大きい\n<   左が右より小さい\n>=  左が右以上\n<=  左が右以下\n==  左と右が等しい\n!=  左と右が等しくない\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "score が 80 のとき、60以上か判定する条件式を書こう。",
+                "content": "次の日本語を条件式で書こう。",
                 "instructions": [
-                    "score >= 60"
+                    "score は int 型の変数とする",
+                    "① score が 60 以上",
+                    "② score が 100 未満",
+                    "③ score が 0 と等しくない"
                 ],
-                "answer": "```java\nscore >= 60\n```",
+                "answer": "```java\nscore >= 60\nscore < 100\nscore != 0\n```",
                 "supporterSlug": "yamada-senpai"
                 }
             ]
@@ -892,21 +964,39 @@
             "detail": "条件を組み合わせます。",
             "explains": [
                 {
-                "order": 1,
-                "content": "&& は AND、|| は OR、! は NOT。",
-                "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nscore >= 60 && absences < 3\n```"
+                    "order": 1,
+                    "content": "論理演算子は『条件と条件をつなぐ』ための記号だよ。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": null,
+                    "code": ""
+                    },
+                    {
+                    "order": 2,
+                    "content": "まずは日本語で考えよう。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": "step-2",
+                    "code": "```text\nA かつ B   → 両方 true のときだけ true\nA または B → どちらかが true なら true\nA ではない → true / false を反転\n```"
+                    },
+                    {
+                    "order": 3,
+                    "content": "Java ではそれぞれ &&（AND）、||（OR）、!（NOT）で書く。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": null,
+                    "code": "```java\nage >= 18 && hasTicket\nscore >= 60 || retry\n!isClosed\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "score が60以上かつ absences が3未満の条件式を書こう。",
+                "content": "次の条件で判定プログラムを書こう。",
                 "instructions": [
-                    "&& を使う"
+                    "int age = 20;",
+                    "boolean hasTicket = true;",
+                    "年齢が18以上 かつ チケットありなら「入場OK」",
+                    "それ以外は「入場NG」と表示する",
+                    "if / else を使う"
                 ],
-                "answer": "```java\nscore >= 60 && absences < 3\n```",
+                "answer": "```java\nint age = 20;\nboolean hasTicket = true;\n\nif (age >= 18 && hasTicket) {\n  System.out.println(\"入場OK\");\n} else {\n  System.out.println(\"入場NG\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
                 }
             ]

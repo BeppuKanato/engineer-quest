@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Typography, Card, TextField, Radio, RadioGroup, FormControlLabel, Select, MenuItem, Button } from "@mui/material";
-import { isComponentType, MissionComponentProps } from "../common/common";
+import { isComponentType, MissionComponentProps } from "../../common/common";
 
-export const Mission_2 = ({ componentType }: MissionComponentProps) => {
+export const Web_Mission_2 = ({ componentType }: MissionComponentProps) => {
   return (
     <Box sx={{ p: 3, maxWidth: 700, mx: "auto" }}>
       <Typography variant="h4" component="h1" sx={{ mb: 2 }}>

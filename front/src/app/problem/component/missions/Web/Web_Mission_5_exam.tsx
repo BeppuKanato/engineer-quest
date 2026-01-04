@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
 
-export const Mission_5_Exam = () => {
+export const Web_Mission_5_Exam = () => {
   const [color, setColor] = useState("black");
   const [text, setText] = useState("最初のタイトル");
   const [colorIndex, setColorIndex] = useState(0);

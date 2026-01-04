@@ -4,6 +4,7 @@ export type MissionComponentProps = {
 }
 
 export const isComponentType = (name: string, propsComponentType?: string) => (
+    console.log("isComponentType check:", name, propsComponentType),
     propsComponentType === name
 );
 

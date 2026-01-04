@@ -2,7 +2,7 @@
 import { Box, Button, Input, List, ListItem, Paper, Typography } from "@mui/material";
 import { useState } from "react";
 
-export const Mission_6_Exam = () => {
+export const Web_Mission_6_Exam = () => {
   const [tasks, setTasks] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
 
