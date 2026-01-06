@@ -1086,7 +1086,7 @@
     {
         "slug": "java-mission-8",
         "title": "同じ処理を繰り返そう（for文入門）",
-        "detail": "for文を使って、同じ処理を何度も実行します。",
+        "detail": "for文を使って、同じ処理を決まった回数だけ実行します。『初期化・条件・更新』の意味まで理解して、回数バグを防げるようになります。",
         "type": "MAIN",
         "component": "Java_Mission_8",
         "experience": 260,
@@ -1100,7 +1100,7 @@
             },
             {
             "speakerSlug": "yamada-senpai",
-            "sentence": "繰り返しは、プログラムを一気に短く・強くする。",
+            "sentence": "繰り返しは、プログラムを一気に短く・強くする。今日は『仕組み』まで掴もう。",
             "order": 2
             }
         ],
@@ -1112,7 +1112,7 @@
             },
             {
             "speakerSlug": "yamada-senpai",
-            "sentence": "次は for の中で変数がどう動くかを見ていこう。",
+            "sentence": "次は for と配列を組み合わせると、一気に世界が広がるよ。",
             "order": 2
             }
         ],
@@ -1120,30 +1120,33 @@
             {
             "order": 1,
             "title": "for文の最小形を覚えよう",
-            "detail": "決まった回数だけ処理を繰り返します。",
+            "detail": "決まった回数だけ処理を繰り返します。3つの要素（初期化・条件・更新）をセットで理解します。",
             "explains": [
                 {
                 "order": 1,
-                "content": "for文は『初期化・条件・更新』の3つで回数を制御する。",
+                "content": "for文は『初期化 → 条件チェック →（trueなら中身実行）→ 更新 → 条件チェック…』を繰り返す構文だよ。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": "```java\nfor (int i = 0; i < 3; i++) {\n  System.out.println(\"Hello\");\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "この例だと、i は 0 → 1 → 2 と変化して、合計3回実行される。",
+                "content": "この例だと、最初に i=0 でスタートして、条件 i<3 が true の間だけ中身を実行する。最後に i++ で1増えて、また条件チェックに戻る。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
+                "componentType": "step-1",
+                "code": "```java\n// 初期化: int i = 0\n// 条件:   i < 3   （true の間くり返す）\n// 更新:   i++     （1ずつ増える）\nfor (int i = 0; i < 3; i++) {\n  System.out.println(\"Hello\");\n}\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "\"Java\" を3回表示しよう。",
+                "content": "for文を使って \"Java\" をちょうど3回表示しよう。",
                 "instructions": [
-                    "for 文を使う",
-                    "3回繰り返す"
+                    "このStepの提出は『クラス / main メソッド不要』です（for文ブロックだけ書けばOK）",
+                    "for文の初期化は int i = 0; を使う",
+                    "条件は i < 3 にする（3回になる）",
+                    "更新は i++ にする",
+                    "ループの中で System.out.println(\"Java\"); を実行する"
                 ],
                 "answer": "```java\nfor (int i = 0; i < 3; i++) {\n  System.out.println(\"Java\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1153,21 +1156,21 @@
             {
             "order": 2,
             "title": "カウンタ変数 i を理解しよう",
-            "detail": "for文の中で変数がどう変わるかを見ます。",
+            "detail": "for文の中で i がどう変化するかを見ます。i を出力して「今何回目か」を体感します。",
             "explains": [
                 {
                 "order": 1,
-                "content": "i は『今何回目か』を表す変数。for文の中で自由に使える。",
+                "content": "i は『今何回目か』を表すカウンタ変数。ループの中で自由に使えるよ。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
                 "code": "```java\nfor (int i = 0; i < 5; i++) {\n  System.out.println(i);\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "このコードは 0,1,2,3,4 の順で出力される。",
+                "content": "このコードは 0, 1, 2, 3, 4 の順で出力される。つまり『i は毎回1ずつ増えている』ってことが目で分かる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
+                "componentType": "step-2",
+                "code": "```java\n// 出力結果イメージ\n// 0\n// 1\n// 2\n// 3\n// 4\nfor (int i = 0; i < 5; i++) {\n  System.out.println(i);\n}\n```"
                 }
             ],
             "stepExams": [
@@ -1175,7 +1178,9 @@
                 "order": 1,
                 "content": "0から4までの数字を順番に出力しよう。",
                 "instructions": [
-                    "i をそのまま println する"
+                    "このStepの提出は『クラス / main メソッド不要』です（for文ブロックだけ書けばOK）",
+                    "for (int i = 0; i < 5; i++) を使う",
+                    "ループの中で println(i) を実行する"
                 ],
                 "answer": "```java\nfor (int i = 0; i < 5; i++) {\n  System.out.println(i);\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1184,31 +1189,34 @@
             },
             {
             "order": 3,
-            "title": "回数を変えてみよう",
-            "detail": "条件部分を変えると回数が変わります。",
+            "title": "< と <= の違いで回数が変わる",
+            "detail": "境界（< と <=）で、実行回数が1回変わることを理解します。",
             "explains": [
                 {
                 "order": 1,
-                "content": "i < 10 にすれば10回、i <= 10 にすれば11回になる。",
+                "content": "条件を i < 10 にすると『0〜9』で10回。i <= 10 にすると『0〜10』で11回。境界のミスは超よくある。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
-                "code": "```java\nfor (int i = 1; i <= 3; i++) {\n  System.out.println(i);\n}\n```"
+                "code": "```java\n// 10回（0〜9）\nfor (int i = 0; i < 10; i++) {\n  System.out.println(i);\n}\n\n// 11回（0〜10）\nfor (int i = 0; i <= 10; i++) {\n  System.out.println(i);\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "境界（< と <=）を間違えると回数バグが起きやすい。超重要。",
+                "content": "『1から3まで』のような範囲を作りたいときは、開始値と条件をセットで考えるのがコツ。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
-                "code": ""
+                "code": "```java\nfor (int i = 1; i <= 3; i++) {\n  System.out.println(i);\n}\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "1から3までを表示しよう。",
+                "content": "1から3までを順番に表示しよう。",
                 "instructions": [
-                    "i = 1 から始める",
-                    "i <= 3 を条件にする"
+                    "このStepの提出は『クラス / main メソッド不要』です（for文ブロックだけ書けばOK）",
+                    "初期化は int i = 1; にする",
+                    "条件は i <= 3 にする",
+                    "更新は i++ にする",
+                    "ループの中で println(i) を実行する"
                 ],
                 "answer": "```java\nfor (int i = 1; i <= 3; i++) {\n  System.out.println(i);\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1221,8 +1229,8 @@
             "criteria": {
                 "score": 60,
                 "factor": [
-                "for文の構文が正しい：最大40点",
-                "回数制御が正しい：最大40点",
+                "for文の構文（初期化・条件・更新）が正しい：最大40点",
+                "回数制御（開始/終了の境界）が正しい：最大40点",
                 "出力結果が指示通り：最大20点"
                 ]
             },
@@ -1230,13 +1238,18 @@
             "component": null,
             "instructions": [
                 "『カウントログ』を作りましょう。",
-                "for文を使って1〜5を出力する",
-                "各行は \"Count: 数字\" の形式で表示する"
+                "このMission Examは『クラス / main メソッドあり』で提出してください。",
+                "for文を使って1〜5を順番に出力する",
+                "各行は \"Count: 数字\" の形式で表示する（例: Count: 1）",
+                "println を使う",
+                "（推奨）なぜこの条件にしたか、コメントを1つ入れる"
             ],
             "exampleCode": {
-                "Java": "public class CountLog {\n  public static void main(String[] args) {\n    for (int i = 1; i <= 5; i++) {\n      System.out.println(\"Count: \" + i);\n    }\n  }\n}\n"
+                "Java": "public class CountLog {\n  public static void main(String[] args) {\n    // 1〜5を出すために i=1 から始め、i<=5 の間くり返す\n    for (int i = 1; i <= 5; i++) {\n      System.out.println(\"Count: \" + i);\n    }\n  }\n}\n"
             },
-            "language": ["Java"]
+            "language": [
+                "Java"
+            ]
             }
         ]
     },
@@ -1276,16 +1289,16 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "for の中で変数を更新すると、値を積み上げられる。",
+                "content": "for の中で変数を更新すると、値を少しずつ積み上げていける。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": "```java\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum = sum + i;\n}\nSystem.out.println(sum);\n```"
                 },
                 {
                 "order": 2,
-                "content": "sum = sum + i は『今までの合計に i を足す』という意味。",
+                "content": "sum = sum + i は『今までの合計（sum）に、今回の値（i）を足して、もう一度 sum に入れ直す』という意味。sum が毎回更新されていく。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": ""
                 }
             ],
@@ -1294,8 +1307,11 @@
                 "order": 1,
                 "content": "1〜3の合計を求めて表示しよう。",
                 "instructions": [
-                    "sum を 0 で初期化",
-                    "for で 1〜3 を回す"
+                    "int sum = 0; で合計用の変数を用意する",
+                    "for文で i を 1〜3 まで回す",
+                    "for の中で sum = sum + i を行う",
+                    "for の外で sum を println する",
+                    "クラスや main メソッドは不要"
                 ],
                 "answer": "```java\nint sum = 0;\nfor (int i = 1; i <= 3; i++) {\n  sum = sum + i;\n}\nSystem.out.println(sum);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1309,14 +1325,21 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "平均 = 合計 ÷ 個数。for と計算を組み合わせる典型例。",
+                "content": "平均は『合計 ÷ 個数』。まず for 文で合計を出し、その後で平均を計算する。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
                 "code": ""
                 },
                 {
                 "order": 2,
-                "content": "int 同士の割り算は切り捨てになる点に注意。",
+                "content": "ポイント：合計は for の中で更新するが、平均の計算は for が終わってから行う。結果を保存するために avg のような変数を使う。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": null,
+                "code": "```java\nint avg = sum / 5;\n```"
+                },
+                {
+                "order": 3,
+                "content": "注意：int 同士の割り算は小数にならず切り捨てになる。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
                 "code": ""
@@ -1325,10 +1348,13 @@
             "stepExams": [
                 {
                 "order": 1,
-                "content": "1〜5の平均を int で計算して表示しよう。",
+                "content": "1〜5の平均を int 型で計算して表示しよう。",
                 "instructions": [
-                    "合計を出す",
-                    "5で割る"
+                    "sum を 0 で初期化する",
+                    "for 文で 1〜5 を足し込む",
+                    "int avg という変数に sum / 5 を入れる",
+                    "avg を println で表示する",
+                    "クラスや main メソッドは不要"
                 ],
                 "answer": "```java\nint sum = 0;\nfor (int i = 1; i <= 5; i++) {\n  sum = sum + i;\n}\nint avg = sum / 5;\nSystem.out.println(avg);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1342,14 +1368,14 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "for の中で if を使うと、『条件に合うものだけ』を扱える。",
+                "content": "for の中で if を使うと、『条件に合うものだけ』を集計できる。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
                 "code": "```java\nint sum = 0;\nfor (int i = 1; i <= 10; i++) {\n  if (i % 2 == 0) {\n    sum = sum + i;\n  }\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "これは『偶数だけ足す』処理。後で超よく使う形。",
+                "content": "これは『偶数だけ足す』処理。配列と組み合わせると実務っぽくなる。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
                 "code": ""
@@ -1360,8 +1386,11 @@
                 "order": 1,
                 "content": "1〜10の中で奇数だけを足して表示しよう。",
                 "instructions": [
-                    "if を使う",
-                    "i % 2 == 1 を条件にする"
+                    "int sum = 0; を用意する",
+                    "for 文で 1〜10 を回す",
+                    "if (i % 2 == 1) のときだけ足す",
+                    "for の外で sum を表示する",
+                    "クラスや main メソッドは不要"
                 ],
                 "answer": "```java\nint sum = 0;\nfor (int i = 1; i <= 10; i++) {\n  if (i % 2 == 1) {\n    sum = sum + i;\n  }\n}\nSystem.out.println(sum);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1370,28 +1399,30 @@
             }
         ],
         "exams": [
-            {
+        {
             "criteria": {
-                "score": 60,
-                "factor": [
+            "score": 60,
+            "factor": [
                 "for文と変数を正しく使えている：最大40点",
                 "累積計算が正しい：最大40点",
                 "if と組み合わせて条件処理できている：最大20点"
-                ]
+            ]
             },
             "type": "HYBRID",
             "component": null,
             "instructions": [
-                "『学習時間集計』を作りましょう。",
-                "1日ごとの学習時間を想定して、1〜7を for で回す",
-                "奇数の日だけ学習したとして、その合計時間を出す",
-                "結果をラベル付きで出力する"
+            "『条件付き合計カウンター』を作りましょう。",
+            "int total = 0; を用意する",
+            "for文で 1〜7 を順番に回す",
+            "奇数のときだけ、その数値を total に足す",
+            "for文が終わった後で、次の形式で出力する",
+            "Total: <total>"
             ],
             "exampleCode": {
-                "Java": "public class StudySum {\n  public static void main(String[] args) {\n    int total = 0;\n    for (int day = 1; day <= 7; day++) {\n      if (day % 2 == 1) {\n        total = total + day;\n      }\n    }\n    System.out.println(\"Total: \" + total);\n  }\n}\n"
+            "Java": "public class OddSum {\n  public static void main(String[] args) {\n    int total = 0;\n    for (int i = 1; i <= 7; i++) {\n      if (i % 2 == 1) {\n        total = total + i;\n      }\n    }\n    System.out.println(\"Total: \" + total);\n  }\n}\n"
             },
             "language": ["Java"]
-            }
+        }
         ]
     },
     {
@@ -1570,10 +1601,10 @@
                 ]
             },
             "type": "HYBRID",
-            "component": "Misson_Exam",
+            "component": "Java_Promotion_1",
             "instructions": [
                 "『学習進捗チェッカー』を作成しましょう。",
-                "次の変数を main の中で用意する：int totalDays（学習日数）, int studiedDays（学習した日数）",
+                "次の変数を main の中で用意する：int totalDays（目標学習日数）, int studiedDays（学習した日数）",
                 "for 文を使って『学習ログ Day X』を studiedDays の回数だけ出力する",
                 "学習達成率（studiedDays ÷ totalDays × 100）を計算して表示する（整数でOK）",
                 "達成率が 70%以上なら『順調です』、それ以外なら『もう少し頑張ろう』と if / else で表示する",
@@ -1581,7 +1612,7 @@
                 "コメントを最低1つ入れる"
             ],
             "exampleCode": {
-                "Java": "public class ProgressChecker {\n  public static void main(String[] args) {\n    // 学習進捗の確認\n    int totalDays = 10;\n    int studiedDays = 7;\n\n    for (int i = 1; i <= studiedDays; i++) {\n      System.out.println(\"学習ログ Day \" + i);\n    }\n\n    int rate = studiedDays * 100 / totalDays;\n    System.out.println(\"Rate: \" + rate + \"%\");\n\n    if (rate >= 70) {\n      System.out.println(\"順調です\");\n    } else {\n      System.out.println(\"もう少し頑張ろう\");\n    }\n  }\n}\n"
+                "Java": "public class ProgressChecker {\n  public static void main(String[] args) {\n    // 学習進捗の確認\n    int totalDays = 10;\n    int studiedDays = 7;\n\n    for (int i = 1; i <= studiedDays; i++) {\n      System.out.println(\"学習ログ Day \" + i);\n    }\n\n    int rate = studiedDays / totalDays * 100;\n    System.out.println(\"Rate: \" + rate + \"%\");\n\n    if (rate >= 70) {\n      System.out.println(\"順調です\");\n    } else {\n      System.out.println(\"もう少し頑張ろう\");\n    }\n  }\n}\n"
             },
             "language": [
                 "Java"
@@ -1666,24 +1697,26 @@
                 "order": 1,
                 "content": "配列は『同じ型の値を順番に並べて持つ』仕組み。番号（インデックス）で取り出す。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": "```java\nint[] scores = {70, 80, 90};\n```"
                 },
                 {
                 "order": 2,
                 "content": "scores[0] は 70、scores[1] は 80。番号は 0 から始まる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": ""
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "3つの整数を持つ配列を作ってみよう。",
+                "content": "3つの整数をまとめて持つ配列を作ろう。",
                 "instructions": [
-                    "int[] を使う",
-                    "{ } で値を並べる"
+                    "クラスや main メソッドは書かなくてよい",
+                    "変数名は nums とする",
+                    "配列の中身は 1, 2, 3 とする",
+                    "他のコードは書かない"
                 ],
                 "answer": "```java\nint[] nums = {1, 2, 3};\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1699,14 +1732,14 @@
                 "order": 1,
                 "content": "配列名[番号] で要素を使える。番号は必ず 0 から。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
                 "code": "```java\nint[] scores = {70, 80, 90};\nSystem.out.println(scores[1]); // 80\n```"
                 },
                 {
                 "order": 2,
                 "content": "存在しない番号を指定するとエラーになる。ここもよくある罠。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
                 "code": ""
                 }
             ],
@@ -1715,7 +1748,9 @@
                 "order": 1,
                 "content": "配列の2番目の要素を表示しよう。",
                 "instructions": [
-                    "index 1 を使う"
+                    "クラスや main メソッドは書かなくてよい",
+                    "配列は scores という名前で {60, 70, 80} とする",
+                    "2番目の要素（70）を println で表示する"
                 ],
                 "answer": "```java\nint[] scores = {60, 70, 80};\nSystem.out.println(scores[1]);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1731,7 +1766,7 @@
                 "order": 1,
                 "content": "配列.length で要素の数が分かる。for と組み合わせるための超重要ポイント。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-3",
                 "code": "```java\nint[] scores = {70, 80, 90};\nSystem.out.println(scores.length); // 3\n```"
                 }
             ],
@@ -1740,7 +1775,9 @@
                 "order": 1,
                 "content": "配列の長さを表示しよう。",
                 "instructions": [
-                    "配列.length を使う"
+                    "クラスや main メソッドは書かなくてよい",
+                    "配列は nums という名前で {5, 10, 15} とする",
+                    "配列の長さを println で表示する"
                 ],
                 "answer": "```java\nint[] nums = {5, 10, 15};\nSystem.out.println(nums.length);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1762,12 +1799,12 @@
             "component": null,
             "instructions": [
                 "『テスト点数表示』を作りましょう。",
-                "3つ以上の点数を配列で用意する",
-                "1つ目と最後の点数を表示する",
+                "int[] scores を用意し、3つ以上の点数を入れる",
+                "最初の要素と最後の要素を表示する",
                 "配列の長さも表示する"
             ],
             "exampleCode": {
-                "Java": "public class Scores {\n  public static void main(String[] args) {\n    int[] scores = {65, 78, 90};\n    System.out.println(scores[0]);\n    System.out.println(scores[2]);\n    System.out.println(scores.length);\n  }\n}\n"
+                "Java": "public class Scores {\n  public static void main(String[] args) {\n    int[] scores = {65, 78, 90};\n    System.out.println(scores[0]);\n    System.out.println(scores[scores.length - 1]);\n    System.out.println(scores.length);\n  }\n}\n"
             },
             "language": ["Java"]
             }
@@ -1814,19 +1851,28 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "for の条件に length を使うと、要素数が変わっても安全。",
+                "content": "配列の要素は 0 から順番に並んでいる。for文を使えば、先頭から最後まで1つずつ取り出せる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
+                "code": ""
+                },
+                {
+                "order": 2,
+                "content": "条件に scores.length を使うと、『配列の長さに合わせて』自動で止まる。要素数が増減しても、コードを直さずに済む。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-1",
                 "code": "```java\nfor (int i = 0; i < scores.length; i++) {\n  System.out.println(scores[i]);\n}\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "配列の全要素を順番に表示しよう。",
+                "content": "配列 scores の全要素を、先頭から順番に1行ずつ表示しよう。",
                 "instructions": [
-                    "for 文を使う",
-                    "length を条件に使う"
+                    "int[] scores = {60, 70, 80}; を使う",
+                    "for文を使う",
+                    "条件は scores.length を使う",
+                    "println で scores[i] を表示する"
                 ],
                 "answer": "```java\nint[] scores = {60, 70, 80};\nfor (int i = 0; i < scores.length; i++) {\n  System.out.println(scores[i]);\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -1840,21 +1886,31 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "for で回しながら足し込めば、合計や平均が出せる。",
+                "content": "for文の中で合計用の変数に足し込んでいけば、配列の合計が作れる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nint sum = 0;\nfor (int i = 0; i < scores.length; i++) {\n  sum += scores[i];\n}\nint avg = sum / scores.length;\n```"
+                "componentType": "step-2",
+                "code": ""
+                },
+                {
+                "order": 2,
+                "content": "`sum += scores[i];` は `sum = sum + scores[i];` と同じ意味。『今までの合計に、今回の値を足す』という書き方。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-2",
+                "code": "```java\nint sum = 0;\nsum += 10; // sum = sum + 10 と同じ\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "配列の平均点を計算して表示しよう。",
+                "content": "配列 scores の平均点を計算して表示しよう。",
                 "instructions": [
-                    "sum を用意する",
-                    "length で割る"
+                    "int[] scores = {60, 70, 80}; を使う",
+                    "合計用に int sum = 0 を用意する",
+                    "for文で scores を回し、sum に足し込む",
+                    "int avg に平均（sum / scores.length）を代入する",
+                    "avg を表示する"
                 ],
-                "answer": "```java\nint[] scores = {60, 70, 80};\nint sum = 0;\nfor (int i = 0; i < scores.length; i++) {\n  sum += scores[i];\n}\nSystem.out.println(sum / scores.length);\n```",
+                "answer": "```java\nint[] scores = {60, 70, 80};\nint sum = 0;\nfor (int i = 0; i < scores.length; i++) {\n  sum += scores[i];\n}\nint avg = sum / scores.length;\nSystem.out.println(avg);\n```",
                 "supporterSlug": "yamada-senpai"
                 }
             ]
@@ -1874,9 +1930,9 @@
             "component": null,
             "instructions": [
                 "『成績集計』を作りましょう。",
-                "点数を配列で用意する",
-                "全点数を表示する",
-                "合計と平均を表示する"
+                "int[] scores に3つ以上の点数を入れる",
+                "for文で全点数を表示する",
+                "合計と平均をそれぞれラベル付きで表示する"
             ],
             "exampleCode": {
                 "Java": "public class Result {\n  public static void main(String[] args) {\n    int[] scores = {55, 70, 85};\n    int sum = 0;\n    for (int i = 0; i < scores.length; i++) {\n      System.out.println(scores[i]);\n      sum += scores[i];\n    }\n    System.out.println(\"Sum: \" + sum);\n    System.out.println(\"Avg: \" + (sum / scores.length));\n  }\n}\n"
@@ -1984,24 +2040,25 @@
                 "order": 1,
                 "content": "メソッドは『処理に名前を付けたもの』。同じ処理を何度も書かなくてよくなる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": "```java\nstatic void hello() {\n  System.out.println(\"Hello\");\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "この例では、hello() という名前で出力処理をまとめている。",
+                "content": "main が static なので、同じクラス内で呼び出すメソッドも static にする必要がある。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": ""
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "println を1行持つ hello メソッドを作ろう。",
+                "content": "println を1行持つ static なメソッドを作ろう。",
                 "instructions": [
                     "static void を使う",
-                    "println を1回書く"
+                    "println を1回書く",
+                    "クラス定義の中に書く（main と同じクラス）"
                 ],
                 "answer": "```java\nstatic void hello() {\n  System.out.println(\"Hello\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2015,25 +2072,26 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "メソッドは main の中から呼び出して使う。",
+                "content": "メソッドは main の中から名前を書いて呼び出す。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
                 "code": "```java\npublic static void main(String[] args) {\n  hello();\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "呼び出すと、その場所に処理が『差し込まれる』イメージ。",
+                "content": "呼び出すと、その場所に処理が順番に実行されるイメージ。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
                 "code": ""
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "main から hello メソッドを呼び出そう。",
+                "content": "main メソッドから hello を呼び出そう。",
                 "instructions": [
-                    "hello(); を書く"
+                    "public static void main を書く",
+                    "hello(); を1行書く"
                 ],
                 "answer": "```java\npublic static void main(String[] args) {\n  hello();\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2049,23 +2107,24 @@
                 "order": 1,
                 "content": "処理をメソッドに分けると、main には『流れ』だけが残る。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-3",
                 "code": ""
                 },
                 {
                 "order": 2,
-                "content": "長い main はバグの温床。早めに分ける癖をつけよう。",
+                "content": "長い main は読みづらくなりやすい。処理は小さく分けるのが基本。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-3",
                 "code": ""
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "出力処理をメソッドに分けて、main を1行にしよう。",
+                "content": "出力処理をメソッドに分けて、main では呼び出すだけにしよう。",
                 "instructions": [
-                    "main ではメソッド呼び出しだけにする"
+                    "出力用の static メソッドを作る",
+                    "main ではそのメソッドを1行で呼ぶ"
                 ],
                 "answer": "```java\nstatic void show() {\n  System.out.println(\"OK\");\n}\n\npublic static void main(String[] args) {\n  show();\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2078,7 +2137,7 @@
             "criteria": {
                 "score": 60,
                 "factor": [
-                "メソッドを正しく定義できている：最大40点",
+                "static メソッドを正しく定義できている：最大40点",
                 "main から呼び出せている：最大40点",
                 "main が整理されている：最大20点"
                 ]
@@ -2087,7 +2146,7 @@
             "component": null,
             "instructions": [
                 "『メニュー表示』を作りましょう。",
-                "メニュー表示用のメソッドを作る",
+                "メニュー表示用の static メソッドを作る",
                 "main ではそのメソッドを呼び出すだけにする",
                 "println を3回以上使う"
             ],
@@ -2139,19 +2198,28 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "引数は『メソッド専用の変数』。呼び出すときに値を渡す。",
+                "content": "引数は『メソッド専用の変数』。呼び出したときに渡された値だけを受け取る。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
+                "code": ""
+                },
+                {
+                "order": 2,
+                "content": "引数はメソッドの中でだけ使える。main から直接触ることはできない（これをスコープと言う）。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-1",
                 "code": "```java\nstatic void greet(String name) {\n  System.out.println(\"Hello \" + name);\n}\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "名前を受け取って表示するメソッドを書こう。",
+                "content": "名前を受け取って表示する static メソッドを書こう。",
                 "instructions": [
-                    "String を引数にする",
-                    "println で表示する"
+                    "static void greet を作る",
+                    "引数は String name",
+                    "println で \"Hello \" + name を表示する",
+                    "main と同じクラス内に書く"
                 ],
                 "answer": "```java\nstatic void greet(String name) {\n  System.out.println(\"Hello \" + name);\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2165,19 +2233,28 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "return はメソッドの結果を返す。void 以外の型が必要。",
+                "content": "void は『何も返さない』という意味。計算結果を返したい場合は、戻り値の型が必要。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-2",
+                "code": ""
+                },
+                {
+                "order": 2,
+                "content": "return は『この値を結果として返す』という命令。戻り値の型と一致している必要がある。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-2",
                 "code": "```java\nstatic int add(int a, int b) {\n  return a + b;\n}\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "2つの数を足して返すメソッドを書こう。",
+                "content": "2つの数を足して結果を返すメソッドを書こう。",
                 "instructions": [
-                    "戻り値は int",
-                    "return を使う"
+                    "static int add を作る",
+                    "int a, int b を引数にする",
+                    "return で a + b を返す",
+                    "main と同じクラス内に書く"
                 ],
                 "answer": "```java\nstatic int add(int a, int b) {\n  return a + b;\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2191,7 +2268,7 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "戻り値は変数で受け取れる。ここで部品感が完成する。",
+                "content": "戻り値は変数で受け取れる。メソッドは『計算する部品』として使えるようになる。",
                 "supporterSlug": "yamada-senpai",
                 "componentType": null,
                 "code": "```java\nint result = add(3, 5);\nSystem.out.println(result);\n```"
@@ -2202,7 +2279,9 @@
                 "order": 1,
                 "content": "add メソッドを呼び出して結果を表示しよう。",
                 "instructions": [
-                    "戻り値を変数で受け取る"
+                    "add(3, 5) を呼び出す",
+                    "戻り値を int result に代入する",
+                    "println で result を表示する"
                 ],
                 "answer": "```java\nint result = add(3, 5);\nSystem.out.println(result);\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2224,9 +2303,10 @@
             "component": null,
             "instructions": [
                 "『料金計算』を作りましょう。",
-                "int price, int count を引数に取るメソッドを作る",
-                "合計金額を戻り値として返す",
-                "main で結果を受け取り、表示する"
+                "static int total(int price, int count) を作る",
+                "return で price * count を返す",
+                "main で total を呼び出し、結果を変数で受け取る",
+                "結果を println で表示する"
             ],
             "exampleCode": {
                 "Java": "public class Calc {\n  static int total(int price, int count) {\n    return price * count;\n  }\n\n  public static void main(String[] args) {\n    int result = total(120, 3);\n    System.out.println(result);\n  }\n}\n"
@@ -2258,22 +2338,20 @@
                 ]
             },
             "type": "HYBRID",
-            "component": "Misson_Exam",
+            "component": "Java_Promotion_2",
             "instructions": [
                 "『テスト結果集計プログラム』を作成しましょう。",
-                "int[] scores（複数人分の点数）を用意する（中身は自由）",
-                "平均点を計算するメソッドを作る（引数で配列を受け取る）",
+                "int[] scores（複数科目の点数）を用意する（中身は自由）",
+                "科目平均点を計算するメソッドを作る（引数で配列を受け取る）",
                 "平均点をもとに、60点以上なら『合格』、それ以外は『不合格』と if / else で判定する",
-                "for 文を使って全員の点数を表示する",
+                "for 文を使って全科目の点数を表示する",
                 "main では『配列を用意 → メソッド呼び出し → 結果表示』の流れだけを書く",
                 "コメントを最低1つ入れる"
             ],
             "exampleCode": {
-                "Java": "public class TestResult {\n  static int calcAverage(int[] scores) {\n    int sum = 0;\n    for (int i = 0; i < scores.length; i++) {\n      sum += scores[i];\n    }\n    return sum / scores.length;\n  }\n\n  static void showScores(int[] scores) {\n    for (int i = 0; i < scores.length; i++) {\n      System.out.println(\"Score \" + (i + 1) + \": \" + scores[i]);\n    }\n  }\n\n  public static void main(String[] args) {\n    // テスト結果の集計\n    int[] scores = {70, 55, 80, 90};\n\n    showScores(scores);\n    int avg = calcAverage(scores);\n    System.out.println(\"Average: \" + avg);\n\n    if (avg >= 60) {\n      System.out.println(\"合格\");\n    } else {\n      System.out.println(\"不合格\");\n    }\n  }\n}\n"
+                "Java": "public class TestResult {\n  static int calcAverage(int[] scores) {\n    int sum = 0;\n    for (int i = 0; i < scores.length; i++) {\n      sum += scores[i];\n    }\n    return sum / scores.length;\n  }\n\n  static void showScores(int[] scores) {\n    for (int i = 0; i < scores.length; i++) {\n      System.out.println(\"Subject \" + (i + 1) + \": \" + scores[i]);\n    }\n  }\n\n  public static void main(String[] args) {\n    // 科目ごとのテスト結果\n    int[] scores = {70, 55, 80, 90};\n\n    showScores(scores);\n    int avg = calcAverage(scores);\n    System.out.println(\"Average: \" + avg);\n\n    if (avg >= 60) {\n      System.out.println(\"合格\");\n    } else {\n      System.out.println(\"不合格\");\n    }\n  }\n}\n"
             },
-            "language": [
-                "Java"
-            ]
+            "language": ["Java"]
             }
         ],
         "beforeSentences": [
@@ -2352,16 +2430,16 @@
             "explains": [
                 {
                 "order": 1,
-                "content": "クラスの中に書いた変数は『フィールド』と呼ばれる。箱の中身だと思ってOK。",
+                "content": "クラスは『値をまとめる箱』。クラスの中に書いた変数は『フィールド』と呼ばれる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": "```java\nclass Player {\n  String name;\n  int hp;\n}\n```"
                 },
                 {
                 "order": 2,
-                "content": "今は public / private は気にしなくていい。まずは形に慣れよう。",
+                "content": "この時点では、まだ箱を定義しただけ。実際のデータは入っていない。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-1",
                 "code": ""
                 }
             ],
@@ -2371,7 +2449,8 @@
                 "content": "名前(name)とレベル(level)を持つクラスを書こう。",
                 "instructions": [
                     "class を使う",
-                    "String と int を使う"
+                    "String name を定義する",
+                    "int level を定義する"
                 ],
                 "answer": "```java\nclass Character {\n  String name;\n  int level;\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2380,31 +2459,32 @@
             },
             {
             "order": 2,
-            "title": "new して使ってみよう",
-            "detail": "クラスから実体（インスタンス）を作ります。",
+            "title": "インスタンスとドット演算子",
+            "detail": "クラスの箱から、実際に使う実体を作ります。",
             "explains": [
                 {
                 "order": 1,
-                "content": "new を使うと、そのクラスの『実体』が1つできる。",
+                "content": "new を使うと、クラスの『実体（インスタンス）』が1つ作られる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": "```java\nPlayer p = new Player();\np.name = \"Hero\";\np.hp = 30;\n```"
+                "componentType": "step-2",
+                "code": "```java\nCharacter c = new Character();\n```"
                 },
                 {
                 "order": 2,
-                "content": "同じクラスから、何個でも別の箱を作れる。",
+                "content": "ドット（.）を使うと、インスタンスの中のフィールドにアクセスできる。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
-                "code": ""
+                "componentType": "step-2",
+                "code": "```java\nc.name = \"Alice\";\nc.level = 5;\n```"
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "Character クラスのインスタンスを作り、値を代入しよう。",
+                "content": "Character クラスのインスタンスを作り、name と level に値を代入しよう。",
                 "instructions": [
-                    "new を使う",
-                    ". を使って値を代入する"
+                    "Character c = new Character(); を書く",
+                    "c.name に文字列を代入する",
+                    "c.level に数値を代入する"
                 ],
                 "answer": "```java\nCharacter c = new Character();\nc.name = \"Alice\";\nc.level = 5;\n```",
                 "supporterSlug": "yamada-senpai"
@@ -2413,28 +2493,100 @@
             },
             {
             "order": 3,
+            "title": "new して使ってみよう",
+            "detail": "インスタンスに入れた値を使います。",
+            "explains": [
+                {
+                "order": 1,
+                "content": "インスタンスに入れた値は、ドットを使って読み取れる。",
+                "supporterSlug": "yamada-senpai",
+                "componentType": "step-3",
+                "code": "```java\nSystem.out.println(c.name);\nSystem.out.println(c.level);\n```"
+                }
+            ],
+            "stepExams": [
+                {
+                "order": 1,
+                "content": "name と level を代入した Character の情報を表示しよう。",
+                "instructions": [
+                    "Character c を new する",
+                    "name と level を代入する",
+                    "println でそれぞれ表示する"
+                ],
+                "answer": "```java\nCharacter c = new Character();\nc.name = \"Alice\";\nc.level = 5;\nSystem.out.println(c.name);\nSystem.out.println(c.level);\n```",
+                "supporterSlug": "yamada-senpai"
+                }
+            ]
+            },
+            {
+            "order": 4,
             "title": "複数のインスタンス",
             "detail": "同じクラスでも中身は別です。",
             "explains": [
                 {
                 "order": 1,
-                "content": "インスタンスごとにフィールドの値は独立している。",
+                "content": "同じクラスから作っても、インスタンスごとにフィールドの値は独立している。",
                 "supporterSlug": "yamada-senpai",
-                "componentType": null,
+                "componentType": "step-4",
                 "code": ""
                 }
             ],
             "stepExams": [
                 {
                 "order": 1,
-                "content": "2人分の Character を作って、それぞれ別の値を入れよう。",
+                "content": "2人分の Character を作り、それぞれ違う名前とレベルを入れよう。",
                 "instructions": [
-                    "2つ new する"
+                    "Character を2回 new する",
+                    "それぞれ別の name を代入する",
+                    "それぞれ別の level を代入する"
                 ],
-                "answer": "```java\nCharacter a = new Character();\na.name = \"Alice\";\n\nCharacter b = new Character();\nb.name = \"Bob\";\n```",
+                "answer": "```java\nCharacter a = new Character();\na.name = \"Alice\";\na.level = 5;\n\nCharacter b = new Character();\nb.name = \"Bob\";\nb.level = 8;\n```",
                 "supporterSlug": "yamada-senpai"
                 }
             ]
+            },
+            {
+                "order": 5,
+                "title": "main を持つクラスと、データ用クラス",
+                "detail": "役割の違うクラスを分けて書いてみます。",
+                "explains": [
+                    {
+                    "order": 1,
+                    "content": "Javaプログラムは main メソッドから実行される。main は『実行の入口』として、1つのクラスにあれば十分。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": "step-5",
+                    "code": ""
+                    },
+                    {
+                    "order": 2,
+                    "content": "Item や Character のようなクラスは、データをまとめるための『箱』。実行はしないので main メソッドを持たない。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": "step-5",
+                    "code": ""
+                    },
+                    {
+                    "order": 3,
+                    "content": "実行用クラス（main を持つ）と、データ用クラスを分けると、プログラムの構造が整理される。",
+                    "supporterSlug": "yamada-senpai",
+                    "componentType": "step-5",
+                    "code": "```java\nclass Item {\n  String name;\n  int price;\n}\n\npublic class Shop {\n  public static void main(String[] args) {\n    Item item = new Item();\n    item.name = \"Potion\";\n    item.price = 50;\n\n    System.out.println(item.name + \": \" + item.price);\n  }\n}\n```"
+                    }
+                ],
+                "stepExams": [
+                    {
+                    "order": 1,
+                    "content": "main を持つクラスと、Item クラスの2つを書いてみよう。",
+                    "instructions": [
+                        "Item クラスを作り、String name と int price を持たせる",
+                        "main メソッドを持つクラスを1つ作る",
+                        "main の中で Item を new する",
+                        "name と price に値を代入する",
+                        "println で Item の情報を表示する"
+                    ],
+                    "answer": "```java\nclass Item {\n  String name;\n  int price;\n}\n\npublic class Shop {\n  public static void main(String[] args) {\n    Item a = new Item();\n    a.name = \"Potion\";\n    a.price = 50;\n\n    System.out.println(a.name + \": \" + a.price);\n  }\n}\n```",
+                    "supporterSlug": "yamada-senpai"
+                    }
+                ]
             }
         ],
         "exams": [
@@ -2442,18 +2594,18 @@
             "criteria": {
                 "score": 60,
                 "factor": [
-                "クラスとフィールドを定義できている：最大40点",
-                "new を使ってインスタンスを作れている：最大40点",
-                "複数インスタンスの違いを理解している：最大20点"
+                "クラスとフィールドを正しく定義できている：最大30点",
+                "new とドット演算子を使えている：最大40点",
+                "複数インスタンスの違いを表現できている：最大30点"
                 ]
             },
             "type": "HYBRID",
             "component": null,
             "instructions": [
                 "『Item』クラスを作りましょう。",
-                "String name と int price を持たせる",
+                "String name と int price をフィールドとして持たせる",
                 "2つの Item インスタンスを作る",
-                "それぞれ違う値を代入して出力する"
+                "それぞれ違う値を代入して表示する"
             ],
             "exampleCode": {
                 "Java": "class Item {\n  String name;\n  int price;\n}\n\npublic class Shop {\n  public static void main(String[] args) {\n    Item a = new Item();\n    a.name = \"Potion\";\n    a.price = 50;\n\n    Item b = new Item();\n    b.name = \"Elixir\";\n    b.price = 200;\n\n    System.out.println(a.name + \": \" + a.price);\n    System.out.println(b.name + \": \" + b.price);\n  }\n}\n"
