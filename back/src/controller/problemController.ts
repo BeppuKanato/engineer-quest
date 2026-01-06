@@ -659,54 +659,55 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
 
     // --- 経験値加算・レベルアップ処理 ---
     if (missionProgress) {
-      const experienceLogs = await fetchExperienceLogs(userId, { 
-        missionProgressId: missionProgress.id
-      }, { id: true, experience: true }) as { id: string; experience: number }[] | null;
+        const experienceLogs = await fetchExperienceLogs(userId, { 
+            missionProgressId: missionProgress.id
+        }, { id: true, experience: true }) as { id: string; experience: number }[] | null;
 
-      if (!experienceLogs || experienceLogs.length === 0) {
-        const experienceToAdd = missionData.experience ?? 0;
-        const oldExperience = user.experience;
-        let newExperience = oldExperience + experienceToAdd;
-        const oldLevel = user.level;
-        let newLevel = oldLevel;
-        let requiredExp = user.levelRequirement?.requiredExperience ?? 0;
-        const levelUps: { level: number; requiredExperience: number }[] = [{ level: oldLevel, requiredExperience: requiredExp }];
-        //レベルアップ判定
-        while (newExperience >= requiredExp && requiredExp > 0) {
-          newExperience -= requiredExp;
-          newLevel += 1;
+        if (!experienceLogs || experienceLogs.length === 0) {
+            const experienceToAdd = missionData.experience ?? 0;
+            const oldExperience = user.experience;
+            let newExperience = oldExperience + experienceToAdd;
+            const oldLevel = user.level;
+            let newLevel = oldLevel;
+            let requiredExp = user.levelRequirement?.requiredExperience ?? 0;
+            const levelUps: { level: number; requiredExperience: number }[] = [{ level: oldLevel, requiredExperience: requiredExp }];
+            //レベルアップ判定
+            while (newExperience >= requiredExp && requiredExp > 0) {
+            newExperience -= requiredExp;
+            newLevel += 1;
 
-          const nextLevelReq = await fetchLevelupRequirement(newLevel, { requiredExperience: true }) as { requiredExperience: number } | null;
-          if (!nextLevelReq || nextLevelReq.requiredExperience <= 0) break;
+            const nextLevelReq = await fetchLevelupRequirement(newLevel, { requiredExperience: true }) as { requiredExperience: number } | null;
+            if (!nextLevelReq || nextLevelReq.requiredExperience <= 0) break;
 
-          levelUps.push({ level: newLevel, requiredExperience: nextLevelReq.requiredExperience });
-          requiredExp = nextLevelReq.requiredExperience;
+            levelUps.push({ level: newLevel, requiredExperience: nextLevelReq.requiredExperience });
+            requiredExp = nextLevelReq.requiredExperience;
+            }
+
+            // DB更新
+            await updateUser(userId, { level: newLevel, experience: newExperience });
+            await createExperienceLog(userId, missionProgress.id, experienceToAdd);
+
+            experienceUpdate = { oldLevel, newLevel, oldExperience, gainedExperience: experienceToAdd, levelUps };
         }
-
-        // DB更新
-        await updateUser(userId, { level: newLevel, experience: newExperience });
-        await createExperienceLog(userId, missionProgress.id, experienceToAdd);
-
-        // 更新ユーザ情報再取得
-        user = await fetchUser(userId, {
-          name: true,
-          level: true,
-          experience: true,
-          rank: { select: { name: true } },
-          levelRequirement: { select: { requiredExperience: true } },
-        }) as typeof user;
-
-        experienceUpdate = { oldLevel, newLevel, oldExperience, gainedExperience: experienceToAdd, levelUps };
-      }
-      await updateMissionProgress(missionProgress.id, {
-        status: MissionStatus.COMPLETED,
-        completedAt: new Date(),
-      });
+        //ミッション完了処理
+        await updateMissionProgress(missionProgress.id, {
+            status: MissionStatus.COMPLETED,
+            completedAt: new Date(),
+        });
     }
 
     //ランクアップ処理
     const updateRankResult = await checkAndUpdateRank(userId, missionId);
     const updatedRank = updateRankResult?.name ? updateRankResult.name : null;
+    
+    // 更新ユーザ情報再取得
+    user = await fetchUser(userId, {
+    name: true,
+    level: true,
+    experience: true,
+    rank: { select: { name: true } },
+    levelRequirement: { select: { requiredExperience: true } },
+    }) as typeof user;
 
     // --- 進行中ミッションがなければ既存データからバー表示用データ作成 ---
     if (!experienceUpdate) {
