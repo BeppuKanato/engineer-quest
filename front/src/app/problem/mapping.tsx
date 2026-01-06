@@ -16,6 +16,15 @@ import { Java_Mission_4 } from "./component/missions/Java/Java_Mission_4";
 import { Java_Mission_5 } from "./component/missions/Java/Java_Mission_5";
 import { Java_Mission_6 } from "./component/missions/Java/Java_Mission_6";
 import { Java_Mission_7 } from "./component/missions/Java/Java_Mission_7";
+import { Java_Mission_8 } from "./component/missions/Java/Java_Mission_8";
+import { Java_Mission_9 } from "./component/missions/Java/Java_ Mission_9";
+import { Java_Promotion_1 } from "./component/missions/Java/Java_Promotion_1";
+import { Java_Mission_10 } from "./component/missions/Java/Java_Mission_10";
+import { Java_Mission_11 } from "./component/missions/Java/Java_Mission_11";
+import { Java_Mission_12 } from "./component/missions/Java/Java_Mission_12";
+import { Java_Mission_13 } from "./component/missions/Java/Java_Mission_13";
+import { Java_Promotion_2 } from "./component/missions/Java/Java_Promotion_2";
+import { Java_Mission_14 } from "./component/missions/Java/Java_Mission_14";
 export const getMissionComponent = (componentName: string, highlight: string, componentType: string) => {
     console.log("getMissionComponent called with:", componentName, highlight, componentType);
     switch (componentName) {
@@ -61,6 +70,64 @@ export const getMissionComponent = (componentName: string, highlight: string, co
                     componentType={componentType}
                 />
             )
+        case "Java_Mission_8":
+            return(
+                <Java_Mission_8
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_9":
+            return(
+                <Java_Mission_9
+                    highlight={highlight}
+                    componentType={componentType} 
+                />
+            )
+        case "Java_Promotion_1":
+            return(
+                <Java_Promotion_1 />
+            )
+        case "Java_Mission_10":
+            return(
+                <Java_Mission_10
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_11":
+            return(
+                <Java_Mission_11
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_12":
+            return(
+                <Java_Mission_12
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_13":
+            return(
+                <Java_Mission_13
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+        case "Java_Promotion_2":
+            return(
+                <Java_Promotion_2 />
+            )
+        case "Java_Mission_14":
+            return(
+                <Java_Mission_14
+                    highlight={highlight}
+                    componentType={componentType}
+                />
+            )
+
         case "Web_Mission_1":
             return (
                 <Web_Mission_1 
