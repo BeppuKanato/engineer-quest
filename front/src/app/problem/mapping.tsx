@@ -25,6 +25,11 @@ import { Java_Mission_12 } from "./component/missions/Java/Java_Mission_12";
 import { Java_Mission_13 } from "./component/missions/Java/Java_Mission_13";
 import { Java_Promotion_2 } from "./component/missions/Java/Java_Promotion_2";
 import { Java_Mission_14 } from "./component/missions/Java/Java_Mission_14";
+import { Java_Mission_15 } from "./component/missions/Java/Java_Mission_15";
+import { Java_Mission_16 } from "./component/missions/Java/Java_Mission_16";
+import { Java_Mission_17 } from "./component/missions/Java/Java_Mission_17";
+import { Java_Mission_18 } from "./component/missions/Java/Java_Mission_18";
+import { Java_Promotion_3 } from "./component/missions/Java/Java_Promotion_3";
 export const getMissionComponent = (componentName: string, highlight: string, componentType: string) => {
     console.log("getMissionComponent called with:", componentName, highlight, componentType);
     switch (componentName) {
@@ -127,7 +132,34 @@ export const getMissionComponent = (componentName: string, highlight: string, co
                     componentType={componentType}
                 />
             )
-
+        case "Java_Mission_15":
+            return(
+                <Java_Mission_15
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_16":
+            return(
+                <Java_Mission_16
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_17":
+            return(
+                <Java_Mission_17
+                    componentType={componentType}
+                />
+            )
+        case "Java_Mission_18":
+            return(
+                <Java_Mission_18
+                    componentType={componentType}
+                />
+            )
+        case "Java_Promotion_3":
+            return(
+                <Java_Promotion_3/>
+            )
         case "Web_Mission_1":
             return (
                 <Web_Mission_1 

@@ -9,9 +9,8 @@ import {
   ListItemText,
   Divider
 } from "@mui/material";
-import { isComponentType, MissionComponentProps } from "../../common/common";
 
-export const Java_Promotion_1 = ({ componentType }: MissionComponentProps) => {
+export const Java_Promotion_1 = () => {
   return (
     <Box sx={{ p: 3, maxWidth: 700, mx: "auto" }}>
         <>

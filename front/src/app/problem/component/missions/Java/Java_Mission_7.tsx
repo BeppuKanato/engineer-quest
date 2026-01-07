@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Card, Button, List, ListItemText, ListItem } from "@mui/material";
+import { Box, Typography, Card, List, ListItemText, ListItem } from "@mui/material";
 import { isComponentType, MissionComponentProps } from "../../common/common";
 
 export const Java_Mission_7 = ({ componentType }: MissionComponentProps) => {

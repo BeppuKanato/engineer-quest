@@ -3,7 +3,6 @@
 import {
   Box,
   Typography,
-  Card,
   List,
   ListItem,
   ListItemText,
@@ -85,7 +84,7 @@ export const Java_Mission_8 = ({ componentType }: MissionComponentProps) => {
                 }}
             >
                 for (int i = 0; i &lt; 3; i++) &#123;<br />
-                &nbsp;&nbsp;System.out.println("Hello");<br />
+                &nbsp;&nbsp;System.out.println(`&quot;Hello&quot;`);<br />
                 &#125;
             </Box>
 
