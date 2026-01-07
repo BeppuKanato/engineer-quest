@@ -3,5 +3,10 @@
         "name": "山田先輩",
         "slug": "yamada-senpai",
         "imagePath": "👨‍💼"
+    },
+    {
+        "name": "佐藤くん",
+        "slug": "sato-kun",
+        "imagePath": "👨"
     }
 ]
