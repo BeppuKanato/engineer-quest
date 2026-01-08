@@ -98,7 +98,11 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
             contents: settings.contents,
             config: {
                 responseMimeType: "application/json",
-                systemInstruction: settings.systemInstruction
+                systemInstruction: settings.systemInstruction,
+
+                temperature: 0.2,
+                topP: 0.1,
+                topK: 1,
             }
         })
 
