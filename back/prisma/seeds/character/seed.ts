@@ -13,7 +13,7 @@ const characterData = JSON.parse(
  * Characterモデルのシードを実行します。
  * slugをユニークキーとして利用し、既存データがあれば更新（upsert）を行います。
  * @param prisma - PrismaClientのインスタンス
- */
+*/
 export async function seedCharacters(prisma: PrismaClient) {
   console.log("-> Seeding Characters...");
 
