@@ -7,8 +7,8 @@ import { seedRanks } from "./seeds/rank/seed";
 
 async function main() {
   console.log('🌱 Starting database seeding...');
-  // await seedCharacters(prisma);
-  // await seedDifficulties(prisma);
+  await seedCharacters(prisma);
+  await seedDifficulties(prisma);
   await seedMissions(prisma);
   await seedMissionUnlocks(prisma);
   await seedRanks(prisma);
