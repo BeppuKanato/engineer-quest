@@ -8,6 +8,7 @@ import { triggerAsyncId } from "async_hooks";
 import { fetchUser } from "./userService";
 import { examJudgeWithFeedbackc } from "./ContentsForGeminiAPI/examJudgeWithFeedback";
 import { examJudgeWithoutFeedback } from "./ContentsForGeminiAPI/examJudgeWithoutFeedback";
+import OpenAI from "openai";
 
 /**
  * @abstract ミッションを取得
@@ -82,7 +83,10 @@ export const fetchMission = async(id: string, select: object) => {
  * @returns 
  */
 export const missionExamJudgeService = async(missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[], judgeType: JudgeType) => {
-    const  ai = new GoogleGenAI({});
+    //openai or gemini
+    const aiModel: string = "openai";
+    // const  ai = new GoogleGenAI({});
+
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
     //フィードバック付きの採点
     if (judgeType === JudgeType.WITH_FEEDBACK) {
@@ -93,24 +97,61 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
         settings = examJudgeWithoutFeedback(missionCode, userCode, factor, instructions);
     }
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: settings.contents,
-            config: {
-                responseMimeType: "application/json",
-                systemInstruction: settings.systemInstruction,
+        let json: AIResponse | null = null;
+        // // Gemini API 呼び出し
+        if (aiModel === "gemini") {
+            const ai = new GoogleGenAI({
+                apiKey: process.env.GEMINI_API_KEY,
+            });
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: settings.contents,
+                config: {
+                    responseMimeType: "application/json",
+                    systemInstruction: settings.systemInstruction,
 
-                temperature: 0.2,
-                topP: 0.1,
-                topK: 1,
+                    temperature: 0.2,
+                    topP: 0.1,
+                    topK: 1,
+                }
+            })
+            
+            if (!response.text) {
+                return null;
             }
-        })
+            json = JSON.parse(response.text);
+        }
+        //openai API 呼び出し
+        else if (aiModel === "openai") {
+            const ai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+            });
+            const response = await ai.responses.create({
+                model: "gpt-5-nano", // ← gpt-4o-mini でもOK
+                input: [
+                {
+                    role: "system",
+                    content: settings.systemInstruction,
+                },
+                {
+                    role: "user",
+                    content: settings.contents,
+                },
+            ],
+                temperature: 0.0,     // 採点用途は 0 推奨
+                top_p: 0.1,
+            });
 
-        if (response.text === undefined) {
+            const text = response.output_text;
+            if (!text) return null;
+
+            json = JSON.parse(text);
+        }
+
+        if (json === null) {
             return null;
         }
 
-        const json: AIResponse = JSON.parse(response.text);
         // reason がなければ空で作る
         if (!json.reason) {
             json.reason = { good: [], bad: [] };
