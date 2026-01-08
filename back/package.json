@@ -21,6 +21,7 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "just-diff": "^6.0.2",
+    "openai": "^6.15.0",
     "puppeteer": "^24.31.0"
   },
   "devDependencies": {
