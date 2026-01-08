@@ -1,7 +1,7 @@
 "use client";
 import { Box, Typography, Card, CardContent } from "@mui/material";
 
-export const Mission_4_Exam = () => {
+export const Web_Mission_4_Exam = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography

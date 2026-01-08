@@ -37,7 +37,7 @@ export function Footer() {
                 >
                   <Code2 size={20} color="white" />
                 </Box>
-                <Typography variant="h6">CodeQuest</Typography>
+                <Typography variant="h6">EngineerQuest</Typography>
               </Stack>
               <Typography variant="body2" color="grey.400">
                 ゲーム感覚で楽しく学べる、プログラミング学習プラットフォーム
@@ -68,7 +68,7 @@ export function Footer() {
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle1" mb={1}>情報</Typography>
             <Stack spacing={0.5}>
-              <Link href="#" color="grey.400" underline="hover">CodeQuestについて</Link>
+              <Link href="#" color="grey.400" underline="hover">EngineerQuestについて</Link>
               <Link href="#" color="grey.400" underline="hover">お問い合わせ</Link>
             </Stack>
           </Box>
@@ -82,7 +82,7 @@ export function Footer() {
             spacing={2}
           >
             <Typography variant="body2" color="grey.400" textAlign={{ xs: "center", md: "left" }}>
-              © 2025 CodeQuest. All rights reserved.
+              © 2025 EngineerQuest. All rights reserved.
             </Typography>
           </Stack>
         </Box>

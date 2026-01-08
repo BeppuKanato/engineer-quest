@@ -4,6 +4,8 @@ export const examJudgeWithFeedbackc = (missionCode: {[key in MissionExamLanguage
     return {
         contents :`
             サンプルコードと比較して、ユーザコードを100点満点で採点してください。
+            サンプルコードと同じ動作をするコードであれば高得点となります。
+            サンプルコードはあくまで参考例であり、実装方法が異なっていても問題ありません。
 
             【採点要素（factor）】
                 以下の項目ごとに、最大点を上限に部分点を付与して評価してください。
@@ -23,7 +25,6 @@ export const examJudgeWithFeedbackc = (missionCode: {[key in MissionExamLanguage
                 ・概ね満たす → 最大点の 70%
                 ・一部のみ満たす → 最大点の 40%
                 ・ほぼ満たさない → 0〜20%
-                - CSS や見た目に関する項目（任意）が未実装でも減点しない（実装されていれば加点）。
                 - 実装方法の違いは減点対象にせず、必要機能が満たされていれば満点とする。
                 - タイポは実行に影響がある場合のみ減点対象とする。
 

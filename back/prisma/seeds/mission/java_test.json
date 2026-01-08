@@ -1,0 +1,999 @@
+[
+  {
+    "slug": "java-mission-1",
+    "title": "Javaで『ようこそ』を表示しよう",
+    "detail": "最小構成のJavaプログラムを書いて、コンソールにメッセージを表示します。",
+    "type": "MAIN",
+    "component": "Java_Mission_1",
+    "experience": 100,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "まずはJavaの『型』より先に、動くプログラムを1本書いてみよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "最小構成を覚えると、以降の学習が一気に楽になるよ。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね！ちゃんとJavaが動いた。まずはここがスタート地点だよ。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は『改行する/しない』を使い分けて、出力を整えていこう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "最小構成の形を押さえよう",
+        "detail": "class と main メソッドの基本構造を作ります。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "Javaは基本的に『クラス』の中から始まるよ。実行は main メソッドからスタートするんだ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\n// ファイル名: クラス名.java\npublic class クラス名 {\n  public static void main(String[] args) {\n    // ここに処理を書く\n  }\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "まずはそのまま写してOK。慣れてきたら『どこに何を書くのか』が分かってくるよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "最小構成のJavaプログラムを自分で書いてみよう。",
+            "instructions": [
+              "public class を使う",
+              "main メソッドを書く",
+              "System.out.println で1行出力する"
+            ],
+            "answer": "```java\npublic class HelloJava {\n  public static void main(String[] args) {\n    System.out.println(\"ようこそJavaへ！\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "printlnで複数行を出してみよう",
+        "detail": "System.out.println を複数回書いて、順番に出力します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "println は『表示して改行する』出力だよ。文は上から下へ順番に実行される。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(\"1行目\");\nSystem.out.println(\"2行目\");\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "『ようこそJavaへ！』と『Javaをはじめましょう！』を2行で表示しよう。",
+            "instructions": [
+              "println を2回使う",
+              "2行目も必ず出力する"
+            ],
+            "answer": "```java\npublic class Welcome {\n  public static void main(String[] args) {\n    System.out.println(\"ようこそJavaへ！\");\n    System.out.println(\"Javaをはじめましょう！\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "ファイル名とクラス名を揃えよう",
+        "detail": "Javaの基本ルールを確認します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "Javaでは『public class の名前』と『ファイル名』を一致させるのがルールだよ。たとえば クラス名がWelcome なら Welcome.java って感じ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          },
+          {
+            "order": 2,
+            "content": "ここを間違えるとコンパイルが通らなくなることがあるから、最初にクセにしよう。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "public class が WelcomeMessage なら、ファイル名は何になる？（答えだけでOK）",
+            "instructions": [
+              "拡張子 .java を付ける"
+            ],
+            "answer": "```text\nWelcomeMessage.java\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "class と main が正しく書けている：最大40点",
+            "println を使って1行以上出力できている：最大35点",
+            "ファイル名とクラス名のルールを守れている：最大25点"
+          ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+          "『自己紹介コンソール』をJavaで作りましょう。",
+          "public class と main メソッドを必ず使う",
+          "println を2回以上使って、自己紹介を2行以上出力する",
+          "クラス名とファイル名を一致させる（提出時に意識）",
+          "内容は自由でOKです"
+        ],
+        "exampleCode": {
+          "Java": "public class MyIntro {\n  public static void main(String[] args) {\n    System.out.println(\"こんにちは。java学生です。\");\n    System.out.println(\"今日はJavaの出力を練習しています。\");\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-2",
+    "title": "改行あり/なしを使い分けよう（print/println）",
+    "detail": "System.out.println と System.out.print の違いを理解して、出力を整えます。",
+    "type": "MAIN",
+    "component": "Java_Mission_2",
+    "experience": 120,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は『改行するかどうか』をコントロールしてみよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ちょっとした差だけど、出力が読みやすくなるとデバッグも楽になるよ。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "OK！出力の見た目を自分で整えられるようになったね。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はコードの読みやすさを上げる『コメント』と『インデント』に進もう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "println と print の違いを知ろう",
+        "detail": "改行の有無を理解します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "println は表示したあとに改行が入る。print は改行が入らないよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(\"A\"); // A + 改行\nSystem.out.print(\"B\");   // B（改行なし）\nSystem.out.print(\"C\");   // そのまま続いて C\n```"
+          },
+          {
+            "order": 2,
+            "content": "『出力を1行にまとめたい』ときは print を使う、って感覚でOK。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "A と B を同じ行に表示し、最後だけ改行しよう。",
+            "instructions": [
+              "A は print で出す",
+              "B は println で出す"
+            ],
+            "answer": "```java\npublic class SameLine {\n  public static void main(String[] args) {\n    System.out.print(\"A\");\n    System.out.println(\"B\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "printf / format を触ってみよう",
+        "detail": "C言語っぽい整形出力を軽く体験します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "printf と format は『整形して出力する』ときに使える。まずは %d（整数）と %s（文字列）だけ覚えよう。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nint age = 20;\nString name = \"名前\";\nSystem.out.printf(\"%sの年齢は%dです\", name, age);\n```"
+          },
+          {
+            "order": 2,
+            "content": "この2つは改行が入らないから、必要なら最後に \\n を付けるか println を使ってね。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "名前と点数を printf で出してみよう（改行も付ける）。",
+            "instructions": [
+              "String name を用意する",
+              "int score を用意する",
+              "printf で『nameの点数はscoreです』の形にする",
+              "最後に \\n を入れる"
+            ],
+            "answer": "```java\npublic class PrintfPractice {\n  public static void main(String[] args) {\n    String name = \"名前\";\n    int score = 85;\n    System.out.printf(\"%sの点数は%dです\\n\", name, score);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "出力を組み合わせて『見やすいログ』にしよう",
+        "detail": "print/println を組み合わせます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "デバッグでは『ラベル: 値』みたいに出すと読みやすいよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nint hp = 30;\nSystem.out.print(\"HP: \");\nSystem.out.println(hp);\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "『Level: 5』を1行で表示しよう（print を2回でもOK）。",
+            "instructions": [
+              "Level: の部分を出す",
+              "5 を出す",
+              "最後は改行する"
+            ],
+            "answer": "```java\npublic class LogStyle {\n  public static void main(String[] args) {\n    System.out.print(\"Level: \");\n    System.out.println(5);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "print/println の改行差を使い分けできている：最大40点",
+            "printf で変数を埋め込めている：最大35点",
+            "出力が読みやすい形になっている：最大25点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+          "『ミニステータス表示』を作りましょう。",
+          "名前(name)とHP(hp)とMP(mp)を変数で用意する",
+          "1行目は println でタイトルを表示（例: === STATUS ===）",
+          "2行目以降は『ラベル: 値』形式で出力する（print/println または printf を使用）",
+          "最低でも3行は出力する"
+        ],
+        "exampleCode": {
+          "Java": "public class Status {\n  public static void main(String[] args) {\n    String name = \"java学生\";\n    int hp = 30;\n    int mp = 12;\n\n    System.out.println(\"=== STATUS ===\");\n    System.out.printf(\"Name: %s\\n\", name);\n    System.out.printf(\"HP: %d\\n\", hp);\n    System.out.printf(\"MP: %d\\n\", mp);\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-3",
+    "title": "読みやすいコードの形を覚えよう（コメント・インデント）",
+    "detail": "コメント、ブロック、文、インデントといった『コードの部品』を理解します。",
+    "type": "MAIN",
+    "component": "Java_Mission_3",
+    "experience": 140,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "動くコードが書けたら、次は『読めるコード』にしよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "将来の自分とチームのために、ここは最初に癖づけたい。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね。コードの『見た目』が整うと、理解スピードが変わってくるよ。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は値の書き方（リテラル）に進もう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "コメントを書けるようになろう",
+        "detail": "// と /* */ の使い分けを学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "コメントはコンパイル時に無視される『メモ』だよ。意図や注意点を書くのに便利。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\n// 1行コメント\n/* 複数行コメント\n   こんなふうに書ける */\n```"
+          },
+          {
+            "order": 2,
+            "content": "まずは『何をしているか』より、『なぜそれをしているか』を書くといいよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次の行に1行コメントを書いてみよう（内容は自由）。",
+            "instructions": [
+              "// から始める"
+            ],
+            "answer": "```java\n// ここは出力の練習です\nSystem.out.println(\"Hello\");\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "ブロックと文を意識しよう",
+        "detail": "{ } のまとまりと、; で終わる命令を区別します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "{ } で囲まれた部分はブロック。; で終わる1行（または1命令）は文（ステートメント）だよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          },
+          {
+            "order": 2,
+            "content": "ブロックの中には複数の文を置ける。文は上から下へ実行される、これが基本。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "main のブロックの中に println を2つ書こう。",
+            "instructions": [
+              "{ } の中に書く",
+              "各行の末尾に ; を付ける"
+            ],
+            "answer": "```java\npublic class BlockAndStatement {\n  public static void main(String[] args) {\n    System.out.println(\"first\");\n    System.out.println(\"second\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "インデントで構造を見える化しよう",
+        "detail": "読みやすい字下げを練習します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "インデント（字下げ）は動作に影響しないけど、理解に直結する。ブロックが1段深くなったらスペース2つ or 4つ、で揃えるのが基本。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          },
+          {
+            "order": 2,
+            "content": "この先 if や for が出てくると、インデントが崩れていると一気に読めなくなるよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次のコードを『インデント付き』で書いてみよう。",
+            "instructions": [
+              "class の中を1段下げる",
+              "main の中をさらに1段下げる"
+            ],
+            "answer": "```java\npublic class Indent {\n  public static void main(String[] args) {\n    System.out.println(\"indent ok\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "コメントが適切に書けている：最大30点",
+            "ブロックと文が正しく構成されている：最大40点",
+            "インデントが整っている：最大30点"
+          ]
+        },
+        "type": "FREE_CREATION",
+        "component": null,
+        "instructions": [
+          "『自分用テンプレート』を作りましょう。",
+          "public class と main を書く",
+          "main の中で println を2回以上使う",
+          "コメントを最低2つ入れる（// でも /* */ でもOK）",
+          "インデントを揃える"
+        ],
+        "exampleCode": {
+          "Java": "public class Template {\n  public static void main(String[] args) {\n    // TODO: ここから処理を書いていく\n    System.out.println(\"template start\");\n\n    /* メモ: 次回は変数を試す */\n    System.out.println(\"template end\");\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-4",
+    "title": "リテラルを使い分けよう（文字・文字列・数値・真偽値）",
+    "detail": "コードの中で値を直接書く『リテラル』を学びます。シングルクォートとダブルクォートの違いも押さえます。",
+    "type": "MAIN",
+    "component": "Java_Mission_4",
+    "experience": 150,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここから『値の書き方』に入るよ。Javaはここを厳密に見るから、最初に整理しよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "特に 'A' と \"A\" の違いは、早めに慣れるとミスが減る。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ナイス。リテラルが分かると、次の『エスケープ』もスッと入るよ。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は改行やタブを表す書き方に進もう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "文字と文字列の違いを覚えよう",
+        "detail": "' ' は1文字、\" \" は文字列です。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "1文字はシングルクォートで囲む（例: 'A'）。文字列はダブルクォートで囲む（例: \"Hello\"）。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println('A');\nSystem.out.println(\"Hello\");\n```"
+          },
+          {
+            "order": 2,
+            "content": "\"A\" はOKだけど、'Hello' は『1文字じゃない』のでエラーになる。ここが最初の罠ポイント。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次の2つをそれぞれ正しいリテラルで出力してみよう：A と Hello",
+            "instructions": [
+              "A は文字リテラルで出す（'A'）",
+              "Hello は文字列リテラルで出す（\"Hello\"）"
+            ],
+            "answer": "```java\npublic class Literal1 {\n  public static void main(String[] args) {\n    System.out.println('A');\n    System.out.println(\"Hello\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "数値と真偽値のリテラルを知ろう",
+        "detail": "整数、実数、true/false を出力します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "整数はそのまま（123）。小数は 0.24 のように書く。真偽値は true / false。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(123);\nSystem.out.println(0.24);\nSystem.out.println(true);\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "整数 42、小数 3.14、false を順番に出力しよう。",
+            "instructions": [
+              "println を3回使う"
+            ],
+            "answer": "```java\npublic class Literal2 {\n  public static void main(String[] args) {\n    System.out.println(42);\n    System.out.println(3.14);\n    System.out.println(false);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "『出力して確認』の習慣をつけよう",
+        "detail": "型の違いはまず出して確かめるのが早い。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "新しい文法を覚えたら、とりあえず println で確認する。これが自己学習の最強ムーブだよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "好きな文字(1文字)・好きな文字列・好きな整数を出力するプログラムを書こう。",
+            "instructions": [
+              "文字は ' ' で囲む",
+              "文字列は \" \" で囲む",
+              "整数はそのまま書く"
+            ],
+            "answer": "```java\npublic class Check {\n  public static void main(String[] args) {\n    System.out.println('K');\n    System.out.println(\"Study\");\n    System.out.println(2025);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "文字リテラルと文字列リテラルを正しく使い分けている：最大40点",
+            "数値（整数/小数）を正しく出力できている：最大35点",
+            "true/false を正しく扱えている：最大25点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+          "次の値をこの順番で出力するプログラムを書きましょう。",
+          "1行目: 文字 'Z'",
+          "2行目: 文字列 \"Java\"",
+          "3行目: 整数 100",
+          "4行目: 小数 0.5",
+          "5行目: true"
+        ],
+        "exampleCode": {
+          "Java": "public class LiteralQuiz {\n  public static void main(String[] args) {\n    System.out.println('Z');\n    System.out.println(\"Java\");\n    System.out.println(100);\n    System.out.println(0.5);\n    System.out.println(true);\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-5",
+    "title": "エスケープシーケンスで改行やタブを出そう",
+    "detail": "\\n や \\t など、特殊な1文字を表すエスケープシーケンスを学びます。",
+    "type": "MAIN",
+    "component": "Java_Mission_5",
+    "experience": 160,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "shokyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "文字列をきれいに整形するなら、エスケープシーケンスが必須だよ。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "最初は \\ と / を間違えやすいから注意ね。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いい感じ！出力が一気に見やすくなったね。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は数値の別表現（16進数や指数表現）に進もう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "\\n と \\t を使ってみよう",
+        "detail": "改行とタブを文字列に混ぜます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "\\n は改行、\\t はタブ。文字列の中に書けるよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(\"Hello\\nWorld\");\nSystem.out.println(\"A\\tB\\tC\");\n```"
+          },
+          {
+            "order": 2,
+            "content": "日本語環境だと、講義資料では ¥ で書かれることがあるけど、コードでは通常 \\（バックスラッシュ）で書くよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "『上の行』と『下の行』を \\n で1回の println で出力しよう。",
+            "instructions": [
+              "1つの文字列の中に \\n を入れる"
+            ],
+            "answer": "```java\npublic class NewLine {\n  public static void main(String[] args) {\n    System.out.println(\"上の行\\n下の行\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "クォートやバックスラッシュを表示しよう",
+        "detail": "\" や \\ 自体を文字列に入れます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "\" を文字列で表示したいときは \\\"。バックスラッシュ自体は \\\\ で書ける。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(\"\\\"quoted\\\"\");\nSystem.out.println(\"C:\\\\Users\\\\name\");\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次の文字列をそのまま表示しよう：\"Java\"",
+            "instructions": [
+              "\\\" を使う"
+            ],
+            "answer": "```java\npublic class Quote {\n  public static void main(String[] args) {\n    System.out.println(\"\\\"Java\\\"\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "出力を『表』っぽく整形しよう",
+        "detail": "タブで列を揃える練習です。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "\\t を使うと、簡易的に列を揃えられる。ログや表の出力で便利。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次の2行をタブで整形しよう：\nName\tScore\nKana\t90",
+            "instructions": [
+              "1行目に \\t を入れる",
+              "2行目に \\t を入れる"
+            ],
+            "answer": "```java\npublic class Table {\n  public static void main(String[] args) {\n    System.out.println(\"Name\\tScore\");\n    System.out.println(\"Kana\\t90\");\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "\\n / \\t を正しく使えている：最大40点",
+            "\\\" や \\\\ を正しく使えている：最大35点",
+            "出力の意図（整形）が伝わる：最大25点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+          "『プロフィール表示』をエスケープシーケンスで整形しましょう。",
+          "1行目に『Name: <自分の名前>』を出す",
+          "2行目に『Skills: Java\\tHTML\\tCSS』のようにタブ区切りで3つ並べる",
+          "3行目に『Message: \"頑張る\"』のようにダブルクォート付きで出す"
+        ],
+        "exampleCode": {
+          "Java": "public class Profile {\n  public static void main(String[] args) {\n    System.out.println(\"Name: java学生\");\n    System.out.println(\"Skills: Java\\tHTML\\tCSS\");\n    System.out.println(\"Message: \\\"頑張る\\\"\");\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-6",
+    "title": "数の表現を広げよう（8進数/16進数/指数）＋連結",
+    "detail": "整数の8進数・16進数表現、実数の指数表現、そして + による文字列連結を学びます。",
+    "type": "MAIN",
+    "component": "Java_Mission_6",
+    "experience": 200,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "chukyu",
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここからちょっとだけ発展。『同じ値でも書き方が違う』を体験しよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ログ出力やデバッグで役立つ知識が多いよ。",
+        "order": 2
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね。数の表現と連結が分かると、出力がかなり自由になる。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はまとめとしてミニ課題（Mission Exam）に挑戦しよう。",
+        "order": 2
+      }
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "title": "整数の8進数/16進数表現を知ろう",
+        "detail": "0 から始まると8進数、0x で16進数です。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "整数リテラルは普通は10進数だけど、0 で始めると8進数、0x で始めると16進数になる。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(10);   // 10進数\nSystem.out.println(012); // 8進数 -> 10\nSystem.out.println(0xA); // 16進数 -> 10\n```"
+          },
+          {
+            "order": 2,
+            "content": "8進数は 0〜7 だけ。0129 みたいなのはエラーになるよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "10 を 10進数/8進数/16進数で出力して、同じ結果になるのを確認しよう。",
+            "instructions": [
+              "10 を出す",
+              "012 を出す",
+              "0xA を出す"
+            ],
+            "answer": "```java\npublic class Bases {\n  public static void main(String[] args) {\n    System.out.println(10);\n    System.out.println(012);\n    System.out.println(0xA);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "指数表現で大きい/小さい数を書こう",
+        "detail": "e/E を使った表現を学びます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "1.2e+2 は 1.2×10^2。1.0e-2 は 1.0×10^-2。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(1.2e+2); // 120.0\nSystem.out.println(1.0e-2); // 0.01\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "0.001 を指数表現で書いて出力してみよう。",
+            "instructions": [
+              "1.0e-3 を使う"
+            ],
+            "answer": "```java\npublic class Expo {\n  public static void main(String[] args) {\n    System.out.println(1.0e-3);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "文字列連結（+）でログを作ろう",
+        "detail": "文字列と他のリテラルを + で繋げます。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "文字列は + で他の値と連結できる。『ラベル + 値』の形で出力すると読みやすいよ。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": "```java\nSystem.out.println(\"9の次は\" + 10);\nSystem.out.println(\"πは\" + 3.14);\nSystem.out.println(\"trueの反対は\" + false);\n```"
+          },
+          {
+            "order": 2,
+            "content": "+ は演算子。数同士だと足し算、文字列が混ざると連結になる。ここは慣れが必要。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "",
+            "code": ""
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "次の形式で出力しよう：Score: 90",
+            "instructions": [
+              "文字列 \"Score: \" と整数 90 を + で連結する"
+            ],
+            "answer": "```java\npublic class Concat {\n  public static void main(String[] args) {\n    System.out.println(\"Score: \" + 90);\n  }\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      }
+    ],
+    "exams": [
+      {
+        "criteria": {
+          "score": 60,
+          "factor": [
+            "8進数/16進数表現を使えている：最大35点",
+            "指数表現を使えている：最大35点",
+            "文字列連結で読みやすく出力できている：最大30点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": null,
+        "instructions": [
+          "次の3行を出力するプログラムを書きましょう。",
+          "1行目: 10進数/8進数/16進数の10を『10 -> 10, 012 -> 10, 0xA -> 10』のように1行で表示（連結でOK）",
+          "2行目: 1.2e+2 の値を『1.2e+2 -> 120.0』の形で表示（連結でOK）",
+          "3行目: 『学習ログ: day 2』のような文字列を表示（自由）"
+        ],
+        "exampleCode": {
+          "Java": "public class NumberAndLog {\n  public static void main(String[] args) {\n    System.out.println(\"10 -> \" + 10 + \", 012 -> \" + 012 + \", 0xA -> \" + 0xA);\n    System.out.println(\"1.2e+2 -> \" + 1.2e+2);\n    System.out.println(\"学習ログ: day 2\");\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "java-mission-7",
+    "title": "ミニアプリ：学習ログ出力ジェネレーター",
+    "detail": "これまでの出力・リテラル・エスケープ・連結を使って、見やすい学習ログを出力します。",
+    "type": "PROMOTION",
+    "component": "Java_Mission_7",
+    "experience": 300,
+    "clientSlug": "yamada-senpai",
+    "difficultySlug": "chukyu",
+    "steps": [],
+    "exams": [
+      {
+        "criteria": {
+          "score": 80,
+          "factor": [
+            "println/print/printf のいずれかを適切に使えている：最大20点",
+            "エスケープシーケンス（\\n/\\t/\\\" など）を1つ以上使っている：最大20点",
+            "文字列連結（+）で値を埋め込めている：最大20点",
+            "リテラル（文字/文字列/数値/真偽値）のうち2種類以上を使っている：最大20点",
+            "コードが読みやすい（インデント/コメント）：最大20点"
+          ]
+        },
+        "type": "HYBRID",
+        "component": "Misson_Exam",
+        "instructions": [
+          "『学習ログ出力ジェネレーター』を作成しましょう。",
+          "次の変数を main の中で用意する：String topic（学習テーマ）, int minutes（学習分数）, boolean done（完了したか）",
+          "1行目にタイトルを出す（例: === Study Log ===）",
+          "2行目以降に topic と minutes を『ラベル: 値』形式で出力する（連結 or printf を使う）",
+          "タブ（\\t）を使って項目を揃える（最低1回）",
+          "done が false の場合は『まだ途中。でも大丈夫、続きは次回やろう。』を出力する",
+          "コメントを最低1つ入れる"
+        ],
+        "exampleCode": {
+          "Java": "public class StudyLog {\n  public static void main(String[] args) {\n    // 学習ログの出力\n    String topic = \"Java 出力\";\n    int minutes = 45;\n    boolean done = false;\n\n    System.out.println(\"=== Study Log ===\");\n    System.out.println(\"Topic:\\t\" + topic);\n    System.out.println(\"Minutes:\\t\" + minutes);\n\n    if (!done) {\n      System.out.println(\"まだ途中。でも大丈夫、続きは次回やろう。\");\n    }\n  }\n}\n"
+        },
+        "language": [
+          "Java"
+        ]
+      }
+    ],
+    "beforeSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ラストは総合問題だよ。『小さく動くもの』を作るのが一番伸びる。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "焦らず、まずは出力の形を作ってから条件分岐を足していこう。",
+        "order": 2
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "分からなくなったら、前のミッションのコードをコピペして組み立ててOK。",
+        "order": 3
+      }
+    ],
+    "afterSentences": [
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "お疲れさま！ここまでできたら、Javaの基本の『出力』はもう怖くないね。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は変数の型や計算、if/forに進むと、できることが一気に増えるよ。",
+        "order": 2
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "今日作ったログ出力は、この先のデバッグでもずっと使える武器になる。",
+        "order": 3
+      }
+    ]
+  }
+]

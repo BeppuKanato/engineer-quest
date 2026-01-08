@@ -1,9 +1,9 @@
 import { Box, Button, Input, List, ListItem, Paper, Typography } from "@mui/material";
-import { isComponentType, MissionComponentProps } from "../common/common";
+import { isComponentType, MissionComponentProps } from "../../common/common";
 import { useState } from "react";
-import { Mission_6_Exam } from "./mission_6_exam";
+import { Web_Mission_6_Exam } from "./Web_Mission_6_exam";
 
-export const Mission_6 = ({ componentType }: MissionComponentProps) => {
+export const Web_Mission_6 = ({ componentType }: MissionComponentProps) => {
     const step2_1Taks = ["掃除", "買い物", "勉強"];
     const [step2_2Items, setStep2_2Items] = useState<string[]>(["掃除"])     
     
@@ -46,7 +46,7 @@ export const Mission_6 = ({ componentType }: MissionComponentProps) => {
         >
             {
                 isComponentType("", componentType) && (
-                    <Mission_6_Exam />
+                    <Web_Mission_6_Exam />
                 )
             }
             {isComponentType("step-2-1", componentType) && (

@@ -36,7 +36,7 @@ export function Hero({ signupRouter }: HeroProps) {
           </Typography>
 
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            CodeQuestは、ミッションをクリアしながらプログラミングスキルを習得できる、ゲーミフィケーション型学習プラットフォームです。
+            EngineerQuestは、ミッションをクリアしながらプログラミングスキルを習得できる、ゲーミフィケーション型学習プラットフォームです。
             あなたのキャラクターと一緒に成長し、エンジニアとしてのキャリアを築きましょう。
           </Typography>
 

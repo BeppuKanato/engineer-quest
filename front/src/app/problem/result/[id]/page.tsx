@@ -144,23 +144,26 @@ export default function ResultPage() {
             </div>
           ),
         },
-        {
-          title: "🏆 実績達成",
-          content: (
-            <ul className="list-none p-2 space-y-1">
-              {json.missionData.steps.map((step) => (
-                <li
-                  key={step.title}
-                  className="flex items-center gap-2 px-2 py-1 bg-indigo-50 rounded-lg"
-                >
-                  <span className="text-green-600 font-bold">✔️</span>
-                  <span className="text-indigo-700 font-semibold">{step.title}</span>
-                </li>
-              ))}
-            </ul>
-          ),
-        },
-        {
+        // {
+        //   title: "🏆 実績達成",
+        //   content: (
+        //     <ul className="list-none p-2 space-y-1">
+        //       {json.missionData.steps.map((step) => (
+        //         <li
+        //           key={step.title}
+        //           className="flex items-center gap-2 px-2 py-1 bg-indigo-50 rounded-lg"
+        //         >
+        //           <span className="text-green-600 font-bold">✔️</span>
+        //           <span className="text-indigo-700 font-semibold">{step.title}</span>
+        //         </li>
+        //       ))}
+        //     </ul>
+        //   ),
+        // },
+      ];
+
+      if (json.updatedRank) { 
+        notifications.push({
           title: "🎖 ランクアップ",
           content: (
             <div className="text-center p-2">
@@ -172,8 +175,8 @@ export default function ResultPage() {
               </Typography>
             </div>
           ),
-        },
-      ];
+        });
+      }
       setNotificationQueue(notifications);
       //フィードバックがある場合は短縮版をセット
       if (json.examResult[0].judgeType === "WITH_FEEDBACK" && json.examResult[0].feedback) {

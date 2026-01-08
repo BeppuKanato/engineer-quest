@@ -1,25 +1,42 @@
 [
   {
-    "slug": "mission-1",
+    "slug": "web-mission-1",
     "title": "Webページの骨組みを作ろう",
     "detail": "HTMLの基本タグを使って、自己紹介ページの骨組みを作ります。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_1",
     "experience": 100,
     "clientSlug": "yamada-senpai",
     "difficultySlug": "shokyu",
-
     "beforeSentences": [
-      { "speakerSlug": "yamada-senpai", "sentence": "ここから本格的にWebの世界に入っていくよ。まずはページの『骨組み』から始めよう。", "order": 1 },
-      { "speakerSlug": "yamada-senpai", "sentence": "最初はタグの種類が多く見えるかもしれないけど、ひとつずつ一緒に確認していこう。", "order": 2 }
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここから本格的にWebの世界に入っていくよ。まずはページの『骨組み』から始めよう。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "最初はタグの種類が多く見えるかもしれないけど、ひとつずつ一緒に確認していこう。",
+        "order": 2
+      }
     ],
-
     "afterSentences": [
-      { "speakerSlug": "yamada-senpai", "sentence": "いいね！ちゃんとページの骨組みが作れているよ。", "order": 1 },
-      { "speakerSlug": "yamada-senpai", "sentence": "これで『自分のHTMLページを1枚作れる』状態になったね。立派な一歩だよ。", "order": 2 },
-      { "speakerSlug": "yamada-senpai", "sentence": "次は入力フォームを作って、ユーザーから情報を受け取れるページにしていこう。", "order": 3 }
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね！ちゃんとページの骨組みが作れているよ。",
+        "order": 1
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "これで『自分のHTMLページを1枚作れる』状態になったね。立派な一歩だよ。",
+        "order": 2
+      },
+      {
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次は入力フォームを作って、ユーザーから情報を受け取れるページにしていこう。",
+        "order": 3
+      }
     ],
-
     "steps": [
       {
         "order": 1,
@@ -57,7 +74,6 @@
           }
         ]
       },
-
       {
         "order": 2,
         "title": "見出し・段落・リスト・画像を使ってみよう",
@@ -141,7 +157,6 @@
         ]
       }
     ],
-
     "exams": [
       {
         "criteria": {
@@ -164,21 +179,21 @@
         "exampleCode": {
           "HTML": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>自己紹介ページ</title>\n  </head>\n  <body>\n    <h1>自己紹介ページ</h1>\n    <p>こんにちは</p>\n    <p>私の使用技術を紹介します</p>\n    <ul>\n      <li>c</li>\n      <li>java</li>\n      <li>python</li>\n    </ul>\n    <img src=\"code.png\" alt=\"プログラミング画像\" />\n  </body>\n</html>"
         },
-        "language": ["HTML"]
+        "language": [
+          "HTML"
+        ]
       }
     ]
-  }
-  ,
+  },
   {
-    "slug": "mission-2",
+    "slug": "web-mission-2",
     "title": "フォームで情報を入力してもらおう",
     "detail": "HTML の form、input、select、radio などを使って、基本的な入力フォームを作ります。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_2",
     "experience": 120,
     "clientSlug": "yamada-senpai",
     "difficultySlug": "shokyu",
-
     "beforeSentences": [
       {
         "order": 1,
@@ -191,7 +206,6 @@
         "sentence": "フォームは Web アプリの基本中の基本だから、ここでしっかり押さえておこうね。"
       }
     ],
-
     "afterSentences": [
       {
         "order": 1,
@@ -204,7 +218,6 @@
         "sentence": "次はいよいよ、このフォームをもっと便利にしていくステップに進むよ！"
       }
     ],
-
     "steps": [
       {
         "order": 1,
@@ -241,7 +254,6 @@
           }
         ]
       },
-
       {
         "order": 2,
         "title": "ラジオボタンを使ってみよう",
@@ -269,7 +281,6 @@
           }
         ]
       },
-
       {
         "order": 3,
         "title": "プルダウンメニューを使ってみよう",
@@ -297,7 +308,6 @@
           }
         ]
       },
-
       {
         "order": 4,
         "title": "送信ボタンを追加しよう",
@@ -326,7 +336,6 @@
         ]
       }
     ],
-
     "exams": [
       {
         "criteria": {
@@ -351,207 +360,191 @@
         "exampleCode": {
           "HTML": "<form>\n  <label>名前: <input type=\"text\" name=\"name\" /></label><br/>\n  <label>メール: <input type=\"email\" name=\"email\" /></label><br/>\n  <label>部署:\n    <select name=\"department\">\n      <option value=\"sales\">営業</option>\n      <option value=\"dev\">開発</option>\n      <option value=\"general\">総務</option>\n    </select>\n  </label><br/>\n  <button type=\"submit\">送信</button>\n</form>"
         },
-        "language": ["HTML"]
+        "language": [
+          "HTML"
+        ]
       }
     ]
   },
   {
-    "slug": "mission-3",
-    "title": "ページの見た目を整えよう（CSS入門）",
-    "detail": "CSSを使ってWebページの見た目を整えます。文字の色やサイズ、余白の調整、背景色など基本的なスタイルを学びましょう。",
-    "type": "MAIN",
+    "slug": "web-mission-3",
+    "title": "CSSで見た目を整えよう",
+    "detail": "CSSを使って、文字の見た目や配置を段階的に整えていきます。",
+    "type": "SUB",
     "component": "Mission_3",
-    "experience": 100,
+    "experience": 150,
     "clientSlug": "yamada-senpai",
     "difficultySlug": "shokyu",
-    "steps": [
+
+    "beforeSentences": [
       {
         "order": 1,
-        "title": "CSSの基本を理解しよう",
-        "detail": "CSSの書き方と基本構造、セレクタの種類を学びます。",
-        "explains": [
-          {
-            "order": 1,
-            "content": "CSSはHTMLの見た目を整えるための言語です。文字の色やサイズ、余白などを指定できます。",
-            "supporterSlug": "yamada-senpai"
-          },
-          {
-            "order": 2,
-            "content": "セレクタで対象のHTML要素を指定し、{ } の中にスタイル（プロパティと値）を書きます。",
-            "supporterSlug": "yamada-senpai",
-            "code": "```css\nh1 {\n  color: red;\n  font-size: 24px;\n}\n```"
-          },
-          {
-            "order": 3,
-            "content": "CSSはHTMLの中に直接書く方法（styleタグ）と、外部ファイルとして読み込む方法があります。",
-            "supporterSlug": "yamada-senpai",
-            "code": "```css\n<!-- HTML内に直接書く場合 -->\n<style>\n  p {\n    color: blue;\n  }\n</style>\n\n<!-- 外部CSSファイルを読み込む場合 -->\n<link rel=\"stylesheet\" href=\"style.css\" />\n```"
-          }
-        ],
-        "stepExams": [
-          {
-            "content": "外部CSSファイル「style.css」を読み込むHTMLを書いてみましょう。",
-            "answer": "```css\n<link rel=\"stylesheet\" href=\"style.css\" />\n```",
-            "supporterSlug": "yamada-senpai"
-          }
-        ]
+        "speakerSlug": "yamada-senpai",
+        "sentence": "ここからはCSSだよ。HTMLで作ったページに、見た目を付けていこう。"
       },
       {
         "order": 2,
-        "title": "文字のスタイルを変更しよう",
-        "detail": "文字の色・サイズ・フォントを変更して見やすくします。",
-        "explains": [
-          {
-            "order": 1,
-            "content": "文字色は `color`、サイズは `font-size` で指定します。",
-            "componentType": "step-2-1",
-            "supporterSlug": "yamada-senpai",
-            "code": "```css\np {\n  color: red;\n  font-size: 28px;\n}\n```"
-          },
-          {
-            "order": 2,
-            "content": "フォントの種類は `font-family` で指定します。代表的なフォントをいくつか紹介します。",
-            "componentType": "step-2-2",
-            "supporterSlug": "yamada-senpai",
-            "code": "```css\n#p1 {\n  font-family: \"serif\";\n}\n#p2 {\n  font-family: \"sans-serif\";\n}\n#p3 {\n  font-family: \"Comic Sans MS\";\n}\n#p4 {\n  font-family: \"monospace\";\n}\n```"
-          }
-        ],
-        "stepExams": [
-          {
-            "content": "h1タグの文字色を赤、フォントサイズを24pxにしてみましょう。",
-            "answer": "```css\nh1 {\n  color: red;\n  font-size: 24px;\n}\n```",
-            "supporterSlug": "yamada-senpai"
-          }
-        ]
+        "speakerSlug": "yamada-senpai",
+        "sentence": "CSSは『どこに』『何を』するかが分かれば怖くない。順番に見ていこう。"
+      }
+    ],
+
+    "afterSentences": [
+      {
+        "order": 1,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "いいね。CSSで見た目をコントロールできるようになったね。"
       },
       {
-        "order": 3,
-        "title": "余白や背景色を整えよう",
-        "detail": "マージンやパディングを調整して要素を整列させ、背景色を設定します。",
+        "order": 2,
+        "speakerSlug": "yamada-senpai",
+        "sentence": "次はJavaScriptを使って、ページを動かしていこう。"
+      }
+    ],
+
+    "steps": [
+      {
+        "order": 1,
+        "title": "CSSを当てる場所を決めてみましょう（セレクタ）",
+        "detail": "CSSは『どのHTML要素に効かせるか』を最初に指定します。",
         "explains": [
           {
             "order": 1,
-            "content": "`margin` は外側の余白、`padding` は内側の余白を指定します。",
-            "componentType": "step-3-1",
+            "content": "CSSでは、まず『どのHTML要素にスタイルを当てるか』を決めます。この指定のことを「セレクタ」と呼びます。",
             "supporterSlug": "yamada-senpai",
-            "code": "```css\n#margin {\n  margin: 20px;\n}\n#padding {\n  padding: 20px;\n}\n```"
+            "componentType": "step-1-1",
+            "code": "```html\n<h1>ページタイトル</h1>\n<p class=\"blue\">クラスが付いた文章</p>\n<p id=\"special\">IDが付いた文章</p>\n```"
           },
           {
             "order": 2,
-            "content": "`margin` や `padding` は、上下左右を個別に指定することもできます。\n\n指定の順番は **上 → 右 → 下 → 左** です。",
-            "componentType": "step-3-1",
+            "content": "HTMLに対応するCSSは次のように書きます。h1 はタグ、.blue は class、#special は id を指定しています。",
             "supporterSlug": "yamada-senpai",
-            "code": "```css\n#box1 {\n  margin: 0 0 0 0;\n}\n\n/* 例: 上だけ10px、左右は5px、下は0 */\n#box2 {\n  margin: 10px 5px 0px 5px;\n}\n```"
+            "componentType": "step-1-2",
+            "code": "```css\nh1 {\n}\n\n.blue {\n}\n\n#special {\n}\n```"
           },
           {
             "order": 3,
-            "content": "背景色は `background-color` で指定します。",
-            "componentType": "step-3-2",
+            "content": "class は同じ名前を何度でも使えます。id はページの中で1つだけに使う特別な名前です。",
             "supporterSlug": "yamada-senpai",
-            "code": "```css\n#bgColor {\n  background-color: purple;\n}\n```"
-          },
-          {
-            "order": 4,
-            "content": "CSSのボックスモデルでは、margin（外側の余白）、padding（内側の余白）、border（枠線）などを使って要素の間隔を調整します。",
-            "supporterSlug": "yamada-senpai",
-            "code": "```css\ndiv {\n  margin: 10px;\n  padding: 10px;\n  border: 1px solid black;\n}\n```"
+            "componentType": "step-1-3",
+            "code": ""
           }
         ],
         "stepExams": [
           {
-            "content": "pタグに上下10pxの外側の余白をつけ、背景色を黄色にしてみましょう。",
-            "answer": "```css\np {\n  margin: 10px 0 10px 0;\n  background-color: yellow;\n}\n```",
+            "order": 1,
+            "content": "h1・class・id のセレクタを書いてみましょう。",
+            "instructions": [
+              "h1 セレクタを書く",
+              ".blue セレクタを書く",
+              "#special セレクタを書く"
+            ],
+            "answer": "```css\nh1 {\n}\n.blue {\n}\n#special {\n}\n```",
             "supporterSlug": "yamada-senpai"
           }
         ]
       },
+
       {
-        "order": 4,
-        "title": "クラスやIDを使ってスタイルを当てよう",
-        "detail": "特定の要素にスタイルを当てるための class と id の使い方を学びます。",
+        "order": 2,
+        "title": "文字の見た目を変えてみましょう",
+        "detail": "CSSで文字の色や大きさを指定します。",
         "explains": [
           {
             "order": 1,
-            "content": "`class` は複数の要素に同じスタイルを当てるときに使います。HTMLでは `class=\"highlight\"` のように指定します。",
-            "componentType": "step-4-1",
+            "content": "文字の色を変えたいときは color を使います。CSSで最もよく使うプロパティの1つです。",
             "supporterSlug": "yamada-senpai",
-            "code": "```css\n.highlight {\n  color: green;\n}\n```"
+            "componentType": "step-2-1",
+            "code": "```css\nh1 {\n  color: red;\n}\n```"
           },
           {
             "order": 2,
-            "content": "`id` はページ内で1つだけの要素にスタイルを当てるときに使います。HTMLでは `id=\"special\"` のように指定します。",
-            "componentType": "step-4-2",
+            "content": "文字の大きさを変えたいときは font-size を使います。px は大きさの単位です。",
             "supporterSlug": "yamada-senpai",
-            "code": "```css\n#special {\n  color: orange;\n}\n```"
+            "componentType": "step-2-2",
+            "code": "```css\n.blue {\n  font-size: 24px;\n}\n```"
           }
         ],
         "stepExams": [
           {
-            "content": "クラス名「highlight」が付いた要素の文字色を青にしてみましょう。",
-            "answer": "```css\n.highlight {\n  color: blue;\n}\n```",
+            "order": 1,
+            "content": "文字の色と大きさを指定してみましょう。",
+            "instructions": [
+              "h1 の文字色を赤色にする",
+              ".blue クラスの文字サイズを 24px にする"
+            ],
+            "answer": "```css\nh1 {\n  color: red;\n}\n.blue {\n  font-size: 24px;\n}\n```",
+            "supporterSlug": "yamada-senpai"
+          }
+        ]
+      },
+
+      {
+        "order": 3,
+        "title": "背景と余白を調整してみましょう",
+        "detail": "要素の背景色や余白を指定します。",
+        "explains": [
+          {
+            "order": 1,
+            "content": "背景色を指定するときは background-color を使います。要素の内側全体に色が付きます。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-3-1",
+            "code": "```css\n.box {\n  background-color: lightblue;\n}\n```"
+          },
+          {
+            "order": 2,
+            "content": "padding は要素の内側の余白、margin は外側の余白です。見た目や配置を整えるために使います。",
+            "supporterSlug": "yamada-senpai",
+            "componentType": "step-3-2",
+            "code": "```css\n.box {\n  padding: 20px;\n  margin: 10px 15px 10px 15px;\n}\n```"
+          }
+        ],
+        "stepExams": [
+          {
+            "order": 1,
+            "content": "背景色と余白を指定してみましょう。",
+            "instructions": [
+              ".box の背景色を lightblue にする",
+              "padding を 20px にする",
+              "margin を 上10px 右15px 下10px 左15px にする"
+            ],
+            "answer": "```css\n.box {\n  background-color: lightblue;\n  padding: 20px;\n  margin: 10px 15px 10px 15px;\n}\n```",
             "supporterSlug": "yamada-senpai"
           }
         ]
       }
     ],
+
     "exams": [
       {
         "criteria": {
           "score": 60,
           "factor": [
-            "h1 の文字色が赤に設定されている：最大15点", 
-            ".blue クラスの文字色が青に設定されている：最大15点", 
-            "#y-24 の文字色が黄に設定されている：最大10点", 
-            "#y-24 のフォントサイズが 24px に設定されている：最大10点", 
-            ".box の背景色が水色に設定されている：最大20点", 
-            ".box の padding が 20px に設定されている：最大15点", 
-            ".box の margin が 10px 15px 10px 15px に設定されている：最大15点"
+            "適切なセレクタ（h1・class・id）が使えている：最大20点",
+            "文字色・文字サイズが正しく指定されている：最大20点",
+            "背景色・余白が正しく指定されている：最大20点"
           ]
         },
         "type": "HYBRID",
-        "instructions": [
-          "h1タグの文字色を赤色にする。",
-          "「blue」クラスの文字色を青色に設定する。",
-          "「y-24」IDの文字色を黄色、フォントサイズを24pxに設定する。",
-          "「box」クラスの背景色を水色、内側の余白を20pxに設定する。\n外側の余白を上:10px、右:15px、下:10px、左:15pxに設定する。"
-        ],
         "component": "Mission_3_Exam",
+        "instructions": [
+          "h1 の文字色を赤色にする",
+          ".blue の文字サイズを 24px にする",
+          ".box の背景色を lightblue にする",
+          ".box の padding を 20px、margin を 上10px 右15px 下10px 左15px にする"
+        ],
         "exampleCode": {
-          "CSS": "h1 {\n    color: red;\n}\n.blue {\n    color: blue;\n}\n#y-24 {\n    color: yeloow;\n    font-size: 24px;\n}\n.box {\n    background-color: lightblule;\n    padding: 20px;\n    margin: 10px 15px 10px 15px;\n}"
+          "CSS": "h1 {\n  color: red;\n}\n.blue {\n  font-size: 24px;\n}\n.box {\n  background-color: lightblue;\n  padding: 20px;\n  margin: 10px 15px 10px 15px;\n}"
         },
         "language": ["CSS"]
-      }
-    ],
-    "beforeSentences": [
-      {
-        "speakerSlug": "yamada-senpai",
-        "sentence": "今回はページの見た目を整えるCSSを学びます。色や余白を変えて、見やすいページにしましょう。",
-        "order": 1
-      },
-      {
-        "speakerSlug": "yamada-senpai",
-        "sentence": "基本を押さえて、自分の作ったHTMLページにスタイルを追加してみましょう。",
-        "order": 2
-      }
-    ],
-    "afterSentences": [
-      {
-        "speakerSlug": "yamada-senpai",
-        "sentence": "見た目が整いましたね！ページがぐっと見やすくなりました。",
-        "order": 1
-      },
-      {
-        "speakerSlug": "yamada-senpai",
-        "sentence": "次はJavaScriptを使ってページに動きをつけるステップです。準備はいいですか？",
-        "order": 2
       }
     ]
   },
   {
-    "slug": "mission-4",
+    "slug": "web-mission-4",
     "title": "JavaScriptの文法を学ぼう（基礎編）",
     "detail": "JavaScriptの基本文法を学びます。変数・型・条件分岐・繰り返し・関数など、Webページに動きをつけるための基礎を押さえましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_4",
     "experience": 120,
     "clientSlug": "yamada-senpai",
@@ -684,11 +677,11 @@
         "criteria": {
           "score": 60,
           "factor": [
-            "変数とデータ型を正しく使用している：最大10点", 
-            "条件分岐（if 等）が正しく書けている：最大15点", 
-            "繰り返し処理（for 等）が正しく書けている：最大15点", 
-            "関数が正しく定義・呼び出しできている：最大20点", 
-            "出力の順序と結果が正しい：最大20点", 
+            "変数とデータ型を正しく使用している：最大10点",
+            "条件分岐（if 等）が正しく書けている：最大15点",
+            "繰り返し処理（for 等）が正しく書けている：最大15点",
+            "関数が正しく定義・呼び出しできている：最大20点",
+            "出力の順序と結果が正しい：最大20点",
             "コードの可読性が保たれている：最大10点",
             "文法理解が総合的にできている：最大10点"
           ]
@@ -708,7 +701,9 @@
         "exampleCode": {
           "JavaScript": "function omikuji(index) {\n    const fortunes = [\"大吉\", \"中吉\", \"小吉\", \"凶\"];\n    const result = fortunes[index];\n    return result;\n}\nfor (let i = 3; i > 0; i--) {\n    console.log(i);\n}\nconst result = omikuji(0);\nconsole.log(result);\nif (result === \"凶\") {\n    console.log(\"どんまい! 明日はきっといいことあるよ\");\n}"
         },
-        "language": ["JavaScript"]
+        "language": [
+          "JavaScript"
+        ]
       }
     ],
     "beforeSentences": [
@@ -737,10 +732,10 @@
     ]
   },
   {
-    "slug": "mission-5",
+    "slug": "web-mission-5",
     "title": "動きをつけよう（JavaScript DOM編）",
     "detail": "JavaScriptでHTMLの要素を操作して、ページに動きを加えます。ボタンを押したら文字が変わる、色が変わるなど、動的な処理を体験しましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_5",
     "experience": 150,
     "clientSlug": "yamada-senpai",
@@ -864,10 +859,10 @@
       {
         "criteria": {
           "score": 60,
-          "factor":[
-            "DOM 要素の取得が正しくできている：最大15点", 
-            "テキストやスタイルの変更が正しく行えている：最大15点", 
-            "イベント（click 等）を適切に扱えている：最大15点", 
+          "factor": [
+            "DOM 要素の取得が正しくできている：最大15点",
+            "テキストやスタイルの変更が正しく行えている：最大15点",
+            "イベント（click 等）を適切に扱えている：最大15点",
             "DOM 操作を組み合わせた処理が実装できている：最大15点"
           ]
         },
@@ -877,11 +872,14 @@
           "ボタンを押す度にタイトル(id = title)が赤➝青➝緑➝黄の順番で変化する。",
           "ボタンを押したらタイトル(id = title)の文字が「クリックされました!」になる"
         ],
-      "exampleCode": {
-        "HTML": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Mission 5</title>\n  </head>\n  <body>\n    <h2 id=\"title\">最初のタイトル</h2>\n    <button id=\"btn\">クリックしてみよう</button>\n  </body>\n</html>",
-        "JavaScript": "const title = document.getElementById(\"title\");\nconst btn = document.getElementById(\"btn\");\nlet colorNum = 0;\nbtn.addEventListener(\"click\", function () {\n  const colors = [\"red\", \"blue\", \"green\", \"yellow\"];\n  title.style.color = colors[colorNum];\n  title.textContent = \"クリックされました！\";\n  colorNum++;\n  if (colorNum > 3) {\n    colorNum = 0;\n  }\n});"
-      },
-  "language": ["HTML", "JavaScript"]
+        "exampleCode": {
+          "HTML": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Mission 5</title>\n  </head>\n  <body>\n    <h2 id=\"title\">最初のタイトル</h2>\n    <button id=\"btn\">クリックしてみよう</button>\n  </body>\n</html>",
+          "JavaScript": "const title = document.getElementById(\"title\");\nconst btn = document.getElementById(\"btn\");\nlet colorNum = 0;\nbtn.addEventListener(\"click\", function () {\n  const colors = [\"red\", \"blue\", \"green\", \"yellow\"];\n  title.style.color = colors[colorNum];\n  title.textContent = \"クリックされました！\";\n  colorNum++;\n  if (colorNum > 3) {\n    colorNum = 0;\n  }\n});"
+        },
+        "language": [
+          "HTML",
+          "JavaScript"
+        ]
       }
     ],
     "beforeSentences": [
@@ -910,10 +908,10 @@
     ]
   },
   {
-    "slug": "mission-6",
+    "slug": "web-mission-6",
     "title": "ToDoリストを作ろう（JavaScript応用）",
     "detail": "JavaScriptの配列とDOM操作を組み合わせて、タスクを追加・削除できるToDoリストを作ります。小さなアプリを通して、実践的なコード構成を学びましょう。",
-    "type": "MAIN",
+    "type": "SUB",
     "component": "Mission_6",
     "experience": 200,
     "clientSlug": "yamada-senpai",
@@ -1043,10 +1041,10 @@
         "criteria": {
           "score": 60,
           "factor": [
-            "配列でタスク管理が正しく行えている：最大20点", 
-            "タスク表示処理（render）が正しく実装されている：最大25点", 
-            "追加機能が正しく動作している：最大25点", 
-            "削除機能が正しく動作している：最大25点", 
+            "配列でタスク管理が正しく行えている：最大20点",
+            "タスク表示処理（render）が正しく実装されている：最大25点",
+            "追加機能が正しく動作している：最大25点",
+            "削除機能が正しく動作している：最大25点",
             "コードの可読性が保たれている：最大5点"
           ]
         },
@@ -1060,7 +1058,10 @@
           "HTML": "<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>ToDoリスト</title>\n  </head>\n  <body>\n    <h2>🧩 ToDoリスト</h2>\n    <input id=\"taskInput\" type=\"text\" placeholder=\"タスクを入力\" />\n    <button id=\"addBtn\">追加</button>\n    <ul id=\"taskList\"></ul>\n  </body>\n</html>",
           "JavaScript": "const taskInput = document.getElementById(\"taskInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst taskList = document.getElementById(\"taskList\");\n\nconst tasks = [];\n\nconst render = () => {\n  taskList.innerHTML = \"\";\n  tasks.forEach((task, index) => {\n    const li = document.createElement(\"li\");\n    li.textContent = task;\n\n    const deleteBtn = document.createElement(\"button\");\n    deleteBtn.textContent = \"削除\";\n    deleteBtn.addEventListener(\"click\", () => {\n      tasks.splice(index, 1);\n      render();\n    });\n\n    li.appendChild(deleteBtn);\n    taskList.appendChild(li);\n  });\n};\n\naddBtn.addEventListener(\"click\", () => {\n  const text = taskInput.value.trim();\n  if (text === \"\") return;\n  tasks.push(text);\n  taskInput.value = \"\";\n  render();\n});"
         },
-        "language": ["HTML", "JavaScript"]
+        "language": [
+          "HTML",
+          "JavaScript"
+        ]
       }
     ],
     "beforeSentences": [
@@ -1089,10 +1090,10 @@
     ]
   },
   {
-    "slug": "mission-7",
+    "slug": "web-mission-7",
     "title": "メモアプリを作成しよう",
     "detail": "これまで学習した知識を使ってメモアプリの作成に取り組みます。",
-    "type": "PROMOTION",
+    "type": "SUB",
     "component": "Mission_7",
     "experience": 300,
     "clientSlug": "yamada-senpai",
@@ -1102,11 +1103,11 @@
       {
         "criteria": {
           "score": 80,
-          "factor":[
+          "factor": [
             "メモの追加機能が正しく動作している：最大25点",
-            "メモの削除機能が正しく動作している：最大25点", 
-            "メモの編集（編集→保存）が正しく動作している：最大25点", 
-            "DOM 操作（表示・要素生成）が正しく実装されている：最大20点", 
+            "メモの削除機能が正しく動作している：最大25点",
+            "メモの編集（編集→保存）が正しく動作している：最大25点",
+            "DOM 操作（表示・要素生成）が正しく実装されている：最大20点",
             "CSS による見た目の調整（任意）：最大5点"
           ]
         },
@@ -1122,9 +1123,13 @@
         ],
         "exampleCode": {
           "HTML": "<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>メモアプリ</title>\n  </head>\n  <body>\n    <h2>📝 メモアプリ</h2>\n    <input id=\"memoInput\" type=\"text\" placeholder=\"メモを入力\" />\n    <button id=\"addBtn\">追加</button>\n    <button id=\"saveBtn\" style=\"display: none;\">保存</button>\n    <ul id=\"memoList\"></ul>\n  </body>\n</html>",
-          "JavaScript": "const memoInput = document.getElementById(\"memoInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst saveBtn = document.getElementById(\"saveBtn\");\nconst memoList = document.getElementById(\"memoList\");\nlet editIndex = null;\n\naddBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (text === \"\") return;\n\n  const li = document.createElement(\"li\");\n  li.textContent = text;\n\n  const editBtn = document.createElement(\"button\");\n  editBtn.textContent = \"編集\";\n  editBtn.addEventListener(\"click\", () => {\n    memoInput.value = li.firstChild.textContent; // 修正ポイント\n    editIndex = Array.from(memoList.children).indexOf(li);\n    addBtn.style.display = \"none\";\n    saveBtn.style.display = \"inline\";\n  });\n\n  const deleteBtn = document.createElement(\"button\");\n  deleteBtn.textContent = \"削除\";\n  deleteBtn.addEventListener(\"click\", () => {\n    memoList.removeChild(li);\n  });\n\n  li.appendChild(editBtn);\n  li.appendChild(deleteBtn);\n  memoList.appendChild(li);\n  memoInput.value = \"\";\n});\n\nsaveBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (editIndex === null || text === \"\") return;\n\n  const li = memoList.children[editIndex];\n  li.firstChild.textContent = text;\n\n  memoInput.value = \"\";\n  editIndex = null;\n  addBtn.style.display = \"inline\";\n  saveBtn.style.display = \"none\";\n});"       
+          "JavaScript": "const memoInput = document.getElementById(\"memoInput\");\nconst addBtn = document.getElementById(\"addBtn\");\nconst saveBtn = document.getElementById(\"saveBtn\");\nconst memoList = document.getElementById(\"memoList\");\nlet editIndex = null;\n\naddBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (text === \"\") return;\n\n  const li = document.createElement(\"li\");\n  li.textContent = text;\n\n  const editBtn = document.createElement(\"button\");\n  editBtn.textContent = \"編集\";\n  editBtn.addEventListener(\"click\", () => {\n    memoInput.value = li.firstChild.textContent; // 修正ポイント\n    editIndex = Array.from(memoList.children).indexOf(li);\n    addBtn.style.display = \"none\";\n    saveBtn.style.display = \"inline\";\n  });\n\n  const deleteBtn = document.createElement(\"button\");\n  deleteBtn.textContent = \"削除\";\n  deleteBtn.addEventListener(\"click\", () => {\n    memoList.removeChild(li);\n  });\n\n  li.appendChild(editBtn);\n  li.appendChild(deleteBtn);\n  memoList.appendChild(li);\n  memoInput.value = \"\";\n});\n\nsaveBtn.addEventListener(\"click\", () => {\n  const text = memoInput.value.trim();\n  if (editIndex === null || text === \"\") return;\n\n  const li = memoList.children[editIndex];\n  li.firstChild.textContent = text;\n\n  memoInput.value = \"\";\n  editIndex = null;\n  addBtn.style.display = \"inline\";\n  saveBtn.style.display = \"none\";\n});"
         },
-        "language": ["HTML", "CSS", "JavaScript"]
+        "language": [
+          "HTML",
+          "CSS",
+          "JavaScript"
+        ]
       }
     ],
     "beforeSentences": [

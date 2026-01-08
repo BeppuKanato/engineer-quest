@@ -178,6 +178,14 @@ export default function StepExplainPage() {
               </div>
             </CardContent>
             <CardActions className="flex justify-end">
+              {/* 戻る */}
+              <MUIButton
+                variant="outlined"
+                disabled={explainNum === 0}
+                onClick={() => setExplainNum(explainNum - 1)}
+              >
+                ← 戻る
+              </MUIButton>
               {explainNum + 1 !== responseData.explains.length ? (
                 <MUIButton
                   variant="contained"

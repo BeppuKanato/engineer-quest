@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Box, Typography, Button, List, ListItem, ListItemText, Input } from "@mui/material";
-import { isComponentType, MissionComponentProps } from "../common/common";
+import { isComponentType, MissionComponentProps } from "../../common/common";
 
-export const Mission_4 = ({ componentType }: MissionComponentProps) => {
+export const Web_Mission_4 = ({ componentType }: MissionComponentProps) => {
   // 状態管理
   const [score, setScore] = useState<number | null>(null);
   const [age, setAge] = useState<number | null>(null);

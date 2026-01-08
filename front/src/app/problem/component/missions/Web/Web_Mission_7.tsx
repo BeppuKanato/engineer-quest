@@ -18,7 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 
-export const Mission_7: React.FC = () => {
+export const Web_Mission_7: React.FC = () => {
   const [memoList, setMemoList] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [editIndex, setEditIndex] = useState<number | null>(null);

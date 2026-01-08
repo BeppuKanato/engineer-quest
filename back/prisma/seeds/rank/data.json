@@ -1,0 +1,26 @@
+[
+  {
+    "name": "新入社員エンジニア",
+    "order": 1,
+    "slug": "rank-1",
+    "requiredMissionSlug": null
+  },
+  {
+    "name": "ジュニアエンジニア",
+    "order": 2,
+    "slug": "rank-2",
+    "requiredMissionSlug": "java-promotion-1"
+  },
+  {
+    "name": "エンジニア",
+    "order": 3,
+    "slug": "rank-3",
+    "requiredMissionSlug": "java-promotion-2"
+  },
+  {
+    "name": "一人前エンジニア",
+    "order": 4,
+    "slug": "rank-4",
+    "requiredMissionSlug": "java-promotion-3"
+  }
+]

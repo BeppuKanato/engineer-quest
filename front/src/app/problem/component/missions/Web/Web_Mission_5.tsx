@@ -1,8 +1,8 @@
 import { Box, Button, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { useState } from "react";
-import { isComponentType, MissionComponentProps } from "../common/common";
+import { isComponentType, MissionComponentProps } from "../../common/common";
 
-export const Mission_5 = ({ componentType }: MissionComponentProps) => {
+export const Web_Mission_5 = ({ componentType }: MissionComponentProps) => {
 
     const [step4_1Clicked, setSetp4_1Clicked] = useState<boolean>(false);
     const [step4ExamClicked, setStep4ExamClicked] = useState<boolean>(false);

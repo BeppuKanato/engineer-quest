@@ -1,0 +1,8 @@
+[
+  { "missionSlug": "web-mission-2", "requiredSlug": "web-mission-1" },
+  { "missionSlug": "web-mission-3", "requiredSlug": "web-mission-2" },
+  { "missionSlug": "web-mission-4", "requiredSlug": "web-mission-3" },
+  { "missionSlug": "web-mission-5", "requiredSlug": "web-mission-4" },
+  { "missionSlug": "web-mission-6", "requiredSlug": "web-mission-5" },
+  { "missionSlug": "web-mission-7", "requiredSlug": "web-mission-6"}
+]
