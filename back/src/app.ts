@@ -13,7 +13,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const allowedOrignis = process.env.ALLOWED_ORIGINS?.split(',') || [];
-console.log("許可されているオリジン:", allowedOrignis);
 app.use(cors({
   origin: allowedOrignis,
   credentials: true,

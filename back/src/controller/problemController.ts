@@ -407,8 +407,6 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
     const { missionId, examId, userCode, judgeType } = req.body;
     const userId = req.user!.uid;
 
-    console.log(judgeType as JudgeType);
-
     const examData = await fetchMission(missionId, {
         exam: {
             select: {
@@ -592,8 +590,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
       exam: {id: string}
       _count: { steps: number };
     } | null;
-
-    console.log(missionData);
 
     if (!missionData) return res.status(500).json({ error: "ミッションリザルトの取得に失敗しました" });
 
@@ -834,7 +830,6 @@ export const startMissionController = async(req: Request, res: Response) => {
 export const completeStepController = async(req: AuthRequest, res: Response) => {
     const { missionId, updateStepNum } = req.body;
     const userId = req.user!.uid;
-    console.log(`currentStepを更新します${updateStepNum}`);
     //進行状態のミッションのIDを取得
     const missionProgress = await fetchMissionProgress(
         missionId, 
