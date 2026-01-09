@@ -22,7 +22,6 @@ export const ensureUserExitController = async (req: AuthRequest, res: Response) 
                     rankId: "ee7d33f0-cd78-4f55-bf15-cb065d37e558"
                 },
             });
-            console.log("ユーザデータを新規作成");
         }
         res.status(200).json({ok: true});
     }
