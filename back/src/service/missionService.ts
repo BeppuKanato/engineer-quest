@@ -110,7 +110,7 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
                     responseMimeType: "application/json",
                     systemInstruction: settings.systemInstruction,
 
-                    temperature: 0.2,
+                    temperature: 0.0,
                     topP: 0.1,
                     topK: 1,
                 }
@@ -127,7 +127,7 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
             apiKey: process.env.OPENAI_API_KEY,
             });
             const response = await ai.responses.create({
-                model: "gpt-5-nano", // ← gpt-4o-mini でもOK
+                model: "gpt-4o-mini", 
                 input: [
                 {
                     role: "system",
