@@ -11,6 +11,12 @@ datasource db {
 enum JudgeType {
   WITH_FEEDBACK
   WITHOUT_FEEDBACK
+  PHILANTHROPIST
+  ACHIEVER
+  FREE_SPIRIT
+  SOCIALIZER
+  PLAYER
+  DISRUPTOR
 }
 
 enum MissionExamLanguages {
