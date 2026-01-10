@@ -6,7 +6,7 @@ import { ClientRequest } from "http";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
 import { triggerAsyncId } from "async_hooks";
 import { fetchUser } from "./userService";
-import { examJudgeWithFeedbackc } from "./ContentsForGeminiAPI/examJudgeWithFeedback";
+import { examJudgeWithFeedback } from "./ContentsForGeminiAPI/examJudgeWithFeedback";
 import { examJudgeWithoutFeedback } from "./ContentsForGeminiAPI/examJudgeWithoutFeedback";
 import OpenAI from "openai";
 
@@ -86,15 +86,20 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
     //openai or gemini
     const aiModel: string = "openai";
     // const  ai = new GoogleGenAI({});
-
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
-    //フィードバック付きの採点
-    if (judgeType === JudgeType.WITH_FEEDBACK) {
-        settings = examJudgeWithFeedbackc(missionCode, userCode, factor, instructions);
-    }
-    //スコアのみの採点
-    else if(judgeType === JudgeType.WITHOUT_FEEDBACK) {
+    // フィードバックなしの採点
+    if (judgeType === JudgeType.WITHOUT_FEEDBACK) {
         settings = examJudgeWithoutFeedback(missionCode, userCode, factor, instructions);
+    }
+    // フィードバックありの採点 
+    else {
+        settings = examJudgeWithFeedback(
+            missionCode,
+            userCode,
+            factor,
+            instructions,
+            judgeType
+        );
     }
     try {
         let json: AIResponse | null = null;
@@ -123,6 +128,8 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
         }
         //openai API 呼び出し
         else if (aiModel === "openai") {
+            console.log("OpnenAIで採点実行")
+            console.log("judgeType:", judgeType);
             const ai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
             });
@@ -145,26 +152,21 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
             const text = response.output_text;
             if (!text) return null;
 
-            json = JSON.parse(text);
+            // ```json ... ``` を除去
+            const cleaned = text
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+
+            json = JSON.parse(cleaned);
         }
 
         if (json === null) {
             return null;
         }
 
-        // reason がなければ空で作る
-        if (!json.reason) {
-            json.reason = { good: [], bad: [] };
-        }
-
-        // feedback も初期化
-        if (json.feedback === undefined) {
-            json.feedback = null;
-        }
-
         if (judgeType === JudgeType.WITHOUT_FEEDBACK) {
-            json.reason.good = [];
-            json.reason.bad = [];
             json.feedback = null;
         }
 
