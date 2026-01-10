@@ -15,10 +15,13 @@ import {
   Tab,
   Select,
   MenuItem,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { JUDGE_TYPE, MISSION_EXAM_LANGUAGE, MissionExamAIResponse } from "@/type";
 import React from "react";
 import Editor from "@monaco-editor/react";
+import { InfoIcon } from "lucide-react";
 
 type Props = {
   title: string;
@@ -119,8 +122,116 @@ export const BaseExamLayout = ({
                 onChange={(e) => setJudgeType(e.target.value as JUDGE_TYPE)}
                 disabled={isEvaluating}
               >
-                <MenuItem value={JUDGE_TYPE.WITH_FEEDBACK}>スコア + フィードバック</MenuItem>
-                <MenuItem value={JUDGE_TYPE.WITHOUT_FEEDBACK}>スコアのみ</MenuItem>
+                <MenuItem value={JUDGE_TYPE.WITHOUT_FEEDBACK}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>スコアのみ</span>
+                    <Tooltip title="スコアと良い点、悪い点を提示します。" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                <MenuItem value={JUDGE_TYPE.WITH_FEEDBACK}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>標準フィードバック</span>
+                    <Tooltip title="スコアに加え、コードの良い点・改善点、改善方法の提案などのフィードバックを提示します。" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* Philanthropists */}
+                <MenuItem value={JUDGE_TYPE.PHILANTHROPIST}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>利他意識重視</span>
+                    <Tooltip title="スコアに加え、周囲や将来にどのように役立つかに焦点を当てたフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* Achiever */}
+                <MenuItem value={JUDGE_TYPE.ACHIEVER}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>成長重視</span>
+                    <Tooltip title="スコアに加え、上達やスキルの向上、次に挑戦できる点に焦点を当てたフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* FreeSpirit */}
+                <MenuItem value={JUDGE_TYPE.FREE_SPIRIT}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>自由度重視</span>
+                    <Tooltip title="スコアに加え、発想や工夫の余地、選択の幅に焦点を当てたフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* Socializer */}
+                <MenuItem value={JUDGE_TYPE.SOCIALIZER}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>つながり重視</span>
+                    <Tooltip title="スコアに加え、他者との共有や関わりを意識した視点のフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* Player */}
+                <MenuItem value={JUDGE_TYPE.PLAYER}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>報酬重視</span>
+                    <Tooltip title="スコアに加え、報酬や利益に焦点を当てたフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
+                {/* Disruptor */}
+                <MenuItem value={JUDGE_TYPE.DISRUPTOR}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <span>変化重視</span>
+                    <Tooltip title="スコアに加え、別のやり方や改善など、変化に焦点を当てたフィードバックを提示します" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <InfoIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </MenuItem>
               </Select>
             </Box>
             {/* リセット / AI評価 */}
@@ -213,9 +324,6 @@ export const BaseExamLayout = ({
                 },
               }}
             />
-
-            {judgeType === JUDGE_TYPE.WITH_FEEDBACK && (
-            <>
             {/* 評価理由 */}
             <Box mb={3}>
               <Typography variant="subtitle1" fontWeight="medium" mb={1}>
@@ -298,8 +406,6 @@ export const BaseExamLayout = ({
                 </Typography>
               </Box>
             )}
-            </>
-          )}
 
             {/* リザルト画面ボタン */}
             {hasPassed && onGoResult && (
