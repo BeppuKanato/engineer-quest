@@ -6,6 +6,7 @@ import problemRouter from './router/problemRouter';
 import homeRouter from './router/homeRouter';
 import usageRouter from './router/usageRouter';
 import authRouter from './router/authRouter';
+import shareRouter from './router/shareRouter';
 
 dotenv.config();
 
@@ -35,6 +36,9 @@ app.use('/home', homeRouter)
 
 //学習時間
 app.use('/usage', usageRouter);
+
+//共有機能
+app.use('/share', shareRouter);
 
 app.listen(PORT, () => {
   console.log(`Backend started. Listening on port ${PORT}`);

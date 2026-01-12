@@ -249,7 +249,7 @@ export default function ResultPage() {
             <CardContent>
               <Typography variant="h5" className="text-indigo-700 font-semibold">
                 {responseData.missionData.title}
-                <MissionDifficultyBadge difficulty={responseData.missionData.difficulty.name} />
+                <MissionDifficultyBadge difficulty={responseData.missionData.difficulty.name} star={responseData.missionData.star}/>
               </Typography>
               <Typography className="mt-2 text-gray-600">{responseData.missionData.detail}</Typography>
             </CardContent>

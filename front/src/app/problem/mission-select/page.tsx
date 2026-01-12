@@ -84,7 +84,7 @@ export default function MissionSelectPage() {
       >
         <CardContent className="p-6">
           <div className="flex gap-2 mb-4">
-            <MissionDifficultyBadge difficulty={mission.difficulty.name} />
+            <MissionDifficultyBadge difficulty={mission.difficulty.name} star={mission.star} />
             <MissionStatusBadge status={mission.missionProgresses[0].status} />
           </div>
 

@@ -189,7 +189,7 @@ export default function HomePage() {
                   <MissionTypeBadge type={mission.type} />
 
                   {/* ✅ 難易度バッジをコンポーネント化 */}
-                  <MissionDifficultyBadge difficulty={mission.difficulty.name} />
+                  <MissionDifficultyBadge difficulty={mission.difficulty.name} star={mission.star} />
                 </div>
               </Card>
             );

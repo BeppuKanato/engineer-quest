@@ -29,6 +29,7 @@ type Props = {
   languages: MISSION_EXAM_LANGUAGE[];
   userCode: string;
   isEvaluating: boolean;
+  isSharing: boolean;
   aiResponseData: MissionExamAIResponse | null;
   hasPassed: boolean;
   children: React.ReactNode; // 出題内容
@@ -38,6 +39,7 @@ type Props = {
   onChangeCode: (v: string) => void;
   onEvaluate: () => void;
   onGoResult?: () => void;
+  onShare: () => void;
 };
 
 export const BaseExamLayout = ({
@@ -46,6 +48,7 @@ export const BaseExamLayout = ({
   languages,
   userCode,
   isEvaluating,
+  isSharing,
   aiResponseData,
   hasPassed,
   children,
@@ -55,6 +58,7 @@ export const BaseExamLayout = ({
   onChangeCode,
   onEvaluate,
   onGoResult,
+  onShare,
 }: Props) => {
   return (
     <Box sx={{ maxWidth: "1200px", mx: "auto", p: 4, display: "flex", flexDirection: "column", gap: 4 }}>
@@ -120,7 +124,7 @@ export const BaseExamLayout = ({
                 fullWidth
                 value={judgeType || ""}
                 onChange={(e) => setJudgeType(e.target.value as JUDGE_TYPE)}
-                disabled={isEvaluating}
+                disabled={isEvaluating || isSharing}
               >
                 <MenuItem value={JUDGE_TYPE.WITHOUT_FEEDBACK}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
@@ -409,15 +413,26 @@ export const BaseExamLayout = ({
 
             {/* リザルト画面ボタン */}
             {hasPassed && onGoResult && (
-              <Box mt={4} display="flex" justifyContent="center">
+              <Box mt={4} display="flex" justifyContent="center" gap={2}>
                 <MUIButton
                   variant="contained"
                   color="primary"
                   size="large"
                   onClick={onGoResult}
+                  disabled={!isSharing}
                   sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
                 >
                   📊 リザルト画面へ
+                </MUIButton>
+                <MUIButton
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  onClick={onShare}
+                  disabled={!isSharing}
+                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
+                >
+                  結果を共有
                 </MUIButton>
               </Box>
             )}

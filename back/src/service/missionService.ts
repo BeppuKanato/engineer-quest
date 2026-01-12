@@ -55,6 +55,19 @@ export const fetchMission = async(id: string, select: object) => {
     }
 }
 
+import { Prisma } from "@prisma/client";
+
+export const fetchMissions = async (
+  args: Prisma.MissionFindManyArgs
+) => {
+  try {
+    return await prisma.mission.findMany(args);
+  } catch (error) {
+    console.log(`fetchMissions error`, error);
+    return null;
+  }
+};
+
 /**
  * @abstract ミッション試験の採点
  * @summary ミッション試験のコードをAIで採点する
