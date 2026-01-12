@@ -88,11 +88,12 @@ model Mission {
   title        String
   detail       String
   component    String
-  experience   Int
+  experience   Int @default(1)
   type         MissionType
   slug         String @unique
 
   difficulty Difficulty @relation(fields: [difficultyId], references: [id])
+  star       Int
   client     Character  @relation("MissionClient", fields: [clientId], references: [id])
   steps      Step[]
   exam      MissionExam?
