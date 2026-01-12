@@ -9,6 +9,7 @@
         "experience": 100,
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
+        "star": 1,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -188,6 +189,7 @@
         "experience": 120,
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
+        "star": 1,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -368,6 +370,7 @@
         "experience": 140,
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
+        "star": 1,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -551,6 +554,7 @@
         "experience": 160,
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
+        "star": 1,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -730,6 +734,7 @@
         "experience": 200,
         "clientSlug": "yamada-senpai",
         "difficultySlug": "shokyu",
+        "star": 1,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -1038,7 +1043,8 @@
         "component": "Java_Mission_6",
         "experience": 220,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 2,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -1316,7 +1322,8 @@
         "component": "Java_Mission_7",
         "experience": 260,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 2,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -1509,7 +1516,8 @@
         "component": "Java_Sub_1",
         "experience": 80,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 2,
         "beforeSentences": [],
         "afterSentences": [],
         "steps": [
@@ -1565,7 +1573,8 @@
         "component": "Java_Mission_8",
         "experience": 260,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 2,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -1818,7 +1827,8 @@
         "component": "Java_Mission_9",
         "experience": 300,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -2071,7 +2081,8 @@
         "component": "Java_Sub_2",
         "experience": 120,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
             {
             "speakerSlug": "yamada-senpai",
@@ -2224,7 +2235,8 @@
         "component": "Java_Promotion_1",
         "experience": 350,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "steps": [],
         "exams": [
             {
@@ -2320,7 +2332,8 @@
         "component": "Java_Mission_10",
         "experience": 300,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -2566,7 +2579,8 @@
         "component": "Java_Mission_11",
         "experience": 340,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -2773,7 +2787,8 @@
         "component": "Java_Sub_3",
         "experience": 160,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [],
         "afterSentences": [],
         "steps": [
@@ -2829,7 +2844,8 @@
         "component": "Java_Mission_12",
         "experience": 360,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -3072,7 +3088,8 @@
         "component": "Java_Mission_13",
         "experience": 420,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 3,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -3320,7 +3337,8 @@
         "component": "Java_Promotion_2",
         "experience": 420,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "steps": [],
         "exams": [
             {
@@ -3404,7 +3422,8 @@
         "component": "Java_Mission_14",
         "experience": 480,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -3763,7 +3782,8 @@
         "component": "Java_Mission_15",
         "experience": 520,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -4060,7 +4080,8 @@
         "component": "Java_Mission_16",
         "experience": 260,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -4294,7 +4315,8 @@
         "component": "Java_Mission_17",
         "experience": 600,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -4501,7 +4523,8 @@
         "component": "Java_Mission_18",
         "experience": 680,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 4,
         "beforeSentences": [
         {
             "speakerSlug": "yamada-senpai",
@@ -4754,7 +4777,8 @@
         "component": "Java_Promotion_3",
         "experience": 600,
         "clientSlug": "yamada-senpai",
-        "difficultySlug": "chukyu",
+        "difficultySlug": "shokyu",
+        "star": 5,
         "steps": [],
         "exams": [
             {
