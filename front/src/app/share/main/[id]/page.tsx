@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Box,
   Card,
@@ -27,7 +27,7 @@ import { SharedMissionMainResponse } from "@/type";
 
 export default function ShareMainPage() {
   const router = useRouter();
-  const {examId} = useParams();
+  const {id} = useParams();
 
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<SharedMissionMainResponse | null>(null);
@@ -47,19 +47,19 @@ export default function ShareMainPage() {
 
   /* fetch */
   useEffect(() => {
-    if (!user || !examId) return;
+    if (!user || !id) return;
 
     const fetchData = async () => {
       const res = await fetchWithUserId(user, "/share/main", {
         method: "POST",
-        body: JSON.stringify({ examId }),
+        body: JSON.stringify({ examId: id }),
       });
       const json: SharedMissionMainResponse = await res.json();
       setData(json);
     };
 
     fetchData();
-  }, [user, examId]);
+  }, [user, id]);
 
   if (!data) return null;
 
