@@ -243,9 +243,6 @@ export type MissionResultResponse = {
         rank: {
             name: string,
         },
-        levelRequirement: {
-            requiredExperience: number
-        }
     },
     examResult: {
         point: number,
