@@ -203,9 +203,13 @@ export type HomePageResponse = {
         rank: {
             name: string,
         },
-        levelRequirement: {
-            requiredExperience: number
-        }
+    },
+    experienceStatus: {
+        currentLevel: number,
+        currentExp: number,
+        requiredExpForNextLevel: number,
+        remainningExp: number,
+        progressRate: number
     }
 }
 

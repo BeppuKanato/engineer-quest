@@ -6,11 +6,11 @@ import { fetchUser, updateUser } from "../service/userService";
 import { fetchMissionProgress, updateMissionProgress } from "../service/missionProgressService";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
 import { createExperienceLog, fetchExperienceLogs } from "../service/experienceLogService";
-import { fetchLevelupRequirement } from "../service/levelupRequirementService";
 import { fetchUsageTime } from "../service/usageTimeService";
 import { checkAndUpdateRank } from "../service/rankService";
 import { AuthRequest } from "../middleware/verifyToken";
 import { createSharedMissionExamProgress } from "../service/shareMissionExamService";
+import { requiredExperienceForLevel } from "../domain/level";
 /**
  * @abstract ミッション選択API
  * @summary ユーザが受け入れたミッションの一覧を取得する
@@ -575,6 +575,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
 export const missionResultController = async (req: AuthRequest, res: Response) => {
   const { missionId } = req.body;
   const userId = req.user!.uid;
+
   try {
     // --- ミッションデータ取得 ---
     const missionData = await fetchMission(missionId, {
@@ -639,17 +640,15 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
 
     // --- ユーザ情報 ---
     let user = await fetchUser(userId, {
-      name: true,
-      level: true,
-      experience: true,
-      rank: { select: { name: true } },
-      levelRequirement: { select: { requiredExperience: true } },
+        name: true,
+        level: true,
+        experience: true,
+        rank: { select: { name: true } },
     }) as {
-      name: string,
-      level: number,
-      experience: number,
-      rank: { name: string } | null,
-      levelRequirement: { requiredExperience: number } | null,
+        name: string;
+        level: number;
+        experience: number;
+        rank: { name: string } | null;
     } | null;
 
     if (!user) return res.status(500).json({ error: "ユーザデータの取得に失敗しました" });
@@ -663,44 +662,69 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
     ) as { id: string } | null;
 
     let experienceUpdate: {
-      oldLevel: number;
-      newLevel: number;
-      oldExperience: number;
-      gainedExperience: number;
-      levelUps: { level: number; requiredExperience: number }[];
+        oldLevel: number;
+        newLevel: number;
+        oldExperience: number;
+        gainedExperience: number;
+        levelUps: { level: number; requiredExperience: number }[];
     } | null = null;
 
     // --- 経験値加算・レベルアップ処理 ---
     if (missionProgress) {
-        const experienceLogs = await fetchExperienceLogs(userId, { 
-            missionProgressId: missionProgress.id
-        }, { id: true, experience: true }) as { id: string; experience: number }[] | null;
+        const experienceLogs = await fetchExperienceLogs(
+            userId,
+            { missionProgressId: missionProgress.id },
+            { id: true, experience: true }
+        ) as { id: string; experience: number }[] | null;
 
+        // 二重加算防止
         if (!experienceLogs || experienceLogs.length === 0) {
             const experienceToAdd = missionData.experience ?? 0;
-            const oldExperience = user.experience;
-            let newExperience = oldExperience + experienceToAdd;
+
             const oldLevel = user.level;
+            const oldExperience = user.experience;
+
             let newLevel = oldLevel;
-            let requiredExp = user.levelRequirement?.requiredExperience ?? 0;
-            const levelUps: { level: number; requiredExperience: number }[] = [{ level: oldLevel, requiredExperience: requiredExp }];
-            //レベルアップ判定
-            while (newExperience >= requiredExp && requiredExp > 0) {
-            newExperience -= requiredExp;
-            newLevel += 1;
+            let newExperience = oldExperience + experienceToAdd;
 
-            const nextLevelReq = await fetchLevelupRequirement(newLevel, { requiredExperience: true }) as { requiredExperience: number } | null;
-            if (!nextLevelReq || nextLevelReq.requiredExperience <= 0) break;
+            const levelUps: { level: number; requiredExperience: number }[] = [];
 
-            levelUps.push({ level: newLevel, requiredExperience: nextLevelReq.requiredExperience });
-            requiredExp = nextLevelReq.requiredExperience;
+            // レベルアップ判定（計算式）
+            while (true) {
+                const requiredExp = requiredExperienceForLevel(newLevel);
+
+                if (requiredExp <= 0) break;
+                if (newExperience < requiredExp) break;
+
+                newExperience -= requiredExp;
+                newLevel += 1;
+
+                levelUps.push({
+                    level: newLevel,
+                    requiredExperience: requiredExperienceForLevel(newLevel),
+                });
             }
 
-            // DB更新
-            await updateUser(userId, { level: newLevel, experience: newExperience });
-            await createExperienceLog(userId, missionProgress.id, experienceToAdd);
+            // ユーザ更新
+            await updateUser(userId, {
+                level: newLevel,
+                experience: newExperience,
+            });
 
-            experienceUpdate = { oldLevel, newLevel, oldExperience, gainedExperience: experienceToAdd, levelUps };
+            // 経験値ログ（加算量のみ記録）
+            await createExperienceLog(
+                userId,
+                missionProgress.id,
+                experienceToAdd
+            );
+
+            experienceUpdate = {
+                oldLevel,
+                newLevel,
+                oldExperience,
+                gainedExperience: experienceToAdd,
+                levelUps,
+            };
         }
         //ミッション完了処理
         await updateMissionProgress(missionProgress.id, {
@@ -715,49 +739,49 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
     
     // 更新ユーザ情報再取得
     user = await fetchUser(userId, {
-    name: true,
-    level: true,
-    experience: true,
-    rank: { select: { name: true } },
-    levelRequirement: { select: { requiredExperience: true } },
+        name: true,
+        level: true,
+        experience: true,
+        rank: { select: { name: true } },
     }) as typeof user;
 
-    // --- 進行中ミッションがなければ既存データからバー表示用データ作成 ---
+    // 進行中ミッションがなかった場合
     if (!experienceUpdate) {
-      const oldLevel = user.level;
-      const oldExperience = user.experience;
-      const requiredExp = user.levelRequirement?.requiredExperience ?? 0;
-      experienceUpdate = {
-        oldLevel,
-        newLevel: oldLevel,
-        oldExperience,
-        gainedExperience: 0,
-        levelUps: [{ level: oldLevel, requiredExperience: requiredExp }],
-      };
+        const oldLevel = user.level;
+        const oldExperience = user.experience;
+
+        experienceUpdate = {
+            oldLevel,
+            newLevel: oldLevel,
+            oldExperience,
+            gainedExperience: 0,
+            levelUps: [
+            {
+                level: oldLevel,
+                requiredExperience: requiredExperienceForLevel(oldLevel),
+            },
+            ],
+        };
     }
-
-
     // --- リターンデータ ---
     const returnData = {
-      missionData,
-      user,
-      examResult,
-      dayUsagetime,
-      weekUsagetime,
-      totalUsagetime,
-      experienceUpdate,
-      updatedRank
+        missionData,
+        user,
+        examResult,
+        dayUsagetime,
+        weekUsagetime,
+        totalUsagetime,
+        experienceUpdate,
+        updatedRank
     };
 
     res.status(200).json(returnData);
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "リザルト処理中にエラーが発生しました" });
-  }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "リザルト処理中にエラーが発生しました" });
+    }
 };
-
-
 
 /**
  * @abstract ミッション開始API

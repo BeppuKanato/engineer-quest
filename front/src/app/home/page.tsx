@@ -116,10 +116,7 @@ export default function HomePage() {
               </div>
               <LinearProgress
                 variant="determinate"
-                value={
-                  (responseData.user.experience /
-                    responseData.user.levelRequirement.requiredExperience) * 100
-                }
+                value={responseData.experienceStatus.progressRate * 100}
                 className="w-24 h-2 rounded-full"
               />
             </>

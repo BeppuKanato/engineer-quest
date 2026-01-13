@@ -106,6 +106,7 @@ export default function MissionExamPage() {
   //共有ボタン
   const handleShare = async() => {
     if (!responseData || !user) return;
+    setIsSharing(true);
 
     const res = await fetchWithUserId(user, "/share/create", {
       method: "POST",
@@ -135,7 +136,7 @@ export default function MissionExamPage() {
         severity: "error"
       })
     }
-    setIsSharing(true);
+    setIsSharing(false);
   }
 
   // ローディング状態
