@@ -160,7 +160,7 @@ export default function ShareSelectPage() {
                   <Button
                     variant="contained"
                     onClick={() =>
-                      router.push(`/share/main?examId=${m.exam?.id}`)
+                      router.push(`/share/main/${m.exam?.id}`)
                     }
                   >
                     共有コードを見る
