@@ -1,7 +1,7 @@
 import e, { Request, Response } from "express";
 import { fetchMission, getAcceptedMissions, missionExamJudgeService } from "../service/missionService";
 import { fetchStep } from "../service/stepService";
-import { createMissionExamProgress, fetchMissionExamProgress } from "../service/missionExamProgressService";
+import { createMissionExamProgress, fetchLatesMissionExamProgress, fetchMissionExamProgress } from "../service/missionExamProgressService";
 import { fetchUser, updateUser } from "../service/userService";
 import { fetchMissionProgress, updateMissionProgress } from "../service/missionProgressService";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
@@ -10,6 +10,7 @@ import { fetchLevelupRequirement } from "../service/levelupRequirementService";
 import { fetchUsageTime } from "../service/usageTimeService";
 import { checkAndUpdateRank } from "../service/rankService";
 import { AuthRequest } from "../middleware/verifyToken";
+import { createSharedMissionExamProgress } from "../service/shareMissionExamService";
 /**
  * @abstract ミッション選択API
  * @summary ユーザが受け入れたミッションの一覧を取得する
@@ -446,13 +447,20 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
 
     if (!missionProgress) {
         console.log("進行中のミッションが見つかりません");
-        return res.status(500).json({ error: "進行中のミッションが見つかりません" });
+        return res.status(500).json({
+            score: 60,
+            reson: {
+                "good": [],
+                "bad": []
+            },
+            feedback: "エラーが発生しました。進行中のミッションが見つかりません。開発者に連絡してください",
+        });
     }
 
     const process = await createMissionExamProgress(
         examId,
         userId,
-        missionProgress.id, // TODO: 実際には missionProgress.id を使う？
+        missionProgress.id,
         {
             score: aiJudge.score,
             isPassed,
@@ -460,12 +468,20 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
             bad: aiJudge.reason.bad,
             feedback: aiJudge.feedback,
         },
-        judgeType as JudgeType
+        judgeType as JudgeType,
+        userCode as { [key in MissionExamLanguages]?: string }
     );
 
     if (!process) {
         console.log("試験結果保存時にエラー");
-        return res.status(500).json({ error: "試験結果保存時にエラーが発生しました" });
+        return res.status(500).json({
+            score: 60,
+            reson: {
+                "good": [],
+                "bad": []
+            },
+            feedback: "試験の結果を保存できませんでした。時間をおいてお試しください",
+        });
     }
 
     const responseData: {
@@ -567,6 +583,7 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
       experience: true,
       steps: { select: { title: true }, orderBy: { order: 'asc' } },
       difficulty: { select: { name: true } },
+      star: true,
       afterSentences: {
         select: {
           speaker: { select: { name: true, imagePath: true } },
@@ -858,4 +875,28 @@ export const completeStepController = async(req: AuthRequest, res: Response) => 
     }
 
     return res.status(200).json({result: "success"})
+}
+
+export const shareMissionExamController = async(req: AuthRequest, res: Response) => {
+    const {examId} = req.body;
+    const userId = req.user!.uid;
+    console.log("動作確認");
+    //最新の試験結果を共有する
+    const latest = await fetchLatesMissionExamProgress(userId, examId, {
+        id: true
+    }) as {id: string};
+
+    //共有済み
+    if (!latest) {
+        return res.sendStatus(404);
+    }
+
+    const result = await createSharedMissionExamProgress(userId, latest.id);
+
+    //共有に失敗
+    if (!result) {
+        return res.sendStatus(409);
+    }
+
+    return res.sendStatus(200);
 }

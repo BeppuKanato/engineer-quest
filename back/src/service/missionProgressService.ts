@@ -146,7 +146,7 @@ export const createMissionProgress =async(missionId: string, userId: string) => 
         return progress
     }
     catch(error) {
-        console.log(`${missionId}を進行中ミッションに追加`)
+        console.log(`${missionId}を進行中ミッションに追加中にエラー${error}`)
         return null;
     }
 }

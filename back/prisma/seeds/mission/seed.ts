@@ -93,6 +93,7 @@ export async function seedMissions(prisma: PrismaClient) {
       client: { connect: { slug: mission.clientSlug } },
       // Slugでconnect
       difficulty: { connect: { slug: mission.difficultySlug } },
+      star: mission.star ?? 1
     };
 
     let missionId: string;

@@ -3,7 +3,7 @@ import { fetchUser } from "../service/userService";
 
 export const loginController = async(req: Request, res: Response) => {
     const { userId } = req.body;
-
+    console.log("ログインテスト", userId);
     // const user = await getUser(name);
     const user = await fetchUser(userId, {
         name: true

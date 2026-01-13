@@ -20,16 +20,27 @@ import { NavBar } from "@/app/component/common/navBar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { fetchWithoutUserId, fetchWithUserId } from "@/utils/fetchers";
+import { Alert, Snackbar } from "@mui/material";
 
 export default function MissionExamPage() {
   const [responseData, setResponseData] = useState<MissionExamRepsonse | null>(null);
   const [codes, setCodes] = useState<{ [key in MISSION_EXAM_LANGUAGE]?: string }>({});
   const [currentLanguage, setCurrentLanguage] = useState<MISSION_EXAM_LANGUAGE>(MISSION_EXAM_LANGUAGE.HTML);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [aiResponseData, setAIResponseData] = useState<MissionExamAIResponse | null>(null);
   const [hasPassed, setHasPassed] = useState(false);
   const [judgeType, setJudgeType] = useState<JUDGE_TYPE>(JUDGE_TYPE.WITH_FEEDBACK);
 
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "warning" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success"
+  });
   const router = useRouter();
   const { id } = useParams();
   const startTime = useRef(new Date());
@@ -92,6 +103,41 @@ export default function MissionExamPage() {
     setIsEvaluating(false);
   };
 
+  //共有ボタン
+  const handleShare = async() => {
+    if (!responseData || !user) return;
+
+    const res = await fetchWithUserId(user, "/share/create", {
+      method: "POST",
+      body: JSON.stringify({
+        examId: responseData.exam.id
+      })
+    });
+
+    if (res.ok) {
+      setSnackbar({
+        open: true,
+        message: "結果を共有しました🎉",
+        severity: "success"
+      });
+    }
+    else if (res.status === 404) {
+      setSnackbar({
+        open: true,
+        message: "すでに共有されています",
+        severity: "warning"
+      })
+    }
+    else {
+      setSnackbar({
+        open: false,
+        message: "共有に失敗しました",
+        severity: "error"
+      })
+    }
+    setIsSharing(true);
+  }
+
   // ローディング状態
   if (!responseData) {
     return (
@@ -127,6 +173,7 @@ export default function MissionExamPage() {
         currentLanguage={currentLanguage}
         languages={responseData.exam.language}
         isEvaluating={isEvaluating}
+        isSharing={isSharing}
         aiResponseData={aiResponseData}
         hasPassed={hasPassed}
         judgeType={judgeType}
@@ -143,6 +190,7 @@ export default function MissionExamPage() {
             "push"
           )
         }
+        onShare={handleShare}
       >
         {examType === MISSION_EXAM_TPYE.REPRODUCTION && (
           <ObjectScreen componentName={responseData.exam.component} />
@@ -160,6 +208,20 @@ export default function MissionExamPage() {
           />
         )}
       </BaseExamLayout>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({...snackbar, open: false})}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+      >
+        <Alert
+          security={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

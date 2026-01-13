@@ -1,4 +1,4 @@
-import { JudgeType } from "@prisma/client"
+import { JudgeType, MissionExamLanguages, Prisma } from "@prisma/client"
 import { prisma } from "../lib/prisma"
 
 /**
@@ -40,29 +40,67 @@ import { prisma } from "../lib/prisma"
  * @param result
  * @returns 
  */
-export const createMissionExamProgress = async (examId: string, userId: string, progressId: string, result: {score: number, isPassed: boolean, good: string[], bad: string[], feedback: string | null}, judgeType: JudgeType) => {
-    try {
-        const progress = await prisma.missionExamProgress.create({
-            data: {
-                examId: examId,
-                userId: userId,
-                progressId: progressId,
-                point: result.score,
-                isPassed: result.isPassed,
-                good: result.good,
-                bad: result.bad,
-                feedback: result.feedback,
-                judgeType: judgeType,
-            }
-        })
+export const createMissionExamProgress = async (
+  examId: string,
+  userId: string,
+  progressId: string,
+  result: {
+    score: number;
+    isPassed: boolean;
+    good: string[];
+    bad: string[];
+    feedback: string | null;
+  },
+  judgeType: JudgeType,
+  code: { [key in MissionExamLanguages]?: string }
+) => {
+  console.log("コード保存用データ:", code);
+  try {
+    const MAX_LENGTH = 10000;
+    //結果保存
+    return await prisma.$transaction(async (tx) => {
+      const progress = await tx.missionExamProgress.create({
+        data: {
+          examId,
+          userId,
+          progressId,
+          point: result.score,
+          isPassed: result.isPassed,
+          good: result.good,
+          bad: result.bad,
+          feedback: result.feedback,
+          judgeType,
+        },
+      });
 
-        return progress
-    }
-    catch(error) {
-        console.log(`${examId}の状況の追加に失敗`)
-        return null;
-    }
-}
+      //コード保存
+      const userCodes: Prisma.MissionExamUserCodeCreateManyInput[] = [];
+
+      for (const language of Object.keys(code) as MissionExamLanguages[]) {
+        const value = code[language];
+        if (!value || value.length > MAX_LENGTH) continue;
+
+        userCodes.push({
+          examProgressId: progress.id,
+          language,
+          code: value,
+        });
+      }
+
+      if (userCodes.length > 0) {
+        await tx.missionExamUserCode.createMany({
+          data: userCodes,
+        });
+      }
+
+      return progress;
+    });
+  } catch (error) {
+    console.error(`${examId} の試験進捗作成に失敗`, error);
+    return null;
+  }
+};
+
 
 /**
  * 特定の missionId に対応する MissionExamProgress を取得
@@ -86,6 +124,32 @@ export const fetchMissionExamProgress = async (userId: string, examId: string, s
     return result;
   } catch (error) {
     console.log(`Service/missionExamProgressService/fetchMissionExamProgressでエラー\n${error}`);
+    return null;
+  }
+};
+
+/**
+ * 特定の missionId に対応する 最新のMissionExamProgress を取得
+ * 
+ * @param missionId 対象のミッションID
+ * @param select Prismaのselect構文を指定（取得フィールドを制御）
+ */
+export const fetchLatesMissionExamProgress = async (userId: string, examId: string, select: object) => {
+  try {
+    const result = await prisma.missionExamProgress.findFirst({
+      where: {
+        userId: userId,
+        examId: examId,
+      },
+      select,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.log(`Service/missionExamProgressService/fetchLatestMissionExamProgressでエラー\n${error}`);
     return null;
   }
 };

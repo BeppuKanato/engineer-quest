@@ -3,38 +3,40 @@
  */
 export type DifficultyLevel = "初級" | "中級" | "上級";
 
+const renderStars = (star: number) => "⭐".repeat(Math.max(1, Math.min(star, 5)));
+
 /**
  * 難易度ごとの設定（色・背景・ラベル・星）
  */
-export const getDifficultyConfig = (difficulty: DifficultyLevel | string) => {
+export const getDifficultyConfig = (difficulty: DifficultyLevel | string, star: number) => {
   switch (difficulty) {
     case "初級":
       return {
         color: "#16a34a", // green-600
         bg: "#dcfce7",    // green-100
         label: "初級",
-        stars: "⭐",
+        stars: renderStars(star),
       };
     case "中級":
       return {
         color: "#ca8a04", // yellow-600
         bg: "#fef9c3",    // yellow-100
         label: "中級",
-        stars: "⭐⭐",
+        stars: renderStars(star),
       };
     case "上級":
       return {
         color: "#dc2626", // red-600
         bg: "#fee2e2",    // red-100
         label: "上級",
-        stars: "⭐⭐⭐",
+        stars: renderStars(star),
       };
     default:
       return {
         color: "#4b5563", // gray-600
         bg: "#f3f4f6",    // gray-100
         label: "未設定",
-        stars: "⭐",
+        stars: renderStars(star),
       };
   }
 };
@@ -42,8 +44,8 @@ export const getDifficultyConfig = (difficulty: DifficultyLevel | string) => {
 /**
  * 難易度バッジの見た目を提供するコンポーネント
  */
-export const MissionDifficultyBadge = ({ difficulty }: { difficulty: DifficultyLevel | string }) => {
-  const { color, bg, label, stars } = getDifficultyConfig(difficulty);
+export const MissionDifficultyBadge = ({ difficulty, star }: { difficulty: DifficultyLevel | string, star: number }) => {
+  const { color, bg, label, stars } = getDifficultyConfig(difficulty, star);
 
   return (
     <div

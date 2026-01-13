@@ -1,6 +1,12 @@
 export enum JUDGE_TYPE {
     WITH_FEEDBACK = "WITH_FEEDBACK",
-    WITHOUT_FEEDBACK = "WITHOUT_FEEDBACK"
+    WITHOUT_FEEDBACK = "WITHOUT_FEEDBACK",
+    PHILANTHROPIST = "PHILANTHROPIST",
+    ACHIEVER = "ACHIEVER",
+    FREE_SPIRIT = "FREE_SPIRIT",
+    SOCIALIZER = "SOCIALIZER",
+    PLAYER = "PLAYER",
+    DISRUPTOR = "DISRUPTOR"
 }
 
 export enum MISSION_TYPE {
@@ -33,6 +39,7 @@ export type MissionSelectResponse = {
     title: string;
     detail: string;
     type: MISSION_TYPE;
+    star: number;
     client: {
         id: string,
         name: string,
@@ -168,6 +175,7 @@ export type HomePageResponse = {
         title: string,
         detail: string,
         type: MISSION_TYPE,
+        star: number,
         client: {
             id: string,
             name: string,
@@ -206,6 +214,7 @@ export type MissionResultResponse = {
         title: string,
         detail: string,
         experience: number,
+        star: number,
         steps: {
             title: string
         }[],
@@ -256,3 +265,52 @@ export type MissionResultResponse = {
     }
     updatedRank: string | null;
 }
+
+export type SharedMissionSelectItem = {
+  title: string;
+  detail: string;
+  star: number;
+  type: MISSION_TYPE;
+  difficulty: {
+    name: string;
+  };
+  exam: {
+    id: string;
+    language: MISSION_EXAM_LANGUAGE[];
+  } | null;
+};
+
+export type SharedMissionUserCode = {
+  code: string;
+  language: MISSION_EXAM_LANGUAGE;
+  fileName: string | null;
+};
+
+export type SharedMissionItem = {
+  user: {
+    name: string;
+  };
+  examProgress: {
+    point: number;
+    good: string[];
+    bad: string[];
+    feedback: string | null;
+    userCodes: {
+      code: string;
+      language: string;
+      fileName?: string | null;
+    }[];
+  };
+};
+
+export type SharedMissionStats = {
+  count: number;
+  average: number;
+  max: number;
+  min: number;
+};
+
+export type SharedMissionMainResponse = {
+  sharedMissions: SharedMissionItem[];
+  stats: SharedMissionStats;
+};

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, Target, User, ArrowLeft } from "lucide-react";
+import { Home, Target, User, ArrowLeft, Share, ShareIcon } from "lucide-react";
 
 interface NavBarProps {
   showBackButton?: boolean; // 前のページへ戻るボタンを表示するか
@@ -45,6 +45,13 @@ export const NavBar: React.FC<NavBarProps> = ({ showBackButton = false }) => {
         >
           <User className={iconClass} />
           プロフィール
+        </Link>
+        <Link
+          href="/share/select"
+          className="flex flex-col items-center text-sm text-gray-600 hover:text-blue-600"
+        >
+          <ShareIcon className={iconClass} />
+          コード共有
         </Link>
       </div>
     </nav>

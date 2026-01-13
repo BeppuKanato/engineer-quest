@@ -4,7 +4,6 @@ import { AuthRequest } from "../middleware/verifyToken";
 
 export const ensureUserExitController = async (req: AuthRequest, res: Response) => {
     const uid = req.user!.uid;
-
     try {
         //idがuidのユーザを取得
         let user = await prisma.user.findUnique({
@@ -19,13 +18,14 @@ export const ensureUserExitController = async (req: AuthRequest, res: Response) 
                     level: 1, 
                     experience: 0,
                     //初期のランクのID
-                    rankId: "ee7d33f0-cd78-4f55-bf15-cb065d37e558"
+                    rankId: "1fea258a-2708-4e5c-862e-cef83dcf2d62"
                 },
             });
         }
         res.status(200).json({ok: true});
     }
-    catch {
+    catch(error) {
+        console.log("ユーザ確認・作成時にエラーが発生しました" + error);
         res.status(500).json({ok: false});
     }
 }
