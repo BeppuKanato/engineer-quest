@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   Box,
   Card,
@@ -24,12 +24,10 @@ import { fetchWithUserId } from "@/utils/fetchers";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { SharedMissionMainResponse } from "@/type";
-import { Target } from "lucide-react";
 
 export default function ShareMainPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const examId = searchParams.get("examId");
+  const {examId} = useParams();
 
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<SharedMissionMainResponse | null>(null);
