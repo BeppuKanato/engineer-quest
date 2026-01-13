@@ -3,6 +3,7 @@ import { getAcceptableMissions } from "../service/missionService";
 import { fetchUser } from "../service/userService";
 import { createMissionProgress } from "../service/missionProgressService";
 import { AuthRequest } from "../middleware/verifyToken";
+import { requiredExperienceForLevel } from "../domain/level";
 
 /**
  * @abstract ホーム画面表示API
@@ -49,31 +50,50 @@ import { AuthRequest } from "../middleware/verifyToken";
  * @param res 
  */
 export const homeController = async (req: AuthRequest, res: Response) => {
-    const userId = req.user!.uid;
-    const acceptableMission = await getAcceptableMissions(userId)
-    const user = await fetchUser(userId, {
-        name: true,
-        level: true,
-        experience: true,
-        rank: {
-            select: {
-                name: true,
-            },
-        },
-        levelRequirement: {
-            select: {
-                requiredExperience: true,
-            }
-        }
-    });
+  const userId = req.user!.uid;
 
-    if (acceptableMission !== null) {
-        res.status(200).json({acceptableMission, user})
+  const acceptableMission = await getAcceptableMissions(userId);
+  const user = await fetchUser(userId, {
+    name: true,
+    level: true,
+    experience: true,
+    rank: {
+      select: { name: true },
+    },
+  }) as {
+    name: string,
+    level: number,
+    experience: number,
+    rank: {
+        name: string
     }
-    else {
-        res.status(500).json({error: "ミッションデータ取得時にエラー、もしくは受注可能なミッションがありません"})
-    }
-}
+  };
+
+  if (!user) {
+    return res.status(500).json({ error: "ユーザ取得失敗" });
+  }
+
+  // 次のレベルに必要な経験値
+  const requiredExpForNextLevel = requiredExperienceForLevel(user.level);
+
+  // 残り経験値
+  const remainingExp = Math.max(requiredExpForNextLevel - user.experience, 0);
+
+  res.status(200).json({
+    acceptableMission,
+    user,
+    experienceStatus: {
+      currentLevel: user.level,
+      currentExp: user.experience,
+      requiredExpForNextLevel,
+      remainingExp,
+      progressRate:
+        requiredExpForNextLevel > 0
+          ? user.experience / requiredExpForNextLevel
+          : 0,
+    },
+  });
+};
 
 /**
  * @abstract ミッション受注API

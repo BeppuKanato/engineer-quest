@@ -12,7 +12,6 @@ const hexadFeedbackInstructions: { [key in JudgeType]: string } = {
 };
 
 export const examJudgeWithFeedback = (missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[], judgeType: JudgeType): {contents: string, systemInstruction: string} => {
-   console.log(`judgeType: ${judgeType}, feedbackInstruction: ${hexadFeedbackInstructions[judgeType as JudgeType]}`);
     return {
         contents :`
             サンプルコードと比較して、ユーザコードを100点満点で採点してください。

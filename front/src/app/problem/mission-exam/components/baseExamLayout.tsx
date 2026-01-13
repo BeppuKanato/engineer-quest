@@ -252,7 +252,7 @@ export const BaseExamLayout = ({
                 color="primary"
                 fullWidth
                 onClick={onEvaluate}
-                disabled={!userCode.trim() || isEvaluating}
+                disabled={!userCode.trim() || isEvaluating || isSharing}
               >
                 {isEvaluating ? "🤖 AI評価中..." : "🤖 AI評価を受ける"}
               </MUIButton>
@@ -419,7 +419,7 @@ export const BaseExamLayout = ({
                   color="primary"
                   size="large"
                   onClick={onGoResult}
-                  disabled={!isSharing}
+                  disabled={isSharing}
                   sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
                 >
                   📊 リザルト画面へ
@@ -429,7 +429,7 @@ export const BaseExamLayout = ({
                   color="primary"
                   size="large"
                   onClick={onShare}
-                  disabled={!isSharing}
+                  disabled={isSharing}
                   sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
                 >
                   結果を共有

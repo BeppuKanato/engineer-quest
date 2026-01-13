@@ -141,8 +141,6 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
         }
         //openai API 呼び出し
         else if (aiModel === "openai") {
-            console.log("OpnenAIで採点実行")
-            console.log("judgeType:", judgeType);
             const ai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
             });
