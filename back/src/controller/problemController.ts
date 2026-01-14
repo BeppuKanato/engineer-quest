@@ -626,15 +626,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
         judgeType: true,
         createdAt: true
     })
-    // --- 試験結果 ---
-    // const examResult = await fetchUser(userId, {
-    //   missionExamProgress: {
-    //     where: {missionId: missionId},
-    //     select: { point: true, isPassed: true, feedback: true, createdAt: true },
-    //     take: 5,
-    //     orderBy: { createdAt: 'desc' },
-    //   },
-    // });
 
     if (!examResult) return res.status(500).json({ error: "ユーザの試験結果の取得に失敗しました" });
 
@@ -651,7 +642,7 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
         rank: { name: string } | null;
     } | null;
 
-    if (!user) return res.status(500).json({ error: "ユーザデータの取得に失敗しました" });
+    if (!user) return res.status(409).json({error: "ユーザデータが見つかりません。"});
 
     // --- 進行中ミッション確認 ---
     const missionProgress = await fetchMissionProgress(
@@ -661,77 +652,86 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
       { id: true }
     ) as { id: string } | null;
 
-    let experienceUpdate: {
+    if (!missionProgress) return res.status(409).json({error: "進行中のミッションが見つかりません"});
+    
+    type ExperienceUpdate = {
         oldLevel: number;
         newLevel: number;
         oldExperience: number;
-        gainedExperience: number;
-        levelUps: { level: number; requiredExperience: number }[];
-    } | null = null;
+        newExperience: number;
+
+        oldLevelRequiredExp: number;
+        newLevelRequiredExp: number;
+    };
+
+    let experienceUpdate: ExperienceUpdate | null = null;
 
     // --- 経験値加算・レベルアップ処理 ---
-    if (missionProgress) {
-        const experienceLogs = await fetchExperienceLogs(
-            userId,
-            { missionProgressId: missionProgress.id },
-            { id: true, experience: true }
-        ) as { id: string; experience: number }[] | null;
+    const experienceLogs = await fetchExperienceLogs(
+        userId,
+        { missionProgressId: missionProgress.id },
+        { id: true, experience: true }
+    ) as { id: string; experience: number }[] | null;
 
-        // 二重加算防止
-        if (!experienceLogs || experienceLogs.length === 0) {
-            const experienceToAdd = missionData.experience ?? 0;
+    // 二重加算防止
+    if (!experienceLogs || experienceLogs.length === 0) {
+        const experienceToAdd = missionData.experience ?? 0;
 
-            const oldLevel = user.level;
-            const oldExperience = user.experience;
+        const oldLevel = user.level;
+        const oldExperience = user.experience;
 
-            let newLevel = oldLevel;
-            let newExperience = oldExperience + experienceToAdd;
+        let newLevel = oldLevel;
+        let newExperience = oldExperience + experienceToAdd;
 
-            const levelUps: { level: number; requiredExperience: number }[] = [];
+        // レベルアップ判定
+        while (true) {
+            const requiredExp = requiredExperienceForLevel(newLevel);
+            if (requiredExp <= 0) break;
+            if (newExperience < requiredExp) break;
 
-            // レベルアップ判定（計算式）
-            while (true) {
-                const requiredExp = requiredExperienceForLevel(newLevel);
-
-                if (requiredExp <= 0) break;
-                if (newExperience < requiredExp) break;
-
-                newExperience -= requiredExp;
-                newLevel += 1;
-
-                levelUps.push({
-                    level: newLevel,
-                    requiredExperience: requiredExperienceForLevel(newLevel),
-                });
-            }
-
-            // ユーザ更新
-            await updateUser(userId, {
-                level: newLevel,
-                experience: newExperience,
-            });
-
-            // 経験値ログ（加算量のみ記録）
-            await createExperienceLog(
-                userId,
-                missionProgress.id,
-                experienceToAdd
-            );
-
-            experienceUpdate = {
-                oldLevel,
-                newLevel,
-                oldExperience,
-                gainedExperience: experienceToAdd,
-                levelUps,
-            };
+            newExperience -= requiredExp;
+            newLevel += 1;
         }
-        //ミッション完了処理
-        await updateMissionProgress(missionProgress.id, {
-            status: MissionStatus.COMPLETED,
-            completedAt: new Date(),
+
+        // 必要EXPは「最終レベル」に対して必ず計算
+        experienceUpdate = {
+            oldLevel,
+            newLevel,
+            oldExperience,
+            newExperience,
+
+            oldLevelRequiredExp: requiredExperienceForLevel(oldLevel),
+            newLevelRequiredExp: requiredExperienceForLevel(newLevel),
+        };
+
+        // ユーザ更新
+        await updateUser(userId, {
+            level: newLevel,
+            experience: newExperience,
         });
+
+        // 経験値ログ（加算量のみ記録）
+        await createExperienceLog(
+            userId,
+            missionProgress.id,
+            experienceToAdd
+        );
     }
+    else {
+        experienceUpdate = {
+            oldLevel: user.level,
+            newLevel: user.level,
+            oldExperience: user.experience,
+            newExperience: user.experience,
+            oldLevelRequiredExp: requiredExperienceForLevel(user.level),
+            newLevelRequiredExp: requiredExperienceForLevel(user.level),
+        };
+    }
+    //ミッション完了処理
+    await updateMissionProgress(missionProgress.id, {
+        status: MissionStatus.COMPLETED,
+        completedAt: new Date(),
+    });
 
     //ランクアップ処理
     const updateRankResult = await checkAndUpdateRank(userId, missionId);
@@ -745,24 +745,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
         rank: { select: { name: true } },
     }) as typeof user;
 
-    // 進行中ミッションがなかった場合
-    if (!experienceUpdate) {
-        const oldLevel = user.level;
-        const oldExperience = user.experience;
-
-        experienceUpdate = {
-            oldLevel,
-            newLevel: oldLevel,
-            oldExperience,
-            gainedExperience: 0,
-            levelUps: [
-            {
-                level: oldLevel,
-                requiredExperience: requiredExperienceForLevel(oldLevel),
-            },
-            ],
-        };
-    }
     // --- リターンデータ ---
     const returnData = {
         missionData,
@@ -775,6 +757,7 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
         updatedRank
     };
 
+    console.log(experienceUpdate)
     res.status(200).json(returnData);
 
     } catch (error) {
