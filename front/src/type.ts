@@ -232,6 +232,7 @@ export type MissionResultResponse = {
             },
             sentence: string
         }[],
+        exam: { id: string }; 
         _count: {
             steps: number
         },
@@ -255,14 +256,13 @@ export type MissionResultResponse = {
     weekUsagetime: number,
     totalUsagetime: number,
     experienceUpdate: {
-        oldLevel: number,
-        newLevel: number,
-        oldExperience: number,
-        gainedExperience: number,
-        levelUps: {
-            level: number,
-            requiredExperience: number,
-        }[],
+        oldLevel: number;
+        newLevel: number;
+        oldExperience: number;
+        newExperience: number;
+
+        oldLevelRequiredExp: number;
+        newLevelRequiredExp: number;
     }
     updatedRank: string | null;
 }

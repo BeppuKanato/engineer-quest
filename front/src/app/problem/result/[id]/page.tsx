@@ -75,70 +75,71 @@ export default function ResultPage() {
   useEffect(() => {
     if (!user) return;
 
-    const fetchData = async() => {
+    const fetchData = async () => {
       const res = await fetchWithUserId(user, "/problem/missionResult", {
-        method: "POST", 
-        body: JSON.stringify({
-          missionId: id,
-        })}
-      );
-      const json: MissionResultResponse = await res?.json();
-      setResponseData(json);
+        method: "POST",
+        body: JSON.stringify({ missionId: id }),
+      });
 
+      const json: MissionResultResponse = await res.json();
+      setResponseData(json);
       setDialogOpen(true);
 
-      const totalExp = json.experienceUpdate.oldExperience + json.experienceUpdate.gainedExperience;
-      const requiredExp = json.experienceUpdate.levelUps[0].requiredExperience;
+      const {
+        oldLevel,
+        newLevel,
+        oldExperience,
+        newExperience,
+        oldLevelRequiredExp,
+        newLevelRequiredExp,
+      } = json.experienceUpdate;
 
-      // 余りの計算
-      const displayedExp = totalExp % requiredExp;
+      // 進捗率（%）
+      const oldProgress =
+        (oldExperience / oldLevelRequiredExp) * 100;
 
-      // パーセンテージ（%）計算
-      const progressValue = (displayedExp / requiredExp) * 100;
-      // 通知データを見た目重視で作成
+      const newProgress =
+        (newExperience / newLevelRequiredExp) * 100;
+
       const notifications = [
         {
           title: "⭐ 獲得EXP",
           content: (
             <div className="p-2 text-center">
+              {/* レベル表示 */}
               <div className="flex justify-center items-center gap-4 mb-4">
                 <Typography className="font-semibold text-indigo-700">
-                  Lv. {json.experienceUpdate.oldLevel}
+                  Lv. {oldLevel}
                 </Typography>
                 <span className="text-2xl">→</span>
                 <Typography className="font-semibold text-indigo-700">
-                  Lv. {json.experienceUpdate.newLevel}
+                  Lv. {newLevel}
                 </Typography>
               </div>
 
-              {/* 元の経験値バー */}
+              {/* 以前のEXPバー */}
               <div className="mb-2">
                 <LinearProgress
                   variant="determinate"
-                  value={
-                    (json.experienceUpdate.oldExperience /
-                      json.experienceUpdate.levelUps[0].requiredExperience) *
-                    100
-                  }
+                  value={Math.min(oldProgress, 100)}
                   className="h-4 rounded-full"
                 />
                 <Typography variant="caption" className="text-gray-500">
-                  {json.experienceUpdate.oldExperience} /{" "}
-                  {json.experienceUpdate.levelUps[0].requiredExperience} EXP
+                  {oldExperience} / {oldLevelRequiredExp} EXP
                 </Typography>
               </div>
 
               <div className="my-3 text-2xl">⬇</div>
 
-              {/* 新しい経験値バー */}
+              {/* 現在のEXPバー */}
               <div>
                 <LinearProgress
                   variant="determinate"
-                  value={progressValue}
+                  value={Math.min(newProgress, 100)}
                   className="h-4 rounded-full"
                 />
                 <Typography variant="caption" className="text-gray-500">
-                  {displayedExp} / {requiredExp} EXP
+                  {newExperience} / {newLevelRequiredExp} EXP
                 </Typography>
               </div>
             </div>

@@ -58,6 +58,6 @@ POST http://localhost:3001/problem/missionResult
 Content-Type: application/json
 
 {
-    "missionId": "5f9262f5-0404-4691-bd4e-cba320d5be45",
-    "userId": "b4e7d30b-bf4a-4485-bfa2-2eb0fc4180d5"
+    "missionId": "504dd75a-4e11-4da1-b0e9-3254661edba0",
+    "userId": "vnqJz40YfNg8Sm6gjgYQDWLvySH2"
 }
