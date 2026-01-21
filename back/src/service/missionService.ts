@@ -6,8 +6,8 @@ import { ClientRequest } from "http";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
 import { triggerAsyncId } from "async_hooks";
 import { fetchUser } from "./userService";
-import { examJudgeWithFeedback } from "./ContentsForGeminiAPI/examJudgeWithFeedback";
-import { examJudgeWithoutFeedback } from "./ContentsForGeminiAPI/examJudgeWithoutFeedback";
+import { examJudgeWithFeedback } from "./ContentsForLLM/examJudgeWithFeedback";
+import { examJudgeWithoutFeedback } from "./ContentsForLLM/examJudgeWithoutFeedback";
 import OpenAI from "openai";
 
 /**
@@ -156,7 +156,7 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
                     content: settings.contents,
                 },
             ],
-                temperature: 0.0,     // 採点用途は 0 推奨
+                temperature: 0.2,
                 top_p: 0.1,
             });
 
