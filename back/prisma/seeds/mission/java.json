@@ -2938,8 +2938,8 @@
                 "content": "println を1行持つ static なメソッドを作ろう。",
                 "instructions": [
                     "static void を使う",
-                    "println を1回書く",
-                    "クラス定義の中に書く（main と同じクラス）"
+                    "hello関数を作成する",
+                    "println を1回書く"
                 ],
                 "answer": "```java\nstatic void hello() {\n  System.out.println(\"Hello\");\n}\n```",
                 "supporterSlug": "yamada-senpai"
@@ -3058,23 +3058,24 @@
         "exams": [
         {
             "criteria": {
-                "score": 60,
-                "factor": [
+            "score": 60,
+            "factor": [
                 "static メソッドを正しく定義できている：最大40点",
                 "main から呼び出せている：最大40点",
                 "main が整理されている：最大20点"
-                ]
+            ]
             },
             "type": "FREE_CREATION",
             "component": null,
             "instructions": [
-                "『メニュー表示』を作りましょう。",
-                "メニュー表示用の static メソッドを作る",
-                "main ではそのメソッドを呼び出すだけにする",
-                "println を3回以上使う"
+            "『メニュー表示プログラム』を作りましょう。",
+            "メニューを表示する static メソッドを1つ作る",
+            "そのメソッド内で println を使い、3行以上のメニューを表示する",
+            "main メソッドでは、メニュー表示用メソッドを呼び出すだけにする",
+            "main メソッド内では println を直接使わない"
             ],
             "exampleCode": {
-                "Java": "public class Menu {\n  static void showMenu() {\n    System.out.println(\"1. Start\");\n    System.out.println(\"2. Option\");\n    System.out.println(\"3. Exit\");\n  }\n\n  public static void main(String[] args) {\n    showMenu();\n  }\n}\n"
+            "Java": "public class Menu {\n  static void showMenu() {\n    System.out.println(\"1. Start\");\n    System.out.println(\"2. Option\");\n    System.out.println(\"3. Exit\");\n  }\n\n  public static void main(String[] args) {\n    showMenu();\n  }\n}\n"
             },
             "language": ["Java"]
         }
@@ -4273,6 +4274,7 @@
                 "order": 1,
                 "content": "for の中で null チェックを入れてみよう。",
                 "instructions": [
+                    "宣言済みのusers配列をforループで回す",
                     "if (users[i] != null) を使う"
                 ],
                 "answer": "```java\nfor (int i = 0; i < users.length; i++) {\n  if (users[i] != null) {\n    users[i].showInfo();\n  }\n}\n```",
@@ -4282,29 +4284,31 @@
         }
         ],
         "exams": [
-            {
+        {
             "criteria": {
-                "score": 60,
-                "factor": [
+            "score": 60,
+            "factor": [
                 "クラス配列を正しく作れている：最大30点",
                 "new したインスタンスを配列に入れている：最大30点",
                 "for を使ってまとめて処理できている：最大30点",
                 "null を考慮できている：最大10点"
-                ]
+            ]
             },
             "type": "FREE_CREATION",
             "component": null,
             "instructions": [
-                "『ユーザ一覧表示』を作りましょう。",
-                "User クラスを配列で3人分管理する",
-                "2人分だけ new してデータを入れる",
-                "for を使って、null でないユーザだけ表示する"
+            "『ユーザ一覧表示プログラム』を作りましょう。",
+            "name フィールドをもつ User クラスを作る",
+            "User クラスに、名前を表示するメソッドを用意する",
+            "User 型の配列を長さ3で作る",
+            "2人分だけ User を new して、名前を設定する",
+            "for 文を使い、配列の中で null でない User だけを表示する"
             ],
             "exampleCode": {
-                "Java": "class User {\n  String name;\n\n  void showInfo() {\n    System.out.println(name);\n  }\n}\n\npublic class App {\n  public static void main(String[] args) {\n    User[] users = new User[3];\n\n    users[0] = new User();\n    users[0].name = \"A\";\n\n    users[1] = new User();\n    users[1].name = \"B\";\n\n    for (int i = 0; i < users.length; i++) {\n      if (users[i] != null) {\n        users[i].showInfo();\n      }\n    }\n  }\n}\n"
+            "Java": "class User {\n  String name;\n\n  void showInfo() {\n    System.out.println(name);\n  }\n}\n\npublic class App {\n  public static void main(String[] args) {\n    User[] users = new User[3];\n\n    users[0] = new User();\n    users[0].name = \"A\";\n\n    users[1] = new User();\n    users[1].name = \"B\";\n\n    for (int i = 0; i < users.length; i++) {\n      if (users[i] != null) {\n        users[i].showInfo();\n      }\n    }\n  }\n}\n"
             },
             "language": ["Java"]
-            }
+        }
         ]
     },
     {
@@ -4474,17 +4478,17 @@
                 }
             ],
             "stepExams": [
-                {
+            {
                 "order": 1,
-                "content": "main メソッドから、コンストラクタを使って Character を生成し表示しよう。",
+                "content": "main メソッドから、コンストラクタを使って Character を生成し、名前を表示しよう。",
                 "instructions": [
-                    "public static void main を書く",
-                    "new Character(...) を使う",
-                    "show メソッドなどで表示する"
+                "public static void main メソッドを書く",
+                "new Character(...) を使ってインスタンスを生成する",
+                "System.out.println を使って Character の情報を表示する"
                 ],
                 "answer": "```java\npublic class App {\n  public static void main(String[] args) {\n    Character c = new Character(\"Hero\", 10);\n    System.out.println(c.name);\n  }\n}\n```",
                 "supporterSlug": "yamada-senpai"
-                }
+            }
             ]
         }
         ],
