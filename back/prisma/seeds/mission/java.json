@@ -4793,7 +4793,7 @@
                 ]
             },
             "type": "HYBRID",
-            "component": "Misson_Exam",
+            "component": "Java_Promotion_3",
             "instructions": [
                 "『タスク管理ミニアプリ』を作成しましょう。",
                 "Task クラスを作る（title: String, done: boolean を持つ）",

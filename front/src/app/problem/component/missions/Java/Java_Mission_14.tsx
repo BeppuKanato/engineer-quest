@@ -168,7 +168,7 @@ Bob
           </Card>
         </>
         )}
-        {isComponentType("step-2", componentType) || isComponentType("step-3", componentType) && (
+        {(isComponentType("step-2", componentType) || isComponentType("step-3", componentType)) && (
         <>
           <Typography variant="h6" sx={{ mb: 2 }}>
             new して、箱に値を入れる
@@ -289,6 +289,99 @@ b.name = "Bob";`}
           </Card>
         </>
         )}
+        {isComponentType("step-5", componentType) && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            実行用クラスと、データ用クラス
+          </Typography>
+
+          <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+            Java プログラムは <b>main メソッドから実行</b>されます。
+            <br />
+            でも、<b>すべてのクラスが main を持つ必要はありません。</b>
+          </Typography>
+
+          {/* ===== 役割の分離イメージ ===== */}
+          <Card variant="outlined" sx={{ p: 2, mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              役割の分け方
+            </Typography>
+
+            <List dense>
+              <ListItem>
+                <ListItemText
+                  primary="実行用クラス：main を持ち、処理の流れを書く"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="データ用クラス：値（フィールド）をまとめる箱"
+                />
+              </ListItem>
+            </List>
+          </Card>
+
+          {/* ===== コード例 ===== */}
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              コード例
+            </Typography>
+
+            <Box
+              component="pre"
+              sx={{
+                fontSize: 13,
+                lineHeight: 1.6,
+                m: 0,
+                bgcolor: "#fafafa",
+                p: 1.5,
+                borderRadius: 1
+              }}
+            >
+{`class Item {
+  String name;
+  int price;
+}
+
+public class Shop {
+  public static void main(String[] args) {
+    Item item = new Item();
+    item.name = "Potion";
+    item.price = 50;
+
+    System.out.println(item.name + ": " + item.price);
+  }
+}`}
+            </Box>
+
+            <Divider sx={{ my: 1.5 }} />
+
+            <List dense>
+              <ListItem>
+                <ListItemText
+                  primary="Shop クラス：プログラムの実行を担当（main を持つ）"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Item クラス：データをまとめるだけの箱"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="役割を分けることで、構造が分かりやすくなる"
+                />
+              </ListItem>
+            </List>
+          </Card>
+
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            👉 これが「クラスで役割を分ける」最初の形です。
+            <br />
+            次のミッションでは、この箱に<b>処理</b>も持たせていきます。
+          </Typography>
+        </>
+      )}
     </Box>
   );
 };
