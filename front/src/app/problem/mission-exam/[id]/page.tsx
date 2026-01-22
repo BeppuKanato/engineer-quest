@@ -22,6 +22,15 @@ import { auth } from "@/lib/firebase";
 import { fetchWithoutUserId, fetchWithUserId } from "@/utils/fetchers";
 import { Alert, Snackbar } from "@mui/material";
 
+
+  //Judgeタイプをランダムに決定
+const getRandomJudgeType = (): JUDGE_TYPE => {
+  const values = Object.values(JUDGE_TYPE) as JUDGE_TYPE[];
+  const randomIndex = Math.floor(Math.random() * values.length);
+
+  return values[randomIndex];
+}
+
 export default function MissionExamPage() {
   const [responseData, setResponseData] = useState<MissionExamRepsonse | null>(null);
   const [codes, setCodes] = useState<{ [key in MISSION_EXAM_LANGUAGE]?: string }>({});
@@ -30,7 +39,7 @@ export default function MissionExamPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [aiResponseData, setAIResponseData] = useState<MissionExamAIResponse | null>(null);
   const [hasPassed, setHasPassed] = useState(false);
-  const [judgeType, setJudgeType] = useState<JUDGE_TYPE>(JUDGE_TYPE.WITH_FEEDBACK);
+  const [judgeType, setJudgeType] = useState<JUDGE_TYPE>(getRandomJudgeType());
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -80,7 +89,6 @@ export default function MissionExamPage() {
 
     fetchData();
   }, [user, id]);
-
 
   // AI判定ボタン
   const handleOnClickAIJudge = async () => {
