@@ -49,9 +49,8 @@ export const createMissionExamProgress = async (
     isPassed: boolean;
     good: string[];
     bad: string[];
-    feedback: string | null;
+    feedbacks: { index: number; type: JudgeType; text: string }[];
   },
-  judgeType: JudgeType,
   code: { [key in MissionExamLanguages]?: string }
 ) => {
   console.log("コード保存用データ:", code);
@@ -68,8 +67,7 @@ export const createMissionExamProgress = async (
           isPassed: result.isPassed,
           good: result.good,
           bad: result.bad,
-          feedback: result.feedback,
-          judgeType,
+          feedbacks: result.feedbacks,
         },
       });
 
