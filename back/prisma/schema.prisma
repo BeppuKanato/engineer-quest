@@ -9,8 +9,7 @@ datasource db {
 }
 
 enum JudgeType {
-  WITH_FEEDBACK
-  WITHOUT_FEEDBACK
+  STANDARD
   PHILANTHROPIST
   ACHIEVER
   FREE_SPIRIT
