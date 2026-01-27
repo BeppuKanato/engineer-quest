@@ -1,7 +1,7 @@
 import e, { Request, Response } from "express";
 import { fetchMission, getAcceptedMissions, missionExamJudgeService } from "../service/missionService";
 import { fetchStep } from "../service/stepService";
-import { createMissionExamProgress, fetchLatesMissionExamProgress, fetchMissionExamProgress } from "../service/missionExamProgressService";
+import { createMissionExamProgress, fetchLatesMissionExamProgress, fetchMissionExamProgress, updateSelectedFeedback } from "../service/missionExamProgressService";
 import { fetchUser, updateUser } from "../service/userService";
 import { fetchMissionProgress, updateMissionProgress } from "../service/missionProgressService";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
@@ -458,6 +458,8 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
         });
     }
 
+    console.log("AI採点結果:", aiJudge);
+
     const isPassed = Number(aiJudge.score) >= Number(examData.exam.criteria.score);
     // ミッション進行状況の更新と試験結果の保存
     const missionProgress = await fetchMissionProgress(
@@ -474,7 +476,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
         })
     }
 
-    const process = await createMissionExamProgress(
+    const progress = await createMissionExamProgress(
         examId,
         userId,
         missionProgress.id,
@@ -488,7 +490,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
         userCode as { [key in MissionExamLanguages]?: string }
     );
 
-    if (!process?.id) {
+    if (!progress?.id) {
         console.log("試験結果保存時にエラー");
         return res.status(500).json({
             message: "試験の結果を保存できませんでした。時間をおいてお試しください",
@@ -496,6 +498,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
     }
 
     const responseData: {
+        progressId: string,
         score: number,
         reason: {
             "good": string[],
@@ -505,6 +508,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
         isPassed: boolean
     } = 
     {
+        progressId: progress.id,
         score: aiJudge.score,
         reason: aiJudge.reason,
         feedbacks: aiJudge.feedbacks,
@@ -512,6 +516,32 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
     }
     return res.status(200).json(responseData);
 };
+
+/**
+ * フィードバック選択API
+ * 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+export const selectFeedbackController = async(req: AuthRequest, res: Response) => {
+    const userId = req.user!.uid;
+    const { progressId, selectedIndex, selectedJudgeType } = req.body;
+
+    if (!Object.values(JudgeType).includes(selectedJudgeType)) {
+        return res.status(400).json({ message: "不正なJudgeTypeです" });
+    }
+
+    const result = await updateSelectedFeedback(userId, progressId, selectedIndex, selectedJudgeType);
+
+    if (!result) {
+        return  res.status(500).json(
+            { message: "フィードバック選択の保存に失敗しました" }
+        );
+    }
+
+    return res.status(200).json({ message: "フィードバック選択を保存しました" });
+}
 
 /**
  * 
@@ -633,7 +663,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
     const examResult = await fetchMissionExamProgress(userId, missionData.exam.id,{
         point: true,
         isPassed: true,
-        judgeType: true,
         createdAt: true
     })
 

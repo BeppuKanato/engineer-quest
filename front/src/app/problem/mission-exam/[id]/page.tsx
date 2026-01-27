@@ -23,15 +23,6 @@ import { auth } from "@/lib/firebase";
 import { fetchWithoutUserId, fetchWithUserId } from "@/utils/fetchers";
 import { Alert, Snackbar } from "@mui/material";
 
-
-  //Judgeタイプをランダムに決定
-const getRandomJudgeType = (): JUDGE_TYPE => {
-  const values = Object.values(JUDGE_TYPE) as JUDGE_TYPE[];
-  const randomIndex = Math.floor(Math.random() * values.length);
-
-  return values[randomIndex];
-}
-
 export default function MissionExamPage() {
   const [responseData, setResponseData] = useState<MissionExamRepsonse | null>(null);
   const [codes, setCodes] = useState<{ [key in MISSION_EXAM_LANGUAGE]?: string }>({});
@@ -40,7 +31,9 @@ export default function MissionExamPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [aiResponseData, setAIResponseData] = useState<MissionExamAIResponse | null>(null);
   const [hasPassed, setHasPassed] = useState(false);
-  const [judgeType, setJudgeType] = useState<JUDGE_TYPE>(getRandomJudgeType());
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [isSelectingFeedback, setIsSelectingFeedback] = useState(false);
+  const [isFeedbackConfirmed, setIsFeedbackConfirmed] = useState(false);
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -102,7 +95,6 @@ export default function MissionExamPage() {
         missionId: responseData.id,
         examId: responseData.exam.id,
         userCode: codes,
-        judgeType: judgeType
       })
     });
 
@@ -121,6 +113,10 @@ export default function MissionExamPage() {
 
     setAIResponseData(json);
     setHasPassed(json.isPassed);
+
+    setSelectedIndex(null);
+    setIsFeedbackConfirmed(false);
+
     setIsEvaluating(false);
   };
 
@@ -158,6 +154,40 @@ export default function MissionExamPage() {
       })
     }
     setIsSharing(false);
+  }
+
+  const handleSelectFeedback = async() => {
+    if (!responseData || !user || selectedIndex == null || selectedIndex == undefined || !aiResponseData) return;
+
+    setIsSelectingFeedback(true);
+    
+    const res = await fetchWithUserId(user, "/problem/selectFeedback", {
+      method: "POST",
+      body: JSON.stringify({
+        progressId: aiResponseData?.progressId,
+        selectedIndex: selectedIndex,
+        selectedJudgeType: aiResponseData.feedbacks[selectedIndex].type
+      })
+    });
+
+    if (res.ok) {
+      setSnackbar({
+        open: true,
+        message: "選択した内容を保存しました🎉",
+        severity: "success"
+      });
+      setIsFeedbackConfirmed(true);
+    }
+    else {
+      const json: FailedConnectionResponse = await res.json();
+      setSnackbar({
+        open: false,
+        message: json.message || "保存に失敗しました",
+        severity: "error"
+      });
+    }
+
+    setIsSelectingFeedback(false);
   }
 
   // ローディング状態
@@ -198,8 +228,10 @@ export default function MissionExamPage() {
         isSharing={isSharing}
         aiResponseData={aiResponseData}
         hasPassed={hasPassed}
-        judgeType={judgeType}
-        setJudgeType={setJudgeType}
+        selectedIndex={selectedIndex}
+        isSelectingFeedback={isSelectingFeedback}
+        isFeedbackConfirmed={isFeedbackConfirmed}
+        setSelectedIndex={setSelectedIndex}
         onChangeLanguage={(lang) => setCurrentLanguage(lang)}
         onChangeCode={(code) => setCodes({ ...codes, [currentLanguage]: code })}
         onEvaluate={handleOnClickAIJudge}
@@ -213,6 +245,7 @@ export default function MissionExamPage() {
           )
         }
         onShare={handleShare}
+        onSelectFeedback={handleSelectFeedback}
       >
         {examType === MISSION_EXAM_TPYE.REPRODUCTION && (
           <ObjectScreen componentName={responseData.exam.component} />

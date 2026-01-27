@@ -145,6 +145,7 @@ export type MissionExamCriteria = {
 }
 
 export type MissionExamAIResponse = {
+    progressId: string;
     score: number;
     reason: {
         "good": string[];
