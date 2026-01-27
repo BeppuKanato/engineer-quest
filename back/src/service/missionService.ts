@@ -109,6 +109,7 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
     //シャッフルしたjudgeTypeの先頭4つのフィードバックを取得
     const selectedJudgeTypes = getShuffledJudgeTypes().slice(0, 4);
+    console.log(`選択されたJudgeTypes: ${selectedJudgeTypes.join(", ")}`);
     settings = examJudgeWithFeedback(
         missionCode,
         userCode,
