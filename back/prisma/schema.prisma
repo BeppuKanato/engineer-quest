@@ -173,8 +173,9 @@ model MissionExamProgress {
   isPassed Boolean
   good     String[]
   bad      String[]
-  feedback String? @db.Text
-  judgeType JudgeType
+  feedbacks Json
+  selectedFeedbackType JudgeType?
+  selectedFeedbackIndex Int?
   createdAt DateTime @default(now())
 
   progress MissionProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
