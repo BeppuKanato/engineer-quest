@@ -68,6 +68,16 @@ export const fetchMissions = async (
   }
 };
 
+//シャッフルしたjudgeTypeを返す
+const getShuffledJudgeTypes = () => {
+  const shuffled = Object.values(JudgeType);
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 /**
  * @abstract ミッション試験の採点
  * @summary ミッション試験のコードをAIで採点する
@@ -95,22 +105,17 @@ export const fetchMissions = async (
  * @param factor 
  * @returns 
  */
-export const missionExamJudgeService = async(missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[], judgeType: JudgeType) => {
+export const missionExamJudgeService = async(missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]) => {
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
-    // フィードバックなしの採点
-    if (judgeType === JudgeType.WITHOUT_FEEDBACK) {
-        settings = examJudgeWithoutFeedback(missionCode, userCode, factor, instructions);
-    }
-    // フィードバックありの採点 
-    else {
-        settings = examJudgeWithFeedback(
-            missionCode,
-            userCode,
-            factor,
-            instructions,
-            judgeType
-        );
-    }
+    //シャッフルしたjudgeTypeの先頭4つのフィードバックを取得
+    const selectedJudgeTypes = getShuffledJudgeTypes().slice(0, 4);
+    settings = examJudgeWithFeedback(
+        missionCode,
+        userCode,
+        factor,
+        instructions,
+        selectedJudgeTypes
+    );
     try {
         //openai API 呼び出し
         const ai = new OpenAI({
@@ -146,10 +151,6 @@ export const missionExamJudgeService = async(missionCode: {[key in MissionExamLa
 
         if (json === null) {
             return null;
-        }
-
-        if (judgeType === JudgeType.WITHOUT_FEEDBACK) {
-            json.feedback = null;
         }
 
         return json
