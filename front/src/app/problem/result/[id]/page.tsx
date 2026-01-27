@@ -179,10 +179,6 @@ export default function ResultPage() {
         });
       }
       setNotificationQueue(notifications);
-      //フィードバックがある場合は短縮版をセット
-      if (json.examResult[0].judgeType === "WITH_FEEDBACK" && json.examResult[0].feedback) {
-        setShortFeedback(json.examResult[0].feedback.slice(0, 60) + "..."); // 最初の60文字だけ取得
-      }
     };
     fetchData();
   }, [user, id]);

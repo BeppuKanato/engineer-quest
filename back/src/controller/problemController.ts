@@ -633,7 +633,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
     const examResult = await fetchMissionExamProgress(userId, missionData.exam.id,{
         point: true,
         isPassed: true,
-        feedback: true,
         judgeType: true,
         createdAt: true
     })
