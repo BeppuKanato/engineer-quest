@@ -400,14 +400,36 @@ export const BaseExamLayout = ({
             <Divider sx={{ my: 2 }} />
 
             {/* フィードバック */}
-            {aiResponseData.feedback && (
+            {aiResponseData.feedbacks && aiResponseData.feedbacks.length > 0 && (
               <Box>
                 <Typography variant="subtitle1" fontWeight="medium" mb={1}>
                   フィードバック
                 </Typography>
-                <Typography sx={{ whiteSpace: "pre-line", color: "text.secondary" }}>
-                  {aiResponseData.feedback}
-                </Typography>
+                
+                {aiResponseData.feedbacks.map((fb, idx) => (
+                  <Box key={idx}>
+                    {/* 区切り線（先頭以外） */}
+                    {idx !== 0 && <Divider sx={{ my: 2 }} />}
+
+                    {/* フィードバック見出し */}
+                    <Typography
+                      variant="caption"
+                      sx={{ color: "text.secondary", display: "block", mb: 0.5 }}
+                    >
+                      フィードバック {fb.index + 1}
+                    </Typography>
+
+                    {/* フィードバック本文 */}
+                    <Typography
+                      sx={{
+                        whiteSpace: "pre-line",
+                        color: "text.secondary",
+                      }}
+                    >
+                      {fb.text}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             )}
 

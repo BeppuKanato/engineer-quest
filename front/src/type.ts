@@ -150,7 +150,11 @@ export type MissionExamAIResponse = {
         "good": string[];
         "bad": string[];
     };
-    feedback: string | null;
+    feedbacks: {
+        index: number;
+        type: JUDGE_TYPE;
+        text: string;
+    }[];
     isPassed: boolean;
 }
 
@@ -248,7 +252,6 @@ export type MissionResultResponse = {
     examResult: {
         point: number,
         isPassed: boolean,
-        feedback: string | null,
         judgeType: JUDGE_TYPE,
         createdAt: string,
     }[],
@@ -295,7 +298,6 @@ export type SharedMissionItem = {
     point: number;
     good: string[];
     bad: string[];
-    feedback: string | null;
     userCodes: {
       code: string;
       language: string;
@@ -315,3 +317,7 @@ export type SharedMissionMainResponse = {
   sharedMissions: SharedMissionItem[];
   stats: SharedMissionStats;
 };
+
+export type FailedConnectionResponse = {
+    message: string;
+}

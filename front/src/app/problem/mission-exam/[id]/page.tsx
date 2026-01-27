@@ -8,6 +8,7 @@ import {
   MISSION_EXAM_TPYE,
   MISSION_EXAM_LANGUAGE,
   JUDGE_TYPE,
+  FailedConnectionResponse,
 } from "@/type";
 import { BackHeader } from "@/app/component/common/backHeader";
 import { navigateWithUpdateUsageTime } from "../../common/common";
@@ -104,8 +105,20 @@ export default function MissionExamPage() {
         judgeType: judgeType
       })
     });
+
+    if (!res.ok) {
+      const json: FailedConnectionResponse = await res.json();
+      setSnackbar({
+        open: true,
+        message: json.message,
+        severity: "error"
+      });
+      setIsEvaluating(false);
+      return;
+    }
     
     const json: MissionExamAIResponse = await res.json();
+
     setAIResponseData(json);
     setHasPassed(json.isPassed);
     setIsEvaluating(false);
@@ -224,7 +237,7 @@ export default function MissionExamPage() {
         anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       >
         <Alert
-          security={snackbar.severity}
+          severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           sx={{ width: "100%" }}
         >
