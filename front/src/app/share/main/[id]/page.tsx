@@ -198,14 +198,6 @@ export default function ShareMainPage() {
                     <Typography fontWeight="bold" noWrap>
                     {m.user?.name ?? "名無し"}
                     </Typography>
-
-                    {m.examProgress.feedback ? (
-                    <Typography color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
-                        {m.examProgress.feedback}
-                    </Typography>
-                    ) : (
-                    <Typography color="text.secondary">（フィードバックなし）</Typography>
-                    )}
                 </Box>
 
                 {/* スコア */}

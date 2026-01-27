@@ -16,7 +16,6 @@ type SharedMissionWithProgress =
           point: true;
           good: true;
           bad: true;
-          feedback: true;
           userCodes: {
             select: {
               code: true;
@@ -121,7 +120,6 @@ export const mainController = async(req: AuthRequest, res: Response) => {
                 point: true,
                 good: true,
                 bad: true,
-                feedback: true,
                 userCodes: {
                 select: {
                     code: true,
