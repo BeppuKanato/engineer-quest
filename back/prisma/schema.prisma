@@ -64,7 +64,6 @@ model User {
   level Int
   experience Int
 
-  levelRequirement LevelupRequirement @relation(fields: [level], references: [level])
   rank Rank @relation(fields: [rankId], references: [id])
   missionExamProgress MissionExamProgress[]
   userAchievements UserAchievement[] 
@@ -309,12 +308,6 @@ model UserAchievement {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-}
-
-model LevelupRequirement {
-  level Int @unique
-  requiredExperience Int
-  users User[]
 }
 
 model UsageTime {
