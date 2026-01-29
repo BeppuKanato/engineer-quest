@@ -208,6 +208,79 @@ export const Java_Mission_13 = ({ componentType }: MissionComponentProps) => {
         </Card>
         </>
         )}
+        {isComponentType("step-3", componentType) && (
+        <>
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              引数と戻り値を組み合わせると？
+            </Typography>
+
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              引数と戻り値を組み合わせることで、メソッドは
+              <b>「値を受け取って、結果を返す部品」</b>になります。
+            </Typography>
+
+            <Typography variant="subtitle2" gutterBottom>
+              処理の流れ
+            </Typography>
+
+            <List dense>
+              <ListItem>
+                <ListItemText primary="① main から値を渡す（引数）" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="② メソッド内で計算する" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="③ 結果を戻り値として返す" />
+              </ListItem>
+            </List>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="subtitle2" gutterBottom>
+              例：計算メソッドを使う
+            </Typography>
+
+            <Card
+              variant="outlined"
+              sx={{ p: 1.5, mb: 2, backgroundColor: "#fafafa" }}
+            >
+              <Typography
+                variant="body2"
+                component="pre"
+                sx={{ fontFamily: "monospace", m: 0 }}
+              >
+{`static int add(int a, int b) {
+  return a + b;
+}
+
+public static void main(String[] args) {
+  int result = add(3, 5);
+  System.out.println(result);
+}`}
+              </Typography>
+            </Card>
+
+            <List dense>
+              <ListItem>
+                <ListItemText primary="add(3, 5) で a=3, b=5 が渡される" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="return a + b の結果（8）が返される" />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="戻り値は result に代入され、普通の値として使える" />
+              </ListItem>
+            </List>
+
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              👉 これで「値を渡す → 処理する → 結果を受け取る」が
+              <b>1 本の流れ</b>として完成します。
+            </Typography>
+          </Card>
+        </>
+      )}
     </Box>
   );
 };

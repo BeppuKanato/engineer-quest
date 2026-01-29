@@ -179,10 +179,6 @@ export default function ResultPage() {
         });
       }
       setNotificationQueue(notifications);
-      //フィードバックがある場合は短縮版をセット
-      if (json.examResult[0].judgeType === "WITH_FEEDBACK" && json.examResult[0].feedback) {
-        setShortFeedback(json.examResult[0].feedback.slice(0, 60) + "..."); // 最初の60文字だけ取得
-      }
     };
     fetchData();
   }, [user, id]);
@@ -257,7 +253,7 @@ export default function ResultPage() {
           </Card>
 
           {/* 📝 学習結果（最新1件） */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-10">
             <Card className="shadow-md rounded-2xl text-center">
               <CardHeader title="✅ 合否判定" />
               <CardContent>

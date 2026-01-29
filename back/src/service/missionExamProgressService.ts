@@ -49,9 +49,8 @@ export const createMissionExamProgress = async (
     isPassed: boolean;
     good: string[];
     bad: string[];
-    feedback: string | null;
+    feedbacks: { index: number; type: JudgeType; text: string }[];
   },
-  judgeType: JudgeType,
   code: { [key in MissionExamLanguages]?: string }
 ) => {
   console.log("コード保存用データ:", code);
@@ -68,8 +67,7 @@ export const createMissionExamProgress = async (
           isPassed: result.isPassed,
           good: result.good,
           bad: result.bad,
-          feedback: result.feedback,
-          judgeType,
+          feedbacks: result.feedbacks,
         },
       });
 
@@ -153,3 +151,42 @@ export const fetchLatesMissionExamProgress = async (userId: string, examId: stri
     return null;
   }
 };
+
+/**
+ * 選択したフィードバックを更新
+ * 
+ * @param progressId 
+ * @param selectedIndex 
+ * @param selectedJudgeType 
+ * @returns 
+ */
+export const updateSelectedFeedback = async(userId: string, progressId: string, selectedIndex: number, selectedJudgeType: JudgeType, elapsedTimeSec: number) => {
+  console.log("経過時間", elapsedTimeSec);
+  try {
+    //ユーザのデータがあるか確認
+    const progress = await prisma.missionExamProgress.findFirst({
+      where: {
+        id: progressId,
+        userId,
+      },
+    });
+
+    if (!progress) return null;
+
+    const result = await prisma.missionExamProgress.update({
+      where: {
+        id: progressId,
+      },
+      data: {
+        selectedFeedbackIndex: selectedIndex,
+        selectedFeedbackType: selectedJudgeType,
+        learningTimeSec: elapsedTimeSec
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.log(`Service/missionExamProgressService/updateSelectedFeedbackでエラー\n${error}`);
+    return null;
+  }
+}

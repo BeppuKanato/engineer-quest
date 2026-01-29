@@ -9,8 +9,6 @@ datasource db {
 }
 
 enum JudgeType {
-  WITH_FEEDBACK
-  WITHOUT_FEEDBACK
   PHILANTHROPIST
   ACHIEVER
   FREE_SPIRIT
@@ -65,7 +63,6 @@ model User {
   level Int
   experience Int
 
-  levelRequirement LevelupRequirement @relation(fields: [level], references: [level])
   rank Rank @relation(fields: [rankId], references: [id])
   missionExamProgress MissionExamProgress[]
   userAchievements UserAchievement[] 
@@ -173,9 +170,11 @@ model MissionExamProgress {
   isPassed Boolean
   good     String[]
   bad      String[]
-  feedback String? @db.Text
-  judgeType JudgeType
+  feedbacks Json
+  selectedFeedbackType JudgeType?
+  selectedFeedbackIndex Int?
   createdAt DateTime @default(now())
+  learningTimeSec Int?
 
   progress MissionProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
   exam MissionExam @relation(fields: [examId], references: [id], onDelete: Cascade)
@@ -309,12 +308,6 @@ model UserAchievement {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-}
-
-model LevelupRequirement {
-  level Int @unique
-  requiredExperience Int
-  users User[]
 }
 
 model UsageTime {

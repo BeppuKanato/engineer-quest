@@ -18,7 +18,7 @@ export const ensureUserExitController = async (req: AuthRequest, res: Response) 
                     level: 1, 
                     experience: 0,
                     //初期のランクのID
-                    rankId: "1fea258a-2708-4e5c-862e-cef83dcf2d62"
+                    rankId: "cd5d0976-d349-4e37-8df3-bfce0dcc2d97"
                 },
             });
         }

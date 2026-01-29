@@ -1,7 +1,7 @@
 import e, { Request, Response } from "express";
 import { fetchMission, getAcceptedMissions, missionExamJudgeService } from "../service/missionService";
 import { fetchStep } from "../service/stepService";
-import { createMissionExamProgress, fetchLatesMissionExamProgress, fetchMissionExamProgress } from "../service/missionExamProgressService";
+import { createMissionExamProgress, fetchLatesMissionExamProgress, fetchMissionExamProgress, updateSelectedFeedback } from "../service/missionExamProgressService";
 import { fetchUser, updateUser } from "../service/userService";
 import { fetchMissionProgress, updateMissionProgress } from "../service/missionProgressService";
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
@@ -373,6 +373,25 @@ export const missionExamController = async(req: Request, res: Response) => {
     }
 }
 
+//フィードバックバリデーション
+const isValidFeedbacks = (
+    feedbacks: { index: number; type: string; text: string }[],
+    expectedLength: number
+): feedbacks is { index: number; type: JudgeType; text: string }[] => {
+    //フィードバック量が期待値と異なる場合は不正
+    if (feedbacks.length !== expectedLength) return false;
+
+    const judgeTypeValues = Object.values(JudgeType);
+    //順番が違う、型が違う、typeが不正(JudgeTypeではない)場合は不正
+    return feedbacks.every((f, i) =>
+        typeof f.index === "number" &&
+        f.index === i &&
+        typeof f.text === "string" &&
+        judgeTypeValues.includes(f.type as JudgeType)
+    );
+};
+
+
 /**
  * @abstract ミッション試験AI採点API
  * @summary ミッション試験のコードをAIで採点し、結果を保存する
@@ -405,7 +424,7 @@ export const missionExamController = async(req: Request, res: Response) => {
  * @returns 
  */
 export const missionExamAIJudgeController = async (req: AuthRequest, res: Response) => {
-    const { missionId, examId, userCode, judgeType } = req.body;
+    const { missionId, examId, userCode } = req.body;
     const userId = req.user!.uid;
 
     const examData = await fetchMission(missionId, {
@@ -423,16 +442,19 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
             exampleCode: {[key in MissionExamLanguages]?: string}
         }
     }
-    const aiJudge = await missionExamJudgeService(examData.exam.exampleCode, userCode, examData.exam.criteria.factor, examData.exam.instructions, judgeType as JudgeType);
+    const aiJudge = await missionExamJudgeService(missionId, examData.exam.exampleCode, userCode, examData.exam.criteria.factor, examData.exam.instructions);
 
     if (!aiJudge) {
         return res.status(500).json({
-            score: 60,
-            reson: {
-                "good": [],
-                "bad": []
-            },
-            feedback: "エラーが発生しました。AI採点を希望の場合、時間をおいてお試しください",
+            message: "AIによる採点に失敗しました。時間をおいて再度お試しください。",
+        });
+    }
+
+    //4タイプのフィードバックを生成なので、要素数が4でない場合はエラー
+    if (!isValidFeedbacks(aiJudge.feedbacks, 4)) {
+        console.log("AIフィードバックの要素数エラー:", aiJudge.feedbacks);
+        return res.status(500).json({
+            message: "AIによるフィードバックの生成に失敗しました。時間をおいて再度お試しください。",
         });
     }
 
@@ -448,16 +470,11 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
     if (!missionProgress) {
         console.log("進行中のミッションが見つかりません");
         return res.status(500).json({
-            score: 60,
-            reson: {
-                "good": [],
-                "bad": []
-            },
-            feedback: "エラーが発生しました。進行中のミッションが見つかりません。開発者に連絡してください",
-        });
+            message: "進行中のミッションが見つかりません。開発者に連絡してください。",
+        })
     }
 
-    const process = await createMissionExamProgress(
+    const progress = await createMissionExamProgress(
         examId,
         userId,
         missionProgress.id,
@@ -466,41 +483,63 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
             isPassed,
             good: aiJudge.reason.good ,
             bad: aiJudge.reason.bad,
-            feedback: aiJudge.feedback,
+            feedbacks: aiJudge.feedbacks,
         },
-        judgeType as JudgeType,
         userCode as { [key in MissionExamLanguages]?: string }
     );
 
-    if (!process) {
+    if (!progress?.id) {
         console.log("試験結果保存時にエラー");
         return res.status(500).json({
-            score: 60,
-            reson: {
-                "good": [],
-                "bad": []
-            },
-            feedback: "試験の結果を保存できませんでした。時間をおいてお試しください",
+            message: "試験の結果を保存できませんでした。時間をおいてお試しください",
         });
     }
 
     const responseData: {
+        progressId: string,
         score: number,
         reason: {
             "good": string[],
             "bad": string[]
         },
-        feedback: string | null,
+        feedbacks: { index: number; type: JudgeType; text: string }[],
         isPassed: boolean
     } = 
     {
+        progressId: progress.id,
         score: aiJudge.score,
         reason: aiJudge.reason,
-        feedback: aiJudge.feedback,
+        feedbacks: aiJudge.feedbacks,
         isPassed: isPassed 
     }
     return res.status(200).json(responseData);
 };
+
+/**
+ * フィードバック選択API
+ * 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+export const selectFeedbackController = async(req: AuthRequest, res: Response) => {
+    const userId = req.user!.uid;
+    const { progressId, selectedIndex, selectedJudgeType, elaspedTime } = req.body;
+
+    if (!Object.values(JudgeType).includes(selectedJudgeType)) {
+        return res.status(400).json({ message: "不正なJudgeTypeです" });
+    }
+
+    const result = await updateSelectedFeedback(userId, progressId, selectedIndex, selectedJudgeType, elaspedTime);
+
+    if (!result) {
+        return  res.status(500).json(
+            { message: "フィードバック選択の保存に失敗しました" }
+        );
+    }
+
+    return res.status(200).json({ message: "フィードバック選択を保存しました" });
+}
 
 /**
  * 
@@ -622,8 +661,6 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
     const examResult = await fetchMissionExamProgress(userId, missionData.exam.id,{
         point: true,
         isPassed: true,
-        feedback: true,
-        judgeType: true,
         createdAt: true
     })
 

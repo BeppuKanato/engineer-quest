@@ -1,4 +1,4 @@
-import { Difficulty } from "@prisma/client";
+import { Difficulty, JudgeType } from "@prisma/client";
 
 export type LoginResponse = {
     id: String
@@ -19,5 +19,9 @@ export type AIResponse = {
         "good": string[],
         "bad": string[],
     },
-    feedback: string | null,
+    feedbacks: {
+        index: number,
+        type: JudgeType,
+        text: string,
+    }[],
 }

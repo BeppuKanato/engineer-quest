@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { completeStepController, missionConfirmController, missionExamAIJudgeController, missionExamController, missionResultController, missionSelectController, shareMissionExamController, startMissionController, stepExamController, stepExplainController } from "../controller/problemController";
+import { completeStepController, missionConfirmController, missionExamAIJudgeController, missionExamController, missionResultController, missionSelectController, selectFeedbackController, shareMissionExamController, startMissionController, stepExamController, stepExplainController } from "../controller/problemController";
 import { verifyToken } from "../middleware/verifyToken";
 
 const problemRouter = Router();
@@ -14,5 +14,6 @@ problemRouter.post('/missionResult', verifyToken, missionResultController);
 problemRouter.post('/startMission', startMissionController);
 problemRouter.post('/completeStep', verifyToken, completeStepController);
 problemRouter.post('/shareExam', verifyToken, shareMissionExamController);
+problemRouter.post('/selectFeedback', verifyToken, selectFeedbackController);
 
 export default problemRouter;

@@ -17,6 +17,9 @@ import {
   MenuItem,
   Tooltip,
   IconButton,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import { JUDGE_TYPE, MISSION_EXAM_LANGUAGE, MissionExamAIResponse } from "@/type";
 import React from "react";
@@ -33,13 +36,16 @@ type Props = {
   aiResponseData: MissionExamAIResponse | null;
   hasPassed: boolean;
   children: React.ReactNode; // 出題内容
-  judgeType: JUDGE_TYPE;
-  setJudgeType: (type: JUDGE_TYPE) => void;
+  selectedIndex: number | null;
+  isFeedbackConfirmed ?: boolean;
+  isSelectingFeedback ?: boolean;
+  setSelectedIndex: (index: number | null) => void;
   onChangeLanguage: (lang: MISSION_EXAM_LANGUAGE) => void;
   onChangeCode: (v: string) => void;
   onEvaluate: () => void;
   onGoResult?: () => void;
   onShare: () => void;
+  onSelectFeedback?: () => void;
 };
 
 export const BaseExamLayout = ({
@@ -52,13 +58,16 @@ export const BaseExamLayout = ({
   aiResponseData,
   hasPassed,
   children,
-  judgeType,
-  setJudgeType,
+  selectedIndex,
+  isFeedbackConfirmed,
+  isSelectingFeedback,
+  setSelectedIndex,
   onChangeLanguage,
   onChangeCode,
   onEvaluate,
   onGoResult,
   onShare,
+  onSelectFeedback,
 }: Props) => {
   return (
     <Box sx={{ maxWidth: "1200px", mx: "auto", p: 4, display: "flex", flexDirection: "column", gap: 4 }}>
@@ -102,142 +111,6 @@ export const BaseExamLayout = ({
                 wordWrap: "on",
               }}
             />
-            <Box
-              sx={{
-                mt: 3,
-                p: 2,
-                borderRadius: 2,
-                border: "1px solid",
-                borderColor: "grey.300",
-                bgcolor: "grey.50",
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                fontWeight="bold"
-                sx={{ mb: 1 }}
-              >
-                採点方法を選択してください
-              </Typography>
-
-              <Select
-                fullWidth
-                value={judgeType || ""}
-                onChange={(e) => setJudgeType(e.target.value as JUDGE_TYPE)}
-                disabled={isEvaluating || isSharing}
-              >
-                <MenuItem value={JUDGE_TYPE.WITHOUT_FEEDBACK}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>スコアのみ</span>
-                    <Tooltip title="スコアと良い点、悪い点を提示します。" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                <MenuItem value={JUDGE_TYPE.WITH_FEEDBACK}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>標準フィードバック</span>
-                    <Tooltip title="スコアに加え、コードの良い点・改善点、改善方法の提案などのフィードバックを提示します。" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* Philanthropists */}
-                <MenuItem value={JUDGE_TYPE.PHILANTHROPIST}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>利他意識重視</span>
-                    <Tooltip title="スコアに加え、周囲や将来にどのように役立つかに焦点を当てたフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* Achiever */}
-                <MenuItem value={JUDGE_TYPE.ACHIEVER}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>成長重視</span>
-                    <Tooltip title="スコアに加え、上達やスキルの向上、次に挑戦できる点に焦点を当てたフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* FreeSpirit */}
-                <MenuItem value={JUDGE_TYPE.FREE_SPIRIT}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>自由度重視</span>
-                    <Tooltip title="スコアに加え、発想や工夫の余地、選択の幅に焦点を当てたフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* Socializer */}
-                <MenuItem value={JUDGE_TYPE.SOCIALIZER}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>つながり重視</span>
-                    <Tooltip title="スコアに加え、他者との共有や関わりを意識した視点のフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* Player */}
-                <MenuItem value={JUDGE_TYPE.PLAYER}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>報酬重視</span>
-                    <Tooltip title="スコアに加え、報酬や利益に焦点を当てたフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-                {/* Disruptor */}
-                <MenuItem value={JUDGE_TYPE.DISRUPTOR}>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                    <span>変化重視</span>
-                    <Tooltip title="スコアに加え、別のやり方や改善など、変化に焦点を当てたフィードバックを提示します" placement="top">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <InfoIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </MenuItem>
-              </Select>
-            </Box>
             {/* リセット / AI評価 */}
             <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
               <MUIButton
@@ -310,7 +183,7 @@ export const BaseExamLayout = ({
                 label={hasPassed ? "🎉 合格！" : "❌ 不合格"}
                 color={hasPassed ? "success" : "error"}
                 variant="outlined"
-                sx={{ fontSize: "1rem", fontWeight: "bold", px: 1 }}
+                sx={{ fontSize: "1rem", fontWeight: "bold", px: 2, py: 1}}
               />
             </Box>
 
@@ -350,7 +223,10 @@ export const BaseExamLayout = ({
                       <Typography
                         key={`good-${idx}`}
                         sx={{
-                          color: "text.secondary",
+                          whiteSpace: "pre-line",
+                          color: "text.primary",
+                          fontSize: "1.05rem",
+                          lineHeight: 1.75,
                           mb: 0.5,
                           "&::before": {
                             content: '"・"',
@@ -381,7 +257,10 @@ export const BaseExamLayout = ({
                       <Typography
                         key={`bad-${idx}`}
                         sx={{
-                          color: "text.secondary",
+                          whiteSpace: "pre-line",
+                          color: "text.primary",
+                          fontSize: "1.05rem",
+                          lineHeight: 1.75,
                           mb: 0.5,
                           "&::before": {
                             content: '"・"',
@@ -398,39 +277,129 @@ export const BaseExamLayout = ({
             </Box>
 
             <Divider sx={{ my: 2 }} />
-
+            <Typography variant="subtitle1" fontWeight="medium" mb={1}>
+              最も参考になるフィードバックを1つ選んでください：
+            </Typography>
             {/* フィードバック */}
-            {aiResponseData.feedback && (
+            {aiResponseData.feedbacks && aiResponseData.feedbacks.length > 0 && (
               <Box>
-                <Typography variant="subtitle1" fontWeight="medium" mb={1}>
-                  フィードバック
-                </Typography>
-                <Typography sx={{ whiteSpace: "pre-line", color: "text.secondary" }}>
-                  {aiResponseData.feedback}
-                </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <RadioGroup
+                    value={selectedIndex}
+                    onChange={(e) => setSelectedIndex(Number(e.target.value))}
+                  >
+                    {aiResponseData.feedbacks.map((fb) => {
+                      const isSelected = selectedIndex === fb.index;
+
+                      return (
+                        <Card
+                          key={fb.index}
+                          variant="outlined"
+                            onClick={isFeedbackConfirmed ? undefined : () => setSelectedIndex(fb.index)}
+                          sx={{
+                            mb: 2,
+                            borderRadius: 2,
+                            cursor: "pointer",
+                            backgroundColor: isSelected
+                              ? "rgba(25, 118, 210, 0.08)"
+                              : "rgba(25, 118, 210, 0.03)",
+                            borderColor: isSelected ? "primary.main" : "divider",
+                            transition: "all 0.2s ease",
+                            pointerEvents: isFeedbackConfirmed ? "none" : "auto",
+                            opacity: isFeedbackConfirmed && !isSelected ? 0.6 : 1,
+                          }}
+                        >
+                          <CardContent>
+                            {/* ヘッダ行：Radio + 見出し */}
+                            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                              <Radio
+                                checked={isSelected}
+                                value={fb.index}
+                                sx={{ mr: 1 }}
+                              />
+
+                              <Typography
+                                variant="subtitle1"
+                                fontWeight="bold"
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1,
+                                  color: "primary.main",
+                                }}
+                              >
+                                📝 フィードバック {fb.index + 1}
+                              </Typography>
+                            </Box>
+
+                            {/* 本文 */}
+                            <Typography
+                              sx={{
+                                whiteSpace: "pre-line",
+                                color: "text.primary",
+                                fontSize: "1.05rem",
+                                lineHeight: 1.7,
+                              }}
+                            >
+                              {fb.text}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </RadioGroup>
+                </Box>
               </Box>
             )}
 
-            {/* リザルト画面ボタン */}
-            {hasPassed && onGoResult && (
-              <Box mt={4} display="flex" justifyContent="center" gap={2}>
+            {aiResponseData && !isFeedbackConfirmed && (
+              <Box mt={4} display="flex" justifyContent="center">
                 <MUIButton
                   variant="contained"
                   color="primary"
                   size="large"
-                  onClick={onGoResult}
-                  disabled={isSharing}
+                  onClick={onSelectFeedback}
+                  disabled={
+                    selectedIndex == null || isSelectingFeedback
+                  }
                   sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
                 >
-                  📊 リザルト画面へ
+                  {isSelectingFeedback ? "保存中..." : "フィードバックを確定"}
                 </MUIButton>
+              </Box>
+            )}
+
+            {isFeedbackConfirmed && (
+              <Box display="flex" justifyContent="center" mt={2}>
+                <Chip
+                  label="✔ フィードバック確定済み"
+                  color="success"
+                  variant="outlined"
+                />
+              </Box>
+            )}
+            {/* リザルト画面ボタン */}
+            {isFeedbackConfirmed && (
+              <Box mt={4} display="flex" justifyContent="center" gap={2}>
+                {hasPassed && onGoResult && (
+                  <MUIButton
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    onClick={onGoResult}
+                    sx={{ px: 4, py: 1.5 }}
+                  >
+                    📊 リザルト画面へ
+                  </MUIButton>
+                )}
+
                 <MUIButton
                   variant="contained"
                   color="primary"
                   size="large"
                   onClick={onShare}
                   disabled={isSharing}
-                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
+                  sx={{ px: 4, py: 1.5 }}
                 >
                   結果を共有
                 </MUIButton>
