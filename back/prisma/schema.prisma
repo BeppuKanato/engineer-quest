@@ -9,7 +9,6 @@ datasource db {
 }
 
 enum JudgeType {
-  STANDARD
   PHILANTHROPIST
   ACHIEVER
   FREE_SPIRIT
@@ -175,6 +174,7 @@ model MissionExamProgress {
   selectedFeedbackType JudgeType?
   selectedFeedbackIndex Int?
   createdAt DateTime @default(now())
+  learningTimeSec Int?
 
   progress MissionProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
   exam MissionExam @relation(fields: [examId], references: [id], onDelete: Cascade)
