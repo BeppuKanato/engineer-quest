@@ -442,7 +442,7 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
             exampleCode: {[key in MissionExamLanguages]?: string}
         }
     }
-    const aiJudge = await missionExamJudgeService(examData.exam.exampleCode, userCode, examData.exam.criteria.factor, examData.exam.instructions);
+    const aiJudge = await missionExamJudgeService(missionId, examData.exam.exampleCode, userCode, examData.exam.criteria.factor, examData.exam.instructions);
 
     if (!aiJudge) {
         return res.status(500).json({
@@ -457,8 +457,6 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
             message: "AIによるフィードバックの生成に失敗しました。時間をおいて再度お試しください。",
         });
     }
-
-    console.log("AI採点結果:", aiJudge);
 
     const isPassed = Number(aiJudge.score) >= Number(examData.exam.criteria.score);
     // ミッション進行状況の更新と試験結果の保存
@@ -526,13 +524,13 @@ export const missionExamAIJudgeController = async (req: AuthRequest, res: Respon
  */
 export const selectFeedbackController = async(req: AuthRequest, res: Response) => {
     const userId = req.user!.uid;
-    const { progressId, selectedIndex, selectedJudgeType } = req.body;
+    const { progressId, selectedIndex, selectedJudgeType, elaspedTime } = req.body;
 
     if (!Object.values(JudgeType).includes(selectedJudgeType)) {
         return res.status(400).json({ message: "不正なJudgeTypeです" });
     }
 
-    const result = await updateSelectedFeedback(userId, progressId, selectedIndex, selectedJudgeType);
+    const result = await updateSelectedFeedback(userId, progressId, selectedIndex, selectedJudgeType, elaspedTime);
 
     if (!result) {
         return  res.status(500).json(

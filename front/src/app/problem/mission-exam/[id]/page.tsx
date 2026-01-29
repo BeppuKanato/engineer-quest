@@ -156,17 +156,23 @@ export default function MissionExamPage() {
     setIsSharing(false);
   }
 
+  //フィードバック選択時の処理
   const handleSelectFeedback = async() => {
     if (!responseData || !user || selectedIndex == null || selectedIndex == undefined || !aiResponseData) return;
 
     setIsSelectingFeedback(true);
-    
+
+    // 経過時間を秒単位で計算
+    const elaspedTime = Math.floor((Date.now() - startTime.current.getTime()) / 1000);
+  
+    console.log("経過時間（秒）:", elaspedTime);
     const res = await fetchWithUserId(user, "/problem/selectFeedback", {
       method: "POST",
       body: JSON.stringify({
         progressId: aiResponseData?.progressId,
         selectedIndex: selectedIndex,
-        selectedJudgeType: aiResponseData.feedbacks[selectedIndex].type
+        selectedJudgeType: aiResponseData.feedbacks[selectedIndex].type,
+        elaspedTime: elaspedTime
       })
     });
 

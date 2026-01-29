@@ -1,7 +1,6 @@
 import { JudgeType, MissionExamLanguages } from "@prisma/client";
 
 const hexadFeedbackInstructions: { [key in JudgeType]: string } = {
-    STANDARD: "特定のユーザタイプを想定しない、一般的で中立的な学習者向けフィードバックです。学習への取り組みを肯定し、学習意欲を高めるフィードバックを作成してください。",
     PHILANTHROPIST: "以下は「user types hexad」の「PHILANTHROPIST」タイプの特徴です。「PHILANTHROPISTタイプ」の動機付け特性を踏まえ、学習の取り組み方を肯定し、学習意欲を高めるフィードバックを作成してください。" + 
                     "【特徴】：Philanthropists are motivated by Purpose and Meaning. This group are altruistic, wanting to give to other people and enrich the lives of others in some way with no expectation of reward.",
     ACHIEVER: "以下は「user types hexad」の「ACHIEVER」タイプの特徴です。「ACHIEVERタイプ」の動機付け特性を踏まえ、学習の取り組み方を肯定し、学習意欲を高めるフィードバックを作成してください。" + 

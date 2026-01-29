@@ -10,6 +10,176 @@ import { examJudgeWithFeedback } from "./ContentsForLLM/examJudgeWithFeedback";
 import { examJudgeWithoutFeedback } from "./ContentsForLLM/examJudgeWithoutFeedback";
 import OpenAI from "openai";
 
+const feedbackTypeMap: { [key: string]: JudgeType[] } = {
+  //java-mission_1 0,1,2,3
+  "1f46e460-2f60-4cec-a801-fdf59835de68": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+  ],
+
+  //java-mission_2 0,1,2,4
+  "3c433b91-d6aa-4ed3-8fe4-bfdb69bbd079": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission_3 0,1,2,5
+  "f1304a3a-d0a5-4602-a445-3a2dd613055a": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission_4 0,1,3,4
+  "8477a25d-79a7-46db-9b5d-ae5e24983486": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission_5 0,1,3,5
+  "eaf40e3d-5bc7-4856-b34b-07f90c99ac17": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.SOCIALIZER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission_6 0,1,4,5
+  "6733096b-d223-49aa-adb1-34c05c637f50": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission_7 0,2,3,4
+  "7f25d965-18b1-41f7-8ac8-d2be355f1d93": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission_8 0,2,3,5
+  "e8e65c4a-2e9d-4008-872c-c4bcc3e7eb2a": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission_9 0,2,4,5
+  "2f4945f5-e27f-45a7-a8a4-94c572c5941b": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-promotion-1 0,3,4,5
+  "1631f289-3231-44c4-ad34-f9b08acf6324": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission-10 1,2,3,4
+  "c740ff2b-7845-42af-80c2-2629800f965e": [
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission-11 1,2,3,5
+  "6ca3f051-9a7d-4beb-ae80-021832cf5ebb": [
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission-12 1,2,4,5
+  "795c4209-9586-4a3d-9a2a-41375a93015f": [
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission-13 1,3,4,5
+  "cf8adad3-9b10-4f04-b371-f01e6dc6e7cd": [
+    JudgeType.ACHIEVER,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-promotion-2 2,3,4,5
+  "8defd706-9ef5-480f-9b39-caf71187cfb0": [
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+   //java-mission-14 0,1,2,3
+  "6963306e-2a5b-4c12-9664-103af23e668c": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.SOCIALIZER,
+  ],
+
+  //java-mission-15 0,1,2,4
+  "4250056f-23b8-4a05-913f-ee10aacb6c39": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission-16 0,1,2,5
+  "3e57ca19-8d65-47a3-9776-6117475c35fc": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.FREE_SPIRIT,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-mission-17 0,1,3,4
+  "f555e100-569b-42d9-a9c0-c65b665fe972": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.SOCIALIZER,
+    JudgeType.PLAYER,
+  ],
+
+  //java-mission-18 0,1,3,5
+  "163c1679-b1bb-4115-9827-e85de6195aa5": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.SOCIALIZER,
+    JudgeType.DISRUPTOR,
+  ],
+
+  //java-promotion-3 0,1,4,5
+  "ce7ebec0-570d-4ca5-bfd0-4ea24ce70bdf": [
+    JudgeType.PHILANTHROPIST,
+    JudgeType.ACHIEVER,
+    JudgeType.PLAYER,
+    JudgeType.DISRUPTOR,
+  ],
+};
+
+
 /**
  * @abstract ミッションを取得
  * @summary 特定のミッションをデータベースから取得する
@@ -68,15 +238,23 @@ export const fetchMissions = async (
   }
 };
 
-//シャッフルしたjudgeTypeを返す
-const getShuffledJudgeTypes = () => {
-  const shuffled = Object.values(JudgeType);
+/**
+ * 4つのフィードバックをシャッフルして返却する
+ * 2026-2-5の実験の場合：15通りのフィードバックを確実にするため、マップから取得した4つのフィードバックをシャッフルするような使い方をする
+ * 
+ * @abstract 配列をシャッフルする
+ * @param types シャッフルする配列
+ * @returns シャッフルされた配列
+ */
+const shuffleJudgeTypes = (types: JudgeType[]): JudgeType[] => {
+  const shuffled: JudgeType[] = [...types]; // 元配列を壊さない
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
-}
+};
+
 
 /**
  * @abstract ミッション試験の採点
@@ -105,10 +283,10 @@ const getShuffledJudgeTypes = () => {
  * @param factor 
  * @returns 
  */
-export const missionExamJudgeService = async(missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]) => {
+export const missionExamJudgeService = async(missionId: string, missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]) => {
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
-    //シャッフルしたjudgeTypeの先頭4つのフィードバックを取得
-    const selectedJudgeTypes = getShuffledJudgeTypes().slice(0, 4);
+    //マップから採点タイプを取得
+    const selectedJudgeTypes = shuffleJudgeTypes(feedbackTypeMap[missionId]);
     console.log(`選択されたJudgeTypes: ${selectedJudgeTypes.join(", ")}`);
     settings = examJudgeWithFeedback(
         missionCode,

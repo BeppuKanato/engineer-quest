@@ -160,7 +160,8 @@ export const fetchLatesMissionExamProgress = async (userId: string, examId: stri
  * @param selectedJudgeType 
  * @returns 
  */
-export const updateSelectedFeedback = async(userId: string, progressId: string, selectedIndex: number, selectedJudgeType: JudgeType) => {
+export const updateSelectedFeedback = async(userId: string, progressId: string, selectedIndex: number, selectedJudgeType: JudgeType, elapsedTimeSec: number) => {
+  console.log("経過時間", elapsedTimeSec);
   try {
     //ユーザのデータがあるか確認
     const progress = await prisma.missionExamProgress.findFirst({
@@ -179,6 +180,7 @@ export const updateSelectedFeedback = async(userId: string, progressId: string, 
       data: {
         selectedFeedbackIndex: selectedIndex,
         selectedFeedbackType: selectedJudgeType,
+        learningTimeSec: elapsedTimeSec
       },
     });
 
