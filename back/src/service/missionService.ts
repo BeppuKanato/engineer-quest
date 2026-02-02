@@ -11,54 +11,6 @@ import { examJudgeWithoutFeedback } from "./ContentsForLLM/examJudgeWithoutFeedb
 import OpenAI from "openai";
 
 const feedbackTypeMap: { [key: string]: JudgeType[] } = {
-  //java-mission_1 0,1,2,3
-  "1f46e460-2f60-4cec-a801-fdf59835de68": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.FREE_SPIRIT,
-    JudgeType.SOCIALIZER,
-  ],
-
-  //java-mission_2 0,1,2,4
-  "3c433b91-d6aa-4ed3-8fe4-bfdb69bbd079": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.FREE_SPIRIT,
-    JudgeType.PLAYER,
-  ],
-
-  //java-mission_3 0,1,2,5
-  "f1304a3a-d0a5-4602-a445-3a2dd613055a": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.FREE_SPIRIT,
-    JudgeType.DISRUPTOR,
-  ],
-
-  //java-mission_4 0,1,3,4
-  "8477a25d-79a7-46db-9b5d-ae5e24983486": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.SOCIALIZER,
-    JudgeType.PLAYER,
-  ],
-
-  //java-mission_5 0,1,3,5
-  "eaf40e3d-5bc7-4856-b34b-07f90c99ac17": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.SOCIALIZER,
-    JudgeType.DISRUPTOR,
-  ],
-
-  //java-mission_6 0,1,4,5
-  "6733096b-d223-49aa-adb1-34c05c637f50": [
-    JudgeType.PHILANTHROPIST,
-    JudgeType.ACHIEVER,
-    JudgeType.PLAYER,
-    JudgeType.DISRUPTOR,
-  ],
-
   //java-mission_7 0,2,3,4
   "7f25d965-18b1-41f7-8ac8-d2be355f1d93": [
     JudgeType.PHILANTHROPIST,
