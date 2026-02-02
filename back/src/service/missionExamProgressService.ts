@@ -53,7 +53,6 @@ export const createMissionExamProgress = async (
   },
   code: { [key in MissionExamLanguages]?: string }
 ) => {
-  console.log("コード保存用データ:", code);
   try {
     const MAX_LENGTH = 10000;
     //結果保存
