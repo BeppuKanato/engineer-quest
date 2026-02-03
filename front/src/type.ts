@@ -136,7 +136,8 @@ export type MissionExamRepsonse = {
         instructions: string[];
         component: string;
         language: MISSION_EXAM_LANGUAGE[];
-    }
+    };
+    selectedFeedbackIndex: number | null;
 }
 
 export type MissionExamCriteria = {

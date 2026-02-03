@@ -105,19 +105,29 @@ export const createMissionExamProgress = async (
  * @param missionId 対象のミッションID
  * @param select Prismaのselect構文を指定（取得フィールドを制御）
  */
-export const fetchMissionExamProgress = async (userId: string, examId: string, select: object) => {
-  try {
-    const result = await prisma.missionExamProgress.findMany({
-      where: {
-        userId: userId,
-        examId: examId,
-      },
-      select,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+// export const fetchMissionExamProgress = async (userId: string, examId: string, select: object) => {
+//   try {
+//     const result = await prisma.missionExamProgress.findMany({
+//       where: {
+//         userId: userId,
+//         examId: examId,
+//       },
+//       select,
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
 
+//     return result;
+//   } catch (error) {
+//     console.log(`Service/missionExamProgressService/fetchMissionExamProgressでエラー\n${error}`);
+//     return null;
+//   }
+// };
+
+export const fetchMissionExamProgress = async (args: Prisma.MissionExamProgressFindManyArgs) => {
+  try {
+    const result = await prisma.missionExamProgress.findMany(args);
     return result;
   } catch (error) {
     console.log(`Service/missionExamProgressService/fetchMissionExamProgressでエラー\n${error}`);

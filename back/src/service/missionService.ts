@@ -191,24 +191,6 @@ export const fetchMissions = async (
 };
 
 /**
- * 4つのフィードバックをシャッフルして返却する
- * 2026-2-5の実験の場合：15通りのフィードバックを確実にするため、マップから取得した4つのフィードバックをシャッフルするような使い方をする
- * 
- * @abstract 配列をシャッフルする
- * @param types シャッフルする配列
- * @returns シャッフルされた配列
- */
-const shuffleJudgeTypes = (types: JudgeType[]): JudgeType[] => {
-  const shuffled: JudgeType[] = [...types]; // 元配列を壊さない
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-
-/**
  * @abstract ミッション試験の採点
  * @summary ミッション試験のコードをAIで採点する
  * @example
@@ -238,8 +220,7 @@ const shuffleJudgeTypes = (types: JudgeType[]): JudgeType[] => {
 export const missionExamJudgeService = async(missionId: string, missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]) => {
     let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
     //マップから採点タイプを取得
-    const selectedJudgeTypes = shuffleJudgeTypes(feedbackTypeMap[missionId]);
-    console.log(`選択されたJudgeTypes: ${selectedJudgeTypes.join(", ")}`);
+    const selectedJudgeTypes = feedbackTypeMap[missionId];
     settings = examJudgeWithFeedback(
         missionCode,
         userCode,
