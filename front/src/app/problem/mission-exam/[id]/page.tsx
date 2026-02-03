@@ -65,10 +65,20 @@ export default function MissionExamPage() {
     if (!user) return;
 
     const fetchData = async () => {
-      const res = await fetchWithoutUserId("/problem/missionExam", {
+      const res = await fetchWithUserId(user, "/problem/missionExam", {
         method: "POST",
         body: JSON.stringify({ missionId: id }),
       });
+
+      if (!res.ok) {
+        const json: FailedConnectionResponse = await res.json();
+        setSnackbar({
+          open: true,
+          message: json.message,
+          severity: "error"
+        });
+        return;
+      }
       const json: MissionExamRepsonse = await res.json();
       setResponseData(json);
 
@@ -79,6 +89,11 @@ export default function MissionExamPage() {
         }));
       });
       setCurrentLanguage(json.exam.language[0]);
+
+      if (json.selectedFeedbackIndex !== null) {
+        setSelectedIndex(json.selectedFeedbackIndex);
+        setIsFeedbackConfirmed(true);
+      }
     };
 
     fetchData();
@@ -114,8 +129,8 @@ export default function MissionExamPage() {
     setAIResponseData(json);
     setHasPassed(json.isPassed);
 
-    setSelectedIndex(null);
-    setIsFeedbackConfirmed(false);
+    // setSelectedIndex(null);
+    // setIsFeedbackConfirmed(false);
 
     setIsEvaluating(false);
   };

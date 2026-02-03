@@ -149,7 +149,7 @@ export const missionConfirmController = async(req: AuthRequest, res: Response) =
         res.status(200).json(mission);
     }
     else {
-        res.status(500).json({error: "ミッションデータ取得時にエラーが発生しました"});
+        res.status(500).json({message: "ミッションデータ取得時にエラーが発生しました"});
     }
 }
 
@@ -349,8 +349,9 @@ export const stepExamController = async(req: Request, res: Response) => {
  * @param req 
  * @param res 
  */
-export const missionExamController = async(req: Request, res: Response) => {
+export const missionExamController = async(req: AuthRequest, res: Response) => {
     const { missionId } = req.body;
+    const userId = req.user!.uid;
 
     const missionExam = await fetchMission(missionId, {
         id: true,
@@ -364,9 +365,43 @@ export const missionExamController = async(req: Request, res: Response) => {
                 language: true,
             }
         }
-    })
+    }) as {
+        id: string;
+        title: string;
+        exam: {
+            id: string
+            type: string;
+            component: string;
+            instructions: string[];
+            language: MissionExamLanguages[];
+        }
+    }
+
+    console.log(missionExam.exam.id, userId);
+    //フィードバックが選択済みかどうか取得
+    const isSelectedFeedback = await fetchMissionExamProgress({
+        where: {
+            userId: userId,
+            examId: missionExam.exam?.id,
+            selectedFeedbackIndex: { 
+                not: null 
+            },
+        },
+        select: {
+            selectedFeedbackIndex: true,
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    }) as { selectedFeedbackIndex: number }[] | null;
+
+    const selectedFeedbackIndex = isSelectedFeedback && isSelectedFeedback.length > 0 ? isSelectedFeedback[0].selectedFeedbackIndex : null;
+
     if (missionExam !== null) {
-        res.status(200).json(missionExam);
+        res.status(200).json({
+            ...missionExam,
+            selectedFeedbackIndex: selectedFeedbackIndex
+        });
     }
     else {
         res.status(500).json({error: "ミッションデータ取得時にエラーが発生しました"});
@@ -658,11 +693,24 @@ export const missionResultController = async (req: AuthRequest, res: Response) =
         return res.status(500).json({ error: "ユーザの学習時間の取得に失敗しました" });
     }
 
-    const examResult = await fetchMissionExamProgress(userId, missionData.exam.id,{
-        point: true,
-        isPassed: true,
-        createdAt: true
-    })
+    const examResult = await fetchMissionExamProgress({
+        where: {
+            userId: userId,
+            examId: missionData.exam.id
+        },
+        select: {
+            point: true,
+            isPassed: true,
+            createdAt: true
+        },
+        orderBy: {
+            createdAt: "desc"
+        },
+    }) as {
+        point: number;
+        isPassed: boolean;
+        createdAt: Date;
+    }[] | null;
 
     if (!examResult) return res.status(500).json({ error: "ユーザの試験結果の取得に失敗しました" });
 
