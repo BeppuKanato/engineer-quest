@@ -319,7 +319,7 @@ export const stepExamController = async(req: Request, res: Response) => {
         res.status(200).json(stepAndExam);
     }
     else {
-        res.status(500).json({error: "ステップデータ取得時にエラーが発生しました"});
+        res.status(500).json({message: "ステップデータ取得時にエラーが発生しました"});
     }
 }
 
@@ -952,7 +952,7 @@ export const completeStepController = async(req: AuthRequest, res: Response) => 
     ) as {id: string} | null
 
     if (missionProgress === null) {
-        return res.status(500).json({error: "ミッション進捗状況の獲得に失敗しました"})
+        return res.status(500).json({message: "ミッション進捗状況の獲得に失敗しました"})
     }
 
     const updatedProgress = await updateMissionProgress(
@@ -963,10 +963,10 @@ export const completeStepController = async(req: AuthRequest, res: Response) => 
     )
 
     if (updatedProgress === null) {
-        return res.status(500).json({error: "ミッション進行状況の更新に失敗しました"})
+        return res.status(500).json({message: "ミッション進行状況の更新に失敗しました"})
     }
 
-    return res.status(200).json({result: "success"})
+    return res.status(200).json({message: "進行状況を更新しました"})
 }
 
 export const shareMissionExamController = async(req: AuthRequest, res: Response) => {

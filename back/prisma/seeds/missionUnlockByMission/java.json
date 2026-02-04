@@ -20,5 +20,8 @@
   { "missionSlug": "java-mission-16", "requiredSlug": "java-mission-15" },
   { "missionSlug": "java-mission-17", "requiredSlug": "java-mission-16" },
   { "missionSlug": "java-mission-18", "requiredSlug": "java-mission-17" },
-  { "missionSlug": "java-promotion-3", "requiredSlug": "java-mission-18" }
+  { "missionSlug": "java-promotion-3", "requiredSlug": "java-mission-18" },
+  { "missionSlug": "java-sub-1", "requiredSlug": "java-sub-1" },
+  { "missionSlug": "java-sub-2", "requiredSlug": "java-sub-2" },
+  { "missionSlug": "java-sub-3", "requiredSlug": "java-sub-3" }
 ]
