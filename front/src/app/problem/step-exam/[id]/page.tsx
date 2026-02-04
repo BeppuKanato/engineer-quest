@@ -14,6 +14,7 @@ import { fetchWithoutUserId, fetchWithUserId } from "@/utils/fetchers";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { InstructionList } from "../../mission-exam/components/instructionList";
+import { Snackbar, Alert } from "@mui/material";
 
 export default function StepExamPage() {
   const [responseData, setResponseData] = useState<StepExamResponse | null>(null);
@@ -24,6 +25,16 @@ export default function StepExamPage() {
   const [showScale, setShowScale] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [user, setUser] = useState<User | null>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const router = useRouter();
   const { id } = useParams();
@@ -81,10 +92,8 @@ export default function StepExamPage() {
   const isLastStep = currentOrder === responseData.mission.steps.length;
 
   const handleAnswerOnclick = async () => {
-    //ログイン状態じゃない場合は処理をしない(将来的に改善 2025/11/21 記載)
-    if (!user) {
-      return;
-    }
+    if (!user || isSaving) return;
+
     // 余分な空白や改行を除去
     const normalize = (str: string) =>
       str
@@ -100,26 +109,49 @@ export default function StepExamPage() {
     const userAnswer = normalize(inputValue);
     const correctAnswer = normalize(responseData.stepExams[examNum].answer);
 
-    if (userAnswer === correctAnswer) {
-      setIsCorrect(true);
-      setShowScale(true);
-      setShowConfetti(true);
+    if (userAnswer !== correctAnswer) {
+      setIsCorrect(false);
+      return;
+    }
 
-      setTimeout(() => setShowScale(false), 150);
-      setTimeout(() => setShowConfetti(false), 5000);
+    // 正解時
+    setShowScale(true);
+    setTimeout(() => setShowScale(false), 150);
+    setShowConfetti(true);
 
-      //ステップの進行状況を変更
-      await fetchWithUserId(user, "/problem/completeStep", {
-        method: "POST", 
+    setIsSaving(true);
+
+    try {
+      const res = await fetchWithUserId(user, "/problem/completeStep", {
+        method: "POST",
         body: JSON.stringify({
           missionId: responseData.mission.id,
-          updateStepNum: responseData.order + 1
-        })
-      })
-    } else {
-      setIsCorrect(false);
+          updateStepNum: responseData.order + 1,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("進行状況の保存に失敗");
+      }
+
+      setIsCorrect(true);
+
+      setSnackbar({
+        open: true,
+        message: "進行状況を保存しました",
+        severity: "success",
+      });
+    } catch (e) {
+      setSnackbar({
+        open: true,
+        message: "進行状況の保存に失敗しました",
+        severity: "error",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
+
 
   const goToNextExam = () => {
     setExamNum(examNum + 1);
@@ -237,14 +269,22 @@ export default function StepExamPage() {
                 </MUIButton>
                 {isCorrect ? (
                   examNum + 1 !== responseData.stepExams.length ? (
-                    <MUIButton variant="contained" color="primary" onClick={goToNextExam}>次へ→</MUIButton>
+                    <MUIButton variant="contained" color="primary" onClick={goToNextExam} disabled={isSaving}>次へ→</MUIButton>
                   ) : !isLastStep ? (
-                    <MUIButton variant="contained" color="primary" onClick={goNextStep}>次のステップへ→</MUIButton>
+                    <MUIButton variant="contained" color="primary" onClick={goNextStep} disabled={isSaving}>次のステップへ→</MUIButton>
                   ) : (
-                    <MUIButton variant="contained" color="primary" onClick={goMissionExam}>ミッション試験へ</MUIButton>
+                    <MUIButton variant="contained" color="primary" onClick={goMissionExam} disabled={isSaving}>ミッション試験へ</MUIButton>
                   )
                 ) : (
-                  <MUIButton variant="contained" color="primary" onClick={handleAnswerOnclick}>解答する</MUIButton>
+                  <MUIButton
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAnswerOnclick}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "保存中..." : "解答する"}
+                  </MUIButton>
+
                 )}
               </div>
 
@@ -270,6 +310,20 @@ export default function StepExamPage() {
           </Card>
         </div>
       </div>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
