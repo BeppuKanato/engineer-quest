@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { ensureUserExitController } from "../controller/authController";
 import { verifyToken } from "../middleware/verifyToken";
 import { shareMissionExamController } from "../controller/problemController";
 import { mainController, selectFilterdMissionController } from "../controller/shareController";

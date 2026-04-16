@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma"
 import { fetchUser, updateUser } from "./userService";
 
-export const fetchRank = async(where: object, select: Object) => {
+export const fetchRank = async(where: object, select: object) => {
     try {
         const rank = await prisma.rank.findFirst({
             where: where,
@@ -38,6 +38,6 @@ export const checkAndUpdateRank = async(userId: string, missionId: string) => {
 
     if (!targetRank) return null;
 
-    const updatedUser = await updateUser(userId, { rankId: targetRank.id });
+    await updateUser(userId, { rankId: targetRank.id });
     return targetRank;
 }

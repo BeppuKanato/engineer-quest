@@ -1,8 +1,8 @@
 import { Difficulty, JudgeType } from "@prisma/client";
 
 export type LoginResponse = {
-    id: String
-    name: String
+    id: string
+    name: string
 }
 
 export type MissionResponse = {

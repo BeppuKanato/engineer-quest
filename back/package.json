@@ -7,7 +7,7 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "build": "tsc",
     "start": "node dist/src/app.js",
-    "lint": "eslint ."
+    "lint": "eslint src prisma --ext .ts"
   },
   "keywords": [],
   "author": "",

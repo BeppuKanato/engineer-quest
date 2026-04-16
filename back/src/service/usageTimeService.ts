@@ -29,22 +29,28 @@ export const fetchUsageTime = async (userId: string, period: UsagePeriod) => {
     let startDate: Date;
 
     switch (period) {
-        case "day":
+        case "day": {
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             startDate.setHours(0, 0, 0, 0);
             break;
-        case "week":
+        }
+        case "week": {
             const dayOfWeek = now.getDay();
             startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
             startDate.setHours(0, 0, 0, 0);
             break;
-        case "month":
+        }
+
+        case "month": {
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
             startDate.setHours(0, 0, 0, 0);
             break;
-        case "total":
+        }
+
+        case "total": {
             startDate = new Date(0);
             break;
+        }
     }
 
     try {
@@ -60,8 +66,7 @@ export const fetchUsageTime = async (userId: string, period: UsagePeriod) => {
 
         return usage._sum.usageTime ?? 0;
     } catch (error) {
-        console.error("Error fetching usage time:", error);
-        throw new Error("Failed to fetch usage time");
+        throw new Error("Failed to fetch usage time", { cause: error });
     }
 };
 
@@ -112,7 +117,6 @@ export const upsertDailyUsage = async(userId: string, useTime: number) => {
         });
         return dailyUsage;
     } catch (error) {
-        console.error("Error upserting daily usage:", error);
-        throw new Error("Failed to upsert daily usage");
+        throw new Error("Failed to upsert daily usage", { cause: error });
     }
 }
