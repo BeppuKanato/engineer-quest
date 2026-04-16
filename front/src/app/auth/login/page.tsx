@@ -16,6 +16,7 @@ export default function Login() {
   const apiBaseUrl = getApiBaseUrl();
 
   const handleLogin = async () => {
+    console.log(`URL: ${apiBaseUrl}`);
     try {
       const signInUser = await signInWithEmailAndPassword(auth, email, password);
       const token = await signInUser.user.getIdToken();

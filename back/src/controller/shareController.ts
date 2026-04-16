@@ -3,8 +3,7 @@ import { AuthRequest } from "../middleware/verifyToken";
 import { fetchLatesMissionExamProgress } from "../service/missionExamProgressService";
 import { createSharedMissionExamProgress, fetchSharedMissions } from "../service/shareMissionExamService";
 import { fetchMissions } from "../service/missionService";
-import { Difficulty, MissionType } from "@prisma/client";
-import { unwatchFile } from "fs";
+import { MissionType } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
 type SharedMissionWithProgress =
@@ -54,8 +53,6 @@ export const shareMissionExamController = async(req: AuthRequest, res: Response)
 
 export const selectFilterdMissionController = async(req: AuthRequest, res: Response) => {
     const {difficulty, star, language, type} = req.body;
-    const userId = req.user!.uid;
-
     const missions = await fetchMissions({
         where: {
             difficulty: difficulty ? {
@@ -99,10 +96,6 @@ export const selectFilterdMissionController = async(req: AuthRequest, res: Respo
 
 export const mainController = async(req: AuthRequest, res: Response) => {
     const {examId} = req.body;
-    const userId = req.user!.uid;
-
-    console.log("動作確認");
-
     const sharedMissions = await fetchSharedMissions({
         where: {
             examProgress: {

@@ -1,13 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
 import { prisma } from "../lib/prisma"
 import { AIResponse } from "../type";
-import { realpathSync, unwatchFile } from "fs";
-import { ClientRequest } from "http";
+
 import { JudgeType, MissionExamLanguages, MissionStatus } from "@prisma/client";
-import { triggerAsyncId } from "async_hooks";
 import { fetchUser } from "./userService";
 import { examJudgeWithFeedback } from "./ContentsForLLM/examJudgeWithFeedback";
-import { examJudgeWithoutFeedback } from "./ContentsForLLM/examJudgeWithoutFeedback";
 import OpenAI from "openai";
 
 const feedbackTypeMap: { [key: string]: JudgeType[] } = {
@@ -218,10 +214,8 @@ export const fetchMissions = async (
  * @returns 
  */
 export const missionExamJudgeService = async(missionId: string, missionCode: {[key in MissionExamLanguages]?: string}, userCode: {[key in MissionExamLanguages]?: string}, factor: string[], instructions: string[]) => {
-    let settings: { contents: string; systemInstruction: string } ={contents: "", systemInstruction: ""} ;
-    //マップから採点タイプを取得
     const selectedJudgeTypes = feedbackTypeMap[missionId];
-    settings = examJudgeWithFeedback(
+    const settings = examJudgeWithFeedback(
         missionCode,
         userCode,
         factor,

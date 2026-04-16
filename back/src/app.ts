@@ -11,11 +11,11 @@ import shareRouter from './router/shareRouter';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
-const allowedOrignis = process.env.ALLOWED_ORIGINS?.split(',') || [];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
 app.use(cors({
-  origin: allowedOrignis,
+  origin: allowedOrigins,
   credentials: true,
 }));
 
@@ -23,6 +23,10 @@ app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
+});
+
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).send("OK");
 });
 
 //ユーザ認証
