@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { getAcceptableMissions } from "../service/missionService";
 import { fetchUser } from "../service/userService";
 import { createMissionProgress } from "../service/missionProgressService";

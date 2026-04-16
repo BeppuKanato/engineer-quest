@@ -18,7 +18,7 @@ export const upsertUsageTimeController = async(req: AuthRequest, res: Response) 
     const { useTime } = req.body;
     const userId = req.user!.uid;
     try {
-        const updatedUsage = await upsertDailyUsage(userId, useTime);
+        await upsertDailyUsage(userId, useTime);
         res.status(200).json({message: "学習時間を更新しました"});
     } catch (error) {
         console.error("Error updating usage time:", error);

@@ -2,30 +2,52 @@ import { Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middleware/verifyToken";
 
-export const ensureUserExitController = async (req: AuthRequest, res: Response) => {
-    const uid = req.user!.uid;
-    try {
-        //idがuidのユーザを取得
-        let user = await prisma.user.findUnique({
-            where: {id: uid}
+export const ensureUserExistController = async (req: AuthRequest, res: Response) => {
+    const uid = req.user?.uid;
+
+    if (!uid) {
+        return res.status(401).json({
+            ok: false,
+            message: "Unauthorized",
         });
-        //ユーザがいない場合(初回ログイン)
-        if (!user) {
-            user = await prisma.user.create({
-                data : {
+    }
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            const existingUser = await tx.user.findUnique({
+                where: { id: uid },
+            });
+
+            if (existingUser) {
+                return;
+            }
+
+            const initialRank = await tx.rank.findUnique({
+                where: { slug: "rank-1" },
+                select: { id: true },
+            });
+
+            if (!initialRank) {
+                throw new Error("初期ランク(rank-1)が見つかりません");
+            }
+
+            await tx.user.create({
+                data: {
                     id: uid,
                     name: "エンジニア",
-                    level: 1, 
+                    level: 1,
                     experience: 0,
-                    //初期のランクのID
-                    rankId: "cd5d0976-d349-4e37-8df3-bfce0dcc2d97"
+                    rankId: initialRank.id,
                 },
             });
-        }
-        res.status(200).json({ok: true});
+        });
+
+        return res.status(200).json({ ok: true });
+    } catch (error) {
+        console.error("ensureUserExistController error:", error);
+        return res.status(500).json({
+            ok: false,
+            message: "Internal Server Error",
+        });
     }
-    catch(error) {
-        console.log("ユーザ確認・作成時にエラーが発生しました" + error);
-        res.status(500).json({ok: false});
-    }
-}
+};

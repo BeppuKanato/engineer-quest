@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --ext ts --exec \"npx ts-node src/app.ts\"",
+    "test": "echo \"No tests yet\"",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "build": "tsc",
-    "start": "node dist/src/app.js"
+    "start": "node dist/src/app.js",
+    "lint": "eslint src --ext .ts"
   },
   "keywords": [],
   "author": "",
@@ -25,13 +26,16 @@
     "puppeteer": "^24.31.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.0",
+    "eslint": "^10.2.0",
     "nodemon": "^3.1.10",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.2"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
