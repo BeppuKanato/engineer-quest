@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { ensureUserExitController } from "../controller/authController";
+import { ensureUserExistController } from "../controller/authController";
 import { verifyToken } from "../middleware/verifyToken";
 
 const authRouter = Router();
 
-authRouter.post('/ensure', verifyToken, ensureUserExitController);
+authRouter.post('/ensure', verifyToken, ensureUserExistController);
 
 export default authRouter;
