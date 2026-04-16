@@ -19,7 +19,6 @@
     "@typescript-eslint/typescript-estree": "^8.47.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "eslint": "^10.2.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "just-diff": "^6.0.2",
@@ -27,13 +26,16 @@
     "puppeteer": "^24.31.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.0",
+    "eslint": "^10.2.0",
     "nodemon": "^3.1.10",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.58.2"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
