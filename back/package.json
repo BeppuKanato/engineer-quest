@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --ext ts --exec \"npx ts-node src/app.ts\"",
+    "test": "echo \"No tests yet\"",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
     "build": "tsc",
-    "start": "node dist/src/app.js"
+    "start": "node dist/src/app.js",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -18,6 +19,7 @@
     "@typescript-eslint/typescript-estree": "^8.47.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
+    "eslint": "^10.2.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "just-diff": "^6.0.2",
