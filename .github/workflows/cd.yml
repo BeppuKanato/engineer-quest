@@ -32,8 +32,29 @@ jobs:
       # =========================
       - name: Build and Push Back
         run: |
-          gcloud builds submit ./back \
-            --tag "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${REPO_NAME}/back:latest"
+          BACK_BUILD_ID=$(gcloud builds submit ./back \
+            --tag "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${REPO_NAME}/back:latest" \
+            --async \
+            --format="value(metadata.build.id)")
+          echo "BACK_BUILD_ID=$BACK_BUILD_ID" >> $GITHUB_ENV
+          echo "Back build id: $BACK_BUILD_ID"
+
+      - name: Wait for Back Build
+        run: |
+          while true; do
+            STATUS=$(gcloud builds describe "$BACK_BUILD_ID" --format="value(status)")
+            echo "Current back build status: $STATUS"
+
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "Back build succeeded"
+              break
+            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "CANCELLED" ] || [ "$STATUS" = "TIMEOUT" ]; then
+              echo "Back build failed with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 10
+          done
 
       - name: Deploy Backend
         run: |
@@ -50,10 +71,31 @@ jobs:
       # =========================
       - name: Build and Push Front
         run: |
-          gcloud builds submit ./front \
+          FRONT_BUILD_ID=$(gcloud builds submit ./front \
             --config ./front/cloudbuild.yaml \
-            --substitutions "_NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}"
-     
+            --async \
+            --substitutions "_NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" \
+            --format="value(metadata.build.id)")
+          echo "FRONT_BUILD_ID=$FRONT_BUILD_ID" >> $GITHUB_ENV
+          echo "Front build id: $FRONT_BUILD_ID"
+
+      - name: Wait for Front Build
+        run: |
+          while true; do
+            STATUS=$(gcloud builds describe "$FRONT_BUILD_ID" --format="value(status)")
+            echo "Current front build status: $STATUS"
+
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "Front build succeeded"
+              break
+            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "CANCELLED" ] || [ "$STATUS" = "TIMEOUT" ]; then
+              echo "Front build failed with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 10
+          done
+
       - name: Deploy Front
         run: |
           gcloud run deploy engineer-quest-front-prod \
