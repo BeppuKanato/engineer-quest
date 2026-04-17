@@ -28,6 +28,7 @@ services:
       PORT: 8080
       DATABASE_URL: ${DATABASE_URL}
       ALLOWED_ORIGINS: http://localhost:3000
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
     volumes:
       - ./back:/app
       - /app/node_modules
