@@ -1,22 +1,19 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAYDGSiF12EspKtEYpW-VoUzFrqkmLH4YU",
-  authDomain: "engineer-quest.firebaseapp.com",
-  projectId: "engineer-quest",
-  storageBucket: "engineer-quest.firebasestorage.app",
-  messagingSenderId: "203336823452",
-  appId: "1:203336823452:web:657a0ca6e4a005d5d4f359",
-  measurementId: "G-FJKVL606SG"
+  apiKey: "AIzaSyCt1Cf4O-JRaiF7YcRL_0tDqPxdYx7cxUs",
+  authDomain: "enginner-quest.firebaseapp.com",
+  projectId: "enginner-quest",
+  storageBucket: "enginner-quest.firebasestorage.app",
+  messagingSenderId: "359293837194",
+  appId: "1:359293837194:web:b1d403430c8cd4e941f273",
+  measurementId: "G-J3CGVBXJHJ",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
-export const auth = getAuth(app); 
+// initializeApp の重複防止
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// Auth を export
+export const auth = getAuth(app);
