@@ -35,9 +35,14 @@ jobs:
           BACK_BUILD_ID=$(gcloud builds submit ./back \
             --tag "${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${REPO_NAME}/back:latest" \
             --async \
-            --format="value(metadata.build.id)")
-          echo "BACK_BUILD_ID=$BACK_BUILD_ID" >> $GITHUB_ENV
+            --format="value(id)")
+          echo "BACK_BUILD_ID=$BACK_BUILD_ID" >> "$GITHUB_ENV"
           echo "Back build id: $BACK_BUILD_ID"
+
+          if [ -z "$BACK_BUILD_ID" ]; then
+            echo "Failed to get back build id"
+            exit 1
+          fi
 
       - name: Wait for Back Build
         run: |
@@ -75,9 +80,14 @@ jobs:
             --config ./front/cloudbuild.yaml \
             --async \
             --substitutions "_NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" \
-            --format="value(metadata.build.id)")
-          echo "FRONT_BUILD_ID=$FRONT_BUILD_ID" >> $GITHUB_ENV
+            --format="value(id)")
+          echo "FRONT_BUILD_ID=$FRONT_BUILD_ID" >> "$GITHUB_ENV"
           echo "Front build id: $FRONT_BUILD_ID"
+
+          if [ -z "$FRONT_BUILD_ID" ]; then
+            echo "Failed to get front build id"
+            exit 1
+          fi
 
       - name: Wait for Front Build
         run: |
