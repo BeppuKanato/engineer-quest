@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000 --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev -p 3000",
+    "build": "next build",
     "start": "next start -p ${PORT:-8080}",
     "lint": "eslint"
   },
@@ -14,9 +14,11 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
+    "@mui/x-date-pickers-pro": "^9.0.2",
     "@shadcn/ui": "^0.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.20",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
