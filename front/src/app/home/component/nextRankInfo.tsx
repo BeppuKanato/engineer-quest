@@ -6,11 +6,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useMemo, useState } from "react"
-
-enum Status {
-    Complete = "complete",
-    Incomplete = "incomplete"
-}
+import { Status } from "../type";
 
 type NextRankInfoProps = {
     nextRankInfo: {
@@ -29,7 +25,7 @@ export const NextRankInfo: React.FC<NextRankInfoProps> = ({
     const incompleteConditionNumForNextRank = useMemo(
         () => 
             Object.values(nextRankCondition).reduce(
-                (total, items) => total + items.filter((item) => item.status === Status.Incomplete).length, 0
+                (total, items) => total + items.filter((item) => item.status === "incomplete").length, 0
             ), [nextRankCondition]
     )
     const completeConditionNumForNextRank = requireConditionNumForNextRank - incompleteConditionNumForNextRank;
@@ -130,7 +126,7 @@ export const NextRankInfo: React.FC<NextRankInfoProps> = ({
                             spacing={1}
                             alignItems="center"
                         >
-                            {item.status === Status.Complete ? (
+                            {item.status === "complete" ? (
                             <CheckCircleIcon color="success" fontSize="small" />
                             ) : (
                             <RadioButtonUncheckedIcon color="disabled" fontSize="small" />

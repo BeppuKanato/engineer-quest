@@ -9,16 +9,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { AppHeader } from "../component/appHeader";
 import { MonthlyCalender } from "../component/monthlyCalender";
-import { Mission, MissionTab } from "./type";
+import { Mission, MissionTab, Status } from "./type";
 import { MissionHeroCard } from "./component/missionHeroCard";
 import { SummaryCard } from "../component/summaryCard";
 import { NextRankInfo } from "./component/nextRankInfo";
 import { TargetAchievementInfo } from "./component/targetAchievementInfo";
-
-enum Status {
-    Complete = "complete",
-    Incomplete = "incomplete"
-}
 
 const userData = {
     rank: "Junior",
@@ -61,14 +56,14 @@ const nextRankInfo = {
 
 const nextRankCondition: Record<string, { title: string; status: Status }[]> = {
   mission: [
-    { title: "ミッション1", status: Status.Complete },
-    { title: "ミッション2", status: Status.Complete },
-    { title: "ミッション3", status: Status.Complete },
+    { title: "ミッション1", status: "complete" },
+    { title: "ミッション2", status: "complete" },
+    { title: "ミッション3", status: "complete" },
   ],
   achievement: [
-    { title: "実績1", status: Status.Complete },
-    { title: "実績2", status: Status.Complete },
-    { title: "実績3", status: Status.Incomplete },
+    { title: "実績1", status: "complete" },
+    { title: "実績2", status: "complete" },
+    { title: "実績3", status: "incomplete" },
   ],
 };
 
