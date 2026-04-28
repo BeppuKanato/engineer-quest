@@ -12,8 +12,8 @@ import { MonthlyCalender } from "../component/monthlyCalender";
 import { Mission, MissionTab } from "./type";
 import { MissionHeroCard } from "./component/missionHeroCard";
 import { SummaryCard } from "../component/summaryCard";
-import { NextRankCard } from "./component/nextRankCard";
-import { TargetAchievementCard } from "./component/targetAchievementCard";
+import { NextRankInfo } from "./component/nextRankInfo";
+import { TargetAchievementInfo } from "./component/targetAchievementInfo";
 
 enum Status {
     Complete = "complete",
@@ -215,11 +215,11 @@ export default function HomePage() {
                                         <Fade in timeout={220} key={goalView}>
                                             <Box sx={{ pt: 0.5 }}>
                                                 {goalView === "rank" || !targetAchievement ? (
-                                                    <NextRankCard
+                                                    <NextRankInfo
                                                         nextRankInfo={nextRankInfo}
                                                         nextRankCondition={nextRankCondition}
                                                     />):
-                                                    <TargetAchievementCard
+                                                    <TargetAchievementInfo
                                                         title={targetAchievement.title}
                                                         factor={targetAchievement.factor}
                                                     /> 
