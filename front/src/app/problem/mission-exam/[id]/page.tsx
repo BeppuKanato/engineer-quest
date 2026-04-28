@@ -7,7 +7,6 @@ import {
   MissionExamAIResponse,
   MISSION_EXAM_TPYE,
   MISSION_EXAM_LANGUAGE,
-  JUDGE_TYPE,
   FailedConnectionResponse,
 } from "@/type";
 import { BackHeader } from "@/app/component/common/backHeader";
@@ -20,7 +19,7 @@ import { HybridExamScreen } from "../components/hybridScreen";
 import { NavBar } from "@/app/component/common/navBar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { fetchWithoutUserId, fetchWithUserId } from "@/utils/fetchers";
+import { fetchWithUserId } from "@/utils/fetchers";
 import { Alert, Snackbar } from "@mui/material";
 
 export default function MissionExamPage() {

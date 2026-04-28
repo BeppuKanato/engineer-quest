@@ -51,7 +51,7 @@ export default function ResultPage() {
   const [responseData, setResponseData] = useState<MissionResultResponse | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [shortFeedback, setShortFeedback] = useState("");
+  // const [shortFeedback, setShortFeedback] = useState("");
 
   const [notificationQueue, setNotificationQueue] = useState<{ title: string; content: React.ReactNode }[]>([]);
   const [currentNotification, setCurrentNotification] = useState<{ title: string; content: React.ReactNode; isLast?: boolean } | null>(null);
@@ -285,9 +285,9 @@ export default function ResultPage() {
               <Card className="shadow-md rounded-2xl text-center">
                 <CardHeader title="🤖 AIフィードバック" />
                 <CardContent>
-                  <Typography className="text-gray-700 whitespace-pre-line">
+                  {/* <Typography className="text-gray-700 whitespace-pre-line">
                     {shortFeedback}
-                  </Typography>
+                  </Typography> */}
                 </CardContent>
               </Card>
             )}

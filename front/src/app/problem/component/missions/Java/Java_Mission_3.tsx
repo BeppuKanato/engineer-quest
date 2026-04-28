@@ -1,4 +1,4 @@
-import { Box, Typography, Card } from "@mui/material";
+import { Typography, Card } from "@mui/material";
 
 export const Java_Mission_3 = () => {
     return (

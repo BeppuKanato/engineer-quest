@@ -141,7 +141,7 @@ export default function StepExamPage() {
         message: "進行状況を保存しました",
         severity: "success",
       });
-    } catch (e) {
+    } catch {
       setSnackbar({
         open: true,
         message: "進行状況の保存に失敗しました",

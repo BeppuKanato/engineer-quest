@@ -1,229 +1,322 @@
-"use client";
+"use client"
 
-import { HomePageResponse, MISSION_TYPE, MissionSentence } from "@/type";
-import { useEffect, useState } from "react";
-import {
-  Card,
-  Typography,
-  Skeleton,
-  LinearProgress,
-} from "@mui/material";
-import { Star } from "lucide-react";
-import { MissionDialog } from "./component/missionDialog";
-import { MissionSnackbar } from "./component/acceptSnackbar";
-import { NavBar } from "../component/common/navBar";
-import { MissionTypeBadge, getMissionTypeConfig } from "../component/common/missionTypeConfig";
-import { MissionDifficultyBadge } from "../component/common/missionDifficultyConfig";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { fetchWithUserId } from "@/utils/fetchers";
+import { useState } from "react"
+import { Box, Card, CardContent, Container, Divider, Fade, Grid, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import MovingIcon from "@mui/icons-material/Moving";
+import BoltIcon from "@mui/icons-material/Bolt";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { AppHeader } from "../component/appHeader";
+import { MonthlyCalender } from "../component/monthlyCalender";
+import { Mission, MissionTab } from "./type";
+import { MissionHeroCard } from "./component/missionHeroCard";
+import { SummaryCard } from "../component/summaryCard";
+import { NextRankInfo } from "./component/nextRankInfo";
+import { TargetAchievementInfo } from "./component/targetAchievementInfo";
+
+enum Status {
+    Complete = "complete",
+    Incomplete = "incomplete"
+}
+
+const userData = {
+    rank: "Junior",
+    level: 12,
+    requireNextLevelExp: 2000,
+    exp: 1550,
+    completedMissionNum: 28,
+    completedAchievementNum: 5,
+    continuationDays: 3,
+    totalDays: 15
+};
+
+const continueMission: Mission = {
+  id: "continue-mission",
+  title: "Reactフックの基礎",
+  difficulty: 1,
+  goalImg: "/images/goals/sample.png",
+  description:
+    "useStateとuseEffectを使って、インタラクティブなコンポーネントを作成しましょう。",
+  progress: 75,
+  ctaLabel: "続きから始める",
+  badgeLabel: "再開",
+};
+
+const recommendMission: Mission = {
+  id: "recommend-mission",
+  title: "状態管理の基本",
+  difficulty: 2,
+  goalImg: "/images/goals/sample.png",
+  description:
+    "複数コンポーネント間で状態を整理し、見通しのよい設計を学びましょう。",
+  progress: 20,
+  ctaLabel: "ミッション開始",
+  badgeLabel: "おすすめ",
+};
+
+const nextRankInfo = {
+  name: "Senior",
+};
+
+const nextRankCondition: Record<string, { title: string; status: Status }[]> = {
+  mission: [
+    { title: "ミッション1", status: Status.Complete },
+    { title: "ミッション2", status: Status.Complete },
+    { title: "ミッション3", status: Status.Complete },
+  ],
+  achievement: [
+    { title: "実績1", status: Status.Complete },
+    { title: "実績2", status: Status.Complete },
+    { title: "実績3", status: Status.Incomplete },
+  ],
+};
+
+const targetAchievement: {title: string, factor: {name: string, goal: number, progress: number}[]} | null= 
+{
+    title: "継続マスター",
+    factor: [
+        {
+            name: "7日連続でログイン",
+            goal: 7,
+            progress: 4
+        },
+        {
+            name: "累計30日ログイン",
+            goal: 30,
+            progress: 15
+        }
+    ]
+} 
 
 export default function HomePage() {
-  const [responseData, setResponseData] = useState<HomePageResponse | null>(null);
-  const [showMissionSentence, setShowMissionSentence] = useState(false);
-  const [missionSentence, setMissionSentence] = useState<MissionSentence | null>(null);
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [activaTab, setActiveTab] = useState<MissionTab>("resume");
+    const [goalView, setGoalView] = useState<"rank" | "achievement">("rank");
+    const activeMission = activaTab === "resume" ? continueMission : recommendMission;
+   
+    const levelProgress = (userData.exp / userData.requireNextLevelExp) * 100;
 
-  const [user, setUser] = useState<User | null>();
-  
-  const router = useRouter();
+    return (
+        <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC"}} >
+            <AppHeader/ >
+            
+            <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
+                <Stack spacing={3.5}>
+                    <MissionHeroCard
+                        mission={activeMission}
+                        tab={activaTab}
+                        onChangeTab={setActiveTab} 
+                    />
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-      setUser(user);
-    });
+                    <Grid container spacing={2.5}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <SummaryCard
+                                icon={<EmojiEventsIcon fontSize="small" />}
+                                label="ランク"
+                                value={userData.rank}
+                                accentColor="#F59E0B"
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <SummaryCard
+                                icon={<MovingIcon fontSize="small" />}
+                                label="レベル"
+                                value={userData.level}
+                                subtext={`次のレベルまで ${userData.requireNextLevelExp - userData.exp} EXP`}
+                                accentColor="#6174F3"
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <SummaryCard
+                                icon={<BoltIcon fontSize="small" />}
+                                label="EXP"
+                                value={userData.exp.toLocaleString()}
+                                progress={levelProgress}
+                                accentColor="#4CAF50"
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <SummaryCard
+                                icon={<CheckCircleIcon fontSize="small" />}
+                                label="完了ミッション"
+                                value={userData.completedMissionNum}
+                                accentColor="#1976D2"
+                            />
+                        </Grid>
+                    </Grid>
 
-    return () => unsub();
-  }, [router]);
-  //HomeAPIへ通信
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
+                    <Grid container spacing={2.5} alignItems="stretch">
+                        <Grid size={{ xs: 12, md: 7}}>
+                            <Card
+                                sx={{
+                                    height: "100%",
+                                    borderRadius: 4,
+                                    border: "1px solid #E8ECF4",
+                                    boxShadow: "0 8px 22px rgba(17, 24, 39, 0.04)",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                <Box       
+                                    sx={{
+                                        height: 4,
+                                        bgcolor: goalView === "rank" ? "#F59E0B" : "#8B5CF6",
+                                    }}
+                                />
+                                <CardContent sx={{ p: 3, height: "100%" }}>
+                                    <Stack spacing={3}>
+                                        <Stack
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                        >
+                                            <Typography variant="h5" fontWeight={800}>
+                                                進行目標
+                                            </Typography>
 
-    const fetchData = async() => {
-      const res = await fetchWithUserId(user, "/home", {method: "POST"});
-      const json: HomePageResponse = await res?.json();
-      setResponseData(json);
-    };
+                                            <ToggleButtonGroup
+                                                value={goalView}
+                                                exclusive
+                                                onChange={(_, value) => {if (value !== null) setGoalView(value); }}
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: "#F8FAFC",
+                                                    borderRadius: 2.5,
+                                                    p: 0.25,
+                                                    gap: 0.5,
+                                                    "& .MuiToggleButton-root": {
+                                                        px: 1.75,
+                                                        py: 0.6,
+                                                        borderRadius: 2,
+                                                        border: "1px solid transparent",
+                                                        color: "#64748B",
+                                                        fontWeight: 700,
+                                                        fontSize: 12,
+                                                        textTransform: "none",
+                                                        lineHeight: 1.2,
+                                                        "&:hover": {
+                                                            bgcolor: "#EEF2F7",
+                                                        },
+                                                    },
+                                                    "& .Mui-selected": {
+                                                        bgcolor: "#FFFFFF",
+                                                        color: "#111827",
+                                                        borderColor: "#E5E7EB",
+                                                        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
+                                                    },
+                                                    "& .Mui-disabled": {
+                                                        opacity: 0.45,
+                                                    },
+                                                }}
+                                            >
+                                                <ToggleButton value="rank">RANK</ToggleButton>
+                                                <ToggleButton value="achievement" disabled={!targetAchievement}>ACHIEVEMENT</ToggleButton>
+                                            </ToggleButtonGroup>
+                                        </Stack>
+                                        <Fade in timeout={220} key={goalView}>
+                                            <Box sx={{ pt: 0.5 }}>
+                                                {goalView === "rank" || !targetAchievement ? (
+                                                    <NextRankInfo
+                                                        nextRankInfo={nextRankInfo}
+                                                        nextRankCondition={nextRankCondition}
+                                                    />):
+                                                    <TargetAchievementInfo
+                                                        title={targetAchievement.title}
+                                                        factor={targetAchievement.factor}
+                                                    /> 
+                                                }
+                                            </Box>
+                                        </Fade>
+                                    </Stack>
+                                </CardContent>
+                            </Card>
+                        </Grid>
 
-    fetchData();
-  }, [user]);
+                        <Grid size={{ xs: 12, md: 5 }}>
+                            <Card
+                                sx={{
+                                height: "100%",
+                                borderRadius: 4,
+                                border: "1px solid #E8ECF4",
+                                boxShadow: "0 8px 22px rgba(17,24,39,0.04)",
+                                overflow: "hidden",
+                                }}
+                            >
+                                <Box sx={{ height: 4, bgcolor: "#6174F3" }} />
+                                <CardContent
+                                    sx={{
+                                        p: 3,
+                                        height: "100%",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                    }}
+                                >
+                                    <Stack direction="row" spacing={1.25} alignItems="center" sx={{ mb: 2 }}>
+                                        <Box
+                                        sx={{
+                                            width: 36,
+                                            height: 36,
+                                            borderRadius: 2,
+                                            bgcolor: "#6174F318",
+                                            color: "#6174F3",
+                                            display: "grid",
+                                            placeItems: "center",
+                                        }}
+                                        >
+                                            <CalendarMonthIcon fontSize="small" />
+                                        </Box>
+                                        <Typography variant="h5" fontWeight={800}>
+                                            学習カレンダー
+                                        </Typography>
+                                    </Stack>
 
-  const onClickMissionCard = (
-    id: string,
-    title: string,
-    detail: string,
-    type: MISSION_TYPE,
-    sentences: {
-      sentence: string;
-      speaker: { name: string; imagePath: string };
-    }[]
-  ) => {
-    setMissionSentence({ id, title, detail, type, sentences });
-    setShowMissionSentence(true);
-  };
+                                    <Box sx={{ flexGrow: 1 }}>
+                                        <MonthlyCalender year={2026} month={3} date={21} />
+                                    </Box>
 
-  const onClickMissionAccept = async (
-    missionId: string,
-    missionTitle: string
-  ) => {
-    if(!user) return;
-    await fetchWithUserId(user, "/home/acceptMission", {method: "POST", body: JSON.stringify({missionId})});
-    setResponseData((prev) =>
-      prev
-        ? {
-            ...prev,
-            acceptableMission: prev.acceptableMission.filter((m) => m.id !== missionId),
-          }
-        : prev
-    );
-    setSnackbarMessage(`ミッション「${missionTitle}」を受注しました！`);
-    setShowSnackbar(true);
-    setShowMissionSentence(false);
-  };
+                                    <Divider sx={{ my: 2 }} />
 
-  return (
-    <div className="min-h-screen bg-indigo-50 pb-20">
-      <NavBar />
-
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 p-4 sticky top-0 z-40 flex items-center justify-between">
-        {responseData ? (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-lg">
-              🙂
-            </div>
-            <div>
-              <p className="font-medium">{responseData.user.rank.name}</p>
-              <p className="text-xs text-gray-500">EngineerQueest</p>
-            </div>
-          </div>
-        ) : (
-          <Skeleton variant="rectangular" width={150} height={24} />
-        )}
-        <div className="flex items-center gap-3">
-          {responseData ? (
-            <>
-              <div className="flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full text-yellow-700 text-sm font-medium">
-                <Star className="w-4 h-4" /> Lv.{responseData.user.level}
-              </div>
-              <LinearProgress
-                variant="determinate"
-                value={responseData.experienceStatus.progressRate * 100}
-                className="w-24 h-2 rounded-full"
-              />
-            </>
-          ) : (
-            <Skeleton variant="rectangular" width={100} height={24} />
-          )}
-        </div>
-      </header>
-
-      {/* Stats */}
-      <div className="p-4 grid grid-cols-2 gap-4 max-w-2xl mx-auto">
-        {responseData ? (
-          <Card className="p-4 shadow-sm">
-            <Typography className="text-lg font-bold text-orange-600">
-              {responseData.user.experience}
-            </Typography>
-            <Typography className="text-xs text-gray-500">総EXP</Typography>
-          </Card>
-        ) : (
-          <Skeleton variant="rectangular" height={72} />
-        )}
-      </div>
-
-      {/* Missions */}
-      <div className="p-4 max-w-2xl mx-auto space-y-4">
-        <h2 className="text-lg font-bold mb-2">受注可能なミッション</h2>
-        {responseData?.acceptableMission ? (
-          responseData.acceptableMission.map((mission) => {
-            const typeConfig = getMissionTypeConfig(mission.type);
-
-            return (
-              <Card
-                key={mission.id}
-                variant="outlined"
-                className="flex items-center gap-4 p-4 hover:shadow-lg transition cursor-pointer border-2"
-                onClick={() =>
-                  onClickMissionCard(
-                    mission.id,
-                    mission.title,
-                    mission.detail,
-                    mission.type,
-                    mission.beforeSentences.map((s) => ({
-                      sentence: s.sentence,
-                      speaker: {
-                        name: s.speaker.name,
-                        imagePath: s.speaker.imagePath,
-                      },
-                    }))
-                  )
-                }
-                style={{
-                  borderColor: typeConfig.color,
-                }}
-              >
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl">
-                  {mission.client.imagePath}
-                </div>
-                <div className="flex-1">
-                  <Typography className="text-sm font-medium">{mission.title}</Typography>
-                  <Typography className="text-xs text-gray-500 line-clamp-2">
-                    {mission.detail}
-                  </Typography>
-                </div>
-
-                <div className="flex flex-col gap-1 items-end text-xs">
-                  {/* ミッションタイプ */}
-                  <MissionTypeBadge type={mission.type} />
-
-                  {/* ✅ 難易度バッジをコンポーネント化 */}
-                  <MissionDifficultyBadge difficulty={mission.difficulty.name} star={mission.star} />
-                </div>
-              </Card>
-            );
-          })
-        ) : (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} variant="rectangular" height={72} className="rounded-lg" />
-          ))
-        )}
-      </div>
-
-      {/* Dialog */}
-      {missionSentence && (
-        <MissionDialog
-          isOpen={showMissionSentence}
-          mission={missionSentence}
-          missionTypeLabel={getMissionTypeConfig(missionSentence.type).label}
-          missionTypeColor={getMissionTypeConfig(missionSentence.type).color}
-          missionTypeIcon={getMissionTypeConfig(missionSentence.type).icon}
-          onClose={() => setShowMissionSentence(false)}
-          onAccept={() =>
-            onClickMissionAccept(
-              missionSentence.id,
-              missionSentence.title
-            )
-          }
-        />
-      )}
-
-      {/* Snackbar */}
-      {showSnackbar && (
-        <MissionSnackbar
-          message={snackbarMessage}
-          duration={3000}
-          onClose={() => setShowSnackbar(false)}
-        />
-      )}
-    </div>
-  );
+                                    <Grid container spacing={1.5}>
+                                        <Grid size={6}>
+                                            <Box
+                                                sx={{
+                                                p: 2,
+                                                borderRadius: 3,
+                                                bgcolor: "#6174F310",
+                                                textAlign: "center",
+                                                }}
+                                            >
+                                                <Typography variant="caption" color="text.secondary">
+                                                    継続日数
+                                                </Typography>
+                                                <Typography sx={{ fontSize: 28, fontWeight: 800, color: "#6174F3" }}>
+                                                    {userData.continuationDays}日
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid size={6}>
+                                            <Box
+                                                sx={{
+                                                p: 2,
+                                                borderRadius: 3,
+                                                bgcolor: "#4CAF5010",
+                                                textAlign: "center",
+                                                }}
+                                            >
+                                                <Typography variant="caption" color="text.secondary">
+                                                    学習日数
+                                                </Typography>
+                                                <Typography sx={{ fontSize: 28, fontWeight: 800, color: "#4CAF50" }}>
+                                                    {userData.totalDays}日
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </Grid>
+                </Stack>
+            </Container>
+        </Box>
+    )
 }
