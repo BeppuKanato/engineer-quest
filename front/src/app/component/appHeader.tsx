@@ -2,14 +2,12 @@
 
 import { AppBar, Container, Box, Toolbar, Typography, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material"
 import AdbIcon from '@mui/icons-material/Adb';
-import { MenuIcon } from "lucide-react";
 import * as React from 'react';
 
 const pages = ['Home', 'Courses', 'Achievements', 'Profile'];
 const settings = ['Test1', 'Test2', 'Test3'];
 
 export const AppHeader: React.FC = () => {
-    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorELlUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     return (
     <AppBar position="static">
@@ -33,40 +31,6 @@ export const AppHeader: React.FC = () => {
                     >
                         FIT
                     </Typography>
-
-                    {/* <Box sx={{ flexGrow: 1, didsplay: { xs: 'flex', md: 'none'} }}>
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={() => (alert("click icon"))}
-                            color="inherit"
-                        >
-
-                            <MenuIcon />
-                        </IconButton>
-
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left'
-                            }}
-                            open={Boolean(anchorElNav)}
-                            onClose={() => setAnchorElNav(null)}
-                            sx={{ display: { xs: 'block', md: 'none' } }}
-                        >
-                            {pages.map((page) => (
-                                <MenuItem key={page} onClick={() => setAnchorElNav(null)}>
-                                    <Typography sx={{ textAlign: 'center' }} >
-                                        {page}
-                                    </Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Box> */}
                     <AdbIcon sx={{ display: { xs: 'flex', md: 'none'}, mr: 1}} />
                     <Typography
                         variant="h5"
