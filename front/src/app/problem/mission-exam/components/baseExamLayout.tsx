@@ -13,18 +13,12 @@ import {
   Divider,
   Tabs,
   Tab,
-  Select,
-  MenuItem,
-  Tooltip,
-  IconButton,
   RadioGroup,
-  FormControlLabel,
   Radio,
 } from "@mui/material";
-import { JUDGE_TYPE, MISSION_EXAM_LANGUAGE, MissionExamAIResponse } from "@/type";
+import { MISSION_EXAM_LANGUAGE, MissionExamAIResponse } from "@/type";
 import React from "react";
 import Editor from "@monaco-editor/react";
-import { InfoIcon } from "lucide-react";
 
 type Props = {
   title: string;
