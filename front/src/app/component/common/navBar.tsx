@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, Target, User, ArrowLeft, Share, ShareIcon } from "lucide-react";
+import { Home, Target, User, ArrowLeft, ShareIcon } from "lucide-react";
 
 interface NavBarProps {
   showBackButton?: boolean; // 前のページへ戻るボタンを表示するか
