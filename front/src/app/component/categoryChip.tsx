@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { CourseCategory } from "../type";
+import { CourseCategory } from "../courses/type";
 
 type CategoryChipProps = {
     category: CourseCategory;
