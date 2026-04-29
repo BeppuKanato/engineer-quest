@@ -2,41 +2,42 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Chip } from "@mui/material";
+import React from "react";
 import { Status } from "../courses/type";
 
 type StatusChipProps = {
     status: Status;
-    size? : "small" | "medium"; 
-};
+    size?: "small" | "medium";
+}
 
-const STATUS_CONFIG: Record<Status, { label: string; icon: React.ReactElement; sx: {"color": string; "bgcolor": string} }> = {
+const STATUS_CONFIG: Record<Status, {label: string, icon: React.ReactElement, sx: {bgcolor: string, color: string}}> = {
     not_started: {
         label: "未着手",
         icon: <RadioButtonUncheckedIcon />,
         sx: {
-            "bgcolor": "#f1f5f9",
-            "color": "#475569",
+            bgcolor: "#f1f5f9",
+            color: "#475569"
         },
     },
     in_progress: {
         label: "進行中",
         icon: <PlayCircleIcon />,
         sx: {
-            "bgcolor": "#fff7ed",
-            "color": "#f97316",
-        }
+            bgcolor: "#fff7ed",
+            color: "#f97316",
+        },
     },
     completed: {
         label: "クリア済み",
         icon: <CheckCircleIcon />,
         sx: {
-            "bgcolor": "#dcfce7",
-            "color": "#16a34a",
-        }
-    }
+            bgcolor: "#dcfce7",
+            color: "#16a34a",
+        },
+    },
 }
 
-export const StatusChip: React.FC<StatusChipProps> = ({ status, size = "small"}) => {
+export const StatusChip: React.FC<StatusChipProps> = ({ status, size = "small" }) => {
     const config = STATUS_CONFIG[status];
 
     return (
@@ -45,12 +46,13 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status, size = "small"})
             label={config.label}
             size={size}
             sx={{
+                width: "fit-content",
                 fontWeight: 700,
                 "& .MuiChip-icon": {
                     color: "inherit",
                 },
-                ...config.sx
-            }}
+                ...config.sx,
+            }} 
         />
     );
 };

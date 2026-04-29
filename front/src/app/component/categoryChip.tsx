@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { CourseCategory } from "../courses/type";
+import { CourseCategory } from "../type";
 
 type CategoryChipProps = {
     category: CourseCategory;
@@ -22,7 +22,7 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({ category }) => {
                 bgcolor: "#eef2ff",
                 color: "#4f46e5",
                 fontWeight: 700,
-            }}
+            }} 
         />
     );
 };

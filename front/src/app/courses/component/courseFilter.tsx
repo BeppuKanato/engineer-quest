@@ -1,37 +1,87 @@
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import { CourseCategory, CourseFilterState, Status, Difficulty } from "../type";
+import { CourseCategory, CourseFilterState, CourseStatus, Difficulty } from "../type";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { getCategoryLabel } from "../../component/categoryChip";
+import { ACTION_BEFORE_REFRESH } from "../../../../node_modules/next/dist/next-devtools/dev-overlay/shared";
 
 type CourseFilterProps = {
     value: CourseFilterState;
     onChange: (value: CourseFilterState) => void;
 };
 
-const categoryOptions: { value: CourseCategory | "all"; label: string }[] = [
+const categoryOptions: {value: CourseCategory | "all", label: string}[] = [
     { value: "all", label: "すべて" },
     { value: "game", label: "ゲーム" },
-    { value: "algorithm", label: "アルゴリズム" },
-    { value: "tool", label: "便利ツール" },
+    { value: "algorithm", label: "アルゴリズム"},
+    { value: "tool", label: "便利ツール"},
     { value: "ui", label: "画面操作" },
-    { value: "data", label: "データ管理" },
+    { value: "data", label: "データ管理"},
 ];
 
-const statusOptions: { value: Status | "all"; label: string }[] = [
+const statusOptions: { value: CourseStatus | "all", label: string}[] = [
     { value: "all", label: "すべて" },
     { value: "not_started", label: "未着手" },
-    { value: "in_progress", label: "進行中" },
-    { value: "completed", label: "クリア済み" },
+    { value: "in_progress", label: "進行中"},
+    { value: "completed", label: "クリア済み"},
 ];
 
-const difficultyOptions: { value: Difficulty | "all"; label: string }[] = [
+const difficultyOptions: { value: Difficulty | "all", label: string}[] = [
     { value: "all", label: "すべて" },
     { value: "easy", label: "やさしい" },
-    { value: "normal", label: "ふつう" },
-    { value: "hard", label: "難しめ" },
-];
+    { value: "normal", label: "ふつう"},
+    { value: "hard", label: "難しめ"}
+]
 
-export const CourseFilter: React.FC<CourseFilterProps> = ({ value, onChange }) => {
+type FilterGroupProps = {
+    title: string;
+    children: React.ReactNode;
+}
+
+const FilterGroup: React.FC<FilterGroupProps> = ({ title, children }) => {
+    return (
+        <Stack spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700}>
+                {title}
+            </Typography>
+            <Stack direction="row" flexWrap="wrap" gap={1.25}>
+                {children}
+            </Stack>
+        </Stack>
+    );
+};
+
+type FilterButtonProps = {
+    selected: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+};
+
+const FilterButton: React.FC<FilterButtonProps> = ({ selected, onClick, children}) => {
+    return(
+        <Button
+            variant={selected ? "contained" : "outlined"}
+            onClick={onClick}
+            sx={{
+                borderRadius: 999,
+                px: 2.5,
+                py: 1,
+                minHeight: 42,
+                bgcolor: selected ? "primary.main" : "#fff",
+                color: selected ? "#fff" : "text.primary",
+                borderColor: selected ? "primary.main" : "#cbd5e1",
+                fontWeight: 700,
+                boxShadow: selected ? "0 6px 14px rgba(37, 99, 235, 0.25)" : "none",
+                "&:hover": {
+                    bgcolor: selected ? "primary.dark" : "#f8fafc",
+                    borderColor: selected ? "primary.dark" : "#94a3b8",
+                },
+            }}
+        >
+            {children}
+        </Button>
+    )
+}
+export const CourseFilter: React.FC<CourseFilterProps> = ({ value, onChange}) => {
     return (
         <Paper
             elevation={0}
@@ -83,7 +133,7 @@ export const CourseFilter: React.FC<CourseFilterProps> = ({ value, onChange }) =
                                     {option.value === "all" ? (
                                         option.label
                                     ) : (
-                                        <DifficultyLabel difficulty={option.value} />
+                                        <DifficultyLabel difficulty={option.value} variant="plain" />
                                     )}
                                 </FilterButton>
                             ))}
@@ -92,55 +142,5 @@ export const CourseFilter: React.FC<CourseFilterProps> = ({ value, onChange }) =
                 </Stack>
             </Stack>
         </Paper>
-    );
-};
-
-type FilterGroupProps = {
-    title: string;
-    children: React.ReactNode;
-};
-
-const FilterGroup: React.FC<FilterGroupProps> = ({ title, children }) => {
-    return (
-        <Stack spacing={1.5}>
-            <Typography variant="subtitle2" fontWeight={700}>
-                {title}
-            </Typography>
-            <Stack direction="row" flexWrap="wrap" gap={1.25}>
-                {children}
-            </Stack>
-        </Stack>
-    );
-};
-
-type FilterButtonProps = {
-    selected: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-};
-
-const FilterButton: React.FC<FilterButtonProps> = ({ selected, onClick, children }) => {
-    return (
-        <Button
-            variant={selected ? "contained" : "outlined"}
-            onClick={onClick}
-            sx={{
-                borderRadius: 999,
-                px: 2.5,
-                py: 1,
-                minHeight: 42,
-                bgcolor: selected ? "primary.main" : "#fff",
-                color: selected ? "#fff" : "text.primary",
-                borderColor: selected ? "primary.main" : "#cbd5e1",
-                fontWeight: 700,
-                boxShadow: selected ? "0 6px 14px rgba(37, 99, 235, 0.25)" : "none",
-                "&:hover": {
-                    bgcolor: selected ? "primary.dark" : "#f8fafc",
-                    borderColor: selected ? "primary.dark" : "#94a3b8",
-                },
-            }}
-        >
-            {children}
-        </Button>
-    );
-};
+    )
+}

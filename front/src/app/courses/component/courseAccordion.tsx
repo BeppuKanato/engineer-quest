@@ -10,7 +10,7 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { Course, Status } from "../type";
+import { Course, CourseStatus } from "../type";
 import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { MissionCard } from "./missionCard";
@@ -28,7 +28,7 @@ export const CourseAccordion: React.FC<Course> = ({
     const status = getCourseStatus(missions);
 
     const isCompleted = status === "completed";
-
+    console.log(title)
     return (
         <Accordion
             defaultExpanded
@@ -38,7 +38,7 @@ export const CourseAccordion: React.FC<Course> = ({
                 overflow: "hidden",
                 border: "1px solid",
                 borderColor: isCompleted ? "#facc15" : "#e2e8f0",
-                boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+                boxShadow: isCompleted ? "0 8px 24px rgba(245, 158, 11, 0.18)" : "0 6px 18px rgba(15, 23, 42, 0.08)",
                 "&:before": {
                     display: "none",
                 },
@@ -52,6 +52,7 @@ export const CourseAccordion: React.FC<Course> = ({
                     px: 3,
                     py: 2,
                     bgcolor: isCompleted ? "#fffbeb" : "#fff",
+                    borderTop: isCompleted ? "5px solid #f59e0b" : "none",  
                 }}
             >
                 <Stack spacing={1.5} sx={{ width: "100%" }}>
@@ -75,6 +76,7 @@ export const CourseAccordion: React.FC<Course> = ({
                                             bgcolor: "#fef3c7",
                                             color: "#b45309",
                                             fontWeight: 900,
+                                            border: "1px solid #f59e0b",
                                             "& .MuiChip-icon": {
                                                 color: "inherit",
                                             },
@@ -100,7 +102,7 @@ export const CourseAccordion: React.FC<Course> = ({
                             sx={{ pr: { md: 2 } }}
                         >
                             <StatusChip status={status} />
-                            <DifficultyLabel difficulty={difficulty} />
+                            <DifficultyLabel difficulty={difficulty} variant="chip"/>
                         </Stack>
                     </Stack>
 
@@ -151,16 +153,24 @@ export const CourseAccordion: React.FC<Course> = ({
                         pb: 1,
                     }}
                 >
-                    {missions.map((mission) => (
-                        <MissionCard key={mission.id} {...mission} />
-                    ))}
+                    {missions.map((mission, index) => {
+                        const canStart = index === 0 || mission.status === "completed" || mission.status === "in_progress" || missions[index - 1]?.status === "completed";
+
+                        return (
+                            <MissionCard
+                                key={mission.id}
+                                {...mission}
+                                canStart={canStart}
+                            />
+                        )
+                    })}
                 </Stack>
             </AccordionDetails>
         </Accordion>
     );
 };
 
-const getCourseStatus = (missions: Course["missions"]): Status => {
+const getCourseStatus = (missions: Course["missions"]): CourseStatus => {
     const completedCount = missions.filter((mission) => mission.status === "completed").length;
 
     if (completedCount === missions.length) {

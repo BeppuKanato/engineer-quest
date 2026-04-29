@@ -34,14 +34,14 @@ const courses: Course[] = [
                 "title": "レスポンシブな2カラム画面を作ろう",
                 "description": "画面幅に合わせてレイアウトを切り替えるUIを作成する",
                 "goalImg": "/images/goals/sample.png",
-                "status": "in_progress"
+                "status": "completed"
             },
             {
                 "id": "test-mission-4",
                 "title": "商品紹介ページを作ろう",
                 "description": "画像・説明・ボタンを使った紹介UIを作成する",
                 "goalImg": "/images/goals/sample.png",
-                "status": "not_started"
+                "status": "completed"
             }
         ]
     },
@@ -185,71 +185,71 @@ export default function CoursesPage() {
         return courses.filter((course) => {
             const courseStatus = getCourseStatus(course);
 
-            const matchesCategory =
-                filter.category === "all" || course.categories.includes(filter.category);
+            const matchesCategory = filter.category === "all" || course.categories.includes(filter.category);
 
-            const matchesStatus =
-                filter.status === "all" || courseStatus === filter.status;
+            const matchesStatus = filter.status === "all" || courseStatus === filter.status;
 
-            const matchesDifficulty =
-                filter.difficulty === "all" || course.difficulty === filter.difficulty;
+            const matchesDifficulty = filter.difficulty === "all" || course.difficulty === filter.difficulty;
 
             return matchesCategory && matchesStatus && matchesDifficulty;
         });
     }, [courses, filter]);
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC"}} >
             <AppHeader />
-            <Stack spacing={4}>
-                <Box>
-                    <Typography variant="h4" fontWeight={900}>
-                        コース一覧
-                    </Typography>
-                    <Typography color="text.secondary" sx={{ mt: 1 }}>
-                        作ってみたいものからコースを選びましょう
-                    </Typography>
-                </Box>
 
-                <CourseFilter value={filter} onChange={setFilter} />
-
-                <Stack spacing={2}>
-                    <Stack direction="row" alignItems="baseline" spacing={1}>
-                        <Typography variant="h5" fontWeight={900}>
-                            条件に合うコース
+            <Container maxWidth="lg" sx={{ py: 4 }}>
+                <Stack spacing={4}>
+                    <Box>
+                        <Typography variant="h4" fontWeight={900}>
+                            コース一覧
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {filteredCourses.length} 件
+                        <Typography color="text.secondary" sx={{ mt: 1 }}>
+                            作ってみたいものからコースを選びましょう
                         </Typography>
-                    </Stack>
+                    </Box>
 
-                    {filteredCourses.length > 0 ? (
-                        <Stack spacing={3}>
-                            {filteredCourses.map((course) => (
-                                <CourseAccordion key={course.id} {...course} />
-                            ))}
+                    <CourseFilter value={filter} onChange={setFilter} />
+
+                    <Stack spacing={2}>
+                        <Stack direction="row" alignItems="baseline" spacing={1}>
+                            <Typography variant="h5" fontWeight={900}>
+                                条件に合うコース
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {filteredCourses.length} 件
+                            </Typography>
                         </Stack>
-                    ) : (
-                        <Box
-                            sx={{
-                                p: 4,
-                                borderRadius: 3,
-                                border: "1px dashed #cbd5e1",
-                                bgcolor: "#f8fafc",
-                                textAlign: "center",
-                            }}
-                        >
-                            <Typography fontWeight={800}>
-                                条件に合うコースがありません
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                フィルター条件を変更して探してみてください。
-                            </Typography>
-                        </Box>
-                    )}
+
+                        {filteredCourses.length > 0 ? (
+                            <Stack spacing={3}>
+                                {filteredCourses.map((course) => (
+                                    <CourseAccordion key={course.id} {...course} />
+                                ))}
+                            </Stack>
+                        ) : (
+                            <Box
+                                sx={{
+                                    p: 4,
+                                    borderRadius: 3,
+                                    border: "1px dashed #cbd5e1",
+                                    bgcolor: "#f8fafc",
+                                    textAlign: "center",
+                                }}
+                            >
+                                <Typography fontWeight={800}>
+                                    条件に合うコースがありません
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                    フィルター条件を変更して探してみてください。
+                                </Typography>
+                            </Box>
+                        )}
+                    </Stack>
                 </Stack>
-            </Stack>
-        </Container>
+            </Container>
+        </Box>
     );
 };
 
