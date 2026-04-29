@@ -10,3 +10,5 @@ export type Mission = {
 };
 
 export type MissionTab = "resume" | "recommended"
+
+export type Status = "complete" | "incomplete";
