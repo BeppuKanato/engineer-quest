@@ -193,7 +193,7 @@ export default function CoursesPage() {
 
             return matchesCategory && matchesStatus && matchesDifficulty;
         });
-    }, [courses, filter]);
+    }, [filter]);
 
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC"}} >

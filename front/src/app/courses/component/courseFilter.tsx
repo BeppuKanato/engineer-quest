@@ -2,7 +2,6 @@ import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { CourseCategory, CourseFilterState, CourseStatus, Difficulty } from "../type";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { getCategoryLabel } from "../../component/categoryChip";
-import { ACTION_BEFORE_REFRESH } from "../../../../node_modules/next/dist/next-devtools/dev-overlay/shared";
 
 type CourseFilterProps = {
     value: CourseFilterState;
