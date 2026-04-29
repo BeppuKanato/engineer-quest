@@ -3,14 +3,14 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Chip } from "@mui/material";
 import React from "react";
-import { Status } from "../courses/type";
+import { CourseStatus } from "../courses/type";
 
 type StatusChipProps = {
-    status: Status;
+    status: CourseStatus;
     size?: "small" | "medium";
 }
 
-const STATUS_CONFIG: Record<Status, {label: string, icon: React.ReactElement, sx: {bgcolor: string, color: string}}> = {
+const STATUS_CONFIG: Record<CourseStatus, {label: string, icon: React.ReactElement, sx: {bgcolor: string, color: string}}> = {
     not_started: {
         label: "未着手",
         icon: <RadioButtonUncheckedIcon />,
