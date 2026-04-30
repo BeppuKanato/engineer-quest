@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import { Lesson, MissionExam, ProgressStatus } from "../type";
-import { LessonNode } from "./LessonNode";
+import { LessonNode } from "./lessonNode";
 
 type LessonRoadmapProps = {
     lessons: Lesson[];
