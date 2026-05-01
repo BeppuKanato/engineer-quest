@@ -1,7 +1,7 @@
 import { Box, Container, Grid } from "@mui/material";
 import { AppHeader } from "../component/appHeader";
 import { LessonRoadmap } from "./component/lessonRoadmap";
-import { MissionSummaryCard } from "./component/MissionSummaryCard";
+import { MissionSummaryCard } from "./component/missionSummaryCard";
 import { Lesson, Mission, MissionExam } from "./type";
 
 const tempMissionExam: MissionExam = {
