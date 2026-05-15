@@ -7,6 +7,7 @@ type BlankChoiceListProps = {
     blankChoices: BlankChoice[];
     answers: Record<string, string>;
     shouldLock: boolean;
+    checked: boolean;
     onSelect: (blankId: string, choiceId: string) => void;
   };
   
@@ -15,6 +16,7 @@ export const BlankChoiceList: React.FC<BlankChoiceListProps> = ({
     blankChoices,
     answers,
     shouldLock,
+    checked,
     onSelect,
   }) => {
     return (
@@ -32,7 +34,12 @@ export const BlankChoiceList: React.FC<BlankChoiceListProps> = ({
   
             <Grid container spacing={2}>
               {blankChoices.map((choice) => {
+                const selectedChoiceId = answers[blank.id];
                 const isSelected = answers[blank.id] === choice.id;
+                const isBlanckCorrect = selectedChoiceId === blank.answerChoiceId;
+
+                const isSelectedCorrect = checked && isSelected && isBlanckCorrect;
+                const isSelectedWrong = checked && isSelected && !isBlanckCorrect;
   
                 return (
                   <Grid size={{ xs: 12, sm: 6 }} key={choice.id}>
@@ -46,7 +53,25 @@ export const BlankChoiceList: React.FC<BlankChoiceListProps> = ({
                         borderRadius: 3,
                         fontWeight: 800,
                         textTransform: "none",
-                        bgcolor: isSelected ? undefined : "#FFFFFF",
+                        bgcolor: isSelectedCorrect
+                        ? "#DCFCE7"
+                        : isSelectedWrong
+                          ? "#FFE4E6"
+                          : isSelected
+                            ? undefined
+                            : "#FFFFFF",
+
+                        color: isSelectedCorrect
+                          ? "#15803D"
+                          : isSelectedWrong
+                            ? "#BE123C"
+                            : undefined,
+
+                        borderColor: isSelectedCorrect
+                          ? "#86EFAC"
+                          : isSelectedWrong
+                            ? "#FDA4AF"
+                          : undefined,
                       }}
                     >
                       {choice.label}

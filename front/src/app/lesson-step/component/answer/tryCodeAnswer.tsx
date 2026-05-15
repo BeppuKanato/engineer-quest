@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import { HtmlIframePreview } from "../preview/HtmlIframePreview";
+import { HtmlIframePreview } from "../preview/htmlIframePreview";
 
 type TryCodeAnswerProps = {
   starterCode?: string;
@@ -147,11 +147,30 @@ export const TryCodeAnswer: React.FC<TryCodeAnswerProps> = ({
 
             <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 1 }}>
               <Button
-                variant="text"
+                variant="outlined"
+                size="small"
                 color="inherit"
                 onClick={handleClear}
                 disabled={!code}
-                sx={{ fontSize: 12 }}
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 800,
+                  fontSize: 12,
+                  px: 1.5,
+                  py: 0.5,
+                  bgcolor: "#FFFFFF",
+                  borderColor: "#CBD5E1",
+                  color: "#475569",
+                  "&:hover": {
+                    bgcolor: "#F8FAFC",
+                    borderColor: "#94A3B8",
+                  },
+                  "&.Mui-disabled": {
+                    bgcolor: "#F8FAFC",
+                    color: "#CBD5E1",
+                    borderColor: "#E2E8F0",
+                  },
+                }}
               >
                 クリア
               </Button>

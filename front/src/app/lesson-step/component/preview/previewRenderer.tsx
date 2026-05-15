@@ -21,6 +21,7 @@ export const PreviewRenderer: React.FC<PreviewRendererProps> = ({
       <StaticHtmlPreview
         html={preview.html ?? ""}
         caption={preview.caption}
+        minHeight={preview.minHeight}
       />
     );
   }

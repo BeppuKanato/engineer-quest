@@ -1,3 +1,4 @@
+import { Box, Stack, Typography } from "@mui/material";
 import { Blank, BlankChoice } from "../../../type";
 import { BlankSlot } from "./blanckSlot";
 

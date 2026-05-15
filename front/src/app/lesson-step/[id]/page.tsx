@@ -11,6 +11,7 @@ import { LessonActionButtons } from "../component/actionButtons";
 import { ActivityAnswerState } from "../type";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
+import { useRouter } from "next/navigation";
 
 export default function LessonPage() {
   const lesson = htmlSelfIntroductionLesson1;
@@ -23,7 +24,10 @@ export default function LessonPage() {
   const [userAnswer, setUserAnswer] = useState<unknown>(null);
   const [activityAnswerMap, setActivityAnswerMap] = useState<Record<string, ActivityAnswerState>>({});
 
-  const currentActivity = lesson.activities[currentActivityIndex];
+  const currentActivity = lesson.activities[currentActivityIndex];  
+  const isLastActivity = currentActivityIndex === lesson.activities.length - 1;
+
+  const router = useRouter();
 
   const resetAnswerState = () => {
     setSelectedChoiceId(null);
@@ -145,7 +149,7 @@ export default function LessonPage() {
 
   const handleNext = () => {
     if (currentActivityIndex >= lesson.activities.length - 1) {
-      console.log("lesson completed");
+      router.push("/lesson-complete");
       return;
     }
 
@@ -159,7 +163,7 @@ export default function LessonPage() {
   };
 
   const handleActionClick = () => {
-    if (checked && isCorrect) {
+    if (canCompleteCurrentActivity) {
       handleNext();
       return;
     }
@@ -185,8 +189,6 @@ export default function LessonPage() {
       }) ?? false
     );
   };
-
-  const isLastActivity = currentActivityIndex === lesson.activities.length - 1;
 
   const canAction =
   currentActivity.type === "TUTORIAL" ||

@@ -3,11 +3,15 @@ import { Box, Typography } from "@mui/material";
 type HtmlIframePreviewProps = {
   html: string;
   minHeight?: number;
+  bodyPadding?: number;
+  showBorder?: boolean;
 };
 
 export const HtmlIframePreview: React.FC<HtmlIframePreviewProps> = ({
   html,
   minHeight = 280,
+  bodyPadding = 24,
+  showBorder = true,
 }) => {
   const srcDoc = `
 <!doctype html>
@@ -22,7 +26,7 @@ export const HtmlIframePreview: React.FC<HtmlIframePreviewProps> = ({
       body {
         margin: 0;
         font-family: Arial, sans-serif;
-        padding: 24px;
+        padding: ${bodyPadding}px;
         color: #0f172a;
         background: #ffffff;
       }
@@ -74,9 +78,9 @@ export const HtmlIframePreview: React.FC<HtmlIframePreviewProps> = ({
       <Box
         sx={{
           width: "100%",
-          minHeight,
+          height: minHeight,
           borderRadius: 3,
-          border: "1px solid #E0E7F0",
+          border: showBorder ? "1px solid #E0E7F0" : "none",
           bgcolor: "#FFFFFF",
           display: "flex",
           alignItems: "center",
@@ -99,8 +103,8 @@ export const HtmlIframePreview: React.FC<HtmlIframePreviewProps> = ({
       sx={{
         display: "block",
         width: "100%",
-        minHeight,
-        border: "1px solid #E0E7F0",
+        height: minHeight,
+        border: showBorder ? "1px solid #E0E7F0" : "none",
         borderRadius: 3,
         bgcolor: "#FFFFFF",
       }}

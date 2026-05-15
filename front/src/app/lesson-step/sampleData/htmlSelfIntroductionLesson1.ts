@@ -81,7 +81,8 @@ export const htmlSelfIntroductionLesson1: Lesson = {
         title: "表示例",
         html: `<h1>自己紹介</h1>`,
         caption: "文字が大きく表示されていることに注目しましょう。",
-        previewKey: "StaticHtml"
+        previewKey: "StaticHtml",
+        minHeight: 140
       },
       actionLabel: "確認する",
     },

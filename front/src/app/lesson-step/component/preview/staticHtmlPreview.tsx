@@ -8,11 +8,13 @@ import { HtmlIframePreview } from "./htmlIframePreview";
 type StaticHtmlPreviewProps = {
   html: string;
   caption?: string;
+  minHeight?: number;
 };
 
 export const StaticHtmlPreview: React.FC<StaticHtmlPreviewProps> = ({
   html,
   caption,
+  minHeight =  140
 }) => {
   return (
     <Stack spacing={1.5}>
@@ -28,10 +30,15 @@ export const StaticHtmlPreview: React.FC<StaticHtmlPreviewProps> = ({
           borderRadius: 3,
           border: "1px solid #DCE6F2",
           bgcolor: "#F8FBFF",
-          p: 2.5,
+          p: { xs: 1.5, md: 2},
         }}
       >
-        <HtmlIframePreview html={html} minHeight={180} />
+        <HtmlIframePreview
+          html={html}
+          minHeight={minHeight}
+          bodyPadding={20}
+          showBorder={false}
+        />
       </Box>
 
       {caption && (

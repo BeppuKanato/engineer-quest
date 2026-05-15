@@ -25,6 +25,10 @@ export const CodeBlankArea: React.FC<CodeBlankAreaProps> = ({
     const getChoiceLabel = (choiceId?: string) => {
       return blankChoices.find((choice) => choice.id === choiceId)?.label;
     };
+
+    const isBlankCorrect = (blank: Blank) => {
+      return answers[blank.id] === blank.answerChoiceId;
+    }
   
     return (
       <Box
@@ -72,7 +76,7 @@ export const CodeBlankArea: React.FC<CodeBlankAreaProps> = ({
               value={displayValue}
               placeholder={blank.placeholder}
               checked={checked}
-              isCorrect={isCorrect}
+              isCorrect={checked ? isBlankCorrect(blank) : null}
             />
           );
         })}

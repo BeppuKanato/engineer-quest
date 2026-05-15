@@ -46,6 +46,7 @@ export type Preview = {
     html?: string;
     caption?: string;
     previewKey?: string;
+    minHeight?: number;
 };
 
 export type Choice = {

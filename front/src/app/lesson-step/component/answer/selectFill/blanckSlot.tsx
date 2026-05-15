@@ -16,18 +16,22 @@ export const BlankSlot: React.FC<BlankSlotProps> = ({
     const hasValue = Boolean(value);
   
     const borderColor =
-      checked && isCorrect === false
-        ? "#F87171"
-        : hasValue
-          ? "#60A5FA"
-          : "#F59E0B";
-  
+      checked && isCorrect === true
+        ? "#86EFAC"
+        : checked && isCorrect === false
+          ? "#F87171"
+          : hasValue
+            ? "#60A5FA"
+            : "#F59E0B";
+
     const bgcolor =
-      checked && isCorrect === false
-        ? "#7F1D1D"
-        : hasValue
-          ? "#1D4ED8"
-          : "#92400E";
+      checked && isCorrect === true
+        ? "#166534"
+        : checked && isCorrect === false
+          ? "#7F1D1D"
+          : hasValue
+            ? "#1D4ED8"
+            : "#92400E";
   
     return (
       <Box

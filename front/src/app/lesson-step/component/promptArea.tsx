@@ -12,10 +12,8 @@ const mentorIconMap: Record<LessonStepType, React.ReactElement> = {
   TUTORIAL: <SchoolRoundedIcon />,
   VIEW: <SchoolRoundedIcon />,
   CHOICE: <QuizRoundedIcon />,
-  FILL_BLANK: <CodeRoundedIcon />,
-  ORDERING: <FormatListNumberedRoundedIcon />,
-  SHORT_INPUT: <EditRoundedIcon />,
-  TRACE: <RouteRoundedIcon />,
+  SELECT_FILL: <CodeRoundedIcon />,
+  TRY_CODE: <CodeRoundedIcon />
 };
 
 type LessonPromptAreaProps = {
