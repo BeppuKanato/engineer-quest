@@ -16,8 +16,8 @@ export const htmlSelfIntroductionLesson1: Lesson = {
         "HTMLは、Webページに表示する内容と構造を書くための言語です。まずは、HTMLコードと表示結果の関係を見てみましょう。",
       mentorMessage:
         "HTMLを書くと、Webページに表示される内容を作ることができます。",
-      goal: {
-        type: "CODE_OUTPUT",
+      preview: {
+        type: "CUSTOM",
         title: "HTMLのイメージ",
         previewKey: "htmlIntroEditableTitle",
       },
@@ -31,8 +31,8 @@ export const htmlSelfIntroductionLesson1: Lesson = {
         "<h1> は大きな見出し、<p> は文章を表します。タグを使うことで、表示する内容の役割を決められます。",
       mentorMessage:
         "タグを切り替えると、同じ文字でも表示のされ方が変わります。",
-      goal: {
-        type: "CODE_OUTPUT",
+      preview: {
+        type: "CUSTOM",
         title: "タグの例",
         previewKey: "htmlHeadingTagSwitcher",
       },
@@ -76,32 +76,37 @@ export const htmlSelfIntroductionLesson1: Lesson = {
             "<button> はボタンを表示するためのタグです。見出しには使いません。",
         },
       ],
-      goal: {
-        type: "CODE_OUTPUT",
-        title: "今回のゴール",
-        previewKey: "htmlHeadingGoal",
+      preview: {
+        type: "STATIC_HTML",
+        title: "表示例",
+        html: `<h1>自己紹介</h1>`,
+        caption: "文字が大きく表示されていることに注目しましょう。",
+        previewKey: "StaticHtml"
       },
       actionLabel: "確認する",
     },
     {
       id: "lesson-1-activity-4",
-      type: "FILL_BLANK",
+      type: "SELECT_FILL",
       title: "見出しタグを埋めよう",
       instruction:
         "「自己紹介」を大きな見出しとして表示するために、空欄に入るタグを選びましょう。",
       mentorMessage:
         "選んだタグが、コードの空欄に入るイメージです。",
-      codeTemplate: `<{{blank-1}}>自己紹介</{{blank-2}}>
+      blankArea: {
+        type: "CODE",
+        template: `<{{blank-1}}>自己紹介</{{blank-2}}>
 <p>こんにちは。プログラミングを勉強中です。</p>`,
+      },
       blanks: [
         {
           id: "blank-1",
-          answer: "h1",
+          answerChoiceId: "blank-choice-1",
           placeholder: "タグ名",
         },
         {
           id: "blank-2",
-          answer: "h1",
+          answerChoiceId: "blank-choice-1",
           placeholder: "タグ名",
         },
       ],
@@ -127,10 +132,10 @@ export const htmlSelfIntroductionLesson1: Lesson = {
         "正解！<h1> で囲むことで、「自己紹介」を大きな見出しとして表示できます。",
       incorrectFeedback:
         "空欄には、見出しを表すタグ名を入れます。もう一度、表示結果を見て考えてみましょう。",
-      goal: {
-        type: "CODE_OUTPUT",
-        title: "コードと表示",
-        previewKey: "htmlHeadingBlank",
+      preview: {
+        type: "NO_PREVIEW",
+        title: "コードと空欄",
+        caption: "選択肢を押すと、空欄に入ります。"
       },
       actionLabel: "確認する",
     },
@@ -172,87 +177,81 @@ export const htmlSelfIntroductionLesson1: Lesson = {
             "<input> は入力欄を作るタグです。文章を表示する目的とは違います。",
         },
       ],
-      goal: {
-        type: "CODE_OUTPUT",
+      preview: {
+        type: "STATIC_HTML",
         title: "文章の表示例",
-        previewKey: "htmlParagraphGoal",
+        html: `<p>私は○○です。</p>`,
+        caption: "この表示結果の「文章の表示」に使うタグを選びます",
+        previewKey: "StaticHTML"
       },
       actionLabel: "確認する",
+    },
+    // {
+    //   id: "lesson-1-activity-6",
+    //   type: "SELECT_FILL",
+    //   title: "HTMLの順番を並べよう",
+    //   instruction:
+    //     "自己紹介ページとして自然に見えるように、HTMLの要素を上から順に並べましょう。",
+    //   mentorMessage:
+    //     "Webページは、基本的に上に書いたものから順番に表示されます。",
+    //   // ORDERING 用。今の型にまだないなら、後で追加するとよい
+    //   orderingItems: [
+    //     { id: "item-1", label: "<h1>自己紹介</h1>", order: 1 },
+    //     { id: "item-2", label: "<p>こんにちは。プログラミングを勉強中です。</p>", order: 2 },
+    //     { id: "item-3", label: "<button>もっと見る</button>", order: 3 },
+    //   ],
+    //   correctFeedback:
+    //     "正解！見出し、文章、ボタンの順に並べると、自然な自己紹介ページになります。",
+    //   incorrectFeedback:
+    //     "まずページの見出し、そのあと説明文、最後に操作できるボタンを置くと自然です。",
+    //   goal: {
+    //     type: "CODE_OUTPUT",
+    //     title: "表示の順番",
+    //     previewKey: "htmlElementOrdering",
+    //   },
+    //   actionLabel: "確認する",
+    // },
+//     {
+//       id: "lesson-1-activity-6",
+//       type: "TRACE",
+//       title: "HTMLが表示される流れを確認しよう",
+//       instruction:
+//         "HTMLは、上から順番に読み取られて画面に表示されます。どの順番で表示されるか確認しましょう。",
+//       mentorMessage:
+//         "コードの上から順に、画面にも上から表示されるイメージです。",
+//       codeTemplate: `<h1>自己紹介</h1>
+// <p>こんにちは。プログラミングを勉強中です。</p>
+// <button>もっと見る</button>`,
+//       correctFeedback:
+//         "正解！HTMLは基本的に、上に書いた要素から順に表示されます。",
+//       incorrectFeedback:
+//         "コードの上から順番に、表示結果にも反映されると考えてみましょう。",
+//       goal: {
+//         type: "CODE_OUTPUT",
+//         title: "表示される順番",
+//         previewKey: "htmlRenderTrace",
+//       },
+//       actionLabel: "確認する",
+//     },
+    {
+      id: "lesson-1-activity-6",
+      type: "TRY_CODE",
+      title: "見出しと文章を書いてみよう",
+      instruction:
+        "例を見ながら、HTMLを書いて表示結果を確認してみましょう。",
+      mentorMessage:
+        "まずはコードを書いて、画面にどう表示されるか試してみましょう。",
+      starterCode: "",
+      sampleCode: `<h1>自己紹介</h1>
+<p>こんにちは。プログラミングを勉強中です。</p>`,
+      preview: {
+        type: "NO_PREVIEW",
+        title: "実行結果",
+      },
+      actionLabel: "次へ"
     },
     {
       id: "lesson-1-activity-6",
-      type: "SHORT_INPUT",
-      title: "自己紹介の見出しを書いてみよう",
-      instruction:
-        "自己紹介ページの一番上に表示する見出しを入力してみましょう。ここでは正解は1つではありません。",
-      mentorMessage:
-        "自分のページのタイトルになる短い言葉を書いてみましょう。",
-      input: {
-        placeholder: "例：自己紹介",
-        minLength: 1,
-        maxLength: 20,
-        answer: "自己紹介",
-      },
-      correctFeedback:
-        "いいですね！見出しを書くと、ページの内容が伝わりやすくなります。",
-      incorrectFeedback:
-        "1文字以上、20文字以内で見出しを入力してみましょう。",
-      goal: {
-        type: "CODE_OUTPUT",
-        title: "見出しの表示",
-        previewKey: "htmlCustomHeadingInput",
-      },
-      actionLabel: "確認する",
-    },
-    {
-      id: "lesson-1-activity-7",
-      type: "ORDERING",
-      title: "HTMLの順番を並べよう",
-      instruction:
-        "自己紹介ページとして自然に見えるように、HTMLの要素を上から順に並べましょう。",
-      mentorMessage:
-        "Webページは、基本的に上に書いたものから順番に表示されます。",
-      // ORDERING 用。今の型にまだないなら、後で追加するとよい
-      orderingItems: [
-        { id: "item-1", label: "<h1>自己紹介</h1>", order: 1 },
-        { id: "item-2", label: "<p>こんにちは。プログラミングを勉強中です。</p>", order: 2 },
-        { id: "item-3", label: "<button>もっと見る</button>", order: 3 },
-      ],
-      correctFeedback:
-        "正解！見出し、文章、ボタンの順に並べると、自然な自己紹介ページになります。",
-      incorrectFeedback:
-        "まずページの見出し、そのあと説明文、最後に操作できるボタンを置くと自然です。",
-      goal: {
-        type: "CODE_OUTPUT",
-        title: "表示の順番",
-        previewKey: "htmlElementOrdering",
-      },
-      actionLabel: "確認する",
-    },
-    {
-      id: "lesson-1-activity-8",
-      type: "TRACE",
-      title: "HTMLが表示される流れを確認しよう",
-      instruction:
-        "HTMLは、上から順番に読み取られて画面に表示されます。どの順番で表示されるか確認しましょう。",
-      mentorMessage:
-        "コードの上から順に、画面にも上から表示されるイメージです。",
-      codeTemplate: `<h1>自己紹介</h1>
-<p>こんにちは。プログラミングを勉強中です。</p>
-<button>もっと見る</button>`,
-      correctFeedback:
-        "正解！HTMLは基本的に、上に書いた要素から順に表示されます。",
-      incorrectFeedback:
-        "コードの上から順番に、表示結果にも反映されると考えてみましょう。",
-      goal: {
-        type: "CODE_OUTPUT",
-        title: "表示される順番",
-        previewKey: "htmlRenderTrace",
-      },
-      actionLabel: "確認する",
-    },
-    {
-      id: "lesson-1-activity-9",
       type: "VIEW",
       title: "HTMLの基本を確認できました",
       instruction:
@@ -265,8 +264,8 @@ export const htmlSelfIntroductionLesson1: Lesson = {
         "<p> は文章を表す",
         "HTMLは上に書いたものから順番に表示される",
       ],
-      goal: {
-        type: "CODE_OUTPUT",
+      preview: {
+        type: "CUSTOM",
         title: "今回のまとめ",
         previewKey: "htmlBasicSummary",
       },

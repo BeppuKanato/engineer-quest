@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Card, CardContent, Container, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Container, Stack, Typography, Fade } from "@mui/material";
 
 import { AppHeader } from "../../component/appHeader";
 import { htmlSelfIntroductionLesson1 } from "../sampleData/htmlSelfIntroductionLesson1";
@@ -9,7 +9,8 @@ import { LessonHeaderCard } from "../component/headerCard";
 import { LessonActivityCard } from "../component/activityCard";
 import { LessonActionButtons } from "../component/actionButtons";
 import { ActivityAnswerState } from "../type";
-// import { normalize } from "path";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 
 export default function LessonPage() {
   const lesson = htmlSelfIntroductionLesson1;
@@ -43,7 +44,7 @@ export default function LessonPage() {
       return selectedChoice?.feedback ?? "";
     }
 
-    if (activity.type === "FILL_BLANK") {
+    if (activity.type === "SELECT_FILL") {
       return activity.correctFeedback ?? "正解です！";
     }
 
@@ -58,7 +59,9 @@ export default function LessonPage() {
   };
 
   const handleConfirm = () => {
-    if (currentActivity.type === "TUTORIAL" || currentActivity.type === "VIEW") {
+    if (currentActivity.type === "TUTORIAL" || 
+    currentActivity.type === "VIEW" || 
+    currentActivity.type === "TRY_CODE") {
       handleNext();
       return;
     }
@@ -90,18 +93,14 @@ export default function LessonPage() {
       return;
     }
 
-    const normalize = (value: unknown) => {
-      return String(value ?? "").trim().toLowerCase();
-    }
-
-    if (currentActivity.type === "FILL_BLANK") {
+    if (currentActivity.type === "SELECT_FILL") {
       const answers = (userAnswer ?? {}) as Record<string, string>;
 
       const result =
         currentActivity.blanks?.every((blank) => {
-          return normalize(answers[blank.id]) === normalize(blank.answer);
+          return answers[blank.id] === blank.answerChoiceId;
         }) ?? false;
-
+    
       setChecked(true);
       setIsCorrect(result);
       setFeedback(
@@ -109,7 +108,7 @@ export default function LessonPage() {
           ? currentActivity.correctFeedback ?? "正解です！"
           : currentActivity.incorrectFeedback ?? "もう一度確認しましょう。"
       );
-
+    
       if (result) {
         setActivityAnswerMap((prev) => ({
           ...prev,
@@ -120,7 +119,7 @@ export default function LessonPage() {
           },
         }));
       }
-
+    
       return;
     }
     // TODO: FILL_BLANK / SHORT_INPUT / ORDERING / TRACE
@@ -175,8 +174,8 @@ export default function LessonPage() {
     setFeedback("");
   }
 
-  const isFillBlanckAnswered = () => {
-    if (currentActivity.type !== "FILL_BLANK") return false;
+  const isSelectFillAnswered = () => {
+    if (currentActivity.type !== "SELECT_FILL") return false;
 
     const answers = (userAnswer ?? {}) as Record<string, string>;
 
@@ -187,21 +186,43 @@ export default function LessonPage() {
     );
   };
 
+  const isLastActivity = currentActivityIndex === lesson.activities.length - 1;
+
   const canAction =
+  currentActivity.type === "TUTORIAL" ||
+  currentActivity.type === "VIEW" ||
+  currentActivity.type === "TRY_CODE" ||
+  (currentActivity.type === "CHOICE" && selectedChoiceId !== null) ||
+  (currentActivity.type === "SELECT_FILL" && isSelectFillAnswered());
+
+  const canCompleteCurrentActivity =
     currentActivity.type === "TUTORIAL" ||
     currentActivity.type === "VIEW" ||
-    (currentActivity.type === "CHOICE" && selectedChoiceId !== null) || 
-    (currentActivity.type === "FILL_BLANK" && isFillBlanckAnswered());
+    currentActivity.type === "TRY_CODE" ||
+    (checked && isCorrect === true);
 
   const buttonLabel =
-    checked && isCorrect ? "次へ" : currentActivity.actionLabel;
-
+    isLastActivity && canCompleteCurrentActivity
+      ? "レッスン完了"
+      : checked && isCorrect === true
+        ? "次へ"
+        : currentActivity.actionLabel;
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
+    <Box sx={{ 
+      minHeight: "100vh", 
+      bgcolor: "#F7F8FC",
+      background: "linear-gradient(180deg, #F7F8FC 0%, #F3F7FF 45%, #F7F8FC 100%)" 
+    }}>
       <AppHeader />
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Stack spacing={3}>
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          py: { xs: 2.5, md: 4},
+          px: { xs: 2, md: 3} 
+        }}
+      >
+        <Stack spacing={{ xs: 2.5, md: 3}}>
           <LessonHeaderCard
             lesson={lesson}
             currentActivityIndex={currentActivityIndex}
@@ -217,27 +238,59 @@ export default function LessonPage() {
             onAnswerChange={handleAnswerChange}
           />
 
-          {checked && feedback && (
+        {checked && feedback && (
+          <Fade in={checked} timeout={250}>
             <Card
               elevation={0}
               sx={{
                 borderRadius: 4,
                 border: "1px solid",
-                borderColor: isCorrect ? "#A7E3C1" : "#F6B3B3",
-                bgcolor: isCorrect ? "#F0FFF6" : "#FFF5F5",
+                borderColor: isCorrect ? "#86EFAC" : "#FCA5A5",
+                bgcolor: isCorrect ? "#ECFDF5" : "#FFF1F2",
+                boxShadow: isCorrect
+                  ? "0 14px 30px rgba(34, 197, 94, 0.10)"
+                  : "0 14px 30px rgba(239, 68, 68, 0.08)",
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Typography fontWeight={800}>
-                  {isCorrect ? "正解！" : "もう一度確認しよう"}
-                </Typography>
+              <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                  <Box
+                    sx={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      bgcolor: isCorrect ? "#DCFCE7" : "#FFE4E6",
+                      color: isCorrect ? "#16A34A" : "#E11D48",
+                    }}
+                  >
+                    {isCorrect ? (
+                      <CheckCircleRoundedIcon />
+                    ) : (
+                      <TipsAndUpdatesRoundedIcon />
+                    )}
+                  </Box>
 
-                <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-                  {feedback}
-                </Typography>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography fontWeight={900} sx={{ color: "#0F172A" }}>
+                      {isCorrect ? "正解！" : "もう一度確認しよう"}
+                    </Typography>
+
+                    <Typography
+                      color="text.secondary"
+                      sx={{ mt: 0.75, lineHeight: 1.8 }}
+                    >
+                      {feedback}
+                    </Typography>
+                  </Box>
+                </Stack>
               </CardContent>
             </Card>
-          )}
+          </Fade>
+        )}
 
           <LessonActionButtons
             showBack={currentActivityIndex !== 0}

@@ -1,7 +1,8 @@
 import { isComponentType } from "@/app/problem/component/common/common";
 import { LessonActivity } from "../../type";
 import { ChoiceAnswer } from "./choiceAnswer";
-import { FillBlankAnswer } from "./fillBlankAnswer";
+import { SelectFillAnswer } from "./selectFillAnwer";
+import { TryCodeAnswer } from "./tryCodeAnswer";
 
 type AnswerRendererProps = {
   activity: LessonActivity;
@@ -34,18 +35,30 @@ export const AnswerRenderer: React.FC<AnswerRendererProps> = ({
         />
       );
     
-    case "FILL_BLANK":
-        return(
-            <FillBlankAnswer
-                codeTemplate={activity.codeTemplate ?? ""}
-                blanks={activity.blanks ?? []}
-                blankChoices={activity.blankChoices ?? []}
-                userAnswer={userAnswer}
-                checked={checked}
-                isCorrect={isCorrect}
-                onAnswerChange={onAnswerChange}
-            />
-        )
+    case "SELECT_FILL":
+
+      if (!activity.blankArea) return null;
+      
+      return(
+          <SelectFillAnswer
+              blankArea={activity.blankArea}
+              blanks={activity.blanks ?? []}
+              blankChoices={activity.blankChoices ?? []}
+              userAnswer={userAnswer}
+              checked={checked}
+              isCorrect={isCorrect}
+              onAnswerChange={onAnswerChange}
+          />
+      )
+    case "TRY_CODE":
+      return (
+        <TryCodeAnswer
+          starterCode={activity.starterCode}
+          sampleCode={activity.sampleCode}
+          userAnswer={userAnswer}
+          onAnswerChange={onAnswerChange} 
+        />
+      )
     default:
       return null;
   }

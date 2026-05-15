@@ -1,4 +1,9 @@
-export type LessonStepType = "TUTORIAL" | "VIEW" | "CHOICE" | "FILL_BLANK" | "ORDERING" | "SHORT_INPUT" | "TRACE";
+export type LessonStepType = "TRY_CODE" | "TUTORIAL" | "VIEW" | "CHOICE" | "SELECT_FILL";
+
+export type PreviewType = "STATIC_HTML" | "CUSTOM" | "NO_PREVIEW";
+
+export type BlankAreaType = "CODE" | "ORDERED_STEPS" | "INLINE_NEXT";
+
 export type Lesson = {
     id: string;
     courseId: string;
@@ -14,22 +19,34 @@ export type LessonActivity = {
     title: string;
     instruction: string;
     mentorMessage: string;
+
     choices?: Choice[]; // CHOICEタイプのときに使用
-    codeTemplate?: string; // FILL_BLANKやTRACEタイプのときに使用
+    
+    blankArea?: BlankArea // SELECT_FILLやTRACEタイプのときに使用
+    blanks?: Blank[]; // SELECT_FILLタイプのときに使用
+    blankChoices?: BlankChoice[]; // SELECT_FILLタイプのときに使用
+  
     input?: Input; // SHORT_INPUTタイプのときに使用
     summary?: string[]; // VIEWタイプのときに使用
-    blanks?: Blank[]; // FILL_BLANKタイプのときに使用
-    blankChoices?: BlankChoice[]; // FILL_BLANKタイプのときに使用
-    orderingItems?: OrderingItem[];
+    
+    starterCode?: string;
+    sampleCode?: string;
+    
     correctFeedback?: string;
     incorrectFeedback?: string;
-    goal: {
-        type: "UI_PREVIEW" | "CODE_OUTPUT" | "CODE_CORRECTNESS";
-        title: string;
-        previewKey?: string;
-    }
+
+    preview: Preview;
+
     actionLabel: string;
 }
+
+export type Preview = {
+    type: PreviewType;
+    title: string;
+    html?: string;
+    caption?: string;
+    previewKey?: string;
+};
 
 export type Choice = {
     id: string;
@@ -43,6 +60,11 @@ export type BlankChoice = {
     label: string;
 }
 
+export type BlankArea = {
+    type: BlankAreaType;
+    template?: string;
+}
+
 export type Input = {
     placeholder: string;
     minLength?: number;
@@ -52,7 +74,7 @@ export type Input = {
 
 export type Blank = {
     id: string;
-    answer: string;
+    answerChoiceId: string;
     placeholder: string;
 }
 
