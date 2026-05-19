@@ -14,7 +14,6 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MapIcon from "@mui/icons-material/Map";
 import ReplayIcon from "@mui/icons-material/Replay";
-import FlagIcon from "@mui/icons-material/Flag";
 
 import { Lesson, NextLesson } from "../type";
 import { CountUpExp } from "./CountUpExp";

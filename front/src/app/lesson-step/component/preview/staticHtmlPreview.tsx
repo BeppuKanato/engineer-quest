@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { HtmlIframePreview } from "./htmlIframePreview";
 
 type StaticHtmlPreviewProps = {

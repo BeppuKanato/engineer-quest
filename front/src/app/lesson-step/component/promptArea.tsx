@@ -2,9 +2,6 @@ import { Avatar, Box, Stack, Typography } from "@mui/material";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
 import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import FormatListNumberedRoundedIcon from "@mui/icons-material/FormatListNumberedRounded";
-import RouteRoundedIcon from "@mui/icons-material/RouteRounded";
 
 import { LessonActivity, LessonStepType } from "../type";
 

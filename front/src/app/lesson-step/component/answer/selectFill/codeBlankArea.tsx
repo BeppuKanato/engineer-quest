@@ -9,7 +9,6 @@ type CodeBlankAreaProps = {
     blankChoices: BlankChoice[];
     answers: Record<string, string>;
     checked: boolean;
-    isCorrect: boolean | null;
   };
   
 export const CodeBlankArea: React.FC<CodeBlankAreaProps> = ({
@@ -18,7 +17,6 @@ export const CodeBlankArea: React.FC<CodeBlankAreaProps> = ({
     blankChoices,
     answers,
     checked,
-    isCorrect,
   }) => {
     const tokens = template.split(/(\{\{.+?\}\})/g);
   

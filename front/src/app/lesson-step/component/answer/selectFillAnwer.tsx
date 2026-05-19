@@ -1,11 +1,10 @@
 "use client";
 
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { Blank, BlankArea, BlankChoice } from "../../type";
 import { BlankChoiceList } from "./selectFill/blankChoiceList";
 import { CodeBlankArea } from "./selectFill/codeBlankArea";
 import { OrderedStepsBlankArea } from "./selectFill/orderStepsBlankArea";
-import { CheckLine } from "lucide-react";
 
 type SelectFillUserAnswer = Record<string, string>;
 
@@ -95,7 +94,6 @@ export const SelectFillAnswer: React.FC<SelectFillAnswerProps> = ({
             blankChoices={blankChoices}
             answers={answers}
             checked={checked}
-            isCorrect={isCorrect}
           />
         )}
 

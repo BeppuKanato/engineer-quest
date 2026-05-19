@@ -6,12 +6,10 @@ import { HtmlHeadingTagSwitcherPreview } from "./sampleCourse/htmlHeadingTagSwit
 
 type PreviewRendererProps = {
   preview?: Preview;
-  userAnswer?: unknown;
 };
 
 export const PreviewRenderer: React.FC<PreviewRendererProps> = ({
   preview,
-  userAnswer,
 }) => {
   console.log(`previewTest: ${preview?.type}`)
   if (!preview) return null;

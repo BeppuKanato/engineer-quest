@@ -104,7 +104,7 @@ export const CountUpExp: React.FC<CountUpExpProps> = ({
         window.clearTimeout(startDelayId);
             cancelAnimationFrame(animationFrameId);
         };
-    }, [exp, duration, delay]);
+    }, [exp, duration, delay, onCountComplete]);
 
     return (
     <Box

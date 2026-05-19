@@ -4,7 +4,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import { Box, Button, Card, Chip, LinearProgress, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, Chip, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { MissionExamResultLog, NextMission } from "../type";
 import { ResultConfetti } from "./resultConfetti";

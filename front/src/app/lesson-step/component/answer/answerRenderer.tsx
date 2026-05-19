@@ -1,4 +1,3 @@
-import { isComponentType } from "@/app/problem/component/common/common";
 import { LessonActivity } from "../../type";
 import { ChoiceAnswer } from "./choiceAnswer";
 import { SelectFillAnswer } from "./selectFillAnwer";
