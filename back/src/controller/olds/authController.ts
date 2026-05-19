@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { prisma } from "../lib/prisma";
-import { AuthRequest } from "../middleware/verifyToken";
+import { prisma } from "../../lib/prisma";
+import { AuthRequest } from "../../middleware/verifyToken";
 
 export const ensureUserExistController = async (req: AuthRequest, res: Response) => {
     const uid = req.user?.uid;
