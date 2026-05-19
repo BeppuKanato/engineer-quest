@@ -2,7 +2,7 @@ import { seedCharacters } from "./seeds/character/seed";
 import { seedDifficulties } from "./seeds/difuculties/seed";
 import { seedMissions } from "./seeds/mission/seed";
 import { seedMissionUnlocks } from "./seeds/missionUnlockByMission/seed";
-import { prisma } from "../src/lib/prisma";
+import { prisma } from "../../src/lib/prisma";
 import { seedRanks } from "./seeds/rank/seed";
 
 async function main() {
