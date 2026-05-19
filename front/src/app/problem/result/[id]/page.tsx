@@ -22,8 +22,8 @@
 //   onGoHome?: () => void;
 // }
 
-function NotificationDialog(){//{ open, title, content, isLast, onNext, onGoHome }: NotificationDialogProps) {
-  return (
+// function NotificationDialog(){//{ open, title, content, isLast, onNext, onGoHome }: NotificationDialogProps) {
+  // return (
 //     <Dialog open={open} onClose={isLast ? onGoHome : onNext} maxWidth="xs" fullWidth>
 //       <Card className="rounded-2xl shadow-lg p-4 bg-white">
 //         <DialogTitle>
@@ -47,7 +47,7 @@ function NotificationDialog(){//{ open, title, content, isLast, onNext, onGoHome
 //   );
 // }
 
-// export default function ResultPage() {
+export default function ResultPage() {
 //   const [responseData, setResponseData] = useState<MissionResultResponse | null>(null);
 //   const [dialogOpen, setDialogOpen] = useState(false);
 //   const [showResult, setShowResult] = useState(false);
@@ -379,6 +379,7 @@ function NotificationDialog(){//{ open, title, content, isLast, onNext, onGoHome
 //       </>
 //       )}
 //     </div>
+return(
 <div></div>
   );
 }
