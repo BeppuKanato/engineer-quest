@@ -1,8 +1,8 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { Box, Container } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { AppHeader } from "@/app/component/appHeader";
 import {
@@ -34,7 +34,7 @@ const tempNextMission: NextMission | null = {
   title: "画像と文章を配置する",
 };
 
-export default function MissionExamResultPage() {
+function MissionExamResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -67,7 +67,7 @@ export default function MissionExamResultPage() {
 
   const handleClickNextMission = () => {
     if (tempNextMission) {
-      router.push(`/mission-overview`);
+      router.push("/mission-overview");
       return;
     }
 
@@ -106,5 +106,13 @@ export default function MissionExamResultPage() {
         </Container>
       </Box>
     </Box>
+  );
+}
+
+export default function MissionExamResultPage() {
+  return (
+    <Suspense fallback={null}>
+      <MissionExamResultContent />
+    </Suspense>
   );
 }
