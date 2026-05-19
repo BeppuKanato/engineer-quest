@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"No tests yet\"",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"ts-node --files src/app.ts\"",
     "build": "tsc",
     "start": "node dist/src/app.js",
     "lint": "eslint src --ext .ts"

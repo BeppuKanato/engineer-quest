@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { acceptController, homeController } from "../controller/homeController";
-import { verifyToken } from "../middleware/verifyToken";
+// import { Router } from "express";
+// // import { acceptController, homeController } from "../controller/olds/homeController";
+// import { verifyToken } from "../middleware/verifyToken";
 
-const homeRouter = Router();
+// const homeRouter = Router();
 
-homeRouter.post('/', verifyToken, homeController);
-homeRouter.post('/acceptMission', verifyToken, acceptController);
+// homeRouter.post('/', verifyToken, homeController);
+// // homeRouter.post('/acceptMission', verifyToken, acceptController);
 
-export default homeRouter;
+// export default homeRouter;
