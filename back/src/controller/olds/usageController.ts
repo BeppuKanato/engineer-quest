@@ -3,7 +3,7 @@
 // import { AuthRequest } from "../../middleware/verifyToken";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/verifyToken"
+import { AuthRequest } from "../../middleware/authMiddleware"
 
 // export const getUsageTimeController = async(req: Request, res: Response) => {
 //     const { userId, period } = req.body;

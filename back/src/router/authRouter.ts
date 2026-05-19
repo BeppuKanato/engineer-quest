@@ -1,9 +1,15 @@
+// src/router/authRouter.ts
+
 import { Router } from "express";
-import { ensureUserExistController } from "../controller/olds/authController";
-import { verifyToken } from "../middleware/verifyToken";
+import {
+  getMeController,
+  ensureUserController,
+} from "../controller/authController";
+import { verifyFirebaseToken } from "../middleware/authMiddleware";
 
-const authRouter = Router();
+const router = Router();
 
-authRouter.post('/ensure', verifyToken, ensureUserExistController);
+router.post("/ensure", verifyFirebaseToken, ensureUserController);
+router.get("/me", verifyFirebaseToken, getMeController);
 
-export default authRouter;
+export default router;

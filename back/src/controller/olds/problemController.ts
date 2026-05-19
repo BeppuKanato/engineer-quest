@@ -47,7 +47,7 @@
 //     const userId  = req.user!.uid;
 
 import { Response } from "express";
-import { AuthRequest } from "../../middleware/verifyToken";
+import { AuthRequest } from "../../middleware/authMiddleware";
 
 //     const acceptedMission = await getAcceptedMissions(userId);
 

@@ -5,7 +5,7 @@ import { Response } from "express";
 // import { AuthRequest } from "../../middleware/verifyToken";
 // import { requiredExperienceForLevel } from "../../domain/level";
 
-import { AuthRequest } from "../../middleware/verifyToken";
+import { AuthRequest } from "../../middleware/authMiddleware";
 
 // /**
 //  * @abstract ホーム画面表示API

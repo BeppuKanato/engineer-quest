@@ -7,7 +7,7 @@
 // import { Prisma } from "@prisma/client";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/verifyToken"
+import { AuthRequest } from "../../middleware/authMiddleware"
 
 // type SharedMissionWithProgress =
 //   Prisma.SharedMissionExamProgressGetPayload<{

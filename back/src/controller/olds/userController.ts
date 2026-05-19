@@ -2,7 +2,7 @@
 // import { fetchUser } from "../../service/userService";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/verifyToken"
+import { AuthRequest } from "../../middleware/authMiddleware"
 
 // export const loginController = async(req: Request, res: Response) => {
 //     const { userId } = req.body;

@@ -1,6 +1,6 @@
 import { Response } from "express";
 // import { prisma } from "../../lib/prisma";
-import { AuthRequest } from "../../middleware/verifyToken";
+import { AuthRequest } from "../../middleware/authMiddleware";
 export const ensureUserExistController = async (req: AuthRequest, res: Response)  => {
     return res.status(400).json({"error": "メンテ中"})
 }
