@@ -90,7 +90,6 @@ export const LessonActivityCard: React.FC<LessonActivityCardProps> = ({
     
                 <PreviewRenderer
                   preview={activity.preview}
-                  userAnswer={userAnswer}
                 />
               </Stack>
             </>
