@@ -47,7 +47,7 @@
 //     const userId  = req.user!.uid;
 
 import { Response } from "express";
-import { AuthRequest } from "../../middleware/authMiddleware";
+// import { AuthRequest } from "../../middleware/authMiddleware";
 
 //     const acceptedMission = await getAcceptedMissions(userId);
 
@@ -939,7 +939,7 @@ import { AuthRequest } from "../../middleware/authMiddleware";
 //  * @param res 
 //  * @returns 
 //  */
-export const completeStepController = async(req: AuthRequest, res: Response) => {
+export const completeStepController = async(req: Request, res: Response) => {
     return res.status(400).json({ "error": "メンテ中"})
 }
 // export const completeStepController = async(req: AuthRequest, res: Response) => {

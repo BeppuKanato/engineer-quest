@@ -1,7 +1,7 @@
 import { Response } from "express";
 // import { prisma } from "../../lib/prisma";
-import { AuthRequest } from "../../middleware/authMiddleware";
-export const ensureUserExistController = async (req: AuthRequest, res: Response)  => {
+// import { AuthRequest } from "../../middleware/authMiddleware";
+export const ensureUserExistController = async (req: Request, res: Response)  => {
     return res.status(400).json({"error": "メンテ中"})
 }
 // export const ensureUserExistController = async (req: AuthRequest, res: Response) => {

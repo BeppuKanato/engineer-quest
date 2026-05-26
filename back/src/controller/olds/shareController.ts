@@ -7,7 +7,7 @@
 // import { Prisma } from "@prisma/client";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/authMiddleware"
+// import { AuthRequest } from "../../middleware/authMiddleware"
 
 // type SharedMissionWithProgress =
 //   Prisma.SharedMissionExamProgressGetPayload<{
@@ -162,6 +162,6 @@ import { AuthRequest } from "../../middleware/authMiddleware"
 //     })
 // }
 
-export const shareController = async(req: AuthRequest, res: Response) => {
+export const shareController = async(req: Request, res: Response) => {
     return res.status(400).json({ "error": "メンテ中"})
 }

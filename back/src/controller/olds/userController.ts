@@ -2,7 +2,7 @@
 // import { fetchUser } from "../../service/userService";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/authMiddleware"
+// import { AuthRequest } from "../../middleware/authMiddleware"
 
 // export const loginController = async(req: Request, res: Response) => {
 //     const { userId } = req.body;
@@ -20,6 +20,6 @@ import { AuthRequest } from "../../middleware/authMiddleware"
 //     }
 // }
 
-export const userController = async(req: AuthRequest, res: Response) => {
+export const userController = async(req: Request, res: Response) => {
     return res.status(400).json({ "error": "メンテ中"})
 }

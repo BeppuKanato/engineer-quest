@@ -5,7 +5,7 @@ import { Response } from "express";
 // import { AuthRequest } from "../../middleware/verifyToken";
 // import { requiredExperienceForLevel } from "../../domain/level";
 
-import { AuthRequest } from "../../middleware/authMiddleware";
+// import { AuthRequest } from "../../middleware/authMiddleware";
 
 // /**
 //  * @abstract ホーム画面表示API
@@ -51,7 +51,7 @@ import { AuthRequest } from "../../middleware/authMiddleware";
 //  * @param req 
 //  * @param res 
 //  */
-export const homeController = async (req: AuthRequest, res: Response) => {
+export const homeController = async (req: Request, res: Response) => {
   return res.status(400).json({ error: "メンテ中"})
 }
 // export const homeController = async (req: AuthRequest, res: Response) => {

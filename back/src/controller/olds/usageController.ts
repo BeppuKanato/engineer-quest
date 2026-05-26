@@ -3,7 +3,7 @@
 // import { AuthRequest } from "../../middleware/verifyToken";
 
 import { Response } from "express"
-import { AuthRequest } from "../../middleware/authMiddleware"
+// import { AuthRequest } from "../../middleware/authMiddleware"
 
 // export const getUsageTimeController = async(req: Request, res: Response) => {
 //     const { userId, period } = req.body;
@@ -29,6 +29,6 @@ import { AuthRequest } from "../../middleware/authMiddleware"
 //     }
 // };
 
-export const usageController = async(req: AuthRequest, res: Response) => {
+export const usageController = async(req: Request, res: Response) => {
     return res.status(400).json({ "error": "メンテ中"})
 }
