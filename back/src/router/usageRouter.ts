@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { getUsageTimeController, upsertUsageTimeController } from "../controller/usageController";
-import { verifyToken } from "../middleware/verifyToken";
+// import { Router } from "express";
+// import { getUsageTimeController, upsertUsageTimeController } from "../controller/olds/usageController";
+// import { verifyToken } from "../middleware/verifyToken";
 
-const usageRouter = Router();
+// const usageRouter = Router();
 
-usageRouter.post('/upsert', verifyToken, upsertUsageTimeController);
-usageRouter.post('/get', verifyToken, getUsageTimeController);
+// usageRouter.post('/upsert', verifyToken, upsertUsageTimeController);
+// usageRouter.post('/get', verifyToken, getUsageTimeController);
 
-export default usageRouter;
+// export default usageRouter;

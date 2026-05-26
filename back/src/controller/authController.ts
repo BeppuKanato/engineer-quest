@@ -1,53 +1,49 @@
-import { Response } from "express";
-import { prisma } from "../lib/prisma";
-import { AuthRequest } from "../middleware/verifyToken";
+import { Request, Response } from "express";
+import {
+  ensureUserService,
+  getUserByFirebaseUidService,
+} from "../service/authService";
 
-export const ensureUserExistController = async (req: AuthRequest, res: Response) => {
-    const uid = req.user?.uid;
+export const ensureUserController = async (req: Request, res: Response) => {
+  if (!req.firebaseUser) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
 
-    if (!uid) {
-        return res.status(401).json({
-            ok: false,
-            message: "Unauthorized",
-        });
-    }
+  const displayName =
+    typeof req.body?.displayName === "string"
+      ? req.body.displayName
+      : req.firebaseUser.name ?? null;
 
-    try {
-        await prisma.$transaction(async (tx) => {
-            const existingUser = await tx.user.findUnique({
-                where: { id: uid },
-            });
+  const user = await ensureUserService({
+    firebaseUid: req.firebaseUser.uid,
+    displayName,
+  });
 
-            if (existingUser) {
-                return;
-            }
+  req.authUser = user;
 
-            const initialRank = await tx.rank.findUnique({
-                where: { slug: "rank-1" },
-                select: { id: true },
-            });
+  return res.json({
+    user,
+  });
+};
 
-            if (!initialRank) {
-                throw new Error("初期ランク(rank-1)が見つかりません");
-            }
+export const getMeController = async (req: Request, res: Response) => {
+  if (!req.firebaseUser) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
 
-            await tx.user.create({
-                data: {
-                    id: uid,
-                    name: "エンジニア",
-                    level: 1,
-                    experience: 0,
-                    rankId: initialRank.id,
-                },
-            });
-        });
+  const user = await getUserByFirebaseUidService(req.firebaseUser.uid);
 
-        return res.status(200).json({ ok: true });
-    } catch (error) {
-        console.error("ensureUserExistController error:", error);
-        return res.status(500).json({
-            ok: false,
-            message: "Internal Server Error",
-        });
-    }
+  if (!user) {
+    return res.status(404).json({
+      error: "User is not registered in app database",
+    });
+  }
+
+  return res.json({
+    user,
+  });
 };
