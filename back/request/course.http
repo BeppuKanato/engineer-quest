@@ -1,0 +1,5 @@
+GET  http://localhost:8080/courses/dev/cmpcf2afh0000yzx8g2oejijs
+Content-Type: application/json
+
+{
+}

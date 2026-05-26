@@ -4,7 +4,7 @@ import { Router } from "express";
 import {
   getMeController,
   ensureUserController,
-} from "../controller/authController";
+} from "../controller/auth.controller";
 import { verifyFirebaseToken } from "../middleware/authMiddleware";
 
 const router = Router();

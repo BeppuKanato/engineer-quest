@@ -1,4 +1,4 @@
-export type CourseStatus = "completed" | "in_progress" | "not_started";
+export type ProgressStatus = "completed" | "in_progress" | "not_started";
 
 export type Course = {
     id: string;
@@ -7,6 +7,10 @@ export type Course = {
     missions: Mission[];
     categories: CourseCategory[];
     difficulty: Difficulty;
+    status: ProgressStatus;
+    progressRate: number;
+    missionCount: number,
+    completedMissionCount: number
 }
 
 export type Mission = {
@@ -14,7 +18,7 @@ export type Mission = {
     title: string;
     description: string;
     goalImg: string;
-    status: CourseStatus;
+    status: ProgressStatus;
     tags?: string[];
 }
 
@@ -25,5 +29,5 @@ export type Difficulty = "easy" | "normal" | "hard";
 export type CourseFilterState =  {
     category: CourseCategory | "all";
     difficulty: Difficulty | "all";
-    status: CourseStatus | "all";
+    status: ProgressStatus | "all";
 }

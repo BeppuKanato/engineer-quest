@@ -1,5 +1,5 @@
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import { CourseCategory, CourseFilterState, CourseStatus, Difficulty } from "../type";
+import { CourseCategory, CourseFilterState, ProgressStatus, Difficulty } from "../type";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { getCategoryLabel } from "../../component/categoryChip";
 
@@ -17,7 +17,7 @@ const categoryOptions: {value: CourseCategory | "all", label: string}[] = [
     { value: "data", label: "データ管理"},
 ];
 
-const statusOptions: { value: CourseStatus | "all", label: string}[] = [
+const statusOptions: { value: ProgressStatus | "all", label: string}[] = [
     { value: "all", label: "すべて" },
     { value: "not_started", label: "未着手" },
     { value: "in_progress", label: "進行中"},
