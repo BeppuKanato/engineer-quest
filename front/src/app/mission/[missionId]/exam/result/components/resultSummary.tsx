@@ -3,7 +3,7 @@ import SendIcon from "@mui/icons-material/Send";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Box, Card, Stack, Typography } from "@mui/material";
 import { MissionExamResultLog } from "../type";
-import { MissionExamDifficulty } from "../../exam/type";
+import { MissionExamDifficulty } from "../../play/type";
 
 type ResultSummaryProps = {
   result: MissionExamResultLog;

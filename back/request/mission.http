@@ -1,7 +1,7 @@
-
 @baseUrl = http://localhost:8080/api
+@missionId = mission-self-introduction-card
 @firebaseUid = 0BvPVYjYhZbEhbvtVV11VcFhNV63
 
-###
-GET {{baseUrl}}/courses
+### Get mission overview
+GET {{baseUrl}}/missions/{{missionId}}/overview
 X-Dev-Firebase-Uid: {{firebaseUid}}

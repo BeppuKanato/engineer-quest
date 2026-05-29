@@ -1,4 +1,4 @@
-import { MissionExamDifficulty } from "../exam/type";
+import { MissionExamDifficulty } from "../play/type";
 
 export type MissionExamResultLog = {
   difficulty: MissionExamDifficulty;

@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { Box, Card, CardContent, Container, Stack, Typography, Fade } from "@mui/material";
 
-import { AppHeader } from "../../component/appHeader";
-import { htmlSelfIntroductionLesson1 } from "../sampleData/htmlSelfIntroductionLesson1";
-import { LessonHeaderCard } from "../component/headerCard";
-import { LessonActivityCard } from "../component/activityCard";
-import { LessonActionButtons } from "../component/actionButtons";
-import { ActivityAnswerState } from "../type";
+import { AppHeader } from "../../../../../component/appHeader";
+import { htmlSelfIntroductionLesson1 } from "./sampleData/htmlSelfIntroductionLesson1";
+import { LessonHeaderCard } from "./component/headerCard";
+import { LessonActivityCard } from "./component/activityCard";
+import { LessonActionButtons } from "./component/actionButtons";
+import { ActivityAnswerState } from "./type";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { useRouter } from "next/navigation";
-
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 export default function LessonPage() {
   const lesson = htmlSelfIntroductionLesson1;
 
@@ -24,6 +25,7 @@ export default function LessonPage() {
   const [userAnswer, setUserAnswer] = useState<unknown>(null);
   const [activityAnswerMap, setActivityAnswerMap] = useState<Record<string, ActivityAnswerState>>({});
 
+  const { isNavigating, showOverlay, startNavigation } = useNavigationFeedback();
   const currentActivity = lesson.activities[currentActivityIndex];  
   const isLastActivity = currentActivityIndex === lesson.activities.length - 1;
 

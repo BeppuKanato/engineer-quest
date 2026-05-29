@@ -180,8 +180,6 @@ export const getCoursesByFirebaseUid = async (
     },
   });
 
-  console.log(firebaseUid)
-
   if (!user) {
     throw new AppError(404, "USER_NOT_FOUND", "User not found");
   }

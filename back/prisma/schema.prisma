@@ -82,6 +82,8 @@ model Mission {
   difficulty  CourseDifficulty
   goalImg     String
 
+  estimatedMinutes Int @default(10)
+
   // Course内での順番。Missionのロック判定に使う
   order Int
 
@@ -110,6 +112,8 @@ model Lesson {
 
   // Mission内での順番。Lessonのロック判定に使う
   order Int
+
+  rewardExp Int @default(30)
 
   mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
@@ -170,7 +174,7 @@ model MissionExam {
   previewCss   String?
 
   estimatedTime String
-  rewardExp     Int
+  rewardExp     Int @default(100)
 
   mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 

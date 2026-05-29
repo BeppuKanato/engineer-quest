@@ -7,15 +7,15 @@ import { ProgressStatus } from "../type";
 
 type LessonNodeProps = {
     status: ProgressStatus;
+    isLocked?: boolean;
     isCurrent?: boolean;
     type?: "lesson" | "exam";
 };
 
 export const LessonNode: React.FC<LessonNodeProps> = ({
-    status, isCurrent = false, type = "lesson",
+    status, isLocked = false, isCurrent = false, type = "lesson",
 }) => {
     const isCompleted = status === "completed";
-    const isLocked = status === "not_started" && !isCurrent;
 
     const Icon = isCompleted
     ? CheckIcon

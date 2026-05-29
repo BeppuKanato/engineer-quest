@@ -1,22 +1,27 @@
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography, ButtonBase } from "@mui/material";
 import { Lesson, MissionExam, ProgressStatus } from "../type";
 import { LessonNode } from "./lessonNode";
 
 type LessonRoadmapProps = {
     lessons: Lesson[];
     missionExam: MissionExam;
+    onLessonClick?: (lessonId: string) => void;
+    onMissionExamClick?: () => void;
 };
 
 type RoadmapItem = {
     id: string;
     title: string;
     status: ProgressStatus;
+    isLocked: boolean;
     type: "lesson" | "exam";
 };
 
 export const LessonRoadmap: React.FC<LessonRoadmapProps> = ({
     lessons,
     missionExam,
+    onLessonClick,
+    onMissionExamClick
 }) => {
     const items: RoadmapItem[] = [
         ...lessons.map((lesson) => ({
@@ -27,6 +32,7 @@ export const LessonRoadmap: React.FC<LessonRoadmapProps> = ({
             id: missionExam.id,
             title: missionExam.title,
             status: missionExam.status,
+            isLocked: missionExam.isLocked,
             type: "exam",
         },
     ];
@@ -58,14 +64,31 @@ export const LessonRoadmap: React.FC<LessonRoadmapProps> = ({
                             const isCurrent = index === currentIndex;
                             const side = index % 2 === 0 ? "right" : "left";
 
+                            const handleClick = () => {
+                                console.log("クリックされた")
+                                if (item.isLocked) {
+                                    return;
+                                }
+                                console.log("クリックされたアイテム:", item);
+                                if (item.type === "lesson") {
+                                    console.log("lessonでの処理");
+                                    onLessonClick?.(item.id);
+
+                                    return;
+                                }
+                                console.log("表示テスト");
+                                onMissionExamClick?.();
+                            }
                             return (
                                 <Box key={item.id}>
                                     <RoadmapItemView
                                         title={item.title}
                                         status={item.status}
+                                        isLocked={item.isLocked}
                                         type={item.type}
                                         isCurrent={isCurrent}
                                         side={side}
+                                        onClick={handleClick}
                                     />
 
                                     {index < items.length - 1 && <RoadmapLine />}
@@ -87,15 +110,16 @@ const getCurrentItemIndex = (items: RoadmapItem[]) => {
 type RoadmapItemViewProps = {
     title: string;
     status: ProgressStatus;
+    isLocked: boolean;
     type: "lesson" | "exam";
     isCurrent: boolean;
     side: "left" | "right";
+    onClick?: () => void;
 };
 
 const RoadmapItemView: React.FC<RoadmapItemViewProps> = ({
-    title, status, type, isCurrent, side,
+    title, status, isLocked, type, isCurrent, side, onClick
 }) => {
-    const isLocked = status === "not_started" && !isCurrent;
 
     return (
         <Box
@@ -116,7 +140,28 @@ const RoadmapItemView: React.FC<RoadmapItemViewProps> = ({
                             : "translateX(52px)",
                 }}
             >
-                <LessonNode status={status} isCurrent={isCurrent} type={type} />
+                <ButtonBase
+                    disabled={isLocked}
+                    onClick={onClick}
+                    aria-label={`${title}を開く`}
+                    sx={{
+                        borderRadius: "50%",
+                        cursor: isLocked ? "not-allowed" : "pointer",
+                        transition: "transform 0.18s ease, filter 0.18s ease",
+                        "&:hover": {
+                            transform: isLocked ? "none" : "translateY(-3px) scale(1.04)",
+                            filter: isLocked ? "none" : "brightness(1.04)",
+                        },
+                        "&:active": {
+                            transform: isLocked ? "none" : "translateY(1px) scale(0.98)",
+                        },
+                        "&.Mui-disabled": {
+                            cursor: "not-allowed",
+                        },
+                    }}
+                >
+                    <LessonNode status={status} isLocked={isLocked} isCurrent={isCurrent} type={type} />
+                </ButtonBase>
             </Box>
 
             <Box
