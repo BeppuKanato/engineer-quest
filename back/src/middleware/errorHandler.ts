@@ -1,11 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Response } from "express";
 import { AppError } from "../error/appError";
 
 export const errorHandler = (
   error: unknown,
-  req: Request,
   res: Response,
-  next: NextFunction
 ) => {
   console.error(error);
 
