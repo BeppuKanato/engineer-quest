@@ -17,15 +17,18 @@ import { StatusChip } from "../../component/statusChip";
 
 type MissionCardProps = Mission & {
     canStart: boolean;
+    onClick?: (misssoinId: string) => void;
 };
 
 export const MissionCard: React.FC<MissionCardProps> = ({
+    id,
     title,
     description,
     goalImg,
     status,
     tags = [],
     canStart,
+    onClick,
 }) => {
     const isCompleted = status === "completed";
     const isLocked = !isCompleted && !canStart;
@@ -147,6 +150,7 @@ export const MissionCard: React.FC<MissionCardProps> = ({
                         variant={isCompleted ? "outlined" : "contained"}
                         startIcon={buttonIcon}
                         disabled={isLocked}
+                        onClick={() => onClick?.(id)}
                         sx={{
                             borderRadius: 2,
                             fontWeight: 800,

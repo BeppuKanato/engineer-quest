@@ -10,25 +10,29 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { Course, CourseStatus } from "../type";
+import { Course, ProgressStatus } from "../type";
 import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { MissionCard } from "./missionCard";
 import { StatusChip } from "../../component/statusChip";
 
-export const CourseAccordion: React.FC<Course> = ({
+type CourseAccordionProps = Course & {
+    onMissionClick?: (missionId: string) => void;
+};
+
+export const CourseAccordion: React.FC<CourseAccordionProps> = ({
     title,
     description,
     categories,
     difficulty,
     missions,
+    status,
+    progressRate,
+    missionCount,
+    completedMissionCount,
+    onMissionClick,
 }) => {
-    const completedCount = missions.filter((mission) => mission.status === "completed").length;
-    const progressRate = missions.length === 0 ? 0 : (completedCount / missions.length) * 100;
-    const status = getCourseStatus(missions);
-
     const isCompleted = status === "completed";
-    console.log(title)
     return (
         <Accordion
             defaultExpanded
@@ -118,7 +122,7 @@ export const CourseAccordion: React.FC<Course> = ({
                                 進捗
                             </Typography>
                             <Typography variant="caption" color="text.secondary" fontWeight={700}>
-                                {completedCount} / {missions.length}
+                                {completedMissionCount} / {missionCount}
                             </Typography>
                         </Stack>
                         <LinearProgress
@@ -161,6 +165,7 @@ export const CourseAccordion: React.FC<Course> = ({
                                 key={mission.id}
                                 {...mission}
                                 canStart={canStart}
+                                onClick={onMissionClick}
                             />
                         )
                     })}
@@ -168,21 +173,4 @@ export const CourseAccordion: React.FC<Course> = ({
             </AccordionDetails>
         </Accordion>
     );
-};
-
-const getCourseStatus = (missions: Course["missions"]): CourseStatus => {
-    const completedCount = missions.filter((mission) => mission.status === "completed").length;
-
-    if (completedCount === missions.length) {
-        return "completed";
-    }
-
-    if (
-        completedCount > 0 ||
-        missions.some((mission) => mission.status === "in_progress")
-    ) {
-        return "in_progress";
-    }
-
-    return "not_started";
 };

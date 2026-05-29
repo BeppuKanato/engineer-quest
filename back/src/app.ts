@@ -5,7 +5,9 @@ import dotenv from 'dotenv';
 // import problemRouter from './router/problemRouter';
 // import homeRouter from './router/homeRouter';
 // import usageRouter from './router/usageRouter';
-import authRouter from './router/authRouter';
+import authRouter from './router/auth.router';
+import courseRouter from './router/course.router';
+import { errorHandler } from './middleware/errorHandler';
 // import shareRouter from './router/shareRouter';
 
 dotenv.config();
@@ -30,7 +32,10 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 //ユーザ認証
-app.use('/auth', authRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/courses', courseRouter);
+
+app.use(errorHandler)
 
 // //問題機能
 // app.use('/problem', problemRouter);

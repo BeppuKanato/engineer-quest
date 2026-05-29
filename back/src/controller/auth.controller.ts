@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   ensureUserService,
   getUserByFirebaseUidService,
-} from "../service/authService";
+} from "../service/auth.service";
 
 export const ensureUserController = async (req: Request, res: Response) => {
   if (!req.firebaseUser) {
