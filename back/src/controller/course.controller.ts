@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { getCoursesByFirebaseUid, getCoursesByUserId } from "../service/course.service";
+import { getCoursesByFirebaseUid } from "../service/course.service";
 import { AppError } from "../error/appError";
 
 type AuthenticatedRequest = Request & {
@@ -14,7 +14,7 @@ export const getCoursesController = async (
     next: NextFunction
 ) => {
   try {
-    const firebaseUid = req.authUser?.firebaseUid;
+    const firebaseUid = req.firebaseUser?.uid;
     if (!firebaseUid) {
       throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
     }

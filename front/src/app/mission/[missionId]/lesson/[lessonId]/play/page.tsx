@@ -12,8 +12,8 @@ import { ActivityAnswerState } from "./type";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { useRouter } from "next/navigation";
-import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
-import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+// import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
+// import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 export default function LessonPage() {
   const lesson = htmlSelfIntroductionLesson1;
 
@@ -25,7 +25,7 @@ export default function LessonPage() {
   const [userAnswer, setUserAnswer] = useState<unknown>(null);
   const [activityAnswerMap, setActivityAnswerMap] = useState<Record<string, ActivityAnswerState>>({});
 
-  const { isNavigating, showOverlay, startNavigation } = useNavigationFeedback();
+  // const { isNavigating, showOverlay, startNavigation } = useNavigationFeedback();
   const currentActivity = lesson.activities[currentActivityIndex];  
   const isLastActivity = currentActivityIndex === lesson.activities.length - 1;
 

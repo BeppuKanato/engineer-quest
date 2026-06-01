@@ -1,4 +1,4 @@
-import { Lesson } from "../../mission/[missionId]/lesson/[lessonId]/type";
+import { Lesson } from "../type";
 
 export const htmlSelfIntroductionLesson1: Lesson = {
   id: "lesson-1",
