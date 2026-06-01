@@ -2,14 +2,14 @@ import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardMedia,
-    LinearProgress,
-    Stack,
-    Typography,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  LinearProgress,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { Mission } from "../type";
 
@@ -17,22 +17,50 @@ type MissionSummaryCardProps = {
     mission: Mission;
 };
 
-export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission }) => {
-    const completedLessons = mission.lessons.filter((lesson) => lesson.status === "completed").length;
+export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({
+    mission,
+}) => {
+    const completedLessons = mission.lessons.filter(
+        (lesson) => lesson.status === "completed"
+    ).length;
+
     const totalLessons = mission.lessons.length;
-    const progressValue = totalLessons === 0 ? 0 : (completedLessons / totalLessons) * 100;
 
-    const currentLesson = mission.lessons.find((lesson) => lesson.status !== "completed") ?? mission.lessons[mission.lessons.length - 1];
+    const progressValue =
+        totalLessons === 0 ? 0 : (completedLessons / totalLessons) * 100;
 
-    const isMissionCompleted = completedLessons === totalLessons && mission.missionExam.status === "completed";
+    const currentLesson = mission.lessons.find(
+        (lesson) => !lesson.isLocked && lesson.status !== "completed"
+    );
+
+    const isAllLessonsCompleted =
+        totalLessons > 0 && completedLessons === totalLessons;
+
+    const isMissionCompleted =
+        isAllLessonsCompleted && mission.missionExam.status === "completed";
+
+    const nextActionTitle = isMissionCompleted
+        ? "ミッションは完了済みです"
+        : currentLesson
+        ? currentLesson.title
+        : !mission.missionExam.isLocked
+            ? mission.missionExam.title
+            : "次のレッスンはまだロックされています";
 
     const buttonLabel = isMissionCompleted
         ? "復習する"
-        : completedLessons > 0
-          ? "続きから学習"
-          : "レッスンを始める";
+        : currentLesson
+        ? completedLessons > 0
+            ? "続きから学習"
+            : "レッスンを始める"
+        : !mission.missionExam.isLocked
+            ? "確認テストへ進む"
+            : "ロック中";
 
     const ButtonIcon = isMissionCompleted ? ReplayIcon : PlayArrowIcon;
+
+    const isButtonDisabled =
+        !isMissionCompleted && !currentLesson && mission.missionExam.isLocked;
 
     return (
         <Card
@@ -49,10 +77,7 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                             {mission.title}
                         </Typography>
 
-                        <Typography
-                            color="text.secondary"
-                            sx={{ mt: 1, lineHeight: 1.7 }}
-                        >
+                        <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
                             {mission.description}
                         </Typography>
                     </Box>
@@ -73,9 +98,7 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                     <Stack direction="row" spacing={2} flexWrap="wrap">
                         <Stack direction="row" alignItems="center" spacing={0.75}>
                             <AutoAwesomeMotionIcon fontSize="small" />
-                            <Typography fontWeight={800}>
-                                {totalLessons} Lessons
-                            </Typography>
+                            <Typography fontWeight={800}>{totalLessons} Lessons</Typography>
                         </Stack>
 
                         <Typography fontWeight={800} color="text.secondary">
@@ -84,13 +107,25 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                     </Stack>
 
                     <Box>
-                        <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" fontWeight={800}>
-                                進捗
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" fontWeight={800}>
-                                {completedLessons} / {totalLessons}
-                            </Typography>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            sx={{ mb: 0.75 }}
+                        >
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            fontWeight={800}
+                        >
+                            進捗
+                        </Typography>
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            fontWeight={800}
+                        >
+                            {completedLessons} / {totalLessons}
+                        </Typography>
                         </Stack>
 
                         <LinearProgress
@@ -101,8 +136,8 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                                 borderRadius: 999,
                                 bgcolor: "#e2e8f0",
                                 "& .MuiLinearProgress-bar": {
-                                    borderRadius: 999,
-                                    bgcolor: "#1976d2",
+                                borderRadius: 999,
+                                bgcolor: "#1976d2",
                                 },
                             }}
                         />
@@ -116,13 +151,15 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                             border: "1px solid #bfdbfe",
                         }}
                     >
-                        <Typography variant="caption" color="text.secondary" fontWeight={800}>
-                            次にやること
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            fontWeight={800}
+                        >
+                          次にやること
                         </Typography>
                         <Typography fontWeight={900} sx={{ mt: 0.5 }}>
-                            {isMissionCompleted
-                                ? "ミッションは完了済みです"
-                                : currentLesson?.title}
+                            {nextActionTitle}
                         </Typography>
                     </Box>
 
@@ -130,10 +167,11 @@ export const MissionSummaryCard: React.FC<MissionSummaryCardProps> = ({ mission 
                         variant="contained"
                         size="large"
                         startIcon={<ButtonIcon />}
+                        disabled={isButtonDisabled}
                         sx={{
-                            borderRadius: 2.5,
-                            py: 1.3,
-                            fontWeight: 900,
+                        borderRadius: 2.5,
+                        py: 1.3,
+                        fontWeight: 900,
                         }}
                     >
                         {buttonLabel}

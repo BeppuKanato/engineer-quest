@@ -9,9 +9,9 @@ import {
   MissionExamResultLog,
   NextMission,
 } from "./type";
-import { missionExamProblems } from "../exam/tempData";
+import { missionExamProblems } from "../play/tempData";
 import { MissionExamCompleteCard } from "./components/resultCard";
-import { MissionExamDifficulty } from "../exam/type";
+import { MissionExamDifficulty } from "../play/type";
 
 const isMissionExamDifficulty = (
   value: string | null

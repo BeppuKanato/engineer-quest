@@ -5,9 +5,9 @@ import { Box, Container } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { AppHeader } from "@/app/component/appHeader";
-import { missionExamProblems } from "../exam/tempData";
+import { missionExamProblems } from "./tempData";
 // import { MissionExamCompleteCard } from "./components";
-import { MissionExamDifficulty } from "../exam/type";
+import { MissionExamDifficulty } from "./type";
 import { MissionExamResultLog, NextMission } from "../result/type";
 import { MissionExamCompleteCard } from "../result/components/resultCard";
 

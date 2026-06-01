@@ -6,7 +6,7 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Box, Button, Card, Chip, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { MissionExamResultLog, NextMission } from "../type";
+import { MissionExamResultLog, NextMission } from "../../result/type";
 import { ResultConfetti } from "./resultConfetti";
 import { CountUpExp } from "./countupExp";
 import { ResultSummary } from "./resultSummary";

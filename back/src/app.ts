@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 // import usageRouter from './router/usageRouter';
 import authRouter from './router/auth.router';
 import courseRouter from './router/course.router';
+import missionRouter from './router/mission.router';
 import { errorHandler } from './middleware/errorHandler';
 // import shareRouter from './router/shareRouter';
 
@@ -34,6 +35,7 @@ app.get("/health", (req: Request, res: Response) => {
 //ユーザ認証
 app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
+app.use('/api/missions', missionRouter);
 
 app.use(errorHandler)
 

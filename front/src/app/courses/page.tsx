@@ -9,9 +9,11 @@ import { CourseFilter } from "./component/courseFilter";
 import { AppHeader } from "../component/appHeader";
 import { getCourses } from "@/api/courses.api";
 import { ApiError } from "@/lib/fetcher";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-
+import { CourseSkeleton } from "./component/courseSkeleton";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 const initialFilter: CourseFilterState = {
     category: "all",
@@ -26,9 +28,12 @@ export default function CoursesPage() {
     const [courses, setCourses] = useState<Course[]>([]);
 
     const router = useRouter();
+    const { showOverlay, startNavigation } = useNavigationFeedback();
 
     const handleMissionClick =  (missionId: string) => {
-        router.push(`/mission-overview/${missionId}`);
+        startNavigation(() => {
+            router.push(`/mission/${missionId}/overview`);
+        });
     }
 
     useEffect(() => {
@@ -88,6 +93,10 @@ export default function CoursesPage() {
     return (
         <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC"}} >
             <AppHeader />
+            <PageTransitionOverlay
+                open={showOverlay}
+                message="ミッションを準備しています..." 
+            />
 
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 <Stack spacing={4}>
@@ -103,17 +112,7 @@ export default function CoursesPage() {
                     <CourseFilter value={filter} onChange={setFilter} />
 
                     {isLoading ? (
-                        <Box
-                            sx={{
-                                p: 4,
-                                borderRadius: 3,
-                                bgcolor: "#fff",
-                                textAlign: "center",
-                                boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-                            }}
-                        >
-                            <Typography fontWeight={800}>コースを読み込み中...</Typography>
-                        </Box>
+                        <CourseSkeleton />
                     ): errorMessage?(
                         <Box
                             sx={{

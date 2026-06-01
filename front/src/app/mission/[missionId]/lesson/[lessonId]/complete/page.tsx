@@ -3,7 +3,7 @@
 import { Box, Container } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-import { AppHeader } from "../component/appHeader";
+import { AppHeader } from "../../../../../component/appHeader";
 import { Lesson, NextLesson } from "./type";
 import { LessonCompleteCard } from "./component/LessonCompleteCard";
 

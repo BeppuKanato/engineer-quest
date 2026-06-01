@@ -10,7 +10,7 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { Course, ProgressStatus } from "../type";
+import { Course } from "../type";
 import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { MissionCard } from "./missionCard";

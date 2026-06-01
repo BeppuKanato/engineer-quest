@@ -27,6 +27,7 @@ export default function Login() {
   const router = useRouter();
   const apiBaseUrl = getApiBaseUrl();
 
+  console.log("API Base URL:", apiBaseUrl);
   const handleLogin = async () => {
     if (isSubmitting) return;
 
