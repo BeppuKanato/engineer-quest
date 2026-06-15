@@ -1,17 +1,29 @@
-export type LessonStepType = "TRY_CODE" | "TUTORIAL" | "VIEW" | "CHOICE" | "SELECT_FILL";
+export type LessonStepType =
+  | "TRY_CODE"
+  | "TUTORIAL"
+  | "VIEW"
+  | "CHOICE"
+  | "SELECT_FILL";
 
-export type PreviewType = "STATIC_HTML" | "CUSTOM" | "NO_PREVIEW";
+export type PreviewType =
+  | "STATIC_HTML"
+  | "CUSTOM"
+  | "NO_PREVIEW";
 
-export type BlankAreaType = "CODE" | "ORDERED_STEPS" | "INLINE_NEXT";
+export type BlankAreaType =
+  | "CODE"
+  | "ORDERED_STEPS"
+  | "INLINE_NEXT";
 
 export type Lesson = {
     id: string;
+    missionId: string;
     courseId: string;
     courseTitle: string;
     title: string;
     description: string;
     activities: LessonActivity[];
-}
+};
 
 export type LessonActivity = {
     id: string;
@@ -20,25 +32,24 @@ export type LessonActivity = {
     instruction: string;
     mentorMessage: string;
 
-    choices?: Choice[]; // CHOICEタイプのときに使用
-    
-    blankArea?: BlankArea // SELECT_FILLやTRACEタイプのときに使用
-    blanks?: Blank[]; // SELECT_FILLタイプのときに使用
-    blankChoices?: BlankChoice[]; // SELECT_FILLタイプのときに使用
-  
-    input?: Input; // SHORT_INPUTタイプのときに使用
-    summary?: string[]; // VIEWタイプのときに使用
-    
+    choices?: Choice[];
+
+    blankArea?: BlankArea;
+    blanks?: Blank[];
+    blankChoices?: BlankChoice[];
+
+    summary?: string[];
+
     starterCode?: string;
     sampleCode?: string;
-    
+
     correctFeedback?: string;
     incorrectFeedback?: string;
 
     preview: Preview;
 
     actionLabel: string;
-}
+};
 
 export type Preview = {
     type: PreviewType;

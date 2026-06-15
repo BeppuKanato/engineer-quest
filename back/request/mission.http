@@ -2,6 +2,13 @@
 @missionId = mission-self-introduction-card
 @firebaseUid = 0BvPVYjYhZbEhbvtVV11VcFhNV63
 
+@lessonId = lesson-card-base
+
 ### Get mission overview
 GET {{baseUrl}}/missions/{{missionId}}/overview
+X-Dev-Firebase-Uid: {{firebaseUid}}
+
+###
+
+GET {{baseUrl}}/missions/lesson/{{lessonId}}/play
 X-Dev-Firebase-Uid: {{firebaseUid}}

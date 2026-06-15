@@ -54,6 +54,27 @@ const toDifficulty = (
   }
 };
 
+const ensureMissionInProgress = async (
+  userId: string,
+  missionId: string
+) => {
+  await prisma.userMissionProgress.upsert({
+    where: {
+      userId_missionId: {
+        userId,
+        missionId,
+      },
+    },
+    update: {},
+    create: {
+      userId,
+      missionId,
+      status: "IN_PROGRESS",
+      startedAt: new Date(),
+    },
+  });
+};
+
 export const getMissionOverviewService = async ({
   missionId,
   firebaseUid,
@@ -71,9 +92,13 @@ export const getMissionOverviewService = async ({
     throw new AppError(404, "USER_NOT_FOUND", "User not found");
   }
 
-  const mission = await prisma.mission.findUnique({
+  const mission = await prisma.mission.findFirst({
     where: {
       id: missionId,
+      isPublished: true,
+      course: {
+        isPublished: true,
+      },
     },
     include: {
       lessons: {
@@ -118,6 +143,8 @@ export const getMissionOverviewService = async ({
       "Mission exam not found"
     );
   }
+
+  await ensureMissionInProgress(user.id, mission.id);
 
   let previousLessonCompleted = true;
 
