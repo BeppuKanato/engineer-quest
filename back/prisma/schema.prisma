@@ -115,6 +115,8 @@ model Lesson {
 
   rewardExp Int @default(30)
 
+  learnedItems String[] @default([])
+
   mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   activities LessonActivity[]

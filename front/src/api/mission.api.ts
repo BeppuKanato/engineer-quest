@@ -1,5 +1,6 @@
 import type { Mission } from "@/app/mission/[missionId]/overview/type";
 import type { Lesson } from "@/app/mission/[missionId]/lesson/[lessonId]/play/type";
+import type { LessonCompleteData } from "@/app/mission/[missionId]/lesson/[lessonId]/complete/type";
 import { fetcher } from "@/lib/fetcher";
 
 export const getMissionOverview = async (token: string, missionId: string): Promise<Mission> => {
@@ -37,6 +38,19 @@ export const completeLesson = async (
     `/missions/lesson/${encodeURIComponent(lessonId)}/complete`,
     {
       method: "POST",
+      token,
+    }
+  );
+};
+
+export const getLessonComplete = async (
+  token: string,
+  lessonId: string
+): Promise<LessonCompleteData> => {
+  return fetcher<LessonCompleteData>(
+    `/missions/lesson/${encodeURIComponent(lessonId)}/complete`,
+    {
+      method: "GET",
       token,
     }
   );

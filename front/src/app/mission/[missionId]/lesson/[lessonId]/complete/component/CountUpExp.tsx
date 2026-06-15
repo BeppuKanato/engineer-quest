@@ -45,7 +45,7 @@ const shine = keyframes`
 `;
 
 type CountUpExpProps = {
-    exp: number;
+    rewardExp: number;
     expRef?: RefObject<HTMLDivElement | null>;
     duration?: number;
     delay?: number;
@@ -53,7 +53,7 @@ type CountUpExpProps = {
 };
 
 export const CountUpExp: React.FC<CountUpExpProps> = ({
-    exp,
+    rewardExp,
     expRef,
     duration = 1100,
     delay = 450,
@@ -80,7 +80,7 @@ export const CountUpExp: React.FC<CountUpExpProps> = ({
                 // 最初は速く、最後はゆっくり止まる
                 const easedProgress = 1 - Math.pow(1 - progress, 3);
 
-                const nextCount = Math.round(exp * easedProgress);
+                const nextCount = Math.round(rewardExp * easedProgress);
                 setCount(nextCount);
 
                 if (progress < 1) {
@@ -88,7 +88,7 @@ export const CountUpExp: React.FC<CountUpExpProps> = ({
                     return;
                 }
 
-                setCount(exp);
+                setCount(rewardExp);
                 setIsCompleted(true);
 
                 if (!completedCalledRef.current) {
@@ -104,7 +104,7 @@ export const CountUpExp: React.FC<CountUpExpProps> = ({
         window.clearTimeout(startDelayId);
             cancelAnimationFrame(animationFrameId);
         };
-    }, [exp, duration, delay, onCountComplete]);
+    }, [rewardExp, duration, delay, onCountComplete]);
 
     return (
     <Box

@@ -185,3 +185,105 @@ export const completeLessonById = async (
     completedAt: lessonProgress.completedAt,
   };
 };
+
+export const getLessonCompleteById = async (
+  firebaseUid: string,
+  lessonId: string
+) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      firebaseUid,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(404, "USER_NOT_FOUND", "User not found");
+  }
+
+  const lesson = await prisma.lesson.findUnique({
+    where: {
+      id: lessonId,
+    },
+    include: {
+      mission: {
+        include: {
+          course: true,
+        },
+      },
+      progresses: {
+        where: {
+          userId: user.id,
+        },
+        select: {
+          status: true,
+        },
+      },
+    },
+  });
+
+  if (!lesson) {
+    throw new AppError(404, "LESSON_NOT_FOUND", "Lesson not found");
+  }
+
+  if (!lesson.mission.isPublished || !lesson.mission.course.isPublished) {
+    throw new AppError(404, "LESSON_NOT_FOUND", "Lesson not found");
+  }
+
+  const lessonProgress = lesson.progresses[0];
+
+  if (lessonProgress?.status !== "COMPLETED") {
+    throw new AppError(
+      403,
+      "LESSON_NOT_COMPLETED",
+      "Lesson is not completed"
+    );
+  }
+
+  const nextLesson = await prisma.lesson.findFirst({
+    where: {
+      missionId: lesson.missionId,
+      order: {
+        gt: lesson.order,
+      },
+    },
+    orderBy: {
+      order: "asc",
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  });
+
+  const totalLessonCount = await prisma.lesson.count({
+    where: {
+      missionId: lesson.missionId,
+    },
+  });
+
+  const completedLessonCount = await prisma.userLessonProgress.count({
+    where: {
+      userId: user.id,
+      status: "COMPLETED",
+      lesson: {
+        missionId: lesson.missionId,
+      },
+    },
+  });
+
+  return {
+    missionId: lesson.missionId,
+    lesson: {
+      id: lesson.id,
+      title: lesson.title,
+      rewardExp: lesson.rewardExp,
+      learnedItems: lesson.learnedItems,
+    },
+    nextLesson,
+    completedLessonCount,
+    totalLessonCount,
+  };
+};

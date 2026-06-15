@@ -19,11 +19,13 @@ import { AppHeader } from "../../../../../component/appHeader";
 import { LessonHeaderCard } from "./component/headerCard";
 import { LessonActivityCard } from "./component/activityCard";
 import { LessonActionButtons } from "./component/actionButtons";
+import { LessonPlaySkeleton } from "./component/skeleton";
 import type { ActivityAnswerState, Lesson, LessonActivity } from "./type";
 
 import { auth } from "@/lib/firebase";
 import { completeLesson, getLessonPlay } from "@/api/mission.api";
-import { LessonPlaySkeleton } from "./component/skeleton";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 export default function LessonPage() {
   const params = useParams<{
@@ -35,6 +37,8 @@ export default function LessonPage() {
 
   const missionId = params.missionId;
   const lessonId = params.lessonId;
+
+  const { showOverlay, startNavigation } = useNavigationFeedback();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +54,14 @@ export default function LessonPage() {
   const [activityAnswerMap, setActivityAnswerMap] = useState<
     Record<string, ActivityAnswerState>
   >({});
+
+  const resetAnswerState = () => {
+    setSelectedChoiceId(null);
+    setChecked(false);
+    setIsCorrect(null);
+    setFeedback("");
+    setUserAnswer(null);
+  };
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -83,14 +95,6 @@ export default function LessonPage() {
     }
   }, [lessonId]);
 
-  const resetAnswerState = () => {
-    setSelectedChoiceId(null);
-    setChecked(false);
-    setIsCorrect(null);
-    setFeedback("");
-    setUserAnswer(null);
-  };
-
   const createFeedback = (
     activity: LessonActivity,
     savedState: ActivityAnswerState
@@ -121,9 +125,14 @@ export default function LessonPage() {
         }}
       >
         <AppHeader />
-        <Container maxWidth="lg" sx={{ py: { xs: 2.5, md: 4 } }}>
-          {/* <Typography fontWeight={900}>レッスンを読み込んでいます...</Typography>
-           */}
+
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: { xs: 2.5, md: 4 },
+            px: { xs: 2, md: 3 },
+          }}
+        >
           <LessonPlaySkeleton />
         </Container>
       </Box>
@@ -136,10 +145,19 @@ export default function LessonPage() {
         sx={{
           minHeight: "100vh",
           bgcolor: "#F7F8FC",
+          background:
+            "linear-gradient(180deg, #F7F8FC 0%, #F3F7FF 45%, #F7F8FC 100%)",
         }}
       >
         <AppHeader />
-        <Container maxWidth="lg" sx={{ py: { xs: 2.5, md: 4 } }}>
+
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: { xs: 2.5, md: 4 },
+            px: { xs: 2, md: 3 },
+          }}
+        >
           <Alert severity="error">
             {errorMessage ?? "レッスン情報を取得できませんでした。"}
           </Alert>
@@ -179,21 +197,24 @@ export default function LessonPage() {
   const handleCompleteLesson = async () => {
     try {
       setIsCompleting(true);
+      setErrorMessage(null);
 
       const token = await auth.currentUser?.getIdToken();
 
       if (!token) {
         setErrorMessage("ログイン情報を取得できませんでした。");
+        setIsCompleting(false);
         return;
       }
 
       await completeLesson(token, lesson.id);
 
-      router.push("/lesson-complete");
+      startNavigation(() => {
+        router.push(`/mission/${missionId}/lesson/${lesson.id}/complete`);
+      });
     } catch (error) {
       console.error(error);
       setErrorMessage("レッスン完了の保存に失敗しました。");
-    } finally {
       setIsCompleting(false);
     }
   };
@@ -340,6 +361,11 @@ export default function LessonPage() {
       }}
     >
       <AppHeader />
+
+      <PageTransitionOverlay
+        open={showOverlay || isCompleting}
+        message="結果を準備しています..."
+      />
 
       <Container
         maxWidth="lg"

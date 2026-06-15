@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyFirebaseToken } from "../middleware/authMiddleware";
 import { getMissionOverviewController } from "../controller/mission.controller";
-import { getLessonPlayController, completeLessonController } from "../controller/lesson.controller";
+import { getLessonPlayController, completeLessonController, getLessonCompleteController } from "../controller/lesson.controller";
 const router = Router();
 
 router.get(
@@ -22,4 +22,9 @@ router.post(
   completeLessonController
 );
 
+router.get(
+  "/lesson/:lessonId/complete",
+  verifyFirebaseToken,
+  getLessonCompleteController
+);
 export default router;
