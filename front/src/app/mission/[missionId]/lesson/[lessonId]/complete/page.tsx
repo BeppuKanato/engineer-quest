@@ -1,47 +1,81 @@
 "use client";
 
-import { Box, Container } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Alert, Box, CircularProgress, Container, Stack, Typography } from "@mui/material";
 
 import { AppHeader } from "../../../../../component/appHeader";
-import { Lesson, NextLesson } from "./type";
 import { LessonCompleteCard } from "./component/LessonCompleteCard";
+import type { LessonCompleteData } from "./type";
 
-const tempLesson: Lesson = {
-  id: "lesson_1",
-  title: "HTMLの基本",
-  exp: 40,
-  learnedItems: [
-    "HTMLはWebページの内容と構造を書く",
-    "<h1> は大きな見出しを表す",
-    "<p> は文章を表す",
-  ],
-};
-
-const tempNextLesson: NextLesson | null = {
-  id: "lesson_2",
-  title: "画像と文章を配置する",
-//   description: "次は画像を追加して、文章と一緒に並べる練習をします。",
-};
+import { auth } from "@/lib/firebase";
+import { getLessonComplete } from "@/api/mission.api";
+import { LessonCompleteSkeleton } from "./component/skeleton";
 
 export default function LessonCompletePage() {
+  const params = useParams<{
+    missionId: string;
+    lessonId: string;
+  }>();
+
   const router = useRouter();
 
+  const missionId = params.missionId;
+  const lessonId = params.lessonId;
+
+  const [completeData, setCompleteData] = useState<LessonCompleteData | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchLessonComplete = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        const token = await auth.currentUser?.getIdToken();
+
+        if (!token) {
+          setErrorMessage("ログイン情報を取得できませんでした。");
+          return;
+        }
+
+        const data = await getLessonComplete(token, lessonId);
+
+        setCompleteData(data);
+      } catch (error) {
+        console.error(error);
+        setErrorMessage("レッスン完了情報の取得に失敗しました。");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (lessonId) {
+      fetchLessonComplete();
+    }
+  }, [lessonId]);
+
   const handleClickNextLesson = () => {
-    if (tempNextLesson) {
-      router.push(`/lessonStep/${tempNextLesson.id}`);
+    if (!completeData) return;
+
+    if (completeData.nextLesson) {
+      router.push(
+        `/mission/${missionId}/lesson/${completeData.nextLesson.id}/play`
+      );
       return;
     }
 
-    router.push("/missionExam");
+    router.push(`/mission/${missionId}/exam/intro`);
   };
 
   const handleClickLessonMap = () => {
-    router.push("/mission-overview");
+    router.push(`/mission/${missionId}/overview`);
   };
 
   const handleClickReview = () => {
-    router.push(`/lesson/${tempLesson.id}`);
+    router.push(`/mission/${missionId}/lesson/${lessonId}/play`);
   };
 
   return (
@@ -63,15 +97,25 @@ export default function LessonCompletePage() {
         }}
       >
         <Container maxWidth="md">
-          <LessonCompleteCard
-            lesson={tempLesson}
-            nextLesson={tempNextLesson}
-            completedLessonCount={1}
-            totalLessonCount={5}
-            onClickNextLesson={handleClickNextLesson}
-            onClickLessonMap={handleClickLessonMap}
-            onClickReview={handleClickReview}
-          />
+          {isLoading && (
+            <LessonCompleteSkeleton />
+          )}
+
+          {!isLoading && errorMessage && (
+            <Alert severity="error">{errorMessage}</Alert>
+          )}
+
+          {!isLoading && !errorMessage && completeData && (
+            <LessonCompleteCard
+              lesson={completeData.lesson}
+              nextLesson={completeData.nextLesson}
+              completedLessonCount={completeData.completedLessonCount}
+              totalLessonCount={completeData.totalLessonCount}
+              onClickNextLesson={handleClickNextLesson}
+              onClickLessonMap={handleClickLessonMap}
+              onClickReview={handleClickReview}
+            />
+          )}
         </Container>
       </Box>
     </Box>
