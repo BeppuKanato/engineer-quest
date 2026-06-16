@@ -163,16 +163,13 @@ model LessonActivity {
 // =========================
 
 model MissionExam {
-  id          String @id @default(cuid())
-  missionId   String @unique
+  id        String @id @default(cuid())
+  missionId String @unique
 
   title       String
   description String
-  difficulty  ExamDifficulty
 
   thumbnailUrl String?
-  answerCode   String
-  initialCode  String
   previewCss   String?
 
   estimatedTime String
@@ -180,12 +177,28 @@ model MissionExam {
 
   mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
-  progresses UserMissionExamProgress[]
-
+  variants    MissionExamVariant[]
+  progresses  UserMissionExamProgress[]
   submissions MissionExamSubmission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model MissionExamVariant {
+  id            String @id @default(cuid())
+  missionExamId String
+  difficulty    ExamDifficulty
+
+  initialCode String
+  answerCode  String
+
+  missionExam MissionExam @relation(fields: [missionExamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([missionExamId, difficulty])
 }
 
 // =========================
@@ -234,10 +247,11 @@ model UserMissionExamProgress {
   id            String @id @default(cuid())
   userId        String
   missionExamId String
+  difficulty    ExamDifficulty
 
-  // 現状は全文一致判定なので、点数やfeedbackは持たない
   passed Boolean @default(false)
 
+  startedAt DateTime?
   completedAt DateTime?
 
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -246,7 +260,7 @@ model UserMissionExamProgress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, missionExamId])
+  @@unique([userId, missionExamId, difficulty])
 }
 
 // =========================
@@ -277,6 +291,7 @@ model MissionExamSubmission {
   userId        String
   missionId     String
   missionExamId String
+  difficulty    ExamDifficulty
 
   submittedCode String
   isCorrect     Boolean
@@ -290,6 +305,7 @@ model MissionExamSubmission {
   @@index([userId])
   @@index([missionId])
   @@index([missionExamId])
+  @@index([difficulty])
 }
 
 // =========================

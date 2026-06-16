@@ -14,7 +14,10 @@ async function deleteExistingData() {
   await prisma.userLessonProgress.deleteMany();
   await prisma.userMissionProgress.deleteMany();
 
+  // MissionExam の子テーブル
+  await prisma.missionExamVariant.deleteMany();
   await prisma.missionExam.deleteMany();
+
   await prisma.lessonActivity.deleteMany();
   await prisma.lesson.deleteMany();
   await prisma.mission.deleteMany();
@@ -139,13 +142,17 @@ async function seedLearningData() {
         missionId: createdMission.id,
         title: mission.exam.title,
         description: mission.exam.description,
-        difficulty: mission.exam.difficulty,
         thumbnailUrl: mission.exam.thumbnailUrl,
-        answerCode: mission.exam.answerCode,
-        initialCode: mission.exam.initialCode,
         previewCss: mission.exam.previewCss,
         estimatedTime: mission.exam.estimatedTime,
         rewardExp: mission.exam.rewardExp,
+        variants: {
+          create: mission.exam.variants.map((variant) => ({
+            difficulty: variant.difficulty,
+            initialCode: variant.initialCode,
+            answerCode: variant.answerCode,
+          })),
+        },
       },
     });
   }

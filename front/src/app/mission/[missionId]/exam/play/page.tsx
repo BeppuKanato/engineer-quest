@@ -1,15 +1,29 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { Box, Container } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useMemo, useState } from "react";
+import { Alert, Box, Container, Grid } from "@mui/material";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { AppHeader } from "@/app/component/appHeader";
+
+import { MissionExamActions } from "./components/missionExamActions";
+import { MissionExamEditor } from "./components/missionExamEditor";
+import { MissionExamHeaderCard } from "./components/missionExamHeaderCard";
+import { MissionExamResultMessage } from "./components/missionExamResultMessage";
+import { MissionExamSidePanel } from "./components/missionExamSidePanel";
+
+import {
+  createUserLineDiff,
+  isCodeCorrect,
+} from "./missionExamDiff";
+
 import { missionExamProblems } from "./tempData";
-// import { MissionExamCompleteCard } from "./components";
-import { MissionExamDifficulty } from "./type";
-import { MissionExamResultLog, NextMission } from "../result/type";
-import { MissionExamCompleteCard } from "../result/components/resultCard";
+import type {
+  MissionExamDifficulty,
+  MissionExamSubmitStatus,
+  MissionExamTab,
+  UserDiffLine,
+} from "./type";
 
 const isMissionExamDifficulty = (
   value: string | null
@@ -17,109 +31,147 @@ const isMissionExamDifficulty = (
   return value === "easy" || value === "normal" || value === "hard";
 };
 
-const createFallbackResult = (
-  difficulty: MissionExamDifficulty
-): MissionExamResultLog => ({
-  difficulty,
-  exp: 120,
-  submitCount: 1,
-  diffCheckCount: 0,
-  clearedAt: new Date().toISOString(),
-});
-
-const tempNextMission: NextMission | null = {
-  id: "mission_2",
-  title: "画像と文章を配置する",
-};
-
-function MissionExamResultContent() {
-  const router = useRouter();
+export default function MissionExamPlayPage() {
+  const params = useParams<{ missionId: string }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const difficultyParam = searchParams.get("difficulty");
+  const missionId = params.missionId;
 
-  const difficulty: MissionExamDifficulty =
-    isMissionExamDifficulty(difficultyParam) ? difficultyParam : "normal";
+  const difficulty = useMemo<MissionExamDifficulty>(() => {
+    const difficultyParam = searchParams.get("difficulty");
+
+    if (isMissionExamDifficulty(difficultyParam)) {
+      return difficultyParam;
+    }
+
+    return "normal";
+  }, [searchParams]);
 
   const problem = missionExamProblems[difficulty];
 
-  const [result, setResult] = useState<MissionExamResultLog>(
-    createFallbackResult(difficulty)
-  );
+  const [code, setCode] = useState(problem.initialCode);
+  const [previewCode, setPreviewCode] = useState(problem.initialCode);
+  const [activeTab, setActiveTab] = useState<MissionExamTab>("preview");
+  const [submitStatus, setSubmitStatus] =
+    useState<MissionExamSubmitStatus>("idle");
+  const [diffLines, setDiffLines] = useState<UserDiffLine[]>([]);
+  const [showDiff, setShowDiff] = useState(false);
 
-  useEffect(() => {
-    const resultKey = `mission-exam-result:${problem.id}:${problem.difficulty}`;
-    const savedResult = window.localStorage.getItem(resultKey);
+  const handleShowReference = () => {
+    setActiveTab("reference");
+  };
 
-    if (!savedResult) {
-      setResult(createFallbackResult(difficulty));
+  const handleUpdatePreview = () => {
+    setPreviewCode(code);
+    setActiveTab("preview");
+  };
+
+  const handleCheckDiff = () => {
+    const result = createUserLineDiff(problem.answerCode, code);
+
+    setDiffLines(result.lines);
+    setShowDiff(result.hasDifference);
+    setActiveTab("reference");
+
+    if (!result.hasDifference) {
+      setSubmitStatus("correct");
+    } else {
+      setSubmitStatus("incorrect");
+    }
+  };
+
+  const handleClearDiff = () => {
+    setShowDiff(false);
+    setDiffLines([]);
+  };
+
+  const handleSubmit = () => {
+    if (submitStatus === "correct") {
+      router.push(`/mission/${encodeURIComponent(missionId)}/exam/result`);
       return;
     }
 
-    try {
-      setResult(JSON.parse(savedResult) as MissionExamResultLog);
-    } catch {
-      setResult(createFallbackResult(difficulty));
-    }
-  }, [difficulty, problem.difficulty, problem.id]);
+    const correct = isCodeCorrect(code, problem.answerCode);
 
-  const handleClickNextMission = () => {
-    if (tempNextMission) {
-      router.push("/mission-overview");
+    if (correct) {
+      setSubmitStatus("correct");
+      setShowDiff(false);
+      setDiffLines([]);
       return;
     }
 
-    router.push("/mission-overview");
+    const result = createUserLineDiff(problem.answerCode, code);
+
+    setSubmitStatus("incorrect");
+    setDiffLines(result.lines);
+    setShowDiff(result.hasDifference);
+    setActiveTab("reference");
   };
 
-  const handleClickMissionMap = () => {
-    router.push("/mission-overview");
-  };
+  if (!problem) {
+    return (
+      <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
+        <AppHeader />
 
-  return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "#F7F8FC",
-        background:
-          "linear-gradient(180deg, #F7F8FC 0%, #F3F7FF 48%, #F7F8FC 100%)",
-      }}
-    >
-      <AppHeader />
-
-      <Box
-        component="main"
-        sx={{
-          minHeight: "calc(100vh - 64px)",
-          py: { xs: 4, md: 6 },
-        }}
-      >
-        <Container maxWidth="md">
-          <MissionExamCompleteCard
-            result={result}
-            nextMission={tempNextMission}
-            onClickNextMission={handleClickNextMission}
-            onClickMissionMap={handleClickMissionMap}
-          />
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error">
+            確認テストの問題データを取得できませんでした。
+          </Alert>
         </Container>
       </Box>
-    </Box>
-  );
-}
+    );
+  }
 
-export default function MissionExamResultPage() {
   return (
-    <Suspense
-      fallback={
-        <Box
-          sx={{
-            minHeight: "100vh",
-            bgcolor: "#F7F8FC",
-          }}
+    <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
+      <AppHeader />
+
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 } }}>
+        <MissionExamHeaderCard problem={problem} />
+
+        <Grid container spacing={2.5} sx={{ mt: 2.5 }} alignItems="stretch">
+          <Grid size={{ xs: 12, md: 6 }}>
+            <MissionExamEditor
+              code={code}
+              onChange={(nextCode) => {
+                setCode(nextCode);
+
+                if (submitStatus !== "idle") {
+                  setSubmitStatus("idle");
+                }
+
+                if (showDiff) {
+                  setShowDiff(false);
+                  setDiffLines([]);
+                }
+              }}
+              diffLines={diffLines}
+              showDiff={showDiff}
+              onClearDiff={handleClearDiff}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <MissionExamSidePanel
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              problem={problem}
+              userCode={previewCode}
+            />
+          </Grid>
+        </Grid>
+
+        <MissionExamResultMessage status={submitStatus} />
+
+        <MissionExamActions
+          submitStatus={submitStatus}
+          onShowReference={handleShowReference}
+          onCheckDiff={handleCheckDiff}
+          onUpdatePreview={handleUpdatePreview}
+          onSubmit={handleSubmit}
         />
-      }
-    >
-      <MissionExamResultContent />
-    </Suspense>
+      </Container>
+    </Box>
   );
 }

@@ -216,15 +216,33 @@ export const learningSeed = {
           title: "自己紹介カードを完成させよう",
           description:
             "学んだタグを使って、自己紹介カードのHTMLを完成させましょう。",
-          difficulty: ExamDifficulty.EASY,
           thumbnailUrl: "/images/missions/self-introduction-card.png",
-          answerCode:
-            '<div class="card">\n  <h1>カナト</h1>\n  <p>情報系の大学院生です。</p>\n</div>',
-          initialCode: '<div class="card">\n  \n</div>',
           previewCss:
             ".card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; max-width: 280px; }",
           estimatedTime: "5分",
           rewardExp: 30,
+          variants: [
+            {
+              difficulty: ExamDifficulty.EASY,
+              answerCode:
+                '<div class="card">\n  <h1>カナト</h1>\n  <p>情報系の大学院生です。</p>\n</div>',
+              initialCode:
+                '<div class="card">\n  <h1></h1>\n  <p></p>\n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.NORMAL,
+              answerCode:
+                '<div class="card">\n  <h1>カナト</h1>\n  <p>情報系の大学院生です。</p>\n</div>',
+              initialCode:
+                '<div class="card">\n  \n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.HARD,
+              answerCode:
+                '<div class="card">\n  <h1>カナト</h1>\n  <p>情報系の大学院生です。</p>\n</div>',
+              initialCode: "",
+            },
+          ],
         },
       },
       {
@@ -242,15 +260,33 @@ export const learningSeed = {
           title: "プロフィール画面を完成させよう",
           description:
             "画像とテキストを並べたプロフィール画面を完成させましょう。",
-          difficulty: ExamDifficulty.NORMAL,
           thumbnailUrl: "/images/missions/profile-layout.png",
-          answerCode:
-            '<div class="profile">\n  <img src="avatar.png" alt="avatar">\n  <p>よろしくお願いします。</p>\n</div>',
-          initialCode: '<div class="profile">\n</div>',
           previewCss:
-            ".profile { display: flex; gap: 12px; align-items: center; }",
+            ".profile { display: flex; gap: 12px; align-items: center; } .profile img { width: 72px; height: 72px; border-radius: 999px; }",
           estimatedTime: "8分",
           rewardExp: 50,
+          variants: [
+            {
+              difficulty: ExamDifficulty.EASY,
+              answerCode:
+                '<div class="profile">\n  <img src="avatar.png" alt="avatar">\n  <p>よろしくお願いします。</p>\n</div>',
+              initialCode:
+                '<div class="profile">\n  <img src="avatar.png" alt="avatar">\n  <p></p>\n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.NORMAL,
+              answerCode:
+                '<div class="profile">\n  <img src="avatar.png" alt="avatar">\n  <p>よろしくお願いします。</p>\n</div>',
+              initialCode:
+                '<div class="profile">\n  \n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.HARD,
+              answerCode:
+                '<div class="profile">\n  <img src="avatar.png" alt="avatar">\n  <p>よろしくお願いします。</p>\n</div>',
+              initialCode: "",
+            },
+          ],
         },
       },
       {
@@ -268,15 +304,33 @@ export const learningSeed = {
           title: "お知らせカードを完成させよう",
           description:
             "お知らせ本文とボタンを含むカードを完成させましょう。",
-          difficulty: ExamDifficulty.NORMAL,
           thumbnailUrl: "/images/missions/news-card.png",
-          answerCode:
-            '<div class="news-card">\n  <p>新しいミッションが追加されました。</p>\n  <button>確認する</button>\n</div>',
-          initialCode: '<div class="news-card">\n</div>',
           previewCss:
-            ".news-card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; }",
+            ".news-card { padding: 16px; border: 1px solid #ddd; border-radius: 12px; } .news-card button { margin-top: 12px; padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; }",
           estimatedTime: "8分",
           rewardExp: 50,
+          variants: [
+            {
+              difficulty: ExamDifficulty.EASY,
+              answerCode:
+                '<div class="news-card">\n  <p>新しいミッションが追加されました。</p>\n  <button>確認する</button>\n</div>',
+              initialCode:
+                '<div class="news-card">\n  <p></p>\n  <button></button>\n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.NORMAL,
+              answerCode:
+                '<div class="news-card">\n  <p>新しいミッションが追加されました。</p>\n  <button>確認する</button>\n</div>',
+              initialCode:
+                '<div class="news-card">\n  \n</div>',
+            },
+            {
+              difficulty: ExamDifficulty.HARD,
+              answerCode:
+                '<div class="news-card">\n  <p>新しいミッションが追加されました。</p>\n  <button>確認する</button>\n</div>',
+              initialCode: "",
+            },
+          ],
         },
       },
     ],

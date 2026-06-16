@@ -16,3 +16,7 @@ X-Dev-Firebase-Uid: {{firebaseUid}}
 ###
 GET {{baseUrl}}/missions/lesson/{{lessonId}}/complete
 X-Dev-Firebase-Uid: {{firebaseUid}}
+
+###
+GET {{baseUrl}}/missions/{{missionId}}/exam/intro
+X-Dev-Firebase-Uid: {{firebaseUid}}
