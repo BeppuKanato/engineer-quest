@@ -2,19 +2,6 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 
-type LessonActivityContent = {
-  choices?: unknown;
-  blankArea?: unknown;
-  blanks?: unknown;
-  blankChoices?: unknown;
-  input?: unknown;
-  summary?: unknown;
-  starterCode?: unknown;
-  sampleCode?: unknown;
-  correctFeedback?: unknown;
-  incorrectFeedback?: unknown;
-};
-
 const toObject = (value: Prisma.JsonValue): Record<string, unknown> => {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as Record<string, unknown>;
