@@ -4,6 +4,10 @@ import type { LessonCompleteData } from "@/app/mission/[missionId]/lesson/[lesso
 import { fetcher } from "@/lib/fetcher";
 import type { ExamIntroData } from "@/app/mission/[missionId]/exam/intro/type";
 import type { Difficulty } from "@/app/mission/[missionId]/exam/intro/type";
+import type {
+  MissionExamDifficulty,
+  MissionExamPlayResponse,
+} from "@/app/mission/[missionId]/exam/play/type";
 
 export const getMissionOverview = async (token: string, missionId: string): Promise<Mission> => {
     return fetcher<Mission>(`/missions/${encodeURIComponent(missionId)}/overview`, {
@@ -92,6 +96,94 @@ export const startMissionExam = async (
       body: JSON.stringify({
         difficulty,
       }),
+    }
+  );
+};
+
+export const getMissionExamPlay = async (
+  token: string,
+  missionId: string,
+  difficulty: MissionExamDifficulty
+): Promise<MissionExamPlayResponse> => {
+  const searchParams = new URLSearchParams({
+    difficulty,
+  });
+
+  return fetcher<MissionExamPlayResponse>(
+    `/missions/${encodeURIComponent(missionId)}/exam/play?${searchParams.toString()}`,
+    {
+      method: "GET",
+      token,
+    }
+  );
+};
+
+export type SubmitMissionExamResponse = {
+  missionId: string;
+  missionExamId: string;
+  difficulty: MissionExamDifficulty;
+  isCorrect: boolean;
+  passed: boolean;
+  rewardExp: number;
+  submittedAt: string;
+  nextMission: {
+    id: string;
+    title: string;
+  } | null;
+};
+
+export const submitMissionExam = async (
+  token: string,
+  missionId: string,
+  difficulty: MissionExamDifficulty,
+  submittedCode: string
+): Promise<SubmitMissionExamResponse> => {
+  return fetcher<SubmitMissionExamResponse>(
+    `/missions/${encodeURIComponent(missionId)}/exam/submit`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify({
+        difficulty,
+        submittedCode,
+      }),
+    }
+  );
+};
+
+export type MissionExamResultResponse = {
+  missionId: string;
+  missionExamId: string;
+  missionTitle: string;
+  examTitle: string;
+  difficulty: MissionExamDifficulty;
+  rewardExp: number;
+  completedAt: string;
+  nextMission: {
+    id: string;
+    title: string;
+  } | null;
+  clearedDifficulties: {
+    easy: boolean;
+    normal: boolean;
+    hard: boolean;
+  };
+};
+
+export const getMissionExamResult = async (
+  token: string,
+  missionId: string,
+  difficulty: MissionExamDifficulty
+): Promise<MissionExamResultResponse> => {
+  const searchParams = new URLSearchParams({
+    difficulty,
+  });
+
+  return fetcher<MissionExamResultResponse>(
+    `/missions/${encodeURIComponent(missionId)}/exam/result?${searchParams.toString()}`,
+    {
+      method: "GET",
+      token,
     }
   );
 };

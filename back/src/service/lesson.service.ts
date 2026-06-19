@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ProgressStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 
@@ -57,21 +57,17 @@ export const getLessonPlayById = async (
    * いったん lesson/play に入った時点で開始扱いにする。
    * すでに progress がある場合は何もしない。
    */
-  await prisma.userLessonProgress.upsert({
-    where: {
-      userId_lessonId: {
-        userId: user.id,
-        lessonId: lesson.id,
-      },
-    },
-    update: {},
-    create: {
-      userId: user.id,
-      lessonId: lesson.id,
-      status: "IN_PROGRESS",
-      startedAt: new Date(),
-    },
-  });
+    await prisma.userLessonProgress.createMany({
+      data: [
+        {
+          userId: user.id,
+          lessonId: lesson.id,
+          status: ProgressStatus.IN_PROGRESS,
+          startedAt: new Date(),
+        },
+      ],
+      skipDuplicates: true,
+    });
 
   const activities = lesson.activities.map((activity) => {
     const content = toObject(activity.content);

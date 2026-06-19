@@ -1,17 +1,19 @@
 import { MissionExamDifficulty } from "../play/type";
 
 export type MissionExamResultLog = {
+  missionId: string;
+  missionExamId: string;
+  missionTitle: string;
+  examTitle: string;
   difficulty: MissionExamDifficulty;
-  exp: number;
-  submitCount: number;
-  diffCheckCount: number;
-  clearedAt: string;
-};
-
-export type MissionExamResult = {
-  id: string;
-  title: string;
-  exp: number;
+  rewardExp: number;
+  completedAt: string;
+  nextMission: NextMission | null;
+  clearedDifficulties: {
+    easy: boolean;
+    normal: boolean;
+    hard: boolean;
+  };
 };
 
 export type NextMission = {

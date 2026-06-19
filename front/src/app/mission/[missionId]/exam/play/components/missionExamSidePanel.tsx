@@ -6,7 +6,7 @@ import {
     Typography,
 } from "@mui/material";
 import {
-    MissionExamProblem,
+    MissionExamPlayData,
     MissionExamTab,
 } from "../type";
 import { createPreviewSrcDoc } from "../missionExamDiff";
@@ -14,7 +14,7 @@ import { createPreviewSrcDoc } from "../missionExamDiff";
 type MissionExamSidePanelProps = {
     activeTab: MissionExamTab;
     onTabChange: (tab: MissionExamTab) => void;
-    problem: MissionExamProblem;
+    problem: MissionExamPlayData;
     userCode: string;
 };
 

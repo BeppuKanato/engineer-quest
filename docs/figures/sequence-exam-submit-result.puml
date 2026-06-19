@@ -1,0 +1,81 @@
+@startuml
+title ミッション確認テストの提出と結果表示
+
+actor "学習者" as Learner
+participant "Next.js Frontend" as Frontend
+participant "Express API" as API
+participant "Auth Middleware" as Auth
+participant "MissionExam Service" as ExamService
+database "PostgreSQL\nvia Prisma" as DB
+
+Learner -> Frontend : 確認テスト導入画面を開く
+Frontend -> API : GET /api/missions/{missionId}/exam/intro
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> ExamService : 確認テスト導入データを取得する
+ExamService -> DB : Mission と MissionExam を検索する
+DB --> ExamService : 導入データを返す
+ExamService --> API : ExamIntro DTO を返す
+API --> Frontend : 200 ExamIntro
+
+Learner -> Frontend : 難易度を選んで開始する
+Frontend -> API : POST /api/missions/{missionId}/exam/start\n{ difficulty }
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> ExamService : 難易度別の試験を開始する
+ExamService -> DB : MissionExamVariant の存在を確認する
+ExamService -> DB : UserMissionExamProgress を取得または作成する
+DB --> ExamService : 進捗を返す
+ExamService --> API : StartExam DTO を返す
+API --> Frontend : 200 StartExam
+Frontend --> Learner : 確認テスト実行画面へ遷移する
+
+Learner -> Frontend : コードを編集して完成チェックを押す
+Frontend -> Frontend : コードを正規化し、answerCode と比較する
+
+alt クライアント側で完全一致
+  Frontend --> Learner : 「完了して次へ」を押せる状態にする
+  Learner -> Frontend : 「完了して次へ」を押す
+  Frontend -> API : POST /api/missions/{missionId}/exam/submit\n{ difficulty, submittedCode }
+  API -> Auth : Firebase token を検証する
+  Auth --> API : req.authUser を設定する
+  API -> ExamService : 提出コードをサーバ側で判定する
+  ExamService -> DB : 対象難易度の answerCode を取得する
+  ExamService -> ExamService : サーバ側でも正規化して比較する
+
+  alt サーバ側でも完全一致
+    ExamService -> DB : UserMissionExamProgress を passed=true に更新する
+    ExamService -> DB : UserMissionProgress を COMPLETED に更新する
+    ExamService -> DB : 次の Mission を検索する
+    DB --> ExamService : nextMission? を返す
+    ExamService --> API : SubmitExam DTO(isCorrect=true) を返す
+    API --> Frontend : 200 SubmitExam
+    Frontend --> Learner : 結果画面へ遷移する
+  else サーバ側では不一致
+    ExamService --> API : SubmitExam DTO(isCorrect=false) を返す
+    API --> Frontend : 200 SubmitExam
+    Frontend --> Learner : 差分を表示して編集を継続する
+  end
+else クライアント側で不一致
+  Frontend --> Learner : 差分を表示して編集を継続する
+end
+
+Learner -> Frontend : 結果画面を開く
+Frontend -> API : GET /api/missions/{missionId}/exam/result?difficulty=...
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> ExamService : 結果表示データを取得する
+ExamService -> DB : Mission、Exam、進捗、クリア済み難易度、次ミッションを取得する
+DB --> ExamService : 結果データを返す
+
+alt 指定難易度がクリア済み
+  ExamService --> API : MissionExamResult DTO を返す
+  API --> Frontend : 200 Result
+  Frontend --> Learner : クリア結果を表示する
+else 結果を表示できない
+  ExamService --> API : 403 RESULT_NOT_AVAILABLE を返す
+  API --> Frontend : 403
+  Frontend --> Learner : エラーを表示する
+end
+
+@enduml

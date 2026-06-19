@@ -1,0 +1,39 @@
+@startuml
+title ローカル開発環境の配置図
+
+node "Developer Machine" {
+  node "Docker Compose" {
+    node "front service\nengineer-quest-front" as Front {
+      component "Next.js dev server\n:3000" as Next
+    }
+
+    node "back service\nengineer-quest-back" as Back {
+      component "Express API\n:8080" as Express
+      component "Prisma Client" as Prisma
+    }
+  }
+
+  database "PostgreSQL\nDATABASE_URL" as DB
+}
+
+cloud "Firebase Project" {
+  component "Firebase Auth" as Firebase
+}
+
+Next --> Express : http://localhost:8080/api を呼び出す
+Next --> Firebase : クライアント側で認証する
+Express --> Firebase : Admin SDK で token を検証する
+Express --> Prisma : DB アクセスを依頼する
+Prisma --> DB : SQL を実行する
+
+note right of Front
+  NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api
+end note
+
+note right of Back
+  ALLOWED_ORIGINS=http://localhost:3000
+  GOOGLE_APPLICATION_CREDENTIALS は
+  Firebase Admin SDK の認証に使う。
+end note
+
+@enduml

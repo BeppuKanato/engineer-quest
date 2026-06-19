@@ -134,7 +134,7 @@ export const MissionExamActions: React.FC<MissionExamActionsProps> = ({
                             },
                         }}
                     >
-                        {submitStatus === "correct" ? "次へ" : "提出する"}
+                        {submitStatus === "correct" ? "完了して次へ" : "完成チェック"}
                     </Button>
                 </Stack>
             </Box>

@@ -173,7 +173,7 @@ export const LessonCompleteCard: React.FC<LessonCompleteCardProps> = ({
               fontWeight: 700,
             }}
           >
-            コース進捗
+            ミッション進捗
           </Typography>
 
           <Typography

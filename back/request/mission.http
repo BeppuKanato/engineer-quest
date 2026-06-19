@@ -1,8 +1,8 @@
 @baseUrl = http://localhost:8080/api
-@missionId = mission-self-introduction-card
+@missionId = mission-html-page-layout
 @firebaseUid = 0BvPVYjYhZbEhbvtVV11VcFhNV63
 
-@lessonId = lesson-card-base
+@lessonId = lesson-card-layout
 
 ### Get mission overview
 GET {{baseUrl}}/missions/{{missionId}}/overview
@@ -19,4 +19,27 @@ X-Dev-Firebase-Uid: {{firebaseUid}}
 
 ###
 GET {{baseUrl}}/missions/{{missionId}}/exam/intro
+X-Dev-Firebase-Uid: {{firebaseUid}}
+
+###
+POST {{baseUrl}}/missions/{{missionId}}/exam/start
+X-Dev-Firebase-Uid: {{firebaseUid}}
+Content-Type: application/json
+
+{
+  "difficulty": "easy"
+}
+
+###
+POST {{baseUrl}}/missions/{{missionId}}/exam/submit
+X-Dev-Firebase-Uid: {{firebaseUid}}
+Content-Type: application/json
+
+{
+  "difficulty": "easy",
+  "submittedCode": "<div class=\"card\">\n  <h1>カナト</h1>\n  <p>情報系の大学院生です。</p>\n</div>"
+}
+
+###
+GET {{baseUrl}}/missions/{{missionId}}/exam/result?difficulty=easy
 X-Dev-Firebase-Uid: {{firebaseUid}}
