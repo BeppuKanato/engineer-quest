@@ -6,9 +6,10 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Box, Button, Card, Chip, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+
 import { MissionExamResultLog, NextMission } from "../../result/type";
-import { ResultConfetti } from "./resultConfetti";
 import { CountUpExp } from "./countupExp";
+import { ResultConfetti } from "./resultConfetti";
 import { ResultSummary } from "./resultSummary";
 
 type MissionExamCompleteCardProps = {
@@ -37,10 +38,7 @@ export const MissionExamCompleteCard = ({
 
   return (
     <>
-      <ResultConfetti
-        targetRef={cardRef}
-        fireKey={confettiFireKey}
-      />
+      <ResultConfetti targetRef={cardRef} fireKey={confettiFireKey} />
 
       <Card
         ref={cardRef}
@@ -96,7 +94,7 @@ export const MissionExamCompleteCard = ({
                 lineHeight: 1.2,
               }}
             >
-              ミッション確認テスト クリア！
+              ミッション確認テストクリア！
             </Typography>
 
             <Typography
@@ -107,7 +105,7 @@ export const MissionExamCompleteCard = ({
                 fontWeight: 900,
               }}
             >
-              自己紹介カードを完成できました
+              {result.missionTitle}
             </Typography>
 
             <Typography
@@ -117,7 +115,7 @@ export const MissionExamCompleteCard = ({
                 fontWeight: 600,
               }}
             >
-              お手本コードとの差分がなくなりました。
+              {result.examTitle}
             </Typography>
           </Box>
 
@@ -147,11 +145,9 @@ export const MissionExamCompleteCard = ({
                 獲得EXP
               </Typography>
 
-              <CountUpExp exp={result.exp} />
+              <CountUpExp exp={result.rewardExp} />
 
-              <Typography sx={{ fontWeight: 900, mt: 0.5 }}>
-                EXP
-              </Typography>
+              <Typography sx={{ fontWeight: 900, mt: 0.5 }}>EXP</Typography>
             </Box>
           </Card>
 
@@ -175,7 +171,7 @@ export const MissionExamCompleteCard = ({
                 },
               }}
             >
-              {nextMission ? "次のミッションへ進む" : "ミッション一覧へ戻る"}
+              {nextMission ? "次のミッションへ進む" : "コース一覧へ戻る"}
             </Button>
 
             <Button

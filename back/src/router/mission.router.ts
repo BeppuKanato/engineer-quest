@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyFirebaseToken } from "../middleware/authMiddleware";
 import { getMissionOverviewController } from "../controller/mission.controller";
 import { getLessonPlayController, completeLessonController, getLessonCompleteController } from "../controller/lesson.controller";
+import { getMissionExamIntroController, startMissionExamController, getMissionExamPlayController, submitMissionExamController, getMissionExamResultController} from "../controller/missionExam.controller";
 const router = Router();
 
 router.get(
@@ -27,4 +28,35 @@ router.get(
   verifyFirebaseToken,
   getLessonCompleteController
 );
+
+router.get(
+  "/:missionId/exam/intro",
+  verifyFirebaseToken,
+  getMissionExamIntroController
+)
+
+router.post(
+  "/:missionId/exam/start",
+  verifyFirebaseToken,
+  startMissionExamController
+);
+
+router.get(
+  "/:missionId/exam/play",
+  verifyFirebaseToken,
+  getMissionExamPlayController
+);
+
+router.post(
+  "/:missionId/exam/submit",
+  verifyFirebaseToken,
+  submitMissionExamController
+)
+
+router.get(
+  "/:missionId/exam/result",
+  verifyFirebaseToken,
+  getMissionExamResultController
+);
+
 export default router;

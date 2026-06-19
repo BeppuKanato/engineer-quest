@@ -1,0 +1,73 @@
+@startuml
+title Engineer Quest - コンポーネント構成
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+actor "学習者" as Learner
+
+node "Browser" {
+  component "Next.js App Router" as NextApp
+  component "Firebase Client SDK" as FirebaseClient
+  component "MUI UI Components" as MUI
+  component "Lesson Renderer" as LessonRenderer
+  component "Exam Editor\nand Diff UI" as ExamEditor
+}
+
+cloud "Firebase" {
+  component "Firebase Authentication" as FirebaseAuth
+}
+
+node "Backend Container" {
+  component "Express App" as Express
+  component "Auth Middleware" as AuthMiddleware
+  component "Auth Controller/Service" as AuthModule
+  component "Course Controller/Service" as CourseModule
+  component "Mission Controller/Service" as MissionModule
+  component "Lesson Controller/Service" as LessonModule
+  component "MissionExam Controller/Service" as ExamModule
+  component "Prisma Client" as Prisma
+}
+
+database "PostgreSQL" as Postgres
+
+Learner --> NextApp : アプリを利用する
+NextApp --> MUI : UI を描画する
+NextApp --> LessonRenderer : レッスン活動を表示する
+NextApp --> ExamEditor : コード入力、プレビュー、差分確認を扱う
+NextApp --> FirebaseClient : サインアップ、ログイン、トークン取得を行う
+FirebaseClient --> FirebaseAuth : 認証する
+
+NextApp --> Express : REST API を呼び出す\nAuthorization: Bearer token
+Express --> AuthMiddleware : 保護されたルートで認証を確認する
+AuthMiddleware --> FirebaseAuth : ID token を検証する
+AuthMiddleware --> Prisma : アプリ側 User を読み込む
+
+Express --> AuthModule : /api/auth/*
+Express --> CourseModule : /api/courses
+Express --> MissionModule : /api/missions/{id}/overview
+Express --> LessonModule : /api/missions/lesson/*
+Express --> ExamModule : /api/missions/{id}/exam/*
+
+AuthModule --> Prisma : User を作成・取得する
+CourseModule --> Prisma : Course と進捗を取得する
+MissionModule --> Prisma : Mission 概要を取得する
+LessonModule --> Prisma : Lesson と進捗を扱う
+ExamModule --> Prisma : Exam と進捗を扱う
+Prisma --> Postgres : SQL を実行する
+
+note right of ExamEditor
+  完全一致型の確認テストでは、
+  クライアント側で answerCode と比較して
+  ユーザーへ即時フィードバックを返す。
+  進捗更新前にサーバ側でも再判定する。
+end note
+
+note bottom of ExamModule
+  正解提出時の処理:
+  - 難易度別進捗を passed にする
+  - ミッション進捗を完了にする
+  - 次のミッションを返す
+end note
+
+@enduml

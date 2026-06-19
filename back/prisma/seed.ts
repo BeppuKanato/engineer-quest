@@ -6,7 +6,6 @@ import { learningSeed } from "./seedData/learningSeed";
 const prisma = new PrismaClient();
 
 async function deleteExistingData() {
-  // 子テーブルから削除する
   await prisma.activityAnswerLog.deleteMany();
   await prisma.missionExamSubmission.deleteMany();
 
@@ -14,7 +13,9 @@ async function deleteExistingData() {
   await prisma.userLessonProgress.deleteMany();
   await prisma.userMissionProgress.deleteMany();
 
+  await prisma.missionExamVariant.deleteMany();
   await prisma.missionExam.deleteMany();
+
   await prisma.lessonActivity.deleteMany();
   await prisma.lesson.deleteMany();
   await prisma.mission.deleteMany();
@@ -22,29 +23,17 @@ async function deleteExistingData() {
   await prisma.courseCategoryMap.deleteMany();
   await prisma.courseCategory.deleteMany();
   await prisma.course.deleteMany();
-
-  // UserはFirebase連携後に使うので、seedでは消さない方針でもOK
-  // 開発初期で完全に消したいなら以下を有効化
-  // await prisma.user.deleteMany();
 }
 
-async function seedLearningData() {
-  const { course } = learningSeed;
-
-  // 1. Categoryを作成
+async function seedCourse(course: (typeof learningSeed.courses)[number]) {
   for (const categoryName of course.categories) {
     await prisma.courseCategory.upsert({
-      where: {
-        name: categoryName,
-      },
+      where: { name: categoryName },
       update: {},
-      create: {
-        name: categoryName,
-      },
+      create: { name: categoryName },
     });
   }
 
-  // 2. Courseを作成
   const createdCourse = await prisma.course.create({
     data: {
       id: course.id,
@@ -57,12 +46,9 @@ async function seedLearningData() {
     },
   });
 
-  // 3. CourseCategoryMapを作成
   for (const categoryName of course.categories) {
     const category = await prisma.courseCategory.findUnique({
-      where: {
-        name: categoryName,
-      },
+      where: { name: categoryName },
     });
 
     if (!category) {
@@ -77,7 +63,6 @@ async function seedLearningData() {
     });
   }
 
-  // 4. Mission / Lesson / Activity / Examを作成
   for (const mission of course.missions) {
     const createdMission = await prisma.mission.create({
       data: {
@@ -87,7 +72,13 @@ async function seedLearningData() {
         description: mission.description,
         difficulty: mission.difficulty,
         goalImg: mission.goalImg,
+        estimatedMinutes: mission.estimatedMinutes,
         order: mission.order,
+        type: mission.type,
+        isRequiredForCourseCompletion: mission.isRequiredForCourseCompletion,
+        parentMissionId: mission.parentMissionId,
+        roadmapLane: mission.roadmapLane,
+        branchOrder: mission.branchOrder,
         isPublished: mission.isPublished,
       },
     });
@@ -100,34 +91,24 @@ async function seedLearningData() {
           title: lesson.title,
           description: lesson.description,
           order: lesson.order,
+          rewardExp: lesson.rewardExp,
+          learnedItems: lesson.learnedItems,
         },
       });
 
       for (const activity of lesson.activities) {
-        const {
-          id,
-          type,
-          title,
-          instruction,
-          mentorMessage,
-          content,
-          preview,
-          actionLabel,
-          order,
-        } = activity;
-
         await prisma.lessonActivity.create({
           data: {
-            id,
+            id: activity.id,
             lessonId: createdLesson.id,
-            type,
-            title,
-            instruction,
-            mentorMessage,
-            content,
-            preview,
-            actionLabel,
-            order,
+            type: activity.type,
+            title: activity.title,
+            instruction: activity.instruction,
+            mentorMessage: activity.mentorMessage,
+            content: activity.content,
+            preview: activity.preview,
+            actionLabel: activity.actionLabel,
+            order: activity.order,
           },
         });
       }
@@ -139,15 +120,25 @@ async function seedLearningData() {
         missionId: createdMission.id,
         title: mission.exam.title,
         description: mission.exam.description,
-        difficulty: mission.exam.difficulty,
         thumbnailUrl: mission.exam.thumbnailUrl,
-        answerCode: mission.exam.answerCode,
-        initialCode: mission.exam.initialCode,
         previewCss: mission.exam.previewCss,
         estimatedTime: mission.exam.estimatedTime,
         rewardExp: mission.exam.rewardExp,
+        variants: {
+          create: mission.exam.variants.map((variant) => ({
+            difficulty: variant.difficulty,
+            initialCode: variant.initialCode,
+            answerCode: variant.answerCode,
+          })),
+        },
       },
     });
+  }
+}
+
+async function seedLearningData() {
+  for (const course of learningSeed.courses) {
+    await seedCourse(course);
   }
 }
 

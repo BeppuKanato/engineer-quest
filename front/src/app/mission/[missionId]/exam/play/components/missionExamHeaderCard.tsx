@@ -6,10 +6,10 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { MissionExamDifficulty, MissionExamProblem } from "../type";
+import { MissionExamDifficulty, MissionExamPlayData } from "../type";
 
 type MissionExamHeaderCardProps = {
-    problem: MissionExamProblem;
+    problem: MissionExamPlayData;
 };
 
 const difficultyLabel: Record<MissionExamDifficulty, string> = {
@@ -154,7 +154,7 @@ export const MissionExamHeaderCard: React.FC<MissionExamHeaderCardProps> = ({
 
                     <Box
                         component="img"
-                        src={problem.thumbnailUrl}
+                        src={problem.thumbnailUrl ?? undefined}
                         alt="完成見本"
                         onError={(event) => {
                             event.currentTarget.style.display = "none";

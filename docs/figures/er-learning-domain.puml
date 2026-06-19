@@ -1,0 +1,213 @@
+@startuml
+title Engineer Quest - 学習ドメイン ER 図
+
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+entity "User" as User {
+  * id : String <<PK>>
+  --
+  firebaseUid : String <<UK>>
+  displayName : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Course" as Course {
+  * id : String <<PK>>
+  --
+  title : String
+  description : String
+  difficulty : CourseDifficulty
+  isInitiallyUnlocked : Boolean
+  isPublished : Boolean
+  version : Int
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "CourseCategory" as CourseCategory {
+  * id : String <<PK>>
+  --
+  name : CourseCategoryType <<UK>>
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "CourseCategoryMap" as CourseCategoryMap {
+  * courseId : String <<PK, FK>>
+  * categoryId : String <<PK, FK>>
+}
+
+entity "Mission" as Mission {
+  * id : String <<PK>>
+  --
+  courseId : String <<FK>>
+  title : String
+  description : String
+  difficulty : CourseDifficulty
+  goalImg : String
+  estimatedMinutes : Int
+  order : Int
+  isPublished : Boolean
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Lesson" as Lesson {
+  * id : String <<PK>>
+  --
+  missionId : String <<FK>>
+  title : String
+  description : String
+  order : Int
+  rewardExp : Int
+  learnedItems : String[]
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "LessonActivity" as LessonActivity {
+  * id : String <<PK>>
+  --
+  lessonId : String <<FK>>
+  type : LessonStepType
+  title : String
+  instruction : String
+  mentorMessage : String
+  content : Json
+  preview : Json
+  actionLabel : String
+  order : Int
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "MissionExam" as MissionExam {
+  * id : String <<PK>>
+  --
+  missionId : String <<UK, FK>>
+  title : String
+  description : String
+  thumbnailUrl : String?
+  previewCss : String?
+  estimatedTime : String
+  rewardExp : Int
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "MissionExamVariant" as MissionExamVariant {
+  * id : String <<PK>>
+  --
+  missionExamId : String <<FK>>
+  difficulty : ExamDifficulty
+  initialCode : String
+  answerCode : String
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "UserMissionProgress" as UserMissionProgress {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  missionId : String <<FK>>
+  status : ProgressStatus
+  startedAt : DateTime?
+  completedAt : DateTime?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "UserLessonProgress" as UserLessonProgress {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  lessonId : String <<FK>>
+  status : ProgressStatus
+  startedAt : DateTime?
+  completedAt : DateTime?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "UserMissionExamProgress" as UserMissionExamProgress {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  missionExamId : String <<FK>>
+  difficulty : ExamDifficulty
+  passed : Boolean
+  startedAt : DateTime?
+  completedAt : DateTime?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "ActivityAnswerLog" as ActivityAnswerLog {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  lessonActivityId : String <<FK>>
+  answer : Json
+  isCorrect : Boolean?
+  answeredAt : DateTime
+}
+
+entity "MissionExamSubmission" as MissionExamSubmission {
+  * id : String <<PK>>
+  --
+  userId : String <<FK>>
+  missionId : String <<FK>>
+  missionExamId : String <<FK>>
+  difficulty : ExamDifficulty
+  submittedCode : String
+  isCorrect : Boolean
+  submittedAt : DateTime
+}
+
+Course ||--o{ Mission : has
+Course ||--o{ CourseCategoryMap : categorized_by
+CourseCategory ||--o{ CourseCategoryMap : maps
+
+Mission ||--o{ Lesson : has
+Lesson ||--o{ LessonActivity : has
+Mission ||--o| MissionExam : has
+MissionExam ||--o{ MissionExamVariant : has
+
+User ||--o{ UserMissionProgress : tracks
+Mission ||--o{ UserMissionProgress : tracked_by
+User ||--o{ UserLessonProgress : tracks
+Lesson ||--o{ UserLessonProgress : tracked_by
+User ||--o{ UserMissionExamProgress : tracks
+MissionExam ||--o{ UserMissionExamProgress : tracked_by
+
+User ||--o{ ActivityAnswerLog : answers
+LessonActivity ||--o{ ActivityAnswerLog : logged_by
+
+User ||--o{ MissionExamSubmission : submits
+Mission ||--o{ MissionExamSubmission : submitted_for
+MissionExam ||--o{ MissionExamSubmission : submitted_for
+
+note right of UserMissionProgress
+  ミッションは、いずれか1つの
+  確認テスト難易度に合格した時点で
+  完了扱いにする。
+end note
+
+note right of UserMissionExamProgress
+  User、MissionExam、difficulty の
+  組み合わせで一意。
+  難易度別のクリア表示に使う。
+end note
+
+note right of MissionExamSubmission
+  現在の完全一致型フローでは、
+  コード本文の保存には使っていない。
+  将来の自由記述問題や AI レビュー型問題で
+  利用する想定。
+end note
+
+@enduml

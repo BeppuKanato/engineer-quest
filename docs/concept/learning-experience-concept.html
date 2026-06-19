@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x5b66;&#x7fd2;&#x4f53;&#x9a13;&#x30b3;&#x30f3;&#x30bb;&#x30d7;&#x30c8;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <span id="markdown-mermaid" aria-hidden="true" data-config="{&quot;darkModeTheme&quot;:&quot;vscode&quot;,&quot;lightModeTheme&quot;:&quot;vscode&quot;,&quot;maxTextSize&quot;:50000,&quot;clickDrag&quot;:&quot;alt&quot;,&quot;showControls&quot;:&quot;onHoverOrFocus&quot;,&quot;resizable&quot;:true,&quot;maxHeight&quot;:&quot;&quot;}"></span>
+				<h1 id="学習体験コンセプト">学習体験コンセプト</h1>
+<h2 id="目的">目的</h2>
+<p>Engineer Quest は、Webアプリ開発への心理的ハードルを下げるための学習補助アプリとして設計する。</p>
+<p>主な目的は次の通り。</p>
+<ul>
+<li>授業内容の理解を促進する</li>
+<li>学習の方向性を示す</li>
+<li>「自分でも何か作れそう」という感覚を持ってもらう</li>
+<li>Webエンジニアを就職先や将来の選択肢として意識してもらう</li>
+<li>最終課題や自由制作で、自分の作りたいものを考えるための材料を増やす</li>
+</ul>
+<p>単に講義内容をテストするのではなく、負担なく楽しくWebアプリ開発に良い印象を持ってもらうことを重視する。</p>
+<h2 id="対象者">対象者</h2>
+<p>想定する対象者は、情報工学科、情報通信系、システムマネジメント系などの大学2年生以上の学生。</p>
+<p>前提として、PythonやWebアプリ開発は初見の学生が多い。情報系の学生ではあるが、Webアプリの仕組み、HTML/CSS、Flask、サーバ起動、ファイル構成などには不慣れな状態を想定する。</p>
+<p>モチベーションは大きく次の2つに分かれる。</p>
+<ul>
+<li>単位取得が主目的</li>
+<li>アプリを作ることに少し興味がある</li>
+</ul>
+<p>そのため、強い自発性や高い前提知識を要求しすぎない設計にする。</p>
+<h2 id="ペルソナ">ペルソナ</h2>
+<h3 id="1-単位目的低モチベーション型">1. 単位目的・低モチベーション型</h3>
+<p>最小限の負担で授業についていきたい学生。</p>
+<p>特徴:</p>
+<ul>
+<li>PythonやWebアプリ開発に自信がない</li>
+<li>何をすればよいか明確なら取り組める</li>
+<li>自由度が高すぎると止まりやすい</li>
+<li>エラーや不明点が続くと離脱しやすい</li>
+</ul>
+<p>刺さる体験:</p>
+<ul>
+<li>短時間で終わる</li>
+<li>正解しやすい</li>
+<li>講義で出る単語を事前に見たことがある状態になる</li>
+<li>「今日の最低ライン」を完了できる</li>
+</ul>
+<p>向く問題形式:</p>
+<ul>
+<li>選択式</li>
+<li>見比べ</li>
+<li>短い穴埋め</li>
+<li>直前に見た内容の確認</li>
+</ul>
+<p>避けたい問題:</p>
+<ul>
+<li>空欄から長いコードを書く</li>
+<li>複数ファイルを同時に考える</li>
+<li>正解が曖昧な課題</li>
+</ul>
+<h3 id="2-ちょっと興味あり型">2. ちょっと興味あり型</h3>
+<p>自分でもアプリを作れるかもしれない、と思えると前向きになる学生。</p>
+<p>特徴:</p>
+<ul>
+<li>プログラミングへの苦手意識は強くない</li>
+<li>Webアプリ開発は初めて</li>
+<li>画面が変わる、自分の内容に変えられる体験を楽しめる</li>
+<li>自分の最終課題や制作物とのつながりが見えると伸びる</li>
+</ul>
+<p>刺さる体験:</p>
+<ul>
+<li>自分の文章やテーマに変えられる</li>
+<li>完成物が画面に見える</li>
+<li>作れる部品が増えていく</li>
+<li>自分のアプリ案に使える知識だと分かる</li>
+</ul>
+<p>向く問題形式:</p>
+<ul>
+<li>小さいコード修正</li>
+<li>UI部品の追加</li>
+<li>既存コードの一部改造</li>
+<li>短い確認テスト</li>
+</ul>
+<h3 id="3-進度が早い発展型">3. 進度が早い発展型</h3>
+<p>講義中に早く終わり、追加課題や発展に取り組みたい学生。</p>
+<p>特徴:</p>
+<ul>
+<li>Python経験がある、または自分で調べながら進められる</li>
+<li>全員向けの確認だけでは退屈になりやすい</li>
+<li>実用的な機能や自由改造に興味を持ちやすい</li>
+</ul>
+<p>刺さる体験:</p>
+<ul>
+<li>任意チャレンジ</li>
+<li>発展課題</li>
+<li>複数ファイルを使う課題</li>
+<li>自由制作やAIレビュー</li>
+</ul>
+<p>向く問題形式:</p>
+<ul>
+<li>発展ミッション</li>
+<li>応用的な確認テスト</li>
+<li>Createモード</li>
+<li>AIレビュー型の自由制作</li>
+</ul>
+<h2 id="使用場面">使用場面</h2>
+<h3 id="1-講義前の予習">1. 講義前の予習</h3>
+<p>講義で出る単語、操作、考え方を先に見て、初見の不安を下げる。</p>
+<p>重視すること:</p>
+<ul>
+<li>用語への抵抗を減らす</li>
+<li>講義中に聞く内容を事前に見たことがある状態にする</li>
+<li>正解できることより、見慣れることを重視する</li>
+</ul>
+<p>向く問題:</p>
+<ul>
+<li>用語確認</li>
+<li>ファイルの役割確認</li>
+<li>画面とコードの見比べ</li>
+<li>短い選択式</li>
+</ul>
+<h3 id="2-講義時間中の暇な時間">2. 講義時間中の暇な時間</h3>
+<p>講義の進度差を吸収する。</p>
+<p>早く終わった学生には発展課題を、詰まっている学生には基礎確認を提供する。</p>
+<p>重視すること:</p>
+<ul>
+<li>早く終わった学生が退屈しない</li>
+<li>つまずいた学生が基礎に戻れる</li>
+<li>講義の流れを邪魔しない</li>
+</ul>
+<p>向く問題:</p>
+<ul>
+<li>任意の追加チャレンジ</li>
+<li>よくあるつまずき確認</li>
+<li>操作の意味を確認する短い問題</li>
+</ul>
+<h3 id="3-講義後の復習">3. 講義後の復習</h3>
+<p>スライド通りに操作した内容の意味を再確認する。</p>
+<p>重視すること:</p>
+<ul>
+<li>何を作ったのか分かる</li>
+<li>なぜそのファイルを触ったのか分かる</li>
+<li>次回の内容につながる最低限の理解を残す</li>
+</ul>
+<p>向く問題:</p>
+<ul>
+<li>講義で触ったコードの再現</li>
+<li>ファイル構成の確認</li>
+<li>お手本再現型の確認テスト</li>
+</ul>
+<h3 id="4-最終課題自由制作前">4. 最終課題・自由制作前</h3>
+<p>自分でアプリを考えるための材料を増やす。</p>
+<p>できることの知識不足によって、発想が狭まらないようにする。</p>
+<p>重視すること:</p>
+<ul>
+<li>こういう機能が作れる、という見通しを持たせる</li>
+<li>自分のアイデアに使える技術を知る</li>
+<li>具体的な制作テンプレートや発想の入口を用意する</li>
+</ul>
+<h2 id="学習時間と粒度">学習時間と粒度</h2>
+<p>1日の推奨学習時間は 20〜25分程度を目安にする。</p>
+<p>ただし、PCブラウザで20分以上連続して取り組ませると負担が大きくなる可能性があるため、次の粒度を目安にする。</p>
+<ul>
+<li>1活動: 30秒〜2分</li>
+<li>1レッスン: 3〜5分</li>
+<li>1ミッション: 8〜12分</li>
+<li>1日の推奨: 2ミッション程度</li>
+</ul>
+<p>途中離脱しても損しないよう、小さい単位で達成感を得られる設計にする。</p>
+<h2 id="現在の学習フローの位置づけ">現在の学習フローの位置づけ</h2>
+<h3 id="ミッション確認テスト">ミッション確認テスト</h3>
+<p>ミッション確認テストは「お手本再現型」として扱う。</p>
+<p>役割:</p>
+<ul>
+<li>基礎概念の定着</li>
+<li>講義内容の復習</li>
+<li>小さな達成感の提供</li>
+<li>難易度別チャレンジ</li>
+<li>自由制作前の型作り</li>
+</ul>
+<p>合格条件:</p>
+<ul>
+<li>ユーザーコードと answerCode の全文一致</li>
+<li>クライアント側で即時確認する</li>
+<li>進捗更新前にサーバ側でも再判定する</li>
+</ul>
+<p>この方式は自由制作の代替ではなく、型を身につけるための明確なクリア型問題として扱う。</p>
+<h3 id="easy--normal--hard-の意味">easy / normal / hard の意味</h3>
+<p>easy / normal / hard は自由度の違いではなく、入力量・再現量の違いとして扱う。</p>
+<ul>
+<li>easy: ほぼ完成コードから重要部分だけ埋める</li>
+<li>normal: 骨組みから完成させる</li>
+<li>hard: お手本を思い出して再現する</li>
+</ul>
+<p>ミッション完了条件は、いずれか1難易度の合格で十分とする。</p>
+<p>他難易度のクリアは、追加達成、称号、挑戦として扱う。</p>
+<h3 id="createモード">Createモード</h3>
+<p>完全自由制作やAIレビューは、ミッション確認テストとは別の Create モードとして扱う。</p>
+<p>Createモードでは、正解が1つではない制作を扱う。AIは採点者というより、レビューや改善提案を行う支援者として位置づける。</p>
+<p>開放方針:</p>
+<ul>
+<li>完全ロックではなく、ソフトロックを基本とする</li>
+<li>Createモード自体は見える状態にする</li>
+<li>関連ミッションの easy クリアなどを推奨条件として表示する</li>
+<li>未クリアでも入れるが、「先にこのミッションをやると作りやすい」と案内する</li>
+<li>高度なテンプレートだけは条件付き開放を検討する</li>
+</ul>
+<h2 id="ゲーミフィケーション方針">ゲーミフィケーション方針</h2>
+<p>競争よりも「できた感」を重視する。</p>
+<p>相性が良い要素:</p>
+<ul>
+<li>今日の達成</li>
+<li>連続学習</li>
+<li>ミッション完了</li>
+<li>難易度別クリア</li>
+<li>作れるようになった部品リスト</li>
+<li>バッジ</li>
+<li>最終課題に使える技術カードの解放</li>
+</ul>
+<p>相性が悪い可能性がある要素:</p>
+<ul>
+<li>細かい正答率ランキング</li>
+<li>失敗回数の強調</li>
+<li>作業速度の競争</li>
+<li>hard を必須に見せる設計</li>
+</ul>
+<p>目標は、低モチベーションの学生には安心して進める体験を、興味がある学生や進度が早い学生には追加で挑戦できる体験を提供すること。</p>
+<h2 id="今後の問題設計で守ること">今後の問題設計で守ること</h2>
+<ul>
+<li>1活動では1つの判断だけを扱う</li>
+<li>初見で解けない問題を出さない</li>
+<li>確認テストで出すコードは、事前のレッスンで見た・触った・意味を確認したものにする</li>
+<li>完全一致型の問題では、理不尽な空白差分や説明不足を避ける</li>
+<li>予習では「正解できる」より「見たことがある」を重視する</li>
+<li>復習では「なぜその操作をしたのか」を確認する</li>
+<li>発展は任意にし、必須の負担にしない</li>
+</ul>
+<h2 id="未決事項">未決事項</h2>
+<ul>
+<li>全日程を通したコース構成</li>
+<li>Createモードの具体的な仕様</li>
+<li>AIレビューの採点・レビュー方針</li>
+<li>ゲーミフィケーションログの具体的な種類</li>
+<li>実績条件に使う行動ログ</li>
+</ul>
+
+            
+            
+        </body>
+        </html>

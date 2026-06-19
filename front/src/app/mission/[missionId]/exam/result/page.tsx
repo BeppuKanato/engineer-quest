@@ -1,17 +1,18 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { Box, Container } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { Alert, Box, Container } from "@mui/material";
+import { onAuthStateChanged } from "firebase/auth";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
+import { getMissionExamResult } from "@/api/mission.api";
 import { AppHeader } from "@/app/component/appHeader";
-import {
-  MissionExamResultLog,
-  NextMission,
-} from "./type";
-import { missionExamProblems } from "../play/tempData";
-import { MissionExamCompleteCard } from "./components/resultCard";
+import { auth } from "@/lib/firebase";
+
 import { MissionExamDifficulty } from "../play/type";
+import { MissionExamCompleteCard } from "./components/resultCard";
+import { MissionExamResultSkeleton } from "./components/skeleton";
+import { MissionExamResultLog } from "./type";
 
 const isMissionExamDifficulty = (
   value: string | null
@@ -19,63 +20,81 @@ const isMissionExamDifficulty = (
   return value === "easy" || value === "normal" || value === "hard";
 };
 
-const createFallbackResult = (
-  difficulty: MissionExamDifficulty
-): MissionExamResultLog => ({
-  difficulty,
-  exp: 120,
-  submitCount: 1,
-  diffCheckCount: 0,
-  clearedAt: new Date().toISOString(),
-});
-
-const tempNextMission: NextMission | null = {
-  id: "mission_2",
-  title: "画像と文章を配置する",
-};
-
 function MissionExamResultContent() {
+  const params = useParams<{ missionId: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const difficultyParam = searchParams.get("difficulty");
+  const missionId = params.missionId;
 
-  const difficulty: MissionExamDifficulty =
-    isMissionExamDifficulty(difficultyParam) ? difficultyParam : "normal";
+  const difficulty = useMemo<MissionExamDifficulty>(() => {
+    const difficultyParam = searchParams.get("difficulty");
 
-  const problem = missionExamProblems[difficulty];
+    if (isMissionExamDifficulty(difficultyParam)) {
+      return difficultyParam;
+    }
 
-  const [result, setResult] = useState<MissionExamResultLog>(
-    createFallbackResult(difficulty)
-  );
+    return "normal";
+  }, [searchParams]);
+
+  const [result, setResult] = useState<MissionExamResultLog | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const resultKey = `mission-exam-result:${problem.id}:${problem.difficulty}`;
-    const savedResult = window.localStorage.getItem(resultKey);
+    let isMounted = true;
 
-    if (!savedResult) {
-      setResult(createFallbackResult(difficulty));
-      return;
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (!isMounted) return;
 
-    try {
-      setResult(JSON.parse(savedResult) as MissionExamResultLog);
-    } catch {
-      setResult(createFallbackResult(difficulty));
-    }
-  }, [difficulty, problem.difficulty, problem.id]);
+        setResult(null);
+        setErrorMessage("ログイン情報を取得できませんでした。");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setErrorMessage(null);
+
+        const token = await user.getIdToken();
+        const data = await getMissionExamResult(token, missionId, difficulty);
+
+        if (!isMounted) return;
+
+        setResult(data);
+      } catch (error) {
+        console.error("Failed to fetch mission exam result:", error);
+
+        if (!isMounted) return;
+
+        setResult(null);
+        setErrorMessage("確認テストの結果を取得できませんでした。");
+      } finally {
+        if (!isMounted) return;
+
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [missionId, difficulty]);
 
   const handleClickNextMission = () => {
-    if (tempNextMission) {
-      router.push("/mission-overview");
+    if (result?.nextMission) {
+      router.push(`/mission/${result.nextMission.id}/overview`);
       return;
     }
 
-    router.push("/mission-overview");
+    router.push("/courses");
   };
 
   const handleClickMissionMap = () => {
-    router.push("/mission-overview");
+    router.push(`/courses`);
   };
 
   return (
@@ -97,12 +116,20 @@ function MissionExamResultContent() {
         }}
       >
         <Container maxWidth="md">
-          <MissionExamCompleteCard
-            result={result}
-            nextMission={tempNextMission}
-            onClickNextMission={handleClickNextMission}
-            onClickMissionMap={handleClickMissionMap}
-          />
+          {isLoading && <MissionExamResultSkeleton />}
+
+          {!isLoading && errorMessage && (
+            <Alert severity="error">{errorMessage}</Alert>
+          )}
+
+          {!isLoading && !errorMessage && result && (
+            <MissionExamCompleteCard
+              result={result}
+              nextMission={result.nextMission}
+              onClickNextMission={handleClickNextMission}
+              onClickMissionMap={handleClickMissionMap}
+            />
+          )}
         </Container>
       </Box>
     </Box>
@@ -111,8 +138,27 @@ function MissionExamResultContent() {
 
 export default function MissionExamResultPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<MissionExamResultPageFallback />}>
       <MissionExamResultContent />
     </Suspense>
   );
 }
+
+const MissionExamResultPageFallback = () => {
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
+      <AppHeader />
+      <Box
+        component="main"
+        sx={{
+          minHeight: "calc(100vh - 64px)",
+          py: { xs: 4, md: 6 },
+        }}
+      >
+        <Container maxWidth="md">
+          <MissionExamResultSkeleton />
+        </Container>
+      </Box>
+    </Box>
+  );
+};

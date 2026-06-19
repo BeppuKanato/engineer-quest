@@ -1,0 +1,48 @@
+@startuml
+title 進捗状態モデル
+
+hide empty description
+
+state "Mission Progress" as MissionProgress {
+  [*] --> NotStarted
+  NotStarted --> InProgress : ミッション概要を開く
+  InProgress --> Completed : いずれかの難易度に合格する
+  NotStarted --> Completed : 先に試験へ合格した場合
+  Completed --> Completed : 再訪問または別難易度に合格する
+}
+
+state "Lesson Progress" as LessonProgress {
+  [*] --> LessonNotStarted
+  LessonNotStarted --> LessonInProgress : レッスン実行画面を開く
+  LessonInProgress --> LessonCompleted : レッスンを完了する
+  LessonNotStarted --> LessonCompleted : 直接完了した場合
+  LessonCompleted --> LessonCompleted : レッスンを復習する
+}
+
+state "Mission Exam Difficulty Progress" as ExamProgress {
+  [*] --> ExamNotStarted
+  ExamNotStarted --> ExamInProgress : 難易度を選んで開始する
+  ExamInProgress --> ExamPassed : 完全一致のコードを提出する
+  ExamNotStarted --> ExamPassed : 直接正解提出した場合
+  ExamPassed --> ExamPassed : 結果画面を再表示する
+}
+
+note right of MissionProgress
+  UserMissionProgress に保存する。
+  どれか1つの難易度に合格すると、
+  ミッション全体を完了扱いにする。
+end note
+
+note right of LessonProgress
+  UserLessonProgress に保存する。
+  ロードマップでは前のレッスン完了状態を見て、
+  後続レッスンや確認テストのロックを判断する。
+end note
+
+note right of ExamProgress
+  UserMissionExamProgress に保存する。
+  user、missionExam、difficulty の組み合わせで一意。
+  難易度別のクリア表示に使う。
+end note
+
+@enduml

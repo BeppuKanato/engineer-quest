@@ -1,0 +1,38 @@
+@startuml
+title 認証とアプリユーザー同期
+
+actor "学習者" as Learner
+participant "Next.js Frontend" as Frontend
+participant "Firebase Auth" as Firebase
+participant "Express API" as API
+participant "Auth Middleware" as AuthMiddleware
+participant "Auth Service" as AuthService
+database "PostgreSQL\nvia Prisma" as DB
+
+Learner -> Frontend : サインアップまたはログインする
+Frontend -> Firebase : createUserWithEmailAndPassword()\nまたは signInWithEmailAndPassword()
+Firebase --> Frontend : Firebase ユーザーを返す
+Frontend -> Firebase : getIdToken()
+Firebase --> Frontend : ID token を返す
+
+Frontend -> API : POST /api/auth/ensure\nAuthorization: Bearer token\n{ displayName }
+API -> AuthMiddleware : Firebase token を検証する
+AuthMiddleware -> Firebase : verifyIdToken(token)
+Firebase --> AuthMiddleware : uid を含む認証情報を返す
+AuthMiddleware -> DB : firebaseUid で User を検索する
+DB --> AuthMiddleware : User または null を返す
+
+alt アプリユーザーが存在する
+  AuthMiddleware --> API : req.firebaseUser と req.authUser を設定する
+else アプリユーザーが存在しない
+  AuthMiddleware --> API : req.firebaseUser のみ設定する
+end
+
+API -> AuthService : Firebase UID と表示名で User を保証する
+AuthService -> DB : User を upsert する
+DB --> AuthService : User を返す
+AuthService --> API : User DTO を返す
+API --> Frontend : 200 { user }
+Frontend --> Learner : /home へ遷移する
+
+@enduml

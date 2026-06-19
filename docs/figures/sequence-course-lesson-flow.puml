@@ -1,0 +1,59 @@
+@startuml
+title コース・ミッション・レッスンの学習フロー
+
+actor "学習者" as Learner
+participant "Next.js Frontend" as Frontend
+participant "Express API" as API
+participant "Auth Middleware" as Auth
+participant "Course Service" as CourseService
+participant "Mission Service" as MissionService
+participant "Lesson Service" as LessonService
+database "PostgreSQL\nvia Prisma" as DB
+
+Learner -> Frontend : /courses を開く
+Frontend -> API : GET /api/courses
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> CourseService : Firebase UID からコース一覧を取得する
+CourseService -> DB : User と公開済み Course を検索し、\nMission とユーザー進捗を含めて取得する
+DB --> CourseService : Course 一覧を返す
+CourseService --> API : 進捗率付き Course DTO を返す
+API --> Frontend : 200 Course[]
+Frontend --> Learner : コース一覧とフィルターを表示する
+
+Learner -> Frontend : ミッションを選択する
+Frontend -> API : GET /api/missions/{missionId}/overview
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> MissionService : ミッション概要を取得する
+MissionService -> DB : Mission、Lesson、Exam、ユーザー進捗を取得する
+MissionService -> DB : UserMissionProgress を IN_PROGRESS で upsert する
+DB --> MissionService : ミッション概要データを返す
+MissionService --> API : Mission overview DTO を返す
+API --> Frontend : 200 Mission overview
+Frontend --> Learner : レッスンと試験のロードマップを表示する
+
+Learner -> Frontend : レッスンを開始する
+Frontend -> API : GET /api/missions/lesson/{lessonId}/play
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> LessonService : レッスン実行データを取得する
+LessonService -> DB : Lesson と Activity を取得する
+LessonService -> DB : UserLessonProgress を IN_PROGRESS で upsert する
+DB --> LessonService : レッスン活動データを返す
+LessonService --> API : Lesson play DTO を返す
+API --> Frontend : 200 Lesson
+Frontend --> Learner : 活動、回答UI、プレビューを表示する
+
+Learner -> Frontend : 最後の活動を完了する
+Frontend -> API : POST /api/missions/lesson/{lessonId}/complete
+API -> Auth : Firebase token を検証する
+Auth --> API : req.authUser を設定する
+API -> LessonService : レッスンを完了状態にする
+LessonService -> DB : UserLessonProgress を COMPLETED で upsert する
+DB --> LessonService : レッスン進捗を返す
+LessonService --> API : 完了 DTO を返す
+API --> Frontend : 200 Completion
+Frontend --> Learner : レッスン完了画面へ遷移する
+
+@enduml
