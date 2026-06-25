@@ -2,9 +2,15 @@
 
 import { AppBar, Container, Box, Toolbar, Typography, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material"
 import AdbIcon from '@mui/icons-material/Adb';
+import Link from 'next/link';
 import * as React from 'react';
 
-const pages = ['Home', 'Courses', 'Achievements', 'Profile'];
+const pages = [
+    { label: 'Home' },
+    { label: 'Courses', href: '/courses' },
+    { label: 'Achievements' },
+    { label: 'Profile' },
+];
 const settings = ['Test1', 'Test2', 'Test3'];
 
 export const AppHeader: React.FC = () => {
@@ -51,12 +57,21 @@ export const AppHeader: React.FC = () => {
                         FIT
                     </Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex'} }}>
-                        {pages.map((page) => (
+                        {pages.map((page) => page.href ? (
                             <Button
-                                key={page}
+                                key={page.label}
+                                component={Link}
+                                href={page.href}
                                 sx={{ my: 2, color: 'white', display: 'block' }}
                             >
-                                {page}
+                                {page.label}
+                            </Button>
+                        ) : (
+                            <Button
+                                key={page.label}
+                                sx={{ my: 2, color: 'white', display: 'block' }}
+                            >
+                                {page.label}
                             </Button>
                         ))}
                     </Box>

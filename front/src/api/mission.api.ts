@@ -1,4 +1,4 @@
-import type { Mission } from "@/app/mission/[missionId]/overview/type";
+import type { MissionOverviewResponse } from "@/app/mission/[missionId]/overview/type";
 import type { Lesson } from "@/app/mission/[missionId]/lesson/[lessonId]/play/type";
 import type { LessonCompleteData } from "@/app/mission/[missionId]/lesson/[lessonId]/complete/type";
 import { fetcher } from "@/lib/fetcher";
@@ -8,12 +8,77 @@ import type {
   MissionExamDifficulty,
   MissionExamPlayResponse,
 } from "@/app/mission/[missionId]/exam/play/type";
+import type {
+  AnswerMissionActivityResponse,
+  CompleteMissionActivityResponse,
+  CompleteMissionResponse,
+  MissionPlayResponse,
+} from "@/app/mission/[missionId]/play/type";
 
-export const getMissionOverview = async (token: string, missionId: string): Promise<Mission> => {
-    return fetcher<Mission>(`/missions/${encodeURIComponent(missionId)}/overview`, {
+export const getMissionOverview = async (
+  token: string,
+  missionId: string
+): Promise<MissionOverviewResponse> => {
+    return fetcher<MissionOverviewResponse>(`/missions/${encodeURIComponent(missionId)}/overview`, {
         method: "GET",
         token,
     });
+};
+
+export const getMissionPlay = async (
+  token: string,
+  missionId: string
+): Promise<MissionPlayResponse> => {
+  return fetcher<MissionPlayResponse>(
+    `/missions/${encodeURIComponent(missionId)}/play`,
+    {
+      method: "GET",
+      token,
+    }
+  );
+};
+
+export const answerMissionActivity = async (
+  token: string,
+  missionId: string,
+  activityId: string,
+  answer: unknown
+): Promise<AnswerMissionActivityResponse> => {
+  return fetcher<AnswerMissionActivityResponse>(
+    `/missions/${encodeURIComponent(missionId)}/activities/${encodeURIComponent(activityId)}/answer`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify({ answer }),
+    }
+  );
+};
+
+export const completeMissionActivity = async (
+  token: string,
+  missionId: string,
+  activityId: string
+): Promise<CompleteMissionActivityResponse> => {
+  return fetcher<CompleteMissionActivityResponse>(
+    `/missions/${encodeURIComponent(missionId)}/activities/${encodeURIComponent(activityId)}/complete`,
+    {
+      method: "POST",
+      token,
+    }
+  );
+};
+
+export const completeMission = async (
+  token: string,
+  missionId: string
+): Promise<CompleteMissionResponse> => {
+  return fetcher<CompleteMissionResponse>(
+    `/missions/${encodeURIComponent(missionId)}/complete`,
+    {
+      method: "POST",
+      token,
+    }
+  );
 };
 
 export const getLessonPlay = async (

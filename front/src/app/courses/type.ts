@@ -1,5 +1,11 @@
 export type ProgressStatus = "completed" | "in_progress" | "not_started";
 
+export type Difficulty = "easy" | "normal" | "hard";
+
+export type MissionType = "main" | "challenge";
+
+export type CourseCategory = "game" | "algorithm" | "tool" | "ui" | "data";
+
 export type Course = {
     id: string;
     title: string;
@@ -9,9 +15,14 @@ export type Course = {
     difficulty: Difficulty;
     status: ProgressStatus;
     progressRate: number;
-    missionCount: number,
-    completedMissionCount: number
-}
+    missionCount: number;
+    completedMissionCount: number;
+    totalMissionCount: number;
+    requiredMissionCount: number;
+    completedRequiredMissionCount: number;
+    challengeMissionCount: number;
+    completedChallengeMissionCount: number;
+};
 
 export type Mission = {
     id: string;
@@ -19,15 +30,16 @@ export type Mission = {
     description: string;
     goalImg: string;
     status: ProgressStatus;
+    type: MissionType;
+    isRequiredForCourseCompletion: boolean;
+    parentMissionId: string | null;
+    roadmapLane: number;
+    branchOrder: number;
     tags?: string[];
-}
-
-export type CourseCategory = "game" | "algorithm" | "tool" | "ui" | "data";
-
-export type Difficulty = "easy" | "normal" | "hard";
+};
 
 export type CourseFilterState =  {
     category: CourseCategory | "all";
     difficulty: Difficulty | "all";
     status: ProgressStatus | "all";
-}
+};

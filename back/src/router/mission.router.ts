@@ -1,62 +1,32 @@
 import { Router } from "express";
+
+import {
+  answerMissionActivityController,
+  completeMissionActivityController,
+  completeMissionController,
+  getMissionOverviewController,
+  getMissionPlayController,
+} from "../controller/mission.controller";
 import { verifyFirebaseToken } from "../middleware/authMiddleware";
-import { getMissionOverviewController } from "../controller/mission.controller";
-import { getLessonPlayController, completeLessonController, getLessonCompleteController } from "../controller/lesson.controller";
-import { getMissionExamIntroController, startMissionExamController, getMissionExamPlayController, submitMissionExamController, getMissionExamResultController} from "../controller/missionExam.controller";
+
 const router = Router();
 
-router.get(
-  "/:missionId/overview",
-  verifyFirebaseToken,
-  getMissionOverviewController
-);
+router.get("/:missionId/overview", verifyFirebaseToken, getMissionOverviewController);
 
-router.get(
-  "/lesson/:lessonId/play",
+router.get("/:missionId/play", verifyFirebaseToken, getMissionPlayController);
+
+router.post(
+  "/:missionId/activities/:activityId/answer",
   verifyFirebaseToken,
-  getLessonPlayController
+  answerMissionActivityController
 );
 
 router.post(
-  "/lesson/:lessonId/complete",
+  "/:missionId/activities/:activityId/complete",
   verifyFirebaseToken,
-  completeLessonController
+  completeMissionActivityController
 );
 
-router.get(
-  "/lesson/:lessonId/complete",
-  verifyFirebaseToken,
-  getLessonCompleteController
-);
-
-router.get(
-  "/:missionId/exam/intro",
-  verifyFirebaseToken,
-  getMissionExamIntroController
-)
-
-router.post(
-  "/:missionId/exam/start",
-  verifyFirebaseToken,
-  startMissionExamController
-);
-
-router.get(
-  "/:missionId/exam/play",
-  verifyFirebaseToken,
-  getMissionExamPlayController
-);
-
-router.post(
-  "/:missionId/exam/submit",
-  verifyFirebaseToken,
-  submitMissionExamController
-)
-
-router.get(
-  "/:missionId/exam/result",
-  verifyFirebaseToken,
-  getMissionExamResultController
-);
+router.post("/:missionId/complete", verifyFirebaseToken, completeMissionController);
 
 export default router;

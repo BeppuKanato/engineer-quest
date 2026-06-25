@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "@/lib/api";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -25,11 +27,13 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
+  const { isNavigating, showOverlay, startNavigation } =
+    useNavigationFeedback();
   const apiBaseUrl = getApiBaseUrl();
 
   console.log("API Base URL:", apiBaseUrl);
   const handleLogin = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || isNavigating) return;
 
     const trimmedEmail = email.trim();
 
@@ -66,7 +70,9 @@ export default function Login() {
       }
 
       setMessage("ログイン成功");
-      router.push("/home");
+      startNavigation(() => {
+        router.push("/home");
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(err.message);
@@ -112,7 +118,7 @@ export default function Login() {
               type="email"
               fullWidth
               value={email}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               onChange={(e) => setEmail(e.target.value)}
             />
 
@@ -121,7 +127,7 @@ export default function Login() {
               type="password"
               fullWidth
               value={password}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               onChange={(e) => setPassword(e.target.value)}
             />
 
@@ -129,7 +135,7 @@ export default function Login() {
               variant="contained"
               fullWidth
               onClick={handleLogin}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               startIcon={
                 isSubmitting ? <CircularProgress size={18} /> : undefined
               }
@@ -157,6 +163,8 @@ export default function Login() {
           </Stack>
         </CardContent>
       </Card>
+
+      <PageTransitionOverlay open={showOverlay} />
     </Box>
   );
 }

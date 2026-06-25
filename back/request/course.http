@@ -2,6 +2,12 @@
 @baseUrl = http://localhost:8080/api
 @firebaseUid = 0BvPVYjYhZbEhbvtVV11VcFhNV63
 
+@courseId = course-web-overview
+
 ###
 GET {{baseUrl}}/courses
+X-Dev-Firebase-Uid: {{firebaseUid}}
+
+###
+GET {{baseUrl}}/courses/{{courseId}}
 X-Dev-Firebase-Uid: {{firebaseUid}}

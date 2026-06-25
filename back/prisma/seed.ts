@@ -1,23 +1,19 @@
 // prisma/seed.ts
 
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { learningSeed } from "./seedData/learningSeed";
 
 const prisma = new PrismaClient();
 
 async function deleteExistingData() {
+  // Logs / Progress
   await prisma.activityAnswerLog.deleteMany();
-  await prisma.missionExamSubmission.deleteMany();
-
-  await prisma.userMissionExamProgress.deleteMany();
-  await prisma.userLessonProgress.deleteMany();
+  await prisma.userMissionActivityProgress.deleteMany();
   await prisma.userMissionProgress.deleteMany();
 
-  await prisma.missionExamVariant.deleteMany();
-  await prisma.missionExam.deleteMany();
-
-  await prisma.lessonActivity.deleteMany();
-  await prisma.lesson.deleteMany();
+  // Master data
+  await prisma.missionActivity.deleteMany();
+  await prisma.missionSection.deleteMany();
   await prisma.mission.deleteMany();
 
   await prisma.courseCategoryMap.deleteMany();
@@ -79,60 +75,46 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
         parentMissionId: mission.parentMissionId,
         roadmapLane: mission.roadmapLane,
         branchOrder: mission.branchOrder,
+        rewardExp: mission.rewardExp,
+        learnedItems: mission.learnedItems,
         isPublished: mission.isPublished,
       },
     });
 
-    for (const lesson of mission.lessons) {
-      const createdLesson = await prisma.lesson.create({
+    for (const section of mission.sections) {
+      const createdSection = await prisma.missionSection.create({
         data: {
-          id: lesson.id,
+          id: section.id,
           missionId: createdMission.id,
-          title: lesson.title,
-          description: lesson.description,
-          order: lesson.order,
-          rewardExp: lesson.rewardExp,
-          learnedItems: lesson.learnedItems,
+          title: section.title,
+          description: section.description ?? null,
+          order: section.order,
         },
       });
 
-      for (const activity of lesson.activities) {
-        await prisma.lessonActivity.create({
+      for (const activity of section.activities) {
+        await prisma.missionActivity.create({
           data: {
             id: activity.id,
-            lessonId: createdLesson.id,
+            missionId: createdMission.id,
+            sectionId: createdSection.id,
             type: activity.type,
             title: activity.title,
             instruction: activity.instruction,
             mentorMessage: activity.mentorMessage,
-            content: activity.content,
-            preview: activity.preview,
+            content: activity.content as Prisma.InputJsonValue,
+            preview:
+              activity.preview === null
+                ? Prisma.JsonNull
+                : (activity.preview as Prisma.InputJsonValue),
             actionLabel: activity.actionLabel,
             order: activity.order,
+            sectionOrder: activity.sectionOrder,
+            isMissionCheck: activity.isMissionCheck,
           },
         });
       }
     }
-
-    await prisma.missionExam.create({
-      data: {
-        id: mission.exam.id,
-        missionId: createdMission.id,
-        title: mission.exam.title,
-        description: mission.exam.description,
-        thumbnailUrl: mission.exam.thumbnailUrl,
-        previewCss: mission.exam.previewCss,
-        estimatedTime: mission.exam.estimatedTime,
-        rewardExp: mission.exam.rewardExp,
-        variants: {
-          create: mission.exam.variants.map((variant) => ({
-            difficulty: variant.difficulty,
-            initialCode: variant.initialCode,
-            answerCode: variant.answerCode,
-          })),
-        },
-      },
-    });
   }
 }
 

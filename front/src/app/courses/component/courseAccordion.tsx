@@ -1,10 +1,14 @@
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ReplayIcon from "@mui/icons-material/Replay";
+import RouteIcon from "@mui/icons-material/Route";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
     Box,
+    Button,
     Chip,
     LinearProgress,
     Stack,
@@ -13,36 +17,44 @@ import {
 import { Course } from "../type";
 import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
-import { MissionCard } from "./missionCard";
 import { StatusChip } from "../../component/statusChip";
 
 type CourseAccordionProps = Course & {
-    onMissionClick?: (missionId: string) => void;
+    onCourseClick?: (courseId: string) => void;
 };
 
 export const CourseAccordion: React.FC<CourseAccordionProps> = ({
+    id,
     title,
     description,
     categories,
     difficulty,
-    missions,
     status,
     progressRate,
     missionCount,
     completedMissionCount,
-    onMissionClick,
+    totalMissionCount,
+    challengeMissionCount,
+    completedChallengeMissionCount,
+    onCourseClick,
 }) => {
     const isCompleted = status === "completed";
+
+    const actionLabel = isCompleted ? "ロードマップを見る" : status === "in_progress" ? "続きから" : "開始する";
+    const actionIcon = isCompleted ? <ReplayIcon /> : <PlayArrowIcon />;
+
     return (
         <Accordion
             defaultExpanded
             disableGutters
             sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 overflow: "hidden",
                 border: "1px solid",
                 borderColor: isCompleted ? "#facc15" : "#e2e8f0",
-                boxShadow: isCompleted ? "0 8px 24px rgba(245, 158, 11, 0.18)" : "0 6px 18px rgba(15, 23, 42, 0.08)",
+                boxShadow: isCompleted
+                    ? "0 8px 24px rgba(245, 158, 11, 0.18)"
+                    : "0 6px 18px rgba(15, 23, 42, 0.08)",
                 "&:before": {
                     display: "none",
                 },
@@ -56,7 +68,7 @@ export const CourseAccordion: React.FC<CourseAccordionProps> = ({
                     px: 3,
                     py: 2,
                     bgcolor: isCompleted ? "#fffbeb" : "#fff",
-                    borderTop: isCompleted ? "5px solid #f59e0b" : "none",  
+                    borderTop: isCompleted ? "5px solid #f59e0b" : "none",
                 }}
             >
                 <Stack spacing={1.5} sx={{ width: "100%" }}>
@@ -92,7 +104,7 @@ export const CourseAccordion: React.FC<CourseAccordionProps> = ({
                             <Typography
                                 variant="body2"
                                 color="text.secondary"
-                                sx={{ mt: 0.75 }}
+                                sx={{ mt: 0.75, maxWidth: 920, lineHeight: 1.7 }}
                             >
                                 {description}
                             </Typography>
@@ -106,7 +118,7 @@ export const CourseAccordion: React.FC<CourseAccordionProps> = ({
                             sx={{ pr: { md: 2 } }}
                         >
                             <StatusChip status={status} />
-                            <DifficultyLabel difficulty={difficulty} variant="chip"/>
+                            <DifficultyLabel difficulty={difficulty} variant="chip" />
                         </Stack>
                     </Stack>
 
@@ -150,25 +162,41 @@ export const CourseAccordion: React.FC<CourseAccordionProps> = ({
                 }}
             >
                 <Stack
-                    direction="row"
+                    direction={{ xs: "column", md: "row" }}
+                    justifyContent="space-between"
                     spacing={2}
-                    sx={{
-                        overflowX: "auto",
-                        pb: 1,
-                    }}
+                    alignItems={{ xs: "stretch", md: "center" }}
                 >
-                    {missions.map((mission, index) => {
-                        const canStart = index === 0 || mission.status === "completed" || mission.status === "in_progress" || missions[index - 1]?.status === "completed";
+                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                        <Chip
+                            icon={<RouteIcon />}
+                            label={`本線 ${completedMissionCount}/${missionCount}`}
+                            sx={{ fontWeight: 800, bgcolor: "#eff6ff", color: "#1d4ed8" }}
+                        />
+                        <Chip
+                            label={`Challenge ${completedChallengeMissionCount}/${challengeMissionCount}`}
+                            sx={{ fontWeight: 800, bgcolor: "#fff7ed", color: "#c2410c" }}
+                        />
+                        <Chip
+                            label={`全${totalMissionCount}ミッション`}
+                            sx={{ fontWeight: 800, bgcolor: "#f1f5f9", color: "#475569" }}
+                        />
+                    </Stack>
 
-                        return (
-                            <MissionCard
-                                key={mission.id}
-                                {...mission}
-                                canStart={canStart}
-                                onClick={onMissionClick}
-                            />
-                        )
-                    })}
+                    <Stack spacing={0.75} alignItems={{ xs: "stretch", md: "flex-end" }}>
+                        <Button
+                            variant="contained"
+                            startIcon={actionIcon}
+                            onClick={() => onCourseClick?.(id)}
+                            sx={{
+                                borderRadius: 2,
+                                fontWeight: 900,
+                                px: 3,
+                            }}
+                        >
+                            {actionLabel}
+                        </Button>
+                    </Stack>
                 </Stack>
             </AccordionDetails>
         </Accordion>
