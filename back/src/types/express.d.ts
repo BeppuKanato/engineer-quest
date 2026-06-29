@@ -9,6 +9,9 @@ declare global {
         id: string;
         firebaseUid: string;
         displayName: string | null;
+        experience: number;
+        badgeTickets: number;
+        selectedTechIconBadgeId: string | null;
       };
       firebaseUser?: DecodedIdToken;
     }

@@ -7,8 +7,18 @@ export type Mission = {
   progress?: number;
   ctaLabel: string;
   badgeLabel: string;
+  href: string;
 };
 
 export type MissionTab = "resume" | "recommended"
 
 export type Status = "complete" | "incomplete";
+
+export type TargetAchievement = {
+  title: string;
+  factor: {
+    name: string;
+    goal: number;
+    progress: number;
+  }[];
+};

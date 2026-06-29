@@ -5,6 +5,7 @@ type MonthlyCalenderProps = {
   year: number;
   month: number; // 0始まり
   date?: number;
+  learnedDays?: number[];
 };
 
 const createMonthArray = (firstDayOfWeek: number, daysInMonth: number) => {
@@ -34,6 +35,7 @@ export const MonthlyCalender: React.FC<MonthlyCalenderProps> = ({
   year,
   month,
   date,
+  learnedDays = [],
 }) => {
   const firstDayOfWeek = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -89,6 +91,7 @@ export const MonthlyCalender: React.FC<MonthlyCalenderProps> = ({
           >
             {week.map((day, dayIndex) => {
               const isToday = day === date;
+              const isLearnedDay = day !== null && learnedDays.includes(day);
 
               return (
                 <Box
@@ -102,11 +105,15 @@ export const MonthlyCalender: React.FC<MonthlyCalenderProps> = ({
                     bgcolor: day
                       ? isToday
                         ? "primary.main"
+                        : isLearnedDay
+                        ? "#dcfce7"
                         : "grey.100"
                       : "transparent",
                     color: day
                       ? isToday
                         ? "common.white"
+                        : isLearnedDay
+                        ? "#15803d"
                         : dayIndex === 0
                         ? "error.main"
                         : dayIndex === 6

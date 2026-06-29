@@ -29,13 +29,15 @@ export const ensureUserController = async (req: Request, res: Response) => {
 };
 
 export const getMeController = async (req: Request, res: Response) => {
-  if (!req.firebaseUser) {
+  const firebaseUid = req.firebaseUser?.uid ?? req.authUser?.firebaseUid;
+
+  if (!firebaseUid) {
     return res.status(401).json({
       error: "Unauthorized",
     });
   }
 
-  const user = await getUserByFirebaseUidService(req.firebaseUser.uid);
+  const user = await getUserByFirebaseUidService(firebaseUid);
 
   if (!user) {
     return res.status(404).json({

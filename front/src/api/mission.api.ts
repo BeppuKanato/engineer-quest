@@ -10,6 +10,7 @@ import type {
 } from "@/app/mission/[missionId]/exam/play/type";
 import type {
   AnswerMissionActivityResponse,
+  CollectKnowledgeCardResponse,
   CompleteMissionActivityResponse,
   CompleteMissionResponse,
   MissionPlayResponse,
@@ -77,6 +78,21 @@ export const completeMission = async (
     {
       method: "POST",
       token,
+    }
+  );
+};
+
+export const collectKnowledgeCard = async (
+  token: string,
+  missionId: string,
+  knowledgeCardId: string
+): Promise<CollectKnowledgeCardResponse> => {
+  return fetcher<CollectKnowledgeCardResponse>(
+    `/missions/${encodeURIComponent(missionId)}/knowledge-cards/collect`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify({ knowledgeCardId }),
     }
   );
 };

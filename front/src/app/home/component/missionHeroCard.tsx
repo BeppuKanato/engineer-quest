@@ -3,6 +3,7 @@ import { Mission, MissionTab } from "../type";
 import { Card, Stack, Tab, Tabs, Typography, Box, Grid, Chip, LinearProgress, Button } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 
 
 
@@ -156,6 +157,8 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
                                     </Box>
                                     <Box>
                                         <Button
+                                            component={Link}
+                                            href={mission.href}
                                             variant="contained"
                                             endIcon={<ArrowForwardIcon />}
                                             sx={{

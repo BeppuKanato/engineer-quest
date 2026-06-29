@@ -8,6 +8,7 @@ import {
   getMissionOverviewService,
   getMissionPlayService,
 } from "../service/mission.service";
+import { collectKnowledgeCardByFirebaseUid } from "../service/knowledgeCard.service";
 
 const getFirebaseUid = (req: Request) => {
   const firebaseUid = req.authUser?.firebaseUid;
@@ -119,6 +120,37 @@ export const completeMissionController = async (
     const data = await completeMissionService({
       missionId: getMissionId(req),
       firebaseUid: getFirebaseUid(req),
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const collectMissionKnowledgeCardController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const knowledgeCardId =
+      typeof req.body?.knowledgeCardId === "string"
+        ? req.body.knowledgeCardId
+        : null;
+
+    if (!knowledgeCardId) {
+      throw new AppError(
+        400,
+        "BAD_REQUEST",
+        "Knowledge card ID is required"
+      );
+    }
+
+    const data = await collectKnowledgeCardByFirebaseUid({
+      missionId: getMissionId(req),
+      firebaseUid: getFirebaseUid(req),
+      knowledgeCardId,
     });
 
     res.status(200).json(data);

@@ -1,0 +1,295 @@
+import { ProgressStatus as PrismaProgressStatus } from "@prisma/client";
+
+import { AppError } from "../error/appError";
+import { prisma } from "../lib/prisma";
+
+type ProfileHistoryType =
+  | "mission_completed"
+  | "achievement_unlocked"
+  | "activity_completed"
+  | "badge_acquired";
+
+type ProfileHistoryItem = {
+  id: string;
+  type: ProfileHistoryType;
+  title: string;
+  description: string;
+  occurredAt: string;
+  href: string | null;
+};
+
+const rankThresholds = [
+  { name: "Junior", requiredCompletedMissionCount: 0 },
+  { name: "Senior", requiredCompletedMissionCount: 6 },
+  { name: "Lead", requiredCompletedMissionCount: 14 },
+  { name: "Master", requiredCompletedMissionCount: 24 },
+];
+
+const requiredExperienceForLevel = (level: number): number => {
+  if (level <= 0) return 0;
+  return Math.floor(100 * Math.pow(level, 1.5));
+};
+
+const deriveLevel = (experience: number) => {
+  let level = 1;
+
+  while (experience >= requiredExperienceForLevel(level + 1)) {
+    level += 1;
+  }
+
+  return level;
+};
+
+const deriveRank = (completedMissionCount: number) =>
+  [...rankThresholds]
+    .reverse()
+    .find((rank) => completedMissionCount >= rank.requiredCompletedMissionCount)
+    ?.name ?? rankThresholds[0].name;
+
+const calculateCompletedCourseCount = async (userId: string) => {
+  const courses = await prisma.course.findMany({
+    where: { isPublished: true },
+    select: {
+      id: true,
+      missions: {
+        where: {
+          isPublished: true,
+          isRequiredForCourseCompletion: true,
+        },
+        select: {
+          id: true,
+          progresses: {
+            where: {
+              userId,
+              status: PrismaProgressStatus.COMPLETED,
+            },
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  return courses.filter(
+    (course) =>
+      course.missions.length > 0 &&
+      course.missions.every((mission) => mission.progresses.length > 0)
+  ).length;
+};
+
+const compareHistoryDesc = (
+  left: ProfileHistoryItem,
+  right: ProfileHistoryItem
+) =>
+  new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime();
+
+export const getProfileByFirebaseUid = async (firebaseUid: string) => {
+  const user = await prisma.user.findUnique({
+    where: { firebaseUid },
+    select: {
+      id: true,
+      displayName: true,
+      experience: true,
+      badgeTickets: true,
+      selectedTechIconBadge: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(404, "USER_NOT_FOUND", "User not found");
+  }
+
+  const [
+    missionProgresses,
+    userAchievements,
+    activityProgresses,
+    userBadges,
+    recentWorks,
+    completedCourseCount,
+    completedMissionCount,
+    badgeCount,
+  ] = await Promise.all([
+      prisma.userMissionProgress.findMany({
+        where: {
+          userId: user.id,
+          status: PrismaProgressStatus.COMPLETED,
+          completedAt: { not: null },
+        },
+        orderBy: { completedAt: "desc" },
+        take: 30,
+        include: {
+          mission: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              course: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.userAchievement.findMany({
+        where: {
+          userId: user.id,
+        },
+        orderBy: { achievedAt: "desc" },
+        take: 30,
+        include: {
+          achievement: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+            },
+          },
+        },
+      }),
+      prisma.userMissionActivityProgress.findMany({
+        where: {
+          userId: user.id,
+          status: PrismaProgressStatus.COMPLETED,
+          completedAt: { not: null },
+        },
+        orderBy: { completedAt: "desc" },
+        take: 30,
+        include: {
+          activity: {
+            select: {
+              id: true,
+              title: true,
+              missionId: true,
+              mission: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.userTechIconBadge.findMany({
+        where: {
+          userId: user.id,
+        },
+        orderBy: { acquiredAt: "desc" },
+        take: 30,
+        include: {
+          badge: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            },
+          },
+        },
+      }),
+      prisma.userWork.findMany({
+        where: { userId: user.id },
+        orderBy: [{ isFavorite: "desc" }, { updatedAt: "desc" }],
+        take: 3,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          isFavorite: true,
+          updatedAt: true,
+          createMission: {
+            select: { title: true },
+          },
+        },
+      }),
+      calculateCompletedCourseCount(user.id),
+      prisma.userMissionProgress.count({
+        where: {
+          userId: user.id,
+          status: PrismaProgressStatus.COMPLETED,
+        },
+      }),
+      prisma.userTechIconBadge.count({ where: { userId: user.id } }),
+    ]);
+
+  const missionHistory: ProfileHistoryItem[] = missionProgresses
+    .filter((progress) => progress.completedAt !== null)
+    .map((progress) => ({
+      id: `mission:${progress.id}`,
+      type: "mission_completed",
+      title: progress.mission.title,
+      description: `${progress.mission.course.title} / Mission完了`,
+      occurredAt: progress.completedAt!.toISOString(),
+      href: `/mission/${encodeURIComponent(progress.mission.id)}/overview`,
+    }));
+
+  const achievementHistory: ProfileHistoryItem[] = userAchievements.map(
+    (userAchievement) => ({
+      id: `achievement:${userAchievement.id}`,
+      type: "achievement_unlocked",
+      title: userAchievement.achievement.title,
+      description: userAchievement.achievement.description,
+      occurredAt: userAchievement.achievedAt.toISOString(),
+      href: "/achievements",
+    })
+  );
+
+  const activityHistory: ProfileHistoryItem[] = activityProgresses
+    .filter((progress) => progress.completedAt !== null)
+    .map((progress) => ({
+      id: `activity:${progress.id}`,
+      type: "activity_completed",
+      title: progress.activity.title,
+      description: `${progress.activity.mission.title} / Activity完了`,
+      occurredAt: progress.completedAt!.toISOString(),
+      href: `/mission/${encodeURIComponent(progress.activity.missionId)}/play`,
+    }));
+
+  const badgeHistory: ProfileHistoryItem[] = userBadges.map((userBadge) => ({
+    id: `badge:${userBadge.id}`,
+    type: "badge_acquired",
+    title: userBadge.badge.name,
+    description: userBadge.badge.description,
+    occurredAt: userBadge.acquiredAt.toISOString(),
+    href: "/badges",
+  }));
+
+  return {
+    user: {
+      displayName: user.displayName,
+      rank: deriveRank(completedMissionCount),
+      level: deriveLevel(user.experience),
+      exp: user.experience,
+      completedCourseCount,
+      completedMissionCount,
+      badgeCount,
+    },
+    ticketBalance: user.badgeTickets,
+    selectedBadge: user.selectedTechIconBadge
+      ? {
+          id: user.selectedTechIconBadge.id,
+          name: user.selectedTechIconBadge.name,
+          description: user.selectedTechIconBadge.description,
+          iconUrl: user.selectedTechIconBadge.iconUrl,
+          rarity: user.selectedTechIconBadge.rarity,
+        }
+      : null,
+    recentWorks: recentWorks.map((work) => ({
+      id: work.id,
+      title: work.title,
+      description: work.description,
+      createMissionTitle: work.createMission.title,
+      isFavorite: work.isFavorite,
+      updatedAt: work.updatedAt.toISOString(),
+      href: "/my-works",
+    })),
+    history: [
+      ...missionHistory,
+      ...achievementHistory,
+      ...activityHistory,
+      ...badgeHistory,
+    ]
+      .sort(compareHistoryDesc)
+      .slice(0, 50),
+  };
+};

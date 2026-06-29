@@ -112,6 +112,44 @@ export type CompleteMissionActivityResponse = {
   isMissionCompleted: boolean;
 };
 
+export type ExperienceUpdate = {
+  gainedExp: number;
+  previousExperience: number;
+  currentExperience: number;
+  isNewlyAwarded: boolean;
+};
+
+export type UnlockedAchievement = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  categoryLabel: string;
+  achievedAt: string;
+};
+
+export type KnowledgeCardChoice = {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  rarity: "COMMON" | "RARE" | "EPIC" | string;
+};
+
+export type BadgeTicketReward = {
+  amount: number;
+  reason:
+    | "MISSION_COMPLETE"
+    | "CHALLENGE_COMPLETE"
+    | "COURSE_COMPLETE"
+    | "ACHIEVEMENT_UNLOCK"
+    | "BADGE_GACHA"
+    | string;
+  currentTickets: number;
+  transactionId: string;
+  createdAt: string;
+};
+
 export type CompleteMissionResponse = {
   mission: {
     id: string;
@@ -120,6 +158,10 @@ export type CompleteMissionResponse = {
     rewardExp: number;
     learnedItems: string[];
   };
+  experienceUpdate: ExperienceUpdate;
+  badgeTicketRewards: BadgeTicketReward[];
+  unlockedAchievements: UnlockedAchievement[];
+  knowledgeCardChoices: KnowledgeCardChoice[];
   nextMission: {
     id: string;
     title: string;
@@ -128,4 +170,9 @@ export type CompleteMissionResponse = {
     id: string;
     title: string;
   }[];
+};
+
+export type CollectKnowledgeCardResponse = {
+  knowledgeCard: KnowledgeCardChoice;
+  collectedAt: string;
 };

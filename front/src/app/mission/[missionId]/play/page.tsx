@@ -32,6 +32,7 @@ import {
 } from "@/api/mission.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { useSoundEffect } from "@/app/component/soundFeedback";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import {
   enqueueActivityCompletion,
@@ -371,6 +372,7 @@ const ActivityBody = ({ activity }: { activity: MissionActivity }) => {
 };
 
 export default function MissionPlayPage() {
+  const { play } = useSoundEffect();
   const params = useParams<{ missionId: string }>();
   const missionId = params.missionId;
   const router = useRouter();
@@ -561,6 +563,7 @@ export default function MissionPlayPage() {
       );
       if (result.isCorrect === true) {
         setSuccessEffectKey((current) => current + 1);
+        play("activityComplete");
       }
       setAnswerResultMap((current) => ({
         ...current,
@@ -568,6 +571,7 @@ export default function MissionPlayPage() {
       }));
     } catch (error) {
       console.error(error);
+      play("errorSoft");
       setErrorMessage("答えの確認に失敗しました。");
     } finally {
       setIsSubmitting(false);

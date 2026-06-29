@@ -30,6 +30,9 @@ const setAuthUserByFirebaseUid = async (
       id: true,
       firebaseUid: true,
       displayName: true,
+      experience: true,
+      badgeTickets: true,
+      selectedTechIconBadgeId: true,
     },
   });
 

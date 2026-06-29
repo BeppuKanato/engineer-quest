@@ -1,12 +1,17 @@
 import {
+  BadgeTicketReason,
   CourseDifficulty,
   MissionActivityType,
   MissionType,
+  Prisma,
   ProgressStatus as PrismaProgressStatus,
 } from "@prisma/client";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
+import { evaluateAchievementsForUser } from "./achievement.service";
+import { awardBadgeTickets } from "./badge.service";
+import { getKnowledgeCardChoicesForMission } from "./knowledgeCard.service";
 
 type ApiDifficulty = "easy" | "normal" | "hard";
 type ApiProgressStatus = "completed" | "in_progress" | "not_started";
@@ -34,6 +39,21 @@ type AnswerActivityInput = ActivityActionInput & {
 type CompleteMissionInput = {
   missionId: string;
   firebaseUid: string;
+};
+
+type ExperienceUpdate = {
+  gainedExp: number;
+  previousExperience: number;
+  currentExperience: number;
+  isNewlyAwarded: boolean;
+};
+
+type BadgeTicketReward = {
+  amount: number;
+  reason: BadgeTicketReason;
+  currentTickets: number;
+  transactionId: string;
+  createdAt: string;
 };
 
 type MissionActivityContent = Record<string, unknown>;
@@ -451,6 +471,106 @@ const completeMissionIfAllActivitiesCompleted = async (
   }
 
   return false;
+};
+
+const awardMissionExperience = async (
+  tx: Prisma.TransactionClient,
+  userId: string,
+  missionId: string,
+  rewardExp: number
+): Promise<ExperienceUpdate> => {
+  const user = await tx.user.findUnique({
+    where: { id: userId },
+    select: { experience: true },
+  });
+
+  if (!user) {
+    throw new AppError(404, "USER_NOT_FOUND", "User not found");
+  }
+
+  const progress = await tx.userMissionProgress.findUnique({
+    where: {
+      userId_missionId: {
+        userId,
+        missionId,
+      },
+    },
+    select: {
+      awardedExp: true,
+    },
+  });
+
+  if (progress?.awardedExp && progress.awardedExp > 0) {
+    return {
+      gainedExp: progress.awardedExp,
+      previousExperience: user.experience,
+      currentExperience: user.experience,
+      isNewlyAwarded: false,
+    };
+  }
+
+  const gainedExp = Math.max(0, rewardExp);
+
+  await tx.userMissionProgress.update({
+    where: {
+      userId_missionId: {
+        userId,
+        missionId,
+      },
+    },
+    data: {
+      awardedExp: gainedExp,
+    },
+  });
+
+  const updatedUser = await tx.user.update({
+    where: { id: userId },
+    data: {
+      experience: {
+        increment: gainedExp,
+      },
+    },
+    select: {
+      experience: true,
+    },
+  });
+
+  return {
+    gainedExp,
+    previousExperience: user.experience,
+    currentExperience: updatedUser.experience,
+    isNewlyAwarded: true,
+  };
+};
+
+const isCourseRequiredMissionsComplete = async (
+  userId: string,
+  courseId: string
+) => {
+  const requiredMissions = await prisma.mission.findMany({
+    where: {
+      courseId,
+      isPublished: true,
+      isRequiredForCourseCompletion: true,
+    },
+    select: {
+      id: true,
+      progresses: {
+        where: {
+          userId,
+          status: PrismaProgressStatus.COMPLETED,
+        },
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  return (
+    requiredMissions.length > 0 &&
+    requiredMissions.every((candidate) => candidate.progresses.length > 0)
+  );
 };
 
 export const getMissionPlayService = async ({
@@ -923,25 +1043,29 @@ export const completeMissionService = async ({
     );
   }
 
-  await prisma.userMissionProgress.upsert({
-    where: {
-      userId_missionId: {
+  const experienceUpdate = await prisma.$transaction(async (tx) => {
+    await tx.userMissionProgress.upsert({
+      where: {
+        userId_missionId: {
+          userId: user.id,
+          missionId: mission.id,
+        },
+      },
+      update: {
+        status: PrismaProgressStatus.COMPLETED,
+        currentActivityId: null,
+        completedAt: new Date(),
+      },
+      create: {
         userId: user.id,
         missionId: mission.id,
+        status: PrismaProgressStatus.COMPLETED,
+        startedAt: new Date(),
+        completedAt: new Date(),
       },
-    },
-    update: {
-      status: PrismaProgressStatus.COMPLETED,
-      currentActivityId: null,
-      completedAt: new Date(),
-    },
-    create: {
-      userId: user.id,
-      missionId: mission.id,
-      status: PrismaProgressStatus.COMPLETED,
-      startedAt: new Date(),
-      completedAt: new Date(),
-    },
+    });
+
+    return awardMissionExperience(tx, user.id, mission.id, mission.rewardExp);
   });
 
   const nextMission = await prisma.mission.findFirst({
@@ -975,6 +1099,55 @@ export const completeMissionService = async ({
       title: true,
     },
   });
+  const unlockedAchievements = await evaluateAchievementsForUser(user.id);
+  const shouldAwardCourseTicket =
+    mission.isRequiredForCourseCompletion &&
+    (await isCourseRequiredMissionsComplete(user.id, mission.courseId));
+  const badgeTicketRewards = await prisma.$transaction(async (tx) => {
+    const rewards: BadgeTicketReward[] = [];
+    const missionReward = await awardBadgeTickets(tx, {
+      userId: user.id,
+      amount: 1,
+      reason:
+        mission.type === MissionType.CHALLENGE
+          ? BadgeTicketReason.CHALLENGE_COMPLETE
+          : BadgeTicketReason.MISSION_COMPLETE,
+      sourceId: mission.id,
+      note: mission.title,
+    });
+
+    if (missionReward) rewards.push(missionReward);
+
+    if (shouldAwardCourseTicket) {
+      const courseReward = await awardBadgeTickets(tx, {
+        userId: user.id,
+        amount: 1,
+        reason: BadgeTicketReason.COURSE_COMPLETE,
+        sourceId: mission.courseId,
+        note: mission.courseId,
+      });
+
+      if (courseReward) rewards.push(courseReward);
+    }
+
+    for (const achievement of unlockedAchievements) {
+      const achievementReward = await awardBadgeTickets(tx, {
+        userId: user.id,
+        amount: 1,
+        reason: BadgeTicketReason.ACHIEVEMENT_UNLOCK,
+        sourceId: achievement.id,
+        note: achievement.title,
+      });
+
+      if (achievementReward) rewards.push(achievementReward);
+    }
+
+    return rewards;
+  });
+  const knowledgeCardChoices = await getKnowledgeCardChoicesForMission(
+    user.id,
+    mission.courseId
+  );
 
   return {
     mission: {
@@ -984,6 +1157,10 @@ export const completeMissionService = async ({
       rewardExp: mission.rewardExp,
       learnedItems: mission.learnedItems,
     },
+    experienceUpdate,
+    badgeTicketRewards,
+    unlockedAchievements,
+    knowledgeCardChoices,
     nextMission,
     unlockedChallenges,
   };

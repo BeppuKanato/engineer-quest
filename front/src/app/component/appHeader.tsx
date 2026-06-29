@@ -1,20 +1,37 @@
 "use client"
 
-import { AppBar, Container, Box, Toolbar, Typography, IconButton, Menu, MenuItem, Button, Tooltip, Avatar } from "@mui/material"
+import { AppBar, Container, Box, Toolbar, Typography, IconButton, Button, Tooltip, Avatar } from "@mui/material"
 import AdbIcon from '@mui/icons-material/Adb';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import Link from 'next/link';
 import * as React from 'react';
+import { useSoundEffect } from './soundFeedback';
 
 const pages = [
-    { label: 'Home' },
+    { label: 'Home', href: '/home' },
     { label: 'Courses', href: '/courses' },
-    { label: 'Achievements' },
-    { label: 'Profile' },
+    { label: 'Board', href: '/quest-board' },
+    { label: 'Create', href: '/create-missions' },
+    { label: 'My Works', href: '/my-works' },
+    { label: 'History', href: '/history' },
+    { label: 'Collection', href: '/collection' },
+    { label: 'Achievements', href: '/achievements' },
+    { label: 'Badges', href: '/badges' },
+    { label: 'Profile', href: '/profile' },
 ];
-const settings = ['Test1', 'Test2', 'Test3'];
-
 export const AppHeader: React.FC = () => {
-    const [anchorELlUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+    const { enabled, setEnabled } = useSoundEffect();
+    const handleSoundToggle = () => {
+        const nextEnabled = !enabled;
+        setEnabled(nextEnabled);
+        if (nextEnabled) {
+            const audio = new Audio("/audio/SE/button-click.mp3");
+            audio.volume = 0.38;
+            audio.play().catch(() => undefined);
+        }
+    };
+
     return (
     <AppBar position="static">
         <Container maxWidth="xl">
@@ -76,33 +93,19 @@ export const AppHeader: React.FC = () => {
                         ))}
                     </Box>
                     <Box sx={{ flexGrow: 0}} >
-                        <Tooltip title="Open Settings">
-                            <IconButton onClick={() => alert("click user icon")} sx={{ p: 0}}>
+                        <Tooltip title={enabled ? "Sound on" : "Sound off"}>
+                            <IconButton
+                                onClick={handleSoundToggle}
+                                sx={{ mr: 1, color: "white" }}
+                            >
+                                {enabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Profile">
+                            <IconButton component={Link} href="/profile" sx={{ p: 0}}>
                                 <Avatar alt="Remy Sharp" src="temp_user_icon.png" />
                             </IconButton>
                         </Tooltip>
-                        <Menu
-                            sx={{ mt: '45px'}}
-                            id="menu-appbar"
-                            anchorEl={anchorELlUser}
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right'
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right'
-                            }}
-                            open={Boolean(anchorELlUser)}
-                            onClose={() => setAnchorElUser(null)}
-                        >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={() => setAnchorElUser(null)}>
-                                    <Typography textAlign="center">{setting}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
                     </Box>
             </Toolbar>
         </Container>
