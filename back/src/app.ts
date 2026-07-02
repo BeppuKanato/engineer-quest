@@ -16,6 +16,7 @@ import historyRouter from './router/history.router';
 import homeRouter from './router/home.router';
 import profileRouter from './router/profile.router';
 import questBoardRouter from './router/questBoard.router';
+import missionRewardRouter from './router/missionReward.router';
 import { errorHandler } from './middleware/errorHandler';
 // import shareRouter from './router/shareRouter';
 
@@ -51,6 +52,7 @@ app.use('/api/badges', badgeRouter);
 app.use('/api/collection', collectionRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/quest-board', questBoardRouter);
+app.use('/api/mission-rewards', missionRewardRouter);
 app.use('/api', createMissionRouter);
 
 app.use(errorHandler)

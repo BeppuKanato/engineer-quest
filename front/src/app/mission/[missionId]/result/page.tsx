@@ -33,11 +33,18 @@ export default function MissionResultPage() {
     }
 
     try {
-      setResult(JSON.parse(storedResult) as CompleteMissionResponse);
+      const parsedResult = JSON.parse(storedResult) as CompleteMissionResponse;
+
+      if (parsedResult.nextPath) {
+        router.replace(parsedResult.nextPath);
+        return;
+      }
+
+      setResult(parsedResult);
     } catch {
       setResult(null);
     }
-  }, [missionId]);
+  }, [missionId, router]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

@@ -32,6 +32,7 @@ model User {
   questPosts           QuestPost[]
   questComments        QuestComment[]
   questReactions       QuestReaction[]
+  missionRewardRuns    MissionRewardRun[]
 
   activityAnswerLogs ActivityAnswerLog[]
 
@@ -133,6 +134,7 @@ model Mission {
   createMissions CreateMission[]
   works UserWork[]
   questPosts QuestPost[]
+  rewardRuns MissionRewardRun[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -380,6 +382,36 @@ model BadgeTicketTransaction {
   @@index([userId])
   @@index([reason])
   @@index([sourceId])
+}
+
+// =========================
+// Mission Reward Flow
+// =========================
+
+model MissionRewardRun {
+  id String @id @default(cuid())
+
+  userId String
+  missionId String
+
+  candidateKnowledgeCardIds String[] @default([])
+  selectedKnowledgeCardId String?
+  knowledgeCardSelectedAt DateTime?
+
+  unlockedAchievementIds String[] @default([])
+
+  awardedExp Int @default(0)
+  awardedBadgeTickets Int @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([missionId])
+  @@index([createdAt])
 }
 
 // =========================

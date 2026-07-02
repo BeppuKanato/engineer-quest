@@ -1,0 +1,193 @@
+import { KnowledgeCardRarity, type Prisma } from "@prisma/client";
+
+const course1Id = "course-web-overview";
+
+export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
+  {
+    id: "card-browser",
+    courseId: course1Id,
+    label: "Browser",
+    title: "ブラウザ",
+    description:
+      "Webページを取得し、HTMLなどを読み取って画面に表示するアプリケーションです。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 10,
+    isPublished: true,
+  },
+  {
+    id: "card-server",
+    courseId: course1Id,
+    label: "Server",
+    title: "サーバ",
+    description:
+      "ブラウザからのリクエストを受け取り、HTMLやデータなどのレスポンスを返す役割を持ちます。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 20,
+    isPublished: true,
+  },
+  {
+    id: "card-html",
+    courseId: course1Id,
+    label: "HTML",
+    title: "HTML",
+    description:
+      "Webページの見出し、文章、リンク、入力欄などの構造を表すための言語です。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 30,
+    isPublished: true,
+  },
+  {
+    id: "card-request",
+    courseId: course1Id,
+    label: "Request",
+    title: "リクエスト",
+    description:
+      "ブラウザなどのクライアントが、サーバに対してページやデータを求める通信です。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 40,
+    isPublished: true,
+  },
+  {
+    id: "card-response",
+    courseId: course1Id,
+    label: "Response",
+    title: "レスポンス",
+    description:
+      "サーバがリクエストに対して返す返事です。HTML、JSON、エラーなどが返ることがあります。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 50,
+    isPublished: true,
+  },
+  {
+    id: "card-frontend",
+    courseId: course1Id,
+    label: "Frontend",
+    title: "フロントエンド",
+    description:
+      "ユーザーが見る画面や操作に近い部分です。HTMLやCSSなどが関係します。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 60,
+    isPublished: true,
+  },
+  {
+    id: "card-backend",
+    courseId: course1Id,
+    label: "Backend",
+    title: "バックエンド",
+    description:
+      "画面の裏側で、入力の受け取り、処理、保存などを行う部分です。",
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 70,
+    isPublished: true,
+  },
+  {
+    id: "card-localhost",
+    courseId: course1Id,
+    label: "localhost",
+    title: "localhost",
+    description:
+      "自分のPC自身を指す名前です。開発中のWebアプリを自分のPCで確認するときによく使います。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 80,
+    isPublished: true,
+  },
+  {
+    id: "card-http-method",
+    courseId: course1Id,
+    label: "GET / POST",
+    title: "GETとPOST",
+    description:
+      "GETはページや情報の取得、POSTはフォーム入力などの送信でよく使われるHTTPメソッドです。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 90,
+    isPublished: true,
+  },
+  {
+    id: "card-json",
+    courseId: course1Id,
+    label: "JSON",
+    title: "JSON",
+    description:
+      "データをやり取りするための形式です。APIのレスポンスなどでよく使われます。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 100,
+    isPublished: true,
+  },
+  {
+    id: "card-database",
+    courseId: course1Id,
+    label: "Database",
+    title: "データベース",
+    description:
+      "予約情報や投稿内容など、あとから使いたいデータを保存する仕組みです。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 110,
+    isPublished: true,
+  },
+  {
+    id: "card-api",
+    courseId: course1Id,
+    label: "API",
+    title: "API",
+    description:
+      "アプリやサービス同士がデータや機能をやり取りするための入口です。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 120,
+    isPublished: true,
+  },
+  {
+    id: "card-dev-environment",
+    courseId: course1Id,
+    label: "Development",
+    title: "開発環境",
+    description:
+      "アプリを作りながら動作確認するための環境です。公開前に試す場所として使います。",
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 130,
+    isPublished: true,
+  },
+  {
+    id: "card-status-code",
+    courseId: course1Id,
+    label: "Status Code",
+    title: "ステータスコード",
+    description:
+      "レスポンスの結果を表す番号です。200は成功、404はページが見つからない、500はサーバ側のエラーを表すことがあります。",
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 140,
+    isPublished: true,
+  },
+  {
+    id: "card-devtools",
+    courseId: course1Id,
+    label: "DevTools",
+    title: "開発者ツール",
+    description:
+      "ブラウザに搭載されている開発用の機能です。HTML、CSS、通信、エラーなどを確認できます。",
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 150,
+    isPublished: true,
+  },
+  {
+    id: "card-web-flow",
+    courseId: course1Id,
+    label: "Web Flow",
+    title: "Webページ表示の流れ",
+    description:
+      "URL入力、リクエスト、サーバ処理、レスポンス、ブラウザ表示という一連の流れです。",
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 160,
+    isPublished: true,
+  },
+  {
+    id: "card-troubleshooting",
+    courseId: course1Id,
+    label: "Troubleshooting",
+    title: "トラブルシューティング",
+    description:
+      "ページが表示されない、CSSが効かない、入力が反映されないなどの問題を、原因の場所ごとに切り分けて確認する考え方です。",
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 170,
+    isPublished: true,
+  },
+];

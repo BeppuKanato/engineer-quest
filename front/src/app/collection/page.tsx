@@ -28,6 +28,7 @@ import {
   type CollectionAchievement,
 } from "@/api/collection.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
 
 const rarityColor = {
@@ -82,23 +83,13 @@ const BadgeCard = ({ badge }: { badge: CollectionBadgeItem }) => {
     >
       <Stack spacing={1.5}>
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Box
-            sx={{
-              width: 54,
-              height: 54,
-              borderRadius: 2,
-              display: "grid",
-              placeItems: "center",
-              bgcolor: "#fff",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            {badge.isOwned ? (
-              <Box component="img" src={badge.iconUrl} alt={badge.name} sx={{ width: 32, height: 32 }} />
-            ) : (
-              <LockIcon sx={{ color: "#94a3b8" }} />
-            )}
-          </Box>
+          <TechBadgeIcon
+            name={badge.name}
+            iconUrl={badge.iconUrl}
+            isLocked={!badge.isOwned}
+            size={54}
+            iconSize={32}
+          />
           <Box>
             <Typography fontWeight={900}>{badge.name}</Typography>
             <Chip label={badge.rarity} size="small" sx={{ color: style.color, bgcolor: style.bgcolor, fontWeight: 900 }} />

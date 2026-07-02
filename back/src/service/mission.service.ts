@@ -11,7 +11,7 @@ import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 import { evaluateAchievementsForUser } from "./achievement.service";
 import { awardBadgeTickets } from "./badge.service";
-import { getKnowledgeCardChoicesForMission } from "./knowledgeCard.service";
+import { getKnowledgeCardCandidateIdsForMission } from "./knowledgeCard.service";
 
 type ApiDifficulty = "easy" | "normal" | "hard";
 type ApiProgressStatus = "completed" | "in_progress" | "not_started";
@@ -1144,12 +1144,34 @@ export const completeMissionService = async ({
 
     return rewards;
   });
-  const knowledgeCardChoices = await getKnowledgeCardChoicesForMission(
+  const candidateKnowledgeCardIds = await getKnowledgeCardCandidateIdsForMission(
     user.id,
     mission.courseId
   );
+  const awardedBadgeTickets = badgeTicketRewards.reduce(
+    (sum, reward) => sum + Math.max(0, reward.amount),
+    0
+  );
+  const rewardRun = await prisma.missionRewardRun.create({
+    data: {
+      userId: user.id,
+      missionId: mission.id,
+      candidateKnowledgeCardIds,
+      unlockedAchievementIds: unlockedAchievements.map((achievement) => achievement.id),
+      awardedExp: experienceUpdate.gainedExp,
+      awardedBadgeTickets,
+    },
+    select: {
+      id: true,
+    },
+  });
 
   return {
+    rewardRunId: rewardRun.id,
+    nextPath:
+      candidateKnowledgeCardIds.length > 0
+        ? `/mission-rewards/${rewardRun.id}/cards`
+        : `/mission-rewards/${rewardRun.id}/achievements`,
     mission: {
       id: mission.id,
       courseId: mission.courseId,
@@ -1160,7 +1182,7 @@ export const completeMissionService = async ({
     experienceUpdate,
     badgeTicketRewards,
     unlockedAchievements,
-    knowledgeCardChoices,
+    knowledgeCardChoices: [],
     nextMission,
     unlockedChallenges,
   };

@@ -57,6 +57,20 @@ export const getKnowledgeCardChoicesForMission = async (
   return shuffle(candidates).slice(0, limit).map(toKnowledgeCardSummary);
 };
 
+export const getKnowledgeCardCandidateIdsForMission = async (
+  userId: string,
+  courseId: string,
+  limit = 3
+): Promise<string[]> => {
+  const choices = await getKnowledgeCardChoicesForMission(userId, courseId, limit);
+
+  return choices.map((choice) => choice.id);
+};
+
+export const toKnowledgeCardSummaries = (
+  cards: Pick<KnowledgeCard, "id" | "label" | "title" | "description" | "rarity">[]
+) => cards.map(toKnowledgeCardSummary);
+
 export const collectKnowledgeCardByFirebaseUid = async ({
   firebaseUid,
   missionId,

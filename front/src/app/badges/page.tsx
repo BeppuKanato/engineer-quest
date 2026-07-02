@@ -2,7 +2,6 @@
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import LockIcon from "@mui/icons-material/Lock";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
   Alert,
@@ -33,6 +32,7 @@ import {
 } from "@/api/badges.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { useSoundEffect } from "@/app/component/soundFeedback";
+import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
 
 const rarityStyle: Record<
@@ -69,38 +69,6 @@ const rarityStyle: Record<
   },
 };
 
-const BadgeIcon = ({
-  badge,
-  isOwned,
-}: {
-  badge: Pick<BadgeCollectionItem, "name" | "iconUrl">;
-  isOwned: boolean;
-}) => (
-  <Box
-    sx={{
-      width: 56,
-      height: 56,
-      borderRadius: 2,
-      display: "grid",
-      placeItems: "center",
-      bgcolor: isOwned ? "#ffffff" : "#f1f5f9",
-      border: "1px solid #e2e8f0",
-      flexShrink: 0,
-    }}
-  >
-    {isOwned ? (
-      <Box
-        component="img"
-        src={badge.iconUrl}
-        alt={badge.name}
-        sx={{ width: 34, height: 34, objectFit: "contain" }}
-      />
-    ) : (
-      <LockIcon sx={{ color: "#94a3b8" }} />
-    )}
-  </Box>
-);
-
 const BadgeCard = ({
   badge,
   onSelect,
@@ -126,7 +94,11 @@ const BadgeCard = ({
     >
       <Stack spacing={1.5} sx={{ height: "100%" }}>
         <Stack direction="row" spacing={1.5} alignItems="flex-start">
-          <BadgeIcon badge={badge} isOwned={badge.isOwned} />
+          <TechBadgeIcon
+            name={badge.name}
+            iconUrl={badge.iconUrl}
+            isLocked={!badge.isOwned}
+          />
           <Box sx={{ minWidth: 0 }}>
             <Typography fontWeight={900} sx={{ wordBreak: "break-word" }}>
               {badge.name}
@@ -434,11 +406,11 @@ export default function BadgesPage() {
                           boxShadow: rarityStyle[drawnBadge.rarity].glow,
                         }}
                       >
-                        <Box
-                          component="img"
-                          src={drawnBadge.iconUrl}
-                          alt={drawnBadge.name}
-                          sx={{ width: 74, height: 74, objectFit: "contain" }}
+                        <TechBadgeIcon
+                          name={drawnBadge.name}
+                          iconUrl={drawnBadge.iconUrl}
+                          size={92}
+                          iconSize={58}
                         />
                       </Box>
                       <Box>

@@ -29,6 +29,7 @@ import {
 } from "@/api/profile.api";
 import type { TechIconBadge } from "@/api/badges.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
 
 const historyMeta: Record<
@@ -328,29 +329,29 @@ export default function ProfilePage() {
                   alignItems={{ xs: "flex-start", sm: "center" }}
                 >
                   <Stack direction="row" spacing={1.5} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 2,
-                        display: "grid",
-                        placeItems: "center",
-                        bgcolor: "#ecfeff",
-                        border: "1px solid #cffafe",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {selectedBadge ? (
-                        <Box
-                          component="img"
-                          src={selectedBadge.iconUrl}
-                          alt={selectedBadge.name}
-                          sx={{ width: 30, height: 30, objectFit: "contain" }}
-                        />
-                      ) : (
+                    {selectedBadge ? (
+                      <TechBadgeIcon
+                        name={selectedBadge.name}
+                        iconUrl={selectedBadge.iconUrl}
+                        size={48}
+                        iconSize={30}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          display: "grid",
+                          placeItems: "center",
+                          bgcolor: "#ecfeff",
+                          border: "1px solid #cffafe",
+                          flexShrink: 0,
+                        }}
+                      >
                         <WorkspacePremiumIcon sx={{ color: "#0891b2" }} />
-                      )}
-                    </Box>
+                      </Box>
+                    )}
                     <Box>
                       <Typography fontWeight={900}>
                         {selectedBadge ? selectedBadge.name : "Profile Badge未設定"}

@@ -151,6 +151,8 @@ export type BadgeTicketReward = {
 };
 
 export type CompleteMissionResponse = {
+  rewardRunId: string;
+  nextPath: string;
   mission: {
     id: string;
     courseId: string;

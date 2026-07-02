@@ -2,7 +2,6 @@ import { Router } from "express";
 
 import {
   answerMissionActivityController,
-  collectMissionKnowledgeCardController,
   completeMissionActivityController,
   completeMissionController,
   getMissionOverviewController,
@@ -29,11 +28,5 @@ router.post(
 );
 
 router.post("/:missionId/complete", verifyFirebaseToken, completeMissionController);
-
-router.post(
-  "/:missionId/knowledge-cards/collect",
-  verifyFirebaseToken,
-  collectMissionKnowledgeCardController
-);
 
 export default router;

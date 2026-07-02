@@ -670,7 +670,7 @@ export default function MissionPlayPage() {
         JSON.stringify(missionResult)
       );
       startNavigation(() => {
-        router.push(`/mission/${encodeURIComponent(mission.id)}/result`);
+        router.push(missionResult.nextPath);
       });
     } catch (error) {
       console.error(error);
