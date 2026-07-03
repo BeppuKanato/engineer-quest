@@ -10,7 +10,7 @@ export type Mission = {
   href: string;
 };
 
-export type MissionTab = "resume" | "recommended"
+export type MissionTab = "today" | "achievement"
 
 export type Status = "complete" | "incomplete";
 

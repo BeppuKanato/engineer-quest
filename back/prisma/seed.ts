@@ -4,6 +4,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 import { achievementSeed } from "./seedData/achievementSeed";
 import { badgeSeed } from "./seedData/badgeSeed";
+import { createThemeSeed } from "./seedData/createThemeSeed";
 import { knowledgeCardSeed } from "./seedData/knowledgeCardSeed";
 import { learningSeed } from "./seedData/learningSeed";
 
@@ -206,6 +207,60 @@ async function seedKnowledgeCards() {
   }
 }
 
+async function seedCreateThemes() {
+  for (const [index, theme] of createThemeSeed.entries()) {
+    await prisma.createTheme.upsert({
+      where: { id: theme.id },
+      update: {
+        title: theme.title,
+        description: theme.description,
+        category: theme.category,
+        difficulty: theme.difficulty,
+        estimatedMinutes: theme.estimatedMinutes,
+        tags: [...theme.tags],
+        defaultThumbnailUrl: theme.defaultThumbnailUrl,
+        sortOrder: index + 1,
+        isPublished: true,
+      },
+      create: {
+        id: theme.id,
+        title: theme.title,
+        description: theme.description,
+        category: theme.category,
+        difficulty: theme.difficulty,
+        estimatedMinutes: theme.estimatedMinutes,
+        tags: [...theme.tags],
+        defaultThumbnailUrl: theme.defaultThumbnailUrl,
+        sortOrder: index + 1,
+        isPublished: true,
+      },
+    });
+
+    await prisma.createThemeRequirement.deleteMany({ where: { themeId: theme.id } });
+    await prisma.createThemeChallenge.deleteMany({ where: { themeId: theme.id } });
+
+    for (const [requirementIndex, label] of theme.requirements.entries()) {
+      await prisma.createThemeRequirement.create({
+        data: {
+          themeId: theme.id,
+          label,
+          order: requirementIndex + 1,
+        },
+      });
+    }
+
+    for (const [challengeIndex, label] of theme.challenges.entries()) {
+      await prisma.createThemeChallenge.create({
+        data: {
+          themeId: theme.id,
+          label,
+          order: challengeIndex + 1,
+        },
+      });
+    }
+  }
+}
+
 async function main() {
   console.log("Start seeding...");
 
@@ -213,6 +268,7 @@ async function main() {
   await seedAchievements();
   await seedTechIconBadges();
   await seedKnowledgeCards();
+  await seedCreateThemes();
 
   console.log("Seeding finished.");
 }

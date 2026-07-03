@@ -11,6 +11,7 @@ import missionRouter from './router/mission.router';
 import achievementRouter from './router/achievement.router';
 import badgeRouter from './router/badge.router';
 import collectionRouter from './router/collection.router';
+import createThemeRouter from './router/createTheme.router';
 import createMissionRouter from './router/createMission.router';
 import historyRouter from './router/history.router';
 import homeRouter from './router/home.router';
@@ -53,6 +54,7 @@ app.use('/api/collection', collectionRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/quest-board', questBoardRouter);
 app.use('/api/mission-rewards', missionRewardRouter);
+app.use('/api', createThemeRouter);
 app.use('/api', createMissionRouter);
 
 app.use(errorHandler)

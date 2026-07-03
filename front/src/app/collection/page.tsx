@@ -1,193 +1,78 @@
 "use client";
 
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import LockIcon from "@mui/icons-material/Lock";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import FlagIcon from "@mui/icons-material/Flag";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import {
-  Alert,
-  Box,
-  Chip,
-  Container,
-  Grid,
-  LinearProgress,
-  Paper,
-  Skeleton,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import {
   getCollection,
-  type CollectionBadgeItem,
-  type CollectionKnowledgeTip,
   type CollectionResponse,
-  type CollectionAchievement,
 } from "@/api/collection.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
 
-const rarityColor = {
-  COMMON: { color: "#334155", bgcolor: "#f1f5f9", border: "#cbd5e1" },
-  RARE: { color: "#1d4ed8", bgcolor: "#dbeafe", border: "#93c5fd" },
-  EPIC: { color: "#7e22ce", bgcolor: "#f3e8ff", border: "#d8b4fe" },
-  LEGENDARY: { color: "#b45309", bgcolor: "#fef3c7", border: "#f59e0b" },
+type RecentItem = {
+  id: string;
+  title: string;
+  type: "badge" | "knowledge" | "achievement";
+  acquiredAt: string;
+  icon: ReactNode;
 };
 
-const ProgressHeader = ({
-  label,
-  current,
-  total,
-}: {
-  label: string;
-  current: number;
-  total: number;
-}) => {
-  const progress = total === 0 ? 0 : Math.round((current / total) * 100);
+const formatDateTime = (value: string) =>
+  new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 
-  return (
-    <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2, border: "1px solid #e2e8f0" }}>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="space-between">
-        <Box>
-          <Typography fontWeight={900}>{label}</Typography>
-          <Typography color="text.secondary" variant="body2">
-            {current} / {total}
-          </Typography>
-        </Box>
-        <Box sx={{ minWidth: { xs: "100%", sm: 260 } }}>
-          <LinearProgress variant="determinate" value={progress} sx={{ height: 10, borderRadius: 999 }} />
-        </Box>
-      </Stack>
-    </Paper>
-  );
+const buildRecentItems = (collection: CollectionResponse): RecentItem[] => {
+  const badges: RecentItem[] = collection.badges.items
+    .filter((badge) => badge.isOwned && badge.acquiredAt)
+    .map((badge) => ({
+      id: `badge-${badge.id}`,
+      title: badge.name,
+      type: "badge",
+      acquiredAt: badge.acquiredAt!,
+      icon: <TechBadgeIcon name={badge.name} iconUrl={badge.iconUrl} isLocked={false} size={28} iconSize={18} />,
+    }));
+
+  const knowledge: RecentItem[] = collection.knowledgeTips.items
+    .filter((tip) => tip.isCollected && tip.collectedAt)
+    .map((tip) => ({
+      id: `knowledge-${tip.id}`,
+      title: tip.title,
+      type: "knowledge",
+      acquiredAt: tip.collectedAt!,
+      icon: <MenuBookIcon sx={{ color: "#7e22ce" }} />,
+    }));
+
+  const achievements: RecentItem[] = collection.achievements.items
+    .filter((achievement) => achievement.status === "achieved" && achievement.achievedAt)
+    .map((achievement) => ({
+      id: `achievement-${achievement.id}`,
+      title: achievement.title,
+      type: "achievement",
+      acquiredAt: achievement.achievedAt!,
+      icon: <FlagIcon sx={{ color: "#0052d9" }} />,
+    }));
+
+  return [...badges, ...knowledge, ...achievements]
+    .sort((a, b) => new Date(b.acquiredAt).getTime() - new Date(a.acquiredAt).getTime())
+    .slice(0, 8);
 };
-
-const BadgeCard = ({ badge }: { badge: CollectionBadgeItem }) => {
-  const style = rarityColor[badge.rarity];
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        border: `1px solid ${badge.isOwned ? style.border : "#e2e8f0"}`,
-        bgcolor: badge.isOwned ? "#fff" : "#f8fafc",
-        opacity: badge.isOwned ? 1 : 0.7,
-        minHeight: 174,
-      }}
-    >
-      <Stack spacing={1.5}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <TechBadgeIcon
-            name={badge.name}
-            iconUrl={badge.iconUrl}
-            isLocked={!badge.isOwned}
-            size={54}
-            iconSize={32}
-          />
-          <Box>
-            <Typography fontWeight={900}>{badge.name}</Typography>
-            <Chip label={badge.rarity} size="small" sx={{ color: style.color, bgcolor: style.bgcolor, fontWeight: 900 }} />
-          </Box>
-        </Stack>
-        <Typography variant="body2" color="text.secondary">
-          {badge.description}
-        </Typography>
-      </Stack>
-    </Paper>
-  );
-};
-
-const KnowledgeCard = ({ tip }: { tip: CollectionKnowledgeTip }) => {
-  const style = rarityColor[tip.rarity];
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        border: `1px solid ${tip.isCollected ? style.border : "#e2e8f0"}`,
-        bgcolor: tip.isCollected ? "#fff" : "#f8fafc",
-        opacity: tip.isCollected ? 1 : 0.72,
-        minHeight: 180,
-      }}
-    >
-      <Stack spacing={1.25}>
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          <Chip label={tip.courseTitle} size="small" sx={{ fontWeight: 900 }} />
-          <Chip label={tip.rarity} size="small" sx={{ color: style.color, bgcolor: style.bgcolor, fontWeight: 900 }} />
-        </Stack>
-        <Typography variant="h6" fontWeight={900}>
-          {tip.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-          {tip.description}
-        </Typography>
-      </Stack>
-    </Paper>
-  );
-};
-
-const AchievementCard = ({ achievement }: { achievement: CollectionAchievement }) => {
-  const achieved = achievement.status === "achieved";
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        border: "1px solid #e2e8f0",
-        bgcolor: achieved ? "#fff" : "#f8fafc",
-        opacity: achievement.status === "secret_locked" ? 0.72 : 1,
-        minHeight: 180,
-      }}
-    >
-      <Stack spacing={1.25}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          <Chip
-            icon={achieved ? <EmojiEventsIcon /> : <LockIcon />}
-            label={achieved ? "Achieved" : achievement.status === "secret_locked" ? "Secret" : "Locked"}
-            size="small"
-            color={achieved ? "success" : "default"}
-            sx={{ fontWeight: 900 }}
-          />
-          <Chip label={achievement.categoryLabel} size="small" />
-        </Stack>
-        <Typography variant="h6" fontWeight={900}>
-          {achievement.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-          {achievement.description}
-        </Typography>
-        {achievement.conditionLabel && (
-          <Typography variant="caption" color="text.secondary">
-            条件: {achievement.conditionLabel}
-          </Typography>
-        )}
-      </Stack>
-    </Paper>
-  );
-};
-
-const LoadingSkeleton = () => (
-  <Grid container spacing={2}>
-    {[0, 1, 2, 3, 4, 5].map((index) => (
-      <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
-        <Skeleton variant="rounded" height={180} sx={{ borderRadius: 2 }} />
-      </Grid>
-    ))}
-  </Grid>
-);
 
 export default function CollectionPage() {
-  const [activeTab, setActiveTab] = useState<"badges" | "tips" | "achievements">("badges");
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -215,7 +100,7 @@ export default function CollectionPage() {
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
-        setErrorMessage("Collectionを取得できませんでした。");
+        setErrorMessage("コレクションを取得できませんでした。");
       } finally {
         if (!isMounted) return;
         setIsLoading(false);
@@ -228,88 +113,61 @@ export default function CollectionPage() {
     };
   }, []);
 
+  const recentItems = useMemo(
+    () => (collection ? buildRecentItems(collection) : []),
+    [collection]
+  );
+
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
-      <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
+      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 5 } }}>
         <Stack spacing={3}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
-            <Stack spacing={2}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 2,
-                    display: "grid",
-                    placeItems: "center",
-                    bgcolor: "#ecfeff",
-                    color: "#0891b2",
-                  }}
-                >
-                  <WorkspacePremiumIcon />
-                </Box>
-                <Box>
-                  <Typography variant="h4" fontWeight={900}>
-                    Collection
-                  </Typography>
-                  <Typography color="text.secondary">
-                    獲得したBadge、Knowledge Tip、Achievementをまとめて確認できます。
-                  </Typography>
-                </Box>
-              </Stack>
-              <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-                <Tab value="badges" label="Tech Badges" />
-                <Tab value="tips" label="Knowledge Tips" />
-                <Tab value="achievements" label="Achievements" />
-              </Tabs>
-            </Stack>
-          </Paper>
+          <Box>
+            <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 56 }, letterSpacing: 0 }}>
+              コレクション
+            </Typography>
+            <Typography color="text.secondary" sx={{ mt: 1, fontSize: 18 }}>
+              獲得した報酬や記録をまとめて確認できます。
+            </Typography>
+          </Box>
 
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
           {isLoading || !collection ? (
-            <LoadingSkeleton />
+            <CollectionSkeleton />
           ) : (
             <>
-              {activeTab === "badges" && (
-                <Stack spacing={2}>
-                  <ProgressHeader label="Tech Icon Badge" current={collection.badges.ownedCount} total={collection.badges.totalCount} />
-                  <Grid container spacing={2}>
-                    {collection.badges.items.map((badge) => (
-                      <Grid key={badge.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <BadgeCard badge={badge} />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Stack>
-              )}
+              <SummaryStrip collection={collection} />
 
-              {activeTab === "tips" && (
-                <Stack spacing={2}>
-                  <ProgressHeader label="Knowledge Tips" current={collection.knowledgeTips.collectedCount} total={collection.knowledgeTips.totalCount} />
-                  <Grid container spacing={2}>
-                    {collection.knowledgeTips.items.map((tip) => (
-                      <Grid key={tip.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <KnowledgeCard tip={tip} />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Stack>
-              )}
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "repeat(3, 1fr)" }, gap: 3 }}>
+                <FeatureCard
+                  tone="teal"
+                  icon={<WorkspacePremiumIcon sx={{ fontSize: 74 }} />}
+                  title="バッジコレクション"
+                  description="バッジチケットを使って集めたTech Icon Badgeを確認できます。"
+                  stat={`${collection.badges.ownedCount} 個 所持`}
+                  href="/badges"
+                />
+                <FeatureCard
+                  tone="purple"
+                  icon={<MenuBookIcon sx={{ fontSize: 74 }} />}
+                  title="知識カード"
+                  description="ミッション完了時に発見した知識カードを確認できます。"
+                  stat={`${collection.knowledgeTips.collectedCount} 枚 所持`}
+                  href="/knowledge-cards"
+                />
+                <FeatureCard
+                  tone="blue"
+                  icon={<FlagIcon sx={{ fontSize: 74 }} />}
+                  title="実績"
+                  description="条件を達成して解除された実績を確認できます。"
+                  stat={`${collection.achievements.achievedCount} 件 達成`}
+                  href="/achievements"
+                />
+              </Box>
 
-              {activeTab === "achievements" && (
-                <Stack spacing={2}>
-                  <ProgressHeader label="Achievements" current={collection.achievements.achievedCount} total={collection.achievements.totalCount} />
-                  <Grid container spacing={2}>
-                    {collection.achievements.items.map((achievement) => (
-                      <Grid key={achievement.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <AchievementCard achievement={achievement} />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Stack>
-              )}
+              <RecentSection items={recentItems} />
             </>
           )}
         </Stack>
@@ -317,3 +175,164 @@ export default function CollectionPage() {
     </Box>
   );
 }
+
+const CollectionSkeleton = () => (
+  <Stack spacing={3}>
+    <Skeleton variant="rounded" height={118} sx={{ borderRadius: 3 }} />
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "repeat(3, 1fr)" }, gap: 3 }}>
+      {[0, 1, 2].map((index) => (
+        <Skeleton key={index} variant="rounded" height={230} sx={{ borderRadius: 3 }} />
+      ))}
+    </Box>
+    <Skeleton variant="rounded" height={260} sx={{ borderRadius: 3 }} />
+  </Stack>
+);
+
+const SummaryStrip = ({ collection }: { collection: CollectionResponse }) => (
+  <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff", boxShadow: "0 18px 44px rgba(15, 23, 42, 0.06)" }}>
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: { xs: 2, md: 0 } }}>
+      <SummaryMetric icon={<WorkspacePremiumIcon />} label="バッジ" value={collection.badges.ownedCount} suffix="個" tone="#0f9a9a" />
+      <SummaryMetric icon={<MenuBookIcon />} label="知識カード" value={collection.knowledgeTips.collectedCount} suffix="枚" tone="#7e22ce" />
+      <SummaryMetric icon={<FlagIcon />} label="実績" value={collection.achievements.achievedCount} suffix="件" tone="#0052d9" />
+      <SummaryMetric icon={<ConfirmationNumberIcon />} label="バッジチケット" value={collection.badges.ticketBalance} suffix="枚" tone="#f59e0b" />
+    </Box>
+  </Paper>
+);
+
+const SummaryMetric = ({
+  icon,
+  label,
+  value,
+  suffix,
+  tone,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: number;
+  suffix: string;
+  tone: string;
+}) => (
+  <Stack
+    direction="row"
+    spacing={2}
+    alignItems="center"
+    sx={{
+      px: { md: 3 },
+      py: 1,
+      borderRight: { md: "1px solid #e2e8f0" },
+      "&:last-of-type": { borderRight: 0 },
+    }}
+  >
+    <Box sx={{ width: 70, height: 70, borderRadius: "50%", display: "grid", placeItems: "center", color: tone, bgcolor: `${tone}18`, flexShrink: 0 }}>
+      {icon}
+    </Box>
+    <Box>
+      <Typography fontWeight={900}>{label}</Typography>
+      <Stack direction="row" spacing={1} alignItems="baseline">
+        <Typography variant="h3" fontWeight={900} sx={{ color: "#050505", lineHeight: 1.05 }}>
+          {value}
+        </Typography>
+        <Typography fontWeight={900}>{suffix}</Typography>
+      </Stack>
+    </Box>
+  </Stack>
+);
+
+const FeatureCard = ({
+  tone,
+  icon,
+  title,
+  description,
+  stat,
+  href,
+}: {
+  tone: "teal" | "purple" | "blue";
+  icon: ReactNode;
+  title: string;
+  description: string;
+  stat: string;
+  href: string;
+}) => {
+  const styles = {
+    teal: { color: "#0f9a9a", bg: "#e6fffb", border: "#0f9a9a" },
+    purple: { color: "#7e22ce", bg: "#f3e8ff", border: "#7e22ce" },
+    blue: { color: "#0052d9", bg: "#eaf2ff", border: "#0052d9" },
+  }[tone];
+
+  return (
+    <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, minHeight: 266, display: "flex", flexDirection: "column", borderRadius: 3, border: "1px solid #dbe3ef", borderLeft: `5px solid ${styles.border}`, bgcolor: "#fff", boxShadow: "0 18px 44px rgba(15, 23, 42, 0.08)" }}>
+      <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 2 }}>
+        <Box sx={{ width: 118, height: 118, borderRadius: "50%", display: "grid", placeItems: "center", color: styles.color, bgcolor: styles.bg, flexShrink: 0 }}>
+          {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h4" fontWeight={900} sx={{ fontSize: { xs: 26, md: 32 } }}>{title}</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.8, fontSize: 17 }}>{description}</Typography>
+          <Chip label={stat} sx={{ mt: 2, px: 1.5, fontWeight: 900, color: styles.color, bgcolor: styles.bg }} />
+        </Box>
+      </Stack>
+      <Button
+        component={Link}
+        href={href}
+        fullWidth
+        variant="contained"
+        endIcon={<ArrowForwardIosIcon />}
+        sx={{ mt: "auto", minHeight: 52, borderRadius: 2, fontWeight: 900, fontSize: 18 }}
+      >
+        一覧を見る
+      </Button>
+    </Paper>
+  );
+};
+
+const RecentSection = ({ items }: { items: RecentItem[] }) => (
+  <Box>
+    <Typography variant="h4" fontWeight={900} sx={{ mb: 1.5 }}>
+      最近獲得した{items.length}件
+    </Typography>
+    {items.length === 0 ? (
+      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff" }}>
+        <Typography color="text.secondary">まだ獲得した報酬はありません。</Typography>
+      </Paper>
+    ) : (
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 2 }}>
+        {[items.slice(0, 4), items.slice(4, 8)].map((group, groupIndex) => (
+          <Paper key={groupIndex} elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff", boxShadow: "0 14px 34px rgba(15, 23, 42, 0.05)" }}>
+            <Stack>
+              {group.map((item, index) => (
+                <RecentRow key={item.id} item={item} rank={groupIndex * 4 + index + 1} />
+              ))}
+            </Stack>
+          </Paper>
+        ))}
+      </Box>
+    )}
+  </Box>
+);
+
+const RecentRow = ({ item, rank }: { item: RecentItem; rank: number }) => {
+  const typeLabel = {
+    badge: "バッジ",
+    knowledge: "知識カード",
+    achievement: "実績",
+  }[item.type];
+  const typeColor = {
+    badge: { color: "#0f9a9a", bg: "#e6fffb" },
+    knowledge: { color: "#7e22ce", bg: "#f3e8ff" },
+    achievement: { color: "#0052d9", bg: "#eaf2ff" },
+  }[item.type];
+
+  return (
+    <Stack direction="row" spacing={2} alignItems="center" sx={{ py: 1.25, borderBottom: "1px solid #e2e8f0", "&:last-child": { borderBottom: 0 } }}>
+      <Box sx={{ width: 34, height: 34, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#f1f5f9", fontWeight: 900, flexShrink: 0 }}>
+        {rank}
+      </Box>
+      <Box sx={{ width: 34, display: "grid", placeItems: "center", flexShrink: 0 }}>
+        {item.icon}
+      </Box>
+      <Typography fontWeight={800} sx={{ flex: 1, minWidth: 0 }} noWrap>{item.title}</Typography>
+      <Chip label={typeLabel} size="small" sx={{ fontWeight: 900, color: typeColor.color, bgcolor: typeColor.bg, minWidth: 92 }} />
+      <Typography color="text.secondary" sx={{ width: 150, textAlign: "right" }}>{formatDateTime(item.acquiredAt)}</Typography>
+    </Stack>
+  );
+};

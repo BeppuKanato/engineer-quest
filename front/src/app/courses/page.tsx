@@ -1,5 +1,8 @@
 "use client";
 
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import StarIcon from "@mui/icons-material/Star";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -57,9 +60,7 @@ export default function CoursesPage() {
       } catch (error) {
         if (error instanceof ApiError) {
           if (error.status === 401) {
-            setErrorMessage(
-              "ログインの有効期限が切れました。再ログインしてください。"
-            );
+            setErrorMessage("ログインの有効期限が切れました。再ログインしてください。");
             return;
           }
           if (error.status === 404) {
@@ -67,9 +68,7 @@ export default function CoursesPage() {
             return;
           }
           if (error.status >= 500) {
-            setErrorMessage(
-              "サーバー側でエラーが発生しました。時間をおいて再度お試しください。"
-            );
+            setErrorMessage("サーバー側でエラーが発生しました。時間をおいて再度お試しください。");
             return;
           }
         }
@@ -84,44 +83,31 @@ export default function CoursesPage() {
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
-      const matchesCategory =
-        filter.category === "all" || course.categories.includes(filter.category);
-      const matchesStatus =
-        filter.status === "all" || course.status === filter.status;
-      const matchesDifficulty =
-        filter.difficulty === "all" || course.difficulty === filter.difficulty;
+      const matchesCategory = filter.category === "all" || course.categories.includes(filter.category);
+      const matchesStatus = filter.status === "all" || course.status === filter.status;
+      const matchesDifficulty = filter.difficulty === "all" || course.difficulty === filter.difficulty;
 
       return matchesCategory && matchesStatus && matchesDifficulty;
     });
   }, [courses, filter]);
 
-  return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#F3F6FB" }}>
-      <AppHeader />
-      <PageTransitionOverlay
-        open={showOverlay}
-        message="コースロードマップを準備しています..."
-      />
+  const recommendedCourse = courses.find((course) => course.status === "not_started") ?? courses[0];
+  const continueCourse = courses.find((course) => course.status === "in_progress") ?? courses.find((course) => course.progressRate > 0);
 
-      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 } }}>
-        <Stack spacing={4}>
-          <Box
-            sx={{
-              px: { xs: 0, md: 0.5 },
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              justifyContent: "space-between",
-              gap: 2,
-            }}
-          >
-            <Box>
-              <Typography variant="h4" fontWeight={900} letterSpacing={0}>
-                コース一覧
-              </Typography>
-              <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.8 }}>
-                学びたいテーマや作ってみたいものからコースを選びましょう
-              </Typography>
-            </Box>
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
+      <AppHeader />
+      <PageTransitionOverlay open={showOverlay} message="コースロードマップを準備しています..." />
+
+      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+        <Stack spacing={3}>
+          <Box>
+            <Typography component="h1" sx={{ fontSize: { xs: 34, md: 46 }, fontWeight: 950, letterSpacing: 0, lineHeight: 1.1 }}>
+              コース一覧
+            </Typography>
+            <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.8 }}>
+              エンジニアスキルを身につけるためのコースを選んで学習を進めましょう。
+            </Typography>
           </Box>
 
           <CourseFilter value={filter} onChange={setFilter} />
@@ -129,73 +115,73 @@ export default function CoursesPage() {
           {isLoading ? (
             <CourseSkeleton />
           ) : errorMessage ? (
-            <Box
-              sx={{
-                p: 4,
-                borderRadius: 3,
-                border: "1px solid #fecaca",
-                bgcolor: "#fff7f7",
-                textAlign: "center",
-              }}
-            >
-              <Typography fontWeight={800} color="error">
+            <Box sx={{ p: 4, borderRadius: 3, border: "1px solid #fecaca", bgcolor: "#fff7f7", textAlign: "center" }}>
+              <Typography fontWeight={900} color="error">
                 {errorMessage}
               </Typography>
             </Box>
           ) : (
-            <Stack spacing={2.5}>
-              <Stack direction="row" alignItems="baseline" spacing={1}>
-                <Typography variant="h5" fontWeight={900} letterSpacing={0}>
-                  絞り込み結果
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {filteredCourses.length} 件
-                </Typography>
-              </Stack>
+            <Stack spacing={3}>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 3 }}>
+                {recommendedCourse && (
+                  <Stack spacing={1.25}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <StarIcon sx={{ color: "#f59e0b" }} />
+                      <Typography variant="h5" fontWeight={950}>おすすめ</Typography>
+                    </Stack>
+                    <CourseCard {...recommendedCourse} featured onCourseClick={handleCourseClick} />
+                  </Stack>
+                )}
 
-              {filteredCourses.length > 0 ? (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      md: "repeat(2, minmax(0, 1fr))",
-                      lg: "repeat(3, minmax(0, 1fr))",
-                    },
-                    gap: 3,
-                    alignItems: "stretch",
-                  }}
-                >
-                  {filteredCourses.map((course) => (
-                    <CourseCard
-                      key={course.id}
-                      {...course}
-                      onCourseClick={handleCourseClick}
-                    />
-                  ))}
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    p: 4,
-                    borderRadius: 3,
-                    border: "1px dashed #cbd5e1",
-                    bgcolor: "#f8fafc",
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography fontWeight={800}>
-                    条件に合うコースがありません
+                {continueCourse && (
+                  <Stack spacing={1.25}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <AutoAwesomeIcon sx={{ color: "#f59e0b" }} />
+                      <Typography variant="h5" fontWeight={950}>続きから</Typography>
+                    </Stack>
+                    <CourseCard {...continueCourse} featured onCourseClick={handleCourseClick} />
+                  </Stack>
+                )}
+              </Box>
+
+              <Stack spacing={2.25}>
+                <Stack direction="row" alignItems="baseline" spacing={1}>
+                  <PlayCircleIcon sx={{ color: "#0057e7" }} />
+                  <Typography variant="h5" fontWeight={950} letterSpacing={0}>
+                    すべてのコース
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
+                  <Typography variant="body2" color="text.secondary">
+                    {filteredCourses.length} 件
+                  </Typography>
+                </Stack>
+
+                {filteredCourses.length > 0 ? (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, minmax(0, 1fr))",
+                        lg: "repeat(3, minmax(0, 1fr))",
+                        xl: "repeat(4, minmax(0, 1fr))",
+                      },
+                      gap: 2.5,
+                      alignItems: "stretch",
+                    }}
                   >
-                    フィルター条件を変えて探してみてください。
-                  </Typography>
-                </Box>
-              )}
+                    {filteredCourses.map((course) => (
+                      <CourseCard key={course.id} {...course} onCourseClick={handleCourseClick} />
+                    ))}
+                  </Box>
+                ) : (
+                  <Box sx={{ p: 4, borderRadius: 3, border: "1px dashed #cbd5e1", bgcolor: "#f8fafc", textAlign: "center" }}>
+                    <Typography fontWeight={900}>条件に合うコースがありません</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      フィルター条件を変えて探してみてください。
+                    </Typography>
+                  </Box>
+                )}
+              </Stack>
             </Stack>
           )}
         </Stack>

@@ -1,214 +1,349 @@
-import React from "react";
-import { Mission, MissionTab } from "../type";
-import { Card, Stack, Tab, Tabs, Typography, Box, Grid, Chip, LinearProgress, Button } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import FlagIcon from "@mui/icons-material/Flag";
+import StarsIcon from "@mui/icons-material/Stars";
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  LinearProgress,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import React from "react";
 
-
+import { Mission, MissionTab, TargetAchievement } from "../type";
 
 type MissionHeroCardProps = {
-    mission: Mission;
-    tab: MissionTab;
-    onChangeTab: (value: MissionTab) => void; 
-}
+  mission: Mission | null;
+  recommendedMission: Mission | null;
+  targetAchievement: TargetAchievement | null;
+  todayCompletedMissionCount: number;
+  dailyMissionGoal: number;
+  mascotId: string;
+  tab: MissionTab;
+  onChangeTab: (value: MissionTab) => void;
+};
+
+const getAchievementProgress = (achievement: TargetAchievement | null) => {
+  if (!achievement) return 0;
+
+  const totalGoal = achievement.factor.reduce((sum, item) => sum + item.goal, 0);
+  const totalProgress = achievement.factor.reduce(
+    (sum, item) => sum + Math.min(item.progress, item.goal),
+    0
+  );
+
+  return totalGoal === 0 ? 0 : Math.round((totalProgress / totalGoal) * 100);
+};
+
+const MascotCoach = ({ message, mascotId }: { message: string; mascotId: string }) => {
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        right: { xs: 20, md: 54 },
+        top: { xs: 92, md: 88 },
+        display: { xs: "none", md: "block" },
+        width: 300,
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          ml: "auto",
+          mb: 2,
+          width: 210,
+          p: 2,
+          borderRadius: 3,
+          bgcolor: "rgba(255,255,255,0.92)",
+          color: "#0f172a",
+          fontWeight: 900,
+          lineHeight: 1.55,
+          boxShadow: "0 14px 30px rgba(0,0,0,0.14)",
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            right: 34,
+            bottom: -12,
+            width: 0,
+            height: 0,
+            borderLeft: "12px solid transparent",
+            borderRight: "12px solid transparent",
+            borderTop: "14px solid #fff",
+          },
+        }}
+      >
+        {message}
+      </Box>
+      <Box
+        sx={{
+          width: 178,
+          height: 178,
+          ml: "auto",
+          borderRadius: "50%",
+          overflow: "hidden",
+          border: "6px solid rgba(255,255,255,0.9)",
+          bgcolor: "#fff",
+          boxShadow: "0 22px 48px rgba(0,0,0,0.24)",
+        }}
+      >
+        <Box
+          component="img"
+          src={`/images/mascots/${mascotId}/face.png`}
+          alt="相棒マスコットの顔。学習を応援している表情の画像を想定"
+          sx={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: "scale(1.08)",
+          }}
+        />
+      </Box>
+    </Box>
+  );
+};
 
 export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
-    mission, tab, onChangeTab
+  mission,
+  recommendedMission,
+  targetAchievement,
+  todayCompletedMissionCount,
+  dailyMissionGoal,
+  mascotId,
+  tab,
+  onChangeTab,
 }) => {
-    return(
-        <AnimatePresence mode="wait">
+  const isAchievementTab = tab === "achievement";
+  const achievementProgress = getAchievementProgress(targetAchievement);
+  const heroKey = isAchievementTab ? targetAchievement?.title ?? "empty-achievement" : mission?.id ?? "empty-mission";
+  const todayProgress = dailyMissionGoal === 0 ? 0 : Math.min(100, Math.round((todayCompletedMissionCount / dailyMissionGoal) * 100));
+  const remainingMissionCount = Math.max(0, dailyMissionGoal - todayCompletedMissionCount);
+  const coachMessage = isAchievementTab
+    ? "今日の積み上げが目標達成につながるよ！"
+    : "あと少し！この調子で進めよう！";
+
+  return (
+    <Card
+      sx={{
+        borderRadius: 3,
+        overflow: "hidden",
+        border: "1px solid #dbeafe",
+        boxShadow: "0 18px 44px rgba(0, 72, 180, 0.14)",
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          minHeight: { xs: 500, md: 380 },
+          p: { xs: 3, md: 5 },
+          pr: { xs: 3, md: 40 },
+          color: "#fff",
+          background:
+            "radial-gradient(circle at 80% 18%, rgba(255,255,255,0.18), transparent 26%), linear-gradient(135deg, #0057e7 0%, #0041c4 52%, #003189 100%)",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.42,
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.55) 0 2px, transparent 3px)",
+            backgroundSize: "72px 72px",
+          }}
+        />
+
+        <Stack spacing={3.5} sx={{ position: "relative", zIndex: 1, maxWidth: 720 }}>
+          <Tabs
+            value={tab}
+            onChange={(_, value) => onChangeTab(value)}
+            sx={{
+              width: "fit-content",
+              minHeight: 48,
+              p: 0.5,
+              borderRadius: 999,
+              bgcolor: "rgba(255,255,255,0.16)",
+              "& .MuiTabs-indicator": { display: "none" },
+              "& .MuiTab-root": {
+                minHeight: 40,
+                px: { xs: 2, md: 4 },
+                borderRadius: 999,
+                color: "rgba(255,255,255,0.8)",
+                fontWeight: 900,
+                letterSpacing: 0,
+              },
+              "& .Mui-selected": {
+                bgcolor: "#fff",
+                color: "#0b4ac8",
+              },
+            }}
+          >
+            <Tab value="today" label="今日の学習" />
+            <Tab value="achievement" label="目標実績" />
+          </Tabs>
+
+          <AnimatePresence mode="wait">
             <motion.div
-                key={mission.id}
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -24 }}
-                transition={{ duration: 0.28, ease: "easeOut"}}
+              key={heroKey}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
             >
-                <Card
-                    sx={{
-                        p: 3,
-                        borderRadius: 4,
-                        border: "1px solid #E8ECF4",
-                        boxShadow: "0 10px 24px rgba(17, 24, 39, 0.05)"
-                    }}
-                >
-                    <Stack
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        sx={{ mb: 3}}
-                    >
-                        <Typography variant="h5" fontWeight={700}>
-                            あなたのミッション
-                        </Typography>
+              {isAchievementTab ? (
+                <Stack spacing={3}>
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <StarsIcon />
+                    <Typography fontWeight={900}>設定中の目標</Typography>
+                  </Stack>
 
-                        <Tabs
-                            value={tab}
-                            onChange={(_, value) => onChangeTab(value)}
-                            sx={{
-                                minHeight: 40,
-                                "& .MuiTab-root": {
-                                    minHeight: 40,
-                                    fontWeight: 700,
-                                    fontSize: 12
-                                },
-                            }}
-                        >
-                            <Tab value="resume" label="RESUME" />
-                            <Tab value="recommended" label="RECOMMENDED" />
-                        </Tabs>
+                  <Box>
+                    <Typography
+                      component="h1"
+                      sx={{
+                        fontSize: { xs: 34, md: 52 },
+                        fontWeight: 950,
+                        lineHeight: 1.08,
+                        letterSpacing: 0,
+                      }}
+                    >
+                      {targetAchievement?.title ?? "目標実績を設定しよう"}
+                    </Typography>
+                    <Typography sx={{ mt: 2, maxWidth: 620, color: "rgba(255,255,255,0.9)", lineHeight: 1.8 }}>
+                      {targetAchievement
+                        ? "自分で決めた実績に向けて、今日の学習を積み上げましょう。"
+                        : "実績一覧から目標を選ぶと、ホームで進捗を確認できます。"}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ maxWidth: 560 }}>
+                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                      <Typography fontWeight={900}>目標達成率</Typography>
+                      <Typography fontWeight={900}>{achievementProgress}%</Typography>
                     </Stack>
-                    <Box
-                        key={mission.id}
-                        sx={{
-                            position: "relative",
-                            overflow: "hidden",
-                            borderRadius: 4,
-                            p: { xs: 3, md: 4},
-                            minHeight: 320,
-                            display: "flex",
-                            alignItems: "stretch",
-                            background:"linear-gradient(135deg, #6174F3 0%, #7E57C2 55%, #8E5AE8 100%)",
-                            color: "#fff"
-                        }} 
+                    <LinearProgress
+                      variant="determinate"
+                      value={achievementProgress}
+                      sx={{
+                        height: 14,
+                        borderRadius: 999,
+                        bgcolor: "rgba(255,255,255,0.22)",
+                        "& .MuiLinearProgress-bar": {
+                          borderRadius: 999,
+                          background: "linear-gradient(90deg, #fbbf24 0%, #34d399 100%)",
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Button
+                    component={Link}
+                    href={targetAchievement ? recommendedMission?.href ?? "/courses" : "/achievements"}
+                    variant="contained"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{
+                      width: "fit-content",
+                      minHeight: 56,
+                      px: 4,
+                      borderRadius: 2,
+                      bgcolor: "#fff",
+                      color: "#0b4ac8",
+                      fontWeight: 900,
+                      boxShadow: "none",
+                      "&:hover": { bgcolor: "#f8fafc", boxShadow: "none" },
+                    }}
+                  >
+                    {targetAchievement ? "この目標に向けて学習する" : "目標を設定する"}
+                  </Button>
+                </Stack>
+              ) : (
+                <Stack spacing={3}>
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <FlagIcon />
+                    <Typography fontWeight={900}>今日の目標</Typography>
+                  </Stack>
+
+                  <Box>
+                    <Typography
+                      component="h1"
+                      sx={{
+                        fontSize: { xs: 36, md: 56 },
+                        fontWeight: 950,
+                        lineHeight: 1.08,
+                        letterSpacing: 0,
+                      }}
                     >
-                        <Grid container spacing={3} alignItems="center">
-                            <Grid size={{ xs: 12, md: 7}}>
-                                <Stack spacing={2.5}>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                        <Chip
-                                            label={mission.badgeLabel}
-                                            size="small"
-                                            sx={{
-                                                color: "#fff",
-                                                bgcolor: "rgba(255, 255, 255, 0.18)",
-                                                fontWeight: 700
-                                            }}
-                                        />
-                                        <Chip
-                                            label={`Medium`}
-                                            size="small"
-                                            sx={{
-                                                bgcolor: "#F59E0B",
-                                                color: "#fff",
-                                                fontWeight: 700,
-                                            }} 
-                                        />
-                                    </Stack>
+                      {Math.min(todayCompletedMissionCount, dailyMissionGoal)} / {dailyMissionGoal} ミッション完了
+                    </Typography>
+                    <Typography sx={{ mt: 2, color: "rgba(255,255,255,0.9)", lineHeight: 1.8 }}>
+                      {remainingMissionCount > 0
+                        ? `今日の目標まであと ${remainingMissionCount} ミッション。${mission ? `次は「${mission.title}」から再開できます。` : "コース一覧から次の学習を選びましょう。"}`
+                        : "今日の目標を達成しました。余裕があれば次のミッションにも進めます。"}
+                    </Typography>
+                  </Box>
 
-                                    <Typography 
-                                        variant="h3" 
-                                        fontWeight={800}
-                                        sx={{
-                                            display: "-webkit-box",
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: "vertical",
-                                            overflow: "hidden",
-                                            lineHeight: 1.2,
-                                            minHeight: "2.4em",
-                                        }}
-                                    >
-                                        {mission.title}
-                                    </Typography>
+                  <Box sx={{ maxWidth: 560 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={todayProgress}
+                      sx={{
+                        height: 14,
+                        borderRadius: 999,
+                        bgcolor: "rgba(255,255,255,0.22)",
+                        "& .MuiLinearProgress-bar": {
+                          borderRadius: 999,
+                          background: "linear-gradient(90deg, #fbbf24 0%, #fde68a 100%)",
+                        },
+                      }}
+                    />
+                  </Box>
 
-                                    <Typography
-                                        variant="body1"
-                                        sx={{ 
-                                            color: "rgba(255, 255, 255, 0.92)", 
-                                            maxWidth: 560,
-                                            display: "-webkit-box",
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: "vertical",
-                                            overflow: "hidden",
-                                            lineHeight: 1.6,
-                                            minHeight: "3.2em" 
-                                        }} 
-                                    >
-                                        {mission.description}
-                                    </Typography>
-
-                                    <Box>
-                                        <Stack
-                                            direction="row"
-                                            justifyContent="space-between"
-                                            sx={{ mb: 1 }}
-                                        >
-                                            <Typography variant="body2" fontWeight={700} >
-                                                進捗状況
-                                            </Typography>
-                                            <Typography variant="body2" fontWeight={700}>
-                                                {mission.progress ?? 0}%
-                                            </Typography>
-                                        </Stack>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={mission.progress ?? 0}
-                                            sx={{
-                                                height: 8,
-                                                borderRadius: 999,
-                                                bgcolor: "rgba(255, 255, 255, 0.2)",
-                                                "& .MuiLinearProgress-bar": {
-                                                    borderRadius: 999,
-                                                    bgcolor: "#fff"
-                                                }
-                                            }} 
-                                        />
-                                    </Box>
-                                    <Box>
-                                        <Button
-                                            component={Link}
-                                            href={mission.href}
-                                            variant="contained"
-                                            endIcon={<ArrowForwardIcon />}
-                                            sx={{
-                                                px: 3,
-                                                py: 1.25,
-                                                borderRadius: 3,
-                                                bgcolor: "#fff",
-                                                color: "#6174F3",
-                                                fontWeight: 700,
-                                                boxShadow: "none",
-                                                "&:hover": {
-                                                    bgcolor: "#F8FAFC",
-                                                    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.12)",
-                                                },
-                                            }}
-                                        >
-                                            {mission.ctaLabel}
-                                        </Button>
-                                    </Box>
-                                </Stack>
-                            </Grid>
-
-                            <Grid size={{ xs: 12, md: 5}}>
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: { xs: "flex-start", md: "center"}
-                                    }}
-                                >
-                                    <Box
-                                        component="img"
-                                        src={mission.goalImg}
-                                        alt={mission.title}
-                                        sx={{
-                                            width: "100%",
-                                            maxWidth: 340,
-                                            height: 220,
-                                            objectFit: "cover",
-                                            borderRadius: 3,
-                                            border: "2px solid rgba(255, 255, 255, 0.22)",
-                                            boxShadow: "0 14px 32px rgba(15, 23, 42, 0.22)",
-                                            bgcolor: "#0F172A",
-                                        }}
-                                    />
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </Card>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "center" }}>
+                    <Button
+                      component={Link}
+                      href={mission?.href ?? "/courses"}
+                      variant="contained"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{
+                        minHeight: 56,
+                        px: 4,
+                        borderRadius: 2,
+                        bgcolor: "#fff",
+                        color: "#0b4ac8",
+                        fontWeight: 900,
+                        boxShadow: "none",
+                        "&:hover": { bgcolor: "#f8fafc", boxShadow: "none" },
+                      }}
+                    >
+                      今日の学習を始める
+                    </Button>
+                    <Chip
+                      icon={<EmojiEventsIcon />}
+                      label="+20 EXP / Badge Ticket"
+                      sx={{
+                        width: "fit-content",
+                        bgcolor: "rgba(255,255,255,0.16)",
+                        color: "#fff",
+                        fontWeight: 900,
+                        "& .MuiChip-icon": { color: "#fbbf24" },
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+              )}
             </motion.div>
-        </AnimatePresence>
-    );
-}
+          </AnimatePresence>
+        </Stack>
+
+        <MascotCoach message={coachMessage} mascotId={mascotId} />
+      </Box>
+    </Card>
+  );
+};

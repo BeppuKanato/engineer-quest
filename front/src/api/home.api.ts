@@ -3,18 +3,22 @@ import { fetcher } from "@/lib/fetcher";
 
 export type HomeResponse = {
   user: {
+    displayName: string | null;
     rank: string;
     level: number;
     requireNextLevelExp: number;
     exp: number;
     completedMissionNum: number;
     completedAchievementNum: number;
+    todayCompletedMissionCount: number;
+    dailyMissionGoal: number;
     continuationDays: number;
     totalDays: number;
   };
   missions: {
     resume: Mission | null;
     recommended: Mission | null;
+    recommendedList: Mission[];
   };
   nextRank: {
     name: string;

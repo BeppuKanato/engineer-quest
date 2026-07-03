@@ -4,14 +4,18 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RouteIcon from "@mui/icons-material/Route";
+import SecurityIcon from "@mui/icons-material/Security";
 import StarIcon from "@mui/icons-material/Star";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Alert, Box, Button, Chip, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import { getMissionRewardRun, type MissionRewardRunResponse } from "@/api/missionRewards.api";
 import { AppHeader } from "@/app/component/appHeader";
@@ -21,12 +25,12 @@ import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { auth } from "@/lib/firebase";
 
 import {
-  LearnedItem,
-  RewardHero,
   RewardPageShell,
-  RewardSummaryCard,
+  RewardSparkles,
   getRarityTone,
 } from "../../_components/rewardVisuals";
+
+const learnedIcons = [StarIcon, SecurityIcon, TrendingUpIcon];
 
 export default function MissionRewardResultPage() {
   const params = useParams<{ rewardRunId: string }>();
@@ -88,126 +92,299 @@ export default function MissionRewardResultPage() {
     });
   };
 
+  const selectedCardTone = rewardRun?.selectedKnowledgeCard
+    ? getRarityTone(rewardRun.selectedKnowledgeCard.rarity)
+    : null;
+
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#eef4fb" }}>
       <AppHeader />
       <PageTransitionOverlay open={showOverlay} message="次の画面を準備しています..." />
-      <RewardPageShell maxWidth={980}>
+      <RewardPageShell maxWidth={1320}>
         {isLoading ? (
-          <Skeleton variant="rounded" height={640} sx={{ borderRadius: 4 }} />
+          <Skeleton variant="rounded" height={720} sx={{ borderRadius: 4 }} />
         ) : !rewardRun ? (
           <Alert severity="error">{errorMessage ?? "報酬データがありません。"}</Alert>
         ) : (
-          <Stack spacing={3}>
-            <RewardHero
-              chip="Reward Summary"
-              title="ミッション完了！"
-              subtitle={`${rewardRun.mission.title} の報酬と、今回できるようになったことを確認します。`}
-            />
+          <Paper
+            component={motion.section}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            elevation={0}
+            sx={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 5,
+              border: "1px solid rgba(191, 219, 254, 0.95)",
+              bgcolor: "rgba(255,255,255,0.9)",
+              px: { xs: 2, md: 5 },
+              py: { xs: 3, md: 4 },
+              boxShadow: "0 30px 90px rgba(37, 99, 235, 0.16)",
+            }}
+          >
+            <RewardSparkles />
 
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 2 }}>
-              <RewardSummaryCard icon={<StarIcon />} label="獲得EXP" value={`+${rewardRun.awardedExp}`} tone="blue" />
-              <RewardSummaryCard icon={<ConfirmationNumberIcon />} label="Badge Ticket" value={`+${rewardRun.awardedBadgeTickets}`} tone="green" />
+            <Box sx={{ position: "relative", zIndex: 1 }}>
+              <Box sx={{ position: "relative", minHeight: { xs: 0, md: 170 }, mb: 2 }}>
+                <Box
+                  component="img"
+                  src="/images/mascots/red-panda/happy.png"
+                  alt="ミッション完了を祝うマスコット"
+                  sx={{
+                    position: { xs: "static", md: "absolute" },
+                    left: { md: 0 },
+                    top: { md: 8 },
+                    display: "block",
+                    width: { xs: 110, md: 170 },
+                    height: { xs: 110, md: 170 },
+                    objectFit: "contain",
+                    mx: { xs: "auto", md: 0 },
+                  }}
+                />
+                <Paper
+                  elevation={0}
+                  sx={{
+                    position: { xs: "static", md: "absolute" },
+                    left: { md: 160 },
+                    top: { md: 20 },
+                    mt: { xs: 1, md: 0 },
+                    mx: { xs: "auto", md: 0 },
+                    width: "fit-content",
+                    maxWidth: 260,
+                    px: 2,
+                    py: 1.3,
+                    borderRadius: 2,
+                    border: "1px solid #dbe3ef",
+                    bgcolor: "rgba(255,255,255,0.96)",
+                    fontWeight: 900,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  おつかれさま！<br />今回もよく頑張ったね！
+                </Paper>
+
+                <Stack spacing={1.3} alignItems="center" textAlign="center" sx={{ px: { md: 24 } }}>
+                  <Chip
+                    icon={<StarIcon />}
+                    label="Reward Summary"
+                    sx={{
+                      fontWeight: 900,
+                      color: "#1d4ed8",
+                      bgcolor: "#dbeafe",
+                      border: "1px solid #bfdbfe",
+                      "& .MuiChip-icon": { color: "inherit" },
+                    }}
+                  />
+                  <Typography variant="h2" fontWeight={900} sx={{ color: "#071b4d", fontSize: { xs: 40, md: 64 }, lineHeight: 1.05 }}>
+                    ミッション完了！
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ fontWeight: 800, lineHeight: 1.8 }}>
+                    {rewardRun.mission.title} の報酬と、今回できるようになったことを確認します。
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
+                <ResultSummaryPanel
+                  label="獲得EXP"
+                  icon={<StarIcon />}
+                  value={`+${rewardRun.awardedExp}`}
+                  suffix="EXP"
+                  tone="blue"
+                />
+                <ResultSummaryPanel
+                  label="Badge Ticket"
+                  icon={<ConfirmationNumberIcon />}
+                  value={`+${rewardRun.awardedBadgeTickets}`}
+                  tone="green"
+                />
+                <ResultSummaryPanel
+                  label="獲得カード"
+                  icon={<MenuBookIcon />}
+                  value={rewardRun.selectedKnowledgeCard?.title ?? "なし"}
+                  suffix={rewardRun.selectedKnowledgeCard?.rarity}
+                  tone="purple"
+                />
+                <ResultSummaryPanel
+                  label="解除実績"
+                  icon={<EmojiEventsIcon />}
+                  value={`${rewardRun.unlockedAchievements.length}`}
+                  suffix="件"
+                  tone="gold"
+                />
+              </Box>
+
+              {rewardRun.unlockedAchievements.length > 0 && (
+                <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 3, border: "1px solid #fde68a", bgcolor: "rgba(255, 251, 235, 0.82)", mb: 3 }}>
+                  <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mb: 2 }}>
+                    <EmojiEventsIcon sx={{ color: "#d97706" }} />
+                    <Typography variant="h6" fontWeight={900}>今回解除された実績</Typography>
+                  </Stack>
+                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" }, gap: 1.5 }}>
+                    {rewardRun.unlockedAchievements.map((achievement, index) => (
+                      <Paper
+                        key={achievement.id}
+                        component={motion.div}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28, delay: index * 0.05 }}
+                        elevation={0}
+                        sx={{ p: 2, borderRadius: 2, bgcolor: "#fff", border: "1px solid #fde68a" }}
+                      >
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Box sx={{ width: 56, height: 56, borderRadius: "50%", display: "grid", placeItems: "center", color: "#d97706", bgcolor: "#fff7ed", flexShrink: 0 }}>
+                            <EmojiEventsIcon />
+                          </Box>
+                          <Box>
+                            <Typography fontWeight={900}>{achievement.title}</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+                              {achievement.description}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Paper>
+                    ))}
+                  </Box>
+                </Paper>
+              )}
+
+              {rewardRun.selectedKnowledgeCard && selectedCardTone && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    border: `1px solid ${selectedCardTone.border}`,
+                    bgcolor: "rgba(255,255,255,0.86)",
+                    mb: 3,
+                    display: { xs: "block", md: "none" },
+                  }}
+                >
+                  <Chip label="獲得カード" size="small" color="primary" sx={{ fontWeight: 900, mb: 1 }} />
+                  <Typography fontWeight={900}>{rewardRun.selectedKnowledgeCard.title}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {rewardRun.selectedKnowledgeCard.description}
+                  </Typography>
+                </Paper>
+              )}
+
+              {rewardRun.mission.learnedItems.length > 0 && (
+                <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "rgba(255,255,255,0.86)", mb: 3 }}>
+                  <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mb: 2 }}>
+                    <CheckCircleIcon sx={{ color: "#16a34a" }} />
+                    <Typography variant="h6" fontWeight={900}>できるようになったこと</Typography>
+                  </Stack>
+                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 1.5 }}>
+                    {rewardRun.mission.learnedItems.slice(0, 3).map((item, index) => {
+                      const Icon = learnedIcons[index % learnedIcons.length];
+                      return (
+                        <Paper key={item} elevation={0} sx={{ p: 2, borderRadius: 2, border: "1px solid #dbeafe", bgcolor: "#fff" }}>
+                          <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box sx={{ width: 56, height: 56, borderRadius: "50%", display: "grid", placeItems: "center", color: "#1d4ed8", bgcolor: "#dbeafe", flexShrink: 0 }}>
+                              <Icon />
+                            </Box>
+                            <Box>
+                              <Stack direction="row" spacing={0.6} alignItems="center">
+                                <CheckCircleIcon sx={{ fontSize: 18, color: "#16a34a" }} />
+                                <Typography fontWeight={900}>{item}</Typography>
+                              </Stack>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, lineHeight: 1.6 }}>
+                                学習した内容を確認できました。
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Paper>
+                      );
+                    })}
+                  </Box>
+                </Paper>
+              )}
+
+              {rewardRun.unlockedChallenges.length > 0 && (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  新しい挑戦ミッション: {rewardRun.unlockedChallenges.map((challenge) => challenge.title).join("、")}
+                </Alert>
+              )}
+
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<RouteIcon />}
+                  onClick={goRoadmap}
+                  sx={{ minHeight: 56, px: 6, fontWeight: 900, borderRadius: 2, bgcolor: "rgba(255,255,255,0.72)" }}
+                >
+                  ミッションロードマップへ
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  endIcon={rewardRun.nextMission ? <NavigateNextIcon /> : undefined}
+                  startIcon={rewardRun.nextMission ? <PlayArrowIcon /> : undefined}
+                  disabled={!rewardRun.nextMission}
+                  onClick={goNextMission}
+                  sx={{ minHeight: 56, px: 7, fontWeight: 900, borderRadius: 2, boxShadow: "0 18px 40px rgba(37, 99, 235, 0.28)" }}
+                >
+                  {rewardRun.nextMission ? "次のミッションへ" : "コース完了"}
+                </Button>
+              </Stack>
             </Box>
-
-            {rewardRun.selectedKnowledgeCard && (
-              <Paper
-                component={motion.div}
-                initial={{ opacity: 0, y: 22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.1 }}
-                elevation={0}
-                sx={{
-                  p: { xs: 2.5, md: 3 },
-                  borderRadius: 3,
-                  border: `1px solid ${getRarityTone(rewardRun.selectedKnowledgeCard.rarity).border}`,
-                  bgcolor: "rgba(255,255,255,0.92)",
-                  boxShadow: getRarityTone(rewardRun.selectedKnowledgeCard.rarity).glow,
-                }}
-              >
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} alignItems={{ xs: "stretch", md: "center" }}>
-                  <Box sx={{ width: 68, height: 68, borderRadius: 2, display: "grid", placeItems: "center", color: getRarityTone(rewardRun.selectedKnowledgeCard.rarity).color, bgcolor: getRarityTone(rewardRun.selectedKnowledgeCard.rarity).bgcolor, border: `1px solid ${getRarityTone(rewardRun.selectedKnowledgeCard.rarity).border}` }}>
-                    <MenuBookIcon sx={{ fontSize: 38 }} />
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
-                      <Chip label="今回入手したカード" size="small" color="primary" sx={{ fontWeight: 900 }} />
-                      <Chip label={rewardRun.selectedKnowledgeCard.rarity} size="small" sx={{ fontWeight: 900 }} />
-                    </Stack>
-                    <Typography variant="h5" fontWeight={900}>
-                      {rewardRun.selectedKnowledgeCard.title}
-                    </Typography>
-                    <Typography color="text.secondary" sx={{ mt: 0.75, lineHeight: 1.8 }}>
-                      {rewardRun.selectedKnowledgeCard.description}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            )}
-
-            {rewardRun.unlockedAchievements.length > 0 && (
-              <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3, border: "1px solid #fde68a", bgcolor: "rgba(255, 251, 235, 0.9)" }}>
-                <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mb: 2 }}>
-                  <EmojiEventsIcon sx={{ color: "#d97706" }} />
-                  <Typography variant="h6" fontWeight={900}>解除された実績</Typography>
-                </Stack>
-                <Stack spacing={1.25}>
-                  {rewardRun.unlockedAchievements.map((achievement, index) => (
-                    <Paper
-                      key={achievement.id}
-                      component={motion.div}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.28, delay: index * 0.05 }}
-                      elevation={0}
-                      sx={{ p: 1.75, borderRadius: 2, bgcolor: "#fff", border: "1px solid #fde68a" }}
-                    >
-                      <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                        <EmojiEventsIcon sx={{ color: "#d97706", mt: 0.25 }} />
-                        <Box>
-                          <Typography fontWeight={900}>{achievement.title}</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                            {achievement.description}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Paper>
-                  ))}
-                </Stack>
-              </Paper>
-            )}
-
-            {rewardRun.mission.learnedItems.length > 0 && (
-              <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "rgba(255,255,255,0.9)" }}>
-                <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mb: 2 }}>
-                  <CheckCircleIcon sx={{ color: "#16a34a" }} />
-                  <Typography variant="h6" fontWeight={900}>できるようになったこと</Typography>
-                </Stack>
-                <Stack spacing={1}>
-                  {rewardRun.mission.learnedItems.map((item) => (
-                    <LearnedItem key={item}>{item}</LearnedItem>
-                  ))}
-                </Stack>
-              </Paper>
-            )}
-
-            {rewardRun.unlockedChallenges.length > 0 && (
-              <Alert severity="info">
-                新しい Challenge Mission: {rewardRun.unlockedChallenges.map((challenge) => challenge.title).join("、")}
-              </Alert>
-            )}
-
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-              <Button fullWidth variant="outlined" size="large" startIcon={<RouteIcon />} onClick={goRoadmap} sx={{ minHeight: 52, fontWeight: 900, borderRadius: 2, bgcolor: "rgba(255,255,255,0.72)" }}>
-                ミッションロードマップへ
-              </Button>
-              <Button fullWidth variant="contained" size="large" endIcon={<PlayArrowIcon />} disabled={!rewardRun.nextMission} onClick={goNextMission} sx={{ minHeight: 52, fontWeight: 900, borderRadius: 2, boxShadow: "0 18px 38px rgba(37, 99, 235, 0.25)" }}>
-                {rewardRun.nextMission ? "次のミッションへ" : "基礎ルート完了"}
-              </Button>
-            </Stack>
-          </Stack>
+          </Paper>
         )}
       </RewardPageShell>
     </Box>
   );
 }
+
+const ResultSummaryPanel = ({
+  label,
+  icon,
+  value,
+  suffix,
+  tone,
+}: {
+  label: string;
+  icon: ReactNode;
+  value: string;
+  suffix?: string;
+  tone: "blue" | "green" | "purple" | "gold";
+}) => {
+  const styles = {
+    blue: { color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe" },
+    green: { color: "#047857", bg: "#ecfdf5", border: "#bbf7d0" },
+    purple: { color: "#6d28d9", bg: "#faf5ff", border: "#e9d5ff" },
+    gold: { color: "#b45309", bg: "#fffbeb", border: "#fde68a" },
+  }[tone];
+
+  return (
+    <Paper
+      component={motion.div}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      elevation={0}
+      sx={{
+        p: 2.5,
+        minHeight: 140,
+        borderRadius: 3,
+        border: `1px solid ${styles.border}`,
+        bgcolor: "rgba(255,255,255,0.84)",
+        boxShadow: "0 14px 36px rgba(15, 23, 42, 0.07)",
+      }}
+    >
+      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ height: "100%" }}>
+        <Box sx={{ width: 70, height: 70, borderRadius: 2, display: "grid", placeItems: "center", color: styles.color, bgcolor: styles.bg, flexShrink: 0 }}>
+          {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography fontWeight={900} color="#334155">{label}</Typography>
+          <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mt: 1 }}>
+            <Typography variant={value.length > 8 ? "h5" : "h4"} fontWeight={900} color={styles.color} noWrap>
+              {value}
+            </Typography>
+            {suffix && <Typography fontWeight={900} color="#475569">{suffix}</Typography>}
+          </Stack>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+};

@@ -210,6 +210,81 @@ const getRecommendedMission = async (
     : null;
 };
 
+const getRecommendedMissions = async (
+  userId: string,
+  completedMissionIds: Set<string>,
+  limit = 3
+) => {
+  const recommendations: HomeMission[] = [];
+  const pushedMissionIds = new Set<string>();
+
+  const pushMission = async (
+    mission: Mission,
+    badgeLabel: string,
+    ctaLabel: string
+  ) => {
+    if (pushedMissionIds.has(mission.id) || recommendations.length >= limit) {
+      return;
+    }
+
+    pushedMissionIds.add(mission.id);
+    recommendations.push(await toHomeMission(mission, userId, badgeLabel, ctaLabel));
+  };
+
+  const courses = await prisma.course.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: "asc" },
+    include: {
+      missions: {
+        where: {
+          isPublished: true,
+          type: MissionType.MAIN,
+          isRequiredForCourseCompletion: true,
+        },
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  for (const course of courses) {
+    const nextMission = course.missions.find(
+      (mission, index) =>
+        !completedMissionIds.has(mission.id) &&
+        (index === 0 || completedMissionIds.has(course.missions[index - 1].id))
+    );
+
+    if (nextMission) {
+      await pushMission(nextMission, "おすすめ", "ミッション開始");
+    }
+
+    if (recommendations.length >= limit) {
+      return recommendations;
+    }
+  }
+
+  const challengeMissions = await prisma.mission.findMany({
+    where: {
+      isPublished: true,
+      type: MissionType.CHALLENGE,
+      parentMissionId: { in: [...completedMissionIds] },
+      progresses: {
+        none: {
+          userId,
+          status: PrismaProgressStatus.COMPLETED,
+        },
+      },
+    },
+    orderBy: [{ courseId: "asc" }, { branchOrder: "asc" }],
+    take: limit,
+  });
+
+  for (const mission of challengeMissions) {
+    await pushMission(mission, "Challenge", "挑戦する");
+  }
+
+  return recommendations;
+};
+
 const calculateAchievementProgress = async (
   achievement: Achievement,
   userId: string,
@@ -406,6 +481,7 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
     where: { firebaseUid },
     select: {
       id: true,
+      displayName: true,
       experience: true,
     },
   });
@@ -426,6 +502,10 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
   const completedMissionIds = new Set(
     completedProgresses.map((progress) => progress.missionId)
   );
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setDate(todayStart.getDate() + 1);
   const [completedAchievementCount, completedActivityCount] = await Promise.all([
     prisma.userAchievement.count({ where: { userId: user.id } }),
     prisma.userMissionActivityProgress.count({
@@ -435,12 +515,29 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
       },
     }),
   ]);
+  const todayCompletedMissionCount = await prisma.userMissionProgress.count({
+    where: {
+      userId: user.id,
+      status: PrismaProgressStatus.COMPLETED,
+      completedAt: {
+        gte: todayStart,
+        lt: tomorrowStart,
+      },
+    },
+  });
   const levelStatus = deriveLevelStatus(user.experience);
   const rankStatus = buildRankStatus(completedMissionIds.size);
-  const [resumeMission, recommendedMission, targetAchievement, calendar] =
+  const [
+    resumeMission,
+    recommendedMission,
+    recommendedList,
+    targetAchievement,
+    calendar,
+  ] =
     await Promise.all([
       getResumeMission(user.id),
       getRecommendedMission(user.id, completedMissionIds),
+      getRecommendedMissions(user.id, completedMissionIds, 3),
       getTargetAchievement(
         user.id,
         completedMissionIds,
@@ -453,18 +550,22 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
 
   return {
     user: {
+      displayName: user.displayName,
       rank: rankStatus.rank,
       level: levelStatus.level,
       requireNextLevelExp: levelStatus.requireNextLevelExp,
       exp: user.experience,
       completedMissionNum: completedMissionIds.size,
       completedAchievementNum: completedAchievementCount,
+      todayCompletedMissionCount,
+      dailyMissionGoal: 5,
       continuationDays: calendar.continuationDays,
       totalDays: calendar.totalDays,
     },
     missions: {
       resume: resumeMission ?? fallbackMission,
       recommended: recommendedMission ?? fallbackMission,
+      recommendedList,
     },
     nextRank: rankStatus.nextRank,
     nextRankCondition: rankStatus.conditions,

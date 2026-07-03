@@ -29,6 +29,7 @@ model User {
   badgeTicketTransactions BadgeTicketTransaction[]
   selectedTechIconBadge TechIconBadge? @relation("SelectedTechIconBadge", fields: [selectedTechIconBadgeId], references: [id], onDelete: SetNull)
   works                UserWork[]
+  createWorks          UserCreateWork[]
   questPosts           QuestPost[]
   questComments        QuestComment[]
   questReactions       QuestReaction[]
@@ -60,6 +61,8 @@ model Course {
   knowledgeCards KnowledgeCard[]
   createMissions CreateMission[]
   works UserWork[]
+  createThemes CreateTheme[]
+  createWorks UserCreateWork[]
   questPosts QuestPost[]
 
   createdAt DateTime @default(now())
@@ -489,6 +492,126 @@ model UserWorkReview {
 }
 
 // =========================
+// Create Themes / My Works
+// =========================
+
+model CreateTheme {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  category    CreateThemeCategory
+  difficulty  CourseDifficulty @default(EASY)
+  estimatedMinutes Int @default(60)
+  tags        String[] @default([])
+  defaultThumbnailUrl String?
+  recommendedCourseId String?
+  sortOrder   Int @default(0)
+  isPublished Boolean @default(true)
+
+  recommendedCourse Course? @relation(fields: [recommendedCourseId], references: [id], onDelete: SetNull)
+  requirements CreateThemeRequirement[]
+  challenges CreateThemeChallenge[]
+  works UserCreateWork[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([recommendedCourseId])
+  @@index([sortOrder])
+}
+
+model CreateThemeRequirement {
+  id String @id @default(cuid())
+  themeId String
+  label String
+  description String?
+  order Int @default(0)
+
+  theme CreateTheme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  checks UserCreateWorkRequirementCheck[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([themeId])
+  @@index([order])
+}
+
+model CreateThemeChallenge {
+  id String @id @default(cuid())
+  themeId String
+  label String
+  description String?
+  order Int @default(0)
+
+  theme CreateTheme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  checks UserCreateWorkChallengeCheck[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([themeId])
+  @@index([order])
+}
+
+model UserCreateWork {
+  id String @id @default(cuid())
+  userId String
+  themeId String
+  courseId String?
+
+  title String
+  description String
+  learnedNote String?
+  techStack String[] @default([])
+  publicUrl String?
+  repositoryUrl String?
+  imageUrl String?
+  imageStoragePath String?
+  status CreateWorkStatus @default(DRAFT)
+  visibility CreateWorkVisibility @default(PRIVATE)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme CreateTheme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  requirementChecks UserCreateWorkRequirementCheck[]
+  challengeChecks UserCreateWorkChallengeCheck[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sharedAt DateTime?
+
+  @@index([userId])
+  @@index([themeId])
+  @@index([courseId])
+  @@index([visibility])
+  @@index([updatedAt])
+}
+
+model UserCreateWorkRequirementCheck {
+  workId String
+  requirementId String
+  checked Boolean @default(false)
+
+  work UserCreateWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  requirement CreateThemeRequirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+
+  @@id([workId, requirementId])
+}
+
+model UserCreateWorkChallengeCheck {
+  workId String
+  challengeId String
+  checked Boolean @default(false)
+
+  work UserCreateWork @relation(fields: [workId], references: [id], onDelete: Cascade)
+  challenge CreateThemeChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@id([workId, challengeId])
+}
+
+// =========================
 // Quest Board
 // =========================
 
@@ -621,6 +744,27 @@ enum CourseCategoryType {
   TOOL
   UI
   DATA
+}
+
+enum CreateThemeCategory {
+  UI
+  HTML_CSS
+  JAVASCRIPT
+  FORM
+  DATA_DISPLAY
+  API
+  CRUD
+  GAME
+}
+
+enum CreateWorkStatus {
+  DRAFT
+  COMPLETED
+}
+
+enum CreateWorkVisibility {
+  PRIVATE
+  SHARED
 }
 
 enum MissionActivityType {
