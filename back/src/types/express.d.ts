@@ -12,6 +12,8 @@ declare global {
         experience: number;
         badgeTickets: number;
         selectedTechIconBadgeId: string | null;
+        selectedMascotId: string;
+        selectedTargetAchievementId: string | null;
       };
       firebaseUser?: DecodedIdToken;
     }

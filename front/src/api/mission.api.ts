@@ -28,10 +28,15 @@ export const getMissionOverview = async (
 
 export const getMissionPlay = async (
   token: string,
-  missionId: string
+  missionId: string,
+  difficulty?: Difficulty
 ): Promise<MissionPlayResponse> => {
+  const searchParams = difficulty
+    ? `?${new URLSearchParams({ difficulty }).toString()}`
+    : "";
+
   return fetcher<MissionPlayResponse>(
-    `/missions/${encodeURIComponent(missionId)}/play`,
+    `/missions/${encodeURIComponent(missionId)}/play${searchParams}`,
     {
       method: "GET",
       token,

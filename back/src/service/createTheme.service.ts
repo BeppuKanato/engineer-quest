@@ -18,6 +18,7 @@ type WorkPayload = {
   repositoryUrl?: string | null;
   imageUrl?: string | null;
   status: CreateWorkStatus;
+  visibility: CreateWorkVisibility;
   requirementIds: string[];
   challengeIds: string[];
 };
@@ -28,10 +29,20 @@ type WorkWithRelations = Prisma.UserCreateWorkGetPayload<{
       include: {
         requirements: { orderBy: { order: "asc" } };
         challenges: { orderBy: { order: "asc" } };
+        recommendedCourse: { select: { id: true; title: true } };
       };
     };
     requirementChecks: true;
     challengeChecks: true;
+  };
+}>;
+
+type ThemeWithRelations = Prisma.CreateThemeGetPayload<{
+  include: {
+    requirements: true;
+    challenges: true;
+    recommendedCourse: { select: { id: true; title: true } };
+    _count: { select: { works: true } };
   };
 }>;
 
@@ -60,6 +71,7 @@ export const normalizeStringArray = (value: unknown): string[] => {
 export const parseWorkPayload = (body: unknown): WorkPayload => {
   const source = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
   const rawStatus = normalizeText(source.status);
+  const rawVisibility = normalizeText(source.visibility);
 
   return {
     title: normalizeText(source.title),
@@ -70,6 +82,8 @@ export const parseWorkPayload = (body: unknown): WorkPayload => {
     repositoryUrl: normalizeText(source.repositoryUrl) || null,
     imageUrl: normalizeText(source.imageUrl) || null,
     status: rawStatus === "COMPLETED" ? CreateWorkStatus.COMPLETED : CreateWorkStatus.DRAFT,
+    visibility:
+      rawVisibility === "SHARED" ? CreateWorkVisibility.SHARED : CreateWorkVisibility.PRIVATE,
     requirementIds: normalizeStringArray(source.requirementIds),
     challengeIds: normalizeStringArray(source.challengeIds),
   };
@@ -94,9 +108,33 @@ const getUserByFirebaseUid = async (firebaseUid: string) => {
   return user;
 };
 
-const toThemeSummary = (theme: Prisma.CreateThemeGetPayload<{
-  include: { requirements: true; challenges: true; _count: { select: { works: true } } };
-}>) => ({
+const fallbackRecommendedCourses = (theme: Pick<ThemeWithRelations, "category" | "tags">) => {
+  const labels = new Set<string>();
+
+  if (theme.category === "UI" || theme.category === "HTML_CSS") {
+    labels.add("HTML/CSSの基本");
+    labels.add("レイアウトを学ぶ");
+  }
+  if (theme.category === "JAVASCRIPT" || theme.category === "GAME") {
+    labels.add("JavaScriptの基本");
+  }
+  if (theme.category === "FORM" || theme.category === "DATA_DISPLAY") {
+    labels.add("画面とデータの扱い");
+  }
+  if (theme.category === "API" || theme.category === "CRUD") {
+    labels.add("フロントエンドとバックエンドを区別する");
+  }
+  if (theme.tags.some((tag) => tag.toLowerCase().includes("crud"))) {
+    labels.add("データを保存して使う");
+  }
+
+  return [...labels].slice(0, 3).map((title, index) => ({
+    id: `recommended-${index}`,
+    title,
+  }));
+};
+
+const toThemeSummary = (theme: ThemeWithRelations) => ({
   id: theme.id,
   title: theme.title,
   description: theme.description,
@@ -106,6 +144,10 @@ const toThemeSummary = (theme: Prisma.CreateThemeGetPayload<{
   tags: theme.tags,
   defaultThumbnailUrl: theme.defaultThumbnailUrl,
   workCount: theme._count.works,
+  isRecommendedForUser: theme.difficulty !== "HARD" || theme._count.works > 0,
+  recommendedCourses: theme.recommendedCourse
+    ? [{ id: theme.recommendedCourse.id, title: theme.recommendedCourse.title }]
+    : fallbackRecommendedCourses(theme),
   requirements: theme.requirements
     .sort((a, b) => a.order - b.order)
     .map((item) => ({ id: item.id, label: item.label, description: item.description })),
@@ -125,6 +167,7 @@ const toWorkDetail = (work: WorkWithRelations) => {
   return {
     id: work.id,
     themeId: work.themeId,
+    courseId: work.courseId,
     themeTitle: work.theme.title,
     title: work.title,
     description: work.description,
@@ -149,6 +192,7 @@ const includeWorkRelations = {
     include: {
       requirements: { orderBy: { order: "asc" } },
       challenges: { orderBy: { order: "asc" } },
+      recommendedCourse: { select: { id: true, title: true } },
     },
   },
   requirementChecks: true,
@@ -163,6 +207,7 @@ export const getCreateThemesByFirebaseUid = async (firebaseUid: string) => {
     include: {
       requirements: true,
       challenges: true,
+      recommendedCourse: { select: { id: true, title: true } },
       _count: { select: { works: { where: { userId: user.id } } } },
     },
   });
@@ -183,6 +228,7 @@ export const getCreateThemeByFirebaseUid = async ({
     include: {
       requirements: true,
       challenges: true,
+      recommendedCourse: { select: { id: true, title: true } },
       _count: { select: { works: true } },
     },
   });
@@ -268,6 +314,8 @@ export const createUserCreateWorkByFirebaseUid = async ({
         repositoryUrl: payload.repositoryUrl,
         imageUrl: payload.imageUrl ?? theme.defaultThumbnailUrl,
         status: payload.status,
+        visibility: payload.visibility,
+        sharedAt: payload.visibility === CreateWorkVisibility.SHARED ? new Date() : null,
       },
     });
 
@@ -326,6 +374,8 @@ export const updateUserCreateWorkByFirebaseUid = async ({
         repositoryUrl: payload.repositoryUrl,
         imageUrl: payload.imageUrl ?? work.theme.defaultThumbnailUrl,
         status: payload.status,
+        visibility: payload.visibility,
+        sharedAt: payload.visibility === CreateWorkVisibility.SHARED ? new Date() : null,
       },
     });
     await tx.userCreateWorkRequirementCheck.deleteMany({ where: { workId: work.id } });

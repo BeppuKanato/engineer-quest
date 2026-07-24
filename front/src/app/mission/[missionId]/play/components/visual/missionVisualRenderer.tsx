@@ -62,9 +62,8 @@ export const MissionVisualRenderer = ({
       {visual.data.caption && (
         <Typography
           component="figcaption"
-          color="text.secondary"
           variant="body2"
-          sx={{ mt: 2, lineHeight: 1.7 }}
+          sx={{ mt: 2, lineHeight: 1.7, color: "#475569", fontWeight: 700 }}
         >
           {visual.data.caption}
         </Typography>

@@ -99,9 +99,9 @@ export const LearningSidebar = ({
       elevation={0}
       sx={{
         position: "sticky",
-        top: 24,
+        top: 88,
         width: "100%",
-        maxHeight: "calc(100vh - 48px)",
+        maxHeight: "calc(100vh - 112px)",
         border: "1px solid #dbe3ef",
         borderRadius: 2,
         bgcolor: "#fff",
@@ -116,7 +116,7 @@ export const LearningSidebar = ({
               <Typography variant="caption" color="text.secondary" fontWeight={800}>
                 Course
               </Typography>
-              <Typography fontWeight={900} sx={{ lineHeight: 1.45 }}>
+              <Typography fontWeight={950} color="#0f172a" sx={{ lineHeight: 1.45 }}>
                 {mission.courseTitle}
               </Typography>
             </Box>
@@ -129,7 +129,7 @@ export const LearningSidebar = ({
           <Typography variant="caption" color="#b45309" fontWeight={900}>
             Mission {mission.missionOrder}
           </Typography>
-          <Typography fontWeight={900} sx={{ mt: 0.25, lineHeight: 1.45 }}>
+          <Typography fontWeight={950} color="#0f172a" sx={{ mt: 0.25, lineHeight: 1.45 }}>
             {mission.title}
           </Typography>
         </Box>
@@ -190,7 +190,7 @@ export const LearningSidebar = ({
                       {group.title}
                     </Typography>
                     {!isExpanded && (
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="#64748b" fontWeight={700}>
                         {isCompleted
                           ? "完了"
                           : isCurrent

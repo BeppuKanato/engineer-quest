@@ -25,6 +25,7 @@ export type ProfileResponse = {
     completedCourseCount: number;
     completedMissionCount: number;
     badgeCount: number;
+    selectedMascotId: string;
   };
   ticketBalance: number;
   selectedBadge: TechIconBadge | null;
@@ -44,5 +45,16 @@ export const getProfile = async (token: string): Promise<ProfileResponse> => {
   return fetcher<ProfileResponse>("/profile", {
     method: "GET",
     token,
+  });
+};
+
+export const updateProfileMascot = async (
+  token: string,
+  mascotId: string
+): Promise<{ selectedMascotId: string }> => {
+  return fetcher<{ selectedMascotId: string }>("/profile/mascot", {
+    method: "PATCH",
+    token,
+    body: JSON.stringify({ mascotId }),
   });
 };

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ApiError } from "@/lib/fetcher";
@@ -101,6 +102,7 @@ export default function CoursesPage() {
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "コース" }]} />
           <Box>
             <Typography component="h1" sx={{ fontSize: { xs: 34, md: 46 }, fontWeight: 950, letterSpacing: 0, lineHeight: 1.1 }}>
               コース一覧

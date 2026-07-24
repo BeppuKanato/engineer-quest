@@ -71,11 +71,11 @@ const FlowNode = ({
           boxShadow: `0 5px 16px ${tone.border}66`,
         }}
       >
-        {/* <Icon sx={{ fontSize: 34 }} /> */}
+        <Icon sx={{ fontSize: 34 }} />
       </Box>
       <Typography fontWeight={900}>{node.label}</Typography>
       {node.description && (
-        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+        <Typography variant="caption" sx={{ lineHeight: 1.5, color: "#475569", fontWeight: 700 }}>
           {node.description}
         </Typography>
       )}

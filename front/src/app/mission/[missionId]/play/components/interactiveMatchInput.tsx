@@ -17,6 +17,7 @@ import { Box, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/materia
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+import { useSoundEffect } from "@/app/component/soundFeedback";
 import type { MatchItem, MatchTarget } from "../type";
 
 const UNASSIGNED_TARGET = "__unassigned";
@@ -27,12 +28,14 @@ const MatchCard = ({
   disabled,
   onClick,
   onRemove,
+  onGrab,
 }: {
   item: MatchItem;
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
   onRemove?: () => void;
+  onGrab: () => void;
 }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: item.id,
@@ -48,10 +51,20 @@ const MatchCard = ({
         role="button"
         tabIndex={disabled ? -1 : 0}
         aria-pressed={selected}
+        onPointerDown={(event) => {
+          listeners?.onPointerDown?.(event);
+          if (!disabled) {
+            onGrab();
+          }
+        }}
         onClick={onClick}
         onKeyDown={(event) => {
+          listeners?.onKeyDown?.(event);
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
+            if (!disabled) {
+              onGrab();
+            }
             onClick();
           }
         }}
@@ -156,7 +169,7 @@ const MatchTargetZone = ({
       <Stack spacing={0.8}>{children}</Stack>
       {!children && (
         <Typography variant="caption" color="text.secondary">
-          ここにカードを配置
+          カードをここにドロップ
         </Typography>
       )}
     </Paper>
@@ -206,6 +219,7 @@ export const InteractiveMatchInput = ({
   onAnswerChange: (answer: { matchPairs: Record<string, string[]> }) => void;
   disabled: boolean;
 }) => {
+  const { play } = useSoundEffect();
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const sensors = useSensors(
@@ -225,6 +239,7 @@ export const InteractiveMatchInput = ({
 
   const assignItem = (itemId: string, targetId: string) => {
     if (disabled) return;
+    const previousTargetId = answer[itemId] ?? UNASSIGNED_TARGET;
     const nextAnswer = { ...answer };
     if (targetId === UNASSIGNED_TARGET) {
       delete nextAnswer[itemId];
@@ -233,6 +248,9 @@ export const InteractiveMatchInput = ({
     }
     emitAnswer(nextAnswer);
     setSelectedItemId(null);
+    if (previousTargetId !== targetId) {
+      play("dragDrop");
+    }
   };
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -248,7 +266,9 @@ export const InteractiveMatchInput = ({
   return (
     <DndContext
       sensors={sensors}
-      onDragStart={({ active }) => setActiveItemId(String(active.id))}
+      onDragStart={({ active }) => {
+        setActiveItemId(String(active.id));
+      }}
       onDragCancel={() => setActiveItemId(null)}
       onDragEnd={handleDragEnd}
     >
@@ -262,7 +282,7 @@ export const InteractiveMatchInput = ({
       >
         <Box>
           <Typography fontWeight={900} sx={{ mb: 1 }}>
-            配置するカード
+            分類するカード
           </Typography>
           <UnassignedZone disabled={disabled}>
             <Stack spacing={1}>
@@ -273,6 +293,7 @@ export const InteractiveMatchInput = ({
                   selected={selectedItemId === item.id}
                   disabled={disabled}
                   onClick={() => setSelectedItemId((current) => current === item.id ? null : item.id)}
+                  onGrab={() => play("dragPickup")}
                 />
               ))}
               {unassignedItems.length === 0 && (
@@ -289,7 +310,7 @@ export const InteractiveMatchInput = ({
 
         <Box>
           <Typography fontWeight={900} sx={{ mb: 1 }}>
-            配置先
+            分類先
           </Typography>
           <Stack spacing={1.25}>
             {targets.map((target) => {
@@ -311,6 +332,7 @@ export const InteractiveMatchInput = ({
                           disabled={disabled}
                           onClick={() => setSelectedItemId((current) => current === item.id ? null : item.id)}
                           onRemove={() => assignItem(item.id, UNASSIGNED_TARGET)}
+                          onGrab={() => play("dragPickup")}
                         />
                       ))
                     : null}

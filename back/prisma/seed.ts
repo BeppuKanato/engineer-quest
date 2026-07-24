@@ -172,6 +172,18 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
 }
 
 async function seedLearningData() {
+  const activeCourseIds = learningSeed.courses.map((course) => course.id);
+
+  // Legacy Web-development courses remain in the database so existing user
+  // progress is not destroyed, but they are removed from the learning catalog.
+  await prisma.course.updateMany({
+    where: {
+      id: { notIn: activeCourseIds },
+      isPublished: true,
+    },
+    data: { isPublished: false },
+  });
+
   for (const course of learningSeed.courses) {
     await seedCourse(course);
   }

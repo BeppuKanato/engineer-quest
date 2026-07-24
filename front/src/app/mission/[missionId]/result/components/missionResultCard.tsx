@@ -11,6 +11,8 @@ import { Alert, Box, Button, Chip, Paper, Stack, Typography, keyframes } from "@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { ActionButton } from "@/app/component/actionButton";
+import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import type { CollectKnowledgeCardResponse, CompleteMissionResponse, KnowledgeCardChoice } from "../../play/type";
 import { CountUpExp } from "./countUpExp";
@@ -63,11 +65,11 @@ export const MissionResultCard = ({
   );
 
   useEffect(() => {
-    play("missionComplete");
-    if (badgeTicketTotal > 0) {
-      window.setTimeout(() => play("ticket"), 450);
-    }
-  }, [badgeTicketTotal, play]);
+    const soundKey = `legacy-mission-completed-sound:${result.mission.id}`;
+    if (window.sessionStorage.getItem(soundKey) === "played") return;
+    window.sessionStorage.setItem(soundKey, "played");
+    play("missionCompleted");
+  }, [play, result.mission.id]);
 
   const handleCollectKnowledgeCard = async () => {
     if (!selectedKnowledgeCardId || collectedKnowledgeCard) return;
@@ -77,10 +79,10 @@ export const MissionResultCard = ({
       setKnowledgeCardError(null);
       const response = await onCollectKnowledgeCard(selectedKnowledgeCardId);
       setCollectedKnowledgeCard(response.knowledgeCard);
-      play("saveSuccess");
+      play("cardFlip");
+      window.setTimeout(() => play("cardAcquired"), 280);
     } catch (error) {
       console.error(error);
-      play("errorSoft");
       setKnowledgeCardError("知識カードを追加できませんでした。もう一度試してください。");
     } finally {
       setIsCollectingKnowledgeCard(false);
@@ -90,6 +92,11 @@ export const MissionResultCard = ({
   return (
     <>
       <MissionResultConfetti targetRef={cardRef} />
+      <BlockingProcessOverlay
+        open={isCollectingKnowledgeCard}
+        title="知識カードを獲得しています"
+        description="獲得内容を保存しています。この処理中は画面を閉じないでください。"
+      />
       <Paper
         ref={cardRef}
         elevation={0}
@@ -306,7 +313,10 @@ export const MissionResultCard = ({
                         <Button
                           key={card.id}
                           variant={selected ? "contained" : "outlined"}
-                          onClick={() => setSelectedKnowledgeCardId(card.id)}
+                          onClick={() => {
+                            setSelectedKnowledgeCardId(card.id);
+                            play("uiSelect");
+                          }}
                           disabled={isCollectingKnowledgeCard}
                           sx={{
                             p: 2,
@@ -351,15 +361,17 @@ export const MissionResultCard = ({
                       {knowledgeCardError}
                     </Alert>
                   )}
-                  <Button
+                  <ActionButton
                     fullWidth
                     variant="contained"
+                    loading={isCollectingKnowledgeCard}
+                    loadingLabel="追加中..."
                     disabled={!selectedKnowledgeCardId || isCollectingKnowledgeCard}
                     onClick={handleCollectKnowledgeCard}
                     sx={{ mt: 2, minHeight: 48, fontWeight: 900, borderRadius: 2 }}
                   >
-                    {isCollectingKnowledgeCard ? "追加中..." : "この知識カードを追加する"}
-                  </Button>
+                    この知識カードを追加する
+                  </ActionButton>
                 </>
               )}
             </Box>

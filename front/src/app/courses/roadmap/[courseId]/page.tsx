@@ -5,12 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { Alert, Box, Container, Stack } from "@mui/material";
 
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { getCourseRoadmap } from "@/api/courses.api";
 import { auth } from "@/lib/firebase";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import type { CourseRoadmap } from "../type";
+import type { Difficulty } from "../../type";
 import { CourseRoadmapFlow } from "./components/courseRoadmapFlow";
 import { RoadmapHeader } from "./components/roadmapHeader";
 import { RoadmapSkeleton } from "./components/roadmapSkeleton";
@@ -68,9 +70,18 @@ export default function CourseRoadmapPage() {
     };
   }, [courseId]);
 
-  const handleMissionClick = (missionId: string) => {
+  const handleMissionClick = (missionId: string, difficulty?: Difficulty) => {
+    const mission = course?.missions.find((item) => item.id === missionId);
+    if (!mission || mission.isLocked) {
+      return;
+    }
+
     startNavigation(() => {
-      router.push(`/mission/${encodeURIComponent(missionId)}/play`);
+      const difficultyQuery =
+        mission.type === "course_exam"
+          ? `?difficulty=${encodeURIComponent(difficulty ?? "normal")}`
+          : "";
+      router.push(`/mission/${encodeURIComponent(missionId)}/play${difficultyQuery}`);
     });
   };
 
@@ -100,6 +111,7 @@ export default function CourseRoadmapPage() {
 
         {!isLoading && !errorMessage && course && (
           <Stack spacing={3}>
+            <AppBreadcrumbs items={[{ label: "コース", href: "/courses" }, { label: course.title }]} />
             <RoadmapHeader course={course} onNextMissionClick={handleNextMissionClick} />
             <CourseRoadmapFlow
               course={course}

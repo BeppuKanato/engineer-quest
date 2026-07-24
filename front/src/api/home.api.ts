@@ -8,6 +8,7 @@ export type HomeResponse = {
     level: number;
     requireNextLevelExp: number;
     exp: number;
+    selectedMascotId: string;
     completedMissionNum: number;
     completedAchievementNum: number;
     todayCompletedMissionCount: number;

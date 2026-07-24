@@ -15,10 +15,12 @@ import { getKnowledgeCardCandidateIdsForMission } from "./knowledgeCard.service"
 
 type ApiDifficulty = "easy" | "normal" | "hard";
 type ApiProgressStatus = "completed" | "in_progress" | "not_started";
+type ApiMissionType = "main" | "challenge" | "course_exam";
 
 type GetMissionPlayInput = {
   missionId: string;
   firebaseUid: string;
+  difficulty?: ApiDifficulty;
 };
 
 type GetMissionOverviewInput = {
@@ -69,12 +71,48 @@ const toDifficulty = (difficulty: CourseDifficulty): ApiDifficulty => {
   }
 };
 
+const toCourseDifficulty = (difficulty: ApiDifficulty): CourseDifficulty => {
+  switch (difficulty) {
+    case "easy":
+      return CourseDifficulty.EASY;
+    case "normal":
+      return CourseDifficulty.NORMAL;
+    case "hard":
+      return CourseDifficulty.HARD;
+  }
+};
+
+const difficultyRank: Record<CourseDifficulty, number> = {
+  [CourseDifficulty.EASY]: 1,
+  [CourseDifficulty.NORMAL]: 2,
+  [CourseDifficulty.HARD]: 3,
+};
+
+const pickHigherDifficulty = (
+  current: CourseDifficulty | null | undefined,
+  next: CourseDifficulty
+) => {
+  if (!current) return next;
+  return difficultyRank[next] > difficultyRank[current] ? next : current;
+};
+
 const toProgressStatus = (
   status?: PrismaProgressStatus | null
 ): ApiProgressStatus => {
   if (status === PrismaProgressStatus.COMPLETED) return "completed";
   if (status === PrismaProgressStatus.IN_PROGRESS) return "in_progress";
   return "not_started";
+};
+
+const toMissionType = (type: MissionType): ApiMissionType => {
+  switch (type) {
+    case MissionType.MAIN:
+      return "main";
+    case MissionType.CHALLENGE:
+      return "challenge";
+    case MissionType.COURSE_EXAM:
+      return "course_exam";
+  }
 };
 
 const asRecord = (value: unknown): MissionActivityContent => {
@@ -249,7 +287,19 @@ const judgeTryCode = (content: MissionActivityContent, answer: unknown) => {
     };
   }
 
-  const isCorrect = submittedCode === answerCode;
+  const normalizeTranscriptionCode = (code: string) =>
+    code
+      .replace(/\r\n?/g, "\n")
+      .split("\n")
+      .map((line) => line.replace(/[ \t]+$/g, ""))
+      .join("\n")
+      .replace(/\n+$/g, "");
+  const isCorrect =
+    content.courseCheck === true
+      ? normalizeTranscriptionCode(submittedCode) ===
+          normalizeTranscriptionCode(answerCode) &&
+        answerRecord.executionPassed === true
+      : submittedCode === answerCode;
 
   return {
     isCorrect,
@@ -351,7 +401,11 @@ const getMissionAccess = async (userId: string, missionId: string) => {
   let unlockMission: { id: string; title: string } | null = null;
   let isUnlocked = isAlreadyStarted;
 
-  if (!isAlreadyStarted && mission.type === MissionType.MAIN) {
+  if (
+    !isAlreadyStarted &&
+    (mission.type === MissionType.MAIN ||
+      mission.type === MissionType.COURSE_EXAM)
+  ) {
     const requiredMissions = mission.course.missions.filter(
       (candidate) => candidate.isRequiredForCourseCompletion
     );
@@ -576,6 +630,7 @@ const isCourseRequiredMissionsComplete = async (
 export const getMissionPlayService = async ({
   missionId,
   firebaseUid,
+  difficulty,
 }: GetMissionPlayInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   await assertMissionUnlocked(user.id, missionId);
@@ -622,6 +677,8 @@ export const getMissionPlayService = async ({
           status: true,
           currentActivityId: true,
           startedAt: true,
+          selectedExamDifficulty: true,
+          highestClearedExamDifficulty: true,
         },
       },
     },
@@ -633,6 +690,10 @@ export const getMissionPlayService = async ({
 
   const firstActivityId = mission.activities[0]?.id ?? null;
   const missionProgress = mission.progresses[0];
+  const selectedExamDifficulty =
+    mission.type === MissionType.COURSE_EXAM && difficulty
+      ? toCourseDifficulty(difficulty)
+      : missionProgress?.selectedExamDifficulty ?? null;
   const completedActivityIds = mission.activities
     .filter(
       (activity) =>
@@ -655,6 +716,9 @@ export const getMissionPlayService = async ({
     update: {
       startedAt: missionProgress?.startedAt ?? new Date(),
       currentActivityId,
+      ...(mission.type === MissionType.COURSE_EXAM && selectedExamDifficulty
+        ? { selectedExamDifficulty }
+        : {}),
     },
     create: {
       userId: user.id,
@@ -662,6 +726,9 @@ export const getMissionPlayService = async ({
       status: PrismaProgressStatus.IN_PROGRESS,
       startedAt: new Date(),
       currentActivityId,
+      ...(mission.type === MissionType.COURSE_EXAM && selectedExamDifficulty
+        ? { selectedExamDifficulty }
+        : {}),
     },
   });
 
@@ -672,7 +739,14 @@ export const getMissionPlayService = async ({
     missionOrder: mission.order,
     title: mission.title,
     description: mission.description,
+    type: toMissionType(mission.type),
     difficulty: toDifficulty(mission.difficulty),
+    selectedExamDifficulty: selectedExamDifficulty
+      ? toDifficulty(selectedExamDifficulty)
+      : null,
+    highestClearedExamDifficulty: missionProgress?.highestClearedExamDifficulty
+      ? toDifficulty(missionProgress.highestClearedExamDifficulty)
+      : null,
     goalImg: mission.goalImg,
     estimatedMinutes: mission.estimatedMinutes,
     rewardExp: mission.rewardExp,
@@ -1043,6 +1117,30 @@ export const completeMissionService = async ({
     );
   }
 
+  const missionProgress = await prisma.userMissionProgress.findUnique({
+    where: {
+      userId_missionId: {
+        userId: user.id,
+        missionId: mission.id,
+      },
+    },
+    select: {
+      selectedExamDifficulty: true,
+      highestClearedExamDifficulty: true,
+    },
+  });
+  const completedExamDifficulty =
+    mission.type === MissionType.COURSE_EXAM
+      ? missionProgress?.selectedExamDifficulty ?? CourseDifficulty.EASY
+      : null;
+  const highestClearedExamDifficulty =
+    completedExamDifficulty !== null
+      ? pickHigherDifficulty(
+          missionProgress?.highestClearedExamDifficulty,
+          completedExamDifficulty
+        )
+      : null;
+
   const experienceUpdate = await prisma.$transaction(async (tx) => {
     await tx.userMissionProgress.upsert({
       where: {
@@ -1055,6 +1153,13 @@ export const completeMissionService = async ({
         status: PrismaProgressStatus.COMPLETED,
         currentActivityId: null,
         completedAt: new Date(),
+        ...(mission.type === MissionType.COURSE_EXAM
+          ? {
+              selectedExamDifficulty: completedExamDifficulty,
+              highestClearedExamDifficulty,
+              examAttemptCount: { increment: 1 },
+            }
+          : {}),
       },
       create: {
         userId: user.id,
@@ -1062,6 +1167,13 @@ export const completeMissionService = async ({
         status: PrismaProgressStatus.COMPLETED,
         startedAt: new Date(),
         completedAt: new Date(),
+        ...(mission.type === MissionType.COURSE_EXAM
+          ? {
+              selectedExamDifficulty: completedExamDifficulty,
+              highestClearedExamDifficulty,
+              examAttemptCount: 1,
+            }
+          : {}),
       },
     });
 
@@ -1171,7 +1283,7 @@ export const completeMissionService = async ({
     nextPath:
       candidateKnowledgeCardIds.length > 0
         ? `/mission-rewards/${rewardRun.id}/cards`
-        : `/mission-rewards/${rewardRun.id}/achievements`,
+        : `/mission-rewards/${rewardRun.id}/result`,
     mission: {
       id: mission.id,
       courseId: mission.courseId,

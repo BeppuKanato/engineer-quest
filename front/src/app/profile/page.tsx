@@ -3,11 +3,11 @@
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
 import HistoryIcon from "@mui/icons-material/History";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import PetsIcon from "@mui/icons-material/Pets";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
@@ -21,6 +21,8 @@ import {
   DialogContent,
   LinearProgress,
   Paper,
+  Radio,
+  RadioGroup,
   Skeleton,
   Stack,
   Typography,
@@ -35,23 +37,31 @@ import {
   type ProfileHistoryItem,
   type ProfileHistoryType,
   type ProfileResponse,
+  updateProfileMascot,
 } from "@/api/profile.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { ActionButton } from "@/app/component/actionButton";
+import { AppSnackbar } from "@/app/component/appSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
+import { getMascotImagePath, isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
+import { useSoundEffect } from "@/app/component/soundFeedback";
 import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
+import {
+  useAchievementNotificationMode,
+  type AchievementNotificationMode,
+} from "@/hooks/useAchievementNotificationMode";
 import { auth } from "@/lib/firebase";
 
 const historyMeta: Record<
   ProfileHistoryType,
   { label: string; color: string; bgcolor: string; icon: ReactNode }
 > = {
-  mission_completed: {
-    label: "ミッション",
+  mission_completed: { label: "ミッション",
     color: "#0052d9",
     bgcolor: "#eaf2ff",
     icon: <CheckCircleIcon fontSize="small" />,
   },
-  achievement_unlocked: {
-    label: "称号",
+  achievement_unlocked: { label: "実績",
     color: "#d97706",
     bgcolor: "#fff7ed",
     icon: <EmojiEventsIcon fontSize="small" />,
@@ -62,8 +72,7 @@ const historyMeta: Record<
     bgcolor: "#dcfce7",
     icon: <FlagIcon fontSize="small" />,
   },
-  badge_acquired: {
-    label: "バッジ",
+  badge_acquired: { label: "バッジ",
     color: "#0f9a9a",
     bgcolor: "#e6fffb",
     icon: <WorkspacePremiumIcon fontSize="small" />,
@@ -84,30 +93,24 @@ const formatDateTime = (value: string) =>
     minute: "2-digit",
   });
 
-const mascotOptions = [
-  { id: "red-panda", label: "レッサーパンダ", image: "/images/mascots/red-panda/normal.png", face: "/images/mascots/red-panda/face.png" },
-  { id: "penguin", label: "ペンギン", image: "/images/mascots/penguin/normal.png", face: "/images/mascots/penguin/face.png" },
-  { id: "owl", label: "フクロウ", image: "/images/mascots/owl/normal.png", face: "/images/mascots/owl/face.png" },
-] as const;
-
-type MascotId = (typeof mascotOptions)[number]["id"];
-
-const mascotStorageKey = "engineerQuest.companionMascot";
 
 export default function ProfilePage() {
+  const { play } = useSoundEffect();
+  const {
+    mode: achievementNotificationMode,
+    setMode: setAchievementNotificationMode,
+  } = useAchievementNotificationMode();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
   const [selectedMascotId, setSelectedMascotId] = useState<MascotId>("red-panda");
+  const [draftMascotId, setDraftMascotId] = useState<MascotId>("red-panda");
   const [isMascotDialogOpen, setIsMascotDialogOpen] = useState(false);
+  const [isMascotSaving, setIsMascotSaving] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedMascotId = window.localStorage.getItem(mascotStorageKey);
-    if (savedMascotId && mascotOptions.some((mascot) => mascot.id === savedMascotId)) {
-      setSelectedMascotId(savedMascotId as MascotId);
-    }
-
     let isMounted = true;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -132,6 +135,11 @@ export default function ProfilePage() {
         if (!isMounted) return;
         setProfile(profileData);
         setCollection(collectionData);
+        const nextMascotId = isMascotId(profileData.user.selectedMascotId)
+          ? profileData.user.selectedMascotId
+          : "red-panda";
+        setSelectedMascotId(nextMascotId);
+        setDraftMascotId(nextMascotId);
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
@@ -170,18 +178,20 @@ export default function ProfilePage() {
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
-        {isLoading ? (
-          <ProfileSkeleton />
-        ) : !profile || !user ? (
-          <Alert severity="error">{errorMessage ?? "プロフィール情報がありません。"}</Alert>
-        ) : (
-          <Stack spacing={3}>
+        <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "プロフィール" }]} />
+          {isLoading ? (
+            <ProfileSkeleton />
+          ) : !profile || !user ? (
+            <Alert severity="error">{errorMessage ?? "プロフィール情報がありません。"}</Alert>
+          ) : (
+            <>
             <Box>
               <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 52 } }}>
                 プロフィール
               </Typography>
               <Typography color="text.secondary" sx={{ mt: 1, fontSize: 17 }}>
-                あなたの学習の記録とアカウント情報を確認できます。
+                あなたの学習記録とアカウント情報を確認できます。
               </Typography>
             </Box>
 
@@ -189,15 +199,15 @@ export default function ProfilePage() {
 
             <Paper elevation={0} sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff", boxShadow: "0 18px 44px rgba(15, 23, 42, 0.06)" }}>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr) 520px" }, gap: { xs: 3, lg: 4 }, alignItems: "center" }}>
-                <Box component="img" src={selectedMascot.image} alt="プロフィールの相棒マスコット" sx={{ width: { xs: 220, md: 300 }, height: { xs: 220, md: 300 }, objectFit: "contain", mx: { xs: "auto", lg: 0 } }} />
+                <Box component="img" src={getMascotImagePath(selectedMascotId, "normal")} alt="マスコット画像" sx={{ width: { xs: 220, md: 300 }, height: { xs: 220, md: 300 }, objectFit: "contain", mx: { xs: "auto", lg: 0 } }} />
 
                 <Stack spacing={2.2}>
-                  <Chip label="エンジニア見習い" sx={{ alignSelf: "flex-start", fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
+                  <Chip label="プロフィール" sx={{ alignSelf: "flex-start", fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
                   <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 42, md: 56 }, lineHeight: 1 }}>
                     {user.displayName ?? "Engineer"}
                   </Typography>
                   <Typography sx={{ maxWidth: 520, lineHeight: 1.8, fontSize: 17 }}>
-                    Webアプリ開発を楽しく学習中。フロントエンドとバックエンドの両方に挑戦しています。
+                    Web開発に関する知識とスキルを深めるための学習プラットフォームです。
                   </Typography>
 
                   <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
@@ -221,8 +231,16 @@ export default function ProfilePage() {
                     プロフィール設定
                   </Typography>
                   <Stack spacing={1.5}>
-                    <SettingRow icon={<PetsIcon />} label="相棒" value={selectedMascot.label} image={selectedMascot.face} onClick={() => setIsMascotDialogOpen(true)} />
-                    <SettingRow icon={<EmojiEventsIcon />} label="お気に入りの称号" value={user.rank} href="/achievements" />
+                    <SettingRow
+                      icon={<PetsIcon />}
+                      label="相棒"
+                      value={selectedMascot.label}
+                      image={getMascotImagePath(selectedMascotId, "face")}
+                      onClick={() => {
+                        setDraftMascotId(selectedMascotId);
+                        setIsMascotDialogOpen(true);
+                      }}
+                    />
                     <SettingRow
                       icon={<WorkspacePremiumIcon />}
                       label="プロフィールバッジ"
@@ -230,9 +248,13 @@ export default function ProfilePage() {
                       badge={selectedBadge}
                       href="/badges"
                     />
-                    <Button component={Link} href="/profile" variant="contained" size="large" startIcon={<EditIcon />} sx={{ minHeight: 56, borderRadius: 2, fontWeight: 900, mt: 1 }}>
-                      プロフィールを編集
-                    </Button>
+                    <AchievementNotificationSetting
+                      value={achievementNotificationMode}
+                      onChange={(mode) => {
+                        setAchievementNotificationMode(mode);
+                        play("uiSelect");
+                      }}
+                    />
                   </Stack>
                 </Paper>
               </Box>
@@ -244,17 +266,53 @@ export default function ProfilePage() {
             </Box>
             <MascotSelectDialog
               open={isMascotDialogOpen}
-              selectedMascotId={selectedMascotId}
+              currentMascotId={selectedMascotId}
+              selectedMascotId={draftMascotId}
               onClose={() => setIsMascotDialogOpen(false)}
+              isSaving={isMascotSaving}
               onSelect={(mascotId) => {
-                setSelectedMascotId(mascotId);
-                window.localStorage.setItem(mascotStorageKey, mascotId);
-                setIsMascotDialogOpen(false);
+                setDraftMascotId(mascotId);
+                play("uiSelect");
+              }}
+              onConfirm={async () => {
+                if (draftMascotId === selectedMascotId || isMascotSaving) return;
+                setIsMascotSaving(true);
+                try {
+                  const currentUser = auth.currentUser;
+                  if (!currentUser) {
+                    throw new Error("Unauthorized");
+                  }
+                  const token = await currentUser.getIdToken();
+                  const result = await updateProfileMascot(token, draftMascotId);
+                  const nextMascotId = isMascotId(result.selectedMascotId)
+                    ? result.selectedMascotId
+                    : draftMascotId;
+                  setSelectedMascotId(nextMascotId);
+                  setDraftMascotId(nextMascotId);
+                  setProfile((current) =>
+                    current
+                      ? {
+                          ...current,
+                          user: {
+                            ...current.user,
+                            selectedMascotId: nextMascotId,
+                          },
+                        }
+                      : current
+                  );
+                  setIsMascotDialogOpen(false);
+                  setSnackbarOpen(true);
+                  play("saveSuccess");
+                } finally {
+                  setIsMascotSaving(false);
+                }
               }}
             />
-          </Stack>
-        )}
+            </>
+          )}
+        </Stack>
       </Container>
+      <AppSnackbar open={snackbarOpen} message="相棒が変更されました。" onClose={() => setSnackbarOpen(false)} />
     </Box>
   );
 }
@@ -307,56 +365,172 @@ const SettingRow = ({
   </Paper>
 );
 
+const achievementNotificationOptions: {
+  value: AchievementNotificationMode;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "modal",
+    label: "モーダル",
+    description: "実績解除時に、大きな演出画面を表示します。",
+  },
+  {
+    value: "snackbar",
+    label: "スナックバー",
+    description: "実績解除時に、画面上へ小さな通知を表示します。",
+  },
+  {
+    value: "none",
+    label: "通知なし",
+    description: "実績は解除されますが、即時通知は表示しません。",
+  },
+];
+
+const AchievementNotificationSetting = ({
+  value,
+  onChange,
+}: {
+  value: AchievementNotificationMode;
+  onChange: (mode: AchievementNotificationMode) => void;
+}) => (
+  <Paper
+    elevation={0}
+    sx={{ p: 1.5, borderRadius: 2, border: "1px solid #dbe3ef", bgcolor: "#fff" }}
+  >
+    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+      <Box sx={{ width: 34, color: "#0052d9", display: "grid", placeItems: "center" }}>
+        <NotificationsActiveIcon />
+      </Box>
+      <Typography fontWeight={800}>実績解除通知</Typography>
+    </Stack>
+    <RadioGroup
+      value={value}
+      onChange={(event) =>
+        onChange(event.target.value as AchievementNotificationMode)
+      }
+      aria-label="実績解除通知"
+    >
+      {achievementNotificationOptions.map((option) => (
+        <Paper
+          component="label"
+          key={option.value}
+          elevation={0}
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            p: 1,
+            borderRadius: 2,
+            cursor: "pointer",
+            bgcolor: value === option.value ? "#eff6ff" : "transparent",
+          }}
+        >
+          <Radio value={option.value} size="small" sx={{ mt: -0.5 }} />
+          <Box>
+            <Typography fontWeight={900}>{option.label}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              {option.description}
+            </Typography>
+          </Box>
+        </Paper>
+      ))}
+    </RadioGroup>
+  </Paper>
+);
+
 const MascotSelectDialog = ({
   open,
+  currentMascotId,
   selectedMascotId,
+  isSaving,
   onClose,
   onSelect,
+  onConfirm,
 }: {
   open: boolean;
+  currentMascotId: MascotId;
   selectedMascotId: MascotId;
+  isSaving: boolean;
   onClose: () => void;
   onSelect: (mascotId: MascotId) => void;
-}) => (
+  onConfirm: () => void;
+}) => {
+  const selectedMascot = mascotOptions.find((mascot) => mascot.id === selectedMascotId) ?? mascotOptions[0];
+  const isCurrentSelection = selectedMascotId === currentMascotId;
+
+  return (
   <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
     <DialogContent sx={{ p: { xs: 3, md: 4 } }}>
       <Typography variant="h4" fontWeight={900}>相棒を選択</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
-        ホームやプロフィールで表示する相棒を選べます。
+        候補を選んでから、確認ボタンで相棒を変更します。
       </Typography>
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
-        {mascotOptions.map((mascot) => {
-          const selected = mascot.id === selectedMascotId;
-          return (
-            <Paper
-              key={mascot.id}
-              component="button"
-              type="button"
-              elevation={0}
-              onClick={() => onSelect(mascot.id)}
-              sx={{
-                p: 2,
-                borderRadius: 3,
-                border: selected ? "3px solid #0052d9" : "1px solid #dbe3ef",
-                bgcolor: selected ? "#eff6ff" : "#fff",
-                cursor: "pointer",
-                textAlign: "center",
-                boxShadow: selected ? "0 18px 42px rgba(0, 82, 217, 0.16)" : "none",
-              }}
-            >
-              <Box component="img" src={mascot.image} alt={mascot.label} sx={{ width: 170, height: 170, objectFit: "contain" }} />
-              <Typography variant="h6" fontWeight={900}>{mascot.label}</Typography>
-              {selected && <Chip label="選択中" size="small" sx={{ mt: 1, fontWeight: 900, bgcolor: "#0052d9", color: "#fff" }} />}
-            </Paper>
-          );
-        })}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 300px" }, gap: 2.5 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2 }}>
+          {mascotOptions.map((mascot) => {
+            const selected = mascot.id === selectedMascotId;
+            const current = mascot.id === currentMascotId;
+            return (
+              <Paper
+                key={mascot.id}
+                component="button"
+                type="button"
+                elevation={0}
+                onClick={() => onSelect(mascot.id)}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: selected ? "3px solid #0052d9" : current ? "2px solid #16a34a" : "1px solid #dbe3ef",
+                  bgcolor: selected ? "#eff6ff" : "#fff",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  boxShadow: selected ? "0 18px 42px rgba(0, 82, 217, 0.16)" : "none",
+                  transition: "transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 16px 34px rgba(15, 23, 42, 0.1)",
+                  },
+                }}
+              >
+                <Box component="img" src={getMascotImagePath(mascot.id, "normal")} alt={mascot.label} sx={{ width: 150, height: 150, objectFit: "contain" }} />
+                <Typography variant="h6" fontWeight={900}>{mascot.label}</Typography>
+                <Stack direction="row" spacing={0.75} justifyContent="center" sx={{ mt: 1 }} flexWrap="wrap">
+                  {current && <Chip label="現在の相棒" size="small" color="success" sx={{ fontWeight: 900 }} />}
+                  {selected && !current && <Chip label="選択中" size="small" sx={{ fontWeight: 900, bgcolor: "#0052d9", color: "#fff" }} />}
+                  {!selected && !current && <Chip label="選択可能" size="small" sx={{ fontWeight: 900 }} />}
+                </Stack>
+              </Paper>
+            );
+          })}
+        </Box>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#f8fbff" }}>
+          <Stack spacing={1.5} alignItems="center" textAlign="center">
+            <Box component="img" src={getMascotImagePath(selectedMascotId, "normal")} alt={selectedMascot.label} sx={{ width: 180, height: 180, objectFit: "contain" }} />
+            <Typography variant="h5" fontWeight={900}>{selectedMascot.label}</Typography>
+            <Chip label={selectedMascot.personality} sx={{ fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
+            <Typography color="#334155" fontWeight={800} sx={{ lineHeight: 1.75 }}>
+              {selectedMascot.message}
+            </Typography>
+          </Stack>
+        </Paper>
       </Box>
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 3 }}>
-      <Button onClick={onClose} sx={{ fontWeight: 900 }}>閉じる</Button>
+      <Button disabled={isSaving} onClick={onClose} sx={{ fontWeight: 900 }}>閉じる</Button>
+      <ActionButton
+        variant="contained"
+        loading={isSaving}
+        loadingLabel="変更中..."
+        disabled={isCurrentSelection}
+        onClick={onConfirm}
+        sx={{ minHeight: 44, fontWeight: 900, borderRadius: 2 }}
+      >
+        {isCurrentSelection ? "現在の相棒" : "この相棒にする"}
+      </ActionButton>
     </DialogActions>
   </Dialog>
-);
+  );
+};
 
 const RecentActivityCard = ({ items }: { items: ProfileHistoryItem[] }) => (
   <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff" }}>

@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { getCollection, type CollectionKnowledgeTip, type CollectionResponse } from "@/api/collection.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { auth } from "@/lib/firebase";
 
@@ -105,10 +106,12 @@ export default function KnowledgeCardsPage() {
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
-        {isLoading ? (
-          <KnowledgeSkeleton />
-        ) : (
-          <Stack spacing={2.5}>
+        <Stack spacing={2.5}>
+          <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "知識カード" }]} />
+          {isLoading ? (
+            <KnowledgeSkeleton />
+          ) : (
+            <>
             <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
               <Box>
                 <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 52 } }}>知識カード</Typography>
@@ -179,8 +182,9 @@ export default function KnowledgeCardsPage() {
 
               <KnowledgeDetailPanel card={selectedCard} />
             </Box>
-          </Stack>
-        )}
+            </>
+          )}
+        </Stack>
       </Container>
     </Box>
   );

@@ -25,6 +25,7 @@ import { Chip, IconButton, Paper, Stack, Tooltip, Typography, keyframes } from "
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
+import { useSoundEffect } from "@/app/component/soundFeedback";
 import type { OrderedStep } from "../type";
 
 const movedPulse = keyframes`
@@ -40,6 +41,7 @@ const SortableStep = ({
   disabled,
   recentlyMoved,
   onMove,
+  onGrab,
 }: {
   step: OrderedStep;
   index: number;
@@ -47,6 +49,7 @@ const SortableStep = ({
   disabled: boolean;
   recentlyMoved: boolean;
   onMove: (direction: -1 | 1) => void;
+  onGrab: () => void;
 }) => {
   const {
     attributes,
@@ -69,8 +72,6 @@ const SortableStep = ({
   return (
     <Paper
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       elevation={0}
       sx={{
         minHeight: 64,
@@ -82,10 +83,11 @@ const SortableStep = ({
         alignItems: "center",
         bgcolor: isDragging || recentlyMoved ? "#eff6ff" : "#fff",
         boxShadow: isDragging ? "0 14px 28px rgba(37, 99, 235, 0.18)" : "none",
+        opacity: isDragging ? 0.45 : 1,
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 2 : "auto",
-        cursor: disabled ? "default" : isDragging ? "grabbing" : "grab",
+        cursor: disabled ? "default" : "default",
         touchAction: "none",
         animation: recentlyMoved ? `${movedPulse} 480ms ease-out` : "none",
         "@media (prefers-reduced-motion: reduce)": {
@@ -94,7 +96,31 @@ const SortableStep = ({
       }}
     >
       <Tooltip title="ドラッグして並べ替え">
-        <IconButton size="small" disabled={disabled} tabIndex={-1} sx={{ pointerEvents: "none" }}>
+        <IconButton
+          size="small"
+          disabled={disabled}
+          aria-label={`${step.label}をドラッグして並べ替え`}
+          {...attributes}
+          {...listeners}
+          onPointerDown={(event) => {
+            listeners?.onPointerDown?.(event);
+            if (!disabled) {
+              onGrab();
+            }
+          }}
+          onKeyDown={(event) => {
+            listeners?.onKeyDown?.(event);
+            if (!disabled && (event.key === " " || event.key === "Enter")) {
+              onGrab();
+            }
+          }}
+          sx={{
+            cursor: disabled ? "default" : isDragging ? "grabbing" : "grab",
+            touchAction: "none",
+            bgcolor: isDragging ? "#dbeafe" : "transparent",
+            "&:hover": { bgcolor: "#eff6ff" },
+          }}
+        >
           <DragIndicatorIcon />
         </IconButton>
       </Tooltip>
@@ -139,6 +165,7 @@ export const SortableOrderedStepsInput = ({
   onAnswerChange: (answer: string[]) => void;
   disabled: boolean;
 }) => {
+  const { play } = useSoundEffect();
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
   const movedTimerRef = useRef<number | null>(null);
@@ -156,6 +183,12 @@ export const SortableOrderedStepsInput = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (answer.length === 0 && steps.length > 0) {
+      onAnswerChange(steps.map((step) => step.id));
+    }
+  }, [answer.length, onAnswerChange, steps]);
+
   const emphasizeMovedStep = (stepId: string) => {
     setRecentlyMovedId(stepId);
     if (movedTimerRef.current) window.clearTimeout(movedTimerRef.current);
@@ -167,6 +200,7 @@ export const SortableOrderedStepsInput = ({
     if (nextIndex < 0 || nextIndex >= currentAnswer.length) return;
     emphasizeMovedStep(currentAnswer[index]);
     onAnswerChange(arrayMove(currentAnswer, index, nextIndex));
+    play("dragDrop");
   };
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -176,6 +210,7 @@ export const SortableOrderedStepsInput = ({
     if (oldIndex < 0 || newIndex < 0) return;
     emphasizeMovedStep(String(active.id));
     onAnswerChange(arrayMove(currentAnswer, oldIndex, newIndex));
+    play("dragDrop");
   };
 
   const activeStep = activeStepId ? stepById.get(activeStepId) ?? null : null;
@@ -184,7 +219,9 @@ export const SortableOrderedStepsInput = ({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={({ active }) => setActiveStepId(String(active.id))}
+      onDragStart={({ active }) => {
+        setActiveStepId(String(active.id));
+      }}
       onDragCancel={() => setActiveStepId(null)}
       onDragEnd={(event) => {
         setActiveStepId(null);
@@ -215,6 +252,7 @@ export const SortableOrderedStepsInput = ({
                   disabled={disabled}
                   recentlyMoved={recentlyMovedId === stepId}
                   onMove={(direction) => move(index, direction)}
+                  onGrab={() => play("dragPickup")}
                 />
               </motion.div>
             );

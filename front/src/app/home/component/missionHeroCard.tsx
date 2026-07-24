@@ -1,4 +1,5 @@
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
 import StarsIcon from "@mui/icons-material/Stars";
@@ -17,14 +18,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import React from "react";
 
+import { getMascotImagePath } from "@/app/component/mascot";
+
 import { Mission, MissionTab, TargetAchievement } from "../type";
 
 type MissionHeroCardProps = {
   mission: Mission | null;
   recommendedMission: Mission | null;
   targetAchievement: TargetAchievement | null;
-  todayCompletedMissionCount: number;
-  dailyMissionGoal: number;
   mascotId: string;
   tab: MissionTab;
   onChangeTab: (value: MissionTab) => void;
@@ -95,8 +96,8 @@ const MascotCoach = ({ message, mascotId }: { message: string; mascotId: string 
       >
         <Box
           component="img"
-          src={`/images/mascots/${mascotId}/face.png`}
-          alt="相棒マスコットの顔。学習を応援している表情の画像を想定"
+          src={getMascotImagePath(mascotId, "face")}
+          alt="学習を応援する相棒の顔"
           sx={{
             width: "100%",
             height: "100%",
@@ -108,13 +109,10 @@ const MascotCoach = ({ message, mascotId }: { message: string; mascotId: string 
     </Box>
   );
 };
-
 export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
   mission,
   recommendedMission,
   targetAchievement,
-  todayCompletedMissionCount,
-  dailyMissionGoal,
   mascotId,
   tab,
   onChangeTab,
@@ -122,11 +120,10 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
   const isAchievementTab = tab === "achievement";
   const achievementProgress = getAchievementProgress(targetAchievement);
   const heroKey = isAchievementTab ? targetAchievement?.title ?? "empty-achievement" : mission?.id ?? "empty-mission";
-  const todayProgress = dailyMissionGoal === 0 ? 0 : Math.min(100, Math.round((todayCompletedMissionCount / dailyMissionGoal) * 100));
-  const remainingMissionCount = Math.max(0, dailyMissionGoal - todayCompletedMissionCount);
+  const missionProgress = mission?.progress ?? 0;
   const coachMessage = isAchievementTab
-    ? "今日の積み上げが目標達成につながるよ！"
-    : "あと少し！この調子で進めよう！";
+    ? "今日の積み上げが目標達成につながるよ。"
+    : "あと少し。この調子で進めよう。";
 
   return (
     <Card
@@ -245,7 +242,7 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
 
                   <Button
                     component={Link}
-                    href={targetAchievement ? recommendedMission?.href ?? "/courses" : "/achievements"}
+                    href={targetAchievement ? targetAchievement.href ?? recommendedMission?.href ?? "/courses" : "/achievements"}
                     variant="contained"
                     endIcon={<ArrowForwardIcon />}
                     sx={{
@@ -260,14 +257,14 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
                       "&:hover": { bgcolor: "#f8fafc", boxShadow: "none" },
                     }}
                   >
-                    {targetAchievement ? "この目標に向けて学習する" : "目標を設定する"}
+                    {targetAchievement ? targetAchievement.actionLabel ?? "学習を続ける" : "目標を設定する"}
                   </Button>
                 </Stack>
               ) : (
                 <Stack spacing={3}>
                   <Stack direction="row" spacing={1.25} alignItems="center">
                     <FlagIcon />
-                    <Typography fontWeight={900}>今日の目標</Typography>
+                    <Typography fontWeight={900}>今日の学習</Typography>
                   </Stack>
 
                   <Box>
@@ -280,19 +277,24 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
                         letterSpacing: 0,
                       }}
                     >
-                      {Math.min(todayCompletedMissionCount, dailyMissionGoal)} / {dailyMissionGoal} ミッション完了
+                      {mission?.title ?? "次に学ぶミッションを選ぼう"}
                     </Typography>
                     <Typography sx={{ mt: 2, color: "rgba(255,255,255,0.9)", lineHeight: 1.8 }}>
-                      {remainingMissionCount > 0
-                        ? `今日の目標まであと ${remainingMissionCount} ミッション。${mission ? `次は「${mission.title}」から再開できます。` : "コース一覧から次の学習を選びましょう。"}`
-                        : "今日の目標を達成しました。余裕があれば次のミッションにも進めます。"}
+                      {mission
+                        ? mission.reason
+                        : "進行中または未完了のミッションが見つかりません。コース一覧から学習先を選べます。"}
                     </Typography>
                   </Box>
 
+                  {mission && (
                   <Box sx={{ maxWidth: 560 }}>
+                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                      <Typography fontWeight={900}>ミッション進捗</Typography>
+                      <Typography fontWeight={900}>{missionProgress}%</Typography>
+                    </Stack>
                     <LinearProgress
                       variant="determinate"
-                      value={todayProgress}
+                      value={missionProgress}
                       sx={{
                         height: 14,
                         borderRadius: 999,
@@ -304,6 +306,7 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
                       }}
                     />
                   </Box>
+                  )}
 
                   <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "stretch", sm: "center" }}>
                     <Button
@@ -322,19 +325,42 @@ export const MissionHeroCard: React.FC<MissionHeroCardProps> = ({
                         "&:hover": { bgcolor: "#f8fafc", boxShadow: "none" },
                       }}
                     >
-                      今日の学習を始める
+                      {mission?.ctaLabel ?? "コース一覧を見る"}
                     </Button>
-                    <Chip
-                      icon={<EmojiEventsIcon />}
-                      label="+20 EXP / Badge Ticket"
-                      sx={{
-                        width: "fit-content",
-                        bgcolor: "rgba(255,255,255,0.16)",
-                        color: "#fff",
-                        fontWeight: 900,
-                        "& .MuiChip-icon": { color: "#fbbf24" },
-                      }}
-                    />
+                    {mission && (
+                      <Stack direction="row" spacing={1} flexWrap="wrap">
+                        <Chip
+                          icon={<AccessTimeIcon />}
+                          label={`約${mission.estimatedMinutes}分`}
+                          sx={{
+                            width: "fit-content",
+                            bgcolor: "rgba(255,255,255,0.16)",
+                            color: "#fff",
+                            fontWeight: 900,
+                            "& .MuiChip-icon": { color: "#bfdbfe" },
+                          }}
+                        />
+                        {mission.activityCount > 0 && (
+                          <Chip
+                            label={`${mission.activityCount} アクティビティ`}
+                            sx={{ width: "fit-content", bgcolor: "rgba(255,255,255,0.16)", color: "#fff", fontWeight: 900 }}
+                          />
+                        )}
+                        {mission.rewardExp > 0 && (
+                          <Chip
+                            icon={<EmojiEventsIcon />}
+                            label={`完了報酬 ${mission.rewardExp} EXP`}
+                            sx={{
+                              width: "fit-content",
+                              bgcolor: "rgba(255,255,255,0.16)",
+                              color: "#fff",
+                              fontWeight: 900,
+                              "& .MuiChip-icon": { color: "#fbbf24" },
+                            }}
+                          />
+                        )}
+                      </Stack>
+                    )}
                   </Stack>
                 </Stack>
               )}

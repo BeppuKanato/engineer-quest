@@ -1,4 +1,5 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LockIcon from "@mui/icons-material/Lock";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StarIcon from "@mui/icons-material/Star";
@@ -11,7 +12,8 @@ type MissionRoadmapNodeProps = {
   isNext: boolean;
   isSelected: boolean;
   onSelect: (mission: CourseRoadmapMission) => void;
-  variant?: "main" | "challenge";
+  onActivate: (mission: CourseRoadmapMission) => void;
+  variant?: "main" | "challenge" | "course_exam";
 };
 
 export const MissionRoadmapNode = ({
@@ -19,17 +21,19 @@ export const MissionRoadmapNode = ({
   isNext,
   isSelected,
   onSelect,
+  onActivate,
   variant = "main",
 }: MissionRoadmapNodeProps) => {
   const isCompleted = mission.status === "completed";
   const isChallenge = variant === "challenge" || mission.type === "challenge";
+  const isCourseExam = variant === "course_exam" || mission.type === "course_exam";
   const isLocked = mission.isLocked;
-  const accentColor = isCompleted ? "#16a34a" : isChallenge ? "#f97316" : "#0057e7";
-  const softColor = isCompleted ? "#dcfce7" : isChallenge ? "#fff7ed" : "#eff6ff";
-  const labelColor = isCompleted ? "#15803d" : isChallenge ? "#ea580c" : "#1d4ed8";
+  const accentColor = isCompleted ? "#16a34a" : isCourseExam ? "#7c3aed" : isChallenge ? "#f97316" : "#0057e7";
+  const softColor = isCompleted ? "#dcfce7" : isCourseExam ? "#f5f3ff" : isChallenge ? "#fff7ed" : "#eff6ff";
+  const labelColor = isCompleted ? "#15803d" : isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#1d4ed8";
 
   return (
-    <Stack spacing={1} alignItems="center" sx={{ width: 132 }}>
+    <Stack spacing={1} alignItems="center" sx={{ width: 132, position: "relative", zIndex: 2 }}>
       <Box sx={{ position: "relative" }}>
         {isNext && (
           <Chip
@@ -73,11 +77,16 @@ export const MissionRoadmapNode = ({
         <Box
           component="button"
           type="button"
-          onClick={() => onSelect(mission)}
+          onClick={() => {
+            onSelect(mission);
+            if (!isLocked) {
+              onActivate(mission);
+            }
+          }}
           aria-label={`${mission.title}の詳細を表示`}
           sx={{
-            width: isChallenge ? 68 : 76,
-            height: isChallenge ? 68 : 76,
+            width: isChallenge ? 68 : isCourseExam ? 82 : 76,
+            height: isChallenge ? 68 : isCourseExam ? 82 : 76,
             borderRadius: "50%",
             border: "4px solid",
             borderColor: isSelected ? accentColor : isCompleted ? "#86efac" : isLocked ? "#cbd5e1" : "#bfdbfe",
@@ -87,12 +96,12 @@ export const MissionRoadmapNode = ({
             placeItems: "center",
             cursor: "pointer",
             boxShadow: isSelected
-              ? `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.14)" : isChallenge ? "rgba(249,115,22,0.12)" : "rgba(0,87,231,0.13)"}, 0 16px 28px rgba(15,23,42,0.16)`
+              ? `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.14)" : isCourseExam ? "rgba(124,58,237,0.14)" : isChallenge ? "rgba(249,115,22,0.12)" : "rgba(0,87,231,0.13)"}, 0 16px 28px rgba(15,23,42,0.16)`
               : "0 10px 22px rgba(15,23,42,0.12)",
             transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
             "&:hover": {
               transform: "translateY(-2px)",
-              boxShadow: `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.12)" : isChallenge ? "rgba(249,115,22,0.1)" : "rgba(0,87,231,0.1)"}, 0 18px 34px rgba(15,23,42,0.16)`,
+              boxShadow: `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.12)" : isCourseExam ? "rgba(124,58,237,0.12)" : isChallenge ? "rgba(249,115,22,0.1)" : "rgba(0,87,231,0.1)"}, 0 18px 34px rgba(15,23,42,0.16)`,
             },
           }}
         >
@@ -102,6 +111,8 @@ export const MissionRoadmapNode = ({
             <CheckCircleIcon sx={{ fontSize: 34 }} />
           ) : isChallenge ? (
             <StarIcon sx={{ fontSize: 32 }} />
+          ) : isCourseExam ? (
+            <EmojiEventsIcon sx={{ fontSize: 38 }} />
           ) : (
             <PlayArrowIcon sx={{ fontSize: 40 }} />
           )}
@@ -123,12 +134,12 @@ export const MissionRoadmapNode = ({
               fontWeight: 950,
             }}
           >
-            {mission.order}
+            {isCourseExam ? "EX" : mission.order}
           </Box>
           <Typography
             sx={{
               maxWidth: 118,
-              color: isChallenge ? "#ea580c" : "#111827",
+              color: isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#111827",
               fontSize: 14,
               fontWeight: 900,
               lineHeight: 1.25,

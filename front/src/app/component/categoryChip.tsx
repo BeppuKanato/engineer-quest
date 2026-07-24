@@ -1,30 +1,28 @@
 import { Chip } from "@mui/material";
-import { CourseCategory } from "../courses/type";
+import type { CourseCategory } from "../courses/type";
 
-type CategoryChipProps = {
-  category: CourseCategory;
-};
+type CategoryChipProps = { category: CourseCategory };
 
 const CATEGORY_LABEL: Record<CourseCategory, string> = {
-  game: "ゲーム",
+  sort: "ソート",
+  search: "探索",
+  graph: "グラフ",
+  data_structure: "データ構造",
+  dynamic_programming: "動的計画法",
   algorithm: "アルゴリズム",
-  tool: "便利ツール",
-  ui: "画面操作",
-  data: "データ管理",
+  game: "ゲーム",
+  tool: "ツール",
+  ui: "UI",
+  data: "データ",
 };
 
-export const CategoryChip: React.FC<CategoryChipProps> = ({ category }) => {
-  return (
-    <Chip
-      label={CATEGORY_LABEL[category]}
-      size="small"
-      sx={{
-        bgcolor: "#eef2ff",
-        color: "#4f46e5",
-        fontWeight: 700,
-      }}
-    />
-  );
-};
+export const CategoryChip = ({ category }: CategoryChipProps) => (
+  <Chip
+    label={CATEGORY_LABEL[category]}
+    size="small"
+    sx={{ bgcolor: "#eef2ff", color: "#4f46e5", fontWeight: 700 }}
+  />
+);
 
-export const getCategoryLabel = (category: CourseCategory) => CATEGORY_LABEL[category];
+export const getCategoryLabel = (category: CourseCategory) =>
+  CATEGORY_LABEL[category];

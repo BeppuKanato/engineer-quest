@@ -24,15 +24,13 @@ import { useEffect, useState } from "react";
 
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { getMascotImagePath, isMascotId, type MascotId } from "@/app/component/mascot";
 import { auth } from "@/lib/firebase";
 
 import { MissionHeroCard } from "./component/missionHeroCard";
 import type { MissionTab } from "./type";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
-const mascotIds = ["red-panda", "penguin", "owl"] as const;
-type MascotId = (typeof mascotIds)[number];
-
 const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
   const today = new Date(calendar.year, calendar.month, calendar.date);
   const weekStart = new Date(today);
@@ -54,25 +52,11 @@ const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<MissionTab>("today");
   const [homeData, setHomeData] = useState<HomeResponse | null>(null);
-  const [storedTargetAchievement, setStoredTargetAchievement] = useState<HomeResponse["targetAchievement"]>(null);
   const [mascotId, setMascotId] = useState<MascotId>("red-panda");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("engineerQuest.targetAchievement");
-    if (stored) {
-      try {
-        setStoredTargetAchievement(JSON.parse(stored));
-      } catch {
-        setStoredTargetAchievement(null);
-      }
-    }
-    const storedMascot = window.localStorage.getItem("engineerQuest.companionMascot");
-    if (storedMascot && mascotIds.includes(storedMascot as MascotId)) {
-      setMascotId(storedMascot as MascotId);
-    }
-
     let isMounted = true;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -92,6 +76,7 @@ export default function HomePage() {
 
         if (!isMounted) return;
         setHomeData(data);
+        setMascotId(isMascotId(data.user.selectedMascotId) ? data.user.selectedMascotId : "red-panda");
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
@@ -134,13 +119,18 @@ export default function HomePage() {
   const userData = homeData.user;
   const resumeMission = homeData.missions.resume ?? homeData.missions.recommended;
   const recommendedMission = homeData.missions.recommended;
-  const targetAchievement = storedTargetAchievement;
+  const targetAchievement = homeData.targetAchievement;
   const weekEntries = buildCurrentWeek(homeData.calendar);
-  const remainingExp = Math.max(0, userData.requireNextLevelExp - userData.exp);
   const levelProgress =
     userData.requireNextLevelExp === 0
       ? 0
       : Math.min(100, (userData.exp / userData.requireNextLevelExp) * 100);
+  const nextRankMissions = homeData.nextRankCondition.mission ?? [];
+  const nextRankCompletedMissionCount = nextRankMissions.filter((condition) => condition.status === "complete").length;
+  const rankProgress =
+    nextRankMissions.length === 0
+      ? 100
+      : Math.min(100, Math.round((nextRankCompletedMissionCount / nextRankMissions.length) * 100));
   const displayName = userData.displayName?.trim() || "Engineer";
   const recommendedMissions = [
     ...(homeData.missions.recommendedList ?? []),
@@ -175,7 +165,7 @@ export default function HomePage() {
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Box
                       component="img"
-                      src={`/images/mascots/${mascotId}/normal.png`}
+                      src={getMascotImagePath(mascotId, "normal")}
                       alt="ユーザーの相棒"
                       sx={{ width: 132, height: 132, objectFit: "cover", borderRadius: 3 }}
                     />
@@ -226,12 +216,16 @@ export default function HomePage() {
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography sx={{ fontSize: 24, fontWeight: 950 }}>{userData.rank}</Typography>
-                      <Typography color="text.secondary">次のランクまで {remainingExp} EXP</Typography>
+                      <Typography color="text.secondary">
+                        {homeData.nextRank
+                          ? `次のランク「${homeData.nextRank.name}」まで ${nextRankCompletedMissionCount} / ${nextRankMissions.length} ミッション`
+                          : "最高ランクに到達済み"}
+                      </Typography>
                     </Box>
                   </Stack>
                   <LinearProgress
                     variant="determinate"
-                    value={levelProgress}
+                    value={rankProgress}
                     sx={{ height: 10, borderRadius: 999, bgcolor: "#fde68a", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#f59e0b" } }}
                   />
                 </Stack>
@@ -278,7 +272,7 @@ export default function HomePage() {
                     </Stack>
                   </Box>
                   <Box sx={{ p: 2, borderRadius: 3, bgcolor: "#eff6ff", display: "flex", gap: 1.5 }}>
-                    <Box component="img" src={`/images/mascots/${mascotId}/happy.png`} alt="応援する相棒" sx={{ width: 54, height: 54, borderRadius: "50%", objectFit: "cover" }} />
+                    <Box component="img" src={getMascotImagePath(mascotId, "happy")} alt="応援する相棒" sx={{ width: 54, height: 54, borderRadius: "50%", objectFit: "cover" }} />
                     <Box>
                       <Typography fontWeight={900}>いいペースだよ！</Typography>
                       <Typography variant="body2" color="text.secondary">この調子でスキルをレベルアップしよう。</Typography>
@@ -294,8 +288,6 @@ export default function HomePage() {
               mission={resumeMission}
               recommendedMission={recommendedMission}
               targetAchievement={targetAchievement}
-              todayCompletedMissionCount={userData.todayCompletedMissionCount}
-              dailyMissionGoal={userData.dailyMissionGoal}
               mascotId={mascotId}
               tab={activeTab}
               onChangeTab={setActiveTab}
@@ -353,14 +345,19 @@ export default function HomePage() {
                             sx={{ width: 64, height: 64, objectFit: "cover", borderRadius: 2 }}
                           />
                           <Typography fontWeight={950}>{mission.title}</Typography>
-                          <Typography color="text.secondary" variant="body2">+20 EXP</Typography>
+                          <Typography color="text.secondary" variant="body2">{mission.reason}</Typography>
+                          <Stack direction="row" spacing={1} flexWrap="wrap">
+                            <Chip label={`約${mission.estimatedMinutes}分`} size="small" sx={{ fontWeight: 900 }} />
+                            {mission.activityCount > 0 && <Chip label={`${mission.activityCount}活動`} size="small" sx={{ fontWeight: 900 }} />}
+                            {mission.rewardExp > 0 && <Chip label={`${mission.rewardExp} EXP`} size="small" sx={{ fontWeight: 900, color: "#b45309", bgcolor: "#fff7ed" }} />}
+                          </Stack>
                         </Stack>
                       </Box>
                     ))}
                   </Box>
 
                   <Button component={Link} href="/courses" sx={{ width: "fit-content", alignSelf: "center", fontWeight: 950 }}>
-                    すべて見る
+                    コース一覧を見る
                   </Button>
                 </Stack>
               </CardContent>

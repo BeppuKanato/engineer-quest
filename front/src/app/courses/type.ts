@@ -2,9 +2,19 @@ export type ProgressStatus = "completed" | "in_progress" | "not_started";
 
 export type Difficulty = "easy" | "normal" | "hard";
 
-export type MissionType = "main" | "challenge";
+export type MissionType = "main" | "challenge" | "course_exam";
 
-export type CourseCategory = "game" | "algorithm" | "tool" | "ui" | "data";
+export type CourseCategory =
+  | "game"
+  | "algorithm"
+  | "tool"
+  | "ui"
+  | "data"
+  | "sort"
+  | "search"
+  | "graph"
+  | "data_structure"
+  | "dynamic_programming";
 
 export type Course = {
     id: string;

@@ -29,6 +29,8 @@ export const ensureUserService = async ({
     experience: user.experience,
     badgeTickets: user.badgeTickets,
     selectedTechIconBadgeId: user.selectedTechIconBadgeId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
   };
 };
 
@@ -50,5 +52,7 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
     experience: user.experience,
     badgeTickets: user.badgeTickets,
     selectedTechIconBadgeId: user.selectedTechIconBadgeId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
   };
 };

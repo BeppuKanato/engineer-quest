@@ -7,7 +7,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -15,9 +15,12 @@ import {
   getCollection,
   type CollectionResponse,
 } from "@/api/collection.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 type RecentItem = {
   id: string;
@@ -73,6 +76,8 @@ const buildRecentItems = (collection: CollectionResponse): RecentItem[] => {
 };
 
 export default function CollectionPage() {
+  const router = useRouter();
+  const { showOverlay, startNavigation } = useNavigationFeedback();
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -118,11 +123,22 @@ export default function CollectionPage() {
     [collection]
   );
 
+  const handleNavigate = (href: string) => {
+    startNavigation(() => router.push(href));
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
+      <PageTransitionOverlay
+        open={showOverlay}
+        title="コレクションを確認しています"
+        description="選んだ一覧ページへ移動しています。"
+        mascotState="thinking"
+      />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 5 } }}>
         <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "コレクション" }]} />
           <Box>
             <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 56 }, letterSpacing: 0 }}>
               コレクション
@@ -148,6 +164,8 @@ export default function CollectionPage() {
                   description="バッジチケットを使って集めたTech Icon Badgeを確認できます。"
                   stat={`${collection.badges.ownedCount} 個 所持`}
                   href="/badges"
+                  actionLabel="バッジ一覧を見る"
+                  onNavigate={handleNavigate}
                 />
                 <FeatureCard
                   tone="purple"
@@ -156,6 +174,8 @@ export default function CollectionPage() {
                   description="ミッション完了時に発見した知識カードを確認できます。"
                   stat={`${collection.knowledgeTips.collectedCount} 枚 所持`}
                   href="/knowledge-cards"
+                  actionLabel="知識カード一覧を見る"
+                  onNavigate={handleNavigate}
                 />
                 <FeatureCard
                   tone="blue"
@@ -164,6 +184,8 @@ export default function CollectionPage() {
                   description="条件を達成して解除された実績を確認できます。"
                   stat={`${collection.achievements.achievedCount} 件 達成`}
                   href="/achievements"
+                  actionLabel="実績一覧を見る"
+                  onNavigate={handleNavigate}
                 />
               </Box>
 
@@ -245,6 +267,8 @@ const FeatureCard = ({
   description,
   stat,
   href,
+  actionLabel,
+  onNavigate,
 }: {
   tone: "teal" | "purple" | "blue";
   icon: ReactNode;
@@ -252,6 +276,8 @@ const FeatureCard = ({
   description: string;
   stat: string;
   href: string;
+  actionLabel: string;
+  onNavigate: (href: string) => void;
 }) => {
   const styles = {
     teal: { color: "#0f9a9a", bg: "#e6fffb", border: "#0f9a9a" },
@@ -272,14 +298,13 @@ const FeatureCard = ({
         </Box>
       </Stack>
       <Button
-        component={Link}
-        href={href}
         fullWidth
         variant="contained"
         endIcon={<ArrowForwardIosIcon />}
+        onClick={() => onNavigate(href)}
         sx={{ mt: "auto", minHeight: 52, borderRadius: 2, fontWeight: 900, fontSize: 18 }}
       >
-        一覧を見る
+        {actionLabel}
       </Button>
     </Paper>
   );

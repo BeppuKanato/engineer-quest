@@ -20,6 +20,11 @@ export type CreateChecklistItem = {
   description: string | null;
 };
 
+export type CreateRecommendedCourse = {
+  id: string;
+  title: string;
+};
+
 export type CreateTheme = {
   id: string;
   title: string;
@@ -30,6 +35,8 @@ export type CreateTheme = {
   tags: string[];
   defaultThumbnailUrl: string | null;
   workCount: number;
+  isRecommendedForUser: boolean;
+  recommendedCourses: CreateRecommendedCourse[];
   requirements: CreateChecklistItem[];
   challenges: CreateChecklistItem[];
 };
@@ -37,6 +44,7 @@ export type CreateTheme = {
 export type CreateWork = {
   id: string;
   themeId: string;
+  courseId: string | null;
   themeTitle: string;
   title: string;
   description: string;
@@ -64,6 +72,7 @@ export type CreateWorkPayload = {
   repositoryUrl: string;
   imageUrl: string;
   status: CreateWorkStatus;
+  visibility: CreateWorkVisibility;
   requirementIds: string[];
   challengeIds: string[];
 };

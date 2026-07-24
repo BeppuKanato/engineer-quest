@@ -10,11 +10,11 @@ type CourseFilterProps = {
 
 const categoryOptions: { value: CourseCategory | "all"; label: string }[] = [
   { value: "all", label: "すべて" },
-  { value: "ui", label: "画面操作" },
-  { value: "data", label: "データ管理" },
-  { value: "tool", label: "便利ツール" },
-  { value: "algorithm", label: "アルゴリズム" },
-  { value: "game", label: "ゲーム" },
+  { value: "sort", label: "ソート" },
+  { value: "search", label: "探索" },
+  { value: "graph", label: "グラフ" },
+  { value: "data_structure", label: "データ構造" },
+  { value: "dynamic_programming", label: "動的計画法" },
 ];
 
 const statusOptions: { value: ProgressStatus | "all"; label: string }[] = [

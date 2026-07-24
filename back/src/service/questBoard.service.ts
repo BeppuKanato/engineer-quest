@@ -1,4 +1,5 @@
 import {
+  CreateWorkVisibility,
   Prisma,
   QuestPostCategory,
   QuestPostStatus,
@@ -17,6 +18,11 @@ type CreateQuestPostInput = {
   referenceUrl: string | null;
   courseId: string | null;
   missionId: string | null;
+  workId: string | null;
+};
+
+type UpdateQuestPostInput = CreateQuestPostInput & {
+  postId: string;
 };
 
 type ListQuestPostsInput = {
@@ -43,6 +49,12 @@ const reactionLabels: Record<QuestReactionType, string> = {
   HELPFUL: "参考になった",
   SAVED_ME: "助かった",
 };
+
+const deletedPostText = "この投稿は削除されました";
+const titleMinLength = 5;
+const titleMaxLength = 100;
+const bodyMinLength = 10;
+const bodyMaxLength = 5000;
 
 const getUserByFirebaseUid = async (firebaseUid: string) => {
   const user = await prisma.user.findUnique({
@@ -105,6 +117,53 @@ const assertPostPayload = ({
       "Title and body are required"
     );
   }
+
+  if (title.length < titleMinLength || title.length > titleMaxLength) {
+    throw new AppError(
+      400,
+      "INVALID_QUEST_POST_TITLE",
+      `Title must be between ${titleMinLength} and ${titleMaxLength} characters`
+    );
+  }
+
+  if (body.length < bodyMinLength || body.length > bodyMaxLength) {
+    throw new AppError(
+      400,
+      "INVALID_QUEST_POST_BODY",
+      `Body must be between ${bodyMinLength} and ${bodyMaxLength} characters`
+    );
+  }
+};
+
+const validateOwnedCreateWorkForShare = async ({
+  userId,
+  workId,
+  category,
+}: {
+  userId: string;
+  workId: string | null;
+  category: QuestPostCategory;
+}) => {
+  if (!workId) return null;
+
+  if (category !== QuestPostCategory.WORK_SHARE) {
+    throw new AppError(
+      400,
+      "CREATE_WORK_SHARE_CATEGORY_REQUIRED",
+      "Work can only be attached to work share posts"
+    );
+  }
+
+  const work = await prisma.userCreateWork.findFirst({
+    where: { id: workId, userId },
+    select: { id: true, courseId: true },
+  });
+
+  if (!work) {
+    throw new AppError(404, "CREATE_WORK_NOT_FOUND", "Create work not found");
+  }
+
+  return work;
 };
 
 const validateCourseAndMission = async ({
@@ -179,28 +238,33 @@ type QuestPostWithRelations = Prisma.QuestPostGetPayload<{
   };
 }>;
 
-const toPostSummary = (post: QuestPostWithRelations, userId: string) => ({
-  id: post.id,
-  category: post.category,
-  categoryLabel: categoryLabels[post.category],
-  title: post.title,
-  body: post.body,
-  excerpt: post.body.length > 140 ? `${post.body.slice(0, 140)}...` : post.body,
-  code: post.code,
-  referenceUrl: post.referenceUrl,
-  status: post.status,
-  authorName: post.user.displayName ?? "Learner",
-  courseId: post.courseId,
-  courseTitle: post.course?.title ?? null,
-  missionId: post.missionId,
-  missionTitle: post.mission?.title ?? null,
-  commentCount: post.comments.length,
-  reactions: reactionCounts(post.reactions, userId),
-  canResolve: post.userId === userId,
-  isOwner: post.userId === userId,
-  createdAt: post.createdAt.toISOString(),
-  updatedAt: post.updatedAt.toISOString(),
-});
+const toPostSummary = (post: QuestPostWithRelations, userId: string) => {
+  const isDeleted = post.title === deletedPostText && post.body === deletedPostText;
+
+  return {
+    id: post.id,
+    category: post.category,
+    categoryLabel: categoryLabels[post.category],
+    title: post.title,
+    body: post.body,
+    excerpt: post.body.length > 140 ? `${post.body.slice(0, 140)}...` : post.body,
+    code: post.code,
+    referenceUrl: post.referenceUrl,
+    status: post.status,
+    authorName: isDeleted ? "削除済み投稿" : post.user.displayName ?? "Learner",
+    courseId: post.courseId,
+    courseTitle: post.course?.title ?? null,
+    missionId: post.missionId,
+    missionTitle: post.mission?.title ?? null,
+    commentCount: post.comments.length,
+    reactions: reactionCounts(post.reactions, userId),
+    canResolve: !isDeleted && post.userId === userId,
+    isOwner: !isDeleted && post.userId === userId,
+    isDeleted,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+  };
+};
 
 export const getQuestBoardOptions = () => ({
   categories: Object.values(QuestPostCategory).map((value) => ({
@@ -276,6 +340,7 @@ export const createQuestPostByFirebaseUid = async ({
   referenceUrl,
   courseId,
   missionId,
+  workId,
 }: CreateQuestPostInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   const normalizedTitle = normalizeText(title);
@@ -283,20 +348,36 @@ export const createQuestPostByFirebaseUid = async ({
   const normalizedCategory = parseCategory(category);
 
   assertPostPayload({ title: normalizedTitle, body: normalizedBody });
+  const work = await validateOwnedCreateWorkForShare({
+    userId: user.id,
+    workId,
+    category: normalizedCategory,
+  });
   await validateCourseAndMission({ courseId, missionId });
 
-  const post = await prisma.questPost.create({
-    data: {
-      userId: user.id,
-      category: normalizedCategory,
-      title: normalizedTitle,
-      body: normalizedBody,
-      code,
-      referenceUrl,
-      courseId,
-      missionId,
-    },
-    select: { id: true },
+  const post = await prisma.$transaction(async (tx) => {
+    const createdPost = await tx.questPost.create({
+      data: {
+        userId: user.id,
+        category: normalizedCategory,
+        title: normalizedTitle,
+        body: normalizedBody,
+        code,
+        referenceUrl,
+        courseId: courseId ?? work?.courseId ?? null,
+        missionId,
+      },
+      select: { id: true },
+    });
+
+    if (work) {
+      await tx.userCreateWork.update({
+        where: { id: work.id },
+        data: { visibility: CreateWorkVisibility.SHARED, sharedAt: new Date() },
+      });
+    }
+
+    return createdPost;
   });
 
   return { postId: post.id };
@@ -369,11 +450,19 @@ export const addQuestCommentByFirebaseUid = async ({
 
   const post = await prisma.questPost.findFirst({
     where: { id: postId, visibility: "PUBLIC" },
-    select: { id: true },
+    select: { id: true, title: true, body: true },
   });
 
   if (!post) {
     throw new AppError(404, "QUEST_POST_NOT_FOUND", "Quest post not found");
+  }
+
+  if (post.title === deletedPostText && post.body === deletedPostText) {
+    throw new AppError(
+      400,
+      "QUEST_POST_DELETED",
+      "Deleted post cannot receive new comments"
+    );
   }
 
   const comment = await prisma.questComment.create({
@@ -410,11 +499,19 @@ export const toggleQuestReactionByFirebaseUid = async ({
 
   const post = await prisma.questPost.findFirst({
     where: { id: postId, visibility: "PUBLIC" },
-    select: { id: true },
+    select: { id: true, title: true, body: true },
   });
 
   if (!post) {
     throw new AppError(404, "QUEST_POST_NOT_FOUND", "Quest post not found");
+  }
+
+  if (post.title === deletedPostText && post.body === deletedPostText) {
+    throw new AppError(
+      400,
+      "QUEST_POST_DELETED",
+      "Deleted post cannot receive reactions"
+    );
   }
 
   const existing = await prisma.questReaction.findUnique({
@@ -462,7 +559,7 @@ export const updateQuestPostStatusByFirebaseUid = async ({
   const nextStatus = parseStatus(status);
   const post = await prisma.questPost.findFirst({
     where: { id: postId, visibility: "PUBLIC" },
-    select: { id: true, userId: true, category: true },
+    select: { id: true, userId: true, category: true, title: true, body: true },
   });
 
   if (!post) {
@@ -471,6 +568,14 @@ export const updateQuestPostStatusByFirebaseUid = async ({
 
   if (post.userId !== user.id) {
     throw new AppError(403, "QUEST_POST_NOT_OWNER", "Only owner can update status");
+  }
+
+  if (post.title === deletedPostText && post.body === deletedPostText) {
+    throw new AppError(
+      400,
+      "QUEST_POST_DELETED",
+      "Deleted post cannot update status"
+    );
   }
 
   if (
@@ -496,6 +601,103 @@ export const updateQuestPostStatusByFirebaseUid = async ({
   };
 };
 
+export const updateQuestPostByFirebaseUid = async ({
+  firebaseUid,
+  postId,
+  category,
+  title,
+  body,
+  code,
+  referenceUrl,
+  courseId,
+  missionId,
+  workId,
+}: UpdateQuestPostInput) => {
+  const user = await getUserByFirebaseUid(firebaseUid);
+  const post = await prisma.questPost.findFirst({
+    where: { id: postId, visibility: "PUBLIC" },
+    select: { id: true, userId: true, title: true, body: true },
+  });
+
+  if (!post) {
+    throw new AppError(404, "QUEST_POST_NOT_FOUND", "Quest post not found");
+  }
+
+  if (post.userId !== user.id) {
+    throw new AppError(403, "QUEST_POST_NOT_OWNER", "Only owner can update post");
+  }
+
+  if (post.title === deletedPostText && post.body === deletedPostText) {
+    throw new AppError(400, "QUEST_POST_DELETED", "Deleted post cannot be updated");
+  }
+
+  const normalizedTitle = normalizeText(title);
+  const normalizedBody = normalizeText(body);
+  const normalizedCategory = parseCategory(category);
+
+  assertPostPayload({ title: normalizedTitle, body: normalizedBody });
+  await validateOwnedCreateWorkForShare({
+    userId: user.id,
+    workId,
+    category: normalizedCategory,
+  });
+  await validateCourseAndMission({ courseId, missionId });
+
+  await prisma.questPost.update({
+    where: { id: post.id },
+    data: {
+      category: normalizedCategory,
+      title: normalizedTitle,
+      body: normalizedBody,
+      code,
+      referenceUrl,
+      courseId,
+      missionId,
+    },
+  });
+
+  return getQuestPostByFirebaseUid({ firebaseUid, postId });
+};
+
+export const softDeleteQuestPostByFirebaseUid = async ({
+  firebaseUid,
+  postId,
+}: {
+  firebaseUid: string;
+  postId: string;
+}) => {
+  const user = await getUserByFirebaseUid(firebaseUid);
+  const post = await prisma.questPost.findFirst({
+    where: { id: postId, visibility: "PUBLIC" },
+    select: { id: true, userId: true },
+  });
+
+  if (!post) {
+    throw new AppError(404, "QUEST_POST_NOT_FOUND", "Quest post not found");
+  }
+
+  if (post.userId !== user.id) {
+    throw new AppError(403, "QUEST_POST_NOT_OWNER", "Only owner can delete post");
+  }
+
+  const updatedPost = await prisma.questPost.update({
+    where: { id: post.id },
+    data: {
+      title: deletedPostText,
+      body: deletedPostText,
+      code: null,
+      referenceUrl: null,
+      status: QuestPostStatus.RESOLVED,
+    },
+    select: { updatedAt: true },
+  });
+
+  return {
+    postId: post.id,
+    deletedAt: updatedPost.updatedAt.toISOString(),
+  };
+};
+
 export const buildCreateQuestPostPayload = (body: unknown) => {
   const payload = body as Record<string, unknown> | null;
 
@@ -507,5 +709,6 @@ export const buildCreateQuestPostPayload = (body: unknown) => {
     referenceUrl: normalizeNullableText(payload?.referenceUrl),
     courseId: normalizeNullableText(payload?.courseId),
     missionId: normalizeNullableText(payload?.missionId),
+    workId: normalizeNullableText(payload?.workId),
   };
 };

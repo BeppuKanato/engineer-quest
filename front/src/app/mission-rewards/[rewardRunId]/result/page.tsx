@@ -14,13 +14,16 @@ import { Alert, Box, Button, Chip, Paper, Skeleton, Stack, Typography } from "@m
 import { onAuthStateChanged } from "firebase/auth";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import { getMissionRewardRun, type MissionRewardRunResponse } from "@/api/missionRewards.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { getMascotImagePath, useUserMascot } from "@/app/component/mascot";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useAchievementNotificationMode } from "@/hooks/useAchievementNotificationMode";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { auth } from "@/lib/firebase";
 
@@ -29,18 +32,48 @@ import {
   RewardSparkles,
   getRarityTone,
 } from "../../_components/rewardVisuals";
+import {
+  AchievementUnlockModal,
+  AchievementUnlockSnackbar,
+} from "../../_components/achievementNotification";
 
 const learnedIcons = [StarIcon, SecurityIcon, TrendingUpIcon];
+const ACHIEVEMENT_SNACKBAR_DELAY_MS = 700;
 
 export default function MissionRewardResultPage() {
   const params = useParams<{ rewardRunId: string }>();
   const rewardRunId = params.rewardRunId;
   const router = useRouter();
   const { play } = useSoundEffect();
+  const {
+    mode: achievementNotificationMode,
+    isReady: isAchievementNotificationModeReady,
+  } = useAchievementNotificationMode();
+  const mascotId = useUserMascot();
   const { showOverlay, startNavigation } = useNavigationFeedback();
   const [rewardRun, setRewardRun] = useState<MissionRewardRunResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [notificationType, setNotificationType] = useState<
+    "modal" | "snackbar" | null
+  >(null);
+  const [activeAchievementIndex, setActiveAchievementIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalClosing, setIsModalClosing] = useState(false);
+  const [visibleSnackbarAchievementIds, setVisibleSnackbarAchievementIds] =
+    useState<string[]>([]);
+  const notificationInitializedRef = useRef(false);
+  const snackbarTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    notificationInitializedRef.current = false;
+    setRewardRun(null);
+    setNotificationType(null);
+    setActiveAchievementIndex(0);
+    setIsModalOpen(false);
+    setIsModalClosing(false);
+    setVisibleSnackbarAchievementIds([]);
+  }, [rewardRunId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -61,7 +94,6 @@ export default function MissionRewardResultPage() {
 
         if (!isMounted) return;
         setRewardRun(data);
-        play("missionComplete");
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
@@ -78,6 +110,111 @@ export default function MissionRewardResultPage() {
     };
   }, [play, rewardRunId]);
 
+  const playResultFanfareOnce = useCallback(() => {
+    const soundKey = `mission-completed-sound:${rewardRunId}`;
+    if (window.sessionStorage.getItem(soundKey) === "played") return;
+    window.sessionStorage.setItem(soundKey, "played");
+    play("missionCompleted");
+  }, [play, rewardRunId]);
+
+  const playAchievementSoundOnce = useCallback(() => {
+    const soundKey = `achievement-unlocked-sound:${rewardRunId}`;
+    if (window.sessionStorage.getItem(soundKey) === "played") return;
+    window.sessionStorage.setItem(soundKey, "played");
+    play("achievementUnlocked");
+  }, [play, rewardRunId]);
+
+  useEffect(() => {
+    if (
+      !rewardRun ||
+      !isAchievementNotificationModeReady ||
+      notificationInitializedRef.current
+    ) {
+      return;
+    }
+    notificationInitializedRef.current = true;
+
+    if (rewardRun.unlockedAchievements.length === 0) {
+      playResultFanfareOnce();
+      return;
+    }
+
+    const notificationKey = `achievement-notification-shown:${rewardRunId}`;
+    if (window.sessionStorage.getItem(notificationKey) === "shown") {
+      playResultFanfareOnce();
+      return;
+    }
+    window.sessionStorage.setItem(notificationKey, "shown");
+
+    if (achievementNotificationMode === "modal") {
+      setNotificationType("modal");
+      setIsModalOpen(true);
+      return;
+    }
+
+    playResultFanfareOnce();
+    if (achievementNotificationMode === "snackbar") {
+      setNotificationType("snackbar");
+    }
+  }, [
+    achievementNotificationMode,
+    isAchievementNotificationModeReady,
+    playResultFanfareOnce,
+    rewardRun,
+    rewardRunId,
+  ]);
+
+  useEffect(() => {
+    if (notificationType !== "modal" || !isModalOpen) return;
+    playAchievementSoundOnce();
+  }, [isModalOpen, notificationType, playAchievementSoundOnce]);
+
+  useEffect(() => {
+    if (notificationType !== "snackbar") return;
+
+    snackbarTimeoutRef.current = window.setTimeout(() => {
+      setVisibleSnackbarAchievementIds(
+        rewardRun?.unlockedAchievements.map((achievement) => achievement.id) ?? []
+      );
+      playAchievementSoundOnce();
+      snackbarTimeoutRef.current = null;
+    }, ACHIEVEMENT_SNACKBAR_DELAY_MS);
+
+    return () => {
+      if (snackbarTimeoutRef.current !== null) {
+        window.clearTimeout(snackbarTimeoutRef.current);
+        snackbarTimeoutRef.current = null;
+      }
+    };
+  }, [notificationType, playAchievementSoundOnce, rewardRun]);
+
+  useEffect(
+    () => () => {
+      if (snackbarTimeoutRef.current !== null) {
+        window.clearTimeout(snackbarTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const handleModalNext = () => {
+    if (!rewardRun || isModalClosing) return;
+    if (activeAchievementIndex < rewardRun.unlockedAchievements.length - 1) {
+      setActiveAchievementIndex((current) => current + 1);
+      return;
+    }
+
+    setIsModalClosing(true);
+    setIsModalOpen(false);
+    playResultFanfareOnce();
+  };
+
+  const handleSnackbarClose = useCallback((achievementId: string) => {
+    setVisibleSnackbarAchievementIds((current) =>
+      current.filter((id) => id !== achievementId)
+    );
+  }, []);
+
   const goNextMission = () => {
     if (!rewardRun?.nextMission) return;
     startNavigation(() => {
@@ -92,15 +229,34 @@ export default function MissionRewardResultPage() {
     });
   };
 
+  const goAchievements = () => {
+    startNavigation(() => {
+      const unlockedIds = rewardRun?.unlockedAchievements.map((achievement) => achievement.id) ?? [];
+      const query = unlockedIds.length > 0 ? `?new=${encodeURIComponent(unlockedIds.join(","))}` : "";
+      router.push(`/achievements${query}`);
+    });
+  };
+
   const selectedCardTone = rewardRun?.selectedKnowledgeCard
     ? getRarityTone(rewardRun.selectedKnowledgeCard.rarity)
     : null;
+  const nextActionLabel = rewardRun?.nextMission
+    ? `次は「${rewardRun.nextMission.title}」に進めます。`
+    : "このコースの到達済み内容をロードマップで確認できます。";
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#eef4fb" }}>
       <AppHeader />
       <PageTransitionOverlay open={showOverlay} message="次の画面を準備しています..." />
       <RewardPageShell maxWidth={1320}>
+        <Box sx={{ mb: 2 }}>
+          <AppBreadcrumbs
+            items={[
+              { label: "コース", href: "/courses" },
+              { label: "ミッション結果" },
+            ]}
+          />
+        </Box>
         {isLoading ? (
           <Skeleton variant="rounded" height={720} sx={{ borderRadius: 4 }} />
         ) : !rewardRun ? (
@@ -128,7 +284,7 @@ export default function MissionRewardResultPage() {
               <Box sx={{ position: "relative", minHeight: { xs: 0, md: 170 }, mb: 2 }}>
                 <Box
                   component="img"
-                  src="/images/mascots/red-panda/happy.png"
+                  src={getMascotImagePath(mascotId, "happy")}
                   alt="ミッション完了を祝うマスコット"
                   sx={{
                     position: { xs: "static", md: "absolute" },
@@ -183,6 +339,42 @@ export default function MissionRewardResultPage() {
                   </Typography>
                 </Stack>
               </Box>
+
+              <Paper
+                elevation={0}
+                sx={{
+                  mb: 3,
+                  p: { xs: 2, md: 2.5 },
+                  borderRadius: 3,
+                  border: "1px solid #bfdbfe",
+                  bgcolor: "rgba(239, 246, 255, 0.92)",
+                }}
+              >
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={2}
+                  justifyContent="space-between"
+                  alignItems={{ xs: "flex-start", md: "center" }}
+                >
+                  <Box>
+                    <Typography variant="h6" fontWeight={900} color="#0f172a">
+                      今回の成果
+                    </Typography>
+                    <Typography color="#334155" sx={{ mt: 0.5, lineHeight: 1.7 }}>
+                      {rewardRun.mission.learnedItems[0] ??
+                        `${rewardRun.mission.title}を完了しました。`}
+                      {rewardRun.selectedKnowledgeCard
+                        ? ` 知識カード「${rewardRun.selectedKnowledgeCard.title}」もコレクションに追加されています。`
+                        : ""}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={nextActionLabel}
+                    color={rewardRun.nextMission ? "primary" : "default"}
+                    sx={{ fontWeight: 900, maxWidth: { xs: "100%", md: 360 }, height: "auto", py: 0.8 }}
+                  />
+                </Stack>
+              </Paper>
 
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
                 <ResultSummaryPanel
@@ -245,6 +437,14 @@ export default function MissionRewardResultPage() {
                       </Paper>
                     ))}
                   </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<EmojiEventsIcon />}
+                    onClick={goAchievements}
+                    sx={{ mt: 2, fontWeight: 900, borderRadius: 2, bgcolor: "#fff" }}
+                  >
+                    実績一覧で確認する
+                  </Button>
                 </Paper>
               )}
 
@@ -332,6 +532,22 @@ export default function MissionRewardResultPage() {
           </Paper>
         )}
       </RewardPageShell>
+      <AchievementUnlockModal
+        open={isModalOpen}
+        achievement={
+          rewardRun?.unlockedAchievements[activeAchievementIndex] ?? null
+        }
+        currentIndex={activeAchievementIndex}
+        total={rewardRun?.unlockedAchievements.length ?? 0}
+        mascotId={mascotId}
+        isClosing={isModalClosing}
+        onNext={handleModalNext}
+      />
+      <AchievementUnlockSnackbar
+        achievements={rewardRun?.unlockedAchievements ?? []}
+        visibleAchievementIds={visibleSnackbarAchievementIds}
+        onClose={handleSnackbarClose}
+      />
     </Box>
   );
 }

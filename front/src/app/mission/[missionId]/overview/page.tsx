@@ -22,6 +22,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { getMissionOverview } from "@/api/mission.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { DifficultyLabel } from "@/app/component/difficultyLabel";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
@@ -471,6 +472,13 @@ export default function MissionOverviewPage() {
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Stack spacing={3}>
+          <AppBreadcrumbs
+            items={[
+              { label: "コース", href: "/courses" },
+              { label: mission.courseTitle, href: `/courses/roadmap/${encodeURIComponent(mission.courseId)}` },
+              { label: mission.title },
+            ]}
+          />
           <Button
             variant="outlined"
             size="large"

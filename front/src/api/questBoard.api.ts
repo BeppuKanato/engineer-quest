@@ -42,6 +42,7 @@ export type QuestPostSummary = {
   reactions: QuestBoardReactionSummary;
   canResolve: boolean;
   isOwner: boolean;
+  isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -82,6 +83,7 @@ export type CreateQuestPostPayload = {
   referenceUrl?: string;
   courseId?: string;
   missionId?: string;
+  workId?: string;
 };
 
 export type QuestBoardListParams = {
@@ -126,6 +128,34 @@ export const createQuestPost = async (
     token,
     body: JSON.stringify(payload),
   });
+};
+
+export const updateQuestPost = async (
+  token: string,
+  postId: string,
+  payload: CreateQuestPostPayload
+): Promise<QuestBoardDetailResponse> => {
+  return fetcher<QuestBoardDetailResponse>(
+    `/quest-board/${encodeURIComponent(postId)}`,
+    {
+      method: "PATCH",
+      token,
+      body: JSON.stringify(payload),
+    }
+  );
+};
+
+export const deleteQuestPost = async (
+  token: string,
+  postId: string
+): Promise<{ postId: string; deletedAt: string }> => {
+  return fetcher<{ postId: string; deletedAt: string }>(
+    `/quest-board/${encodeURIComponent(postId)}`,
+    {
+      method: "DELETE",
+      token,
+    }
+  );
 };
 
 export const getQuestPost = async (

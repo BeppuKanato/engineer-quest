@@ -39,6 +39,19 @@ const getActivityId = (req: Request) => {
   return activityId;
 };
 
+const getDifficulty = (req: Request) => {
+  const difficulty = req.query.difficulty;
+  if (
+    difficulty === "easy" ||
+    difficulty === "normal" ||
+    difficulty === "hard"
+  ) {
+    return difficulty;
+  }
+
+  return undefined;
+};
+
 export const getMissionPlayController = async (
   req: Request,
   res: Response,
@@ -48,6 +61,7 @@ export const getMissionPlayController = async (
     const data = await getMissionPlayService({
       missionId: getMissionId(req),
       firebaseUid: getFirebaseUid(req),
+      difficulty: getDifficulty(req),
     });
 
     res.status(200).json(data);

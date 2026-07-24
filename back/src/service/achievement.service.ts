@@ -2,6 +2,8 @@ import {
   Achievement,
   AchievementCategory,
   AchievementConditionType,
+  CourseDifficulty,
+  MissionType,
   ProgressStatus as PrismaProgressStatus,
 } from "@prisma/client";
 
@@ -54,6 +56,58 @@ const createConditionLabel = (achievement: Pick<
   }
 };
 
+const stripLevelSuffix = (title: string) =>
+  title.replace(/\s*Lv\.\d+\s*$/, "").trim();
+
+const extractLevel = (title: string) => {
+  const matched = title.match(/Lv\.(\d+)/);
+  return matched ? Number(matched[1]) : 1;
+};
+
+const buildSeriesKey = (
+  achievement: Pick<
+    Achievement,
+    "title" | "category" | "conditionType" | "courseId" | "missionId"
+  >
+) => {
+  const seriesTitle = stripLevelSuffix(achievement.title);
+  return [
+    achievement.category,
+    achievement.conditionType,
+    achievement.courseId ?? "all-courses",
+    achievement.missionId ?? "all-missions",
+    seriesTitle,
+  ].join(":");
+};
+
+const buildTargetLink = (
+  achievement: Pick<Achievement, "conditionType" | "courseId" | "missionId">
+) => {
+  switch (achievement.conditionType) {
+    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
+      return achievement.missionId
+        ? {
+            href: `/mission/${encodeURIComponent(achievement.missionId)}/overview`,
+            actionLabel: "対象ミッションを見る",
+          }
+        : { href: "/courses", actionLabel: "コースを選ぶ" };
+    case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_COMPLETE:
+    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
+      return achievement.courseId
+        ? {
+            href: `/courses/roadmap/${encodeURIComponent(achievement.courseId)}`,
+            actionLabel: "対象コースを見る",
+          }
+        : { href: "/courses", actionLabel: "コースを選ぶ" };
+    case AchievementConditionType.MISSION_COUNT:
+    case AchievementConditionType.ACTIVITY_COUNT:
+    case AchievementConditionType.STREAK_DAYS:
+      return { href: "/courses", actionLabel: "学習を続ける" };
+  }
+};
+
 const getCompletedMissionIds = async (userId: string) => {
   const progresses = await prisma.userMissionProgress.findMany({
     where: {
@@ -75,6 +129,97 @@ const getCompletedActivityCount = async (userId: string) => {
       status: PrismaProgressStatus.COMPLETED,
     },
   });
+};
+
+const calculateAchievementProgress = async (
+  achievement: Achievement,
+  userId: string,
+  completedMissionIds: Set<string>,
+  completedActivityCount: number
+) => {
+  switch (achievement.conditionType) {
+    case AchievementConditionType.MISSION_COUNT:
+      return {
+        goal: achievement.conditionValue ?? 0,
+        progress: completedMissionIds.size,
+      };
+    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
+      return {
+        goal: 1,
+        progress:
+          achievement.missionId && completedMissionIds.has(achievement.missionId)
+            ? 1
+            : 0,
+      };
+    case AchievementConditionType.ACTIVITY_COUNT:
+      return {
+        goal: achievement.conditionValue ?? 0,
+        progress: completedActivityCount,
+      };
+    case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_COMPLETE: {
+      if (!achievement.courseId) return { goal: 1, progress: 0 };
+
+      const [goal, progress] = await Promise.all([
+        prisma.mission.count({
+          where: {
+            courseId: achievement.courseId,
+            isPublished: true,
+            isRequiredForCourseCompletion: true,
+          },
+        }),
+        prisma.userMissionProgress.count({
+          where: {
+            userId,
+            status: PrismaProgressStatus.COMPLETED,
+            mission: {
+              courseId: achievement.courseId,
+              isPublished: true,
+              isRequiredForCourseCompletion: true,
+            },
+          },
+        }),
+      ]);
+
+      return { goal, progress };
+    }
+    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE: {
+      if (!achievement.courseId) return { goal: 1, progress: 0 };
+
+      const [goal, progress] = await Promise.all([
+        prisma.mission.count({
+          where: {
+            courseId: achievement.courseId,
+            isPublished: true,
+          },
+        }),
+        prisma.userMissionProgress.count({
+          where: {
+            userId,
+            status: PrismaProgressStatus.COMPLETED,
+            mission: {
+              courseId: achievement.courseId,
+              isPublished: true,
+            },
+          },
+        }),
+      ]);
+
+      return { goal, progress };
+    }
+    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
+      return {
+        goal: 1,
+        progress: (await hasHardCourseExamClear(userId, achievement.courseId))
+          ? 1
+          : 0,
+      };
+    case AchievementConditionType.STREAK_DAYS:
+      return {
+        goal: achievement.conditionValue ?? 0,
+        progress: 0,
+      };
+  }
 };
 
 const isCourseRequiredComplete = async (
@@ -140,6 +285,29 @@ const isCourseAllMissionsComplete = async (
   );
 };
 
+const hasHardCourseExamClear = async (
+  userId: string,
+  courseId: string | null
+) => {
+  if (!courseId) return false;
+
+  const progress = await prisma.userMissionProgress.findFirst({
+    where: {
+      userId,
+      status: PrismaProgressStatus.COMPLETED,
+      highestClearedExamDifficulty: CourseDifficulty.HARD,
+      mission: {
+        courseId,
+        type: MissionType.COURSE_EXAM,
+        isPublished: true,
+      },
+    },
+    select: { id: true },
+  });
+
+  return Boolean(progress);
+};
+
 const isAchievementEligible = async (
   achievement: Achievement,
   userId: string,
@@ -161,6 +329,7 @@ const isAchievementEligible = async (
     case AchievementConditionType.ACTIVITY_COUNT:
       return completedActivityCount >= (achievement.conditionValue ?? 0);
     case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
+      return hasHardCourseExamClear(userId, achievement.courseId);
     case AchievementConditionType.STREAK_DAYS:
       return false;
   }
@@ -229,7 +398,7 @@ export const evaluateAchievementsForUser = async (userId: string) => {
 export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
   const user = await prisma.user.findUnique({
     where: { firebaseUid },
-    select: { id: true },
+    select: { id: true, selectedTargetAchievementId: true },
   });
 
   if (!user) {
@@ -249,11 +418,13 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
       },
     },
   });
+  const completedMissionIds = await getCompletedMissionIds(user.id);
+  const completedActivityCount = await getCompletedActivityCount(user.id);
 
   const grouped = categoryOrder.map((category) => {
     const items = achievements
       .filter((achievement) => achievement.category === category)
-      .map((achievement) => {
+      .map(async (achievement) => {
         const achievedAt = achievement.userAchievements[0]?.achievedAt ?? null;
         const status: AchievementStatus = achievedAt
           ? "achieved"
@@ -262,10 +433,22 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
             : "visible_locked";
 
         const isSecretLocked = status === "secret_locked";
+        const progress = await calculateAchievementProgress(
+          achievement,
+          user.id,
+          completedMissionIds,
+          completedActivityCount
+        );
+        const targetLink = buildTargetLink(achievement);
 
         return {
           id: achievement.id,
           category: achievement.category,
+          conditionType: achievement.conditionType,
+          conditionValue: achievement.conditionValue,
+          seriesKey: buildSeriesKey(achievement),
+          seriesTitle: isSecretLocked ? "???" : stripLevelSuffix(achievement.title),
+          level: extractLevel(achievement.title),
           status,
           title: isSecretLocked ? "???" : achievement.title,
           description: isSecretLocked
@@ -274,6 +457,10 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
           conditionLabel: isSecretLocked
             ? null
             : createConditionLabel(achievement),
+          goal: progress.goal,
+          progress: progress.progress,
+          href: targetLink.href,
+          actionLabel: targetLink.actionLabel,
           achievedAt: achievedAt?.toISOString() ?? null,
         };
       });
@@ -285,5 +472,68 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
     };
   });
 
-  return grouped.filter((group) => group.achievements.length > 0);
+  const groups = (await Promise.all(
+    grouped.map(async (group) => ({
+      ...group,
+      achievements: await Promise.all(group.achievements),
+    }))
+  )).filter((group) => group.achievements.length > 0);
+
+  return {
+    groups,
+    targetAchievementId: user.selectedTargetAchievementId,
+  };
+};
+
+export const updateTargetAchievementByFirebaseUid = async (
+  firebaseUid: string,
+  achievementId: string | null
+) => {
+  const user = await prisma.user.findUnique({
+    where: { firebaseUid },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new AppError(404, "USER_NOT_FOUND", "User not found");
+  }
+
+  if (achievementId !== null) {
+    const achievement = await prisma.achievement.findUnique({
+      where: { id: achievementId },
+      select: { id: true, isSecret: true },
+    });
+
+    if (!achievement || achievement.isSecret) {
+      throw new AppError(400, "INVALID_TARGET_ACHIEVEMENT", "Invalid target achievement");
+    }
+
+    const achieved = await prisma.userAchievement.findUnique({
+      where: {
+        userId_achievementId: {
+          userId: user.id,
+          achievementId,
+        },
+      },
+      select: { id: true },
+    });
+
+    if (achieved) {
+      throw new AppError(400, "ACHIEVEMENT_ALREADY_UNLOCKED", "Achievement already unlocked");
+    }
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      selectedTargetAchievementId: achievementId,
+    },
+    select: {
+      selectedTargetAchievementId: true,
+    },
+  });
+
+  return {
+    targetAchievementId: updated.selectedTargetAchievementId,
+  };
 };

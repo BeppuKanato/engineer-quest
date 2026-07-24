@@ -7,7 +7,9 @@ import {
   createQuestPostByFirebaseUid,
   getQuestPostByFirebaseUid,
   listQuestPostsByFirebaseUid,
+  softDeleteQuestPostByFirebaseUid,
   toggleQuestReactionByFirebaseUid,
+  updateQuestPostByFirebaseUid,
   updateQuestPostStatusByFirebaseUid,
 } from "../service/questBoard.service";
 
@@ -83,6 +85,41 @@ export const getQuestPostController = async (
 ) => {
   try {
     const data = await getQuestPostByFirebaseUid({
+      firebaseUid: getFirebaseUid(req),
+      postId: getParam(req, "postId"),
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateQuestPostController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await updateQuestPostByFirebaseUid({
+      firebaseUid: getFirebaseUid(req),
+      postId: getParam(req, "postId"),
+      ...buildCreateQuestPostPayload(req.body),
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteQuestPostController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await softDeleteQuestPostByFirebaseUid({
       firebaseUid: getFirebaseUid(req),
       postId: getParam(req, "postId"),
     });

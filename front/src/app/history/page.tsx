@@ -9,7 +9,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HistoryIcon from "@mui/icons-material/History";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ReviewsIcon from "@mui/icons-material/Reviews";
 import TrackChangesIcon from "@mui/icons-material/TrackChanges";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
@@ -30,6 +29,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { getHistory, type HistoryEvent, type HistoryEventType } from "@/api/history.api";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { auth } from "@/lib/firebase";
 
@@ -256,6 +256,7 @@ export default function HistoryPage() {
       <AppHeader />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "履歴" }]} />
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <Box sx={{ width: 58, height: 58, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#0b63e5", color: "#fff", boxShadow: "0 14px 34px rgba(11, 99, 229, 0.28)" }}>
@@ -499,7 +500,7 @@ const HistoryRow = ({ event }: { event: HistoryEvent }) => {
   const meta = eventMeta[event.type];
 
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: "64px 48px minmax(0, 1fr) auto 32px", gap: 1.5, alignItems: "center", py: 1.25, borderBottom: "1px solid #edf2f7" }}>
+    <Box sx={{ display: "grid", gridTemplateColumns: "64px 48px minmax(0, 1fr) auto", gap: 1.5, alignItems: "center", py: 1.25, borderBottom: "1px solid #edf2f7" }}>
       <Typography color="text.secondary" fontWeight={800}>{formatTime(event.occurredAt)}</Typography>
       <Box sx={{ width: 38, height: 38, borderRadius: 2, display: "grid", placeItems: "center", color: meta.color, bgcolor: meta.bgcolor }}>
         {meta.icon}
@@ -513,7 +514,6 @@ const HistoryRow = ({ event }: { event: HistoryEvent }) => {
         </Typography>
       </Box>
       <Chip label={meta.label} size="small" sx={{ color: meta.color, bgcolor: meta.bgcolor, fontWeight: 900 }} />
-      <MoreVertIcon sx={{ color: "#94a3b8" }} />
     </Box>
   );
 };

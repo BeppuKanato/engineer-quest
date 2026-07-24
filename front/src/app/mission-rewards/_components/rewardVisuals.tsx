@@ -7,9 +7,10 @@ import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
+import { getMascotImagePath, useUserMascot } from "@/app/component/mascot";
 import type { KnowledgeCardChoice } from "@/app/mission/[missionId]/play/type";
 
 export const rewardPalette = {
@@ -157,11 +158,14 @@ export const RewardHero = ({
   </Stack>
 );
 
-export const MascotBubble = ({ message }: { message: string }) => (
+export const MascotBubble = ({ message }: { message: string }) => {
+  const mascotId = useUserMascot();
+
+  return (
   <Box sx={{ position: { xs: "relative", md: "absolute" }, right: { md: 72 }, top: { md: 22 }, display: "flex", alignItems: "center", justifyContent: "center", mt: { xs: 1, md: 0 } }}>
     <Box
       component="img"
-      src="/images/mascots/red-panda/normal.png"
+      src={getMascotImagePath(mascotId, "normal")}
       alt="報酬を案内するマスコット"
       sx={{ width: { xs: 92, md: 136 }, height: { xs: 92, md: 136 }, objectFit: "contain", flexShrink: 0 }}
     />
@@ -183,18 +187,21 @@ export const MascotBubble = ({ message }: { message: string }) => (
       {message}
     </Paper>
   </Box>
-);
+  );
+};
 
 export const AchievementUnlockCard = ({
   title,
   description,
   categoryLabel,
   progressLabel,
+  compact = false,
 }: {
   title: string;
   description: string;
   categoryLabel: string;
   progressLabel: string;
+  compact?: boolean;
 }) => (
   <Paper
     component={motion.div}
@@ -208,8 +215,8 @@ export const AchievementUnlockCard = ({
       position: "relative",
       width: "100%",
       maxWidth: 520,
-      minHeight: { xs: 430, md: 500 },
-      p: { xs: 3, md: 5 },
+      minHeight: compact ? { xs: 300, sm: 340 } : { xs: 430, md: 500 },
+      p: compact ? { xs: 2, sm: 3 } : { xs: 3, md: 5 },
       borderRadius: 4,
       border: "1px solid rgba(245, 158, 11, 0.48)",
       background:
@@ -226,8 +233,8 @@ export const AchievementUnlockCard = ({
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
         transition={{ duration: 0.5, delay: 0.08, type: "spring", stiffness: 210 }}
         sx={{
-          width: 158,
-          height: 158,
+          width: compact ? 104 : 158,
+          height: compact ? 104 : 158,
           borderRadius: "50%",
           display: "grid",
           placeItems: "center",
@@ -236,7 +243,7 @@ export const AchievementUnlockCard = ({
           color: rewardPalette.gold,
         }}
       >
-        <EmojiEventsIcon sx={{ fontSize: 102, filter: "drop-shadow(0 14px 22px rgba(217, 119, 6, 0.32))" }} />
+        <EmojiEventsIcon sx={{ fontSize: compact ? 72 : 102, filter: "drop-shadow(0 14px 22px rgba(217, 119, 6, 0.32))" }} />
       </Box>
       <Chip label="ACHIEVEMENT UNLOCKED" sx={{ fontWeight: 900, color: rewardPalette.goldDeep, bgcolor: "#fef3c7", border: "1px solid #fde68a" }} />
       <Typography variant="caption" color="text.secondary" fontWeight={900}>
@@ -271,6 +278,9 @@ export const KnowledgeCardRewardCard = ({
   acquired?: boolean;
 }) => {
   const tone = getRarityTone(card.rarity);
+  const prefersReducedMotion = useReducedMotion();
+  const transitionDuration = prefersReducedMotion ? 0.08 : 0.36;
+  const flipDuration = prefersReducedMotion ? 0.12 : 0.76;
 
   return (
     <Box
@@ -280,7 +290,7 @@ export const KnowledgeCardRewardCard = ({
       animate={{ opacity: disabled && !selected ? 0.64 : 1, y: 0, scale: acquired ? 1.06 : selected ? 1.06 : 1 }}
       whileHover={disabled ? undefined : { y: -14, scale: selected ? 1.08 : 1.06 }}
       whileTap={disabled ? undefined : { scale: 1.02 }}
-      transition={{ duration: 0.36, delay: 0.08 + index * 0.08 }}
+      transition={{ duration: transitionDuration, delay: prefersReducedMotion ? 0 : 0.08 + index * 0.08 }}
       onClick={onSelect}
       disabled={disabled}
       sx={{
@@ -298,7 +308,7 @@ export const KnowledgeCardRewardCard = ({
       <Box
         component={motion.div}
         animate={{ rotateY: revealed ? 180 : 0 }}
-        transition={{ duration: 0.76, ease: [0.2, 0.8, 0.2, 1] }}
+        transition={{ duration: flipDuration, ease: [0.2, 0.8, 0.2, 1] }}
         sx={{
           position: "relative",
           width: "100%",
@@ -347,6 +357,23 @@ export const KnowledgeCardRewardCard = ({
         >
           <AutoAwesomeIcon sx={{ position: "absolute", top: "12%", left: "18%", fontSize: 18, opacity: 0.78 }} />
           <AutoAwesomeIcon sx={{ position: "absolute", right: "19%", bottom: "15%", fontSize: 16, opacity: 0.72 }} />
+          {selected && (
+            <Chip
+              icon={<CheckCircleIcon />}
+              label="選択中"
+              sx={{
+                position: "absolute",
+                top: 14,
+                right: 14,
+                zIndex: 2,
+                fontWeight: 900,
+                color: "#fff",
+                bgcolor: "#2563eb",
+                boxShadow: "0 10px 24px rgba(37, 99, 235, 0.35)",
+                "& .MuiChip-icon": { color: "inherit" },
+              }}
+            />
+          )}
           <Typography sx={{ position: "relative", zIndex: 1, fontSize: { xs: 88, md: 104 }, fontWeight: 900, textShadow: "0 0 24px rgba(255,255,255,0.68)" }}>
             ?
           </Typography>

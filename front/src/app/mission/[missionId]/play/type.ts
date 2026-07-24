@@ -1,4 +1,4 @@
-import type { Difficulty, ProgressStatus } from "@/app/courses/type";
+import type { Difficulty, MissionType, ProgressStatus } from "@/app/courses/type";
 
 import type { MissionVisualContent } from "./components/visual/type";
 
@@ -81,7 +81,10 @@ export type MissionPlayResponse = {
   missionOrder: number;
   title: string;
   description: string;
+  type: MissionType;
   difficulty: Difficulty;
+  selectedExamDifficulty: Difficulty | null;
+  highestClearedExamDifficulty: Difficulty | null;
   goalImg: string;
   estimatedMinutes: number;
   rewardExp: number;

@@ -3,6 +3,13 @@ import { ProgressStatus as PrismaProgressStatus } from "@prisma/client";
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
+const mascotIds = ["red-panda", "penguin", "owl"] as const;
+
+export type MascotId = (typeof mascotIds)[number];
+
+export const isMascotId = (value: string): value is MascotId =>
+  mascotIds.includes(value as MascotId);
+
 type ProfileHistoryType =
   | "mission_completed"
   | "achievement_unlocked"
@@ -91,6 +98,7 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
       displayName: true,
       experience: true,
       badgeTickets: true,
+      selectedMascotId: true,
       selectedTechIconBadge: true,
     },
   });
@@ -263,6 +271,9 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
       completedCourseCount,
       completedMissionCount,
       badgeCount,
+      selectedMascotId: isMascotId(user.selectedMascotId)
+        ? user.selectedMascotId
+        : "red-panda",
     },
     ticketBalance: user.badgeTickets,
     selectedBadge: user.selectedTechIconBadge
@@ -291,5 +302,26 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
     ]
       .sort(compareHistoryDesc)
       .slice(0, 50),
+  };
+};
+
+export const updateMascotByFirebaseUid = async (
+  firebaseUid: string,
+  mascotId: string
+) => {
+  if (!isMascotId(mascotId)) {
+    throw new AppError(400, "INVALID_MASCOT", "Invalid mascot id");
+  }
+
+  const user = await prisma.user.update({
+    where: { firebaseUid },
+    data: { selectedMascotId: mascotId },
+    select: {
+      selectedMascotId: true,
+    },
+  });
+
+  return {
+    selectedMascotId: user.selectedMascotId,
   };
 };

@@ -8,6 +8,16 @@ const course1Id = "course-web-overview";
 
 export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
   {
+    id: "ach-bubble-sort-complete",
+    category: AchievementCategory.COURSE_COMPLETE,
+    conditionType: AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE,
+    courseId: "course-algorithm-bubble-sort",
+    title: "バブルソートを理解した",
+    description: "比較・交換・確定済み領域をたどり、バブルソートのCourse Checkを完了した証です。",
+    isSecret: false,
+    sortOrder: 5,
+  },
+  {
     id: "ach-first-mission-clear",
     category: AchievementCategory.MISSION_CLEAR,
     conditionType: AchievementConditionType.MISSION_COUNT,
@@ -68,6 +78,17 @@ export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
       "Course1のすべてのミッションをクリアし、Webアプリの全体像を深く探索した証です。",
     isSecret: false,
     sortOrder: 60,
+  },
+  {
+    id: "ach-course1-exam-hard-clear",
+    category: AchievementCategory.COURSE_EXAM,
+    conditionType: AchievementConditionType.COURSE_EXAM_HARD_CLEAR,
+    courseId: course1Id,
+    title: "Webアプリ全体像 Hardクリア",
+    description:
+      "Webアプリの全体像コース完了ミッションを、むずかしい難易度でクリアした証です。",
+    isSecret: false,
+    sortOrder: 65,
   },
   {
     id: "ach-activity-clear-lv1",

@@ -53,6 +53,31 @@ const COURSE_VISUAL_STYLE: Record<CourseCategory, CourseVisualStyle> = {
     accent: "#ea580c",
     icon: <RouteIcon />,
   },
+  sort: {
+    background: "linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%)",
+    accent: "#ea580c",
+    icon: <RouteIcon />,
+  },
+  search: {
+    background: "linear-gradient(135deg, #eff6ff 0%, #ecfeff 100%)",
+    accent: "#2563eb",
+    icon: <RouteIcon />,
+  },
+  graph: {
+    background: "linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%)",
+    accent: "#7c3aed",
+    icon: <RouteIcon />,
+  },
+  data_structure: {
+    background: "linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%)",
+    accent: "#059669",
+    icon: <DatasetIcon />,
+  },
+  dynamic_programming: {
+    background: "linear-gradient(135deg, #fdf2f8 0%, #fff1f2 100%)",
+    accent: "#db2777",
+    icon: <CodeIcon />,
+  },
   game: {
     background: "linear-gradient(135deg, #faf5ff 0%, #eef2ff 100%)",
     accent: "#7c3aed",

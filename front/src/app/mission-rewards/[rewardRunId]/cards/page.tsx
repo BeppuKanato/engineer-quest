@@ -17,7 +17,12 @@ import {
   type MissionRewardRunResponse,
 } from "@/api/missionRewards.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { ActionButton } from "@/app/component/actionButton";
+import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { auth } from "@/lib/firebase";
 
 import {
@@ -33,6 +38,7 @@ export default function MissionRewardCardsPage() {
   const rewardRunId = params.rewardRunId;
   const router = useRouter();
   const { play } = useSoundEffect();
+  const { showOverlay, startNavigation } = useNavigationFeedback();
   const [token, setToken] = useState<string | null>(null);
   const [rewardRun, setRewardRun] = useState<MissionRewardRunResponse | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -96,16 +102,15 @@ export default function MissionRewardCardsPage() {
   }, [pendingCardId, rewardRun]);
 
   const goNextRewardStep = () => {
-    if (rewardRun && rewardRun.unlockedAchievements.length === 0) {
+    startNavigation(() => {
       router.push(`/mission-rewards/${encodeURIComponent(rewardRunId)}/result`);
-      return;
-    }
-    router.push(`/mission-rewards/${encodeURIComponent(rewardRunId)}/achievements`);
+    });
   };
 
   const handlePickCard = (knowledgeCardId: string) => {
     if (isSelecting || revealedCardId || rewardRun?.selectedKnowledgeCard) return;
     setPendingCardId(knowledgeCardId);
+    play("uiSelect");
   };
 
   const handleSelect = async () => {
@@ -116,13 +121,14 @@ export default function MissionRewardCardsPage() {
       setErrorMessage(null);
       setSelectedCardId(pendingCardId);
       const result = await selectMissionRewardKnowledgeCard(token, rewardRun.id, pendingCardId);
-      play("saveSuccess");
+      play("cardFlip");
       setRewardRun({ ...rewardRun, selectedKnowledgeCard: result.knowledgeCard });
       setRevealedCardId(result.knowledgeCard.id);
+      window.setTimeout(() => play("cardAcquired"), 280);
     } catch (error) {
       console.error(error);
-      play("errorSoft");
       setSelectedCardId(null);
+      setPendingCardId(null);
       setErrorMessage("このカードを選択できませんでした。再読み込みして確認してください。");
     } finally {
       setIsSelecting(false);
@@ -135,6 +141,15 @@ export default function MissionRewardCardsPage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#eef4fb" }}>
       <AppHeader />
+      <PageTransitionOverlay
+        open={showOverlay}
+        message="次の報酬確認へ進んでいます..."
+      />
+      <BlockingProcessOverlay
+        open={isSelecting}
+        title="知識カードを獲得しています"
+        description="獲得内容を保存しています。この処理中は画面を閉じないでください。"
+      />
       <RewardPageShell maxWidth={1560}>
         {isLoading ? (
           <Skeleton variant="rounded" height={620} sx={{ borderRadius: 4 }} />
@@ -142,6 +157,12 @@ export default function MissionRewardCardsPage() {
           <Alert severity="error">{errorMessage ?? "報酬データがありません。"}</Alert>
         ) : (
           <Stack spacing={3}>
+            <AppBreadcrumbs
+              items={[
+                { label: "コレクション", href: "/collection" },
+                { label: "知識カード獲得" },
+              ]}
+            />
             <Box sx={{ position: "relative", minHeight: { md: 190 }, pt: { md: 1 } }}>
               <RewardHero
                 chip="Mission Reward"
@@ -181,7 +202,10 @@ export default function MissionRewardCardsPage() {
                       <KnowledgeCardRewardCard
                         card={card}
                         selected={pendingCardId === card.id}
-                        disabled={isSelecting || Boolean(revealedCardId)}
+                        disabled={
+                          isSelecting ||
+                          Boolean(revealedCardId)
+                        }
                         index={index}
                         revealed={revealedCardId === card.id}
                         acquired={revealedCardId === card.id}
@@ -231,6 +255,9 @@ export default function MissionRewardCardsPage() {
                           </Stack>
                           <Typography variant="h5" fontWeight={900}>{selectedCard.title}</Typography>
                           <Typography color="text.secondary" sx={{ mt: 0.5, lineHeight: 1.7 }}>{selectedCard.description}</Typography>
+                          <Typography color="#047857" fontWeight={900} sx={{ mt: 0.75 }}>
+                            コレクションに追加しました。
+                          </Typography>
                         </Box>
                       </Stack>
                       <Button
@@ -241,7 +268,7 @@ export default function MissionRewardCardsPage() {
                         onClick={goNextRewardStep}
                         sx={{ minHeight: 54, px: 4, fontWeight: 900, borderRadius: 2, flexShrink: 0 }}
                       >
-                        コレクションに追加
+                        次へ進む
                       </Button>
                     </Stack>
                   ) : (
@@ -268,17 +295,19 @@ export default function MissionRewardCardsPage() {
                             : "カードをクリックして候補を選び、獲得ボタンで中身を明らかにします。"}
                         </Typography>
                       </Box>
-                      <Button
+                      <ActionButton
                         variant="contained"
                         size="large"
                         endIcon={<NavigateNextIcon />}
                         startIcon={<CollectionsBookmarkIcon />}
+                        loading={isSelecting}
+                        loadingLabel="獲得中..."
                         disabled={!pendingCard || isSelecting}
                         onClick={handleSelect}
                         sx={{ minHeight: 54, px: 3, fontWeight: 900, borderRadius: 2 }}
                       >
-                        {isSelecting ? "獲得中..." : "このカードを獲得する"}
-                      </Button>
+                        このカードを獲得する
+                      </ActionButton>
                     </Box>
                   )}
                 </Paper>

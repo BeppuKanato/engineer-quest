@@ -12,11 +12,12 @@ import { DifficultyLabel } from "@/app/component/difficultyLabel";
 import { StatusChip } from "@/app/component/statusChip";
 
 import type { CourseRoadmap, CourseRoadmapMission } from "../../type";
+import type { Difficulty } from "../../../type";
 import { MissionRoadmapNode } from "./missionRoadmapNode";
 
 type CourseRoadmapFlowProps = {
   course: CourseRoadmap;
-  onMissionClick: (missionId: string) => void;
+  onMissionClick: (missionId: string, difficulty?: Difficulty) => void;
   onMissionDetailClick: (missionId: string) => void;
 };
 
@@ -24,6 +25,7 @@ const NODE_WIDTH = 132;
 const NODE_GAP = 110;
 const MAIN_LINE_TOP = 70;
 const CHALLENGE_TOP = 232;
+const CHALLENGE_CONNECTOR_TOP = 142;
 
 const groupChallengesByParentId = (missions: CourseRoadmapMission[]) => {
   return missions
@@ -56,17 +58,21 @@ const MissionDetailPanel = ({
   onMissionDetailClick,
 }: {
   mission: CourseRoadmapMission;
-  onMissionClick: (missionId: string) => void;
+  onMissionClick: (missionId: string, difficulty?: Difficulty) => void;
   onMissionDetailClick: (missionId: string) => void;
 }) => {
   const isChallenge = mission.type === "challenge";
+  const isCourseExam = mission.type === "course_exam";
+  const accentColor = isCourseExam ? "#7c3aed" : isChallenge ? "#f97316" : "#0057e7";
+  const softColor = isCourseExam ? "#f5f3ff" : isChallenge ? "#fff7ed" : "#eff6ff";
+  const labelColor = isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#1d4ed8";
 
   return (
     <Box
       sx={{
         borderRadius: 3,
         border: "2px solid",
-        borderColor: isChallenge ? "#fed7aa" : "#2563eb",
+        borderColor: accentColor,
         bgcolor: "#fff",
         boxShadow: "0 16px 38px rgba(15,23,42,0.08)",
         p: { xs: 2.5, md: 3 },
@@ -77,10 +83,10 @@ const MissionDetailPanel = ({
       <Stack spacing={2.5}>
         <Stack direction="row" spacing={1} flexWrap="wrap">
           <Chip
-            label={isChallenge ? "挑戦" : "必須"}
+            label={isCourseExam ? "コース完了" : isChallenge ? "挑戦" : "必須"}
             sx={{
-              bgcolor: isChallenge ? "#fff7ed" : "#eff6ff",
-              color: isChallenge ? "#ea580c" : "#1d4ed8",
+              bgcolor: softColor,
+              color: labelColor,
               fontWeight: 950,
             }}
           />
@@ -154,24 +160,55 @@ const MissionDetailPanel = ({
           </Stack>
         </Stack>
 
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          disabled={mission.isLocked}
-          startIcon={mission.isLocked ? <LockIcon /> : <PlayArrowIcon />}
-          onClick={() => onMissionClick(mission.id)}
-          sx={{
-            minHeight: 58,
-            borderRadius: 2,
-            fontWeight: 950,
-            fontSize: 20,
-            bgcolor: isChallenge ? "#f97316" : "#0057e7",
-            boxShadow: "0 12px 24px rgba(0,87,231,0.22)",
-          }}
-        >
-          {getActionLabel(mission)}
-        </Button>
+        {isCourseExam && !mission.isLocked ? (
+          <Stack spacing={1.25}>
+            <Typography fontWeight={900} color="text.secondary">
+              難易度を選んで開始できます。どの難易度でもコース完了になります。
+            </Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+              {([
+                ["easy", "やさしい"],
+                ["normal", "ふつう"],
+                ["hard", "むずかしい"],
+              ] as const).map(([difficulty, label]) => (
+                <Button
+                  key={difficulty}
+                  variant={difficulty === "normal" ? "contained" : "outlined"}
+                  fullWidth
+                  startIcon={<PlayArrowIcon />}
+                  onClick={() => onMissionClick(mission.id, difficulty)}
+                  sx={{
+                    minHeight: 52,
+                    borderRadius: 2,
+                    fontWeight: 950,
+                    bgcolor: difficulty === "normal" ? accentColor : undefined,
+                  }}
+                >
+                  {label}
+                </Button>
+              ))}
+            </Stack>
+          </Stack>
+        ) : (
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            disabled={mission.isLocked}
+            startIcon={mission.isLocked ? <LockIcon /> : <PlayArrowIcon />}
+            onClick={() => onMissionClick(mission.id)}
+            sx={{
+              minHeight: 58,
+              borderRadius: 2,
+              fontWeight: 950,
+              fontSize: 20,
+              bgcolor: accentColor,
+              boxShadow: "0 12px 24px rgba(0,87,231,0.22)",
+            }}
+          >
+            {getActionLabel(mission)}
+          </Button>
+        )}
 
         <Button
           variant="outlined"
@@ -336,6 +373,7 @@ export const CourseRoadmapFlow = ({
                   height: 5,
                   borderRadius: 999,
                   bgcolor: "#0057e7",
+                  pointerEvents: "none",
                   zIndex: 0,
                 }}
               />
@@ -352,7 +390,8 @@ export const CourseRoadmapFlow = ({
                         isNext={course.nextMission?.id === mission.id}
                         isSelected={selectedMission?.id === mission.id}
                         onSelect={(nextMission) => setSelectedMissionId(nextMission.id)}
-                        variant="main"
+                        onActivate={(nextMission) => onMissionClick(nextMission.id)}
+                        variant={mission.type === "course_exam" ? "course_exam" : "main"}
                       />
 
                       {challenges.length > 0 && (
@@ -360,13 +399,14 @@ export const CourseRoadmapFlow = ({
                           <Box
                             sx={{
                               position: "absolute",
-                              top: MAIN_LINE_TOP,
+                              top: CHALLENGE_CONNECTOR_TOP,
                               left: "50%",
                               width: 5,
-                              height: CHALLENGE_TOP - MAIN_LINE_TOP,
+                              height: CHALLENGE_TOP - CHALLENGE_CONNECTOR_TOP,
                               bgcolor: "#f97316",
                               borderRadius: 999,
                               transform: "translateX(-50%)",
+                              pointerEvents: "none",
                               zIndex: 0,
                             }}
                           />
@@ -386,6 +426,7 @@ export const CourseRoadmapFlow = ({
                                   isNext={false}
                                   isSelected={selectedMission?.id === challenge.id}
                                   onSelect={(nextMission) => setSelectedMissionId(nextMission.id)}
+                                  onActivate={(nextMission) => onMissionClick(nextMission.id)}
                                   variant="challenge"
                                 />
                               ))}
@@ -406,6 +447,7 @@ export const CourseRoadmapFlow = ({
                             bgcolor: "#f97316",
                             transform: "translateX(-50%)",
                             border: "3px solid #fff",
+                            pointerEvents: "none",
                             zIndex: 2,
                           }}
                         />

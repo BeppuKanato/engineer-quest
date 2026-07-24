@@ -41,6 +41,16 @@ const toCourseCategory = (
       return "ui";
     case CourseCategoryType.DATA:
       return "data";
+    case CourseCategoryType.SORT:
+      return "sort";
+    case CourseCategoryType.SEARCH:
+      return "search";
+    case CourseCategoryType.GRAPH:
+      return "graph";
+    case CourseCategoryType.DATA_STRUCTURE:
+      return "data_structure";
+    case CourseCategoryType.DYNAMIC_PROGRAMMING:
+      return "dynamic_programming";
   }
 };
 
@@ -50,6 +60,8 @@ const toMissionType = (type: PrismaMissionType): MissionType => {
       return "main";
     case PrismaMissionType.CHALLENGE:
       return "challenge";
+    case PrismaMissionType.COURSE_EXAM:
+      return "course_exam";
   }
 };
 
@@ -239,6 +251,10 @@ const buildRoadmapMissions = (
       missionType === "main" &&
       (previousRequiredMissionId === null ||
         previousRequiredStatus === "completed");
+    const isCourseExamUnlocked =
+      missionType === "course_exam" &&
+      (previousRequiredMissionId === null ||
+        previousRequiredStatus === "completed");
     const isChallengeUnlocked =
       missionType === "challenge" &&
       requiredParentStatus === "completed";
@@ -246,6 +262,7 @@ const buildRoadmapMissions = (
     const isLocked = !(
       isAlreadyStarted ||
       isMainUnlocked ||
+      isCourseExamUnlocked ||
       isChallengeUnlocked
     );
 

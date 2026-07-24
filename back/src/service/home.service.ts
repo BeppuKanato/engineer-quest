@@ -17,8 +17,12 @@ type HomeMission = {
   goalImg: string;
   description: string;
   progress: number;
+  estimatedMinutes: number;
+  rewardExp: number;
+  activityCount: number;
   ctaLabel: string;
   badgeLabel: string;
+  reason: string;
   href: string;
 };
 
@@ -125,18 +129,30 @@ const toHomeMission = async (
   mission: Mission,
   userId: string,
   badgeLabel: string,
-  ctaLabel: string
-): Promise<HomeMission> => ({
-  id: mission.id,
-  title: mission.title,
-  difficulty: toDifficultyValue(mission.difficulty),
-  goalImg: mission.goalImg,
-  description: mission.description,
-  progress: await calculateMissionProgress(userId, mission.id),
-  ctaLabel,
-  badgeLabel,
-  href: `/mission/${encodeURIComponent(mission.id)}/play`,
-});
+  ctaLabel: string,
+  reason: string
+): Promise<HomeMission> => {
+  const [progress, activityCount] = await Promise.all([
+    calculateMissionProgress(userId, mission.id),
+    prisma.missionActivity.count({ where: { missionId: mission.id } }),
+  ]);
+
+  return {
+    id: mission.id,
+    title: mission.title,
+    difficulty: toDifficultyValue(mission.difficulty),
+    goalImg: mission.goalImg,
+    description: mission.description,
+    progress,
+    estimatedMinutes: mission.estimatedMinutes,
+    rewardExp: mission.rewardExp,
+    activityCount,
+    ctaLabel,
+    badgeLabel,
+    reason,
+    href: `/mission/${encodeURIComponent(mission.id)}/play`,
+  };
+};
 
 const getResumeMission = async (userId: string) => {
   const progress = await prisma.userMissionProgress.findFirst({
@@ -156,7 +172,7 @@ const getResumeMission = async (userId: string) => {
 
   if (!progress) return null;
 
-  return toHomeMission(progress.mission, userId, "再開", "続きから始める");
+  return toHomeMission(progress.mission, userId, "前回の続き", "続きから始める", "前回の続き");
 };
 
 const getRecommendedMission = async (
@@ -186,7 +202,7 @@ const getRecommendedMission = async (
     );
 
     if (nextMission) {
-      return toHomeMission(nextMission, userId, "おすすめ", "ミッション開始");
+      return toHomeMission(nextMission, userId, "次におすすめ", "学習を始める", "現在のコースで次に進めるミッション");
     }
   }
 
@@ -206,7 +222,7 @@ const getRecommendedMission = async (
   });
 
   return challengeMission
-    ? toHomeMission(challengeMission, userId, "Challenge", "挑戦する")
+    ? toHomeMission(challengeMission, userId, "挑戦ミッション", "挑戦する", "解放済みの挑戦ミッション")
     : null;
 };
 
@@ -221,14 +237,15 @@ const getRecommendedMissions = async (
   const pushMission = async (
     mission: Mission,
     badgeLabel: string,
-    ctaLabel: string
+    ctaLabel: string,
+    reason: string
   ) => {
     if (pushedMissionIds.has(mission.id) || recommendations.length >= limit) {
       return;
     }
 
     pushedMissionIds.add(mission.id);
-    recommendations.push(await toHomeMission(mission, userId, badgeLabel, ctaLabel));
+    recommendations.push(await toHomeMission(mission, userId, badgeLabel, ctaLabel, reason));
   };
 
   const courses = await prisma.course.findMany({
@@ -254,7 +271,7 @@ const getRecommendedMissions = async (
     );
 
     if (nextMission) {
-      await pushMission(nextMission, "おすすめ", "ミッション開始");
+      await pushMission(nextMission, "次におすすめ", "学習を始める", "現在のコースで次に進めるミッション");
     }
 
     if (recommendations.length >= limit) {
@@ -279,7 +296,7 @@ const getRecommendedMissions = async (
   });
 
   for (const mission of challengeMissions) {
-    await pushMission(mission, "Challenge", "挑戦する");
+    await pushMission(mission, "挑戦ミッション", "挑戦する", "解放済みの挑戦ミッション");
   }
 
   return recommendations;
@@ -387,25 +404,52 @@ const calculateAchievementProgress = async (
   }
 };
 
+const buildAchievementTargetLink = (
+  achievement: Pick<Achievement, "conditionType" | "courseId" | "missionId">
+) => {
+  switch (achievement.conditionType) {
+    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
+      return achievement.missionId
+        ? {
+            href: `/mission/${encodeURIComponent(achievement.missionId)}/overview`,
+            actionLabel: "対象ミッションを見る",
+          }
+        : { href: "/courses", actionLabel: "コースを選ぶ" };
+    case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_COMPLETE:
+    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
+      return achievement.courseId
+        ? {
+            href: `/courses/roadmap/${encodeURIComponent(achievement.courseId)}`,
+            actionLabel: "対象コースを見る",
+          }
+        : { href: "/courses", actionLabel: "コースを選ぶ" };
+    case AchievementConditionType.MISSION_COUNT:
+    case AchievementConditionType.ACTIVITY_COUNT:
+    case AchievementConditionType.STREAK_DAYS:
+      return { href: "/courses", actionLabel: "学習を続ける" };
+  }
+};
+
 const getTargetAchievement = async (
   userId: string,
+  selectedTargetAchievementId: string | null,
   completedMissionIds: Set<string>,
   completedActivityCount: number
 ) => {
-  const userAchievements = await prisma.userAchievement.findMany({
-    where: { userId },
-    select: { achievementId: true },
-  });
-  const achievedIds = new Set(
-    userAchievements.map((achievement) => achievement.achievementId)
-  );
+  if (!selectedTargetAchievementId) return null;
 
   const achievement = await prisma.achievement.findFirst({
     where: {
-      id: { notIn: [...achievedIds] },
+      id: selectedTargetAchievementId,
       isSecret: false,
+      userAchievements: {
+        none: {
+          userId,
+        },
+      },
     },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 
   if (!achievement) return null;
@@ -416,9 +460,12 @@ const getTargetAchievement = async (
     completedMissionIds,
     completedActivityCount
   );
+  const targetLink = buildAchievementTargetLink(achievement);
 
   return {
     title: achievement.title,
+    href: targetLink.href,
+    actionLabel: targetLink.actionLabel,
     factor: [factor],
   };
 };
@@ -483,6 +530,8 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
       id: true,
       displayName: true,
       experience: true,
+      selectedMascotId: true,
+      selectedTargetAchievementId: true,
     },
   });
 
@@ -540,6 +589,7 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
       getRecommendedMissions(user.id, completedMissionIds, 3),
       getTargetAchievement(
         user.id,
+        user.selectedTargetAchievementId,
         completedMissionIds,
         completedActivityCount
       ),
@@ -555,6 +605,7 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
       level: levelStatus.level,
       requireNextLevelExp: levelStatus.requireNextLevelExp,
       exp: user.experience,
+      selectedMascotId: user.selectedMascotId,
       completedMissionNum: completedMissionIds.size,
       completedAchievementNum: completedAchievementCount,
       todayCompletedMissionCount,

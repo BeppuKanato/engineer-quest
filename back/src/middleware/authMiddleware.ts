@@ -33,6 +33,8 @@ const setAuthUserByFirebaseUid = async (
       experience: true,
       badgeTickets: true,
       selectedTechIconBadgeId: true,
+      selectedMascotId: true,
+      selectedTargetAchievementId: true,
     },
   });
 
@@ -45,12 +47,41 @@ const setAuthUserByFirebaseUid = async (
   return true;
 };
 
+export const verifyFirebaseTokenOnly = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = extractBearerToken(req.headers.authorization);
+
+  if (!token) {
+    return res.status(401).json({
+      error: "No token provided",
+    });
+  }
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+
+    req.firebaseUser = decoded;
+
+    return next();
+  } catch (error) {
+    console.error("Firebase token verification failed:", error);
+
+    return res.status(401).json({
+      error: "Invalid token",
+    });
+  }
+};
+
 export const verifyFirebaseToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const devFirebaseUid = req.headers["x-dev-firebase-uid"];
+
   if (
     process.env.ENABLE_DEV_AUTH === "true" &&
     typeof devFirebaseUid === "string"
@@ -91,7 +122,7 @@ export const verifyFirebaseToken = async (
   } catch (error) {
     console.error("Firebase token verification failed:", error);
 
-    return res.status(403).json({
+    return res.status(401).json({
       error: "Invalid token",
     });
   }

@@ -43,8 +43,7 @@ const ComparisonPanel = ({
         {panel.subtitle && (
           <Typography
             variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", mt: 0.25 }}
+            sx={{ display: "block", mt: 0.25, color: "#475569", fontWeight: 700 }}
           >
             {panel.subtitle}
           </Typography>
@@ -70,7 +69,7 @@ const ComparisonPanel = ({
                 bgcolor: tone.accent,
               }}
             />
-            <Typography sx={{ lineHeight: 1.7 }}>{item}</Typography>
+            <Typography sx={{ lineHeight: 1.7, color: "#334155", fontWeight: 700 }}>{item}</Typography>
           </Stack>
         ))}
       </Stack>

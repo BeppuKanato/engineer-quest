@@ -27,6 +27,7 @@ import {
 } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
@@ -38,8 +39,11 @@ import {
   type QuestPostSummary,
 } from "@/api/questBoard.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import type { Course } from "@/app/courses/type";
 import { auth } from "@/lib/firebase";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 const categoryColor: Record<QuestPostCategory, "primary" | "secondary" | "success" | "warning" | "info" | "default"> = {
   QUESTION: "primary",
@@ -129,6 +133,8 @@ const PostCard = ({ post }: { post: QuestPostSummary }) => {
 };
 
 export default function QuestBoardPage() {
+  const router = useRouter();
+  const { showOverlay, startNavigation } = useNavigationFeedback();
   const [token, setToken] = useState<string | null>(null);
   const [board, setBoard] = useState<QuestBoardListResponse | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -185,7 +191,7 @@ export default function QuestBoardPage() {
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
-        setErrorMessage("Quest Board を取得できませんでした。");
+        setErrorMessage("掲示板を取得できませんでした。");
       } finally {
         if (!isMounted) return;
         setIsLoading(false);
@@ -216,8 +222,15 @@ export default function QuestBoardPage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
       <AppHeader />
+      <PageTransitionOverlay
+        open={showOverlay}
+        title="投稿画面を開いています"
+        description="新しい投稿を作成する画面へ移動しています。"
+        mascotState="thinking"
+      />
       <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
         <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "掲示板" }]} />
           <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
             <Stack
               direction={{ xs: "column", md: "row" }}
@@ -241,7 +254,7 @@ export default function QuestBoardPage() {
                 </Box>
                 <Box>
                   <Typography variant="h4" fontWeight={900}>
-                    Quest Board
+                    掲示板
                   </Typography>
                   <Typography color="text.secondary">
                     質問、エラー相談、作品共有、メモをカテゴリ別に投稿できます。
@@ -249,10 +262,9 @@ export default function QuestBoardPage() {
                 </Box>
               </Stack>
               <Button
-                component={Link}
-                href="/quest-board/new"
                 variant="contained"
                 startIcon={<AddIcon />}
+                onClick={() => startNavigation(() => router.push("/quest-board/new"))}
                 sx={{ minHeight: 44, fontWeight: 900, borderRadius: 2 }}
               >
                 投稿する

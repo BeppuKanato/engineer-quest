@@ -40,6 +40,8 @@ import {
   type TechIconBadge,
   type TechIconBadgeRarity,
 } from "@/api/badges.api";
+import { ActionButton } from "@/app/component/actionButton";
+import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
@@ -165,8 +167,6 @@ export default function BadgesPage() {
       setResultOpen(false);
       setAcquiredBadge(null);
       setErrorMessage(null);
-      play("gachaStart");
-
       const startedAt = Date.now();
       const result = await drawTechIconBadge(token);
       const remainingMs = Math.max(0, DRAW_DURATION_MS - (Date.now() - startedAt));
@@ -175,12 +175,11 @@ export default function BadgesPage() {
       await wait(remainingMs);
       await refreshCollection(token, result.badge.id);
 
-      play(result.badge.rarity === "COMMON" ? "badgeCommon" : "badgeRare");
+      play("cardAcquired");
       setAcquiredBadge(result.badge);
       setResultOpen(true);
     } catch (error) {
       console.error(error);
-      play("errorSoft");
       setErrorMessage("バッジを獲得できませんでした。チケット数と未獲得バッジを確認してください。");
     } finally {
       setIsOverlayOpen(false);
@@ -198,7 +197,6 @@ export default function BadgesPage() {
       await refreshCollection(token, badgeId);
     } catch (error) {
       console.error(error);
-      play("errorSoft");
       setErrorMessage("プロフィールバッジを設定できませんでした。");
     } finally {
       setSelectingBadgeId(null);
@@ -211,10 +209,12 @@ export default function BadgesPage() {
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
-        {isLoading ? (
-          <BadgesSkeleton />
-        ) : (
-          <Stack spacing={3}>
+        <Stack spacing={3}>
+          <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "バッジ" }]} />
+          {isLoading ? (
+            <BadgesSkeleton />
+          ) : (
+            <>
             <BadgeGachaPanel
               collection={collection}
               progress={progress}
@@ -251,8 +251,9 @@ export default function BadgesPage() {
 
               <BadgeDetailPanel badge={selectedBadge} onSetProfile={handleSelectBadge} isSelecting={selectingBadgeId === selectedBadge?.id} />
             </Box>
-          </Stack>
-        )}
+            </>
+          )}
+        </Stack>
       </Container>
 
       <BadgeDrawOverlay open={isOverlayOpen} />
@@ -342,9 +343,18 @@ const BadgeGachaPanel = ({
             </Box>
           </Stack>
           <Chip icon={<ConfirmationNumberIcon />} label="必要チケット: 1枚" sx={{ alignSelf: "flex-start", fontWeight: 900, bgcolor: "#fff7ed", color: "#b45309" }} />
-          <Button variant="contained" size="large" startIcon={<ConfirmationNumberIcon />} disabled={!canDraw} onClick={onDraw} sx={{ minHeight: 56, px: 4, fontWeight: 900, borderRadius: 2 }}>
-            {isDrawing ? "開封中..." : "チケットを使う"}
-          </Button>
+          <ActionButton
+            variant="contained"
+            size="large"
+            startIcon={<ConfirmationNumberIcon />}
+            loading={isDrawing}
+            loadingLabel="開封中..."
+            disabled={!canDraw}
+            onClick={onDraw}
+            sx={{ minHeight: 56, px: 4, fontWeight: 900, borderRadius: 2 }}
+          >
+            チケットを使う
+          </ActionButton>
         </Stack>
       </Paper>
     </Box>
@@ -392,9 +402,19 @@ const BadgeDetailPanel = ({ badge, onSetProfile, isSelecting }: { badge: BadgeCo
             <Typography color="text.secondary">{new Date(badge.acquiredAt).toLocaleString("ja-JP")}</Typography>
           </Box>
         )}
-        <Button fullWidth variant="contained" size="large" startIcon={<PersonIcon />} disabled={!badge.isOwned || badge.isSelected || isSelecting} onClick={() => onSetProfile(badge.id)} sx={{ mt: "auto", minHeight: 54, borderRadius: 2, fontWeight: 900 }}>
+        <ActionButton
+          fullWidth
+          variant="contained"
+          size="large"
+          startIcon={<PersonIcon />}
+          loading={isSelecting}
+          loadingLabel="設定中..."
+          disabled={!badge.isOwned || badge.isSelected || isSelecting}
+          onClick={() => onSetProfile(badge.id)}
+          sx={{ mt: "auto", minHeight: 54, borderRadius: 2, fontWeight: 900 }}
+        >
           {badge.isSelected ? "プロフィールに設定済み" : "プロフィールに設定"}
-        </Button>
+        </ActionButton>
         <Button fullWidth component={Link} href="/collection" variant="outlined" sx={{ minHeight: 48, borderRadius: 2, fontWeight: 900 }}>
           コレクションTOPへ
         </Button>
@@ -511,12 +531,12 @@ const BadgeAcquiredDialog = ({
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1, flexWrap: "wrap" }}>
           <Button variant="outlined" onClick={onClose} sx={{ fontWeight: 900, borderRadius: 2 }}>閉じる</Button>
-          <Button variant="outlined" disabled={!canDrawAgain || isDrawing} onClick={onDrawAgain} sx={{ fontWeight: 900, borderRadius: 2 }}>
+          <ActionButton variant="outlined" loading={isDrawing} loadingLabel="開封中..." disabled={!canDrawAgain || isDrawing} onClick={onDrawAgain} sx={{ fontWeight: 900, borderRadius: 2 }}>
             もう一度引く
-          </Button>
-          <Button variant="contained" disabled={isSelecting} onClick={() => onSetProfile(badge.id)} sx={{ fontWeight: 900, borderRadius: 2 }}>
+          </ActionButton>
+          <ActionButton variant="contained" loading={isSelecting} loadingLabel="設定中..." disabled={isSelecting} onClick={() => onSetProfile(badge.id)} sx={{ fontWeight: 900, borderRadius: 2 }}>
             プロフィールに設定
-          </Button>
+          </ActionButton>
         </DialogActions>
       </>
     )}

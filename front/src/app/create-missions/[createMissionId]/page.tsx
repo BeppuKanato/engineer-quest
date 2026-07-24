@@ -27,6 +27,7 @@ import {
   type CreateMission,
 } from "@/api/createMissions.api";
 import { AppHeader } from "@/app/component/appHeader";
+import { ActionButton } from "@/app/component/actionButton";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import { auth } from "@/lib/firebase";
 
@@ -130,7 +131,6 @@ export default function CreateMissionDetailPage() {
       play("saveSuccess");
     } catch (error) {
       console.error(error);
-      play("errorSoft");
       setErrorMessage("作品を保存できませんでした。入力内容を確認してください。");
     } finally {
       setIsSaving(false);
@@ -285,16 +285,18 @@ export default function CreateMissionDetailPage() {
                         </Stack>
                       }
                     />
-                    <Button
+                    <ActionButton
                       variant="contained"
                       size="large"
                       startIcon={<SaveIcon />}
+                      loading={isSaving}
+                      loadingLabel="保存中..."
                       disabled={!canSave || isSaving}
                       onClick={handleSave}
                       sx={{ minHeight: 52, fontWeight: 900, borderRadius: 2 }}
                     >
-                      {isSaving ? "保存中..." : "作品を保存する"}
-                    </Button>
+                      作品を保存する
+                    </ActionButton>
                   </Stack>
                 </Paper>
               </>
