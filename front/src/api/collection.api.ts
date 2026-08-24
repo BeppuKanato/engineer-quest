@@ -1,6 +1,7 @@
 import { fetcher } from "@/lib/fetcher";
 import type { TechIconBadge, TechIconBadgeRarity } from "./badges.api";
 import type { AchievementStatus } from "./achievements.api";
+import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export type CollectionBadgeItem = TechIconBadge & {
   isOwned: boolean;
@@ -54,10 +55,11 @@ export type CollectionResponse = {
 export const getCollection = async (
   token: string
 ): Promise<CollectionResponse> => {
-  return fetcher<CollectionResponse>("/collection", {
-    method: "GET",
-    token,
-  });
+  return fetchClientQuery(
+    "collection",
+    () => fetcher<CollectionResponse>("/collection", { method: "GET", token }),
+    { staleTimeMs: 20_000, tags: [queryTags.collection] }
+  );
 };
 
 export type { TechIconBadgeRarity };

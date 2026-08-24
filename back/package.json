@@ -6,6 +6,11 @@
     "test": "echo \"No tests yet\"",
     "dev": "nodemon --watch src --ext ts --exec \"ts-node --files src/app.ts\"",
     "build": "tsc",
+    "validate:learning-seed": "ts-node src/scripts/validateLearningSeed.ts",
+    "verify:learning-db": "ts-node src/scripts/verifySeededLearningData.ts",
+    "test:e2e:learning": "ts-node src/scripts/e2eLearningFlow.ts",
+    "preview:feedback-prompts": "ts-node src/scripts/previewCourseExamFeedbackPrompts.ts",
+    "verify:feedback-prompts": "ts-node src/scripts/verifyCourseExamFeedbackPrompts.ts",
     "start": "node dist/src/app.js",
     "lint": "eslint src --ext .ts"
   },
@@ -23,7 +28,8 @@
     "firebase-admin": "^13.6.0",
     "just-diff": "^6.0.2",
     "openai": "^6.15.0",
-    "puppeteer": "^24.31.0"
+    "puppeteer": "^24.31.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

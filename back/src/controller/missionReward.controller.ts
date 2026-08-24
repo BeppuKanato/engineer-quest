@@ -2,18 +2,18 @@ import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
 import {
-  getMissionRewardRunByFirebaseUid,
-  selectMissionRewardKnowledgeCardByFirebaseUid,
+  getMissionRewardRunByUserId,
+  selectMissionRewardKnowledgeCardByUserId,
 } from "../service/missionReward.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getUserId = (req: Request) => {
+  const userId = req.authUser?.id;
 
-  if (!firebaseUid) {
+  if (!userId) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return userId;
 };
 
 const getRewardRunId = (req: Request) => {
@@ -32,8 +32,8 @@ export const getMissionRewardRunController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getMissionRewardRunByFirebaseUid({
-      firebaseUid: getFirebaseUid(req),
+    const data = await getMissionRewardRunByUserId({
+      userId: getUserId(req),
       rewardRunId: getRewardRunId(req),
     });
 
@@ -58,8 +58,8 @@ export const selectMissionRewardKnowledgeCardController = async (
       throw new AppError(400, "BAD_REQUEST", "Knowledge card ID is required");
     }
 
-    const data = await selectMissionRewardKnowledgeCardByFirebaseUid({
-      firebaseUid: getFirebaseUid(req),
+    const data = await selectMissionRewardKnowledgeCardByUserId({
+      userId: getUserId(req),
       rewardRunId: getRewardRunId(req),
       knowledgeCardId,
     });

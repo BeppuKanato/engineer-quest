@@ -14,6 +14,7 @@ declare global {
         selectedTechIconBadgeId: string | null;
         selectedMascotId: string;
         selectedTargetAchievementId: string | null;
+        hasHexadResponse: boolean;
       };
       firebaseUser?: DecodedIdToken;
     }

@@ -24,6 +24,7 @@ export type CourseMissionSummaryResponse = {
   order?: number;
   difficulty?: Difficulty;
   estimatedMinutes?: number;
+  rewardExp?: number;
   status: ProgressStatus;
   type: MissionType;
   isRequiredForCourseCompletion: boolean;
@@ -65,6 +66,7 @@ export type CourseRoadmapMissionResponse = Required<
     | "order"
     | "difficulty"
     | "estimatedMinutes"
+    | "rewardExp"
     | "status"
     | "type"
     | "isRequiredForCourseCompletion"

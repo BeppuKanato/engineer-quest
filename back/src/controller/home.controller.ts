@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
-import { getHomeByFirebaseUid } from "../service/home.service";
+import { getHomeByUser } from "../service/home.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getAuthUser = (req: Request) => {
+  const user = req.authUser;
 
-  if (!firebaseUid) {
+  if (!user) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return user;
 };
 
 export const getHomeController = async (
@@ -19,7 +19,7 @@ export const getHomeController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getHomeByFirebaseUid(getFirebaseUid(req));
+    const data = await getHomeByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {

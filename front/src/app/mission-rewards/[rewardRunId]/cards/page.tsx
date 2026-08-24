@@ -103,7 +103,11 @@ export default function MissionRewardCardsPage() {
 
   const goNextRewardStep = () => {
     startNavigation(() => {
-      router.push(`/mission-rewards/${encodeURIComponent(rewardRunId)}/result`);
+      router.push(
+        rewardRun?.mission.isCourseCompletion
+          ? `/course-results/${encodeURIComponent(rewardRunId)}`
+          : `/mission-rewards/${encodeURIComponent(rewardRunId)}/result`
+      );
     });
   };
 

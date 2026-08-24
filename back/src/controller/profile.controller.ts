@@ -2,18 +2,18 @@ import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
 import {
-  getProfileByFirebaseUid,
-  updateMascotByFirebaseUid,
+  getProfileByUser,
+  updateMascotByUserId,
 } from "../service/profile.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getAuthUser = (req: Request) => {
+  const user = req.authUser;
 
-  if (!firebaseUid) {
+  if (!user) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return user;
 };
 
 export const getProfileController = async (
@@ -22,7 +22,7 @@ export const getProfileController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getProfileByFirebaseUid(getFirebaseUid(req));
+    const data = await getProfileByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {
@@ -37,7 +37,7 @@ export const updateMascotController = async (
 ) => {
   try {
     const mascotId = typeof req.body?.mascotId === "string" ? req.body.mascotId : "";
-    const data = await updateMascotByFirebaseUid(getFirebaseUid(req), mascotId);
+    const data = await updateMascotByUserId(getAuthUser(req).id, mascotId);
 
     res.status(200).json(data);
   } catch (error) {

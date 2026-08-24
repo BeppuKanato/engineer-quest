@@ -1,7 +1,6 @@
 import {
   BadgeTicketReason,
   CourseDifficulty,
-  MissionActivityType,
   MissionType,
   Prisma,
   ProgressStatus as PrismaProgressStatus,
@@ -9,9 +8,19 @@ import {
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
+import { parseActivityContent } from "../type/activityContent";
+import {
+  getActivityRendererDefinition,
+  type ActivityAnswerRenderer,
+} from "../type/activityRendererRegistry";
 import { evaluateAchievementsForUser } from "./achievement.service";
 import { awardBadgeTickets } from "./badge.service";
 import { getKnowledgeCardCandidateIdsForMission } from "./knowledgeCard.service";
+import {
+  getCurrentCourseExamAttempt,
+  recordCourseExamSubmission,
+  startOrResumeCourseExamAttempt,
+} from "./courseExamAttempt.service";
 
 type ApiDifficulty = "easy" | "normal" | "hard";
 type ApiProgressStatus = "completed" | "in_progress" | "not_started";
@@ -157,7 +166,83 @@ const getAnswerFeedback = (
   return fallback;
 };
 
-const judgeChoice = (content: MissionActivityContent, answer: unknown) => {
+const judgeChoice = (
+  answerRenderer: ActivityAnswerRenderer,
+  content: MissionActivityContent,
+  answer: unknown,
+) => {
+  if (answerRenderer === "INDEX_SELECT") {
+    const indexQuestions = Array.isArray(content.indexSelectionQuestions)
+      ? content.indexSelectionQuestions
+      : [];
+    const questions = indexQuestions.flatMap((question) => {
+      const questionRecord = asRecord(question);
+      if (
+        typeof questionRecord.id !== "string" ||
+        typeof questionRecord.correctIndex !== "number"
+      ) {
+        return [];
+      }
+      return [{ id: questionRecord.id, correctIndex: questionRecord.correctIndex }];
+    });
+    const selectedIndices = asRecord(asRecord(answer).selectedIndices);
+    if (
+      questions.length === 0 ||
+      questions.some(({ id }) => typeof selectedIndices[id] !== "number")
+    ) {
+      return {
+        isCorrect: false,
+        feedback: "すべての問題で位置を選んでから確認してください。",
+      };
+    }
+    const isCorrect =
+      Object.keys(selectedIndices).length === questions.length &&
+      questions.every(({ id, correctIndex }) => selectedIndices[id] === correctIndex);
+    return { isCorrect, feedback: getAnswerFeedback(isCorrect, content) };
+  }
+
+  if (answerRenderer === "ARRAY_REGION_SELECT") {
+    const rangeQuestions = Array.isArray(content.rangeDecisionQuestions)
+      ? content.rangeDecisionQuestions
+      : [];
+    const questions = rangeQuestions.flatMap((question) => {
+      const questionRecord = asRecord(question);
+      const correctRegion = questionRecord.correctRegion;
+      if (
+        typeof questionRecord.id !== "string" ||
+        (correctRegion !== "left" &&
+          correctRegion !== "center" &&
+          correctRegion !== "right")
+      ) {
+        return [];
+      }
+
+      return [{ id: questionRecord.id, correctRegion }];
+    });
+    const selectedRegions = asRecord(asRecord(answer).selectedRegions);
+
+    if (
+      questions.length === 0 ||
+      questions.some(({ id }) => typeof selectedRegions[id] !== "string")
+    ) {
+      return {
+        isCorrect: false,
+        feedback: "すべての場面で探す範囲を選んでから確認してください。",
+      };
+    }
+
+    const isCorrect =
+      Object.keys(selectedRegions).length === questions.length &&
+      questions.every(
+        ({ id, correctRegion }) => selectedRegions[id] === correctRegion
+      );
+
+    return {
+      isCorrect,
+      feedback: getAnswerFeedback(isCorrect, content),
+    };
+  }
+
   const choices = Array.isArray(content.choices) ? content.choices : [];
   const selectedChoiceId =
     typeof answer === "string"
@@ -243,7 +328,11 @@ const judgeMatch = (content: MissionActivityContent, answer: unknown) => {
   };
 };
 
-const judgeSelectFill = (content: MissionActivityContent, answer: unknown) => {
+const judgeSelectFill = (
+  answerRenderer: ActivityAnswerRenderer,
+  content: MissionActivityContent,
+  answer: unknown,
+) => {
   const answerRecord = asRecord(answer);
   const expected = content.correctAnswers ?? content.answer;
 
@@ -254,8 +343,46 @@ const judgeSelectFill = (content: MissionActivityContent, answer: unknown) => {
     };
   }
 
-  const isCorrect =
-    JSON.stringify(answerRecord.values ?? answer) === JSON.stringify(expected);
+  const submitted = answerRecord.values ?? answer;
+  const isCorrect = answerRenderer === "MULTI_DECISION" || answerRenderer === "PAIR_DECISION"
+    ? Object.entries(asRecord(expected)).every(
+        ([key, value]) => asRecord(submitted)[key] === value
+      ) && Object.keys(asRecord(submitted)).length === Object.keys(asRecord(expected)).length
+    : JSON.stringify(submitted) === JSON.stringify(expected);
+
+  if (!isCorrect && answerRenderer === "CODE_BLOCK_BUILDER") {
+    const selected = normalizeStringArray(answerRecord.values);
+    const expectedBlocks = normalizeStringArray(expected);
+    const blocks = Array.isArray(content.codeBlocks) ? content.codeBlocks : [];
+    const feedbackFor = (blockId: string | undefined) => {
+      const block = blocks.find((item) => asRecord(item).id === blockId);
+      const feedback = asRecord(block).feedback;
+      return typeof feedback === "string" ? feedback : null;
+    };
+
+    const mismatchIndex = expectedBlocks.findIndex(
+      (blockId, index) => selected[index] !== blockId
+    );
+    if (mismatchIndex >= 0) {
+      return {
+        isCorrect: false,
+        feedback:
+          feedbackFor(selected[mismatchIndex]) ??
+          (typeof content.incorrectFeedback === "string"
+            ? content.incorrectFeedback
+            : "ブロックの順番とインデントを確認してください。"),
+      };
+    }
+  }
+
+  if (!isCorrect && answerRenderer === "OPTION_FILL") {
+    const selected = typeof answer === "string" ? answer : answerRecord.values;
+    const optionFeedback = asRecord(content.optionFeedback);
+    const feedback = typeof selected === "string" ? optionFeedback[selected] : null;
+    if (typeof feedback === "string") {
+      return { isCorrect: false, feedback };
+    }
+  }
 
   return {
     isCorrect,
@@ -280,6 +407,32 @@ const judgeTryCode = (content: MissionActivityContent, answer: unknown) => {
         ? content.expectedCode
         : null;
 
+  if (content.evaluationMode === "TEST_CASES") {
+    const expectedTestCount = Array.isArray(content.testCases)
+      ? content.testCases.length
+      : 0;
+    const passedTestCount =
+      typeof answerRecord.passedTestCount === "number"
+        ? answerRecord.passedTestCount
+        : 0;
+    const totalTestCount =
+      typeof answerRecord.totalTestCount === "number"
+        ? answerRecord.totalTestCount
+        : 0;
+    const isCorrect =
+      typeof submittedCode === "string" &&
+      submittedCode.trim().length > 0 &&
+      expectedTestCount > 0 &&
+      answerRecord.executionPassed === true &&
+      passedTestCount === expectedTestCount &&
+      totalTestCount === expectedTestCount;
+
+    return {
+      isCorrect,
+      feedback: getAnswerFeedback(isCorrect, content),
+    };
+  }
+
   if (submittedCode === null || answerCode === null) {
     return {
       isCorrect: null,
@@ -295,7 +448,7 @@ const judgeTryCode = (content: MissionActivityContent, answer: unknown) => {
       .join("\n")
       .replace(/\n+$/g, "");
   const isCorrect =
-    content.courseCheck === true
+    content.evaluationMode === "TRANSCRIPTION"
       ? normalizeTranscriptionCode(submittedCode) ===
           normalizeTranscriptionCode(answerCode) &&
         answerRecord.executionPassed === true
@@ -308,31 +461,27 @@ const judgeTryCode = (content: MissionActivityContent, answer: unknown) => {
 };
 
 const judgeAnswer = (
-  type: MissionActivityType,
+  rendererKey: string,
   content: MissionActivityContent,
   answer: unknown
 ) => {
-  const checkType = content.checkType;
-  const effectiveType =
-    type === MissionActivityType.MISSION_CHECK && typeof checkType === "string"
-      ? checkType
-      : type;
-
-  switch (effectiveType) {
-    case MissionActivityType.CHOICE:
-    case "CHOICE":
-      return judgeChoice(content, answer);
-    case MissionActivityType.MATCH:
+  const answerRenderer = getActivityRendererDefinition(rendererKey).answer;
+  switch (answerRenderer) {
+    case "SINGLE_CHOICE":
+    case "ARRAY_REGION_SELECT":
+    case "INDEX_SELECT":
+      return judgeChoice(answerRenderer, content, answer);
     case "MATCH":
       return judgeMatch(content, answer);
-    case MissionActivityType.ORDERED_STEPS:
-    case "ORDERED_STEPS":
+    case "BLOCK_ORDER":
       return judgeOrderedSteps(content, answer);
-    case MissionActivityType.SELECT_FILL:
-    case "SELECT_FILL":
-      return judgeSelectFill(content, answer);
-    case MissionActivityType.TRY_CODE:
-    case "TRY_CODE":
+    case "PAIR_DECISION":
+    case "MULTI_DECISION":
+    case "OPTION_FILL":
+    case "CODE_BLOCK_BUILDER":
+    case "COMPARISON_SEQUENCE":
+      return judgeSelectFill(answerRenderer, content, answer);
+    case "CODE_EDITOR":
       return judgeTryCode(content, answer);
     default:
       return {
@@ -635,6 +784,15 @@ export const getMissionPlayService = async ({
   const user = await getUserByFirebaseUid(firebaseUid);
   await assertMissionUnlocked(user.id, missionId);
 
+  const requestedMission = await prisma.mission.findFirst({
+    where: { id: missionId, isPublished: true },
+    select: { type: true },
+  });
+  const courseExamAttempt =
+    requestedMission?.type === MissionType.COURSE_EXAM
+      ? await startOrResumeCourseExamAttempt(user.id, missionId)
+      : null;
+
   const mission = await prisma.mission.findFirst({
     where: {
       id: missionId,
@@ -649,11 +807,6 @@ export const getMissionPlayService = async ({
           title: true,
         },
       },
-      sections: {
-        orderBy: {
-          order: "asc",
-        },
-      },
       activities: {
         orderBy: {
           order: "asc",
@@ -666,6 +819,10 @@ export const getMissionPlayService = async ({
             select: {
               status: true,
             },
+          },
+          answerLogs: {
+            where: { userId: user.id },
+            select: { isCorrect: true },
           },
         },
       },
@@ -753,31 +910,24 @@ export const getMissionPlayService = async ({
     learnedItems: mission.learnedItems,
     isLocked: false,
     unlockRequirement: null,
+    courseExamAttempt,
     progress: {
       status: toProgressStatus(missionProgress?.status ?? PrismaProgressStatus.IN_PROGRESS),
       currentActivityId,
       completedActivityIds,
     },
-    sections: mission.sections.map((section) => ({
-      id: section.id,
-      title: section.title,
-      description: section.description,
-      order: section.order,
-    })),
     activities: mission.activities.map((activity) => ({
       id: activity.id,
-      sectionId: activity.sectionId,
       type: activity.type,
       title: activity.title,
       instruction: activity.instruction,
       mentorMessage: activity.mentorMessage,
-      content: activity.content,
+      content: parseActivityContent(activity.content, activity.type),
       preview: activity.preview,
       actionLabel: activity.actionLabel,
       order: activity.order,
-      sectionOrder: activity.sectionOrder,
-      isMissionCheck: activity.isMissionCheck,
       progressStatus: toProgressStatus(activity.progresses[0]?.status),
+      incorrectAttemptCount: activity.answerLogs.filter((log) => log.isCorrect === false).length,
     })),
   };
 };
@@ -801,11 +951,6 @@ export const getMissionOverviewService = async ({
       course: {
         select: {
           title: true,
-        },
-      },
-      sections: {
-        orderBy: {
-          order: "asc",
         },
       },
       activities: {
@@ -852,6 +997,10 @@ export const getMissionOverviewService = async ({
       ?.id ??
     mission.activities[0]?.id ??
     null;
+  const courseExamAttempt =
+    mission.type === MissionType.COURSE_EXAM
+      ? (await getCurrentCourseExamAttempt(user.id, mission.id)).attempt
+      : null;
 
   return {
     id: mission.id,
@@ -872,30 +1021,22 @@ export const getMissionOverviewService = async ({
           missionTitle: access.unlockMission.title,
         }
       : null,
+    courseExamAttempt,
     progress: {
       status: toProgressStatus(missionProgress?.status),
       currentActivityId,
       completedActivityIds,
     },
-    sections: mission.sections.map((section) => ({
-      id: section.id,
-      title: section.title,
-      description: section.description,
-      order: section.order,
-    })),
     activities: mission.activities.map((activity) => ({
       id: activity.id,
-      sectionId: activity.sectionId,
       type: activity.type,
       title: activity.title,
       instruction: activity.instruction,
       mentorMessage: activity.mentorMessage,
-      content: activity.content,
+      content: parseActivityContent(activity.content, activity.type),
       preview: activity.preview,
       actionLabel: activity.actionLabel,
       order: activity.order,
-      sectionOrder: activity.sectionOrder,
-      isMissionCheck: activity.isMissionCheck,
       progressStatus: toProgressStatus(activity.progresses[0]?.status),
     })),
   };
@@ -918,14 +1059,39 @@ export const answerMissionActivityService = async ({
         isPublished: true,
       },
     },
+    include: {
+      mission: { select: { type: true } },
+    },
   });
 
   if (!activity) {
     throw new AppError(404, "ACTIVITY_NOT_FOUND", "Activity not found");
   }
 
-  const content = asRecord(activity.content);
-  const result = judgeAnswer(activity.type, content, answer);
+  const parsedContent = parseActivityContent(activity.content, activity.type);
+  const content = parsedContent.data;
+  const result = judgeAnswer(parsedContent.rendererKey, content, answer);
+
+  if (
+    activity.mission.type === MissionType.COURSE_EXAM &&
+    content.evaluationMode === "TEST_CASES"
+  ) {
+    const answerRecord = asRecord(answer);
+    await recordCourseExamSubmission({
+      userId: user.id,
+      missionId,
+      code:
+        typeof answer === "string"
+          ? answer
+          : typeof answerRecord.code === "string"
+            ? answerRecord.code
+            : "",
+      passed: result.isCorrect === true,
+      testResults: Array.isArray(answerRecord.testResults)
+        ? answerRecord.testResults
+        : [],
+    });
+  }
 
   await prisma.activityAnswerLog.create({
     data: {
@@ -936,7 +1102,11 @@ export const answerMissionActivityService = async ({
     },
   });
 
-  return result;
+  const incorrectAttemptCount = await prisma.activityAnswerLog.count({
+    where: { userId: user.id, activityId: activity.id, isCorrect: false },
+  });
+
+  return { ...result, incorrectAttemptCount };
 };
 
 export const completeMissionActivityService = async ({
@@ -959,27 +1129,6 @@ export const completeMissionActivityService = async ({
 
   if (!activity) {
     throw new AppError(404, "ACTIVITY_NOT_FOUND", "Activity not found");
-  }
-
-  if (activity.type === MissionActivityType.MISSION_CHECK) {
-    const latestCorrectAnswer = await prisma.activityAnswerLog.findFirst({
-      where: {
-        userId: user.id,
-        activityId: activity.id,
-        isCorrect: true,
-      },
-      orderBy: {
-        answeredAt: "desc",
-      },
-    });
-
-    if (!latestCorrectAnswer) {
-      throw new AppError(
-        400,
-        "MISSION_CHECK_NOT_PASSED",
-        "Mission check must be answered correctly before completion"
-      );
-    }
   }
 
   await prisma.userMissionProgress.upsert({
@@ -1133,6 +1282,43 @@ export const completeMissionService = async ({
     mission.type === MissionType.COURSE_EXAM
       ? missionProgress?.selectedExamDifficulty ?? CourseDifficulty.EASY
       : null;
+  const courseExamAttempt =
+    mission.type === MissionType.COURSE_EXAM
+      ? await prisma.courseExamAttempt.findFirst({
+          where: {
+            userId: user.id,
+            missionId: mission.id,
+            completedAt: null,
+          },
+          orderBy: { startedAt: "desc" },
+          include: {
+            _count: { select: { hintViews: true } },
+            submissions: {
+              where: { passed: true },
+              select: { id: true },
+              take: 1,
+            },
+          },
+        })
+      : null;
+
+  if (mission.type === MissionType.COURSE_EXAM && !courseExamAttempt) {
+    throw new AppError(
+      409,
+      "COURSE_EXAM_ATTEMPT_NOT_FOUND",
+      "進行中のCOURSE_EXAM挑戦が見つかりません。"
+    );
+  }
+  if (
+    mission.type === MissionType.COURSE_EXAM &&
+    courseExamAttempt?.submissions.length === 0
+  ) {
+    throw new AppError(
+      409,
+      "COURSE_EXAM_NOT_PASSED",
+      "合格した提出がないためCOURSE_EXAMを完了できません。"
+    );
+  }
   const highestClearedExamDifficulty =
     completedExamDifficulty !== null
       ? pickHigherDifficulty(
@@ -1158,6 +1344,9 @@ export const completeMissionService = async ({
               selectedExamDifficulty: completedExamDifficulty,
               highestClearedExamDifficulty,
               examAttemptCount: { increment: 1 },
+              examHintCount: {
+                increment: courseExamAttempt?._count.hintViews ?? 0,
+              },
             }
           : {}),
       },
@@ -1172,6 +1361,7 @@ export const completeMissionService = async ({
               selectedExamDifficulty: completedExamDifficulty,
               highestClearedExamDifficulty,
               examAttemptCount: 1,
+              examHintCount: courseExamAttempt?._count.hintViews ?? 0,
             }
           : {}),
       },
@@ -1213,20 +1403,26 @@ export const completeMissionService = async ({
   });
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
   const shouldAwardCourseTicket =
+    (mission.type !== MissionType.COURSE_EXAM ||
+      experienceUpdate.isNewlyAwarded) &&
     mission.isRequiredForCourseCompletion &&
     (await isCourseRequiredMissionsComplete(user.id, mission.courseId));
   const badgeTicketRewards = await prisma.$transaction(async (tx) => {
     const rewards: BadgeTicketReward[] = [];
-    const missionReward = await awardBadgeTickets(tx, {
-      userId: user.id,
-      amount: 1,
-      reason:
-        mission.type === MissionType.CHALLENGE
-          ? BadgeTicketReason.CHALLENGE_COMPLETE
-          : BadgeTicketReason.MISSION_COMPLETE,
-      sourceId: mission.id,
-      note: mission.title,
-    });
+    const missionReward =
+      mission.type === MissionType.COURSE_EXAM &&
+      !experienceUpdate.isNewlyAwarded
+        ? null
+        : await awardBadgeTickets(tx, {
+            userId: user.id,
+            amount: 1,
+            reason:
+              mission.type === MissionType.CHALLENGE
+                ? BadgeTicketReason.CHALLENGE_COMPLETE
+                : BadgeTicketReason.MISSION_COMPLETE,
+            sourceId: mission.id,
+            note: mission.title,
+          });
 
     if (missionReward) rewards.push(missionReward);
 
@@ -1256,34 +1452,54 @@ export const completeMissionService = async ({
 
     return rewards;
   });
-  const candidateKnowledgeCardIds = await getKnowledgeCardCandidateIdsForMission(
-    user.id,
-    mission.courseId
-  );
+  const candidateKnowledgeCardIds =
+    mission.type === MissionType.COURSE_EXAM &&
+    !experienceUpdate.isNewlyAwarded
+      ? []
+      : await getKnowledgeCardCandidateIdsForMission(user.id, mission.courseId);
   const awardedBadgeTickets = badgeTicketRewards.reduce(
     (sum, reward) => sum + Math.max(0, reward.amount),
     0
   );
-  const rewardRun = await prisma.missionRewardRun.create({
-    data: {
-      userId: user.id,
-      missionId: mission.id,
-      candidateKnowledgeCardIds,
-      unlockedAchievementIds: unlockedAchievements.map((achievement) => achievement.id),
-      awardedExp: experienceUpdate.gainedExp,
-      awardedBadgeTickets,
-    },
-    select: {
-      id: true,
-    },
+  const rewardRun = await prisma.$transaction(async (tx) => {
+    const completedAt = new Date();
+    if (courseExamAttempt) {
+      const updated = await tx.courseExamAttempt.updateMany({
+        where: { id: courseExamAttempt.id, userId: user.id, completedAt: null },
+        data: { completedAt },
+      });
+      if (updated.count !== 1) {
+        throw new AppError(
+          409,
+          "COURSE_EXAM_ATTEMPT_ALREADY_COMPLETED",
+          "このCOURSE_EXAM挑戦はすでに完了しています。"
+        );
+      }
+    }
+
+    return tx.missionRewardRun.create({
+      data: {
+        userId: user.id,
+        missionId: mission.id,
+        courseExamAttemptId: courseExamAttempt?.id ?? null,
+        candidateKnowledgeCardIds,
+        unlockedAchievementIds: unlockedAchievements.map((achievement) => achievement.id),
+        awardedExp: experienceUpdate.gainedExp,
+        awardedBadgeTickets,
+      },
+      select: { id: true },
+    });
   });
 
   return {
     rewardRunId: rewardRun.id,
+    courseExamAttemptId: courseExamAttempt?.id ?? null,
     nextPath:
       candidateKnowledgeCardIds.length > 0
         ? `/mission-rewards/${rewardRun.id}/cards`
-        : `/mission-rewards/${rewardRun.id}/result`,
+        : mission.type === MissionType.COURSE_EXAM
+          ? `/course-results/${rewardRun.id}`
+          : `/mission-rewards/${rewardRun.id}/result`,
     mission: {
       id: mission.id,
       courseId: mission.courseId,

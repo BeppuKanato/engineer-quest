@@ -1,4 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
+import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
 
 export type TechIconBadgeRarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
 
@@ -37,28 +38,33 @@ export type SetSelectedTechIconBadgeResponse = {
 export const getBadgeCollection = async (
   token: string
 ): Promise<BadgeCollectionResponse> => {
-  return fetcher<BadgeCollectionResponse>("/badges", {
-    method: "GET",
-    token,
-  });
+  return fetchClientQuery(
+    "badges",
+    () => fetcher<BadgeCollectionResponse>("/badges", { method: "GET", token }),
+    { staleTimeMs: 15_000, tags: [queryTags.badges] }
+  );
 };
 
 export const drawTechIconBadge = async (
   token: string
 ): Promise<DrawTechIconBadgeResponse> => {
-  return fetcher<DrawTechIconBadgeResponse>("/badges/gacha", {
+  const result = await fetcher<DrawTechIconBadgeResponse>("/badges/gacha", {
     method: "POST",
     token,
   });
+  invalidateClientQueries([queryTags.badges, queryTags.collection, queryTags.profile, queryTags.history]);
+  return result;
 };
 
 export const setSelectedTechIconBadge = async (
   token: string,
   badgeId: string
 ): Promise<SetSelectedTechIconBadgeResponse> => {
-  return fetcher<SetSelectedTechIconBadgeResponse>("/badges/profile", {
+  const result = await fetcher<SetSelectedTechIconBadgeResponse>("/badges/profile", {
     method: "POST",
     token,
     body: JSON.stringify({ badgeId }),
   });
+  invalidateClientQueries([queryTags.badges, queryTags.collection, queryTags.profile]);
+  return result;
 };

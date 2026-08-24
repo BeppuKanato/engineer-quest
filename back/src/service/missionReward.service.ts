@@ -14,25 +14,11 @@ const categoryLabel = {
   STREAK: "継続",
 } as const;
 
-const getUserByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: { id: true },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return user;
-};
-
-const getRewardRunForUser = async (firebaseUid: string, rewardRunId: string) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
+const getRewardRunForUser = async (userId: string, rewardRunId: string) => {
   const rewardRun = await prisma.missionRewardRun.findFirst({
     where: {
       id: rewardRunId,
-      userId: user.id,
+      userId,
     },
     include: {
       mission: {
@@ -42,7 +28,11 @@ const getRewardRunForUser = async (firebaseUid: string, rewardRunId: string) => 
           title: true,
           learnedItems: true,
           order: true,
+          type: true,
           isRequiredForCourseCompletion: true,
+          course: {
+            select: { title: true },
+          },
         },
       },
     },
@@ -52,7 +42,7 @@ const getRewardRunForUser = async (firebaseUid: string, rewardRunId: string) => 
     throw new AppError(404, "MISSION_REWARD_RUN_NOT_FOUND", "Reward run not found");
   }
 
-  return { user, rewardRun };
+  return rewardRun;
 };
 
 const getNextMission = async (courseId: string, currentOrder: number) => {
@@ -79,14 +69,14 @@ const getUnlockedChallenges = async (missionId: string) => {
   });
 };
 
-export const getMissionRewardRunByFirebaseUid = async ({
-  firebaseUid,
+export const getMissionRewardRunByUserId = async ({
+  userId,
   rewardRunId,
 }: {
-  firebaseUid: string;
+  userId: string;
   rewardRunId: string;
 }) => {
-  const { rewardRun } = await getRewardRunForUser(firebaseUid, rewardRunId);
+  const rewardRun = await getRewardRunForUser(userId, rewardRunId);
 
   const [candidateCards, selectedCard, unlockedAchievements, nextMission, unlockedChallenges] =
     await Promise.all([
@@ -119,6 +109,8 @@ export const getMissionRewardRunByFirebaseUid = async ({
       courseId: rewardRun.mission.courseId,
       title: rewardRun.mission.title,
       learnedItems: rewardRun.mission.learnedItems,
+      courseTitle: rewardRun.mission.course.title,
+      isCourseCompletion: rewardRun.mission.type === "COURSE_EXAM",
     },
     candidateKnowledgeCards: toKnowledgeCardSummaries(
       rewardRun.candidateKnowledgeCardIds
@@ -146,16 +138,16 @@ export const getMissionRewardRunByFirebaseUid = async ({
   };
 };
 
-export const selectMissionRewardKnowledgeCardByFirebaseUid = async ({
-  firebaseUid,
+export const selectMissionRewardKnowledgeCardByUserId = async ({
+  userId,
   rewardRunId,
   knowledgeCardId,
 }: {
-  firebaseUid: string;
+  userId: string;
   rewardRunId: string;
   knowledgeCardId: string;
 }) => {
-  const { user, rewardRun } = await getRewardRunForUser(firebaseUid, rewardRunId);
+  const rewardRun = await getRewardRunForUser(userId, rewardRunId);
 
   if (rewardRun.selectedKnowledgeCardId) {
     throw new AppError(
@@ -190,13 +182,13 @@ export const selectMissionRewardKnowledgeCardByFirebaseUid = async ({
     const collected = await tx.userKnowledgeCard.upsert({
       where: {
         userId_knowledgeCardId: {
-          userId: user.id,
+          userId,
           knowledgeCardId,
         },
       },
       update: {},
       create: {
-        userId: user.id,
+        userId,
         knowledgeCardId,
       },
       include: {

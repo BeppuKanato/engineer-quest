@@ -23,6 +23,7 @@ import type { Course, CourseCategory } from "../type";
 
 type CourseCardProps = Course & {
   onCourseClick?: (courseId: string) => void;
+  onCoursePrefetch?: (courseId: string) => void;
   featured?: boolean;
 };
 
@@ -86,8 +87,18 @@ const COURSE_VISUAL_STYLE: Record<CourseCategory, CourseVisualStyle> = {
 };
 
 const getCourseVisualStyle = (categories: CourseCategory[]) => {
-  const primaryCategory = categories[0] ?? "ui";
-  return COURSE_VISUAL_STYLE[primaryCategory];
+  const primaryCategory = categories?.[0];
+
+  if (
+    typeof primaryCategory === "string" &&
+    primaryCategory in COURSE_VISUAL_STYLE
+  ) {
+    return COURSE_VISUAL_STYLE[primaryCategory as CourseCategory];
+  }
+
+  // APIとフロントの更新タイミングがずれたり、未知カテゴリが保存されて
+  // いたりしても、コース一覧全体をクラッシュさせない。
+  return COURSE_VISUAL_STYLE.sort;
 };
 
 const getActionLabel = (status: Course["status"]) => {
@@ -116,6 +127,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   challengeMissionCount,
   completedChallengeMissionCount,
   onCourseClick,
+  onCoursePrefetch,
   featured = false,
 }) => {
   const visualStyle = getCourseVisualStyle(categories);
@@ -254,6 +266,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           fullWidth={!featured}
           startIcon={actionIcon}
           onClick={() => onCourseClick?.(id)}
+          onMouseEnter={() => onCoursePrefetch?.(id)}
+          onFocus={() => onCoursePrefetch?.(id)}
           sx={{
             mt: 0.25,
             minHeight: 44,

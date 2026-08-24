@@ -5,7 +5,7 @@ const course1Id = "course-web-overview";
 export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   {
     id: "card-bubble-adjacent",
-    courseId: "course-algorithm-bubble-sort",
+    courseId: "course-algorithm-bubble-sort-v2",
     label: "Adjacent Compare",
     title: "隣り合う要素を比較する",
     description: "バブルソートは左から隣り合う2要素を比較し、左が大きいときに交換します。",
@@ -15,7 +15,7 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   },
   {
     id: "card-bubble-pass",
-    courseId: "course-algorithm-bubble-sort",
+    courseId: "course-algorithm-bubble-sort-v2",
     label: "One Pass",
     title: "1周で最大値が右端へ移る",
     description: "未確定範囲を1周すると、その範囲の最大値が右端で確定します。",
@@ -25,7 +25,7 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   },
   {
     id: "card-bubble-complexity",
-    courseId: "course-algorithm-bubble-sort",
+    courseId: "course-algorithm-bubble-sort-v2",
     label: "O(n²)",
     title: "基本の時間計算量",
     description: "基本的なバブルソートは二重ループで比較するため、時間計算量はO(n²)です。",

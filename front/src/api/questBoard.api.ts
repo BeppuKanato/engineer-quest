@@ -1,4 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
+import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
 
 export type QuestPostCategory =
   | "QUESTION"
@@ -113,21 +114,25 @@ export const getQuestBoardPosts = async (
   token: string,
   params: QuestBoardListParams = {}
 ): Promise<QuestBoardListResponse> => {
-  return fetcher<QuestBoardListResponse>(`/quest-board${buildQuery(params)}`, {
-    method: "GET",
-    token,
-  });
+  const query = buildQuery(params);
+  return fetchClientQuery(
+    `quest-board:list${query}`,
+    () => fetcher<QuestBoardListResponse>(`/quest-board${query}`, { method: "GET", token }),
+    { staleTimeMs: 10_000, tags: [queryTags.questBoard] }
+  );
 };
 
 export const createQuestPost = async (
   token: string,
   payload: CreateQuestPostPayload
 ): Promise<{ postId: string }> => {
-  return fetcher<{ postId: string }>("/quest-board", {
+  const result = await fetcher<{ postId: string }>("/quest-board", {
     method: "POST",
     token,
     body: JSON.stringify(payload),
   });
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };
 
 export const updateQuestPost = async (
@@ -135,7 +140,7 @@ export const updateQuestPost = async (
   postId: string,
   payload: CreateQuestPostPayload
 ): Promise<QuestBoardDetailResponse> => {
-  return fetcher<QuestBoardDetailResponse>(
+  const result = await fetcher<QuestBoardDetailResponse>(
     `/quest-board/${encodeURIComponent(postId)}`,
     {
       method: "PATCH",
@@ -143,31 +148,36 @@ export const updateQuestPost = async (
       body: JSON.stringify(payload),
     }
   );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };
 
 export const deleteQuestPost = async (
   token: string,
   postId: string
 ): Promise<{ postId: string; deletedAt: string }> => {
-  return fetcher<{ postId: string; deletedAt: string }>(
+  const result = await fetcher<{ postId: string; deletedAt: string }>(
     `/quest-board/${encodeURIComponent(postId)}`,
     {
       method: "DELETE",
       token,
     }
   );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };
 
 export const getQuestPost = async (
   token: string,
   postId: string
 ): Promise<QuestBoardDetailResponse> => {
-  return fetcher<QuestBoardDetailResponse>(
-    `/quest-board/${encodeURIComponent(postId)}`,
-    {
-      method: "GET",
-      token,
-    }
+  return fetchClientQuery(
+    `quest-board:detail:${postId}`,
+    () => fetcher<QuestBoardDetailResponse>(
+      `/quest-board/${encodeURIComponent(postId)}`,
+      { method: "GET", token }
+    ),
+    { staleTimeMs: 10_000, tags: [queryTags.questBoard] }
   );
 };
 
@@ -176,7 +186,7 @@ export const addQuestComment = async (
   postId: string,
   body: string
 ): Promise<{ comment: QuestComment }> => {
-  return fetcher<{ comment: QuestComment }>(
+  const result = await fetcher<{ comment: QuestComment }>(
     `/quest-board/${encodeURIComponent(postId)}/comments`,
     {
       method: "POST",
@@ -184,6 +194,8 @@ export const addQuestComment = async (
       body: JSON.stringify({ body }),
     }
   );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };
 
 export const toggleQuestReaction = async (
@@ -191,7 +203,7 @@ export const toggleQuestReaction = async (
   postId: string,
   type: QuestReactionType
 ): Promise<{ reactions: QuestBoardReactionSummary }> => {
-  return fetcher<{ reactions: QuestBoardReactionSummary }>(
+  const result = await fetcher<{ reactions: QuestBoardReactionSummary }>(
     `/quest-board/${encodeURIComponent(postId)}/reactions`,
     {
       method: "POST",
@@ -199,6 +211,8 @@ export const toggleQuestReaction = async (
       body: JSON.stringify({ type }),
     }
   );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };
 
 export const updateQuestPostStatus = async (
@@ -206,7 +220,7 @@ export const updateQuestPostStatus = async (
   postId: string,
   status: QuestPostStatus
 ): Promise<{ status: QuestPostStatus; updatedAt: string }> => {
-  return fetcher<{ status: QuestPostStatus; updatedAt: string }>(
+  const result = await fetcher<{ status: QuestPostStatus; updatedAt: string }>(
     `/quest-board/${encodeURIComponent(postId)}/status`,
     {
       method: "POST",
@@ -214,4 +228,6 @@ export const updateQuestPostStatus = async (
       body: JSON.stringify({ status }),
     }
   );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
 };

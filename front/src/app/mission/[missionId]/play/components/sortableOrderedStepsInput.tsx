@@ -21,7 +21,8 @@ import { CSS } from "@dnd-kit/utilities";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { Chip, IconButton, Paper, Stack, Tooltip, Typography, keyframes } from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { Button, Chip, IconButton, Paper, Stack, Tooltip, Typography, keyframes } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -82,7 +83,7 @@ const SortableStep = ({
         gap: 1,
         alignItems: "center",
         bgcolor: isDragging || recentlyMoved ? "#eff6ff" : "#fff",
-        boxShadow: isDragging ? "0 14px 28px rgba(37, 99, 235, 0.18)" : "none",
+        boxShadow: isDragging ? "0 14px 28px rgba(37, 99, 235, 0.18)" : "0 3px 10px rgba(15, 23, 42, 0.06)",
         opacity: isDragging ? 0.45 : 1,
         transform: CSS.Transform.toString(transform),
         transition,
@@ -92,6 +93,11 @@ const SortableStep = ({
         animation: recentlyMoved ? `${movedPulse} 480ms ease-out` : "none",
         "@media (prefers-reduced-motion: reduce)": {
           transition: "none",
+        },
+        "&:hover": disabled ? undefined : {
+          transform: isDragging ? CSS.Transform.toString(transform) : "translateY(-2px)",
+          boxShadow: "0 10px 24px rgba(37, 99, 235, 0.14)",
+          borderColor: "#60a5fa",
         },
       }}
     >
@@ -216,6 +222,18 @@ export const SortableOrderedStepsInput = ({
   const activeStep = activeStepId ? stepById.get(activeStepId) ?? null : null;
 
   return (
+    <Stack spacing={1.5}>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} gap={1}>
+        <Typography fontWeight={900}>ドラッグして処理ブロックを並べてください</Typography>
+        <Button
+          size="small"
+          startIcon={<RestartAltIcon />}
+          disabled={disabled}
+          onClick={() => onAnswerChange(steps.map((step) => step.id))}
+        >
+          元の順番に戻す
+        </Button>
+      </Stack>
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
@@ -276,5 +294,6 @@ export const SortableOrderedStepsInput = ({
         ) : null}
       </DragOverlay>
     </DndContext>
+    </Stack>
   );
 };

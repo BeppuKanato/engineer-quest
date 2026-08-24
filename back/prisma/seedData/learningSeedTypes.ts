@@ -5,6 +5,7 @@ import type {
   MissionType,
 } from "@prisma/client";
 import type { MissionVisualContent } from "../../src/type/missionVisual";
+import type { ActivityContent } from "../../src/type/activityContent";
 
 export type ActivitySeed = {
   id: string;
@@ -12,20 +13,10 @@ export type ActivitySeed = {
   title: string;
   instruction: string;
   mentorMessage: string;
-  content: Record<string, unknown> & { visual?: MissionVisualContent };
-  preview: Record<string, unknown> | null;
+  content: ActivityContent & { data: Record<string, unknown> & { visual?: MissionVisualContent } };
+  preview?: Record<string, unknown> | null;
   actionLabel: string;
   order: number;
-  sectionOrder: number | null;
-  isMissionCheck: boolean;
-};
-
-export type SectionSeed = {
-  id: string;
-  title: string;
-  description?: string;
-  order: number;
-  activities: ActivitySeed[];
 };
 
 export type MissionSeed = {
@@ -44,7 +35,7 @@ export type MissionSeed = {
   rewardExp: number;
   learnedItems: string[];
   isPublished: boolean;
-  sections: SectionSeed[];
+  activities: ActivitySeed[];
 };
 
 export type CourseSeed = {

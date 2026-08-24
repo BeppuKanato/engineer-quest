@@ -19,6 +19,8 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "@/lib/api";
+import { type AuthUser } from "@/api/auth.api";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function Signup() {
   const [displayName, setDisplayName] = useState("");
@@ -31,6 +33,7 @@ export default function Signup() {
 
   const router = useRouter();
   const apiBaseUrl = getApiBaseUrl();
+  const { setAppUser } = useUserSession();
 
   const handleSignup = async () => {
     if (isSubmitting) return;
@@ -79,8 +82,13 @@ export default function Signup() {
         throw new Error("ユーザー情報の作成に失敗しました");
       }
 
+      const data = (await res.json()) as {
+        user: AuthUser;
+      };
+
+      setAppUser(data.user);
       setMessage("サインアップ成功");
-      router.push("/home");
+      router.push(data.user.hasHexadResponse ? "/home" : "/hexad");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(err.message);

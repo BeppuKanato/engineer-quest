@@ -20,6 +20,11 @@ export const ensureUserService = async ({
       firebaseUid,
       displayName: displayName ?? null,
     },
+    include: {
+      hexadResponse: {
+        select: { id: true },
+      },
+    },
   });
 
   return {
@@ -31,6 +36,7 @@ export const ensureUserService = async ({
     selectedTechIconBadgeId: user.selectedTechIconBadgeId,
     selectedMascotId: user.selectedMascotId,
     selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
   };
 };
 
@@ -38,6 +44,11 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
   const user = await prisma.user.findUnique({
     where: {
       firebaseUid,
+    },
+    include: {
+      hexadResponse: {
+        select: { id: true },
+      },
     },
   });
 
@@ -54,5 +65,6 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
     selectedTechIconBadgeId: user.selectedTechIconBadgeId,
     selectedMascotId: user.selectedMascotId,
     selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
   };
 };

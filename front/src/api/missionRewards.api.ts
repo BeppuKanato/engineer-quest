@@ -4,6 +4,7 @@ import type {
   KnowledgeCardChoice,
   UnlockedAchievement,
 } from "@/app/mission/[missionId]/play/type";
+import { fetchClientQuery, invalidateClientQueries, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
 
 export type MissionRewardRunResponse = {
   id: string;
@@ -12,6 +13,8 @@ export type MissionRewardRunResponse = {
     courseId: string;
     title: string;
     learnedItems: string[];
+    courseTitle: string;
+    isCourseCompletion: boolean;
   };
   candidateKnowledgeCards: KnowledgeCardChoice[];
   selectedKnowledgeCard: KnowledgeCardChoice | null;
@@ -33,12 +36,13 @@ export const getMissionRewardRun = async (
   token: string,
   rewardRunId: string
 ): Promise<MissionRewardRunResponse> => {
-  return fetcher<MissionRewardRunResponse>(
-    `/mission-rewards/${encodeURIComponent(rewardRunId)}`,
-    {
-      method: "GET",
-      token,
-    }
+  return fetchClientQuery(
+    `mission-reward:${rewardRunId}`,
+    () => fetcher<MissionRewardRunResponse>(
+      `/mission-rewards/${encodeURIComponent(rewardRunId)}`,
+      { method: "GET", token }
+    ),
+    { staleTimeMs: 2 * 60_000, tags: [queryTags.missionRewards] }
   );
 };
 
@@ -47,7 +51,7 @@ export const selectMissionRewardKnowledgeCard = async (
   rewardRunId: string,
   knowledgeCardId: string
 ): Promise<CollectKnowledgeCardResponse & { selectedAt: string }> => {
-  return fetcher<CollectKnowledgeCardResponse & { selectedAt: string }>(
+  const result = await fetcher<CollectKnowledgeCardResponse & { selectedAt: string }>(
     `/mission-rewards/${encodeURIComponent(rewardRunId)}/knowledge-card/select`,
     {
       method: "POST",
@@ -55,4 +59,10 @@ export const selectMissionRewardKnowledgeCard = async (
       body: JSON.stringify({ knowledgeCardId }),
     }
   );
+  updateClientQueryData<MissionRewardRunResponse>(
+    `mission-reward:${rewardRunId}`,
+    (current) => ({ ...current, selectedKnowledgeCard: result.knowledgeCard })
+  );
+  invalidateClientQueries([queryTags.collection, queryTags.profile, queryTags.history]);
+  return result;
 };

@@ -1,4 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
+import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export type HistoryEventType =
   | "activity_completed"
@@ -33,8 +34,9 @@ export type HistoryResponse = {
 };
 
 export const getHistory = async (token: string): Promise<HistoryResponse> => {
-  return fetcher<HistoryResponse>("/history", {
-    method: "GET",
-    token,
-  });
+  return fetchClientQuery(
+    "history",
+    () => fetcher<HistoryResponse>("/history", { method: "GET", token }),
+    { staleTimeMs: 15_000, tags: [queryTags.history] }
+  );
 };

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SoundProvider } from "./component/soundFeedback";
+import { HexadRouteGuard } from "./component/hexadRouteGuard";
+import { UserSessionProvider } from "./component/userSession";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-200`}
       >
-        <SoundProvider>{children}</SoundProvider>
+        <UserSessionProvider>
+          <SoundProvider>
+            <HexadRouteGuard />
+            {children}
+          </SoundProvider>
+        </UserSessionProvider>
       </body>
     </html>
   );

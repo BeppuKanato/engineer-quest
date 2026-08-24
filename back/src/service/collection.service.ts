@@ -4,7 +4,6 @@ import {
   AchievementConditionType,
 } from "@prisma/client";
 
-import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
 const achievementCategoryLabel: Record<AchievementCategory, string> = {
@@ -41,27 +40,11 @@ const createConditionLabel = (achievement: Pick<
   }
 };
 
-const getUserByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: {
-      id: true,
-      badgeTickets: true,
-      selectedTechIconBadgeId: true,
-      selectedTechIconBadge: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return user;
-};
-
-export const getCollectionByFirebaseUid = async (firebaseUid: string) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
-
+export const getCollectionByUser = async (user: {
+  id: string;
+  badgeTickets: number;
+  selectedTechIconBadgeId: string | null;
+}) => {
   const [badges, knowledgeCards, achievements] = await Promise.all([
     prisma.techIconBadge.findMany({
       where: { isPublished: true },
@@ -154,16 +137,22 @@ export const getCollectionByFirebaseUid = async (firebaseUid: string) => {
     };
   });
 
+  const selectedBadge = badges.find(
+    (badge) =>
+      badge.id === user.selectedTechIconBadgeId &&
+      badge.userTechIconBadges.length > 0
+  );
+
   return {
     badges: {
       ticketBalance: user.badgeTickets,
-      selectedBadge: user.selectedTechIconBadge
+      selectedBadge: selectedBadge
         ? {
-            id: user.selectedTechIconBadge.id,
-            name: user.selectedTechIconBadge.name,
-            description: user.selectedTechIconBadge.description,
-            iconUrl: user.selectedTechIconBadge.iconUrl,
-            rarity: user.selectedTechIconBadge.rarity,
+            id: selectedBadge.id,
+            name: selectedBadge.name,
+            description: selectedBadge.description,
+            iconUrl: selectedBadge.iconUrl,
+            rarity: selectedBadge.rarity,
           }
         : null,
       ownedCount: badgeItems.filter((badge) => badge.isOwned).length,

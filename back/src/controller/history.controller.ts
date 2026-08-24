@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
-import { getHistoryByFirebaseUid } from "../service/history.service";
+import { getHistoryByUserId } from "../service/history.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getUserId = (req: Request) => {
+  const userId = req.authUser?.id;
 
-  if (!firebaseUid) {
+  if (!userId) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return userId;
 };
 
 export const getHistoryController = async (
@@ -19,7 +19,7 @@ export const getHistoryController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getHistoryByFirebaseUid(getFirebaseUid(req));
+    const data = await getHistoryByUserId(getUserId(req));
 
     res.status(200).json(data);
   } catch (error) {

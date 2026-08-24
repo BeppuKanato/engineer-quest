@@ -1,10 +1,6 @@
 "use client";
 
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
-
-import { getProfile } from "@/api/profile.api";
-import { auth } from "@/lib/firebase";
+import { useUserSession } from "./userSession";
 
 export const mascotOptions = [
   {
@@ -54,81 +50,22 @@ export const getMascotImagePath = (
 };
 
 export const useUserMascot = () => {
-  const [mascotId, setMascotId] = useState<MascotId>(defaultMascotId);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (isMounted) setMascotId(defaultMascotId);
-        return;
-      }
-
-      try {
-        const token = await user.getIdToken();
-        const profile = await getProfile(token);
-
-        if (!isMounted) return;
-        setMascotId(
-          isMascotId(profile.user.selectedMascotId)
-            ? profile.user.selectedMascotId
-            : defaultMascotId
-        );
-      } catch (error) {
-        console.error(error);
-        if (isMounted) setMascotId(defaultMascotId);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
-
-  return mascotId;
+  const { appUser } = useUserSession();
+  return isMascotId(appUser?.selectedMascotId)
+    ? appUser.selectedMascotId
+    : defaultMascotId;
 };
 
 export const useUserMascotState = () => {
-  const [mascotId, setMascotId] = useState<MascotId | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { status, appUser, isAppUserLoading } = useUserSession();
+  const mascotId = isMascotId(appUser?.selectedMascotId)
+    ? appUser.selectedMascotId
+    : status === "authenticated" && !isAppUserLoading
+      ? defaultMascotId
+      : null;
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setMascotId(null);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const token = await user.getIdToken();
-        const profile = await getProfile(token);
-
-        if (!isMounted) return;
-        setMascotId(
-          isMascotId(profile.user.selectedMascotId)
-            ? profile.user.selectedMascotId
-            : defaultMascotId
-        );
-      } catch (error) {
-        console.error(error);
-        if (isMounted) setMascotId(defaultMascotId);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
-
-  return { mascotId, isLoading };
+  return {
+    mascotId,
+    isLoading: status === "loading" || isAppUserLoading,
+  };
 };

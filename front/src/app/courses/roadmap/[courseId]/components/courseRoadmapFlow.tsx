@@ -63,9 +63,9 @@ const MissionDetailPanel = ({
 }) => {
   const isChallenge = mission.type === "challenge";
   const isCourseExam = mission.type === "course_exam";
-  const accentColor = isCourseExam ? "#7c3aed" : isChallenge ? "#f97316" : "#0057e7";
-  const softColor = isCourseExam ? "#f5f3ff" : isChallenge ? "#fff7ed" : "#eff6ff";
-  const labelColor = isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#1d4ed8";
+  const accentColor = isCourseExam ? "#d97706" : isChallenge ? "#f97316" : "#0057e7";
+  const softColor = isCourseExam ? "#fef3c7" : isChallenge ? "#fff7ed" : "#eff6ff";
+  const labelColor = isCourseExam ? "#a16207" : isChallenge ? "#ea580c" : "#1d4ed8";
 
   return (
     <Box
@@ -83,7 +83,7 @@ const MissionDetailPanel = ({
       <Stack spacing={2.5}>
         <Stack direction="row" spacing={1} flexWrap="wrap">
           <Chip
-            label={isCourseExam ? "コース完了" : isChallenge ? "挑戦" : "必須"}
+            label={isCourseExam ? "COURSE MISSION・コース完了課題" : isChallenge ? "挑戦" : "必須"}
             sx={{
               bgcolor: softColor,
               color: labelColor,
@@ -135,26 +135,9 @@ const MissionDetailPanel = ({
               </Box>
               <Box>
                 <Typography fontWeight={950}>EXP</Typography>
-                <Typography color="text.secondary" fontWeight={800}>+50</Typography>
-              </Box>
-            </Stack>
-            <Stack direction="row" spacing={1.25} alignItems="center">
-              <Box
-                sx={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 2,
-                  bgcolor: "#fef3c7",
-                  color: "#d97706",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                <EmojiEventsIcon />
-              </Box>
-              <Box>
-                <Typography fontWeight={950}>Badge</Typography>
-                <Typography color="text.secondary" fontWeight={800}>+1</Typography>
+                <Typography color="text.secondary" fontWeight={800}>
+                  +{mission.rewardExp}
+                </Typography>
               </Box>
             </Stack>
           </Stack>
@@ -310,6 +293,10 @@ export const CourseRoadmapFlow = ({
               <Stack direction="row" spacing={1} alignItems="center">
                 <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: "#f97316" }} />
                 <Typography variant="body2" fontWeight={800}>挑戦ミッション</Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Box sx={{ width: 12, height: 12, borderRadius: 1, bgcolor: "#d97706" }} />
+                <Typography variant="body2" fontWeight={800}>コース完了課題</Typography>
               </Stack>
             </Stack>
           </Stack>
@@ -472,7 +459,7 @@ export const CourseRoadmapFlow = ({
           >
             <TipsAndUpdatesIcon />
             <Typography fontWeight={800}>
-              各ミッションをクリアして、Webアプリが動く仕組みをステップごとに理解していきましょう。
+              ロードマップに沿って、ミッションごとの学習内容を一つずつ身につけていきましょう。
             </Typography>
           </Box>
         </Stack>

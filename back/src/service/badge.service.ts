@@ -41,24 +41,6 @@ const toOwnedBadge = (badge: TechIconBadge) => ({
   rarity: badge.rarity,
 });
 
-const getUserByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: {
-      id: true,
-      badgeTickets: true,
-      selectedTechIconBadgeId: true,
-      selectedTechIconBadge: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return user;
-};
-
 export const awardBadgeTickets = async (
   tx: Prisma.TransactionClient,
   {
@@ -110,9 +92,11 @@ export const awardBadgeTickets = async (
   };
 };
 
-export const getBadgeCollectionByFirebaseUid = async (firebaseUid: string) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
-
+export const getBadgeCollectionByUser = async (user: {
+  id: string;
+  badgeTickets: number;
+  selectedTechIconBadgeId: string | null;
+}) => {
   const badges = await prisma.techIconBadge.findMany({
     where: { isPublished: true },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -131,13 +115,18 @@ export const getBadgeCollectionByFirebaseUid = async (firebaseUid: string) => {
   const ownedCount = badges.filter(
     (badge) => badge.userTechIconBadges.length > 0
   ).length;
+  const selectedBadge = badges.find(
+    (badge) =>
+      badge.id === user.selectedTechIconBadgeId &&
+      badge.userTechIconBadges.length > 0
+  );
 
   return {
     ticketBalance: user.badgeTickets,
     ownedCount,
     totalCount: badges.length,
-    selectedBadge: user.selectedTechIconBadge
-      ? toOwnedBadge(user.selectedTechIconBadge)
+    selectedBadge: selectedBadge
+      ? toOwnedBadge(selectedBadge)
       : null,
     badges: badges.map((badge) =>
       toBadgeItem(badge, user.selectedTechIconBadgeId)
@@ -145,9 +134,10 @@ export const getBadgeCollectionByFirebaseUid = async (firebaseUid: string) => {
   };
 };
 
-export const drawTechIconBadgeByFirebaseUid = async (firebaseUid: string) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
-
+export const drawTechIconBadgeByUser = async (user: {
+  id: string;
+  badgeTickets: number;
+}) => {
   if (user.badgeTickets <= 0) {
     throw new AppError(
       400,
@@ -234,19 +224,17 @@ export const drawTechIconBadgeByFirebaseUid = async (firebaseUid: string) => {
   };
 };
 
-export const setSelectedTechIconBadgeByFirebaseUid = async ({
-  firebaseUid,
+export const setSelectedTechIconBadgeByUserId = async ({
+  userId,
   badgeId,
 }: {
-  firebaseUid: string;
+  userId: string;
   badgeId: string;
 }) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
-
   const ownedBadge = await prisma.userTechIconBadge.findUnique({
     where: {
       userId_badgeId: {
-        userId: user.id,
+        userId,
         badgeId,
       },
     },
@@ -264,7 +252,7 @@ export const setSelectedTechIconBadgeByFirebaseUid = async ({
   }
 
   await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: {
       selectedTechIconBadgeId: badgeId,
     },

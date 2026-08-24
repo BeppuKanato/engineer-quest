@@ -47,8 +47,6 @@ import { useSoundEffect } from "@/app/component/soundFeedback";
 import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import { auth } from "@/lib/firebase";
 
-const DRAW_DURATION_MS = 1500;
-
 const rarityStyle: Record<
   TechIconBadgeRarity,
   { label: string; color: string; bgcolor: string; borderColor: string; glow: string }
@@ -60,8 +58,6 @@ const rarityStyle: Record<
 };
 
 type BadgeFilter = "all" | "owned" | "locked";
-
-const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export default function BadgesPage() {
   const { play } = useSoundEffect();
@@ -167,13 +163,29 @@ export default function BadgesPage() {
       setResultOpen(false);
       setAcquiredBadge(null);
       setErrorMessage(null);
-      const startedAt = Date.now();
       const result = await drawTechIconBadge(token);
-      const remainingMs = Math.max(0, DRAW_DURATION_MS - (Date.now() - startedAt));
-
       setSelectedBadgeId(result.badge.id);
-      await wait(remainingMs);
-      await refreshCollection(token, result.badge.id);
+      setCollection((current) => {
+        if (!current) return current;
+        const wasOwned = current.badges.some(
+          (badge) => badge.id === result.badge.id && badge.isOwned
+        );
+        return {
+          ...current,
+          ticketBalance: result.ticketBalance,
+          ownedCount: wasOwned ? current.ownedCount : current.ownedCount + 1,
+          badges: current.badges.map((badge) =>
+            badge.id === result.badge.id
+              ? {
+                  ...badge,
+                  ...result.badge,
+                  isOwned: true,
+                  acquiredAt: result.acquiredAt,
+                }
+              : badge
+          ),
+        };
+      });
 
       play("cardAcquired");
       setAcquiredBadge(result.badge);
@@ -192,9 +204,21 @@ export default function BadgesPage() {
     try {
       setSelectingBadgeId(badgeId);
       setErrorMessage(null);
-      await setSelectedTechIconBadge(token, badgeId);
+      const result = await setSelectedTechIconBadge(token, badgeId);
       play("saveSuccess");
-      await refreshCollection(token, badgeId);
+      setSelectedBadgeId(badgeId);
+      setCollection((current) =>
+        current
+          ? {
+              ...current,
+              selectedBadge: result.selectedBadge,
+              badges: current.badges.map((badge) => ({
+                ...badge,
+                isSelected: badge.id === badgeId,
+              })),
+            }
+          : current
+      );
     } catch (error) {
       console.error(error);
       setErrorMessage("プロフィールバッジを設定できませんでした。");

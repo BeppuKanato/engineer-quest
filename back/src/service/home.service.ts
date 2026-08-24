@@ -7,7 +7,6 @@ import {
   ProgressStatus as PrismaProgressStatus,
 } from "@prisma/client";
 
-import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
 type HomeMission = {
@@ -107,7 +106,7 @@ const buildRankStatus = (completedMissionCount: number) => {
   };
 };
 
-const calculateMissionProgress = async (userId: string, missionId: string) => {
+const getMissionProgressSummary = async (userId: string, missionId: string) => {
   const [activityCount, completedActivityCount] = await Promise.all([
     prisma.missionActivity.count({
       where: { missionId },
@@ -121,8 +120,13 @@ const calculateMissionProgress = async (userId: string, missionId: string) => {
     }),
   ]);
 
-  if (activityCount === 0) return 0;
-  return Math.round((completedActivityCount / activityCount) * 100);
+  return {
+    activityCount,
+    progress:
+      activityCount === 0
+        ? 0
+        : Math.round((completedActivityCount / activityCount) * 100),
+  };
 };
 
 const toHomeMission = async (
@@ -132,10 +136,10 @@ const toHomeMission = async (
   ctaLabel: string,
   reason: string
 ): Promise<HomeMission> => {
-  const [progress, activityCount] = await Promise.all([
-    calculateMissionProgress(userId, mission.id),
-    prisma.missionActivity.count({ where: { missionId: mission.id } }),
-  ]);
+  const { progress, activityCount } = await getMissionProgressSummary(
+    userId,
+    mission.id
+  );
 
   return {
     id: mission.id,
@@ -523,22 +527,13 @@ const buildLearningCalendar = async (userId: string) => {
   };
 };
 
-export const getHomeByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: {
-      id: true,
-      displayName: true,
-      experience: true,
-      selectedMascotId: true,
-      selectedTargetAchievementId: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
+export const getHomeByUser = async (user: {
+  id: string;
+  displayName: string | null;
+  experience: number;
+  selectedMascotId: string;
+  selectedTargetAchievementId: string | null;
+}) => {
   const completedProgresses = await prisma.userMissionProgress.findMany({
     where: {
       userId: user.id,
@@ -576,16 +571,9 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
   });
   const levelStatus = deriveLevelStatus(user.experience);
   const rankStatus = buildRankStatus(completedMissionIds.size);
-  const [
-    resumeMission,
-    recommendedMission,
-    recommendedList,
-    targetAchievement,
-    calendar,
-  ] =
+  const [resumeMission, recommendedList, targetAchievement, calendar] =
     await Promise.all([
       getResumeMission(user.id),
-      getRecommendedMission(user.id, completedMissionIds),
       getRecommendedMissions(user.id, completedMissionIds, 3),
       getTargetAchievement(
         user.id,
@@ -596,6 +584,7 @@ export const getHomeByFirebaseUid = async (firebaseUid: string) => {
       buildLearningCalendar(user.id),
     ]);
 
+  const recommendedMission = recommendedList[0] ?? null;
   const fallbackMission = resumeMission ?? recommendedMission;
 
   return {

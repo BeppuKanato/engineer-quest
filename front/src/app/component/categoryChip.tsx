@@ -5,7 +5,7 @@ type CategoryChipProps = { category: CourseCategory };
 
 const CATEGORY_LABEL: Record<CourseCategory, string> = {
   sort: "ソート",
-  search: "探索",
+  search: "データ探索",
   graph: "グラフ",
   data_structure: "データ構造",
   dynamic_programming: "動的計画法",
@@ -18,11 +18,11 @@ const CATEGORY_LABEL: Record<CourseCategory, string> = {
 
 export const CategoryChip = ({ category }: CategoryChipProps) => (
   <Chip
-    label={CATEGORY_LABEL[category]}
+    label={CATEGORY_LABEL[category] ?? "アルゴリズム"}
     size="small"
     sx={{ bgcolor: "#eef2ff", color: "#4f46e5", fontWeight: 700 }}
   />
 );
 
 export const getCategoryLabel = (category: CourseCategory) =>
-  CATEGORY_LABEL[category];
+  CATEGORY_LABEL[category] ?? "アルゴリズム";

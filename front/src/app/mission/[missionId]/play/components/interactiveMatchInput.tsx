@@ -15,9 +15,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { Box, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import { motion } from "framer-motion";
+import type { KeyboardEvent, PointerEvent } from "react";
 import { useState } from "react";
 
 import { useSoundEffect } from "@/app/component/soundFeedback";
+import { learningBlockCardSx } from "@/features/learning/components/blockCardStyles";
 import type { MatchItem, MatchTarget } from "../type";
 
 const UNASSIGNED_TARGET = "__unassigned";
@@ -51,14 +53,14 @@ const MatchCard = ({
         role="button"
         tabIndex={disabled ? -1 : 0}
         aria-pressed={selected}
-        onPointerDown={(event) => {
+        onPointerDown={(event: PointerEvent<HTMLElement>) => {
           listeners?.onPointerDown?.(event);
           if (!disabled) {
             onGrab();
           }
         }}
         onClick={onClick}
-        onKeyDown={(event) => {
+        onKeyDown={(event: KeyboardEvent<HTMLElement>) => {
           listeners?.onKeyDown?.(event);
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
@@ -70,34 +72,11 @@ const MatchCard = ({
         }}
         elevation={0}
         sx={{
-          minHeight: 48,
-          px: 1.25,
-          py: 0.8,
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          borderRadius: 2,
-          border: selected ? "2px solid #2563eb" : "1px solid #bfdbfe",
-          bgcolor: selected ? "#eff6ff" : "#fff",
-          boxShadow: selected ? "0 0 0 4px rgba(37, 99, 235, 0.10)" : "none",
-          cursor: disabled ? "default" : isDragging ? "grabbing" : "grab",
+          ...learningBlockCardSx({ selected, disabled, dragging: isDragging }),
           opacity: isDragging ? 0.35 : 1,
           transform: transform
             ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
             : undefined,
-          transition: "border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease",
-          "@media (prefers-reduced-motion: reduce)": {
-            transition: "none",
-          },
-          userSelect: "none",
-          touchAction: "none",
-          "&:hover": disabled
-            ? undefined
-            : {
-                borderColor: "#2563eb",
-                bgcolor: "#f8fbff",
-                boxShadow: "0 8px 18px rgba(37, 99, 235, 0.12)",
-              },
         }}
       >
         <Box
@@ -264,6 +243,10 @@ export const InteractiveMatchInput = ({
   const activeItem = items.find((item) => item.id === activeItemId) ?? null;
 
   return (
+    <Stack spacing={1.5}>
+      <Typography fontWeight={900} color="#475569">
+        コードブロックをドラッグするか選択し、対応する役割へ配置してください。
+      </Typography>
     <DndContext
       sensors={sensors}
       onDragStart={({ active }) => {
@@ -282,7 +265,7 @@ export const InteractiveMatchInput = ({
       >
         <Box>
           <Typography fontWeight={900} sx={{ mb: 1 }}>
-            分類するカード
+            使えるコードブロック
           </Typography>
           <UnassignedZone disabled={disabled}>
             <Stack spacing={1}>
@@ -310,7 +293,7 @@ export const InteractiveMatchInput = ({
 
         <Box>
           <Typography fontWeight={900} sx={{ mb: 1 }}>
-            分類先
+            コードの役割
           </Typography>
           <Stack spacing={1.25}>
             {targets.map((target) => {
@@ -351,5 +334,6 @@ export const InteractiveMatchInput = ({
         ) : null}
       </DragOverlay>
     </DndContext>
+    </Stack>
   );
 };

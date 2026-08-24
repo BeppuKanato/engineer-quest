@@ -1,6 +1,10 @@
 import type { Difficulty, MissionType, ProgressStatus } from "@/app/courses/type";
 
 import type { MissionVisualContent } from "./components/visual/type";
+import type {
+  ActivityContent,
+  ActivityRendererData,
+} from "@/features/learning/activityContent";
 
 export type MissionActivityType =
   | "TUTORIAL"
@@ -9,10 +13,9 @@ export type MissionActivityType =
   | "MATCH"
   | "ORDERED_STEPS"
   | "SELECT_FILL"
-  | "TRY_CODE"
-  | "MISSION_CHECK";
+  | "TRY_CODE";
 
-export type MissionActivityContent = {
+export type MissionActivityContentData = ActivityRendererData & {
   body?: string;
   text?: string;
   summary?: string[];
@@ -21,12 +24,15 @@ export type MissionActivityContent = {
   items?: MatchItem[];
   targets?: MatchTarget[];
   steps?: OrderedStep[];
-  checkType?: "CHOICE" | "MATCH" | "ORDERED_STEPS" | "SELECT_FILL" | "TRY_CODE";
   starterCode?: string;
   sampleCode?: string;
   answerCode?: string;
   visual?: MissionVisualContent;
   [key: string]: unknown;
+};
+
+export type MissionActivityContent = Omit<ActivityContent, "data"> & {
+  data: MissionActivityContentData;
 };
 
 export type ChoiceItem = {
@@ -51,16 +57,8 @@ export type OrderedStep = {
   label: string;
 };
 
-export type MissionSection = {
-  id: string;
-  title: string;
-  description: string | null;
-  order: number;
-};
-
 export type MissionActivity = {
   id: string;
-  sectionId: string | null;
   type: MissionActivityType;
   title: string;
   instruction: string;
@@ -69,9 +67,8 @@ export type MissionActivity = {
   preview: Record<string, unknown> | null;
   actionLabel: string;
   order: number;
-  sectionOrder: number | null;
-  isMissionCheck: boolean;
   progressStatus: ProgressStatus;
+  incorrectAttemptCount: number;
 };
 
 export type MissionPlayResponse = {
@@ -94,18 +91,58 @@ export type MissionPlayResponse = {
     missionId: string;
     missionTitle: string;
   } | null;
+  courseExamAttempt: CourseExamAttempt | null;
   progress: {
     status: Extract<ProgressStatus, "completed" | "in_progress">;
     currentActivityId: string | null;
     completedActivityIds: string[];
   };
-  sections: MissionSection[];
   activities: MissionActivity[];
+};
+
+export type CourseExamHintView = {
+  hintId: string;
+  title: string;
+  viewedAt: string;
+};
+
+export type CourseExamTestResultLog = {
+  testCaseId: string;
+  passed: boolean;
+  expectedOutput?: unknown;
+  actualOutput?: unknown;
+};
+
+export type CourseExamTestExecution = {
+  id: string;
+  code: string;
+  testResults: CourseExamTestResultLog[];
+  runtimeError: string | null;
+  executedAt: string;
+};
+
+export type CourseExamSubmission = {
+  id: string;
+  code: string;
+  passed: boolean;
+  testResults: CourseExamTestResultLog[];
+  submittedAt: string;
+};
+
+export type CourseExamAttempt = {
+  id: string;
+  missionId: string;
+  startedAt: string;
+  completedAt: string | null;
+  hintViews: CourseExamHintView[];
+  testExecutions: CourseExamTestExecution[];
+  submissions: CourseExamSubmission[];
 };
 
 export type AnswerMissionActivityResponse = {
   isCorrect: boolean | null;
   feedback?: string;
+  incorrectAttemptCount: number;
 };
 
 export type CompleteMissionActivityResponse = {
@@ -155,6 +192,7 @@ export type BadgeTicketReward = {
 
 export type CompleteMissionResponse = {
   rewardRunId: string;
+  courseExamAttemptId: string | null;
   nextPath: string;
   mission: {
     id: string;

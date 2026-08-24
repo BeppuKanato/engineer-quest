@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
-import { getCollectionByFirebaseUid } from "../service/collection.service";
+import { getCollectionByUser } from "../service/collection.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getAuthUser = (req: Request) => {
+  const user = req.authUser;
 
-  if (!firebaseUid) {
+  if (!user) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return user;
 };
 
 export const getCollectionController = async (
@@ -19,7 +19,7 @@ export const getCollectionController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getCollectionByFirebaseUid(getFirebaseUid(req));
+    const data = await getCollectionByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {

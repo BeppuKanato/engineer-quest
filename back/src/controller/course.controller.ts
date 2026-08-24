@@ -1,36 +1,23 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  getCourseRoadmapByFirebaseUid,
-  getCoursesByFirebaseUid,
+  getCourseRoadmapByUserId,
+  getCoursesByUserId,
 } from "../service/course.service";
 import { AppError } from "../error/appError";
 
-type AuthenticatedRequest = Request & {
-  firebaseUser?: {
-    uid: string;
-  };
-  authUser?: {
-    firebaseUid: string;
-  };
-};
-
-const getFirebaseUid = (req: AuthenticatedRequest): string | undefined => {
-  return req.authUser?.firebaseUid ?? req.firebaseUser?.uid;
+const getUserId = (req: Request): string => {
+  const userId = req.authUser?.id;
+  if (!userId) throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
+  return userId;
 };
 
 export const getCoursesController = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const firebaseUid = getFirebaseUid(req);
-
-    if (!firebaseUid) {
-      throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
-    }
-
-    const courses = await getCoursesByFirebaseUid(firebaseUid);
+    const courses = await getCoursesByUserId(getUserId(req));
 
     res.status(200).json(courses);
   } catch (error) {
@@ -39,23 +26,18 @@ export const getCoursesController = async (
 };
 
 export const getCourseRoadmapController = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const firebaseUid = getFirebaseUid(req);
     const courseId = req.params.courseId;
-
-    if (!firebaseUid) {
-      throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
-    }
 
     if (!courseId) {
       throw new AppError(400, "BAD_REQUEST", "Course ID is required");
     }
 
-    const course = await getCourseRoadmapByFirebaseUid(firebaseUid, courseId);
+    const course = await getCourseRoadmapByUserId(getUserId(req), courseId);
 
     res.status(200).json(course);
   } catch (error) {

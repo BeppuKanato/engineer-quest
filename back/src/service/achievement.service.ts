@@ -395,16 +395,10 @@ export const evaluateAchievementsForUser = async (userId: string) => {
   return newlyUnlocked;
 };
 
-export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: { id: true, selectedTargetAchievementId: true },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
+export const getAchievementsByUser = async (user: {
+  id: string;
+  selectedTargetAchievementId: string | null;
+}) => {
   const achievements = await prisma.achievement.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: {
@@ -420,6 +414,38 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
   });
   const completedMissionIds = await getCompletedMissionIds(user.id);
   const completedActivityCount = await getCompletedActivityCount(user.id);
+  const courseProgressPromises = new Map<string, ReturnType<typeof calculateAchievementProgress>>();
+
+  const getProgress = (achievement: Achievement) => {
+    const isCourseProgress =
+      achievement.conditionType === AchievementConditionType.COURSE_COMPLETE ||
+      achievement.conditionType === AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE ||
+      achievement.conditionType === AchievementConditionType.COURSE_ALL_MISSION_COMPLETE;
+    const cacheKey = isCourseProgress
+      ? `${achievement.conditionType}:${achievement.courseId ?? "none"}`
+      : null;
+
+    if (!cacheKey) {
+      return calculateAchievementProgress(
+        achievement,
+        user.id,
+        completedMissionIds,
+        completedActivityCount
+      );
+    }
+
+    const cached = courseProgressPromises.get(cacheKey);
+    if (cached) return cached;
+
+    const progress = calculateAchievementProgress(
+      achievement,
+      user.id,
+      completedMissionIds,
+      completedActivityCount
+    );
+    courseProgressPromises.set(cacheKey, progress);
+    return progress;
+  };
 
   const grouped = categoryOrder.map((category) => {
     const items = achievements
@@ -433,12 +459,7 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
             : "visible_locked";
 
         const isSecretLocked = status === "secret_locked";
-        const progress = await calculateAchievementProgress(
-          achievement,
-          user.id,
-          completedMissionIds,
-          completedActivityCount
-        );
+        const progress = await getProgress(achievement);
         const targetLink = buildTargetLink(achievement);
 
         return {
@@ -485,19 +506,10 @@ export const getAchievementsByFirebaseUid = async (firebaseUid: string) => {
   };
 };
 
-export const updateTargetAchievementByFirebaseUid = async (
-  firebaseUid: string,
+export const updateTargetAchievementByUserId = async (
+  userId: string,
   achievementId: string | null
 ) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: { id: true },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
   if (achievementId !== null) {
     const achievement = await prisma.achievement.findUnique({
       where: { id: achievementId },
@@ -511,7 +523,7 @@ export const updateTargetAchievementByFirebaseUid = async (
     const achieved = await prisma.userAchievement.findUnique({
       where: {
         userId_achievementId: {
-          userId: user.id,
+          userId,
           achievementId,
         },
       },
@@ -524,7 +536,7 @@ export const updateTargetAchievementByFirebaseUid = async (
   }
 
   const updated = await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: {
       selectedTargetAchievementId: achievementId,
     },

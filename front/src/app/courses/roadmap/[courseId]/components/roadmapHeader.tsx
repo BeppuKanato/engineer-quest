@@ -1,7 +1,5 @@
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import RouteIcon from "@mui/icons-material/Route";
-import StarsIcon from "@mui/icons-material/Stars";
 import {
   Box,
   Button,
@@ -91,11 +89,6 @@ export const RoadmapHeader = ({ course, onNextMissionClick }: RoadmapHeaderProps
         </Stack>
 
         <Stack spacing={2}>
-          <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ xs: "flex-start", lg: "flex-end" }}>
-            <Chip icon={<AccessTimeIcon />} label="進行中" sx={{ bgcolor: "#eff6ff", color: "#1d4ed8", fontWeight: 900, "& .MuiChip-icon": { color: "inherit" } }} />
-            <Chip icon={<StarsIcon />} label="やさしい" sx={{ bgcolor: "#dcfce7", color: "#15803d", fontWeight: 900, "& .MuiChip-icon": { color: "inherit" } }} />
-          </Stack>
-
           <Button
             variant="contained"
             disabled={!course.nextMission}

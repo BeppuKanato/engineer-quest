@@ -3,7 +3,6 @@ export type {
   MissionActivityContent,
   MissionActivityType,
   MissionPlayResponse as MissionOverviewResponse,
-  MissionSection,
 } from "../play/type";
 
 export type ProgressStatus = "completed" | "in_progress" | "not_started";

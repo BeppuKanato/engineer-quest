@@ -51,6 +51,8 @@ import {
   type AchievementNotificationMode,
 } from "@/hooks/useAchievementNotificationMode";
 import { auth } from "@/lib/firebase";
+import { HexadRadarChart } from "@/features/hexad/hexadRadarChart";
+import { useUserSession } from "@/app/component/userSession";
 
 const historyMeta: Record<
   ProfileHistoryType,
@@ -96,6 +98,7 @@ const formatDateTime = (value: string) =>
 
 export default function ProfilePage() {
   const { play } = useSoundEffect();
+  const { updateAppUser } = useUserSession();
   const {
     mode: achievementNotificationMode,
     setMode: setAchievementNotificationMode,
@@ -260,6 +263,20 @@ export default function ProfilePage() {
               </Box>
             </Paper>
 
+            {profile.hexadProfile ? (
+              <HexadRadarChart scores={profile.hexadProfile.scores} />
+            ) : (
+              <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff" }}>
+                <Typography variant="h5" fontWeight={900}>動機づけプロフィール</Typography>
+                <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+                  24問のアンケートに回答すると、6つの観点から動機づけ傾向を確認できます。
+                </Typography>
+                <Button component={Link} href="/hexad" variant="contained" sx={{ minHeight: 48, borderRadius: 2, fontWeight: 900 }}>
+                  HEXADアンケートに回答する
+                </Button>
+              </Paper>
+            )}
+
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) 0.9fr" }, gap: 3 }}>
               <RecentActivityCard items={history.slice(0, 5)} />
               <LearningSummaryCard summary={summary} />
@@ -289,6 +306,7 @@ export default function ProfilePage() {
                     : draftMascotId;
                   setSelectedMascotId(nextMascotId);
                   setDraftMascotId(nextMascotId);
+                  updateAppUser({ selectedMascotId: nextMascotId });
                   setProfile((current) =>
                     current
                       ? {

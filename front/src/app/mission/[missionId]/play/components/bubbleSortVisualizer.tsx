@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Button, Chip, MenuItem, Paper, Select, Stack, Typography } from "@mui/material";
-import { Pause, PlayArrow, Replay, SkipNext, SkipPrevious } from "@mui/icons-material";
+import { Paper, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { generateBubbleSortSteps } from "@/lib/bubbleSort";
+import { CodeLines, StepTraceControls } from "@/features/learning/components";
+import { AlgorithmLegend, ArrayCards, PassIndicator, VariablePanel } from "./algorithm/primitives";
 
 const codeLines = [
   "def bubble_sort(array):",
@@ -17,18 +18,33 @@ const codeLines = [
   "    return array",
 ];
 
-export function BubbleSortVisualizer({
+export function BubbleSortScene({
   initialValues,
   autoPlay = false,
+  showCode = false,
+  onePassOnly = false,
+  introMode = false,
 }: {
   initialValues: number[];
   autoPlay?: boolean;
+  showCode?: boolean;
+  onePassOnly?: boolean;
+  introMode?: boolean;
 }) {
-  const steps = useMemo(() => generateBubbleSortSteps(initialValues), [initialValues]);
+  const steps = useMemo(() => {
+    const generated = generateBubbleSortSteps(initialValues);
+    if (!onePassOnly) return generated;
+    const passCompleteIndex = generated.findIndex((item) => item.phase === "pass-complete");
+    return passCompleteIndex >= 0 ? generated.slice(0, passCompleteIndex + 1) : generated;
+  }, [initialValues, onePassOnly]);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(900);
   const step = steps[index];
+  const isOnePassComplete = onePassOnly && step?.phase === "pass-complete";
+  const message = isOnePassComplete
+    ? `一周分の比較と交換が終わり、最も大きい${step.values.at(-1)}が右端へ移動しました。`
+    : step?.message;
 
   useEffect(() => {
     if (!playing || index >= steps.length - 1) {
@@ -44,61 +60,55 @@ export function BubbleSortVisualizer({
   return (
     <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 2.5 }, border: "1px solid #bfdbfe", borderRadius: 3, overflow: "hidden" }}>
       <Stack spacing={2}>
-        <Stack direction="row" gap={1} flexWrap="wrap">
-          <Chip label={`外側 i: ${step.outerIndex ?? "—"}`} />
-          <Chip label={`内側 j: ${step.innerIndex ?? "—"}`} />
-          <Chip label={`比較 ${step.comparisonCount}回`} />
-          <Chip label={`交換 ${step.swapCount}回`} />
-        </Stack>
-        <Box sx={{ overflowX: "auto", pb: 1 }}>
-          <Stack direction="row" spacing={1} sx={{ minWidth: "max-content" }}>
-            {step.values.map((value, valueIndex) => {
-              const compared = step.comparedIndices?.includes(valueIndex);
-              const swapped = step.swappedIndices?.includes(valueIndex);
-              const sorted = step.sortedIndices.includes(valueIndex);
-              return (
-                <Box
-                  key={`${valueIndex}-${value}`}
-                  aria-label={`${value}${compared ? " 比較中" : ""}${swapped ? " 交換" : ""}${sorted ? " 確定済み" : ""}`}
-                  sx={{
-                    width: 58, height: 68, display: "grid", placeItems: "center", borderRadius: 2,
-                    fontWeight: 900, fontSize: 22, position: "relative",
-                    border: swapped ? "3px dashed #c2410c" : compared ? "3px solid #2563eb" : sorted ? "3px double #15803d" : "2px solid #cbd5e1",
-                    bgcolor: swapped ? "#fff7ed" : compared ? "#eff6ff" : sorted ? "#ecfdf5" : "#fff",
-                    transition: "all 260ms ease",
-                  }}
-                >
-                  {value}
-                  <Typography sx={{ position: "absolute", bottom: -22, fontSize: 10, fontWeight: 800 }}>
-                    {swapped ? "交換" : compared ? "比較" : sorted ? "確定" : ""}
-                  </Typography>
-                </Box>
-              );
-            })}
+        <Stack direction={{ xs: "column", sm: "row" }} gap={1} justifyContent="space-between">
+          <Stack direction="row" gap={1} flexWrap="wrap">
+            {!introMode && <PassIndicator passIndex={step.outerIndex} />}
+            <VariablePanel variables={{
+              ...(introMode ? {} : { i: step.outerIndex ?? "—", j: step.innerIndex ?? "—" }),
+              比較: step.comparisonCount,
+              交換: step.swapCount,
+            }} />
           </Stack>
-        </Box>
-        <Typography aria-live="polite" fontWeight={800} sx={{ pt: 1.5 }}>{step.message}</Typography>
-        <Box sx={{ bgcolor: "#0f172a", color: "#e2e8f0", borderRadius: 2, p: 1.5, overflowX: "auto" }}>
-          {codeLines.map((line, lineIndex) => (
-            <Box key={lineIndex} sx={{ display: "flex", minWidth: 570, bgcolor: step.highlightedCodeLines.includes(lineIndex + 1) ? "#1d4ed8" : "transparent" }}>
-              <Typography component="span" sx={{ width: 28, color: "#94a3b8", fontFamily: "monospace" }}>{lineIndex + 1}</Typography>
-              <Typography component="code" sx={{ whiteSpace: "pre", fontFamily: "monospace", fontSize: 13 }}>{line || " "}</Typography>
-            </Box>
-          ))}
-        </Box>
-        <Stack direction="row" gap={1} flexWrap="wrap" alignItems="center">
-          <Button aria-label="最初から" onClick={() => { setPlaying(false); setIndex(0); }}><Replay /></Button>
-          <Button aria-label="前のステップ" disabled={index === 0} onClick={() => { setPlaying(false); setIndex(index - 1); }}><SkipPrevious /></Button>
-          <Button variant="contained" aria-label={playing ? "一時停止" : "再生"} onClick={() => setPlaying(!playing)}>
-            {playing ? <Pause /> : <PlayArrow />}{playing ? "一時停止" : "再生"}
-          </Button>
-          <Button aria-label="次のステップ" disabled={index === steps.length - 1} onClick={() => { setPlaying(false); setIndex(index + 1); }}><SkipNext /></Button>
-          <Select size="small" value={speed} aria-label="再生速度" onChange={(event) => setSpeed(Number(event.target.value))}>
-            <MenuItem value={1500}>ゆっくり</MenuItem><MenuItem value={900}>標準</MenuItem><MenuItem value={400}>速い</MenuItem>
-          </Select>
-          <Typography variant="body2">{index + 1} / {steps.length}</Typography>
         </Stack>
+        <ArrayCards
+          values={step.values}
+          compareIndices={step.comparedIndices}
+          swappedIndices={step.swappedIndices}
+          confirmedIndices={step.sortedIndices}
+          activeRange={[0, Math.max(0, step.values.length - 1 - (step.outerIndex ?? 0))]}
+        />
+        {introMode ? (
+          <Stack direction="row" gap={1} flexWrap="wrap" aria-label="表示の凡例">
+            <Typography component="span" sx={{ px: 1.25, py: 0.5, borderRadius: 99, bgcolor: "#eff6ff", fontWeight: 800 }}>青枠：比較中</Typography>
+            <Typography component="span" sx={{ px: 1.25, py: 0.5, borderRadius: 99, bgcolor: "#fff7ed", fontWeight: 800 }}>橙破線：交換</Typography>
+            <Typography component="span" sx={{ px: 1.25, py: 0.5, borderRadius: 99, bgcolor: "#ecfdf5", fontWeight: 800 }}>緑枠：1周で右端へ移動</Typography>
+          </Stack>
+        ) : <AlgorithmLegend />}
+        <Typography aria-live="polite" fontWeight={800} sx={{ pt: 1.5 }}>{message}</Typography>
+        {isOnePassComplete && (
+          <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, bgcolor: "#eff6ff", border: "1px solid #bfdbfe" }}>
+            <Typography sx={{ lineHeight: 1.8 }}>
+              一周しただけでは、配列全体の並べ替えはまだ完了していません。同じ処理を繰り返すことで、配列全体を少しずつ並べ替えていきます。
+            </Typography>
+          </Paper>
+        )}
+        {showCode && <CodeLines code={codeLines.join("\n")} activeLines={step.highlightedCodeLines} showLineNumbers />}
+        <StepTraceControls
+          stepIndex={index}
+          stepCount={steps.length}
+          playing={playing}
+          speed={introMode ? undefined : speed}
+          showStepButtons={!introMode}
+          onReset={() => { setPlaying(false); setIndex(0); }}
+          onPrevious={() => { setPlaying(false); setIndex((current) => Math.max(0, current - 1)); }}
+          onNext={() => { setPlaying(false); setIndex((current) => Math.min(steps.length - 1, current + 1)); }}
+          onPlayingChange={setPlaying}
+          onSpeedChange={introMode ? undefined : setSpeed}
+        />
       </Stack>
     </Paper>
   );
 }
+
+// Existing Activity rendering keeps this name as a compatibility alias.
+export const BubbleSortVisualizer = BubbleSortScene;

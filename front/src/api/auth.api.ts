@@ -5,6 +5,11 @@ export type AuthUser = {
   firebaseUid: string;
   displayName: string | null;
   experience: number;
+  badgeTickets: number;
+  selectedTechIconBadgeId: string | null;
+  selectedMascotId: string;
+  selectedTargetAchievementId: string | null;
+  hasHexadResponse: boolean;
 };
 
 export type GetMeResponse = {

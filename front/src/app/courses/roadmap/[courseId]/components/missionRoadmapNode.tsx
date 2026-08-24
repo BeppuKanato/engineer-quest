@@ -28,9 +28,9 @@ export const MissionRoadmapNode = ({
   const isChallenge = variant === "challenge" || mission.type === "challenge";
   const isCourseExam = variant === "course_exam" || mission.type === "course_exam";
   const isLocked = mission.isLocked;
-  const accentColor = isCompleted ? "#16a34a" : isCourseExam ? "#7c3aed" : isChallenge ? "#f97316" : "#0057e7";
-  const softColor = isCompleted ? "#dcfce7" : isCourseExam ? "#f5f3ff" : isChallenge ? "#fff7ed" : "#eff6ff";
-  const labelColor = isCompleted ? "#15803d" : isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#1d4ed8";
+  const accentColor = isCompleted ? "#16a34a" : isCourseExam ? "#d97706" : isChallenge ? "#f97316" : "#0057e7";
+  const softColor = isCompleted ? "#dcfce7" : isCourseExam ? "#fef3c7" : isChallenge ? "#fff7ed" : "#eff6ff";
+  const labelColor = isCompleted ? "#15803d" : isCourseExam ? "#a16207" : isChallenge ? "#ea580c" : "#1d4ed8";
 
   return (
     <Stack spacing={1} alignItems="center" sx={{ width: 132, position: "relative", zIndex: 2 }}>
@@ -45,7 +45,7 @@ export const MissionRoadmapNode = ({
               top: -34,
               transform: "translateX(-50%)",
               zIndex: 2,
-              bgcolor: "#0057e7",
+              bgcolor: isCourseExam ? "#d97706" : "#0057e7",
               color: "#fff",
               fontWeight: 950,
               boxShadow: "0 8px 18px rgba(0,87,231,0.24)",
@@ -87,21 +87,21 @@ export const MissionRoadmapNode = ({
           sx={{
             width: isChallenge ? 68 : isCourseExam ? 82 : 76,
             height: isChallenge ? 68 : isCourseExam ? 82 : 76,
-            borderRadius: "50%",
+            borderRadius: isCourseExam ? 3 : "50%",
             border: "4px solid",
-            borderColor: isSelected ? accentColor : isCompleted ? "#86efac" : isLocked ? "#cbd5e1" : "#bfdbfe",
-            bgcolor: isLocked ? "#f8fafc" : accentColor,
-            color: isLocked ? "#64748b" : "#fff",
+            borderColor: isSelected ? accentColor : isCompleted ? "#86efac" : isLocked && isCourseExam ? "#facc15" : isLocked ? "#cbd5e1" : isCourseExam ? "#fbbf24" : "#bfdbfe",
+            bgcolor: isLocked ? (isCourseExam ? "#fffbeb" : "#f8fafc") : accentColor,
+            color: isLocked ? (isCourseExam ? "#ca8a04" : "#64748b") : "#fff",
             display: "grid",
             placeItems: "center",
             cursor: "pointer",
             boxShadow: isSelected
-              ? `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.14)" : isCourseExam ? "rgba(124,58,237,0.14)" : isChallenge ? "rgba(249,115,22,0.12)" : "rgba(0,87,231,0.13)"}, 0 16px 28px rgba(15,23,42,0.16)`
+              ? `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.14)" : isCourseExam ? "rgba(217,119,6,0.16)" : isChallenge ? "rgba(249,115,22,0.12)" : "rgba(0,87,231,0.13)"}, 0 16px 28px rgba(15,23,42,0.16)`
               : "0 10px 22px rgba(15,23,42,0.12)",
             transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease",
             "&:hover": {
               transform: "translateY(-2px)",
-              boxShadow: `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.12)" : isCourseExam ? "rgba(124,58,237,0.12)" : isChallenge ? "rgba(249,115,22,0.1)" : "rgba(0,87,231,0.1)"}, 0 18px 34px rgba(15,23,42,0.16)`,
+              boxShadow: `0 0 0 8px ${isCompleted ? "rgba(22,163,74,0.12)" : isCourseExam ? "rgba(217,119,6,0.14)" : isChallenge ? "rgba(249,115,22,0.1)" : "rgba(0,87,231,0.1)"}, 0 18px 34px rgba(15,23,42,0.16)` ,
             },
           }}
         >
@@ -123,7 +123,7 @@ export const MissionRoadmapNode = ({
         <Stack direction="row" spacing={0.5} alignItems="center">
           <Box
             sx={{
-              width: 22,
+              width: isCourseExam ? 42 : 22,
               height: 22,
               borderRadius: "50%",
               bgcolor: softColor,
@@ -134,12 +134,12 @@ export const MissionRoadmapNode = ({
               fontWeight: 950,
             }}
           >
-            {isCourseExam ? "EX" : mission.order}
+            {isCourseExam ? "GOAL" : mission.order}
           </Box>
           <Typography
             sx={{
               maxWidth: 118,
-              color: isCourseExam ? "#6d28d9" : isChallenge ? "#ea580c" : "#111827",
+              color: isCourseExam ? "#a16207" : isChallenge ? "#ea580c" : "#111827",
               fontSize: 14,
               fontWeight: 900,
               lineHeight: 1.25,

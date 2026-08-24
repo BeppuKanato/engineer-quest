@@ -1,5 +1,6 @@
 import type { Mission, Status, TargetAchievement } from "@/app/home/type";
 import { fetcher } from "@/lib/fetcher";
+import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export type HomeResponse = {
   user: {
@@ -38,8 +39,9 @@ export type HomeResponse = {
 };
 
 export const getHome = async (token: string): Promise<HomeResponse> => {
-  return fetcher<HomeResponse>("/home", {
-    method: "GET",
-    token,
-  });
+  return fetchClientQuery(
+    "home",
+    () => fetcher<HomeResponse>("/home", { method: "GET", token }),
+    { staleTimeMs: 15_000, tags: [queryTags.home] }
+  );
 };

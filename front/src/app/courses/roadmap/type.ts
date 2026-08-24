@@ -13,6 +13,7 @@ export type CourseRoadmapMission = {
     order: number;
     difficulty: Difficulty;
     estimatedMinutes: number;
+    rewardExp: number;
     status: ProgressStatus;
     type: MissionType;
     isRequiredForCourseCompletion: boolean;

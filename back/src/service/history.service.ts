@@ -1,6 +1,5 @@
 import { ProgressStatus as PrismaProgressStatus } from "@prisma/client";
 
-import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
 export type HistoryEventType =
@@ -34,19 +33,6 @@ const toDateKey = (value: string) =>
     month: "2-digit",
     day: "2-digit",
   });
-
-const getUserByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: { id: true },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return user;
-};
 
 const getCourseCompletedEvents = async (
   userId: string
@@ -102,9 +88,7 @@ const getCourseCompletedEvents = async (
   });
 };
 
-export const getHistoryByFirebaseUid = async (firebaseUid: string) => {
-  const user = await getUserByFirebaseUid(firebaseUid);
-
+export const getHistoryByUserId = async (userId: string) => {
   const [
     activityProgresses,
     missionProgresses,
@@ -118,7 +102,7 @@ export const getHistoryByFirebaseUid = async (firebaseUid: string) => {
   ] = await Promise.all([
     prisma.userMissionActivityProgress.findMany({
       where: {
-        userId: user.id,
+        userId,
         status: PrismaProgressStatus.COMPLETED,
         completedAt: { not: null },
       },
@@ -136,7 +120,7 @@ export const getHistoryByFirebaseUid = async (firebaseUid: string) => {
     }),
     prisma.userMissionProgress.findMany({
       where: {
-        userId: user.id,
+        userId,
         status: PrismaProgressStatus.COMPLETED,
         completedAt: { not: null },
       },
@@ -153,41 +137,41 @@ export const getHistoryByFirebaseUid = async (firebaseUid: string) => {
       },
     }),
     prisma.badgeTicketTransaction.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { createdAt: "desc" },
       take: 120,
     }),
     prisma.userTechIconBadge.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { acquiredAt: "desc" },
       take: 80,
       include: { badge: true },
     }),
     prisma.userKnowledgeCard.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { collectedAt: "desc" },
       take: 80,
       include: { knowledgeCard: true },
     }),
     prisma.userAchievement.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { achievedAt: "desc" },
       take: 80,
       include: { achievement: true },
     }),
     prisma.userWork.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { createdAt: "desc" },
       take: 80,
       include: { createMission: { select: { title: true } } },
     }),
     prisma.userWorkReview.findMany({
-      where: { userWork: { userId: user.id } },
+      where: { userWork: { userId } },
       orderBy: { createdAt: "desc" },
       take: 80,
       include: { userWork: { select: { id: true, title: true } } },
     }),
-    getCourseCompletedEvents(user.id),
+    getCourseCompletedEvents(userId),
   ]);
 
   const events: HistoryEvent[] = [

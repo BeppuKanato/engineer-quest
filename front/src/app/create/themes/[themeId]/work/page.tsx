@@ -102,9 +102,7 @@ export default function CreateThemeWorkPage() {
       const result = await createMyWork(token, params.themeId, payload);
       setSuccessOpen(true);
       play("saveSuccess");
-      window.setTimeout(() => {
-        router.push(`/my-works/${encodeURIComponent(result.workId)}`);
-      }, 700);
+      router.push(`/my-works/${encodeURIComponent(result.workId)}`);
     } catch (error) {
       console.error(error);
       setErrorMessage("制作記録を保存できませんでした。保存上限は10件です。");

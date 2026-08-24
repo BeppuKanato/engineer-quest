@@ -90,24 +90,17 @@ const compareHistoryDesc = (
 ) =>
   new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime();
 
-export const getProfileByFirebaseUid = async (firebaseUid: string) => {
-  const user = await prisma.user.findUnique({
-    where: { firebaseUid },
-    select: {
-      id: true,
-      displayName: true,
-      experience: true,
-      badgeTickets: true,
-      selectedMascotId: true,
-      selectedTechIconBadge: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
+export const getProfileByUser = async (user: {
+  id: string;
+  displayName: string | null;
+  experience: number;
+  badgeTickets: number;
+  selectedMascotId: string;
+  selectedTechIconBadgeId: string | null;
+}) => {
   const [
+    selectedTechIconBadge,
+    hexadResponse,
     missionProgresses,
     userAchievements,
     activityProgresses,
@@ -117,6 +110,24 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
     completedMissionCount,
     badgeCount,
   ] = await Promise.all([
+      user.selectedTechIconBadgeId
+        ? prisma.techIconBadge.findUnique({
+            where: { id: user.selectedTechIconBadgeId },
+          })
+        : Promise.resolve(null),
+      prisma.hexadResponse.findUnique({
+        where: { userId: user.id },
+        select: {
+          questionnaireVersion: true,
+          philanthropistScore: true,
+          socialiserScore: true,
+          freeSpiritScore: true,
+          achieverScore: true,
+          disruptorScore: true,
+          playerScore: true,
+          completedAt: true,
+        },
+      }),
       prisma.userMissionProgress.findMany({
         where: {
           userId: user.id,
@@ -276,13 +287,27 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
         : "red-panda",
     },
     ticketBalance: user.badgeTickets,
-    selectedBadge: user.selectedTechIconBadge
+    selectedBadge: selectedTechIconBadge
       ? {
-          id: user.selectedTechIconBadge.id,
-          name: user.selectedTechIconBadge.name,
-          description: user.selectedTechIconBadge.description,
-          iconUrl: user.selectedTechIconBadge.iconUrl,
-          rarity: user.selectedTechIconBadge.rarity,
+          id: selectedTechIconBadge.id,
+          name: selectedTechIconBadge.name,
+          description: selectedTechIconBadge.description,
+          iconUrl: selectedTechIconBadge.iconUrl,
+          rarity: selectedTechIconBadge.rarity,
+        }
+      : null,
+    hexadProfile: hexadResponse
+      ? {
+          questionnaireVersion: hexadResponse.questionnaireVersion,
+          scores: {
+            philanthropist: hexadResponse.philanthropistScore,
+            socialiser: hexadResponse.socialiserScore,
+            freeSpirit: hexadResponse.freeSpiritScore,
+            achiever: hexadResponse.achieverScore,
+            disruptor: hexadResponse.disruptorScore,
+            player: hexadResponse.playerScore,
+          },
+          completedAt: hexadResponse.completedAt.toISOString(),
         }
       : null,
     recentWorks: recentWorks.map((work) => ({
@@ -305,8 +330,8 @@ export const getProfileByFirebaseUid = async (firebaseUid: string) => {
   };
 };
 
-export const updateMascotByFirebaseUid = async (
-  firebaseUid: string,
+export const updateMascotByUserId = async (
+  userId: string,
   mascotId: string
 ) => {
   if (!isMascotId(mascotId)) {
@@ -314,7 +339,7 @@ export const updateMascotByFirebaseUid = async (
   }
 
   const user = await prisma.user.update({
-    where: { firebaseUid },
+    where: { id: userId },
     data: { selectedMascotId: mascotId },
     select: {
       selectedMascotId: true,

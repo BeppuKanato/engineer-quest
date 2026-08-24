@@ -1,31 +1,38 @@
 // prisma/seed.ts
 
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, ProgressStatus } from "@prisma/client";
 
 import { achievementSeed } from "./seedData/achievementSeed";
 import { badgeSeed } from "./seedData/badgeSeed";
 import { createThemeSeed } from "./seedData/createThemeSeed";
 import { knowledgeCardSeed } from "./seedData/knowledgeCardSeed";
 import { learningSeed } from "./seedData/learningSeed";
+import { parseActivityContent } from "../src/type/activityContent";
 
 const prisma = new PrismaClient();
+const activeCourseIds = learningSeed.courses.map((course) => course.id);
+const activeCourseIdSet = new Set(activeCourseIds);
 
 async function seedCourseCategory(
+  client: Prisma.TransactionClient,
   categoryName: (typeof learningSeed.courses)[number]["categories"][number],
 ) {
-  await prisma.courseCategory.upsert({
+  await client.courseCategory.upsert({
     where: { name: categoryName },
     update: {},
     create: { name: categoryName },
   });
 }
 
-async function seedCourse(course: (typeof learningSeed.courses)[number]) {
+async function seedCourse(
+  client: Prisma.TransactionClient,
+  course: (typeof learningSeed.courses)[number],
+) {
   for (const categoryName of course.categories) {
-    await seedCourseCategory(categoryName);
+    await seedCourseCategory(client, categoryName);
   }
 
-  await prisma.course.upsert({
+  await client.course.upsert({
     where: { id: course.id },
     update: {
       title: course.title,
@@ -46,8 +53,19 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
     },
   });
 
+  const activeCategories = await client.courseCategory.findMany({
+    where: { name: { in: course.categories } },
+    select: { id: true },
+  });
+  await client.courseCategoryMap.deleteMany({
+    where: {
+      courseId: course.id,
+      categoryId: { notIn: activeCategories.map((category) => category.id) },
+    },
+  });
+
   for (const categoryName of course.categories) {
-    const category = await prisma.courseCategory.findUnique({
+    const category = await client.courseCategory.findUnique({
       where: { name: categoryName },
     });
 
@@ -55,7 +73,7 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
       throw new Error(`Category not found: ${categoryName}`);
     }
 
-    await prisma.courseCategoryMap.upsert({
+    await client.courseCategoryMap.upsert({
       where: {
         courseId_categoryId: {
           courseId: course.id,
@@ -70,8 +88,14 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
     });
   }
 
+  const activeMissionIds = course.missions.map((mission) => mission.id);
+  await client.mission.updateMany({
+    where: { courseId: course.id },
+    data: { order: { increment: 10_000 } },
+  });
+
   for (const mission of course.missions) {
-    await prisma.mission.upsert({
+    await client.mission.upsert({
       where: { id: mission.id },
       update: {
         courseId: course.id,
@@ -110,87 +134,175 @@ async function seedCourse(course: (typeof learningSeed.courses)[number]) {
       },
     });
 
-    for (const section of mission.sections) {
-      await prisma.missionSection.upsert({
-        where: { id: section.id },
-        update: {
-          missionId: mission.id,
-          title: section.title,
-          description: section.description ?? null,
-          order: section.order,
-        },
-        create: {
-          id: section.id,
-          missionId: mission.id,
-          title: section.title,
-          description: section.description ?? null,
-          order: section.order,
-        },
-      });
+    const activeActivityIds = mission.activities.map((activity) => activity.id);
 
-      for (const activity of section.activities) {
-        const preview =
-          activity.preview === null
-            ? Prisma.JsonNull
-            : (activity.preview as Prisma.InputJsonValue);
+    // Free every mission-local order slot before upserting. Stale rows may still
+    // occupy an order used by a newly inserted activity until synchronization ends.
+    await client.missionActivity.updateMany({
+      where: { missionId: mission.id },
+      data: {
+        order: { increment: 10_000 },
+      },
+    });
 
-        await prisma.missionActivity.upsert({
+    for (const activity of mission.activities) {
+      const content = parseActivityContent(activity.content, activity.type);
+      const preview =
+        activity.preview == null
+          ? Prisma.JsonNull
+          : (activity.preview as Prisma.InputJsonValue);
+
+      await client.missionActivity.upsert({
           where: { id: activity.id },
           update: {
             missionId: mission.id,
-            sectionId: section.id,
             type: activity.type,
             title: activity.title,
             instruction: activity.instruction,
             mentorMessage: activity.mentorMessage,
-            content: activity.content as Prisma.InputJsonValue,
+            content: content as Prisma.InputJsonValue,
             preview,
             actionLabel: activity.actionLabel,
             order: activity.order,
-            sectionOrder: activity.sectionOrder,
-            isMissionCheck: activity.isMissionCheck,
           },
           create: {
             id: activity.id,
             missionId: mission.id,
-            sectionId: section.id,
             type: activity.type,
             title: activity.title,
             instruction: activity.instruction,
             mentorMessage: activity.mentorMessage,
-            content: activity.content as Prisma.InputJsonValue,
+            content: content as Prisma.InputJsonValue,
             preview,
             actionLabel: activity.actionLabel,
             order: activity.order,
-            sectionOrder: activity.sectionOrder,
-            isMissionCheck: activity.isMissionCheck,
+          },
+      });
+    }
+
+    const staleActivities = await client.missionActivity.findMany({
+      where: {
+        missionId: mission.id,
+        id: { notIn: activeActivityIds },
+      },
+      select: { id: true },
+    });
+
+    if (staleActivities.length > 0) {
+      const staleActivityIds = staleActivities.map((activity) => activity.id);
+      await client.userMissionProgress.updateMany({
+        where: {
+          missionId: mission.id,
+          currentActivityId: { in: staleActivityIds },
+        },
+        data: { currentActivityId: activeActivityIds[0] ?? null },
+      });
+      await client.missionActivity.deleteMany({
+        where: { id: { in: staleActivityIds } },
+      });
+    }
+
+    const completedMissionProgresses = await client.userMissionProgress.findMany({
+      where: {
+        missionId: mission.id,
+        status: ProgressStatus.COMPLETED,
+      },
+      select: { userId: true },
+    });
+
+    if (completedMissionProgresses.length > 0) {
+      const completedUserIds = completedMissionProgresses.map((progress) => progress.userId);
+      const completedActivityProgresses = await client.userMissionActivityProgress.findMany({
+        where: {
+          userId: { in: completedUserIds },
+          activityId: { in: activeActivityIds },
+          status: ProgressStatus.COMPLETED,
+        },
+        select: { userId: true, activityId: true },
+      });
+      const completedActivityIdsByUser = new Map<string, Set<string>>();
+
+      for (const progress of completedActivityProgresses) {
+        const completedIds = completedActivityIdsByUser.get(progress.userId) ?? new Set<string>();
+        completedIds.add(progress.activityId);
+        completedActivityIdsByUser.set(progress.userId, completedIds);
+      }
+
+      for (const progress of completedMissionProgresses) {
+        const completedIds = completedActivityIdsByUser.get(progress.userId) ?? new Set<string>();
+        const firstIncompleteActivityId = mission.activities.find(
+          (activity) => !completedIds.has(activity.id)
+        )?.id;
+
+        if (!firstIncompleteActivityId) continue;
+
+        await client.userMissionProgress.update({
+          where: {
+            userId_missionId: {
+              userId: progress.userId,
+              missionId: mission.id,
+            },
+          },
+          data: {
+            status: ProgressStatus.IN_PROGRESS,
+            currentActivityId: firstIncompleteActivityId,
+            completedAt: null,
           },
         });
       }
     }
+
   }
+
+  await client.mission.deleteMany({
+    where: {
+      courseId: course.id,
+      id: { notIn: activeMissionIds },
+    },
+  });
 }
 
 async function seedLearningData() {
-  const activeCourseIds = learningSeed.courses.map((course) => course.id);
+  await prisma.$transaction(
+    async (client) => {
+      for (const course of learningSeed.courses) {
+        await seedCourse(client, course);
+      }
 
-  // Legacy Web-development courses remain in the database so existing user
-  // progress is not destroyed, but they are removed from the learning catalog.
-  await prisma.course.updateMany({
-    where: {
-      id: { notIn: activeCourseIds },
-      isPublished: true,
+      await client.course.deleteMany({
+        where: {
+          id: { notIn: activeCourseIds },
+        },
+      });
+      await client.courseCategory.deleteMany({
+        where: {
+          courses: { none: {} },
+        },
+      });
     },
-    data: { isPublished: false },
-  });
-
-  for (const course of learningSeed.courses) {
-    await seedCourse(course);
-  }
+    { maxWait: 10_000, timeout: 120_000 },
+  );
 }
 
 async function seedAchievements() {
-  for (const achievement of achievementSeed) {
+  const obsoleteAchievementIds = achievementSeed
+    .filter(
+      (achievement) =>
+        typeof achievement.courseId === "string" &&
+        !activeCourseIdSet.has(achievement.courseId),
+    )
+    .flatMap((achievement) =>
+      typeof achievement.id === "string" ? [achievement.id] : [],
+    );
+
+  await prisma.achievement.deleteMany({
+    where: { id: { in: obsoleteAchievementIds } },
+  });
+
+  for (const achievement of achievementSeed.filter(
+    (item) =>
+      typeof item.courseId !== "string" || activeCourseIdSet.has(item.courseId),
+  )) {
     await prisma.achievement.upsert({
       where: { id: achievement.id },
       update: achievement,
@@ -210,7 +322,9 @@ async function seedTechIconBadges() {
 }
 
 async function seedKnowledgeCards() {
-  for (const card of knowledgeCardSeed) {
+  for (const card of knowledgeCardSeed.filter((item) =>
+    activeCourseIdSet.has(item.courseId),
+  )) {
     await prisma.knowledgeCard.upsert({
       where: { id: card.id },
       update: card,

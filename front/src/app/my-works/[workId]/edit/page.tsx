@@ -67,9 +67,7 @@ export default function MyWorkEditPage() {
       await updateMyWork(token, params.workId, payload);
       setSuccessOpen(true);
       play("saveSuccess");
-      window.setTimeout(() => {
-        router.push(`/my-works/${encodeURIComponent(params.workId)}`);
-      }, 700);
+      router.push(`/my-works/${encodeURIComponent(params.workId)}`);
     } catch (error) {
       console.error(error);
       setErrorMessage("制作記録を更新できませんでした。");

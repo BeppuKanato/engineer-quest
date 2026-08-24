@@ -1,4 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
+import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
 
 export type AchievementStatus =
   | "achieved"
@@ -38,19 +39,22 @@ export type AchievementsResponse = {
 export const getAchievements = async (
   token: string
 ): Promise<AchievementsResponse> => {
-  return fetcher<AchievementsResponse>("/achievements", {
-    method: "GET",
-    token,
-  });
+  return fetchClientQuery(
+    "achievements",
+    () => fetcher<AchievementsResponse>("/achievements", { method: "GET", token }),
+    { staleTimeMs: 15_000, tags: [queryTags.achievements] }
+  );
 };
 
 export const updateTargetAchievement = async (
   token: string,
   achievementId: string | null
 ): Promise<{ targetAchievementId: string | null }> => {
-  return fetcher<{ targetAchievementId: string | null }>("/achievements/target", {
+  const result = await fetcher<{ targetAchievementId: string | null }>("/achievements/target", {
     method: "PATCH",
     token,
     body: JSON.stringify({ achievementId }),
   });
+  invalidateClientQueries([queryTags.achievements, queryTags.home]);
+  return result;
 };

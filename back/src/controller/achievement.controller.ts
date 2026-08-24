@@ -2,18 +2,18 @@ import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
 import {
-  getAchievementsByFirebaseUid,
-  updateTargetAchievementByFirebaseUid,
+  getAchievementsByUser,
+  updateTargetAchievementByUserId,
 } from "../service/achievement.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getAuthUser = (req: Request) => {
+  const user = req.authUser;
 
-  if (!firebaseUid) {
+  if (!user) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return user;
 };
 
 export const getAchievementsController = async (
@@ -22,7 +22,7 @@ export const getAchievementsController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getAchievementsByFirebaseUid(getFirebaseUid(req));
+    const data = await getAchievementsByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {
@@ -43,8 +43,8 @@ export const updateTargetAchievementController = async (
         : typeof rawAchievementId === "string" && rawAchievementId.trim()
           ? rawAchievementId.trim()
           : null;
-    const data = await updateTargetAchievementByFirebaseUid(
-      getFirebaseUid(req),
+    const data = await updateTargetAchievementByUserId(
+      getAuthUser(req).id,
       achievementId
     );
 

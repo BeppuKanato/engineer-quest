@@ -48,12 +48,6 @@ const titleMinLength = 5;
 const titleMaxLength = 100;
 const bodyMinLength = 10;
 const bodyMaxLength = 5000;
-const postSuccessConfirmationMs = 320;
-const postTransitionOverlayLeadMs = 120;
-
-const wait = (ms: number) =>
-  new Promise((resolve) => window.setTimeout(resolve, ms));
-
 const getLengthError = (
   value: string,
   min: number,
@@ -197,9 +191,7 @@ export default function NewQuestPostPage() {
 
       play("saveSuccess");
       setSuccessSnackbarOpen(true);
-      await wait(postSuccessConfirmationMs);
       setIsNavigatingAfterSubmit(true);
-      await wait(postTransitionOverlayLeadMs);
       router.push(`/quest-board/${encodeURIComponent(result.postId)}`);
     } catch (error) {
       console.error(error);

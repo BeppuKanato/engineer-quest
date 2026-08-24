@@ -14,16 +14,104 @@ import type {
   CompleteMissionActivityResponse,
   CompleteMissionResponse,
   MissionPlayResponse,
+  CourseExamAttempt,
+  CourseExamHintView,
+  CourseExamTestExecution,
+  CourseExamTestResultLog,
 } from "@/app/mission/[missionId]/play/type";
+import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
+import { parseActivityContent } from "@/features/learning/activityContent";
+
+const validateMissionActivityContent = <T extends MissionPlayResponse>(mission: T): T => ({
+  ...mission,
+  activities: mission.activities.map((activity) => ({
+    ...activity,
+    content: parseActivityContent(activity.content),
+  })),
+});
+
+const invalidateProgressQueries = () =>
+  invalidateClientQueries([
+    queryTags.home,
+    queryTags.courses,
+    queryTags.roadmap,
+    queryTags.profile,
+    queryTags.collection,
+    queryTags.achievements,
+    queryTags.history,
+    queryTags.missionOverview,
+  ]);
+
+export const getCurrentCourseExamAttempt = async (
+  token: string,
+  missionId: string
+): Promise<{ attempt: CourseExamAttempt | null }> =>
+  fetcher<{ attempt: CourseExamAttempt | null }>(
+    `/missions/${encodeURIComponent(missionId)}/course-exam/attempt`,
+    { method: "GET", token }
+  );
+
+export const listCourseExamAttempts = async (
+  token: string,
+  missionId: string
+): Promise<{ attempts: CourseExamAttempt[] }> =>
+  fetcher<{ attempts: CourseExamAttempt[] }>(
+    `/missions/${encodeURIComponent(missionId)}/course-exam/attempts`,
+    { method: "GET", token }
+  );
+
+export const startCourseExamAttempt = async (
+  token: string,
+  missionId: string
+): Promise<CourseExamAttempt> =>
+  fetcher<CourseExamAttempt>(
+    `/missions/${encodeURIComponent(missionId)}/course-exam/attempt`,
+    { method: "POST", token }
+  ).then((result) => {
+    invalidateClientQueries([queryTags.home, queryTags.courses, queryTags.roadmap]);
+    return result;
+  });
+
+export const viewCourseExamHint = async (
+  token: string,
+  missionId: string,
+  attemptId: string,
+  hintId: string
+): Promise<CourseExamHintView> =>
+  fetcher<CourseExamHintView>(
+    `/missions/${encodeURIComponent(missionId)}/course-exam/attempts/${encodeURIComponent(attemptId)}/hints/${encodeURIComponent(hintId)}`,
+    { method: "POST", token }
+  );
+
+export const recordCourseExamTestExecution = async (
+  token: string,
+  missionId: string,
+  attemptId: string,
+  payload: {
+    code: string;
+    testResults: CourseExamTestResultLog[];
+    runtimeError: string | null;
+  }
+): Promise<CourseExamTestExecution> =>
+  fetcher<CourseExamTestExecution>(
+    `/missions/${encodeURIComponent(missionId)}/course-exam/attempts/${encodeURIComponent(attemptId)}/test-executions`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify(payload),
+    }
+  );
 
 export const getMissionOverview = async (
   token: string,
   missionId: string
 ): Promise<MissionOverviewResponse> => {
-    return fetcher<MissionOverviewResponse>(`/missions/${encodeURIComponent(missionId)}/overview`, {
-        method: "GET",
-        token,
-    });
+    return fetchClientQuery(
+      `mission-overview:${missionId}`,
+      () => fetcher<MissionOverviewResponse>(`/missions/${encodeURIComponent(missionId)}/overview`, { method: "GET", token })
+        .then(validateMissionActivityContent),
+      { staleTimeMs: 20_000, tags: [queryTags.missionOverview] }
+    );
 };
 
 export const getMissionPlay = async (
@@ -35,13 +123,21 @@ export const getMissionPlay = async (
     ? `?${new URLSearchParams({ difficulty }).toString()}`
     : "";
 
-  return fetcher<MissionPlayResponse>(
+  const result = await fetcher<MissionPlayResponse>(
     `/missions/${encodeURIComponent(missionId)}/play${searchParams}`,
     {
       method: "GET",
       token,
     }
   );
+  // This legacy GET initializes/resumes progress, so related read caches must be stale.
+  invalidateClientQueries([
+    queryTags.home,
+    queryTags.courses,
+    queryTags.roadmap,
+    queryTags.profile,
+  ]);
+  return validateMissionActivityContent(result);
 };
 
 export const answerMissionActivity = async (
@@ -65,26 +161,31 @@ export const completeMissionActivity = async (
   missionId: string,
   activityId: string
 ): Promise<CompleteMissionActivityResponse> => {
-  return fetcher<CompleteMissionActivityResponse>(
+  const result = await fetcher<CompleteMissionActivityResponse>(
     `/missions/${encodeURIComponent(missionId)}/activities/${encodeURIComponent(activityId)}/complete`,
     {
       method: "POST",
       token,
     }
   );
+  invalidateProgressQueries();
+  return result;
 };
 
 export const completeMission = async (
   token: string,
   missionId: string
 ): Promise<CompleteMissionResponse> => {
-  return fetcher<CompleteMissionResponse>(
+  const result = await fetcher<CompleteMissionResponse>(
     `/missions/${encodeURIComponent(missionId)}/complete`,
     {
       method: "POST",
       token,
     }
   );
+  invalidateProgressQueries();
+  invalidateClientQueries([queryTags.badges, queryTags.missionRewards]);
+  return result;
 };
 
 export const collectKnowledgeCard = async (
@@ -92,7 +193,7 @@ export const collectKnowledgeCard = async (
   missionId: string,
   knowledgeCardId: string
 ): Promise<CollectKnowledgeCardResponse> => {
-  return fetcher<CollectKnowledgeCardResponse>(
+  const result = await fetcher<CollectKnowledgeCardResponse>(
     `/missions/${encodeURIComponent(missionId)}/knowledge-cards/collect`,
     {
       method: "POST",
@@ -100,6 +201,8 @@ export const collectKnowledgeCard = async (
       body: JSON.stringify({ knowledgeCardId }),
     }
   );
+  invalidateClientQueries([queryTags.collection, queryTags.profile, queryTags.history]);
+  return result;
 };
 
 export const getLessonPlay = async (
@@ -126,13 +229,15 @@ export const completeLesson = async (
   token: string,
   lessonId: string
 ): Promise<CompleteLessonResponse> => {
-  return fetcher<CompleteLessonResponse>(
+  const result = await fetcher<CompleteLessonResponse>(
     `/missions/lesson/${encodeURIComponent(lessonId)}/complete`,
     {
       method: "POST",
       token,
     }
   );
+  invalidateProgressQueries();
+  return result;
 };
 
 export const getLessonComplete = async (
@@ -224,7 +329,7 @@ export const submitMissionExam = async (
   difficulty: MissionExamDifficulty,
   submittedCode: string
 ): Promise<SubmitMissionExamResponse> => {
-  return fetcher<SubmitMissionExamResponse>(
+  const result = await fetcher<SubmitMissionExamResponse>(
     `/missions/${encodeURIComponent(missionId)}/exam/submit`,
     {
       method: "POST",
@@ -235,6 +340,9 @@ export const submitMissionExam = async (
       }),
     }
   );
+  invalidateProgressQueries();
+  invalidateClientQueries([queryTags.badges]);
+  return result;
 };
 
 export type MissionExamResultResponse = {

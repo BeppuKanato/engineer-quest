@@ -35,6 +35,9 @@ const setAuthUserByFirebaseUid = async (
       selectedTechIconBadgeId: true,
       selectedMascotId: true,
       selectedTargetAchievementId: true,
+      hexadResponse: {
+        select: { id: true },
+      },
     },
   });
 
@@ -42,7 +45,17 @@ const setAuthUserByFirebaseUid = async (
     return false;
   }
 
-  req.authUser = user;
+  req.authUser = {
+    id: user.id,
+    firebaseUid: user.firebaseUid,
+    displayName: user.displayName,
+    experience: user.experience,
+    badgeTickets: user.badgeTickets,
+    selectedTechIconBadgeId: user.selectedTechIconBadgeId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
+  };
 
   return true;
 };

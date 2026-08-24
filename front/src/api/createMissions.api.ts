@@ -1,4 +1,14 @@
 import { fetcher } from "@/lib/fetcher";
+import { invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
+
+const invalidateWorkQueries = () =>
+  invalidateClientQueries([
+    queryTags.works,
+    queryTags.profile,
+    queryTags.history,
+    queryTags.badges,
+    queryTags.collection,
+  ]);
 
 export type BadgeTicketReward = {
   amount: number;
@@ -100,7 +110,7 @@ export const saveUserWork = async (
   createMissionId: string,
   payload: WorkPayload
 ): Promise<SaveWorkResponse> => {
-  return fetcher<SaveWorkResponse>(
+  const result = await fetcher<SaveWorkResponse>(
     `/create-missions/${encodeURIComponent(createMissionId)}/works`,
     {
       method: "POST",
@@ -108,6 +118,8 @@ export const saveUserWork = async (
       body: JSON.stringify(payload),
     }
   );
+  invalidateWorkQueries();
+  return result;
 };
 
 export const getUserWorks = async (token: string): Promise<UserWork[]> => {
@@ -122,32 +134,37 @@ export const updateUserWork = async (
   workId: string,
   payload: WorkPayload
 ): Promise<{ workId: string }> => {
-  return fetcher<{ workId: string }>(`/my-works/${encodeURIComponent(workId)}`, {
+  const result = await fetcher<{ workId: string }>(`/my-works/${encodeURIComponent(workId)}`, {
     method: "PUT",
     token,
     body: JSON.stringify(payload),
   });
+  invalidateWorkQueries();
+  return result;
 };
 
 export const deleteUserWork = async (
   token: string,
   workId: string
 ): Promise<void> => {
-  return fetcher<void>(`/my-works/${encodeURIComponent(workId)}`, {
+  await fetcher<void>(`/my-works/${encodeURIComponent(workId)}`, {
     method: "DELETE",
     token,
   });
+  invalidateWorkQueries();
 };
 
 export const reviewUserWork = async (
   token: string,
   workId: string
 ): Promise<ReviewWorkResponse> => {
-  return fetcher<ReviewWorkResponse>(
+  const result = await fetcher<ReviewWorkResponse>(
     `/my-works/${encodeURIComponent(workId)}/review`,
     {
       method: "POST",
       token,
     }
   );
+  invalidateWorkQueries();
+  return result;
 };

@@ -93,6 +93,10 @@ export default function MissionRewardResultPage() {
         const data = await getMissionRewardRun(token, rewardRunId);
 
         if (!isMounted) return;
+        if (data.mission.isCourseCompletion) {
+          router.replace(`/course-results/${encodeURIComponent(rewardRunId)}`);
+          return;
+        }
         setRewardRun(data);
       } catch (error) {
         console.error(error);
@@ -108,7 +112,7 @@ export default function MissionRewardResultPage() {
       isMounted = false;
       unsubscribe();
     };
-  }, [play, rewardRunId]);
+  }, [play, rewardRunId, router]);
 
   const playResultFanfareOnce = useCallback(() => {
     const soundKey = `mission-completed-sound:${rewardRunId}`;
@@ -216,9 +220,14 @@ export default function MissionRewardResultPage() {
   }, []);
 
   const goNextMission = () => {
-    if (!rewardRun?.nextMission) return;
+    if (!rewardRun) return;
     startNavigation(() => {
-      router.push(`/mission/${encodeURIComponent(rewardRun.nextMission!.id)}/play`);
+      if (rewardRun.nextMission) {
+        router.push(`/mission/${encodeURIComponent(rewardRun.nextMission.id)}/play`);
+        return;
+      }
+
+      router.push(`/courses/roadmap/${encodeURIComponent(rewardRun.mission.courseId)}`);
     });
   };
 
@@ -521,7 +530,6 @@ export default function MissionRewardResultPage() {
                   size="large"
                   endIcon={rewardRun.nextMission ? <NavigateNextIcon /> : undefined}
                   startIcon={rewardRun.nextMission ? <PlayArrowIcon /> : undefined}
-                  disabled={!rewardRun.nextMission}
                   onClick={goNextMission}
                   sx={{ minHeight: 56, px: 7, fontWeight: 900, borderRadius: 2, boxShadow: "0 18px 40px rgba(37, 99, 235, 0.28)" }}
                 >

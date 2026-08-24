@@ -123,6 +123,7 @@ type CourseMissionForSummary = {
   order: number;
   difficulty: CourseDifficulty;
   estimatedMinutes: number;
+  rewardExp: number;
   type: PrismaMissionType;
   isRequiredForCourseCompletion: boolean;
   parentMissionId: string | null;
@@ -274,6 +275,7 @@ const buildRoadmapMissions = (
       order: mission.order,
       difficulty: toDifficulty(mission.difficulty),
       estimatedMinutes: mission.estimatedMinutes,
+      rewardExp: mission.rewardExp,
       status,
       type: missionType,
       isRequiredForCourseCompletion: mission.isRequiredForCourseCompletion,
@@ -353,25 +355,6 @@ export const getCoursesByUserId = async (
   return courses.map(buildCourseSummary);
 };
 
-export const getCoursesByFirebaseUid = async (
-  firebaseUid: string
-): Promise<GetCoursesResponse> => {
-  const user = await prisma.user.findUnique({
-    where: {
-      firebaseUid,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return getCoursesByUserId(user.id);
-};
-
 export const getCourseRoadmapByUserId = async (
   userId: string,
   courseId: string
@@ -420,24 +403,4 @@ export const getCourseRoadmapByUserId = async (
     missions,
     nextMission: findNextMission(missions),
   };
-};
-
-export const getCourseRoadmapByFirebaseUid = async (
-  firebaseUid: string,
-  courseId: string
-): Promise<CourseRoadmapResponse> => {
-  const user = await prisma.user.findUnique({
-    where: {
-      firebaseUid,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!user) {
-    throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  }
-
-  return getCourseRoadmapByUserId(user.id, courseId);
 };

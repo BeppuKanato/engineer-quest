@@ -8,12 +8,13 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { getCourses } from "@/api/courses.api";
+import { getCourseRoadmap, getCourses } from "@/api/courses.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ApiError } from "@/lib/fetcher";
 import { auth } from "@/lib/firebase";
+import { useUserSession } from "@/app/component/userSession";
 
 import { AppHeader } from "../component/appHeader";
 import { CourseCard } from "./component/courseCard";
@@ -35,11 +36,21 @@ export default function CoursesPage() {
 
   const router = useRouter();
   const { showOverlay, startNavigation } = useNavigationFeedback();
+  const { token: sessionToken } = useUserSession();
 
   const handleCourseClick = (courseId: string) => {
     startNavigation(() => {
       router.push(`/courses/roadmap/${courseId}`);
     });
+  };
+
+  const handleCoursePrefetch = (courseId: string) => {
+    router.prefetch(`/courses/roadmap/${encodeURIComponent(courseId)}`);
+    if (sessionToken) {
+      void getCourseRoadmap(sessionToken, courseId).catch(() => {
+        // Hover/focus prefetch is best-effort; normal navigation handles errors.
+      });
+    }
   };
 
   useEffect(() => {
@@ -131,7 +142,7 @@ export default function CoursesPage() {
                       <StarIcon sx={{ color: "#f59e0b" }} />
                       <Typography variant="h5" fontWeight={950}>おすすめ</Typography>
                     </Stack>
-                    <CourseCard {...recommendedCourse} featured onCourseClick={handleCourseClick} />
+                    <CourseCard {...recommendedCourse} featured onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
                   </Stack>
                 )}
 
@@ -141,7 +152,7 @@ export default function CoursesPage() {
                       <AutoAwesomeIcon sx={{ color: "#f59e0b" }} />
                       <Typography variant="h5" fontWeight={950}>続きから</Typography>
                     </Stack>
-                    <CourseCard {...continueCourse} featured onCourseClick={handleCourseClick} />
+                    <CourseCard {...continueCourse} featured onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
                   </Stack>
                 )}
               </Box>
@@ -172,7 +183,7 @@ export default function CoursesPage() {
                     }}
                   >
                     {filteredCourses.map((course) => (
-                      <CourseCard key={course.id} {...course} onCourseClick={handleCourseClick} />
+                      <CourseCard key={course.id} {...course} onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
                     ))}
                   </Box>
                 ) : (

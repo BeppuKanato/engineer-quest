@@ -18,6 +18,8 @@ import homeRouter from './router/home.router';
 import profileRouter from './router/profile.router';
 import questBoardRouter from './router/questBoard.router';
 import missionRewardRouter from './router/missionReward.router';
+import courseResultRouter from './router/courseResult.router';
+import hexadRouter from './router/hexad.router';
 import { errorHandler } from './middleware/errorHandler';
 // import shareRouter from './router/shareRouter';
 
@@ -54,6 +56,8 @@ app.use('/api/collection', collectionRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/quest-board', questBoardRouter);
 app.use('/api/mission-rewards', missionRewardRouter);
+app.use('/api/course-results', courseResultRouter);
+app.use('/api/hexad', hexadRouter);
 app.use('/api', createThemeRouter);
 app.use('/api', createMissionRouter);
 

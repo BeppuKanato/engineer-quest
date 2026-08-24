@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "@/lib/api";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
+import { type AuthUser } from "@/api/auth.api";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,6 +32,7 @@ export default function Login() {
   const { isNavigating, showOverlay, startNavigation } =
     useNavigationFeedback();
   const apiBaseUrl = getApiBaseUrl();
+  const { setAppUser } = useUserSession();
 
   console.log("API Base URL:", apiBaseUrl);
   const handleLogin = async () => {
@@ -69,9 +72,14 @@ export default function Login() {
         throw new Error("ユーザー情報の確認に失敗しました");
       }
 
+      const data = (await res.json()) as {
+        user: AuthUser;
+      };
+
+      setAppUser(data.user);
       setMessage("ログイン成功");
       startNavigation(() => {
-        router.push("/home");
+        router.push(data.user.hasHexadResponse ? "/home" : "/hexad");
       });
     } catch (err: unknown) {
       if (err instanceof Error) {

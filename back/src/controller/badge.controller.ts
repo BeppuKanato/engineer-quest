@@ -2,19 +2,19 @@ import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";
 import {
-  drawTechIconBadgeByFirebaseUid,
-  getBadgeCollectionByFirebaseUid,
-  setSelectedTechIconBadgeByFirebaseUid,
+  drawTechIconBadgeByUser,
+  getBadgeCollectionByUser,
+  setSelectedTechIconBadgeByUserId,
 } from "../service/badge.service";
 
-const getFirebaseUid = (req: Request) => {
-  const firebaseUid = req.authUser?.firebaseUid;
+const getAuthUser = (req: Request) => {
+  const user = req.authUser;
 
-  if (!firebaseUid) {
+  if (!user) {
     throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
-  return firebaseUid;
+  return user;
 };
 
 export const getBadgeCollectionController = async (
@@ -23,7 +23,7 @@ export const getBadgeCollectionController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await getBadgeCollectionByFirebaseUid(getFirebaseUid(req));
+    const data = await getBadgeCollectionByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {
@@ -37,7 +37,7 @@ export const drawTechIconBadgeController = async (
   next: NextFunction
 ) => {
   try {
-    const data = await drawTechIconBadgeByFirebaseUid(getFirebaseUid(req));
+    const data = await drawTechIconBadgeByUser(getAuthUser(req));
 
     res.status(200).json(data);
   } catch (error) {
@@ -57,8 +57,8 @@ export const setSelectedTechIconBadgeController = async (
       throw new AppError(400, "BAD_REQUEST", "Badge ID is required");
     }
 
-    const data = await setSelectedTechIconBadgeByFirebaseUid({
-      firebaseUid: getFirebaseUid(req),
+    const data = await setSelectedTechIconBadgeByUserId({
+      userId: getAuthUser(req).id,
       badgeId,
     });
 
