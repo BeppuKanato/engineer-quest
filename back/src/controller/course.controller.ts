@@ -1,3 +1,4 @@
+/** Course一覧・ロードマップAPIのHTTP境界。永続化と解除判定はCourse serviceへ委譲する。 */
 import { NextFunction, Request, Response } from "express";
 import {
   getCourseRoadmapByUserId,

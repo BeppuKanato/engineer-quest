@@ -1,3 +1,4 @@
+/** Course一覧とロードマップをPrismaから組み立て、ユーザー進捗に応じた解除状態を返す。 */
 import {
   CourseCategoryType,
   CourseDifficulty,

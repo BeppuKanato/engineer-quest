@@ -36,7 +36,7 @@ export const CodeLines = ({
         }}
       >
         {showLineNumbers && (
-          <Typography component="span" sx={{ width: 32, pr: 1, color: "#94a3b8", textAlign: "right", fontFamily: "monospace", userSelect: "none" }}>
+          <Typography component="span" sx={{ width: 32, flexShrink: 0, pr: 1, color: "#94a3b8", textAlign: "right", fontFamily: "monospace", userSelect: "none" }}>
             {index + 1}
           </Typography>
         )}

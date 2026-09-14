@@ -1,3 +1,4 @@
+/** 二分探索Courseに属するMission・Activity教材データだけを定義する。 */
 import {
   CourseCategoryType,
   CourseDifficulty,

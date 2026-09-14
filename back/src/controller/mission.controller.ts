@@ -1,3 +1,7 @@
+/**
+ * Mission APIのHTTP境界。認証ユーザーとリクエスト値をserviceへ渡し、HTTPレスポンスへ変換する。
+ * Prisma取得、採点、進捗・報酬の判断はserviceへ委譲する。
+ */
 import { NextFunction, Request, Response } from "express";
 
 import { AppError } from "../error/appError";

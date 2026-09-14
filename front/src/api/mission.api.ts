@@ -1,26 +1,30 @@
-import type { MissionOverviewResponse } from "@/app/mission/[missionId]/overview/type";
-import type { Lesson } from "@/app/mission/[missionId]/lesson/[lessonId]/play/type";
-import type { LessonCompleteData } from "@/app/mission/[missionId]/lesson/[lessonId]/complete/type";
+/**
+ * Mission・Activity・Course MissionのフロントエンドAPIクライアント。
+ * 現行画面はMission play/answer/completeとcourse-exam attempt系を使用する。
+ * 末尾の旧Lesson・旧Mission Exam関数は移行判断のため互換コードとして明示して保持する。
+ */
+import type { Lesson } from "@/api/types/legacyLesson.types";
+import type { LessonCompleteData } from "@/api/types/legacyLessonCompletion.types";
 import { fetcher } from "@/lib/fetcher";
-import type { ExamIntroData } from "@/app/mission/[missionId]/exam/intro/type";
-import type { Difficulty } from "@/app/mission/[missionId]/exam/intro/type";
+import type { Difficulty, ExamIntroData } from "@/api/types/legacyMissionExamIntro.types";
 import type {
   MissionExamDifficulty,
   MissionExamPlayResponse,
-} from "@/app/mission/[missionId]/exam/play/type";
+} from "@/api/types/legacyMissionExamPlay.types";
 import type {
   AnswerMissionActivityResponse,
   CollectKnowledgeCardResponse,
   CompleteMissionActivityResponse,
   CompleteMissionResponse,
   MissionPlayResponse,
+  MissionOverviewResponse,
   CourseExamAttempt,
   CourseExamHintView,
   CourseExamTestExecution,
   CourseExamTestResultLog,
-} from "@/app/mission/[missionId]/play/type";
+} from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
-import { parseActivityContent } from "@/features/learning/activityContent";
+import { parseActivityContent } from "@/features/learning/activity-content/activityRendererRegistry";
 
 const validateMissionActivityContent = <T extends MissionPlayResponse>(mission: T): T => ({
   ...mission,
@@ -205,6 +209,7 @@ export const collectKnowledgeCard = async (
   return result;
 };
 
+/** @deprecated 現行Next.js/Expressルートから未参照。移行元確認まで互換用に保持する。 */
 export const getLessonPlay = async (
   token: string,
   lessonId: string
@@ -253,6 +258,7 @@ export const getLessonComplete = async (
   );
 };
 
+/** @deprecated 現行Course Missionはcourse-exam attempt APIと`/mission/[missionId]/play`を使用する。 */
 export const getMissionExamIntro = async (
   token: string,
   missionId: string

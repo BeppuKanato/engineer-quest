@@ -11,7 +11,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 import { getMascotImagePath, useUserMascot } from "@/app/component/mascot";
-import type { KnowledgeCardChoice } from "@/app/mission/[missionId]/play/type";
+import type { KnowledgeCardChoice } from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 
 export const rewardPalette = {
   blue: "#0052d9",

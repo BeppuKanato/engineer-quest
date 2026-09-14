@@ -16,6 +16,7 @@ export type ArrayTraceStep = {
   pointers?: AlgorithmPointer[];
   message: string;
   activeCodeLines?: number[];
+  nextLabel?: string;
 };
 
 export type ArrayTraceData = {
@@ -55,6 +56,7 @@ export const parseArrayTraceData = (value: unknown): ArrayTraceData | null => {
       : undefined;
     return [{
       message: item.message,
+      ...(typeof item.nextLabel === "string" ? { nextLabel: item.nextLabel } : {}),
       ...(numberList(item.values) ? { values: numberList(item.values) } : {}),
       ...(indexList(item.comparingIndices) ? { comparingIndices: indexList(item.comparingIndices) } : {}),
       ...(indexList(item.swappingIndices) ? { swappingIndices: indexList(item.swappingIndices) } : {}),
@@ -78,6 +80,11 @@ export const ArrayTrace = ({ data }: { data: ArrayTraceData }) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const step = data.steps[stepIndex];
+
+  useEffect(() => {
+    setPlaying(false);
+    setStepIndex(0);
+  }, [data]);
 
   useEffect(() => {
     if (!playing || stepIndex >= data.steps.length - 1) {
@@ -114,10 +121,16 @@ export const ArrayTrace = ({ data }: { data: ArrayTraceData }) => {
         stepIndex={stepIndex}
         stepCount={data.steps.length}
         playing={playing}
+        nextLabel={step.nextLabel}
+        showPlayback={data.steps.length > 1}
+        showStepButtons={data.steps.length > 1}
         onReset={() => { setPlaying(false); setStepIndex(0); }}
         onPrevious={() => { setPlaying(false); setStepIndex((current) => Math.max(0, current - 1)); }}
         onNext={() => { setPlaying(false); setStepIndex((current) => Math.min(data.steps.length - 1, current + 1)); }}
-        onPlayingChange={setPlaying}
+        onPlayingChange={(nextPlaying) => {
+          if (nextPlaying && stepIndex >= data.steps.length - 1) setStepIndex(0);
+          setPlaying(nextPlaying);
+        }}
       />
     </Stack>
   );

@@ -1,3 +1,4 @@
+/** `/api/courses` の一覧・ロードマップ取得ルートをCourse controllerへ接続する。 */
 import { Router } from "express";
 import {
   getCourseRoadmapController,

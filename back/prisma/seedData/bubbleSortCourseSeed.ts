@@ -1,3 +1,4 @@
+/** バブルソートCourseに属するMission・Activity教材データだけを定義する。 */
 import {
   CourseCategoryType,
   CourseDifficulty,
@@ -1357,6 +1358,7 @@ const courseMission: MissionSeed = {
           feedbackPolicy: { mode: "RETRY_WITH_HINT", revealAfterAttempts: 2 },
           data: {
             evaluationMode: "TEST_CASES",
+            functionName: "bubble_sort",
             courseResult: {
             masteryTitle: "バブルソートをマスター",
             description: "バブルソートコースをすべて修了しました。",

@@ -89,7 +89,7 @@ export const CodeBlockWorkspace = ({
       <Stack spacing={0.75}>
         <Typography fontWeight={950}>{instruction}</Typography>
         <Typography color="#475569" fontWeight={800}>
-          1. 候補をクリックまたはドラッグして配置　2. コード側の「上へ」「下へ」で順番と階層を調整　3. 不要なブロックは「外す」
+          候補をクリックして、上から空欄へ置きます。「上へ」「下へ」で置く場所を変え、「外す」で選び直せます。字下げは空欄の位置に合わせて決まります。
         </Typography>
         <Typography aria-live="polite" color="primary" fontWeight={850}>{statusMessage}</Typography>
       </Stack>
@@ -110,7 +110,7 @@ export const CodeBlockWorkspace = ({
                 elevation={0}
                 sx={{
                   mt: 1.5,
-                  ml: { xs: Math.min(slot.indent ?? index, 3) * 1.25, sm: Math.min(slot.indent ?? index, 3) * 4 },
+                  ml: { xs: (slot.indent ?? index) * 0.75, sm: (slot.indent ?? index) * 2 },
                   p: 1.25,
                   minHeight: 64,
                   border: block ? "2px solid #60a5fa" : "2px dashed #60a5fa",
@@ -124,13 +124,13 @@ export const CodeBlockWorkspace = ({
                   transition: "background-color 180ms ease, border-color 180ms ease",
                 }}
               >
-                <Chip size="small" label={`${index + 1}. ${slot.label || `処理 ${index + 1}`}`} />
-                <Typography component="code" sx={{ minWidth: 180, flex: 1, fontFamily: "ui-monospace, monospace", fontWeight: 800, overflowWrap: "anywhere" }}>{block?.label ?? "ここへ配置"}</Typography>
+                <Chip size="small" label={`${index + 1}. ${slot.label || `処理 ${index + 1}`}`} sx={{ maxWidth: "100%", height: "auto", "& .MuiChip-label": { whiteSpace: "normal", py: 0.5 } }} />
+                <Typography component="code" sx={{ minWidth: 0, flex: "1 1 160px", fontFamily: "ui-monospace, monospace", fontWeight: 800, overflowWrap: "anywhere" }}>{block?.label ?? "ここへ配置"}</Typography>
                 {block && (
                   <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                     <Button size="small" variant="outlined" startIcon={<ArrowUpwardIcon />} disabled={disabled || index === 0} onClick={() => move(index, index - 1)}>上へ</Button>
                     <Button size="small" variant="outlined" startIcon={<ArrowDownwardIcon />} disabled={disabled || index === slots.length - 1} onClick={() => move(index, index + 1)}>下へ</Button>
-                    <Button size="small" color="inherit" onClick={() => remove(index)}>外す</Button>
+                    <Button size="small" color="inherit" disabled={disabled} onClick={() => remove(index)}>外す</Button>
                   </Stack>
                 )}
               </Paper>

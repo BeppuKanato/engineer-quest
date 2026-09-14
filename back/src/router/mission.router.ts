@@ -1,3 +1,7 @@
+/**
+ * `/api/missions` 配下のHTTPルート定義。
+ * 認証後にMission概要・Activity学習・回答・完了・Course Mission試行をcontrollerへ渡す。
+ */
 import { Router } from "express";
 
 import {

@@ -1,4 +1,7 @@
-// prisma/seed.ts
+/**
+ * Prisma seedの実行入口。
+ * `seedData/learningSeed.ts`を正としてCourse・Mission・Activityをupsertし、再実行可能性を保つ。
+ */
 
 import { Prisma, PrismaClient, ProgressStatus } from "@prisma/client";
 
@@ -7,11 +10,13 @@ import { badgeSeed } from "./seedData/badgeSeed";
 import { createThemeSeed } from "./seedData/createThemeSeed";
 import { knowledgeCardSeed } from "./seedData/knowledgeCardSeed";
 import { learningSeed } from "./seedData/learningSeed";
-import { parseActivityContent } from "../src/type/activityContent";
+import { parseActivityContent } from "../src/learning/activity-content/activityContentSchema";
 
 const prisma = new PrismaClient();
 const activeCourseIds = learningSeed.courses.map((course) => course.id);
 const activeCourseIdSet = new Set(activeCourseIds);
+const courseIdArgument = process.argv.find((argument) => argument.startsWith("--course-id="));
+const selectedCourseId = courseIdArgument?.slice("--course-id=".length);
 
 async function seedCourseCategory(
   client: Prisma.TransactionClient,
@@ -265,9 +270,13 @@ async function seedCourse(
 async function seedLearningData() {
   await prisma.$transaction(
     async (client) => {
-      for (const course of learningSeed.courses) {
-        await seedCourse(client, course);
-      }
+        for (const course of learningSeed.courses) {
+          if (selectedCourseId && course.id !== selectedCourseId) continue;
+          await seedCourse(client, course);
+        }
+
+        // A targeted update must never prune unrelated courses or categories.
+        if (selectedCourseId) return;
 
       await client.course.deleteMany({
         where: {
@@ -388,9 +397,16 @@ async function seedCreateThemes() {
 }
 
 async function main() {
+  if (courseIdArgument && (!selectedCourseId || !activeCourseIdSet.has(selectedCourseId))) {
+    throw new Error("--course-id must name an existing learningSeed course");
+  }
   console.log("Start seeding...");
 
   await seedLearningData();
+  if (selectedCourseId) {
+    console.log(`Seeded only ${selectedCourseId}. Other courses and rewards were not changed.`);
+    return;
+  }
   await seedAchievements();
   await seedTechIconBadges();
   await seedKnowledgeCards();

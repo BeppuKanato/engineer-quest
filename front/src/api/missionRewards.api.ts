@@ -3,7 +3,7 @@ import type {
   CollectKnowledgeCardResponse,
   KnowledgeCardChoice,
   UnlockedAchievement,
-} from "@/app/mission/[missionId]/play/type";
+} from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 import { fetchClientQuery, invalidateClientQueries, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
 
 export type MissionRewardRunResponse = {

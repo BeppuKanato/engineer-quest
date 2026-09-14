@@ -1,3 +1,8 @@
+/**
+ * URL: /mission/[missionId]/overview
+ * Missionの説明、学習項目、開始導線を表示する概要画面。
+ * Activityの回答・進捗操作は `/mission/[missionId]/play` が担当する。
+ */
 "use client";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -28,7 +33,7 @@ import { DifficultyLabel } from "@/app/component/difficultyLabel";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { auth } from "@/lib/firebase";
-import type { MissionOverviewResponse } from "./type";
+import type { MissionOverviewResponse } from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 
 const Loading = () => (
   <Container maxWidth="lg" sx={{ py: 4 }}>

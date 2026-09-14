@@ -47,6 +47,7 @@ export const AlgorithmValueCard = ({
   pointers = [],
   showIndex = true,
   disabled = false,
+  stateLabel,
   onSelect,
 }: {
   value: string | number;
@@ -56,9 +57,11 @@ export const AlgorithmValueCard = ({
   pointers?: AlgorithmPointer[];
   showIndex?: boolean;
   disabled?: boolean;
+  stateLabel?: string;
   onSelect?: (index: number) => void;
 }) => {
   const style = cellStyles[state];
+  const visibleStateLabel = stateLabel ?? style.label;
   const interactive = Boolean(onSelect) && !disabled;
   const activate = () => {
     if (interactive) onSelect?.(index);
@@ -70,7 +73,7 @@ export const AlgorithmValueCard = ({
         role={onSelect ? "button" : undefined}
         tabIndex={interactive ? 0 : undefined}
         aria-disabled={onSelect ? disabled : undefined}
-        aria-label={`添字${index}、値${value}${style.label ? `、${style.label}` : ""}`}
+        aria-label={`添字${index}、値${value}${visibleStateLabel ? `、${visibleStateLabel}` : ""}`}
         onClick={activate}
         onKeyDown={(event) => {
           if (interactive && (event.key === "Enter" || event.key === " ")) {
@@ -99,7 +102,7 @@ export const AlgorithmValueCard = ({
         {value}
       </Paper>
       <Typography sx={{ mt: 0.5, minHeight: 18, fontSize: 12, fontWeight: 800 }}>
-        {style.label}
+        {visibleStateLabel}
       </Typography>
       {showIndex && (
         <Typography component="span" color="text.secondary" fontSize={11} fontWeight={800}>
@@ -124,6 +127,7 @@ export const AlgorithmValueCard = ({
 export const AlgorithmArray = ({
   values,
   states = {},
+  stateLabels = {},
   pointers = [],
   compact = false,
   showIndices = true,
@@ -134,6 +138,7 @@ export const AlgorithmArray = ({
 }: {
   values: readonly (string | number)[];
   states?: Partial<Record<number, AlgorithmCellState>>;
+  stateLabels?: Partial<Record<number, string>>;
   pointers?: readonly AlgorithmPointer[];
   compact?: boolean;
   showIndices?: boolean;
@@ -150,6 +155,7 @@ export const AlgorithmArray = ({
           value={value}
           index={index}
           state={states[index] ?? "idle"}
+          stateLabel={stateLabels[index]}
           compact={compact}
           pointers={pointers.filter((pointer) => pointer.index === index)}
           showIndex={showIndices}

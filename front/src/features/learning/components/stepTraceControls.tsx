@@ -14,6 +14,8 @@ export const StepTraceControls = ({
   speed,
   showPlayback = true,
   showStepButtons = true,
+  nextLabel,
+  stepDescription,
   onReset,
   onPrevious,
   onNext,
@@ -26,6 +28,8 @@ export const StepTraceControls = ({
   speed?: number;
   showPlayback?: boolean;
   showStepButtons?: boolean;
+  nextLabel?: string;
+  stepDescription?: string;
   onReset: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -54,8 +58,13 @@ export const StepTraceControls = ({
         </Button>
       )}
       {showStepButtons && (
-        <Button aria-label="次のステップ" disabled={atEnd} onClick={onNext}>
-          <SkipNextIcon />
+        <Button
+          aria-label={nextLabel ?? "次のステップ"}
+          disabled={atEnd}
+          onClick={onNext}
+          endIcon={nextLabel ? <SkipNextIcon /> : undefined}
+        >
+          {nextLabel ?? <SkipNextIcon />}
         </Button>
       )}
       {speed !== undefined && onSpeedChange && (
@@ -71,7 +80,7 @@ export const StepTraceControls = ({
         </Select>
       )}
       <Typography variant="body2" aria-live="polite" fontWeight={800}>
-        {stepCount === 0 ? "0 / 0" : `${stepIndex + 1} / ${stepCount}`}
+        {stepDescription ?? (stepCount === 0 ? "0 / 0" : `${stepIndex + 1} / ${stepCount}`)}
       </Typography>
     </Stack>
   );

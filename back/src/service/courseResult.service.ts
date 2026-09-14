@@ -2,7 +2,7 @@ import { MissionType } from "@prisma/client";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
-import { parseActivityContent } from "../type/activityContent";
+import { parseActivityContent } from "../learning/activity-content/activityContentSchema";
 export {
   getCourseExamFeedbackByFirebaseUid as getCourseResultFeedbackByFirebaseUid,
   startCourseExamFeedbackByFirebaseUid as startCourseResultFeedbackByFirebaseUid,

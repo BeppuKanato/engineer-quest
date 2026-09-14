@@ -3,9 +3,10 @@ import { MissionType } from "@prisma/client";
 import { learningSeed } from "../../prisma/seedData/learningSeed";
 import type { ActivitySeed } from "../../prisma/seedData/learningSeedTypes";
 import { prisma } from "../lib/prisma";
-import { getActivityRendererDefinition } from "../type/activityRendererRegistry";
+import { getActivityRendererDefinition } from "../learning/activity-content/activityRendererRegistry";
 
 const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:8080/api";
+const targetCourseId = process.env.E2E_COURSE_ID;
 const firebaseUid = "e2e-learning-flow-user";
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -108,6 +109,15 @@ const getCorrectAnswer = (activity: ActivitySeed) => {
 };
 
 const getIntentionalWrongAnswer = (activity: ActivitySeed) => {
+  if (activity.id === "selection-candidate-check") {
+    return { selectedIndices: { partial: 3, equal: 2 } };
+  }
+  if (activity.id === "selection-candidate-build") {
+    return { values: ["greater", "value"] };
+  }
+  if (activity.id === "selection-candidate-transfer") {
+    return { selectedChoiceId: "option-0" };
+  }
   if (activity.id === "binary-search-compare-middle-practice") {
     return {
       selectedRegions: Object.fromEntries(
@@ -126,6 +136,11 @@ const getIntentionalWrongAnswer = (activity: ActivitySeed) => {
           "keep",
         ]),
       ),
+    };
+  }
+  if (activity.id === "algorithm-kmp-naive-practice") {
+    return {
+      values: ["n1-shift", "n2-both", "n3-found"],
     };
   }
   return undefined;
@@ -147,7 +162,11 @@ const main = async () => {
     assert(initialCourses.length === learningSeed.courses.length, "course list count mismatch");
     assert(initialCourses.every((course) => course.progressRate === 0), "fresh user course progress must be 0%");
 
-    for (const course of learningSeed.courses) {
+    const courses = targetCourseId
+      ? learningSeed.courses.filter((course) => course.id === targetCourseId)
+      : learningSeed.courses;
+    assert(courses.length > 0, `E2E course not found: ${targetCourseId}`);
+    for (const course of courses) {
       const initialRoadmap = await api<{ missions: Array<{ id: string; isLocked: boolean }> }>(
         `/courses/${course.id}`,
       );
@@ -248,10 +267,13 @@ const main = async () => {
     }
 
     const finalCourses = await api<Array<{ id: string; progressRate: number; status: string }>>("/courses");
-    assert(finalCourses.every((course) => course.progressRate === 100), "completed course progress must be 100%");
-    assert(finalCourses.every((course) => course.status === "completed"), "completed course status mismatch");
+    const verifiedCourses = targetCourseId
+      ? finalCourses.filter((course) => course.id === targetCourseId)
+      : finalCourses;
+    assert(verifiedCourses.every((course) => course.progressRate === 100), "completed course progress must be 100%");
+    assert(verifiedCourses.every((course) => course.status === "completed"), "completed course status mismatch");
 
-    const expectedExp = learningSeed.courses.flatMap((course) => course.missions).reduce(
+    const expectedExp = courses.flatMap((course) => course.missions).reduce(
       (sum, mission) => sum + mission.rewardExp,
       0,
     );
@@ -274,10 +296,10 @@ const main = async () => {
     }
 
     console.log(
-      `Learning HTTP E2E passed: ${learningSeed.courses.length} courses, ${completedMissionCount} missions, ${completedActivityCount} activities, ${answeredActivityCount} answered activities.`,
+      `Learning HTTP E2E passed: ${courses.length} courses, ${completedMissionCount} missions, ${completedActivityCount} activities, ${answeredActivityCount} answered activities.`,
     );
     console.log(`Retry paths passed: ${retriedActivityIds.join(", ")}.`);
-    console.log(`Course exam test-case submissions passed for both courses. Total EXP: ${storedUser.experience}.`);
+    console.log(`Course exam test-case submissions passed for all ${courses.length} courses. Total EXP: ${storedUser.experience}.`);
   } finally {
     await prisma.user.deleteMany({ where: { firebaseUid } });
   }

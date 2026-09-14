@@ -1,6 +1,6 @@
 import { MissionType } from "@prisma/client";
 
-import { getActivityRendererDefinition } from "../../src/type/activityRendererRegistry";
+import { getActivityRendererDefinition } from "../../src/learning/activity-content/activityRendererRegistry";
 import type { ActivitySeed, MissionSeed } from "./learningSeedTypes";
 
 export const LEARNING_REWARD_POLICY = {

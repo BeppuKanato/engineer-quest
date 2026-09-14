@@ -1,3 +1,7 @@
+/**
+ * URL: /mission/[missionId]/result
+ * Mission完了後の結果表示用ルート。Activity学習本体や採点処理は担当しない。
+ */
 "use client";
 
 import { Alert, Box, Container } from "@mui/material";
@@ -11,7 +15,7 @@ import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { auth } from "@/lib/firebase";
 
-import type { CompleteMissionResponse } from "../play/type";
+import type { CompleteMissionResponse } from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 import { MissionResultCard } from "./components/missionResultCard";
 
 export default function MissionResultPage() {

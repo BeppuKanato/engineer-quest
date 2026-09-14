@@ -4,8 +4,8 @@ import type {
   MissionActivityType,
   MissionType,
 } from "@prisma/client";
-import type { MissionVisualContent } from "../../src/type/missionVisual";
-import type { ActivityContent } from "../../src/type/activityContent";
+import type { MissionVisualContent } from "../../src/learning/activity-content/missionVisual.types";
+import type { ActivityContent } from "../../src/learning/activity-content/activityContentSchema";
 
 export type ActivitySeed = {
   id: string;

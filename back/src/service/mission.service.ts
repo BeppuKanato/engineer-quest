@@ -1,3 +1,8 @@
+/**
+ * Mission Activity学習のユースケース層。
+ * Prismaによる取得、回答採点、再回答回数、Activity/Mission完了と報酬接続を担当する。
+ * HTTP固有処理はcontroller、ActivityContent検証はlearning/activity-contentへ委譲する。
+ */
 import {
   BadgeTicketReason,
   CourseDifficulty,
@@ -8,11 +13,11 @@ import {
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
-import { parseActivityContent } from "../type/activityContent";
+import { parseActivityContent } from "../learning/activity-content/activityContentSchema";
 import {
   getActivityRendererDefinition,
   type ActivityAnswerRenderer,
-} from "../type/activityRendererRegistry";
+} from "../learning/activity-content/activityRendererRegistry";
 import { evaluateAchievementsForUser } from "./achievement.service";
 import { awardBadgeTickets } from "./badge.service";
 import { getKnowledgeCardCandidateIdsForMission } from "./knowledgeCard.service";

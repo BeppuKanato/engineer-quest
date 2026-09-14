@@ -2,7 +2,7 @@ import { FeedbackCondition, MissionType } from "@prisma/client";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
-import { parseActivityContent } from "../type/activityContent";
+import { parseActivityContent } from "../learning/activity-content/activityContentSchema";
 import { HEXAD_FEEDBACK_EXPERIMENT_KEY } from "./experimentAssignment.service";
 import { getAvailableCourseExamFeedbackActions } from "./courseExamFeedback.actions";
 

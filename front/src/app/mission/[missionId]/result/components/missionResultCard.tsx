@@ -14,7 +14,11 @@ import { useEffect, useRef, useState } from "react";
 import { ActionButton } from "@/app/component/actionButton";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
-import type { CollectKnowledgeCardResponse, CompleteMissionResponse, KnowledgeCardChoice } from "../../play/type";
+import type {
+  CollectKnowledgeCardResponse,
+  CompleteMissionResponse,
+  KnowledgeCardChoice,
+} from "@/features/learning/mission-activity-play/missionActivityPlay.types";
 import { CountUpExp } from "./countUpExp";
 import { MissionResultConfetti } from "./missionResultConfetti";
 

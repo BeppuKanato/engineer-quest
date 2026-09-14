@@ -1,48 +1,37 @@
 @startuml
-title Backend API ルート一覧
+title Course・Mission学習API ルート一覧
 
 left to right direction
 skinparam packageStyle rectangle
 
-actor "Frontend" as Frontend
-
-package "/api/auth" {
-  usecase "POST /ensure\nアプリユーザーを作成または更新する" as AuthEnsure
-  usecase "GET /me\n現在のアプリユーザーを取得する" as AuthMe
-}
+actor "Mission Activity画面" as Frontend
 
 package "/api/courses" {
-  usecase "GET /\n公開済みコースとユーザー進捗を取得する" as CoursesList
+  usecase "GET /\n公開Course一覧と進捗" as CoursesList
+  usecase "GET /{courseId}\nCourseロードマップ" as CourseRoadmap
 }
 
 package "/api/missions" {
-  usecase "GET /{missionId}/overview\nミッションのロードマップを取得する" as MissionOverview
-  usecase "GET /lesson/{lessonId}/play\nレッスン活動データを取得する" as LessonPlay
-  usecase "POST /lesson/{lessonId}/complete\nレッスンを完了する" as LessonComplete
-  usecase "GET /lesson/{lessonId}/complete\nレッスン完了サマリーを取得する" as LessonCompleteGet
-  usecase "GET /{missionId}/exam/intro\n確認テスト導入データを取得する" as ExamIntro
-  usecase "POST /{missionId}/exam/start\n難易度別の確認テストを開始する" as ExamStart
-  usecase "GET /{missionId}/exam/play\n確認テスト問題を取得する" as ExamPlay
-  usecase "POST /{missionId}/exam/submit\n完全一致型の回答を提出する" as ExamSubmit
-  usecase "GET /{missionId}/exam/result\n確認テスト結果を取得する" as ExamResult
+  usecase "GET /{missionId}/overview\nMission概要" as MissionOverview
+  usecase "GET /{missionId}/play\nActivity一覧と進捗" as MissionPlay
+  usecase "POST /{missionId}/activities/{activityId}/answer\n回答・採点・回答ログ" as ActivityAnswer
+  usecase "POST /{missionId}/activities/{activityId}/complete\nActivity完了" as ActivityComplete
+  usecase "POST /{missionId}/complete\nMission完了・報酬" as MissionComplete
+  usecase "GET・POST /{missionId}/course-exam/attempt*\nCourse Mission試行・ヒント・テスト実行" as CourseExamAttempt
 }
 
-Frontend --> AuthEnsure
-Frontend --> AuthMe
 Frontend --> CoursesList
+Frontend --> CourseRoadmap
 Frontend --> MissionOverview
-Frontend --> LessonPlay
-Frontend --> LessonComplete
-Frontend --> LessonCompleteGet
-Frontend --> ExamIntro
-Frontend --> ExamStart
-Frontend --> ExamPlay
-Frontend --> ExamSubmit
-Frontend --> ExamResult
+Frontend --> MissionPlay
+Frontend --> ActivityAnswer
+Frontend --> ActivityComplete
+Frontend --> MissionComplete
+Frontend --> CourseExamAttempt
 
 note bottom
-  /api/courses と /api/missions 配下のルートは Firebase token 検証が必要。
-  /api/auth/ensure も Firebase token を検証し、アプリ側の User を作成または更新する。
+  すべてFirebase token検証を通る。
+  旧 /lesson/* と /exam/* は現在のExpress routerには存在しない。
 end note
 
 @enduml
