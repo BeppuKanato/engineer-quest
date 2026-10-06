@@ -76,7 +76,6 @@ export default function NewQuestPostPage() {
   const [referenceUrl, setReferenceUrl] = useState("");
   const [courseId, setCourseId] = useState("");
   const [missionId, setMissionId] = useState("");
-  const [workId, setWorkId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigatingAfterSubmit, setIsNavigatingAfterSubmit] =
     useState(false);
@@ -109,10 +108,10 @@ export default function NewQuestPostPage() {
     const nextCategory = searchParams.get("category") as QuestPostCategory | null;
     const nextTitle = searchParams.get("title") ?? "";
     const nextBody = searchParams.get("body") ?? "";
+    const nextCode = searchParams.get("code") ?? "";
     const nextReferenceUrl = searchParams.get("referenceUrl") ?? "";
     const nextCourseId = searchParams.get("courseId") ?? "";
     const nextMissionId = searchParams.get("missionId") ?? "";
-    const nextWorkId = searchParams.get("workId") ?? "";
 
     if (
       nextCategory &&
@@ -122,10 +121,10 @@ export default function NewQuestPostPage() {
     }
     if (nextTitle) setTitle(nextTitle);
     if (nextBody) setBody(nextBody);
+    if (nextCode) setCode(nextCode);
     if (nextReferenceUrl) setReferenceUrl(nextReferenceUrl);
     if (nextCourseId) setCourseId(nextCourseId);
     if (nextMissionId) setMissionId(nextMissionId);
-    if (nextWorkId) setWorkId(nextWorkId);
   }, []);
 
   useEffect(() => {
@@ -186,7 +185,6 @@ export default function NewQuestPostPage() {
         referenceUrl: referenceUrl.trim() || undefined,
         courseId: courseId || undefined,
         missionId: missionId || undefined,
-        workId: workId || undefined,
       });
 
       play("saveSuccess");

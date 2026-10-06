@@ -115,7 +115,7 @@ export default function KnowledgeCardsPage() {
             <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
               <Box>
                 <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 52 } }}>知識カード</Typography>
-                <Typography color="text.secondary" sx={{ mt: 1, fontSize: 17 }}>学習で獲得した知識カードをコースごとに確認・復習できます。</Typography>
+                <Typography color="text.secondary" sx={{ mt: 1, fontSize: 17 }}>コースで学んだ考え方から、次に調べてみたい世界へつながるカードです。</Typography>
               </Box>
               <Chip icon={<InfoOutlinedIcon />} label="学習完了時に獲得" sx={{ alignSelf: { xs: "flex-start", md: "center" }, px: 1, py: 2.3, fontWeight: 900, color: "#0052d9", bgcolor: "#fff", border: "1px solid #bfdbfe" }} />
             </Stack>
@@ -207,7 +207,7 @@ const KnowledgeCardTile = ({ card, selected, onClick }: { card: CollectionKnowle
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.6} flexWrap="wrap" sx={{ mb: 0.7 }}>
-            <Chip label="Web基礎" size="small" sx={{ height: 20, fontWeight: 800 }} />
+            <Chip label={`No.${String(card.catalogNumber).padStart(2, "0")}`} size="small" sx={{ height: 20, fontWeight: 800 }} />
             <Chip label={card.isCollected ? style.label : "???"} size="small" sx={{ height: 20, fontWeight: 900, color: style.color, bgcolor: style.bgcolor }} />
           </Stack>
           <Typography fontWeight={900}>{card.isCollected ? card.title : "???"}</Typography>
@@ -233,6 +233,7 @@ const KnowledgeDetailPanel = ({ card }: { card: CollectionKnowledgeTip | null })
             {card.isCollected ? <MenuBookIcon sx={{ fontSize: 72 }} /> : <LockIcon sx={{ fontSize: 58 }} />}
           </Box>
           <Stack direction="row" spacing={1} justifyContent="center">
+            <Chip label={`No.${String(card.catalogNumber).padStart(2, "0")}`} sx={{ fontWeight: 900 }} />
             <Chip label={card.courseTitle} sx={{ fontWeight: 800 }} />
             <Chip label={card.isCollected ? style.label : "???"} sx={{ fontWeight: 900, color: style.color, bgcolor: style.bgcolor }} />
           </Stack>
@@ -243,6 +244,11 @@ const KnowledgeDetailPanel = ({ card }: { card: CollectionKnowledgeTip | null })
           <Typography fontWeight={900} color="#0052d9" sx={{ mb: 1 }}>説明</Typography>
           <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{card.isCollected ? card.description : "このカードを獲得すると、学習した知識をここで確認できます。"}</Typography>
         </Box>
+        {card.isCollected && <>
+          <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2 }}><Typography fontWeight={900} color="#7e22ce" mb={1}>コースとのつながり</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{card.connection}</Typography></Box>
+          <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2 }}><Typography fontWeight={900} color="#7e22ce" mb={1}>どこで使われる？</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{card.useCase}</Typography></Box>
+          <Box><Typography fontWeight={900} mb={1}>もっと調べるキーワード</Typography><Stack direction="row" gap={1} flexWrap="wrap">{card.searchKeywords.map((word) => <Chip key={word} label={word} size="small" />)}</Stack></Box>
+        </>}
         <DetailRow icon={<CalendarMonthIcon />} label="獲得日" value={card.collectedAt ? new Date(card.collectedAt).toLocaleString("ja-JP") : "未獲得"} />
         <DetailRow icon={<MenuBookIcon />} label="対象コース" value={card.courseTitle} />
         <DetailRow icon={<ShieldOutlinedIcon />} label="レアリティ" value={card.isCollected ? style.label : "???"} />

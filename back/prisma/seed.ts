@@ -6,9 +6,11 @@
 import { Prisma, PrismaClient, ProgressStatus } from "@prisma/client";
 
 import { achievementSeed } from "./seedData/achievementSeed";
-import { badgeSeed } from "./seedData/badgeSeed";
-import { createThemeSeed } from "./seedData/createThemeSeed";
-import { knowledgeCardSeed } from "./seedData/knowledgeCardSeed";
+import { createQuestSeed } from "./seedData/createQuestSeed";
+import {
+  knowledgeCardScheduleSeed,
+  knowledgeCardSeed,
+} from "./seedData/knowledgeCardSeed";
 import { learningSeed } from "./seedData/learningSeed";
 import { parseActivityContent } from "../src/learning/activity-content/activityContentSchema";
 
@@ -17,6 +19,7 @@ const activeCourseIds = learningSeed.courses.map((course) => course.id);
 const activeCourseIdSet = new Set(activeCourseIds);
 const courseIdArgument = process.argv.find((argument) => argument.startsWith("--course-id="));
 const selectedCourseId = courseIdArgument?.slice("--course-id=".length);
+const createQuestsOnly = process.argv.includes("--create-quests-only");
 
 async function seedCourseCategory(
   client: Prisma.TransactionClient,
@@ -294,24 +297,12 @@ async function seedLearningData() {
 }
 
 async function seedAchievements() {
-  const obsoleteAchievementIds = achievementSeed
-    .filter(
-      (achievement) =>
-        typeof achievement.courseId === "string" &&
-        !activeCourseIdSet.has(achievement.courseId),
-    )
-    .flatMap((achievement) =>
-      typeof achievement.id === "string" ? [achievement.id] : [],
-    );
-
+  const activeAchievementIds = achievementSeed.map((achievement) => String(achievement.id));
   await prisma.achievement.deleteMany({
-    where: { id: { in: obsoleteAchievementIds } },
+    where: { id: { notIn: activeAchievementIds } },
   });
 
-  for (const achievement of achievementSeed.filter(
-    (item) =>
-      typeof item.courseId !== "string" || activeCourseIdSet.has(item.courseId),
-  )) {
+  for (const achievement of achievementSeed) {
     await prisma.achievement.upsert({
       where: { id: achievement.id },
       update: achievement,
@@ -320,83 +311,105 @@ async function seedAchievements() {
   }
 }
 
-async function seedTechIconBadges() {
-  for (const badge of badgeSeed) {
-    await prisma.techIconBadge.upsert({
-      where: { id: badge.id },
-      update: badge,
-      create: badge,
-    });
-  }
-}
-
 async function seedKnowledgeCards() {
-  for (const card of knowledgeCardSeed.filter((item) =>
-    activeCourseIdSet.has(item.courseId),
-  )) {
+  const activeCardIds = knowledgeCardSeed.map((card) => String(card.id));
+  const activeScheduleIds = knowledgeCardScheduleSeed.map((entry) => entry.id);
+
+  await prisma.knowledgeCardScheduleEntry.deleteMany({
+    where: { id: { notIn: activeScheduleIds } },
+  });
+  await prisma.knowledgeCard.deleteMany({
+    where: { id: { notIn: activeCardIds } },
+  });
+
+  for (const card of knowledgeCardSeed) {
     await prisma.knowledgeCard.upsert({
       where: { id: card.id },
       update: card,
       create: card,
     });
   }
+
+  for (const entry of knowledgeCardScheduleSeed) {
+    await prisma.knowledgeCardScheduleEntry.upsert({
+      where: { id: entry.id },
+      update: entry,
+      create: entry,
+    });
+  }
 }
 
-async function seedCreateThemes() {
-  for (const [index, theme] of createThemeSeed.entries()) {
-    await prisma.createTheme.upsert({
-      where: { id: theme.id },
+async function seedCreateQuests() {
+  const activeQuestIds = createQuestSeed.map((quest) => quest.id);
+
+  await prisma.createQuest.deleteMany({ where: { id: { notIn: activeQuestIds } } });
+  for (const quest of createQuestSeed) {
+    await prisma.createQuest.upsert({
+      where: { id: quest.id },
       update: {
-        title: theme.title,
-        description: theme.description,
-        category: theme.category,
-        difficulty: theme.difficulty,
-        estimatedMinutes: theme.estimatedMinutes,
-        tags: [...theme.tags],
-        defaultThumbnailUrl: theme.defaultThumbnailUrl,
-        sortOrder: index + 1,
+        title: quest.title,
+        description: quest.description,
+        scenario: quest.scenario,
+        problemType: quest.problemType,
+        functionName: quest.functionName,
+        starterCode: quest.starterCode,
+        estimatedMinutes: quest.estimatedMinutes,
+        tags: [...quest.tags],
+        thumbnailUrl: quest.thumbnailUrl,
+        previewData: quest.previewData as Prisma.InputJsonValue,
+        sortOrder: quest.sortOrder,
         isPublished: true,
       },
       create: {
-        id: theme.id,
-        title: theme.title,
-        description: theme.description,
-        category: theme.category,
-        difficulty: theme.difficulty,
-        estimatedMinutes: theme.estimatedMinutes,
-        tags: [...theme.tags],
-        defaultThumbnailUrl: theme.defaultThumbnailUrl,
-        sortOrder: index + 1,
+        id: quest.id,
+        title: quest.title,
+        description: quest.description,
+        scenario: quest.scenario,
+        problemType: quest.problemType,
+        functionName: quest.functionName,
+        starterCode: quest.starterCode,
+        estimatedMinutes: quest.estimatedMinutes,
+        tags: [...quest.tags],
+        thumbnailUrl: quest.thumbnailUrl,
+        previewData: quest.previewData as Prisma.InputJsonValue,
+        sortOrder: quest.sortOrder,
         isPublished: true,
       },
     });
 
-    await prisma.createThemeRequirement.deleteMany({ where: { themeId: theme.id } });
-    await prisma.createThemeChallenge.deleteMany({ where: { themeId: theme.id } });
-
-    for (const [requirementIndex, label] of theme.requirements.entries()) {
-      await prisma.createThemeRequirement.create({
+    await prisma.createQuestRequirement.deleteMany({ where: { questId: quest.id } });
+    await prisma.createQuestCourse.deleteMany({ where: { questId: quest.id } });
+    for (const requirement of quest.requirements) {
+      await prisma.createQuestRequirement.create({
         data: {
-          themeId: theme.id,
-          label,
-          order: requirementIndex + 1,
+          id: requirement.id,
+          questId: quest.id,
+          title: requirement.title,
+          description: requirement.description,
+          kind: requirement.kind,
+          category: requirement.category,
+          points: requirement.points,
+          order: requirement.order,
+          tests: requirement.tests as unknown as Prisma.InputJsonValue,
+          hints: requirement.hints as unknown as Prisma.InputJsonValue,
         },
       });
     }
-
-    for (const [challengeIndex, label] of theme.challenges.entries()) {
-      await prisma.createThemeChallenge.create({
-        data: {
-          themeId: theme.id,
-          label,
-          order: challengeIndex + 1,
-        },
+    for (const relatedCourse of quest.relatedCourses) {
+      await prisma.createQuestCourse.create({
+        data: { questId: quest.id, ...relatedCourse },
       });
     }
   }
 }
 
 async function main() {
+  if (createQuestsOnly) {
+    console.log("Start seeding Create quests...");
+    await seedCreateQuests();
+    console.log("Create quest seeding finished.");
+    return;
+  }
   if (courseIdArgument && (!selectedCourseId || !activeCourseIdSet.has(selectedCourseId))) {
     throw new Error("--course-id must name an existing learningSeed course");
   }
@@ -407,10 +420,9 @@ async function main() {
     console.log(`Seeded only ${selectedCourseId}. Other courses and rewards were not changed.`);
     return;
   }
+  await seedCreateQuests();
   await seedAchievements();
-  await seedTechIconBadges();
   await seedKnowledgeCards();
-  await seedCreateThemes();
 
   console.log("Seeding finished.");
 }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">幅優先探索</title>
+  <desc id="desc">開始地点から近い順に色が広がるグラフ</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eff6ff"/><stop offset="1" stop-color="#ecfdf5"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#1e3a8a" flood-opacity=".14"/></filter>
+  </defs>
+  <rect width="800" height="450" rx="34" fill="url(#bg)"/>
+  <g stroke="#94a3b8" stroke-width="8" stroke-linecap="round">
+    <path d="M120 230L285 120M120 230L285 340M285 120L500 95M285 120L500 225M285 340L500 225M500 95L680 215M500 225L680 215"/>
+  </g>
+  <g filter="url(#shadow)" font-family="Arial,sans-serif" font-size="34" font-weight="800" text-anchor="middle">
+    <g><circle cx="120" cy="230" r="54" fill="#2563eb"/><text x="120" y="242" fill="white">A</text></g>
+    <g><circle cx="285" cy="120" r="48" fill="#fde68a" stroke="#d97706" stroke-width="6"/><text x="285" y="132" fill="#78350f">B</text></g>
+    <g><circle cx="285" cy="340" r="48" fill="#fde68a" stroke="#d97706" stroke-width="6"/><text x="285" y="352" fill="#78350f">C</text></g>
+    <g><circle cx="500" cy="95" r="44" fill="#fff" stroke="#94a3b8" stroke-width="6"/><text x="500" y="107" fill="#334155">D</text></g>
+    <g><circle cx="500" cy="225" r="44" fill="#fff" stroke="#94a3b8" stroke-width="6"/><text x="500" y="237" fill="#334155">E</text></g>
+    <g><circle cx="680" cy="215" r="42" fill="#fff" stroke="#94a3b8" stroke-width="6"/><text x="680" y="227" fill="#334155">F</text></g>
+  </g>
+  <g font-family="Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <text x="120" y="310" font-size="22" fill="#1d4ed8">距離 0</text>
+    <text x="285" y="420" font-size="22" fill="#92400e">次は距離 1</text>
+    <text x="610" y="390" font-size="25" fill="#334155">近い場所から順に広げる</text>
+  </g>
+</svg>

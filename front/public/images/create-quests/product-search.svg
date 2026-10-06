@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">ショップの商品番号検索</title><desc id="desc">番号順の商品一覧から目的の商品を探す画面</desc>
+  <rect width="720" height="420" rx="28" fill="#ecfdf5"/><rect x="45" y="40" width="630" height="340" rx="24" fill="#fff" stroke="#bbf7d0" stroke-width="3"/>
+  <text x="75" y="90" fill="#166534" font-family="sans-serif" font-size="28" font-weight="700">ITEM LOOKUP</text>
+  <g font-family="sans-serif" font-size="20"><rect x="75" y="120" width="570" height="48" rx="12" fill="#f8fafc"/><text x="95" y="151" fill="#475569">#101　回復薬</text><text x="535" y="151" fill="#475569">12個</text><rect x="75" y="180" width="570" height="48" rx="12" fill="#f8fafc"/><text x="95" y="211" fill="#475569">#205　魔法の杖</text><text x="545" y="211" fill="#475569">3個</text><rect x="70" y="237" width="580" height="56" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/><text x="95" y="272" font-weight="700" fill="#166534">#330　鉄の盾</text><text x="545" y="272" font-weight="700" fill="#166534">5個</text><rect x="75" y="305" width="570" height="48" rx="12" fill="#f8fafc"/><text x="95" y="336" fill="#475569">#480　旅人のマント</text><text x="545" y="336" fill="#475569">2個</text></g>
+</svg>

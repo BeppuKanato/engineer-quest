@@ -9,10 +9,8 @@ import authRouter from './router/auth.router';
 import courseRouter from './router/course.router';
 import missionRouter from './router/mission.router';
 import achievementRouter from './router/achievement.router';
-import badgeRouter from './router/badge.router';
 import collectionRouter from './router/collection.router';
-import createThemeRouter from './router/createTheme.router';
-import createMissionRouter from './router/createMission.router';
+import createQuestRouter from './router/createQuest.router';
 import historyRouter from './router/history.router';
 import homeRouter from './router/home.router';
 import profileRouter from './router/profile.router';
@@ -51,15 +49,13 @@ app.use('/api/profile', profileRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/missions', missionRouter);
 app.use('/api/achievements', achievementRouter);
-app.use('/api/badges', badgeRouter);
 app.use('/api/collection', collectionRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/quest-board', questBoardRouter);
 app.use('/api/mission-rewards', missionRewardRouter);
 app.use('/api/course-results', courseResultRouter);
 app.use('/api/hexad', hexadRouter);
-app.use('/api', createThemeRouter);
-app.use('/api', createMissionRouter);
+app.use('/api', createQuestRouter);
 
 app.use(errorHandler)
 

@@ -6,8 +6,6 @@ export type HistoryEventType =
   | "mission_completed"
   | "course_completed"
   | "exp_gained"
-  | "badge_ticket"
-  | "badge_acquired"
   | "knowledge_tip_acquired"
   | "achievement_unlocked"
   | "work_saved"

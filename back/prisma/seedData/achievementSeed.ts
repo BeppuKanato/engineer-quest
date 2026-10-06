@@ -1,153 +1,104 @@
 import {
   AchievementCategory,
   AchievementConditionType,
+  AchievementRarity,
   type Prisma,
 } from "@prisma/client";
 
-const course1Id = "course-web-overview";
+import { createQuestSeed } from "./createQuestSeed";
+import { learningSeed } from "./learningSeed";
+
+const levelRarity = [
+  AchievementRarity.COMMON,
+  AchievementRarity.RARE,
+  AchievementRarity.EPIC,
+  AchievementRarity.LEGENDARY,
+] as const;
+
+const countSeries = ({
+  id,
+  title,
+  description,
+  category,
+  conditionType,
+  values,
+  sortOrder,
+  iconKey,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  category: AchievementCategory;
+  conditionType: AchievementConditionType;
+  values: number[];
+  sortOrder: number;
+  iconKey: string;
+}): Prisma.AchievementUncheckedCreateInput[] =>
+  values.map((conditionValue, index) => ({
+    id: `${id}-lv${index + 1}`,
+    title: `${title} Lv.${index + 1}`,
+    description: description.replace("{count}", String(conditionValue)),
+    category,
+    conditionType,
+    conditionValue,
+    rarity: levelRarity[Math.min(index, levelRarity.length - 1)],
+    iconKey,
+    isSecret: false,
+    sortOrder: sortOrder + index,
+  }));
+
+const courseAchievements: Prisma.AchievementUncheckedCreateInput[] =
+  learningSeed.courses.map((course, index) => ({
+    id: `ach-course-${course.id.replace("course-algorithm-", "")}-complete`,
+    category: AchievementCategory.COURSE_COMPLETE,
+    conditionType: AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE,
+    courseId: course.id,
+    title: `${course.title}を修得した`,
+    description: `${course.title}の必須ミッションをすべて完了した証です。`,
+    rarity: AchievementRarity.RARE,
+    iconKey: "course",
+    isSecret: false,
+    sortOrder: 100 + index,
+  }));
+
+const createQuestAchievements: Prisma.AchievementUncheckedCreateInput[] =
+  createQuestSeed.flatMap((quest, index) => [
+    {
+      id: `ach-create-${quest.id}-advanced`,
+      category: AchievementCategory.CREATE_QUEST,
+      conditionType: AchievementConditionType.CREATE_QUEST_SCORE,
+      conditionValue: 75,
+      createQuestId: quest.id,
+      title: `${quest.title}・発展達成`,
+      description: `${quest.title}で75点以上を獲得し、追加要件にも対応した証です。`,
+      rarity: AchievementRarity.RARE,
+      iconKey: "build",
+      isSecret: false,
+      sortOrder: 300 + index * 2,
+    },
+    {
+      id: `ach-create-${quest.id}-perfect`,
+      category: AchievementCategory.CREATE_QUEST,
+      conditionType: AchievementConditionType.CREATE_QUEST_SCORE,
+      conditionValue: 100,
+      createQuestId: quest.id,
+      title: `${quest.title}・完全達成`,
+      description: `${quest.title}の全要件を満たし、100点を獲得した証です。`,
+      rarity: AchievementRarity.EPIC,
+      iconKey: "perfect",
+      isSecret: false,
+      sortOrder: 301 + index * 2,
+    },
+  ]);
 
 export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
-  {
-    id: "ach-bubble-sort-complete",
-    category: AchievementCategory.COURSE_COMPLETE,
-    conditionType: AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE,
-    courseId: "course-algorithm-bubble-sort-v2",
-    title: "バブルソートを理解した",
-    description: "比較・交換・確定済み領域をたどり、バブルソートのコース完了課題を達成した証です。",
-    isSecret: false,
-    sortOrder: 5,
-  },
-  {
-    id: "ach-first-mission-clear",
-    category: AchievementCategory.MISSION_CLEAR,
-    conditionType: AchievementConditionType.MISSION_COUNT,
-    conditionValue: 1,
-    title: "はじめての一歩",
-    description: "はじめてミッションをクリアした証です。",
-    isSecret: false,
-    sortOrder: 10,
-  },
-  {
-    id: "ach-mission-clear-lv1",
-    category: AchievementCategory.MISSION_COUNT,
-    conditionType: AchievementConditionType.MISSION_COUNT,
-    conditionValue: 3,
-    title: "ミッション挑戦者 Lv.1",
-    description: "3個のミッションをクリアした証です。",
-    isSecret: false,
-    sortOrder: 20,
-  },
-  {
-    id: "ach-mission-clear-lv2",
-    category: AchievementCategory.MISSION_COUNT,
-    conditionType: AchievementConditionType.MISSION_COUNT,
-    conditionValue: 5,
-    title: "ミッション挑戦者 Lv.2",
-    description: "5個のミッションをクリアした証です。",
-    isSecret: false,
-    sortOrder: 30,
-  },
-  {
-    id: "ach-mission-clear-lv3",
-    category: AchievementCategory.MISSION_COUNT,
-    conditionType: AchievementConditionType.MISSION_COUNT,
-    conditionValue: 10,
-    title: "ミッション挑戦者 Lv.3",
-    description: "10個のミッションをクリアした証です。",
-    isSecret: false,
-    sortOrder: 40,
-  },
-  {
-    id: "ach-course1-required-complete",
-    category: AchievementCategory.COURSE_COMPLETE,
-    conditionType: AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE,
-    courseId: course1Id,
-    title: "Webアプリの見取り図を手に入れた",
-    description:
-      "Webアプリの基本的な流れと構成要素を理解した証です。",
-    isSecret: false,
-    sortOrder: 50,
-  },
-  {
-    id: "ach-course1-all-complete",
-    category: AchievementCategory.COURSE_COMPLETE,
-    conditionType: AchievementConditionType.COURSE_ALL_MISSION_COMPLETE,
-    courseId: course1Id,
-    title: "Webアプリ探索マスター",
-    description:
-      "Course1のすべてのミッションをクリアし、Webアプリの全体像を深く探索した証です。",
-    isSecret: false,
-    sortOrder: 60,
-  },
-  {
-    id: "ach-course1-exam-hard-clear",
-    category: AchievementCategory.COURSE_EXAM,
-    conditionType: AchievementConditionType.COURSE_EXAM_HARD_CLEAR,
-    courseId: course1Id,
-    title: "Webアプリ全体像 Hardクリア",
-    description:
-      "Webアプリの全体像コース完了ミッションを、むずかしい難易度でクリアした証です。",
-    isSecret: false,
-    sortOrder: 65,
-  },
-  {
-    id: "ach-activity-clear-lv1",
-    category: AchievementCategory.LEARNING_ACTION,
-    conditionType: AchievementConditionType.ACTIVITY_COUNT,
-    conditionValue: 10,
-    title: "学習ステップ Lv.1",
-    description: "10個のアクティビティを完了した証です。",
-    isSecret: false,
-    sortOrder: 70,
-  },
-  {
-    id: "ach-activity-clear-lv2",
-    category: AchievementCategory.LEARNING_ACTION,
-    conditionType: AchievementConditionType.ACTIVITY_COUNT,
-    conditionValue: 30,
-    title: "学習ステップ Lv.2",
-    description: "30個のアクティビティを完了した証です。",
-    isSecret: false,
-    sortOrder: 80,
-  },
-  {
-    id: "ach-activity-clear-lv3",
-    category: AchievementCategory.LEARNING_ACTION,
-    conditionType: AchievementConditionType.ACTIVITY_COUNT,
-    conditionValue: 50,
-    title: "学習ステップ Lv.3",
-    description: "50個のアクティビティを完了した証です。",
-    isSecret: false,
-    sortOrder: 90,
-  },
-  {
-    id: "ach-streak-lv1",
-    category: AchievementCategory.STREAK,
-    conditionType: AchievementConditionType.STREAK_DAYS,
-    conditionValue: 2,
-    title: "学習リズム Lv.1",
-    description: "2日連続で学習した証です。",
-    isSecret: false,
-    sortOrder: 100,
-  },
-  {
-    id: "ach-streak-lv2",
-    category: AchievementCategory.STREAK,
-    conditionType: AchievementConditionType.STREAK_DAYS,
-    conditionValue: 3,
-    title: "学習リズム Lv.2",
-    description: "3日連続で学習した証です。",
-    isSecret: false,
-    sortOrder: 110,
-  },
-  {
-    id: "ach-streak-lv3",
-    category: AchievementCategory.STREAK,
-    conditionType: AchievementConditionType.STREAK_DAYS,
-    conditionValue: 7,
-    title: "学習リズム Lv.3",
-    description: "7日連続で学習した証です。",
-    isSecret: false,
-    sortOrder: 120,
-  },
+  ...countSeries({ id: "ach-mission-clear", title: "ミッション挑戦者", description: "{count}個のミッションを完了した証です。", category: AchievementCategory.MISSION_COUNT, conditionType: AchievementConditionType.MISSION_COUNT, values: [1, 10, 25, 49], sortOrder: 10, iconKey: "mission" }),
+  ...countSeries({ id: "ach-activity-clear", title: "学習ステップ", description: "{count}個のアクティビティを完了した証です。", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.ACTIVITY_COUNT, values: [25, 100, 200], sortOrder: 30, iconKey: "steps" }),
+  ...countSeries({ id: "ach-course-count", title: "アルゴリズム探究者", description: "{count}種類のコースを完了した証です。", category: AchievementCategory.COURSE_COMPLETE, conditionType: AchievementConditionType.COURSE_COMPLETED_COUNT, values: [1, 3, learningSeed.courses.length], sortOrder: 50, iconKey: "course" }),
+  ...courseAchievements,
+  ...countSeries({ id: "ach-create-complete", title: "機能ビルダー", description: "{count}種類の作る課題で基本要件を達成した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT, values: [1, 3, createQuestSeed.length], sortOrder: 200, iconKey: "build" }),
+  ...countSeries({ id: "ach-create-optional", title: "追加要件ハンター", description: "異なる追加要件を{count}件達成した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT, values: [5, 10, createQuestSeed.reduce((sum, quest) => sum + quest.requirements.filter((requirement) => requirement.kind === "OPTIONAL").length, 0)], sortOrder: 220, iconKey: "challenge" }),
+  ...countSeries({ id: "ach-create-perfect", title: "パーフェクトビルダー", description: "{count}種類の作る課題で100点を獲得した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_PERFECT_COUNT, values: [1, 3, createQuestSeed.length], sortOrder: 240, iconKey: "perfect" }),
+  ...createQuestAchievements,
+  ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, 10, learningSeed.courses.length * 5], sortOrder: 400, iconKey: "knowledge" }),
 ];

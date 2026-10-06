@@ -35,7 +35,7 @@ const pages = [
     label: "コレクション",
     href: "/collection",
     icon: CollectionsBookmarkIcon,
-    match: ["/collection", "/badges", "/knowledge-cards", "/achievements", "/mission-rewards"],
+    match: ["/collection", "/knowledge-cards", "/achievements", "/mission-rewards"],
   },
   { label: "プロフィール", href: "/profile", icon: AccountCircleIcon, match: ["/profile"] },
 ];

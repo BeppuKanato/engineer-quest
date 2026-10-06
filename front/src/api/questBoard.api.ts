@@ -84,7 +84,6 @@ export type CreateQuestPostPayload = {
   referenceUrl?: string;
   courseId?: string;
   missionId?: string;
-  workId?: string;
 };
 
 export type QuestBoardListParams = {

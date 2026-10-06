@@ -1,5 +1,4 @@
 import {
-  CreateWorkVisibility,
   Prisma,
   QuestPostCategory,
   QuestPostStatus,
@@ -18,7 +17,6 @@ type CreateQuestPostInput = {
   referenceUrl: string | null;
   courseId: string | null;
   missionId: string | null;
-  workId: string | null;
 };
 
 type UpdateQuestPostInput = CreateQuestPostInput & {
@@ -133,37 +131,6 @@ const assertPostPayload = ({
       `Body must be between ${bodyMinLength} and ${bodyMaxLength} characters`
     );
   }
-};
-
-const validateOwnedCreateWorkForShare = async ({
-  userId,
-  workId,
-  category,
-}: {
-  userId: string;
-  workId: string | null;
-  category: QuestPostCategory;
-}) => {
-  if (!workId) return null;
-
-  if (category !== QuestPostCategory.WORK_SHARE) {
-    throw new AppError(
-      400,
-      "CREATE_WORK_SHARE_CATEGORY_REQUIRED",
-      "Work can only be attached to work share posts"
-    );
-  }
-
-  const work = await prisma.userCreateWork.findFirst({
-    where: { id: workId, userId },
-    select: { id: true, courseId: true },
-  });
-
-  if (!work) {
-    throw new AppError(404, "CREATE_WORK_NOT_FOUND", "Create work not found");
-  }
-
-  return work;
 };
 
 const validateCourseAndMission = async ({
@@ -340,7 +307,6 @@ export const createQuestPostByFirebaseUid = async ({
   referenceUrl,
   courseId,
   missionId,
-  workId,
 }: CreateQuestPostInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   const normalizedTitle = normalizeText(title);
@@ -348,11 +314,6 @@ export const createQuestPostByFirebaseUid = async ({
   const normalizedCategory = parseCategory(category);
 
   assertPostPayload({ title: normalizedTitle, body: normalizedBody });
-  const work = await validateOwnedCreateWorkForShare({
-    userId: user.id,
-    workId,
-    category: normalizedCategory,
-  });
   await validateCourseAndMission({ courseId, missionId });
 
   const post = await prisma.$transaction(async (tx) => {
@@ -364,18 +325,11 @@ export const createQuestPostByFirebaseUid = async ({
         body: normalizedBody,
         code,
         referenceUrl,
-        courseId: courseId ?? work?.courseId ?? null,
+        courseId,
         missionId,
       },
       select: { id: true },
     });
-
-    if (work) {
-      await tx.userCreateWork.update({
-        where: { id: work.id },
-        data: { visibility: CreateWorkVisibility.SHARED, sharedAt: new Date() },
-      });
-    }
 
     return createdPost;
   });
@@ -611,7 +565,6 @@ export const updateQuestPostByFirebaseUid = async ({
   referenceUrl,
   courseId,
   missionId,
-  workId,
 }: UpdateQuestPostInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   const post = await prisma.questPost.findFirst({
@@ -636,11 +589,6 @@ export const updateQuestPostByFirebaseUid = async ({
   const normalizedCategory = parseCategory(category);
 
   assertPostPayload({ title: normalizedTitle, body: normalizedBody });
-  await validateOwnedCreateWorkForShare({
-    userId: user.id,
-    workId,
-    category: normalizedCategory,
-  });
   await validateCourseAndMission({ courseId, missionId });
 
   await prisma.questPost.update({
@@ -709,6 +657,5 @@ export const buildCreateQuestPostPayload = (body: unknown) => {
     referenceUrl: normalizeNullableText(payload?.referenceUrl),
     courseId: normalizeNullableText(payload?.courseId),
     missionId: normalizeNullableText(payload?.missionId),
-    workId: normalizeNullableText(payload?.workId),
   };
 };

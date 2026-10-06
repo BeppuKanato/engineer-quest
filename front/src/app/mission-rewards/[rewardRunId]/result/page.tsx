@@ -1,7 +1,6 @@
 "use client";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -246,8 +245,8 @@ export default function MissionRewardResultPage() {
     });
   };
 
-  const selectedCardTone = rewardRun?.selectedKnowledgeCard
-    ? getRarityTone(rewardRun.selectedKnowledgeCard.rarity)
+  const selectedCardTone = rewardRun?.awardedKnowledgeCard
+    ? getRarityTone(rewardRun.awardedKnowledgeCard.rarity)
     : null;
   const nextActionLabel = rewardRun?.nextMission
     ? `次は「${rewardRun.nextMission.title}」に進めます。`
@@ -372,8 +371,8 @@ export default function MissionRewardResultPage() {
                     <Typography color="#334155" sx={{ mt: 0.5, lineHeight: 1.7 }}>
                       {rewardRun.mission.learnedItems[0] ??
                         `${rewardRun.mission.title}を完了しました。`}
-                      {rewardRun.selectedKnowledgeCard
-                        ? ` 知識カード「${rewardRun.selectedKnowledgeCard.title}」もコレクションに追加されています。`
+                      {rewardRun.awardedKnowledgeCard
+                        ? ` 知識カード「${rewardRun.awardedKnowledgeCard.title}」もコレクションに追加されています。`
                         : ""}
                     </Typography>
                   </Box>
@@ -385,7 +384,7 @@ export default function MissionRewardResultPage() {
                 </Stack>
               </Paper>
 
-              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2, mb: 3 }}>
                 <ResultSummaryPanel
                   label="獲得EXP"
                   icon={<StarIcon />}
@@ -394,16 +393,10 @@ export default function MissionRewardResultPage() {
                   tone="blue"
                 />
                 <ResultSummaryPanel
-                  label="Badge Ticket"
-                  icon={<ConfirmationNumberIcon />}
-                  value={`+${rewardRun.awardedBadgeTickets}`}
-                  tone="green"
-                />
-                <ResultSummaryPanel
                   label="獲得カード"
                   icon={<MenuBookIcon />}
-                  value={rewardRun.selectedKnowledgeCard?.title ?? "なし"}
-                  suffix={rewardRun.selectedKnowledgeCard?.rarity}
+                  value={rewardRun.awardedKnowledgeCard?.title ?? "なし"}
+                  suffix={rewardRun.awardedKnowledgeCard?.rarity}
                   tone="purple"
                 />
                 <ResultSummaryPanel
@@ -457,7 +450,7 @@ export default function MissionRewardResultPage() {
                 </Paper>
               )}
 
-              {rewardRun.selectedKnowledgeCard && selectedCardTone && (
+              {rewardRun.awardedKnowledgeCard && selectedCardTone && (
                 <Paper
                   elevation={0}
                   sx={{
@@ -470,9 +463,9 @@ export default function MissionRewardResultPage() {
                   }}
                 >
                   <Chip label="獲得カード" size="small" color="primary" sx={{ fontWeight: 900, mb: 1 }} />
-                  <Typography fontWeight={900}>{rewardRun.selectedKnowledgeCard.title}</Typography>
+                  <Typography fontWeight={900}>{rewardRun.awardedKnowledgeCard.title}</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {rewardRun.selectedKnowledgeCard.description}
+                    {rewardRun.awardedKnowledgeCard.description}
                   </Typography>
                 </Paper>
               )}

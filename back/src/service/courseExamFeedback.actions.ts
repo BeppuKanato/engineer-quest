@@ -65,40 +65,34 @@ export const COURSE_EXAM_FEEDBACK_ACTION_CATALOG: Record<
     label: "目標実績を設定する",
     description: "次に目指す実績を設定する。",
   },
-  USE_BADGE_TICKET: {
-    actionType: "USE_BADGE_TICKET",
-    label: "バッジチケットを使う",
-    description: "所持しているバッジチケットを使用する。",
-  },
-  VIEW_BADGE_COLLECTION: {
-    actionType: "VIEW_BADGE_COLLECTION",
-    label: "バッジコレクションを見る",
-    description: "獲得済みバッジと未獲得バッジを確認する。",
-  },
-  SET_PROFILE_BADGE: {
-    actionType: "SET_PROFILE_BADGE",
-    label: "プロフィールバッジを設定する",
-    description: "獲得済みバッジをプロフィールに設定する。",
-  },
   VIEW_PROFILE: {
     actionType: "VIEW_PROFILE",
     label: "プロフィールを見る",
     description: "自分のプロフィールと学習状況を確認する。",
+  },
+  RETRY_CREATE_QUEST: {
+    actionType: "RETRY_CREATE_QUEST",
+    label: "作る課題を改善する",
+    description: "同じ作る課題で未達成の追加要件へ再挑戦する。",
+  },
+  OPEN_RELATED_COURSE: {
+    actionType: "OPEN_RELATED_COURSE",
+    label: "関連コースを学ぶ",
+    description: "要件の達成に役立つ関連コースを学ぶ。",
+  },
+  SHARE_CREATE_QUEST: {
+    actionType: "SHARE_CREATE_QUEST",
+    label: "作った機能を共有する",
+    description: "提出コードと達成要件をクエストボードで共有する。",
   },
 };
 
 export const getAvailableCourseExamFeedbackActions = ({
   hasWork,
   hasKnowledgeCard,
-  badgeTickets,
-  ownedBadgeCount,
-  publishedBadgeCount,
 }: {
   hasWork: boolean;
   hasKnowledgeCard: boolean;
-  badgeTickets: number;
-  ownedBadgeCount: number;
-  publishedBadgeCount: number;
 }) => {
   const actionTypes: ActionDefinition["actionType"][] = [
     "RETRY_COURSE_EXAM",
@@ -108,15 +102,10 @@ export const getAvailableCourseExamFeedbackActions = ({
     "VIEW_BOARD_POSTS",
     "VIEW_ACHIEVEMENTS",
     "SET_TARGET_ACHIEVEMENT",
-    "VIEW_BADGE_COLLECTION",
     "VIEW_PROFILE",
   ];
   if (hasWork) actionTypes.push("CREATE_WORK_POST");
   if (hasKnowledgeCard) actionTypes.push("REVIEW_KNOWLEDGE_CARDS");
-  if (badgeTickets > 0 && ownedBadgeCount < publishedBadgeCount) {
-    actionTypes.push("USE_BADGE_TICKET");
-  }
-  if (ownedBadgeCount > 0) actionTypes.push("SET_PROFILE_BADGE");
   return actionTypes.map((type) => COURSE_EXAM_FEEDBACK_ACTION_CATALOG[type]);
 };
 

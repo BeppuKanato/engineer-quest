@@ -25,7 +25,7 @@ export const buildCourseExamFeedbackContext = async ({
         select: {
           id: true,
           experience: true,
-          badgeTickets: true,
+          _count: { select: { achievements: true, knowledgeCards: true } },
           selectedTargetAchievement: { select: { id: true, title: true } },
           hexadResponse: {
             select: {
@@ -109,12 +109,10 @@ export const buildCourseExamFeedbackContext = async ({
     );
   }
 
-  const [ownedKnowledgeCardCount, ownedBadgeCount, publishedBadgeCount, workCount] =
+  const [ownedKnowledgeCardCount, workCount] =
     await Promise.all([
       prisma.userKnowledgeCard.count({ where: { userId: rewardRun.user.id } }),
-      prisma.userTechIconBadge.count({ where: { userId: rewardRun.user.id } }),
-      prisma.techIconBadge.count({ where: { isPublished: true } }),
-      prisma.userWork.count({ where: { userId: rewardRun.user.id } }),
+      prisma.createQuestAttempt.count({ where: { userId: rewardRun.user.id } }),
     ]);
 
   const unlockedAchievements = rewardRun.unlockedAchievementIds.length
@@ -123,9 +121,9 @@ export const buildCourseExamFeedbackContext = async ({
         select: { id: true, title: true },
       })
     : [];
-  const selectedKnowledgeCard = rewardRun.selectedKnowledgeCardId
+  const awardedKnowledgeCard = rewardRun.awardedKnowledgeCardId
     ? await prisma.knowledgeCard.findUnique({
-        where: { id: rewardRun.selectedKnowledgeCardId },
+        where: { id: rewardRun.awardedKnowledgeCardId },
         select: { id: true, title: true },
       })
     : null;
@@ -171,27 +169,21 @@ export const buildCourseExamFeedbackContext = async ({
 
   const appState = {
     experience: rewardRun.user.experience,
-    badgeTickets: rewardRun.user.badgeTickets,
+    achievementCount: rewardRun.user._count.achievements,
     selectedTargetAchievement: rewardRun.user.selectedTargetAchievement,
     collections: {
       knowledgeCardCount: ownedKnowledgeCardCount,
-      techIconBadgeCount: ownedBadgeCount,
-      publishedTechIconBadgeCount: publishedBadgeCount,
     },
     thisCompletion: {
       awardedExperience: rewardRun.awardedExp,
-      awardedBadgeTickets: rewardRun.awardedBadgeTickets,
       unlockedAchievements,
-      selectedKnowledgeCard,
+      awardedKnowledgeCard,
     },
   };
 
   const availableActions = getAvailableCourseExamFeedbackActions({
     hasWork: workCount > 0,
     hasKnowledgeCard: ownedKnowledgeCardCount > 0,
-    badgeTickets: rewardRun.user.badgeTickets,
-    ownedBadgeCount,
-    publishedBadgeCount,
   });
   const hexad = rewardRun.user.hexadResponse;
   const hexadProfile =

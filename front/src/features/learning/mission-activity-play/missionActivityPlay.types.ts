@@ -36,7 +36,6 @@ export type MissionActivityContentData = ActivityRendererData & {
   visual?: MissionVisualContent;
   [key: string]: unknown;
 };
-
 export type MissionActivityContent = Omit<ActivityContent, "data"> & {
   data: MissionActivityContentData;
 };
@@ -185,20 +184,6 @@ export type KnowledgeCardChoice = {
   rarity: "COMMON" | "RARE" | "EPIC" | string;
 };
 
-export type BadgeTicketReward = {
-  amount: number;
-  reason:
-    | "MISSION_COMPLETE"
-    | "CHALLENGE_COMPLETE"
-    | "COURSE_COMPLETE"
-    | "ACHIEVEMENT_UNLOCK"
-    | "BADGE_GACHA"
-    | string;
-  currentTickets: number;
-  transactionId: string;
-  createdAt: string;
-};
-
 export type CompleteMissionResponse = {
   rewardRunId: string;
   courseExamAttemptId: string | null;
@@ -211,9 +196,8 @@ export type CompleteMissionResponse = {
     learnedItems: string[];
   };
   experienceUpdate: ExperienceUpdate;
-  badgeTicketRewards: BadgeTicketReward[];
   unlockedAchievements: UnlockedAchievement[];
-  knowledgeCardChoices: KnowledgeCardChoice[];
+  awardedKnowledgeCard: KnowledgeCardChoice | null;
   nextMission: {
     id: string;
     title: string;
@@ -222,9 +206,4 @@ export type CompleteMissionResponse = {
     id: string;
     title: string;
   }[];
-};
-
-export type CollectKnowledgeCardResponse = {
-  knowledgeCard: KnowledgeCardChoice;
-  collectedAt: string;
 };

@@ -30,6 +30,7 @@ import {
   type AchievementCategoryGroup,
   type AchievementItem,
   getAchievements,
+  updateProfileAchievement,
   updateTargetAchievement,
 } from "@/api/achievements.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
@@ -155,6 +156,7 @@ function AchievementsPageContent() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedSeriesKey, setSelectedSeriesKey] = useState<string | null>(null);
   const [targetSeriesKey, setTargetSeriesKey] = useState<string | null>(null);
+  const [profileAchievementId, setProfileAchievementId] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: AlertColor }>({
     open: false,
     message: "",
@@ -183,6 +185,7 @@ function AchievementsPageContent() {
 
         if (!isMounted) return;
         setGroups(data.groups);
+        setProfileAchievementId(data.profileAchievementId);
         const targetSeries = data.targetAchievementId
           ? toSeries(data.groups).find((series) =>
               series.levels.some((level) => level.id === data.targetAchievementId)
@@ -271,6 +274,19 @@ function AchievementsPageContent() {
       setSnackbar({ open: true, message: "目標実績を保存できませんでした。もう一度お試しください。", severity: "error" });
     }
   };
+  const handleSetProfile = async (achievementId: string | null) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("Unauthorized");
+      const next = profileAchievementId === achievementId ? null : achievementId;
+      await updateProfileAchievement(await user.getIdToken(), next);
+      setProfileAchievementId(next);
+      setSnackbar({ open: true, message: next ? "プロフィールに表示する実績を設定しました" : "プロフィール表示を解除しました", severity: "success" });
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ open: true, message: "プロフィール実績を保存できませんでした。", severity: "error" });
+    }
+  };
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       <AppHeader />
@@ -355,6 +371,8 @@ function AchievementsPageContent() {
                   targetSeriesKey={targetSeriesKey}
                   newlyUnlockedAchievementIds={newlyUnlockedAchievementIds}
                   onToggleTarget={handleToggleTarget}
+                  profileAchievementId={profileAchievementId}
+                  onSetProfile={handleSetProfile}
                 />
               </Box>
             </>
@@ -489,17 +507,22 @@ const AchievementDetailPanel = ({
   targetSeriesKey,
   newlyUnlockedAchievementIds,
   onToggleTarget,
+  profileAchievementId,
+  onSetProfile,
 }: {
   series: AchievementSeries | null;
   targetSeriesKey: string | null;
   newlyUnlockedAchievementIds: Set<string>;
   onToggleTarget: (series: AchievementSeries) => void;
+  profileAchievementId: string | null;
+  onSetProfile: (achievementId: string | null) => void;
 }) => {
   if (!series) return null;
   const meta = statusMeta[getSeriesStatus(series)];
   const isTarget = series.key === targetSeriesKey;
   const canSetTarget = !series.isSecret && !series.isMaxLevel;
   const newlyUnlockedLevel = series.levels.find((level) => newlyUnlockedAchievementIds.has(level.id));
+  const profileCandidate = [...series.levels].reverse().find((level) => level.status === "achieved") ?? null;
 
   return (
     <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: isTarget ? "2px solid #f59e0b" : "1px solid #dbe3ef", bgcolor: "#fff", minHeight: 560, position: { lg: "sticky" }, top: { lg: 88 } }}>
@@ -507,6 +530,7 @@ const AchievementDetailPanel = ({
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Chip label={meta.label} sx={{ fontWeight: 900, color: meta.color, bgcolor: meta.bgcolor }} />
           <Stack direction="row" spacing={1}>
+            <Chip label={series.displayLevel.rarity} size="small" sx={{ fontWeight: 900, bgcolor: "#fff7ed", color: "#b45309" }} />
             {newlyUnlockedLevel && <Chip label="今回解除" sx={{ fontWeight: 900, color: "#b45309", bgcolor: "#fef3c7" }} />}
             {isTarget && <Chip icon={<PushPinIcon />} label="目標設定中" sx={{ fontWeight: 900, color: "#b45309", bgcolor: "#fef3c7", "& .MuiChip-icon": { color: "inherit" } }} />}
           </Stack>
@@ -611,6 +635,18 @@ const AchievementDetailPanel = ({
         >
           {series.isMaxLevel ? "最大レベル到達済み" : isTarget ? "目標を解除する" : "目標に設定する"}
         </Button>
+        {profileCandidate && (
+          <Button
+            fullWidth
+            variant={profileAchievementId === profileCandidate.id ? "outlined" : "contained"}
+            color="warning"
+            startIcon={<EmojiEventsIcon />}
+            onClick={() => onSetProfile(profileCandidate.id)}
+            sx={{ minHeight: 50, borderRadius: 2, fontWeight: 900 }}
+          >
+            {profileAchievementId === profileCandidate.id ? "プロフィール表示を解除" : "プロフィールに表示"}
+          </Button>
+        )}
       </Stack>
     </Paper>
   );

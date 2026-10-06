@@ -7,8 +7,6 @@ export type HistoryEventType =
   | "mission_completed"
   | "course_completed"
   | "exp_gained"
-  | "badge_ticket"
-  | "badge_acquired"
   | "knowledge_tip_acquired"
   | "achievement_unlocked"
   | "work_saved"
@@ -92,12 +90,10 @@ export const getHistoryByUserId = async (userId: string) => {
   const [
     activityProgresses,
     missionProgresses,
-    ticketTransactions,
-    userBadges,
     userKnowledgeCards,
     userAchievements,
-    userWorks,
-    workReviews,
+    createQuestSubmissions,
+    createQuestFeedbacks,
     courseCompletedEvents,
   ] = await Promise.all([
     prisma.userMissionActivityProgress.findMany({
@@ -136,17 +132,6 @@ export const getHistoryByUserId = async (userId: string) => {
         },
       },
     }),
-    prisma.badgeTicketTransaction.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 120,
-    }),
-    prisma.userTechIconBadge.findMany({
-      where: { userId },
-      orderBy: { acquiredAt: "desc" },
-      take: 80,
-      include: { badge: true },
-    }),
     prisma.userKnowledgeCard.findMany({
       where: { userId },
       orderBy: { collectedAt: "desc" },
@@ -159,17 +144,17 @@ export const getHistoryByUserId = async (userId: string) => {
       take: 80,
       include: { achievement: true },
     }),
-    prisma.userWork.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
+    prisma.createQuestSubmission.findMany({
+      where: { attempt: { userId } },
+      orderBy: { submittedAt: "desc" },
       take: 80,
-      include: { createMission: { select: { title: true } } },
+      include: { attempt: { include: { quest: { select: { title: true } } } } },
     }),
-    prisma.userWorkReview.findMany({
-      where: { userWork: { userId } },
+    prisma.createQuestFeedback.findMany({
+      where: { submission: { attempt: { userId } } },
       orderBy: { createdAt: "desc" },
       take: 80,
-      include: { userWork: { select: { id: true, title: true } } },
+      include: { submission: { include: { attempt: { include: { quest: { select: { title: true } } } } } } },
     }),
     getCourseCompletedEvents(userId),
   ]);
@@ -217,26 +202,6 @@ export const getHistoryByUserId = async (userId: string) => {
         return expEvent ? [missionEvent, expEvent] : [missionEvent];
       }),
     ...courseCompletedEvents,
-    ...ticketTransactions.map((transaction) => ({
-      id: `ticket:${transaction.id}`,
-      type: "badge_ticket" as const,
-      title:
-        transaction.amount >= 0
-          ? `Badge Ticket +${transaction.amount}`
-          : `Badge Ticket ${transaction.amount}`,
-      description: transaction.note ?? transaction.reason,
-      amount: transaction.amount,
-      occurredAt: transaction.createdAt.toISOString(),
-      href: "/badges",
-    })),
-    ...userBadges.map((userBadge) => ({
-      id: `badge:${userBadge.id}`,
-      type: "badge_acquired" as const,
-      title: userBadge.badge.name,
-      description: userBadge.badge.description,
-      occurredAt: userBadge.acquiredAt.toISOString(),
-      href: "/collection",
-    })),
     ...userKnowledgeCards.map((userCard) => ({
       id: `knowledge:${userCard.id}`,
       type: "knowledge_tip_acquired" as const,
@@ -253,20 +218,20 @@ export const getHistoryByUserId = async (userId: string) => {
       occurredAt: userAchievement.achievedAt.toISOString(),
       href: "/collection",
     })),
-    ...userWorks.map((work) => ({
-      id: `work:${work.id}`,
+    ...createQuestSubmissions.map((submission) => ({
+      id: `work:${submission.id}`,
       type: "work_saved" as const,
-      title: work.title,
-      description: `${work.createMission.title} / Work saved`,
-      occurredAt: work.createdAt.toISOString(),
+      title: submission.attempt.quest.title,
+      description: `${submission.score} / ${submission.maxScore}点で提出`,
+      occurredAt: submission.submittedAt.toISOString(),
       href: "/my-works",
     })),
-    ...workReviews.map((review) => ({
-      id: `review:${review.id}`,
+    ...createQuestFeedbacks.map((feedback) => ({
+      id: `review:${feedback.id}`,
       type: "ai_review" as const,
-      title: review.userWork.title,
+      title: feedback.submission.attempt.quest.title,
       description: "AIレビューを保存しました。",
-      occurredAt: review.createdAt.toISOString(),
+      occurredAt: feedback.createdAt.toISOString(),
       href: "/my-works",
     })),
   ].sort(compareHistoryDesc);

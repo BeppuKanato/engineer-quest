@@ -405,6 +405,13 @@ const calculateAchievementProgress = async (
         goal: achievement.conditionValue ?? 0,
         progress: 0,
       };
+    case AchievementConditionType.CREATE_QUEST_SCORE:
+    case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT:
+    case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:
+    case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT:
+    case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
+    case AchievementConditionType.COURSE_COMPLETED_COUNT:
+      return { name: achievement.title, goal: achievement.conditionValue ?? 1, progress: 0 };
   }
 };
 
@@ -433,6 +440,15 @@ const buildAchievementTargetLink = (
     case AchievementConditionType.ACTIVITY_COUNT:
     case AchievementConditionType.STREAK_DAYS:
       return { href: "/courses", actionLabel: "学習を続ける" };
+    case AchievementConditionType.CREATE_QUEST_SCORE:
+    case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT:
+    case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:
+    case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT:
+      return { href: "/create", actionLabel: "作る課題に挑戦する" };
+    case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
+      return { href: "/collection", actionLabel: "コレクションを見る" };
+    case AchievementConditionType.COURSE_COMPLETED_COUNT:
+      return { href: "/courses", actionLabel: "コースを選ぶ" };
   }
 };
 

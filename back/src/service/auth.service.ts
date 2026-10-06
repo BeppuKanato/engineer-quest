@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { randomInt } from "node:crypto";
 
 type EnsureUserInput = {
   firebaseUid: string;
@@ -19,6 +20,7 @@ export const ensureUserService = async ({
     create: {
       firebaseUid,
       displayName: displayName ?? null,
+      knowledgeCardTableNumber: randomInt(1, 16),
     },
     include: {
       hexadResponse: {
@@ -32,8 +34,8 @@ export const ensureUserService = async ({
     firebaseUid: user.firebaseUid,
     displayName: user.displayName,
     experience: user.experience,
-    badgeTickets: user.badgeTickets,
-    selectedTechIconBadgeId: user.selectedTechIconBadgeId,
+    knowledgeCardTableNumber: user.knowledgeCardTableNumber,
+    selectedProfileAchievementId: user.selectedProfileAchievementId,
     selectedMascotId: user.selectedMascotId,
     selectedTargetAchievementId: user.selectedTargetAchievementId,
     hasHexadResponse: user.hexadResponse !== null,
@@ -61,8 +63,8 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
     firebaseUid: user.firebaseUid,
     displayName: user.displayName,
     experience: user.experience,
-    badgeTickets: user.badgeTickets,
-    selectedTechIconBadgeId: user.selectedTechIconBadgeId,
+    knowledgeCardTableNumber: user.knowledgeCardTableNumber,
+    selectedProfileAchievementId: user.selectedProfileAchievementId,
     selectedMascotId: user.selectedMascotId,
     selectedTargetAchievementId: user.selectedTargetAchievementId,
     hasHexadResponse: user.hexadResponse !== null,

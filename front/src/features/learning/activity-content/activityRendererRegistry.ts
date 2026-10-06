@@ -32,6 +32,9 @@ type VisualizationRenderer =
   | "SORT_OVERVIEW"
   | "LEARNING_ROADMAP"
   | "ARRAY_TRACE"
+  | "DIVIDE_COMBINE_TRACE"
+  | "TWO_LIST_MERGE_TRACE"
+  | "GRAPH"
   | "CODE_MAPPING"
   | "STRING_SEARCH"
   | "BINARY_SEARCH"
@@ -72,6 +75,10 @@ export const activityRendererRegistry = {
   LEARNING_ROADMAP: renderer("LEARNING_ROADMAP"),
   SORT_OVERVIEW: renderer("SORT_OVERVIEW"),
   ARRAY_TRACE: renderer("ARRAY_TRACE"),
+  DIVIDE_COMBINE_TRACE: renderer("DIVIDE_COMBINE_TRACE"),
+  TWO_LIST_MERGE_TRACE: renderer("TWO_LIST_MERGE_TRACE"),
+  GRAPH_TRACE: renderer("GRAPH"),
+  GRAPH_CHOICE: renderer("GRAPH", "SINGLE_CHOICE"),
   CODE_STATE_MAPPING: renderer("CODE_MAPPING"),
   ARRAY_REGION_SELECT: renderer("NONE", "ARRAY_REGION_SELECT"),
   INDEX_SELECT: renderer("NONE", "INDEX_SELECT"),
@@ -199,6 +206,15 @@ export const parseActivityContent = (value: unknown): ActivityContent => {
     (!Array.isArray(value.data.values) || !Array.isArray(value.data.steps))
   ) {
     throw new Error("ARRAY_TRACE requires values and steps");
+  }
+  if (value.rendererKey === "DIVIDE_COMBINE_TRACE" && !Array.isArray(value.data.levels)) {
+    throw new Error("DIVIDE_COMBINE_TRACE requires levels");
+  }
+  if (
+    value.rendererKey === "TWO_LIST_MERGE_TRACE" &&
+    (!Array.isArray(value.data.left) || !Array.isArray(value.data.right) || !Array.isArray(value.data.steps))
+  ) {
+    throw new Error("TWO_LIST_MERGE_TRACE requires left, right, and steps");
   }
   if (
     value.rendererKey === "ARRAY_REGION_SELECT" &&

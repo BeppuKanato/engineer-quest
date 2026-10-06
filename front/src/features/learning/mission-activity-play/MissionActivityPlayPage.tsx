@@ -112,8 +112,20 @@ const StringSearchVisualization = dynamic(
   () => import("@/features/learning/activity-renderers/visualizations/stringSearchVisualizations").then((module) => module.StringSearchVisualization),
   { ssr: false }
 );
+const GraphTraversalVisualization = dynamic(
+  () => import("@/features/learning/activity-renderers/visualizations/graphTraversalVisualization").then((module) => module.GraphTraversalVisualization),
+  { ssr: false }
+);
 const CodeStateMappingVisualization = dynamic(
   () => import("@/features/learning/activity-renderers/visualizations/codeStateMappingVisualization").then((module) => module.CodeStateMappingVisualization),
+  { ssr: false }
+);
+const DivideCombineTraceVisualization = dynamic(
+  () => import("@/features/learning/activity-renderers/visualizations/divideCombineVisualizations").then((module) => module.DivideCombineTraceVisualization),
+  { ssr: false }
+);
+const TwoListMergeTraceVisualization = dynamic(
+  () => import("@/features/learning/activity-renderers/visualizations/divideCombineVisualizations").then((module) => module.TwoListMergeTraceVisualization),
   { ssr: false }
 );
 const SortOverviewScene = dynamic(
@@ -776,6 +788,10 @@ const ActivityVisualization = ({
     return <StringSearchVisualization rendererKey={rendererKey} content={data} answer={answer} />;
   }
 
+  if (renderer.visualization === "GRAPH") {
+    return <GraphTraversalVisualization key={activity.id} content={data} />;
+  }
+
   if (renderer.visualization === "CODE_MAPPING") {
     return <CodeStateMappingVisualization content={data} />;
   }
@@ -783,6 +799,14 @@ const ActivityVisualization = ({
   if (renderer.visualization === "ARRAY_TRACE") {
     const trace = parseArrayTraceData(data);
     return trace ? <ArrayTrace key={activity.id} data={trace} /> : null;
+  }
+
+  if (renderer.visualization === "DIVIDE_COMBINE_TRACE") {
+    return <DivideCombineTraceVisualization key={activity.id} content={data} />;
+  }
+
+  if (renderer.visualization === "TWO_LIST_MERGE_TRACE") {
+    return <TwoListMergeTraceVisualization key={activity.id} content={data} />;
   }
 
   if (renderer.visualization === "BUBBLE_COMPLETION") {

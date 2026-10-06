@@ -3,11 +3,11 @@
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SendIcon from "@mui/icons-material/Send";
@@ -82,9 +82,6 @@ const actionRouteMap: Record<
   REVIEW_KNOWLEDGE_CARDS: "/knowledge-cards",
   VIEW_ACHIEVEMENTS: "/achievements",
   SET_TARGET_ACHIEVEMENT: "/achievements",
-  USE_BADGE_TICKET: "/badges",
-  VIEW_BADGE_COLLECTION: "/badges",
-  SET_PROFILE_BADGE: "/profile",
   VIEW_PROFILE: "/profile",
 };
 
@@ -468,8 +465,8 @@ export default function CourseCompletionResultPage() {
 
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }, gap: 1.5, mb: 2.5 }}>
                 <MetricCard icon={<StarIcon />} label="獲得EXP" value={`+${result.rewards.experience}`} tone="blue" />
-                <MetricCard icon={<ConfirmationNumberIcon />} label="Badge Ticket" value={`+${result.rewards.badgeTickets}`} tone="green" />
                 <MetricCard icon={<EmojiEventsIcon />} label="解除実績" value={`${result.rewards.unlockedAchievementCount}件`} tone="orange" />
+                <MetricCard icon={<MenuBookIcon />} label="発見したカード" value={result.awardedKnowledgeCard?.title ?? "なし"} tone="green" />
                 <MetricCard icon={<FlagIcon />} label="コース完了" value={result.course.title.replace("の動きを理解する", "")} tone="purple" />
               </Box>
 

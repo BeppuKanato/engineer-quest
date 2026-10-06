@@ -99,6 +99,12 @@ export const getCourseResultByFirebaseUid = async ({
           where: { id: { in: rewardRun.unlockedAchievementIds } },
         })
       : [];
+  const awardedKnowledgeCard = rewardRun.awardedKnowledgeCardId
+    ? await prisma.knowledgeCard.findUnique({
+        where: { id: rewardRun.awardedKnowledgeCardId },
+        select: { id: true, catalogNumber: true, title: true, description: true, rarity: true },
+      })
+    : null;
   const achievementMap = new Map(
     unlockedAchievements.map((achievement) => [achievement.id, achievement])
   );
@@ -188,7 +194,6 @@ export const getCourseResultByFirebaseUid = async ({
       rewardRun.createdAt.toISOString(),
     rewards: {
       experience: rewardRun.awardedExp,
-      badgeTickets: rewardRun.awardedBadgeTickets,
       unlockedAchievementCount: rewardRun.unlockedAchievementIds.length,
     },
     unlockedAchievements: rewardRun.unlockedAchievementIds
@@ -203,7 +208,10 @@ export const getCourseResultByFirebaseUid = async ({
         category: achievement.category,
         categoryLabel:
           achievement.category === "COURSE_COMPLETE" ? "コース完了" : "実績解除",
+        rarity: achievement.rarity,
+        iconKey: achievement.iconKey,
       })),
+    awardedKnowledgeCard,
     summary: {
       passedTests:
         successfulTestResults.length > 0

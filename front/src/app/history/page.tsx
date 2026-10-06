@@ -6,7 +6,6 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HistoryIcon from "@mui/icons-material/History";
 import ReviewsIcon from "@mui/icons-material/Reviews";
@@ -60,18 +59,6 @@ const eventMeta: Record<
     color: "#d97706",
     bgcolor: "#fffbeb",
     icon: <BoltIcon fontSize="small" />,
-  },
-  badge_ticket: {
-    label: "Ticket",
-    color: "#f59e0b",
-    bgcolor: "#fff7ed",
-    icon: <ConfirmationNumberIcon fontSize="small" />,
-  },
-  badge_acquired: {
-    label: "Badge",
-    color: "#0891b2",
-    bgcolor: "#ecfeff",
-    icon: <WorkspacePremiumIcon fontSize="small" />,
   },
   knowledge_tip_acquired: {
     label: "Card",

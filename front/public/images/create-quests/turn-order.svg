@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">RPGのキャラクター行動順</title>
+  <desc id="desc">4人のキャラクターが素早さ順に並ぶイメージ</desc>
+  <rect width="720" height="420" rx="28" fill="#eef4ff"/>
+  <rect x="45" y="40" width="630" height="340" rx="24" fill="#fff" stroke="#c7d8f7" stroke-width="3"/>
+  <text x="75" y="90" fill="#1e3a8a" font-family="sans-serif" font-size="28" font-weight="700">TURN ORDER</text>
+  <g font-family="sans-serif" font-weight="700">
+    <g transform="translate(75 125)"><rect width="570" height="48" rx="12" fill="#dbeafe"/><circle cx="28" cy="24" r="15" fill="#2563eb"/><text x="22" y="30" fill="#fff">1</text><text x="58" y="31" fill="#1e3a8a">アーチャー</text><text x="475" y="31" fill="#1e3a8a">SPD 81</text></g>
+    <g transform="translate(75 185)"><rect width="570" height="48" rx="12" fill="#ede9fe"/><circle cx="28" cy="24" r="15" fill="#7c3aed"/><text x="22" y="30" fill="#fff">2</text><text x="58" y="31" fill="#4c1d95">メイジ</text><text x="475" y="31" fill="#4c1d95">SPD 68</text></g>
+    <g transform="translate(75 245)"><rect width="570" height="48" rx="12" fill="#dcfce7"/><circle cx="28" cy="24" r="15" fill="#16a34a"/><text x="22" y="30" fill="#fff">3</text><text x="58" y="31" fill="#166534">ヒーラー</text><text x="475" y="31" fill="#166534">SPD 55</text></g>
+    <g transform="translate(75 305)"><rect width="570" height="48" rx="12" fill="#fef3c7"/><circle cx="28" cy="24" r="15" fill="#d97706"/><text x="22" y="30" fill="#fff">4</text><text x="58" y="31" fill="#92400e">ナイト</text><text x="475" y="31" fill="#92400e">SPD 42</text></g>
+  </g>
+</svg>

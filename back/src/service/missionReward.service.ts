@@ -1,106 +1,61 @@
-import { Prisma } from "@prisma/client";
+import { AchievementCategory } from "@prisma/client";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
-import { toKnowledgeCardSummaries } from "./knowledgeCard.service";
+import { toKnowledgeCardSummary } from "./knowledgeCard.service";
 
-const categoryLabel = {
+const categoryLabel: Record<AchievementCategory, string> = {
   MISSION_COUNT: "Mission数",
   MISSION_CLEAR: "特定Mission",
   MISSION_COMPLETE: "Missionコンプリート",
   COURSE_EXAM: "Course終了試験",
   LEARNING_ACTION: "学習行動",
   COURSE_COMPLETE: "Course完了",
+  CREATE_QUEST: "作る課題",
+  COLLECTION: "コレクション",
   STREAK: "継続",
-} as const;
+};
 
-const getRewardRunForUser = async (userId: string, rewardRunId: string) => {
+const getNextMission = (courseId: string, currentOrder: number) =>
+  prisma.mission.findFirst({
+    where: { courseId, isPublished: true, isRequiredForCourseCompletion: true, order: { gt: currentOrder } },
+    orderBy: { order: "asc" },
+    select: { id: true, title: true },
+  });
+
+const getUnlockedChallenges = (missionId: string) =>
+  prisma.mission.findMany({
+    where: { parentMissionId: missionId, isPublished: true },
+    orderBy: { branchOrder: "asc" },
+    select: { id: true, title: true },
+  });
+
+export const getMissionRewardRunByUserId = async ({ userId, rewardRunId }: { userId: string; rewardRunId: string }) => {
   const rewardRun = await prisma.missionRewardRun.findFirst({
-    where: {
-      id: rewardRunId,
-      userId,
-    },
+    where: { id: rewardRunId, userId },
     include: {
       mission: {
         select: {
-          id: true,
-          courseId: true,
-          title: true,
-          learnedItems: true,
-          order: true,
-          type: true,
-          isRequiredForCourseCompletion: true,
-          course: {
-            select: { title: true },
-          },
+          id: true, courseId: true, title: true, learnedItems: true, order: true, type: true,
+          course: { select: { title: true } },
         },
       },
     },
   });
 
-  if (!rewardRun) {
-    throw new AppError(404, "MISSION_REWARD_RUN_NOT_FOUND", "Reward run not found");
-  }
+  if (!rewardRun) throw new AppError(404, "MISSION_REWARD_RUN_NOT_FOUND", "Reward run not found");
 
-  return rewardRun;
-};
-
-const getNextMission = async (courseId: string, currentOrder: number) => {
-  return prisma.mission.findFirst({
-    where: {
-      courseId,
-      isPublished: true,
-      isRequiredForCourseCompletion: true,
-      order: { gt: currentOrder },
-    },
-    orderBy: { order: "asc" },
-    select: { id: true, title: true },
-  });
-};
-
-const getUnlockedChallenges = async (missionId: string) => {
-  return prisma.mission.findMany({
-    where: {
-      parentMissionId: missionId,
-      isPublished: true,
-    },
-    orderBy: { branchOrder: "asc" },
-    select: { id: true, title: true },
-  });
-};
-
-export const getMissionRewardRunByUserId = async ({
-  userId,
-  rewardRunId,
-}: {
-  userId: string;
-  rewardRunId: string;
-}) => {
-  const rewardRun = await getRewardRunForUser(userId, rewardRunId);
-
-  const [candidateCards, selectedCard, unlockedAchievements, nextMission, unlockedChallenges] =
-    await Promise.all([
-      rewardRun.candidateKnowledgeCardIds.length > 0
-        ? prisma.knowledgeCard.findMany({
-            where: { id: { in: rewardRun.candidateKnowledgeCardIds } },
-          })
-        : Promise.resolve([]),
-      rewardRun.selectedKnowledgeCardId
-        ? prisma.knowledgeCard.findUnique({
-            where: { id: rewardRun.selectedKnowledgeCardId },
-          })
-        : Promise.resolve(null),
-      rewardRun.unlockedAchievementIds.length > 0
-        ? prisma.achievement.findMany({
-            where: { id: { in: rewardRun.unlockedAchievementIds } },
-          })
-        : Promise.resolve([]),
-      getNextMission(rewardRun.mission.courseId, rewardRun.mission.order),
-      getUnlockedChallenges(rewardRun.missionId),
-    ]);
-
-  const candidateMap = new Map(candidateCards.map((card) => [card.id, card]));
-  const achievementMap = new Map(unlockedAchievements.map((achievement) => [achievement.id, achievement]));
+  const [awardedCard, unlockedAchievements, nextMission, unlockedChallenges] = await Promise.all([
+    rewardRun.awardedKnowledgeCardId
+      ? prisma.knowledgeCard.findUnique({ where: { id: rewardRun.awardedKnowledgeCardId } })
+      : Promise.resolve(null),
+    rewardRun.unlockedAchievementIds.length
+      ? prisma.achievement.findMany({ where: { id: { in: rewardRun.unlockedAchievementIds } } })
+      : Promise.resolve([]),
+    getNextMission(rewardRun.mission.courseId, rewardRun.mission.order),
+    getUnlockedChallenges(rewardRun.missionId),
+  ]);
+  const achievementMap = new Map(unlockedAchievements.map((item) => [item.id, item]));
 
   return {
     id: rewardRun.id,
@@ -112,104 +67,22 @@ export const getMissionRewardRunByUserId = async ({
       courseTitle: rewardRun.mission.course.title,
       isCourseCompletion: rewardRun.mission.type === "COURSE_EXAM",
     },
-    candidateKnowledgeCards: toKnowledgeCardSummaries(
-      rewardRun.candidateKnowledgeCardIds
-        .map((id) => candidateMap.get(id))
-        .filter((card): card is NonNullable<typeof card> => Boolean(card))
-    ),
-    selectedKnowledgeCard: selectedCard
-      ? toKnowledgeCardSummaries([selectedCard])[0]
-      : null,
+    awardedKnowledgeCard: awardedCard ? toKnowledgeCardSummary(awardedCard) : null,
     unlockedAchievements: rewardRun.unlockedAchievementIds
       .map((id) => achievementMap.get(id))
-      .filter((achievement): achievement is NonNullable<typeof achievement> => Boolean(achievement))
-      .map((achievement) => ({
-        id: achievement.id,
-        title: achievement.title,
-        description: achievement.description,
-        category: achievement.category,
-        categoryLabel: categoryLabel[achievement.category],
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        categoryLabel: categoryLabel[item.category],
+        rarity: item.rarity,
+        iconKey: item.iconKey,
       })),
     awardedExp: rewardRun.awardedExp,
-    awardedBadgeTickets: rewardRun.awardedBadgeTickets,
     nextMission,
     unlockedChallenges,
     createdAt: rewardRun.createdAt.toISOString(),
-  };
-};
-
-export const selectMissionRewardKnowledgeCardByUserId = async ({
-  userId,
-  rewardRunId,
-  knowledgeCardId,
-}: {
-  userId: string;
-  rewardRunId: string;
-  knowledgeCardId: string;
-}) => {
-  const rewardRun = await getRewardRunForUser(userId, rewardRunId);
-
-  if (rewardRun.selectedKnowledgeCardId) {
-    throw new AppError(
-      409,
-      "KNOWLEDGE_CARD_ALREADY_SELECTED",
-      "Knowledge card has already been selected for this reward run."
-    );
-  }
-
-  if (!rewardRun.candidateKnowledgeCardIds.includes(knowledgeCardId)) {
-    throw new AppError(
-      400,
-      "KNOWLEDGE_CARD_NOT_IN_REWARD_RUN",
-      "Knowledge card is not a candidate for this reward run"
-    );
-  }
-
-  const knowledgeCard = await prisma.knowledgeCard.findFirst({
-    where: {
-      id: knowledgeCardId,
-      courseId: rewardRun.mission.courseId,
-      isPublished: true,
-    },
-  });
-
-  if (!knowledgeCard) {
-    throw new AppError(404, "KNOWLEDGE_CARD_NOT_FOUND", "Knowledge card not found");
-  }
-
-  const selectedAt = new Date();
-  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const collected = await tx.userKnowledgeCard.upsert({
-      where: {
-        userId_knowledgeCardId: {
-          userId,
-          knowledgeCardId,
-        },
-      },
-      update: {},
-      create: {
-        userId,
-        knowledgeCardId,
-      },
-      include: {
-        knowledgeCard: true,
-      },
-    });
-
-    await tx.missionRewardRun.update({
-      where: { id: rewardRun.id },
-      data: {
-        selectedKnowledgeCardId: knowledgeCardId,
-        knowledgeCardSelectedAt: selectedAt,
-      },
-    });
-
-    return collected;
-  });
-
-  return {
-    knowledgeCard: toKnowledgeCardSummaries([result.knowledgeCard])[0],
-    collectedAt: result.collectedAt.toISOString(),
-    selectedAt: selectedAt.toISOString(),
   };
 };

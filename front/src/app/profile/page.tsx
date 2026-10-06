@@ -45,7 +45,6 @@ import { AppSnackbar } from "@/app/component/appSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
 import { getMascotImagePath, isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
 import { useSoundEffect } from "@/app/component/soundFeedback";
-import { TechBadgeIcon } from "@/app/component/techBadgeIcon";
 import {
   useAchievementNotificationMode,
   type AchievementNotificationMode,
@@ -73,11 +72,6 @@ const historyMeta: Record<
     color: "#16a34a",
     bgcolor: "#dcfce7",
     icon: <FlagIcon fontSize="small" />,
-  },
-  badge_acquired: { label: "バッジ",
-    color: "#0f9a9a",
-    bgcolor: "#e6fffb",
-    icon: <WorkspacePremiumIcon fontSize="small" />,
   },
 };
 
@@ -161,7 +155,6 @@ export default function ProfilePage() {
 
   const history = profile?.history ?? [];
   const user = profile?.user ?? null;
-  const selectedBadge = profile?.selectedBadge ?? null;
   const selectedMascot = mascotOptions.find((mascot) => mascot.id === selectedMascotId) ?? mascotOptions[0];
   const nextLevelExp = user ? requiredExperienceForLevel(user.level + 1) : 0;
   const currentLevelExp = user ? requiredExperienceForLevel(user.level) : 0;
@@ -172,7 +165,7 @@ export default function ProfilePage() {
 
   const summary = {
     missions: user?.completedMissionCount ?? 0,
-    badges: collection?.badges.ownedCount ?? user?.badgeCount ?? 0,
+    courses: user?.completedCourseCount ?? 0,
     knowledgeCards: collection?.knowledgeTips.collectedCount ?? 0,
     achievements: collection?.achievements.achievedCount ?? history.filter((item) => item.type === "achievement_unlocked").length,
   };
@@ -246,10 +239,9 @@ export default function ProfilePage() {
                     />
                     <SettingRow
                       icon={<WorkspacePremiumIcon />}
-                      label="プロフィールバッジ"
-                      value={selectedBadge?.name ?? "未設定"}
-                      badge={selectedBadge}
-                      href="/badges"
+                      label="代表実績"
+                      value={profile.selectedAchievement?.title ?? "未設定"}
+                      href="/achievements"
                     />
                     <AchievementNotificationSetting
                       value={achievementNotificationMode}
@@ -342,7 +334,6 @@ const SettingRow = ({
   href,
   onClick,
   image,
-  badge,
 }: {
   icon: ReactNode;
   label: string;
@@ -350,7 +341,6 @@ const SettingRow = ({
   href?: string;
   onClick?: () => void;
   image?: string;
-  badge?: { name: string; iconUrl: string | null } | null;
 }) => (
   <Paper
     component={onClick ? "button" : Link}
@@ -376,7 +366,6 @@ const SettingRow = ({
       <Box sx={{ width: 34, color: "#0052d9", display: "grid", placeItems: "center" }}>{icon}</Box>
       <Typography fontWeight={800} sx={{ flex: 1 }}>{label}</Typography>
       {image && <Box component="img" src={image} alt={value} sx={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover" }} />}
-      {badge && <TechBadgeIcon name={badge.name} iconUrl={badge.iconUrl} size={34} iconSize={20} />}
       <Typography fontWeight={800}>{value}</Typography>
       <ChevronRightIcon sx={{ color: "#94a3b8" }} />
     </Stack>
@@ -587,7 +576,7 @@ const LearningSummaryCard = ({
 }: {
   summary: {
     missions: number;
-    badges: number;
+    courses: number;
     knowledgeCards: number;
     achievements: number;
   };
@@ -599,7 +588,7 @@ const LearningSummaryCard = ({
     </Stack>
     <Stack spacing={1.2}>
       <SummaryRow icon={<FlagIcon />} label="完了ミッション" value={summary.missions} suffix="件" color="#0052d9" />
-      <SummaryRow icon={<WorkspacePremiumIcon />} label="獲得バッジ" value={summary.badges} suffix="個" color="#16a34a" />
+      <SummaryRow icon={<WorkspacePremiumIcon />} label="完了コース" value={summary.courses} suffix="件" color="#16a34a" />
       <SummaryRow icon={<MenuBookIcon />} label="知識カード" value={summary.knowledgeCards} suffix="枚" color="#7e22ce" />
       <SummaryRow icon={<EmojiEventsIcon />} label="獲得称号" value={summary.achievements} suffix="個" color="#f59e0b" />
     </Stack>

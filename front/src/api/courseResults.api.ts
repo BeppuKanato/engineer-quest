@@ -12,9 +12,6 @@ export type CourseResultActionType =
   | "REVIEW_KNOWLEDGE_CARDS"
   | "VIEW_ACHIEVEMENTS"
   | "SET_TARGET_ACHIEVEMENT"
-  | "USE_BADGE_TICKET"
-  | "VIEW_BADGE_COLLECTION"
-  | "SET_PROFILE_BADGE"
   | "VIEW_PROFILE"
   | "NO_APP_ACTION";
 
@@ -35,7 +32,6 @@ export type CourseResultResponse = {
   } | null;
   rewards: {
     experience: number;
-    badgeTickets: number;
     unlockedAchievementCount: number;
   };
   unlockedAchievements: {
@@ -44,7 +40,16 @@ export type CourseResultResponse = {
     description: string;
     category: string;
     categoryLabel: string;
+    rarity: string;
+    iconKey: string;
   }[];
+  awardedKnowledgeCard: {
+    id: string;
+    catalogNumber: number;
+    title: string;
+    description: string;
+    rarity: "COMMON" | "RARE" | "EPIC";
+  } | null;
   summary: {
     passedTests: number;
     totalTests: number;

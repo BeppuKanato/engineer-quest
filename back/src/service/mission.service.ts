@@ -4,7 +4,6 @@
  * HTTP固有処理はcontroller、ActivityContent検証はlearning/activity-contentへ委譲する。
  */
 import {
-  BadgeTicketReason,
   CourseDifficulty,
   MissionType,
   Prisma,
@@ -19,8 +18,7 @@ import {
   type ActivityAnswerRenderer,
 } from "../learning/activity-content/activityRendererRegistry";
 import { evaluateAchievementsForUser } from "./achievement.service";
-import { awardBadgeTickets } from "./badge.service";
-import { getKnowledgeCardCandidateIdsForMission } from "./knowledgeCard.service";
+import { awardScheduledKnowledgeCard } from "./knowledgeCard.service";
 import {
   getCurrentCourseExamAttempt,
   recordCourseExamSubmission,
@@ -62,14 +60,6 @@ type ExperienceUpdate = {
   previousExperience: number;
   currentExperience: number;
   isNewlyAwarded: boolean;
-};
-
-type BadgeTicketReward = {
-  amount: number;
-  reason: BadgeTicketReason;
-  currentTickets: number;
-  transactionId: string;
-  createdAt: string;
 };
 
 type MissionActivityContent = Record<string, unknown>;
@@ -499,7 +489,7 @@ const judgeAnswer = (
 const getUserByFirebaseUid = async (firebaseUid: string) => {
   const user = await prisma.user.findUnique({
     where: { firebaseUid },
-    select: { id: true },
+    select: { id: true, knowledgeCardTableNumber: true },
   });
 
   if (!user) {
@@ -1231,6 +1221,7 @@ export const completeMissionService = async ({
       isPublished: true,
     },
     include: {
+      course: { select: { version: true } },
       activities: {
         orderBy: {
           order: "asc",
@@ -1406,66 +1397,16 @@ export const completeMissionService = async ({
       title: true,
     },
   });
+  const knowledgeCardAward = experienceUpdate.isNewlyAwarded
+    ? await prisma.$transaction((tx) => awardScheduledKnowledgeCard(tx, {
+        userId: user.id,
+        missionId: mission.id,
+        courseId: mission.courseId,
+        courseVersion: mission.course.version,
+        tableNumber: user.knowledgeCardTableNumber,
+      }))
+    : null;
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
-  const shouldAwardCourseTicket =
-    (mission.type !== MissionType.COURSE_EXAM ||
-      experienceUpdate.isNewlyAwarded) &&
-    mission.isRequiredForCourseCompletion &&
-    (await isCourseRequiredMissionsComplete(user.id, mission.courseId));
-  const badgeTicketRewards = await prisma.$transaction(async (tx) => {
-    const rewards: BadgeTicketReward[] = [];
-    const missionReward =
-      mission.type === MissionType.COURSE_EXAM &&
-      !experienceUpdate.isNewlyAwarded
-        ? null
-        : await awardBadgeTickets(tx, {
-            userId: user.id,
-            amount: 1,
-            reason:
-              mission.type === MissionType.CHALLENGE
-                ? BadgeTicketReason.CHALLENGE_COMPLETE
-                : BadgeTicketReason.MISSION_COMPLETE,
-            sourceId: mission.id,
-            note: mission.title,
-          });
-
-    if (missionReward) rewards.push(missionReward);
-
-    if (shouldAwardCourseTicket) {
-      const courseReward = await awardBadgeTickets(tx, {
-        userId: user.id,
-        amount: 1,
-        reason: BadgeTicketReason.COURSE_COMPLETE,
-        sourceId: mission.courseId,
-        note: mission.courseId,
-      });
-
-      if (courseReward) rewards.push(courseReward);
-    }
-
-    for (const achievement of unlockedAchievements) {
-      const achievementReward = await awardBadgeTickets(tx, {
-        userId: user.id,
-        amount: 1,
-        reason: BadgeTicketReason.ACHIEVEMENT_UNLOCK,
-        sourceId: achievement.id,
-        note: achievement.title,
-      });
-
-      if (achievementReward) rewards.push(achievementReward);
-    }
-
-    return rewards;
-  });
-  const candidateKnowledgeCardIds =
-    mission.type === MissionType.COURSE_EXAM &&
-    !experienceUpdate.isNewlyAwarded
-      ? []
-      : await getKnowledgeCardCandidateIdsForMission(user.id, mission.courseId);
-  const awardedBadgeTickets = badgeTicketRewards.reduce(
-    (sum, reward) => sum + Math.max(0, reward.amount),
-    0
-  );
   const rewardRun = await prisma.$transaction(async (tx) => {
     const completedAt = new Date();
     if (courseExamAttempt) {
@@ -1487,10 +1428,10 @@ export const completeMissionService = async ({
         userId: user.id,
         missionId: mission.id,
         courseExamAttemptId: courseExamAttempt?.id ?? null,
-        candidateKnowledgeCardIds,
+        awardedKnowledgeCardId: knowledgeCardAward?.card.id ?? null,
+        knowledgeCardAwardedAt: knowledgeCardAward?.collectedAt ?? null,
         unlockedAchievementIds: unlockedAchievements.map((achievement) => achievement.id),
         awardedExp: experienceUpdate.gainedExp,
-        awardedBadgeTickets,
       },
       select: { id: true },
     });
@@ -1499,12 +1440,9 @@ export const completeMissionService = async ({
   return {
     rewardRunId: rewardRun.id,
     courseExamAttemptId: courseExamAttempt?.id ?? null,
-    nextPath:
-      candidateKnowledgeCardIds.length > 0
-        ? `/mission-rewards/${rewardRun.id}/cards`
-        : mission.type === MissionType.COURSE_EXAM
-          ? `/course-results/${rewardRun.id}`
-          : `/mission-rewards/${rewardRun.id}/result`,
+    nextPath: mission.type === MissionType.COURSE_EXAM
+      ? `/course-results/${rewardRun.id}`
+      : `/mission-rewards/${rewardRun.id}/result`,
     mission: {
       id: mission.id,
       courseId: mission.courseId,
@@ -1513,9 +1451,8 @@ export const completeMissionService = async ({
       learnedItems: mission.learnedItems,
     },
     experienceUpdate,
-    badgeTicketRewards,
     unlockedAchievements,
-    knowledgeCardChoices: [],
+    awardedKnowledgeCard: knowledgeCardAward?.card ?? null,
     nextMission,
     unlockedChallenges,
   };

@@ -22,7 +22,6 @@ export const queryTags = {
   roadmap: "roadmap",
   collection: "collection",
   achievements: "achievements",
-  badges: "badges",
   history: "history",
   missionOverview: "mission-overview",
   missionRewards: "mission-rewards",

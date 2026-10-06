@@ -15,10 +15,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getApiBaseUrl } from "@/lib/api";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
-import { type AuthUser } from "@/api/auth.api";
+import { ensureUser } from "@/api/auth.api";
 import { useUserSession } from "@/app/component/userSession";
 
 export default function Login() {
@@ -31,10 +30,8 @@ export default function Login() {
   const router = useRouter();
   const { isNavigating, showOverlay, startNavigation } =
     useNavigationFeedback();
-  const apiBaseUrl = getApiBaseUrl();
   const { setAppUser } = useUserSession();
 
-  console.log("API Base URL:", apiBaseUrl);
   const handleLogin = async () => {
     if (isSubmitting || isNavigating) return;
 
@@ -57,24 +54,10 @@ export default function Login() {
 
       const token = await credential.user.getIdToken();
 
-      const res = await fetch(`${apiBaseUrl}/auth/ensure`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          displayName: credential.user.displayName ?? null,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("ユーザー情報の確認に失敗しました");
-      }
-
-      const data = (await res.json()) as {
-        user: AuthUser;
-      };
+      const data = await ensureUser(
+        token,
+        credential.user.displayName ?? null
+      );
 
       setAppUser(data.user);
       setMessage("ログイン成功");

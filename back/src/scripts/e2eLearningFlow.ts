@@ -109,6 +109,33 @@ const getCorrectAnswer = (activity: ActivitySeed) => {
 };
 
 const getIntentionalWrongAnswer = (activity: ActivitySeed) => {
+  if (activity.id === "merge-split-choice") {
+    return { selectedChoiceId: "option-0" };
+  }
+  if (activity.id === "merge-base-choice") {
+    return { selectedChoiceId: "option-0" };
+  }
+  if (activity.id === "merge-merge-decisions") {
+    return { values: ["three", "four", "six", "discard"] };
+  }
+  if (activity.id === "dfs-first-neighbor") {
+    return { selectedChoiceId: "option-2" };
+  }
+  if (activity.id === "dfs-mark-time") {
+    return { selectedChoiceId: "option-1" };
+  }
+  if (activity.id === "dfs-visited-build") {
+    return { values: ["mark-late", "loop", "wrong-condition", "wrong-call"] };
+  }
+  if (activity.id === "bfs-next-pop") {
+    return { selectedChoiceId: "option-2" };
+  }
+  if (activity.id === "bfs-discovery-build") {
+    return { values: ["wrong-condition", "same", "left"] };
+  }
+  if (activity.id === "bfs-mark-time") {
+    return { selectedChoiceId: "option-1" };
+  }
   if (activity.id === "selection-candidate-check") {
     return { selectedIndices: { partial: 3, equal: 2 } };
   }

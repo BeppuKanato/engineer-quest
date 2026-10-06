@@ -66,9 +66,24 @@ const indexQuestionSchema = z.object({
 const indexSelectDataSchema = z.object({
   indexSelectionQuestions: z.array(indexQuestionSchema).min(1),
 }).passthrough();
-const orderedStepsDataSchema = z.object({
+const orderedStepsBaseDataSchema = z.object({
   steps: z.array(z.object({ id: z.string(), label: z.string() }).passthrough()).min(1),
+  answerOrder: z.array(z.string()).min(1),
 }).passthrough();
+const orderedStepsDataSchema = orderedStepsBaseDataSchema.superRefine((data, context) => {
+  const stepIds = data.steps.map((step) => step.id);
+  const answerIds = data.answerOrder;
+  if (new Set(stepIds).size !== stepIds.length) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["steps"], message: "step ids must be unique" });
+  }
+  if (
+    answerIds.length !== stepIds.length ||
+    new Set(answerIds).size !== answerIds.length ||
+    answerIds.some((id) => !stepIds.includes(id))
+  ) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["answerOrder"], message: "answerOrder must contain every step id exactly once" });
+  }
+});
 const pairDecisionDataSchema = z.object({
   decisionPairs: z.array(z.object({
     id: z.string(),
@@ -301,6 +316,107 @@ const arrayTraceDataSchema = z.object({
   finalMessage: z.string().optional(),
   intervalMs: z.number().int().positive().optional(),
 }).passthrough();
+const divideCombineTraceDataSchema = z.object({
+  levels: z.array(z.object({
+    label: z.string().min(1),
+    phase: z.enum(["DIVIDE", "COMBINE"]),
+    groups: z.array(z.array(z.number()).min(1)).min(1),
+    message: z.string().min(1),
+    nextLabel: z.string().optional(),
+  }).passthrough()).min(1),
+  intervalMs: z.number().int().positive().optional(),
+  finalMessage: z.string().optional(),
+}).passthrough();
+const twoListMergeTraceDataSchema = z.object({
+  left: z.array(z.number()).min(1),
+  right: z.array(z.number()).min(1),
+  steps: z.array(z.object({
+    leftIndex: z.number().int().nonnegative(),
+    rightIndex: z.number().int().nonnegative(),
+    result: z.array(z.number()),
+    message: z.string().min(1),
+    nextLabel: z.string().optional(),
+  }).passthrough()).min(1),
+  intervalMs: z.number().int().positive().optional(),
+  finalMessage: z.string().optional(),
+  showVariableNames: z.boolean().optional(),
+}).passthrough().superRefine((data, context) => {
+  data.steps.forEach((step, index) => {
+    if (step.leftIndex > data.left.length || step.rightIndex > data.right.length) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["steps", index], message: "Merge pointers must stay within or immediately after their list" });
+    }
+  });
+});
+const graphNodeSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+});
+const graphEdgeSchema = z.object({
+  from: z.string().min(1),
+  to: z.string().min(1),
+});
+const graphStepSchema = z.object({
+  currentNode: z.string().optional(),
+  inspectingNode: z.string().optional(),
+  queue: z.array(z.string()),
+  discoveredNodes: z.array(z.string()),
+  processedNodes: z.array(z.string()),
+  distances: z.record(z.number().int().nonnegative()).optional(),
+  activeEdge: z.object({ from: z.string(), to: z.string() }).optional(),
+  message: z.string().min(1),
+  nextLabel: z.string().optional(),
+  activeCodeLines: z.array(z.number().int().positive()).optional(),
+}).passthrough();
+const graphTraceDataSchema = z.object({
+  nodes: z.array(graphNodeSchema).min(1),
+  edges: z.array(graphEdgeSchema),
+  steps: z.array(graphStepSchema).min(1),
+  adjacency: z.record(z.array(z.string())).optional(),
+  code: z.string().optional(),
+  finalMessage: z.string().optional(),
+  intervalMs: z.number().int().positive().optional(),
+  showQueue: z.boolean().optional(),
+  showDistances: z.boolean().optional(),
+  currentNodeLabel: z.string().min(1).optional(),
+  waitingNodeLabel: z.string().min(1).optional(),
+  containerLabel: z.string().min(1).optional(),
+  containerLeadingLabel: z.string().min(1).optional(),
+  containerTrailingLabel: z.string().min(1).optional(),
+  activeContainerItem: z.enum(["FIRST", "LAST"]).optional(),
+}).passthrough().superRefine((data, context) => {
+  const nodeIds = new Set(data.nodes.map((node) => node.id));
+  if (nodeIds.size !== data.nodes.length) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["nodes"], message: "Graph node ids must be unique" });
+  }
+  data.edges.forEach((edge, index) => {
+    if (!nodeIds.has(edge.from) || !nodeIds.has(edge.to)) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["edges", index], message: "Graph edges must reference existing nodes" });
+    }
+  });
+  data.steps.forEach((step, index) => {
+    const referenced = [
+      step.currentNode,
+      step.inspectingNode,
+      step.activeEdge?.from,
+      step.activeEdge?.to,
+      ...step.queue,
+      ...step.discoveredNodes,
+      ...step.processedNodes,
+      ...Object.keys(step.distances ?? {}),
+    ]
+      .filter((value): value is string => typeof value === "string");
+    if (referenced.some((id) => !nodeIds.has(id))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["steps", index], message: "Graph steps must reference existing nodes" });
+    }
+  });
+  Object.entries(data.adjacency ?? {}).forEach(([id, neighbors]) => {
+    if (!nodeIds.has(id) || neighbors.some((neighbor) => !nodeIds.has(neighbor))) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["adjacency", id], message: "Graph adjacency must reference existing nodes" });
+    }
+  });
+});
 const codeStateMappingDataSchema = z.object({
   code: z.string().min(1),
   mappings: z.array(z.object({
@@ -602,6 +718,9 @@ type RendererDefinition = {
     | "SORT_OVERVIEW"
     | "LEARNING_ROADMAP"
     | "ARRAY_TRACE"
+    | "DIVIDE_COMBINE_TRACE"
+    | "TWO_LIST_MERGE_TRACE"
+    | "GRAPH"
     | "CODE_MAPPING"
     | "STRING_SEARCH"
     | "BINARY_SEARCH"
@@ -648,6 +767,10 @@ export const activityRendererRegistry = {
   LEARNING_ROADMAP: defineRenderer(VIEW, "LEARNING_ROADMAP", learningRoadmapDataSchema),
   SORT_OVERVIEW: defineRenderer(VIEW, "SORT_OVERVIEW", sortOverviewDataSchema),
   ARRAY_TRACE: defineRenderer(VIEW, "ARRAY_TRACE", arrayTraceDataSchema),
+  DIVIDE_COMBINE_TRACE: defineRenderer(VIEW, "DIVIDE_COMBINE_TRACE", divideCombineTraceDataSchema),
+  TWO_LIST_MERGE_TRACE: defineRenderer(VIEW, "TWO_LIST_MERGE_TRACE", twoListMergeTraceDataSchema),
+  GRAPH_TRACE: defineRenderer(VIEW, "GRAPH", graphTraceDataSchema),
+  GRAPH_CHOICE: defineRenderer(CHOICE, "GRAPH", graphTraceDataSchema.and(choiceDataSchema), "SINGLE_CHOICE"),
   CODE_STATE_MAPPING: defineRenderer(VIEW, "CODE_MAPPING", codeStateMappingDataSchema),
   ARRAY_REGION_SELECT: defineRenderer(CHOICE, "NONE", arrayRegionSelectDataSchema, "ARRAY_REGION_SELECT"),
   INDEX_SELECT: defineRenderer(CHOICE, "NONE", indexSelectDataSchema, "INDEX_SELECT"),
@@ -708,7 +831,7 @@ export const activityRendererRegistry = {
   BINARY_SEARCH_MID_CALCULATION: defineRenderer(VIEW, "BINARY_SEARCH", binaryArrayStateSchema.extend({ midIndex: z.number().int().nonnegative(), formula: z.string(), pythonCode: z.string(), sceneConclusion: z.string() })),
   BINARY_SEARCH_RANGE_UPDATE: defineRenderer(VIEW, "BINARY_SEARCH", binaryRangeUpdateSchema),
   BINARY_SEARCH_RECALCULATE_MID: defineRenderer(VIEW, "BINARY_SEARCH", binaryArrayStateSchema.extend({ midIndex: z.number().int().nonnegative(), formula: z.string(), sceneConclusion: z.string() })),
-  BINARY_SEARCH_ONE_ITERATION: defineRenderer(ORDERED_STEPS, "BINARY_SEARCH", orderedStepsDataSchema.extend({ values: z.array(z.number()).min(1), leftIndex: z.number().int().nonnegative(), rightIndex: z.number().int().nonnegative(), midIndex: z.number().int().nonnegative(), formula: z.string() })),
+  BINARY_SEARCH_ONE_ITERATION: defineRenderer(ORDERED_STEPS, "BINARY_SEARCH", orderedStepsBaseDataSchema.extend({ values: z.array(z.number()).min(1), leftIndex: z.number().int().nonnegative(), rightIndex: z.number().int().nonnegative(), midIndex: z.number().int().nonnegative(), formula: z.string() })),
   BINARY_SEARCH_WHILE_LOOP: defineRenderer(VIEW, "BINARY_SEARCH", binaryArrayStateSchema.extend({ midIndex: z.number().int().nonnegative(), pythonCode: z.string() })),
   BINARY_SEARCH_ENDINGS: defineRenderer(VIEW, "BINARY_SEARCH", binaryEndingsSchema),
 } satisfies Record<string, RendererDefinition>;

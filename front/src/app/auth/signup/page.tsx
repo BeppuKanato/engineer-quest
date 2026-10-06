@@ -18,8 +18,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getApiBaseUrl } from "@/lib/api";
-import { type AuthUser } from "@/api/auth.api";
+import { ensureUser } from "@/api/auth.api";
 import { useUserSession } from "@/app/component/userSession";
 
 export default function Signup() {
@@ -32,7 +31,6 @@ export default function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
-  const apiBaseUrl = getApiBaseUrl();
   const { setAppUser } = useUserSession();
 
   const handleSignup = async () => {
@@ -67,24 +65,7 @@ export default function Signup() {
 
       const token = await credential.user.getIdToken();
 
-      const res = await fetch(`${apiBaseUrl}/auth/ensure`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          displayName: trimmedDisplayName,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("ユーザー情報の作成に失敗しました");
-      }
-
-      const data = (await res.json()) as {
-        user: AuthUser;
-      };
+      const data = await ensureUser(token, trimmedDisplayName);
 
       setAppUser(data.user);
       setMessage("サインアップ成功");

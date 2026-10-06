@@ -1,173 +1,139 @@
-import { fetcher } from "@/lib/fetcher";
 import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
+import { fetcher } from "@/lib/fetcher";
 
-export type CreateThemeCategory =
-  | "UI"
-  | "HTML_CSS"
-  | "JAVASCRIPT"
-  | "FORM"
-  | "DATA_DISPLAY"
-  | "API"
-  | "CRUD"
-  | "GAME";
-
-export type CourseDifficulty = "EASY" | "NORMAL" | "HARD";
-export type CreateWorkStatus = "DRAFT" | "COMPLETED";
-export type CreateWorkVisibility = "PRIVATE" | "SHARED";
-
-export type CreateChecklistItem = {
-  id: string;
-  label: string;
-  description: string | null;
-};
-
-export type CreateRecommendedCourse = {
-  id: string;
-  title: string;
-};
-
-export type CreateTheme = {
+export type CreateQuestRequirementKind = "BASIC" | "OPTIONAL";
+export type CreateQuestRequirementCategory = "FUNCTIONAL" | "QUALITY" | "PERFORMANCE" | "IMPLEMENTATION";
+export type CreateQuestHint = { id: string; title: string; body: string; courseId?: string };
+export type CreateQuestRequirement = {
   id: string;
   title: string;
   description: string;
-  category: CreateThemeCategory;
-  difficulty: CourseDifficulty;
+  kind: CreateQuestRequirementKind;
+  category: CreateQuestRequirementCategory;
+  points: number;
+  order: number;
+  tests: unknown[];
+  hints: CreateQuestHint[];
+};
+export type RelatedCreateQuestCourse = { id: string; title: string; description: string; reason: string; isCompleted: boolean };
+export type CreateQuestAttemptSummary = {
+  id: string;
+  code: string;
+  selectedRequirementIds: string[];
+  status: "IN_PROGRESS" | "COMPLETED";
+  bestScore: number;
+  updatedAt: string;
+  viewedHints?: Array<{ requirementId: string; hintId: string }>;
+  latestExecution?: { requirementResults: RequirementResult[] } | null;
+  latestSubmission?: {
+    id: string;
+    score: number;
+    maxScore: number;
+    feedback: CreateQuestFeedbackResponse | null;
+  } | null;
+};
+export type CreateQuest = {
+  id: string;
+  title: string;
+  description: string;
+  scenario: string;
+  problemType: string;
+  functionName: string;
+  starterCode: string;
   estimatedMinutes: number;
   tags: string[];
-  defaultThumbnailUrl: string | null;
-  workCount: number;
-  isRecommendedForUser: boolean;
-  recommendedCourses: CreateRecommendedCourse[];
-  requirements: CreateChecklistItem[];
-  challenges: CreateChecklistItem[];
+  thumbnailUrl: string | null;
+  previewData: {
+    kind?: "SORT" | "ROUTE" | "TEXT_SEARCH" | "PRODUCT_SEARCH" | "GRAPH";
+    previewTitle?: string;
+    previewDescription?: string;
+    guidanceTitle?: string;
+    guidanceBody?: string;
+    characters?: Array<{ id: string; name: string; speed: number }>;
+    passages?: Record<string, string[]>;
+    start?: string;
+    goal?: string;
+    text?: string;
+    keyword?: string;
+    products?: Array<{ id: number; name: string; stock: number }>;
+    targetId?: number;
+    graph?: Record<string, string[]>;
+  };
+  maxScore: number;
+  basicScore: number;
+  requirements: CreateQuestRequirement[];
+  relatedCourses: RelatedCreateQuestCourse[];
+  attempt: CreateQuestAttemptSummary | null;
+};
+export type RequirementResult = {
+  requirementId: string;
+  passed: boolean;
+  testResults: Array<{
+    id: string;
+    label: string;
+    passed: boolean;
+    expected?: unknown;
+    actual?: unknown;
+    metric?: { comparisons?: number; maxComparisons?: number; accesses?: number; maxAccesses?: number } | null;
+    error?: string;
+  }>;
+};
+export type ExecutionResult = {
+  executionId: string;
+  score: number;
+  maxScore: number;
+  basicPassed: boolean;
+  requirementResults: RequirementResult[];
+};
+export type CreateQuestFeedbackResponse = {
+  status: "GENERATING" | "COMPLETED" | "FAILED";
+  requestedAt: string;
+  completedAt: string | null;
+  feedback: null | { currentState: string; nextGoal: string; nextStep: string; actionType: string; actionLabel: string };
 };
 
-export type CreateWork = {
+export const getCreateQuests = (token: string): Promise<CreateQuest[]> =>
+  fetchClientQuery("create-quests", () => fetcher<CreateQuest[]>("/create-quests", { token }), {
+    staleTimeMs: 30_000,
+    tags: [queryTags.works],
+  });
+export const getCreateQuest = (token: string, questId: string): Promise<CreateQuest> =>
+  fetcher<CreateQuest>(`/create-quests/${encodeURIComponent(questId)}`, { token });
+export const startCreateQuestAttempt = async (token: string, questId: string) => {
+  const result = await fetcher<{ attemptId: string }>(`/create-quests/${encodeURIComponent(questId)}/attempts`, { method: "POST", token });
+  invalidateClientQueries([queryTags.works]);
+  return result;
+};
+export const saveCreateQuestAttempt = (token: string, attemptId: string, code: string, selectedRequirementIds: string[]) =>
+  fetcher<{ attemptId: string; savedAt: string }>(`/create-quest-attempts/${encodeURIComponent(attemptId)}`, {
+    method: "PATCH", token, body: JSON.stringify({ code, selectedRequirementIds }),
+  });
+export const saveCreateQuestExecution = (token: string, attemptId: string, code: string, requirementResults: RequirementResult[], runtimeError: string | null) =>
+  fetcher<ExecutionResult>(`/create-quest-attempts/${encodeURIComponent(attemptId)}/executions`, {
+    method: "POST", token, body: JSON.stringify({ code, requirementResults, runtimeError }),
+  });
+export const viewCreateQuestHint = (token: string, attemptId: string, requirementId: string, hintId: string) =>
+  fetcher<void>(`/create-quest-attempts/${encodeURIComponent(attemptId)}/hints/${encodeURIComponent(requirementId)}/${encodeURIComponent(hintId)}`, { method: "POST", token });
+export const submitCreateQuest = async (token: string, attemptId: string, code: string, requirementResults: RequirementResult[]) => {
+  const result = await fetcher<{ submissionId: string; score: number; maxScore: number; unlockedAchievements: { id: string; title: string; description: string; rarity: string }[] }>(`/create-quest-attempts/${encodeURIComponent(attemptId)}/submissions`, {
+    method: "POST", token, body: JSON.stringify({ code, requirementResults }),
+  });
+  invalidateClientQueries([queryTags.works, queryTags.profile, queryTags.history, queryTags.achievements, queryTags.collection]);
+  return result;
+};
+export const startCreateQuestFeedback = (token: string, submissionId: string) =>
+  fetcher<CreateQuestFeedbackResponse>(`/create-quest-submissions/${encodeURIComponent(submissionId)}/feedback`, { method: "POST", token });
+export const getCreateQuestFeedback = (token: string, submissionId: string) =>
+  fetcher<CreateQuestFeedbackResponse>(`/create-quest-submissions/${encodeURIComponent(submissionId)}/feedback`, { token });
+
+export type CreateQuestAttemptListItem = {
   id: string;
-  themeId: string;
-  courseId: string | null;
-  themeTitle: string;
-  title: string;
-  description: string;
-  learnedNote: string | null;
-  techStack: string[];
-  publicUrl: string | null;
-  repositoryUrl: string | null;
-  imageUrl: string | null;
-  status: CreateWorkStatus;
-  visibility: CreateWorkVisibility;
-  createdAt: string;
+  questId: string;
+  status: "IN_PROGRESS" | "COMPLETED";
+  bestScore: number;
   updatedAt: string;
-  sharedAt: string | null;
-  theme: CreateTheme;
-  checkedRequirementIds: string[];
-  checkedChallengeIds: string[];
+  quest: { title: string; description: string; thumbnailUrl: string | null; problemType: string };
+  submissions: Array<{ id: string; score: number; maxScore: number }>;
 };
-
-export type CreateWorkPayload = {
-  title: string;
-  description: string;
-  learnedNote: string;
-  techStack: string[];
-  publicUrl: string;
-  repositoryUrl: string;
-  imageUrl: string;
-  status: CreateWorkStatus;
-  visibility: CreateWorkVisibility;
-  requirementIds: string[];
-  challengeIds: string[];
-};
-
-export const getCreateThemes = async (token: string): Promise<CreateTheme[]> =>
-  fetchClientQuery(
-    "create-themes",
-    () => fetcher<CreateTheme[]>("/create-themes", { method: "GET", token }),
-    { staleTimeMs: 60_000, tags: [queryTags.works] }
-  );
-
-export const getCreateTheme = async (
-  token: string,
-  themeId: string
-): Promise<CreateTheme> =>
-  fetchClientQuery(
-    `create-theme:${themeId}`,
-    () => fetcher<CreateTheme>(`/create-themes/${encodeURIComponent(themeId)}`, { method: "GET", token }),
-    { staleTimeMs: 60_000, tags: [queryTags.works] }
-  );
-
-export const createMyWork = async (
-  token: string,
-  themeId: string,
-  payload: CreateWorkPayload
-): Promise<{ workId: string }> => {
-  const result = await fetcher<{ workId: string }>(`/create-themes/${encodeURIComponent(themeId)}/works`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-  invalidateClientQueries([queryTags.works, queryTags.profile, queryTags.history]);
-  return result;
-};
-
-export const getMyWorks = async (token: string): Promise<CreateWork[]> =>
-  fetchClientQuery(
-    "create-theme-my-works",
-    () => fetcher<CreateWork[]>("/my-works", { method: "GET", token }),
-    { staleTimeMs: 15_000, tags: [queryTags.works] }
-  );
-
-export const getMyWork = async (token: string, workId: string): Promise<CreateWork> =>
-  fetchClientQuery(
-    `create-theme-my-work:${workId}`,
-    () => fetcher<CreateWork>(`/my-works/${encodeURIComponent(workId)}`, { method: "GET", token }),
-    { staleTimeMs: 15_000, tags: [queryTags.works] }
-  );
-
-export const updateMyWork = async (
-  token: string,
-  workId: string,
-  payload: CreateWorkPayload
-): Promise<{ workId: string }> => {
-  const result = await fetcher<{ workId: string }>(`/my-works/${encodeURIComponent(workId)}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-  invalidateClientQueries([queryTags.works, queryTags.profile, queryTags.history]);
-  return result;
-};
-
-export const deleteMyWork = async (token: string, workId: string): Promise<void> => {
-  await fetcher<void>(`/my-works/${encodeURIComponent(workId)}`, {
-    method: "DELETE",
-    token,
-  });
-  invalidateClientQueries([queryTags.works, queryTags.profile, queryTags.history]);
-};
-
-export const shareMyWork = async (
-  token: string,
-  workId: string
-): Promise<{ workId: string }> => {
-  const result = await fetcher<{ workId: string }>(`/my-works/${encodeURIComponent(workId)}/share`, {
-    method: "POST",
-    token,
-  });
-  invalidateClientQueries([queryTags.works, queryTags.questBoard, queryTags.profile, queryTags.history]);
-  return result;
-};
-
-export const unshareMyWork = async (
-  token: string,
-  workId: string
-): Promise<{ workId: string }> => {
-  const result = await fetcher<{ workId: string }>(`/my-works/${encodeURIComponent(workId)}/unshare`, {
-    method: "POST",
-    token,
-  });
-  invalidateClientQueries([queryTags.works, queryTags.questBoard, queryTags.profile, queryTags.history]);
-  return result;
-};
-
-export const getSharedWorks = async (): Promise<CreateWork[]> =>
-  fetcher<CreateWork[]>("/shared-works", { method: "GET" });
+export const getCreateQuestAttempts = (token: string) =>
+  fetcher<CreateQuestAttemptListItem[]>("/create-quest-attempts", { token });

@@ -13,7 +13,6 @@ import type {
 } from "@/api/types/legacyMissionExamPlay.types";
 import type {
   AnswerMissionActivityResponse,
-  CollectKnowledgeCardResponse,
   CompleteMissionActivityResponse,
   CompleteMissionResponse,
   MissionPlayResponse,
@@ -188,24 +187,7 @@ export const completeMission = async (
     }
   );
   invalidateProgressQueries();
-  invalidateClientQueries([queryTags.badges, queryTags.missionRewards]);
-  return result;
-};
-
-export const collectKnowledgeCard = async (
-  token: string,
-  missionId: string,
-  knowledgeCardId: string
-): Promise<CollectKnowledgeCardResponse> => {
-  const result = await fetcher<CollectKnowledgeCardResponse>(
-    `/missions/${encodeURIComponent(missionId)}/knowledge-cards/collect`,
-    {
-      method: "POST",
-      token,
-      body: JSON.stringify({ knowledgeCardId }),
-    }
-  );
-  invalidateClientQueries([queryTags.collection, queryTags.profile, queryTags.history]);
+  invalidateClientQueries([queryTags.collection, queryTags.achievements, queryTags.profile, queryTags.history, queryTags.missionRewards]);
   return result;
 };
 
@@ -347,7 +329,7 @@ export const submitMissionExam = async (
     }
   );
   invalidateProgressQueries();
-  invalidateClientQueries([queryTags.badges]);
+  invalidateClientQueries([queryTags.collection, queryTags.achievements]);
   return result;
 };
 

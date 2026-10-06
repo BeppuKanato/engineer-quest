@@ -5,6 +5,7 @@ export type AchievementStatus =
   | "achieved"
   | "visible_locked"
   | "secret_locked";
+export type AchievementRarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
 
 export type AchievementItem = {
   id: string;
@@ -23,6 +24,9 @@ export type AchievementItem = {
   href: string;
   actionLabel: string;
   achievedAt: string | null;
+  rarity: AchievementRarity;
+  iconKey: string;
+  isProfileSelected: boolean;
 };
 
 export type AchievementCategoryGroup = {
@@ -34,6 +38,15 @@ export type AchievementCategoryGroup = {
 export type AchievementsResponse = {
   groups: AchievementCategoryGroup[];
   targetAchievementId: string | null;
+  profileAchievementId: string | null;
+};
+
+export const updateProfileAchievement = async (token: string, achievementId: string | null) => {
+  const result = await fetcher<{ profileAchievementId: string | null }>("/achievements/profile", {
+    method: "PATCH", token, body: JSON.stringify({ achievementId }),
+  });
+  invalidateClientQueries([queryTags.achievements, queryTags.collection, queryTags.profile]);
+  return result;
 };
 
 export const getAchievements = async (

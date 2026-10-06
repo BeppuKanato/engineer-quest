@@ -18,21 +18,18 @@ model User {
   firebaseUid                 String  @unique
   displayName                 String?
   experience                  Int     @default(0)
-  badgeTickets                Int     @default(0)
-  selectedTechIconBadgeId     String?
+  knowledgeCardTableNumber    Int     @default(1)
   selectedMascotId            String  @default("red-panda")
   selectedTargetAchievementId String?
+  selectedProfileAchievementId String?
 
   missionProgresses         UserMissionProgress[]
   activityProgresses        UserMissionActivityProgress[]
   achievements              UserAchievement[]
   knowledgeCards            UserKnowledgeCard[]
-  techIconBadges            UserTechIconBadge[]
-  badgeTicketTransactions   BadgeTicketTransaction[]
-  selectedTechIconBadge     TechIconBadge?                @relation("SelectedTechIconBadge", fields: [selectedTechIconBadgeId], references: [id], onDelete: SetNull)
   selectedTargetAchievement Achievement?                  @relation("SelectedTargetAchievement", fields: [selectedTargetAchievementId], references: [id], onDelete: SetNull)
-  works                     UserWork[]
-  createWorks               UserCreateWork[]
+  selectedProfileAchievement Achievement?                 @relation("SelectedProfileAchievement", fields: [selectedProfileAchievementId], references: [id], onDelete: SetNull)
+  createQuestAttempts       CreateQuestAttempt[]
   questPosts                QuestPost[]
   questComments             QuestComment[]
   questReactions            QuestReaction[]
@@ -120,15 +117,13 @@ model Course {
   isPublished         Boolean @default(true)
   version             Int     @default(1)
 
-  missions       Mission[]
-  categories     CourseCategoryMap[]
-  achievements   Achievement[]
-  knowledgeCards KnowledgeCard[]
-  createMissions CreateMission[]
-  works          UserWork[]
-  createThemes   CreateTheme[]
-  createWorks    UserCreateWork[]
-  questPosts     QuestPost[]
+  missions         Mission[]
+  categories       CourseCategoryMap[]
+  achievements     Achievement[]
+  knowledgeCards   KnowledgeCard[]
+  knowledgeCardScheduleEntries KnowledgeCardScheduleEntry[]
+  createQuestLinks CreateQuestCourse[]
+  questPosts       QuestPost[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -197,13 +192,12 @@ model Mission {
 
   activities MissionActivity[]
 
-  progresses     UserMissionProgress[]
-  achievements   Achievement[]
-  createMissions CreateMission[]
-  works          UserWork[]
-  questPosts     QuestPost[]
-  rewardRuns     MissionRewardRun[]
-  examAttempts   CourseExamAttempt[]
+  progresses   UserMissionProgress[]
+  achievements Achievement[]
+  knowledgeCardScheduleEntries KnowledgeCardScheduleEntry[]
+  questPosts   QuestPost[]
+  rewardRuns   MissionRewardRun[]
+  examAttempts CourseExamAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -373,7 +367,6 @@ model CourseExamFeedback {
   inputSnapshot     Json
 
   model            String
-  promptVersion    String
   openAiResponseId String?
   usage            Json?
   failureCode      String?
@@ -398,20 +391,25 @@ model Achievement {
   title       String
   description String
   category    AchievementCategory
+  rarity      AchievementRarity   @default(COMMON)
+  iconKey     String              @default("achievement")
 
   conditionType  AchievementConditionType
   conditionValue Int?
   missionId      String?
   courseId       String?
+  createQuestId  String?
 
   isSecret  Boolean @default(false)
   sortOrder Int     @default(0)
 
   mission Mission? @relation(fields: [missionId], references: [id], onDelete: SetNull)
   course  Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  createQuest CreateQuest? @relation(fields: [createQuestId], references: [id], onDelete: SetNull)
 
   userAchievements        UserAchievement[]
   selectedAsTargetByUsers User[]            @relation("SelectedTargetAchievement")
+  selectedForProfileByUsers User[]           @relation("SelectedProfileAchievement")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -420,6 +418,7 @@ model Achievement {
   @@index([conditionType])
   @@index([missionId])
   @@index([courseId])
+  @@index([createQuestId])
 }
 
 model UserAchievement {
@@ -447,18 +446,24 @@ model KnowledgeCard {
   label       String
   title       String
   description String
+  connection  String
+  useCase     String
+  searchKeywords String[] @default([])
+  catalogNumber Int
   rarity      KnowledgeCardRarity @default(COMMON)
   sortOrder   Int                 @default(0)
   isPublished Boolean             @default(true)
 
   course             Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userKnowledgeCards UserKnowledgeCard[]
+  scheduleEntries    KnowledgeCardScheduleEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([courseId])
   @@index([rarity])
+  @@unique([courseId, catalogNumber])
 }
 
 model UserKnowledgeCard {
@@ -477,58 +482,27 @@ model UserKnowledgeCard {
 }
 
 // =========================
-// Tech Icon Badge
+// Knowledge Card Schedule
 // =========================
 
-model TechIconBadge {
-  id          String              @id @default(cuid())
-  name        String
-  description String
-  iconUrl     String
-  rarity      TechIconBadgeRarity @default(COMMON)
-  sortOrder   Int                 @default(0)
-  isPublished Boolean             @default(true)
+model KnowledgeCardScheduleEntry {
+  id              String @id
+  courseId        String
+  courseVersion   Int
+  tableNumber     Int
+  missionId       String
+  knowledgeCardId String
 
-  userTechIconBadges UserTechIconBadge[]
-  selectedByUsers    User[]              @relation("SelectedTechIconBadge")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([rarity])
-  @@index([sortOrder])
-}
-
-model UserTechIconBadge {
-  id      String @id @default(cuid())
-  userId  String
-  badgeId String
-
-  acquiredAt DateTime @default(now())
-
-  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge TechIconBadge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, badgeId])
-  @@index([userId])
-  @@index([badgeId])
-}
-
-model BadgeTicketTransaction {
-  id       String            @id @default(cuid())
-  userId   String
-  amount   Int
-  reason   BadgeTicketReason
-  sourceId String?
-  note     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  mission       Mission       @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  knowledgeCard KnowledgeCard @relation(fields: [knowledgeCardId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@index([userId])
-  @@index([reason])
-  @@index([sourceId])
+  @@unique([courseId, courseVersion, tableNumber, missionId], map: "KnowledgeSchedule_course_version_table_mission_key")
+  @@unique([courseId, courseVersion, tableNumber, knowledgeCardId], map: "KnowledgeSchedule_course_version_table_card_key")
+  @@index([missionId])
+  @@index([knowledgeCardId])
 }
 
 // =========================
@@ -542,14 +516,12 @@ model MissionRewardRun {
   missionId           String
   courseExamAttemptId String? @unique
 
-  candidateKnowledgeCardIds String[]  @default([])
-  selectedKnowledgeCardId   String?
-  knowledgeCardSelectedAt   DateTime?
+  awardedKnowledgeCardId String?
+  knowledgeCardAwardedAt DateTime?
 
   unlockedAchievementIds String[] @default([])
 
-  awardedExp          Int @default(0)
-  awardedBadgeTickets Int @default(0)
+  awardedExp Int @default(0)
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   mission           Mission            @relation(fields: [missionId], references: [id], onDelete: Cascade)
@@ -564,197 +536,171 @@ model MissionRewardRun {
 }
 
 // =========================
-// Create Mission / My Works
+// Create Quest
 // =========================
 
-model CreateMission {
-  id                    String   @id @default(cuid())
-  courseId              String
-  missionId             String?
-  title                 String
-  theme                 String
-  description           String
-  minimumRequirements   String[] @default([])
-  advancedRequirements  String[] @default([])
-  suggestedTechnologies String[] @default([])
-  starterCode           String?
-  sortOrder             Int      @default(0)
-  isPublished           Boolean  @default(true)
-
-  course  Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  mission Mission?   @relation(fields: [missionId], references: [id], onDelete: SetNull)
-  works   UserWork[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([courseId])
-  @@index([missionId])
-  @@index([sortOrder])
-}
-
-model UserWork {
-  id              String  @id @default(cuid())
-  userId          String
-  createMissionId String
-  courseId        String
-  missionId       String?
-
-  title        String
-  description  String
-  focusPoint   String
-  technologies String[] @default([])
-  code         String
-  isFavorite   Boolean  @default(false)
-
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createMission CreateMission    @relation(fields: [createMissionId], references: [id], onDelete: Cascade)
-  course        Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  mission       Mission?         @relation(fields: [missionId], references: [id], onDelete: SetNull)
-  reviews       UserWorkReview[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([createMissionId])
-  @@index([courseId])
-  @@index([missionId])
-}
-
-model UserWorkReview {
-  id           String @id @default(cuid())
-  userWorkId   String
-  goodPoints   String
-  improvements String
-  nextTry      String
-  rawText      String
-
-  userWork UserWork @relation(fields: [userWorkId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@index([userWorkId])
-}
-
-// =========================
-// Create Themes / My Works
-// =========================
-
-model CreateTheme {
-  id                  String              @id @default(cuid())
-  title               String
-  description         String
-  category            CreateThemeCategory
-  difficulty          CourseDifficulty    @default(EASY)
-  estimatedMinutes    Int                 @default(60)
-  tags                String[]            @default([])
-  defaultThumbnailUrl String?
-  recommendedCourseId String?
-  sortOrder           Int                 @default(0)
-  isPublished         Boolean             @default(true)
-
-  recommendedCourse Course?                  @relation(fields: [recommendedCourseId], references: [id], onDelete: SetNull)
-  requirements      CreateThemeRequirement[]
-  challenges        CreateThemeChallenge[]
-  works             UserCreateWork[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([category])
-  @@index([recommendedCourseId])
-  @@index([sortOrder])
-}
-
-model CreateThemeRequirement {
-  id          String  @id @default(cuid())
-  themeId     String
-  label       String
-  description String?
-  order       Int     @default(0)
-
-  theme  CreateTheme                      @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  checks UserCreateWorkRequirementCheck[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([themeId])
-  @@index([order])
-}
-
-model CreateThemeChallenge {
-  id          String  @id @default(cuid())
-  themeId     String
-  label       String
-  description String?
-  order       Int     @default(0)
-
-  theme  CreateTheme                    @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  checks UserCreateWorkChallengeCheck[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([themeId])
-  @@index([order])
-}
-
-model UserCreateWork {
-  id       String  @id @default(cuid())
-  userId   String
-  themeId  String
-  courseId String?
-
+model CreateQuest {
+  id               String   @id
   title            String
   description      String
-  learnedNote      String?
-  techStack        String[]             @default([])
-  publicUrl        String?
-  repositoryUrl    String?
-  imageUrl         String?
-  imageStoragePath String?
-  status           CreateWorkStatus     @default(DRAFT)
-  visibility       CreateWorkVisibility @default(PRIVATE)
+  scenario         String
+  problemType      String
+  functionName     String
+  starterCode      String
+  estimatedMinutes Int      @default(45)
+  tags             String[] @default([])
+  thumbnailUrl     String?
+  previewData      Json
+  sortOrder        Int      @default(0)
+  isPublished      Boolean  @default(true)
 
-  user              User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme             CreateTheme                      @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  course            Course?                          @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  requirementChecks UserCreateWorkRequirementCheck[]
-  challengeChecks   UserCreateWorkChallengeCheck[]
+  requirements   CreateQuestRequirement[]
+  relatedCourses CreateQuestCourse[]
+  attempts       CreateQuestAttempt[]
+  achievements   Achievement[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  sharedAt  DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([themeId])
+  @@index([sortOrder])
+  @@index([problemType])
+}
+
+model CreateQuestRequirement {
+  id          String                         @id
+  questId     String
+  title       String
+  description String
+  kind        CreateQuestRequirementKind
+  category    CreateQuestRequirementCategory
+  points      Int
+  order       Int                            @default(0)
+  tests       Json
+  hints       Json
+
+  quest     CreateQuest           @relation(fields: [questId], references: [id], onDelete: Cascade)
+  hintViews CreateQuestHintView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questId, order])
+  @@index([kind])
+}
+
+model CreateQuestCourse {
+  questId  String
+  courseId String
+  reason   String
+  order    Int    @default(0)
+
+  quest  CreateQuest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  course Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([questId, courseId])
   @@index([courseId])
-  @@index([visibility])
-  @@index([updatedAt])
 }
 
-model UserCreateWorkRequirementCheck {
-  workId        String
+model CreateQuestAttempt {
+  id                     String                   @id @default(cuid())
+  userId                 String
+  questId                String
+  code                   String
+  selectedRequirementIds String[]                 @default([])
+  status                 CreateQuestAttemptStatus @default(IN_PROGRESS)
+  bestScore              Int                      @default(0)
+  startedAt              DateTime                 @default(now())
+  completedAt            DateTime?
+
+  user        User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest       CreateQuest                @relation(fields: [questId], references: [id], onDelete: Cascade)
+  executions  CreateQuestTestExecution[]
+  submissions CreateQuestSubmission[]
+  hintViews   CreateQuestHintView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, questId])
+  @@index([userId, updatedAt])
+  @@index([questId])
+}
+
+model CreateQuestTestExecution {
+  id           String   @id @default(cuid())
+  attemptId    String
+  code         String
+  score        Int
+  basicPassed  Boolean
+  results      Json
+  runtimeError String?
+  executedAt   DateTime @default(now())
+
+  attempt CreateQuestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, executedAt])
+}
+
+model CreateQuestSubmission {
+  id          String   @id @default(cuid())
+  attemptId   String
+  code        String
+  score       Int
+  maxScore    Int
+  basicPassed Boolean
+  results     Json
+  submittedAt DateTime @default(now())
+
+  attempt  CreateQuestAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  feedback CreateQuestFeedback?
+
+  @@index([attemptId, submittedAt])
+}
+
+model CreateQuestHintView {
+  id            String   @id @default(cuid())
+  attemptId     String
   requirementId String
-  checked       Boolean @default(false)
+  hintId        String
+  viewedAt      DateTime @default(now())
 
-  work        UserCreateWork         @relation(fields: [workId], references: [id], onDelete: Cascade)
-  requirement CreateThemeRequirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  attempt     CreateQuestAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  requirement CreateQuestRequirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
 
-  @@id([workId, requirementId])
+  @@unique([attemptId, requirementId, hintId])
+  @@index([attemptId, viewedAt])
 }
 
-model UserCreateWorkChallengeCheck {
-  workId      String
-  challengeId String
-  checked     Boolean @default(false)
+model CreateQuestFeedback {
+  id           String @id @default(cuid())
+  submissionId String @unique
 
-  work      UserCreateWork       @relation(fields: [workId], references: [id], onDelete: Cascade)
-  challenge CreateThemeChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  status    CourseExamFeedbackStatus
+  condition FeedbackCondition
 
-  @@id([workId, challengeId])
+  currentState String?
+  nextGoal     String?
+  nextStep     String?
+  actionType   CourseExamFeedbackActionType?
+  actionLabel  String?
+
+  learningAnalysis  Json?
+  selectionAnalysis Json?
+  inputSnapshot     Json
+
+  model            String
+  openAiResponseId String?
+  usage            Json?
+  failureCode      String?
+  generatedAt      DateTime?
+
+  submission CreateQuestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([condition])
 }
 
 // =========================
@@ -906,6 +852,9 @@ enum CourseExamFeedbackActionType {
   VIEW_BADGE_COLLECTION
   SET_PROFILE_BADGE
   VIEW_PROFILE
+  RETRY_CREATE_QUEST
+  OPEN_RELATED_COURSE
+  SHARE_CREATE_QUEST
   NO_APP_ACTION
 }
 
@@ -928,25 +877,21 @@ enum CourseCategoryType {
   DYNAMIC_PROGRAMMING
 }
 
-enum CreateThemeCategory {
-  UI
-  HTML_CSS
-  JAVASCRIPT
-  FORM
-  DATA_DISPLAY
-  API
-  CRUD
-  GAME
+enum CreateQuestRequirementKind {
+  BASIC
+  OPTIONAL
 }
 
-enum CreateWorkStatus {
-  DRAFT
+enum CreateQuestRequirementCategory {
+  FUNCTIONAL
+  QUALITY
+  PERFORMANCE
+  IMPLEMENTATION
+}
+
+enum CreateQuestAttemptStatus {
+  IN_PROGRESS
   COMPLETED
-}
-
-enum CreateWorkVisibility {
-  PRIVATE
-  SHARED
 }
 
 enum MissionActivityType {
@@ -972,6 +917,8 @@ enum AchievementCategory {
   LEARNING_ACTION
   COURSE_COMPLETE
   STREAK
+  CREATE_QUEST
+  COLLECTION
 }
 
 enum AchievementConditionType {
@@ -983,29 +930,25 @@ enum AchievementConditionType {
   ACTIVITY_COUNT
   COURSE_COMPLETE
   STREAK_DAYS
+  CREATE_QUEST_SCORE
+  CREATE_QUEST_COMPLETED_COUNT
+  CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT
+  CREATE_QUEST_PERFECT_COUNT
+  KNOWLEDGE_CARD_COUNT
+  COURSE_COMPLETED_COUNT
 }
 
-enum KnowledgeCardRarity {
-  COMMON
-  RARE
-  EPIC
-}
-
-enum TechIconBadgeRarity {
+enum AchievementRarity {
   COMMON
   RARE
   EPIC
   LEGENDARY
 }
 
-enum BadgeTicketReason {
-  MISSION_COMPLETE
-  CHALLENGE_COMPLETE
-  COURSE_COMPLETE
-  ACHIEVEMENT_UNLOCK
-  BADGE_GACHA
-  CREATE_WORK_SAVE
-  CREATE_WORK_REVIEW
+enum KnowledgeCardRarity {
+  COMMON
+  RARE
+  EPIC
 }
 
 enum QuestPostCategory {

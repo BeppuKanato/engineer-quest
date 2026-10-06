@@ -19,7 +19,7 @@ export const estimateActivityMinutes = (activity: ActivitySeed): number => {
   if (answerRenderer === "CODE_EDITOR") return LEARNING_REWARD_POLICY.courseMissionMinutes;
   if (rendererKey === "TEXT") return 1;
   if (rendererKey === "LEARNING_ROADMAP" || rendererKey === "SORT_OVERVIEW") return 2;
-  if (rendererKey === "ARRAY_TRACE") return 2;
+  if (rendererKey === "ARRAY_TRACE" || rendererKey === "GRAPH_TRACE" || rendererKey === "GRAPH_CHOICE") return 2;
 
   switch (answerRenderer) {
     case "PAIR_DECISION":

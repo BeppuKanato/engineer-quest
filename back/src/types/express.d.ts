@@ -10,8 +10,8 @@ declare global {
         firebaseUid: string;
         displayName: string | null;
         experience: number;
-        badgeTickets: number;
-        selectedTechIconBadgeId: string | null;
+        knowledgeCardTableNumber: number;
+        selectedProfileAchievementId: string | null;
         selectedMascotId: string;
         selectedTargetAchievementId: string | null;
         hasHexadResponse: boolean;

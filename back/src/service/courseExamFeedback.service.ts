@@ -14,10 +14,7 @@ import {
   type CourseExamFeedbackGenerationResult,
   type CourseExamFeedbackGenerator,
 } from "./courseExamFeedback.openai";
-import {
-  buildCourseExamFeedbackPrompt,
-  COURSE_EXAM_FEEDBACK_PROMPT_VERSION,
-} from "./courseExamFeedback.prompt";
+import { buildCourseExamFeedbackPrompt } from "./courseExamFeedback.prompt";
 import type {
   CourseExamFeedbackActionType,
   GeneratedCourseExamFeedback,
@@ -241,7 +238,6 @@ export const startCourseExamFeedbackByFirebaseUid = async ({
         status: CourseExamFeedbackStatus.GENERATING,
         condition: context.condition,
         model: getCourseExamFeedbackModel(),
-        promptVersion: COURSE_EXAM_FEEDBACK_PROMPT_VERSION,
         inputSnapshot: toJson(inputSnapshot),
         failureCode: null,
       },
@@ -258,7 +254,6 @@ export const startCourseExamFeedbackByFirebaseUid = async ({
           status: CourseExamFeedbackStatus.GENERATING,
           condition: context.condition,
           model: getCourseExamFeedbackModel(),
-          promptVersion: COURSE_EXAM_FEEDBACK_PROMPT_VERSION,
           inputSnapshot: toJson(inputSnapshot),
         },
       });

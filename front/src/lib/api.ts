@@ -1,9 +1,19 @@
-export const getApiBaseUrl = () => {
-  // ブラウザ側：window が存在する
-  if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
+const normalizeApiBaseUrl = (baseUrl: string): string => {
+  const normalized = baseUrl.replace(/\/+$/, "");
+
+  return normalized.endsWith("/api") ? normalized : `${normalized}/api`;
+};
+
+export const getApiBaseUrl = (): string => {
+  const baseUrl =
+    typeof window !== "undefined"
+      ? process.env.NEXT_PUBLIC_API_BASE_URL
+      : process.env.INTERNAL_API_BASE_URL ??
+        process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("API base URL is not defined");
   }
 
-  // サーバー側（SSR）：内部ネットワークを使う
-  return process.env.INTERNAL_API_BASE_URL;
+  return normalizeApiBaseUrl(baseUrl);
 };

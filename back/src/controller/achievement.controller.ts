@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../error/appError";
 import {
   getAchievementsByUser,
+  updateProfileAchievementByUserId,
   updateTargetAchievementByUserId,
 } from "../service/achievement.service";
 
@@ -14,6 +15,20 @@ const getAuthUser = (req: Request) => {
   }
 
   return user;
+};
+
+export const updateProfileAchievementController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const value = req.body?.achievementId;
+    const achievementId = typeof value === "string" && value.trim() ? value.trim() : null;
+    res.status(200).json(await updateProfileAchievementByUserId(getAuthUser(req).id, achievementId));
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getAchievementsController = async (

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">ダンジョンの最短脱出ルート</title><desc id="desc">入口から出口まで短い経路が光るダンジョンマップ</desc>
+  <rect width="720" height="420" rx="28" fill="#eef4ff"/><rect x="45" y="40" width="630" height="340" rx="24" fill="#fff" stroke="#c7d8f7" stroke-width="3"/>
+  <text x="75" y="90" fill="#1e3a8a" font-family="sans-serif" font-size="28" font-weight="700">ESCAPE ROUTE</text>
+  <g fill="none" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round"><path d="M125 210 L270 145 L420 120 L575 205"/><path d="M125 210 L280 275 L455 275 L575 205"/></g>
+  <path d="M125 210 L280 275 L455 275 L575 205" fill="none" stroke="#2563eb" stroke-width="12" stroke-linecap="round"/>
+  <g font-family="sans-serif" font-size="22" font-weight="700" text-anchor="middle"><g fill="#dbeafe" stroke="#2563eb" stroke-width="4"><circle cx="125" cy="210" r="34"/><circle cx="280" cy="275" r="34"/><circle cx="455" cy="275" r="34"/></g><circle cx="575" cy="205" r="36" fill="#dcfce7" stroke="#16a34a" stroke-width="4"/><circle cx="270" cy="145" r="30" fill="#f8fafc" stroke="#94a3b8" stroke-width="4"/><circle cx="420" cy="120" r="30" fill="#f8fafc" stroke="#94a3b8" stroke-width="4"/><text x="125" y="218" fill="#1e3a8a">S</text><text x="280" y="283" fill="#1e3a8a">B</text><text x="455" y="283" fill="#1e3a8a">C</text><text x="575" y="213" fill="#166534">G</text><text x="270" y="153" fill="#475569">A</text><text x="420" y="128" fill="#475569">D</text></g>
+</svg>

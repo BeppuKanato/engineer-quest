@@ -1,7 +1,5 @@
 import { FeedbackCondition } from "@prisma/client";
 
-export const COURSE_EXAM_FEEDBACK_PROMPT_VERSION = "COURSE_EXAM_FEEDBACK_V1";
-
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
 export const buildCommonCourseExamFeedbackPrompt = ({
@@ -13,7 +11,7 @@ export const buildCommonCourseExamFeedbackPrompt = ({
   appState: unknown;
   availableActions: unknown;
 }) => `あなたは、ゲーミフィケーションを取り入れたプログラミング学習アプリ
-「Engineer Quest」で、コース完了後に学習者へ提示する
+「Engineer Quest」で、学習活動の提出後に学習者へ提示する
 フィードバックを生成します。
 
 【重要】
@@ -39,7 +37,7 @@ export const buildCommonCourseExamFeedbackPrompt = ({
 
 【学習ログ】
 
-以下は、今回のコース完了ミッションにおける
+以下は、今回の学習活動における
 学習者の実際の学習ログです。
 
 ${json(learningLog)}
@@ -112,7 +110,7 @@ ${json(availableActions)}
 アプリ内の行動を提案する場合は、
 必ずこの一覧に含まれる利用可能な行動から選択してください。
 
-一覧に存在しない機能、問題、実績、バッジ、
+一覧に存在しない機能、問題、実績、
 知識カード、コース等を新しく作らないでください。
 
 固有名称を使用する場合も、
@@ -237,7 +235,7 @@ Achiever
 明確な目標の達成によって動機づけられる傾向。
 
 Player
-ポイント、報酬、実績、バッジ、
+ポイント、報酬、実績、コレクション、
 目に見える進捗によって動機づけられる傾向。
 
 Disruptor
@@ -278,7 +276,7 @@ HEXADは学習者を1タイプへ分類するために
 
 Philanthropistだから必ず掲示板へ回答する
 Socializerだから必ず掲示板へ投稿する
-Playerだから必ずバッジを利用する
+Playerだから必ずコレクション機能を利用する
 
 という固定的な判断をしないでください。
 
