@@ -8,14 +8,14 @@ export const getActivityLearningRole = (
 ): ActivityLearningRole => activity.content.learningRole;
 
 export const learningRoleLabel: Record<ActivityLearningRole, string> = {
-  ORIENTATION: "コース案内",
-  EXPLANATION: "学習",
+  ORIENTATION: "導入",
+  EXPLANATION: "説明",
   GUIDED_PRACTICE: "練習",
-  INDEPENDENT_PRACTICE: "確認",
-  CODE_MAPPING: "コード",
-  SYNTHESIS: "総合",
-  MISSION_CHECK: "確認",
-  COURSE_EXAM: "コース課題",
+  INDEPENDENT_PRACTICE: "練習",
+  CODE_MAPPING: "コードとの対応",
+  SYNTHESIS: "まとめ",
+  MISSION_CHECK: "練習",
+  COURSE_EXAM: "Course Mission",
 };
 
 export const isCodeLearningRole = (role: ActivityLearningRole) =>

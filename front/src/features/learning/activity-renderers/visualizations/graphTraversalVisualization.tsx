@@ -10,11 +10,13 @@ type GraphEdge = { from: string; to: string };
 type GraphStep = {
   currentNode?: string;
   inspectingNode?: string;
+  inspectingNodes?: string[];
   queue: string[];
   discoveredNodes: string[];
   processedNodes: string[];
   distances?: Record<string, number>;
   activeEdge?: { from: string; to: string };
+  activeEdges?: { from: string; to: string }[];
   message: string;
   nextLabel?: string;
   activeCodeLines?: number[];
@@ -61,14 +63,21 @@ const parseData = (content: Record<string, unknown>): GraphTraceData | null => {
     const activeEdge = isRecord(item.activeEdge) && typeof item.activeEdge.from === "string" && typeof item.activeEdge.to === "string"
       ? { from: item.activeEdge.from, to: item.activeEdge.to }
       : undefined;
+    const activeEdges = Array.isArray(item.activeEdges)
+      ? item.activeEdges.flatMap((edge) => isRecord(edge) && typeof edge.from === "string" && typeof edge.to === "string"
+        ? [{ from: edge.from, to: edge.to }]
+        : [])
+      : undefined;
     return [{
       currentNode: typeof item.currentNode === "string" ? item.currentNode : undefined,
       inspectingNode: typeof item.inspectingNode === "string" ? item.inspectingNode : undefined,
+      inspectingNodes: stringList(item.inspectingNodes),
       queue: stringList(item.queue),
       discoveredNodes: stringList(item.discoveredNodes),
       processedNodes: stringList(item.processedNodes),
       distances,
       activeEdge,
+      activeEdges,
       message: item.message,
       nextLabel: typeof item.nextLabel === "string" ? item.nextLabel : undefined,
       activeCodeLines: Array.isArray(item.activeCodeLines)
@@ -101,7 +110,7 @@ const parseData = (content: Record<string, unknown>): GraphTraceData | null => {
 
 const nodeColors = (nodeId: string, step: GraphStep) => {
   if (nodeId === step.currentNode) return { fill: "#2563eb", stroke: "#1d4ed8", text: "#ffffff", label: "現在取り出した場所" };
-  if (nodeId === step.inspectingNode) return { fill: "#c4b5fd", stroke: "#7c3aed", text: "#3b0764", label: "今確認する隣" };
+  if (nodeId === step.inspectingNode || step.inspectingNodes?.includes(nodeId)) return { fill: "#c4b5fd", stroke: "#7c3aed", text: "#3b0764", label: "今確認している隣" };
   if (step.processedNodes.includes(nodeId)) return { fill: "#bbf7d0", stroke: "#16a34a", text: "#14532d", label: "確認済み" };
   if (step.discoveredNodes.includes(nodeId)) return { fill: "#fde68a", stroke: "#d97706", text: "#78350f", label: "発見済み" };
   return { fill: "#ffffff", stroke: "#94a3b8", text: "#334155", label: "未発見" };
@@ -133,12 +142,13 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
   const step = data.steps[stepIndex];
   const nodeById = new Map(data.nodes.map((node) => [node.id, node]));
   const showCurrentLegend = data.steps.some((item) => item.currentNode);
+  const showInspectingLegend = data.steps.some((item) => item.inspectingNode || item.inspectingNodes?.length);
   const showWaitingLegend = data.steps.some((item) => item.discoveredNodes.some((id) => !item.processedNodes.includes(id) && id !== item.currentNode));
   const showProcessedLegend = data.steps.some((item) => item.processedNodes.length > 0);
-  const activeEdge = (edge: GraphEdge) => step.activeEdge && (
-    (step.activeEdge.from === edge.from && step.activeEdge.to === edge.to)
-    || (step.activeEdge.from === edge.to && step.activeEdge.to === edge.from)
-  );
+  const activeEdge = (edge: GraphEdge) => [step.activeEdge, ...(step.activeEdges ?? [])].some((candidate) => candidate && (
+    (candidate.from === edge.from && candidate.to === edge.to)
+    || (candidate.from === edge.to && candidate.to === edge.from)
+  ));
 
   return (
     <Stack spacing={2.25} sx={{ minWidth: 0 }}>
@@ -178,6 +188,7 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
         </Box>
         <Stack direction="row" gap={1} flexWrap="wrap" useFlexGap justifyContent="center" sx={{ mt: 1 }} aria-label="図の状態説明">
           {showCurrentLegend && <Chip size="small" label={data.currentNodeLabel ?? "現在取り出した場所"} sx={{ bgcolor: "#dbeafe", fontWeight: 800 }} />}
+          {showInspectingLegend && <Chip size="small" label="今確認している隣" sx={{ bgcolor: "#ede9fe", color: "#5b21b6", fontWeight: 800 }} />}
           {showWaitingLegend && <Chip size="small" label={data.waitingNodeLabel ?? "発見済み・待機中"} sx={{ bgcolor: "#fef3c7", fontWeight: 800 }} />}
           {showProcessedLegend && <Chip size="small" label="確認済み" sx={{ bgcolor: "#dcfce7", fontWeight: 800 }} />}
         </Stack>
@@ -195,14 +206,15 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
       )}
 
       {data.showQueue && (
-        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2.5, borderColor: "#f59e0b", bgcolor: "#fffbeb" }}>
-          <Typography fontWeight={950}>{data.containerLabel ?? "待ち行列（左から取り出す）"}</Typography>
-          <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+        <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, borderWidth: 2, borderColor: "#f59e0b", bgcolor: "#fffbeb" }}>
+          <Typography variant="h6" fontWeight={950}>{data.containerLabel ?? "待ち行列（左から取り出す）"}</Typography>
+          <Stack direction="row" gap={1.25} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
             <Typography fontSize={13} fontWeight={900} color="#92400e">{data.containerLeadingLabel ?? "次に取り出す側"}</Typography>
             {step.queue.length > 0
               ? step.queue.map((node, index) => {
                 const activeIndex = data.activeContainerItem === "LAST" ? step.queue.length - 1 : 0;
-                return <Chip key={`${node}-${index}`} label={node} color={index === activeIndex ? "warning" : "default"} sx={{ fontWeight: 900 }} />;
+                const colors = nodeColors(node, step);
+                return <Chip key={`${node}-${index}`} label={node} sx={{ height: 42, minWidth: 48, fontSize: 17, fontWeight: 950, color: colors.text, bgcolor: colors.fill, border: `${index === activeIndex ? 3 : 2}px solid ${colors.stroke}`, boxShadow: index === activeIndex ? `0 0 0 3px ${colors.fill}` : "none" }} />;
               })
               : <Chip label="空" variant="outlined" />}
             <Typography fontSize={13} fontWeight={900} color="#92400e">{data.containerTrailingLabel ?? "追加する側"}</Typography>

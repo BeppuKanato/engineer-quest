@@ -201,13 +201,6 @@ export function CourseMissionPythonEditor({
     setResults([]);
     setRunError(null);
     setPersistenceError(null);
-    onTestResult({
-      passed: false,
-      passedCount: 0,
-      totalCount: tests.length,
-      testResults: [],
-      runtimeError: null,
-    });
     onChange(nextCode);
   };
 

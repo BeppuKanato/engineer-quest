@@ -2,7 +2,7 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Button, Chip, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Button, Chip, Paper, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 
 import { AlgorithmArray } from "./algorithmArray";
@@ -20,7 +20,7 @@ type PairDecisionSelectProps = {
   correctAnswers: Record<string, string>;
   disabled?: boolean;
   showCorrect?: boolean;
-  onChange: (values: Record<string, string>) => void;
+  onChange: (values: Record<string, string>, locallyVerified: boolean) => void;
 };
 
 const options = [
@@ -38,18 +38,34 @@ export const PairDecisionSelect = ({
 }: PairDecisionSelectProps) => {
   const firstUnanswered = questions.findIndex((question) => !values[question.id]);
   const [questionIndex, setQuestionIndex] = useState(firstUnanswered >= 0 ? firstUnanswered : 0);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [checked, setChecked] = useState<Record<string, string>>({});
   const safeQuestionIndex = Math.min(questionIndex, Math.max(questions.length - 1, 0));
   const question = questions[safeQuestionIndex];
   if (!question) throw new Error("PAIR_DECISION requires at least one question");
 
-  const selected = values[question.id];
+  const selected = drafts[question.id] ?? values[question.id];
   const correct = correctAnswers[question.id];
   const allAnswered = questions.every((item) => Boolean(values[item.id]));
+  const isChecked = checked[question.id] === selected && Boolean(selected);
+  const isCorrect = isChecked && selected === correct;
 
   const select = (optionId: string) => {
     if (disabled) return;
-    onChange({ ...values, [question.id]: optionId });
-    if (safeQuestionIndex < questions.length - 1) setQuestionIndex(safeQuestionIndex + 1);
+    setDrafts((current) => ({ ...current, [question.id]: optionId }));
+    setChecked((current) => {
+      const next = { ...current };
+      delete next[question.id];
+      return next;
+    });
+  };
+
+  const checkAnswer = () => {
+    if (!selected || disabled) return;
+    setChecked((current) => ({ ...current, [question.id]: selected }));
+    if (selected !== correct) return;
+    const next = { ...values, [question.id]: selected };
+    onChange(next, questions.every((item) => Boolean(next[item.id])));
   };
 
   return (
@@ -61,7 +77,7 @@ export const PairDecisionSelect = ({
             label={`問題 ${index + 1}`}
             color={index === safeQuestionIndex ? "primary" : values[item.id] ? "success" : "default"}
             variant={index === safeQuestionIndex ? "filled" : "outlined"}
-            onClick={() => setQuestionIndex(index)}
+            onClick={index <= safeQuestionIndex || Boolean(values[item.id]) ? () => setQuestionIndex(index) : undefined}
             sx={{ fontWeight: 900, cursor: "pointer" }}
           />
         ))}
@@ -97,17 +113,31 @@ export const PairDecisionSelect = ({
               );
             })}
           </Stack>
-          {showCorrect && question.feedback && (
-            <Typography color="#166534" fontWeight={850} aria-live="polite">
-              {question.feedback}
-            </Typography>
+          {isChecked && !showCorrect && (
+            <Alert severity={isCorrect ? "success" : "warning"} sx={{ width: "100%" }}>
+              {isCorrect
+                ? question.feedback ?? "正解です。左右の値を比べて判断できました。"
+                : "左の値が右の値より大きいときだけ交換します。もう一度選び直しましょう。"}
+            </Alert>
           )}
+          {showCorrect && question.feedback && <Alert severity="success" sx={{ width: "100%" }}>{question.feedback}</Alert>}
         </Stack>
       </Paper>
 
+      {!disabled && !showCorrect && !isCorrect && (
+        <Button variant="outlined" disabled={!selected} onClick={checkAnswer} sx={{ minHeight: 46, fontWeight: 900 }}>
+          この問題の答えを確認する
+        </Button>
+      )}
+      {isCorrect && safeQuestionIndex < questions.length - 1 && (
+        <Button variant="contained" onClick={() => setQuestionIndex(safeQuestionIndex + 1)} sx={{ minHeight: 46, fontWeight: 900 }}>
+          次の問題へ
+        </Button>
+      )}
+
       {allAnswered && (
         <Typography color="#166534" fontWeight={900}>
-          {questions.length}問の回答がそろいました。「答えを確認する」を押してください。
+          {questions.length}問すべてに正解しました。下の「次へ」から進みましょう。
         </Typography>
       )}
     </Stack>

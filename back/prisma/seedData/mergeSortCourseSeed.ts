@@ -134,7 +134,17 @@ const sequence = (
   id: string,
   title: string,
   body: string,
-  questions: { question: string; options: { id: string; label: string }[]; correctFeedback: string; incorrectFeedback: string }[],
+  questions: {
+    question: string;
+    options: { id: string; label: string }[];
+    correctFeedback: string;
+    incorrectFeedback: string;
+    leftValues?: number[];
+    rightValues?: number[];
+    leftIndex?: number;
+    rightIndex?: number;
+    resultValues?: number[];
+  }[],
   answers: string[],
   feedback: string,
 ) => a(
@@ -310,10 +320,10 @@ const merge = m("merge", "整列済みの2列を、小さい順に結合しよ�
     ], finalMessage: "結果は[1, 2, 5, 7]。4つの値を一度ずつ残せました。" },
     "1回の操作で、選んだ値を1つだけ結果へ移すよ。"),
   sequence("merge-decisions", "別の2列を順に結合しよう", "左[3, 6]と右[2, 4]は整列済みです。各問題では、表示された未使用の先頭だけを比べます。", [
-    { question: "最初は左3と右2。次に結果へ移す値は？", options: [{ id: "two", label: "右の2" }, { id: "three", label: "左の3" }, { id: "six", label: "左の6" }], correctFeedback: "2が小さいので、結果は[2]になります。", incorrectFeedback: "左3と右2だけを比べましょう。" },
-    { question: "右2を使用済みにしました。左3と右4では？", options: [{ id: "three", label: "左の3" }, { id: "four", label: "右の4" }, { id: "six", label: "左の6" }], correctFeedback: "3が小さいので、結果は[2, 3]です。", incorrectFeedback: "現在の未使用の先頭は左3と右4です。" },
-    { question: "左3を使用済みにしました。左6と右4では？", options: [{ id: "four", label: "右の4" }, { id: "six", label: "左の6" }, { id: "done", label: "ここで終了" }], correctFeedback: "4を移し、結果は[2, 3, 4]です。", incorrectFeedback: "両方に未使用の値があるため、先頭を比較します。" },
-    { question: "右は空になり、左に6が残りました。次は？", options: [{ id: "six", label: "左の6を追加" }, { id: "discard", label: "6を捨てて終了" }, { id: "restart", label: "最初から比較し直す" }], correctFeedback: "残りの6はすでに順序どおりなので末尾へ追加します。", incorrectFeedback: "値をすべて残すため、空でない側の残りを考えましょう。" },
+    { question: "最初は左3と右2。次に結果へ移す値は？", leftValues: [3, 6], rightValues: [2, 4], leftIndex: 0, rightIndex: 0, resultValues: [], options: [{ id: "two", label: "右の2" }, { id: "three", label: "左の3" }, { id: "six", label: "左の6" }], correctFeedback: "2が小さいので、結果は[2]になります。", incorrectFeedback: "左3と右2だけを比べましょう。" },
+    { question: "右2を使用済みにしました。左3と右4では？", leftValues: [3, 6], rightValues: [2, 4], leftIndex: 0, rightIndex: 1, resultValues: [2], options: [{ id: "three", label: "左の3" }, { id: "four", label: "右の4" }, { id: "six", label: "左の6" }], correctFeedback: "3が小さいので、結果は[2, 3]です。", incorrectFeedback: "現在の未使用の先頭は左3と右4です。" },
+    { question: "左3を使用済みにしました。左6と右4では？", leftValues: [3, 6], rightValues: [2, 4], leftIndex: 1, rightIndex: 1, resultValues: [2, 3], options: [{ id: "four", label: "右の4" }, { id: "six", label: "左の6" }, { id: "done", label: "ここで終了" }], correctFeedback: "4を移し、結果は[2, 3, 4]です。", incorrectFeedback: "両方に未使用の値があるため、先頭を比較します。" },
+    { question: "右は空になり、左に6が残りました。次は？", leftValues: [3, 6], rightValues: [2, 4], leftIndex: 1, rightIndex: 2, resultValues: [2, 3, 4], options: [{ id: "six", label: "左の6を追加" }, { id: "discard", label: "6を捨てて終了" }, { id: "restart", label: "最初から比較し直す" }], correctFeedback: "残りの6はすでに順序どおりなので末尾へ追加します。", incorrectFeedback: "値をすべて残すため、空でない側の残りを考えましょう。" },
   ], ["two", "three", "four", "six"], "[3, 6]と[2, 4]を[2, 3, 4, 6]へ結合できました。"),
   a("remainder", "片方が空なら、もう片方の残りを追加しよう", "比較を止める条件と、残りを使える理由を確認しましょう。",
     "両方に未使用の値がある間だけ、先頭を比較します。片方が空になった時点で、もう片方の未使用部分はすでに小さい順です。結合結果の末尾より小さい値も残っていないため、その順番のまま全部追加できます。値を捨てて終了してはいけません。",

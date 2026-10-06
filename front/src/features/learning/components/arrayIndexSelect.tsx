@@ -80,7 +80,7 @@ export const ArrayIndexSelect = ({
   selectedIndices: Record<string, unknown>;
   disabled?: boolean;
   showCorrect?: boolean;
-  onChange: (selectedIndices: Record<string, number>) => void;
+  onChange: (selectedIndices: Record<string, number>, locallyVerified: boolean) => void;
 }) => {
   const firstUnanswered = useMemo(
     () => questions.findIndex((question) => typeof selectedIndices[question.id] !== "number"),
@@ -124,14 +124,15 @@ export const ArrayIndexSelect = ({
     // Remove an earlier accepted response when the learner changes it.
     const next = { ...selectedIndices } as Record<string, number>;
     delete next[question.id];
-    onChange(next);
+    onChange(next, false);
   };
   const checkAnswer = () => {
     if (selected === undefined || disabled) return;
     setChecked((current) => ({ ...current, [question.id]: selected }));
     setAttempts((current) => ({ ...current, [question.id]: (current[question.id] ?? 0) + 1 }));
     if (selected === question.correctIndex) {
-      onChange({ ...selectedIndices, [question.id]: selected } as Record<string, number>);
+      const next = { ...selectedIndices, [question.id]: selected } as Record<string, number>;
+      onChange(next, questions.every((item) => typeof next[item.id] === "number"));
     }
   };
 
@@ -185,6 +186,11 @@ export const ArrayIndexSelect = ({
         <Button variant="contained" disabled={!isCorrect && !showCorrect && selectedIndices[question.id] !== question.correctIndex} onClick={() => setQuestionIndex((index) => index + 1)}>
           次の問題へ
         </Button>
+      )}
+      {questions.every((item) => typeof selectedIndices[item.id] === "number") && (
+        <Typography color="#166534" fontWeight={900}>
+          {questions.length}問すべてに正解しました。下の「次へ」から進みましょう。
+        </Typography>
       )}
     </Stack>
   );

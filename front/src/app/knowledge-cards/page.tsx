@@ -6,7 +6,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import { Alert, Box, Chip, Container, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Alert, Box, Chip, Container, Dialog, DialogContent, IconButton, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -50,8 +50,6 @@ export default function KnowledgeCardsPage() {
 
         if (!isMounted) return;
         setCollection(data);
-        const firstCollected = data.knowledgeTips.items.find((tip) => tip.isCollected);
-        setSelectedCardId((current) => current ?? firstCollected?.id ?? data.knowledgeTips.items[0]?.id ?? null);
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
@@ -139,7 +137,7 @@ export default function KnowledgeCardsPage() {
               </Box>
             </Paper>
 
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 390px" }, gap: 3, alignItems: "start" }}>
+            <Box>
               <Stack spacing={2}>
                 <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2.5, border: "1px solid #dbe3ef", bgcolor: "#fff" }}>
                   <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} justifyContent="space-between">
@@ -180,7 +178,7 @@ export default function KnowledgeCardsPage() {
                 </Stack>
               </Stack>
 
-              <KnowledgeDetailPanel card={selectedCard} />
+              <KnowledgeDetailModal card={selectedCard} onClose={() => setSelectedCardId(null)} />
             </Box>
             </>
           )}
@@ -218,15 +216,15 @@ const KnowledgeCardTile = ({ card, selected, onClick }: { card: CollectionKnowle
   );
 };
 
-const KnowledgeDetailPanel = ({ card }: { card: CollectionKnowledgeTip | null }) => {
-  if (!card) return null;
-  const style = rarityStyle[card.rarity];
+const KnowledgeDetailModal = ({ card, onClose }: { card: CollectionKnowledgeTip | null; onClose: () => void }) => {
+  const style = card ? rarityStyle[card.rarity] : rarityStyle.COMMON;
   return (
-    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff", minHeight: 620, position: { lg: "sticky" }, top: { lg: 88 } }}>
+    <Dialog open={Boolean(card)} onClose={onClose} fullWidth maxWidth="md" aria-labelledby="knowledge-card-detail-title" slotProps={{ backdrop: { sx: { bgcolor: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(3px)" } }, paper: { sx: { borderRadius: 4, overflow: "hidden" } } }}>
+      {card && <DialogContent sx={{ p: { xs: 2.5, sm: 4 }, background: `radial-gradient(circle at 50% 0%, ${style.bgcolor}, #fff 42%)` }}>
       <Stack spacing={2.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight={900}>知識カードの詳細</Typography>
-          <CloseIcon sx={{ color: "#64748b" }} />
+          <Typography id="knowledge-card-detail-title" variant="h6" fontWeight={900}>知識カードの詳細</Typography>
+          <IconButton onClick={onClose} aria-label="知識カードの詳細を閉じる"><CloseIcon sx={{ color: "#64748b" }} /></IconButton>
         </Stack>
         <Stack spacing={1.5} alignItems="center" textAlign="center">
           <Box sx={{ width: 128, height: 128, borderRadius: 3, display: "grid", placeItems: "center", color: card.isCollected ? style.color : "#94a3b8", bgcolor: card.isCollected ? style.bgcolor : "#f1f5f9", border: `1px solid ${card.isCollected ? style.border : "#e2e8f0"}` }}>
@@ -253,7 +251,8 @@ const KnowledgeDetailPanel = ({ card }: { card: CollectionKnowledgeTip | null })
         <DetailRow icon={<MenuBookIcon />} label="対象コース" value={card.courseTitle} />
         <DetailRow icon={<ShieldOutlinedIcon />} label="レアリティ" value={card.isCollected ? style.label : "???"} />
       </Stack>
-    </Paper>
+      </DialogContent>}
+    </Dialog>
   );
 };
 
@@ -269,9 +268,6 @@ const KnowledgeSkeleton = () => (
   <Stack spacing={3}>
     <Skeleton variant="rounded" height={96} sx={{ borderRadius: 3 }} />
     <Skeleton variant="rounded" height={92} sx={{ borderRadius: 3 }} />
-    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 390px" }, gap: 3 }}>
-      <Skeleton variant="rounded" height={660} sx={{ borderRadius: 3 }} />
-      <Skeleton variant="rounded" height={620} sx={{ borderRadius: 3 }} />
-    </Box>
+    <Skeleton variant="rounded" height={660} sx={{ borderRadius: 3 }} />
   </Stack>
 );

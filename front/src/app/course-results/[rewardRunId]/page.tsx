@@ -55,6 +55,7 @@ import {
   AchievementUnlockSnackbar,
 } from "../../mission-rewards/_components/achievementNotification";
 import { RewardPageShell, RewardSparkles } from "../../mission-rewards/_components/rewardVisuals";
+import { KnowledgeCardUnlockModal } from "../../mission-rewards/_components/knowledgeCardNotification";
 
 const FEEDBACK_POLL_INTERVAL_MS = 1_000;
 const ACHIEVEMENT_SNACKBAR_DELAY_MS = 700;
@@ -120,6 +121,8 @@ export default function CourseCompletionResultPage() {
   const [activeAchievementIndex, setActiveAchievementIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalClosing, setIsModalClosing] = useState(false);
+  const [canShowKnowledgeCard, setCanShowKnowledgeCard] = useState(false);
+  const [isKnowledgeCardModalOpen, setIsKnowledgeCardModalOpen] = useState(false);
   const [visibleSnackbarAchievementIds, setVisibleSnackbarAchievementIds] = useState<string[]>([]);
   const loggedEventsRef = useRef(new Set<string>());
   const notificationInitializedRef = useRef(false);
@@ -206,13 +209,13 @@ export default function CourseCompletionResultPage() {
     notificationInitializedRef.current = true;
 
     if (result.unlockedAchievements.length === 0) {
-      playResultFanfareOnce();
+      setCanShowKnowledgeCard(true);
       return;
     }
 
     const notificationKey = `achievement-notification-shown:${rewardRunId}`;
     if (window.sessionStorage.getItem(notificationKey) === "shown") {
-      playResultFanfareOnce();
+      setCanShowKnowledgeCard(true);
       return;
     }
     window.sessionStorage.setItem(notificationKey, "shown");
@@ -223,10 +226,11 @@ export default function CourseCompletionResultPage() {
       return;
     }
 
-    playResultFanfareOnce();
     if (achievementNotificationMode === "snackbar") {
       setNotificationType("snackbar");
+      return;
     }
+    setCanShowKnowledgeCard(true);
   }, [
     achievementNotificationMode,
     isAchievementNotificationModeReady,
@@ -247,7 +251,11 @@ export default function CourseCompletionResultPage() {
         result?.unlockedAchievements.map((achievement) => achievement.id) ?? []
       );
       playAchievementSoundOnce();
-      snackbarTimeoutRef.current = null;
+      snackbarTimeoutRef.current = window.setTimeout(() => {
+        setVisibleSnackbarAchievementIds([]);
+        setCanShowKnowledgeCard(true);
+        snackbarTimeoutRef.current = null;
+      }, 1800);
     }, ACHIEVEMENT_SNACKBAR_DELAY_MS);
 
     return () => {
@@ -266,6 +274,29 @@ export default function CourseCompletionResultPage() {
     }
     setIsModalClosing(true);
     setIsModalOpen(false);
+    window.setTimeout(() => setCanShowKnowledgeCard(true), 220);
+  };
+
+  useEffect(() => {
+    if (!result || !canShowKnowledgeCard) return;
+    if (!result.awardedKnowledgeCard) {
+      playResultFanfareOnce();
+      return;
+    }
+
+    const notificationKey = `knowledge-card-notification-shown:${rewardRunId}`;
+    if (window.sessionStorage.getItem(notificationKey) === "shown") {
+      playResultFanfareOnce();
+      return;
+    }
+
+    window.sessionStorage.setItem(notificationKey, "shown");
+    setIsKnowledgeCardModalOpen(true);
+    play("cardAcquired");
+  }, [canShowKnowledgeCard, play, playResultFanfareOnce, result, rewardRunId]);
+
+  const handleKnowledgeCardModalClose = () => {
+    setIsKnowledgeCardModalOpen(false);
     playResultFanfareOnce();
   };
 
@@ -574,6 +605,11 @@ export default function CourseCompletionResultPage() {
         achievements={result?.unlockedAchievements ?? []}
         visibleAchievementIds={visibleSnackbarAchievementIds}
         onClose={handleSnackbarClose}
+      />
+      <KnowledgeCardUnlockModal
+        open={isKnowledgeCardModalOpen}
+        card={result?.awardedKnowledgeCard ?? null}
+        onClose={handleKnowledgeCardModalClose}
       />
     </Box>
   );

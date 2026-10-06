@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 
 import { AlgorithmArray, type AlgorithmCellState, type AlgorithmPointer } from "./algorithmArray";
@@ -90,17 +90,19 @@ export const ArrayRegionSelect = ({
   disabled?: boolean;
   showCorrect?: boolean;
   sequenceMode?: "QUESTIONS" | "TRACE";
-  onChange: (selectedRegions: Record<string, ArrayRegion>) => void;
+  onChange: (selectedRegions: Record<string, ArrayRegion>, locallyVerified: boolean) => void;
 }) => {
   const firstUnanswered = useMemo(
     () => questions.findIndex((question) => !selectedRegions[question.id]),
     [questions, selectedRegions],
   );
   const [questionIndex, setQuestionIndex] = useState(firstUnanswered >= 0 ? firstUnanswered : Math.max(questions.length - 1, 0));
+  const [drafts, setDrafts] = useState<Record<string, ArrayRegion>>({});
+  const [checked, setChecked] = useState<Record<string, ArrayRegion>>({});
 
   const question = questions[questionIndex];
   if (!question) return null;
-  const selectedValue = selectedRegions[question.id];
+  const selectedValue = drafts[question.id] ?? selectedRegions[question.id];
   const selected = selectedValue === "left" || selectedValue === "center" || selectedValue === "right"
     ? selectedValue
     : undefined;
@@ -123,9 +125,21 @@ export const ArrayRegionSelect = ({
   const selectIndex = (index: number) => {
     if (disabled || index < leftIndex || index > rightIndex) return;
     const region: ArrayRegion = index < question.midIndex ? "left" : index === question.midIndex ? "center" : "right";
-    const next = { ...selectedRegions, [question.id]: region } as Record<string, ArrayRegion>;
-    onChange(next);
-    if (questionIndex < questions.length - 1) setQuestionIndex(questionIndex + 1);
+    setDrafts((current) => ({ ...current, [question.id]: region }));
+    setChecked((current) => {
+      const next = { ...current };
+      delete next[question.id];
+      return next;
+    });
+  };
+  const isChecked = checked[question.id] === selected && Boolean(selected);
+  const isCorrect = isChecked && selected === question.correctRegion;
+  const checkAnswer = () => {
+    if (!selected || disabled) return;
+    setChecked((current) => ({ ...current, [question.id]: selected }));
+    if (selected !== question.correctRegion) return;
+    const next = { ...selectedRegions, [question.id]: selected } as Record<string, ArrayRegion>;
+    onChange(next, questions.every((item) => Boolean(next[item.id])));
   };
 
   return (
@@ -139,7 +153,7 @@ export const ArrayRegionSelect = ({
             color={index === questionIndex ? "primary" : selectedRegions[item.id] ? "success" : "default"}
             variant={index === questionIndex ? "filled" : "outlined"}
             label={`${item.stepLabel ?? `${sequenceMode === "TRACE" ? "ステップ" : "問題"} ${index + 1}`}${selectedRegions[item.id] ? " ✓" : ""}`}
-            onClick={() => setQuestionIndex(index)}
+            onClick={index <= questionIndex || Boolean(selectedRegions[item.id]) ? () => setQuestionIndex(index) : undefined}
             sx={{ fontWeight: 900 }}
           />
         ))}
@@ -176,6 +190,28 @@ export const ArrayRegionSelect = ({
         )}
         {showCorrect && question.resultText && <Typography color="#166534" fontWeight={950} sx={{ mt: 1.25, whiteSpace: "pre-line" }}>{question.resultText}</Typography>}
       </Paper>
+      {isChecked && !showCorrect && (
+        <Alert severity={isCorrect ? "success" : "warning"}>
+          {isCorrect
+            ? question.correctExplanation ?? "正解です。中央の値との比較から、残す範囲を判断できました。"
+            : "探す値と中央の値をもう一度比べ、どちら側に残るか考えましょう。"}
+        </Alert>
+      )}
+      {!disabled && !showCorrect && !isCorrect && (
+        <Button variant="outlined" disabled={!selected} onClick={checkAnswer} sx={{ minHeight: 46, fontWeight: 900 }}>
+          この問題の答えを確認する
+        </Button>
+      )}
+      {isCorrect && questionIndex < questions.length - 1 && (
+        <Button variant="contained" onClick={() => setQuestionIndex((index) => index + 1)} sx={{ minHeight: 46, fontWeight: 900 }}>
+          次の問題へ
+        </Button>
+      )}
+      {questions.every((item) => Boolean(selectedRegions[item.id])) && (
+        <Typography color="#166534" fontWeight={900}>
+          {questions.length}問すべてに正解しました。下の「次へ」から進みましょう。
+        </Typography>
+      )}
     </Stack>
   );
 };

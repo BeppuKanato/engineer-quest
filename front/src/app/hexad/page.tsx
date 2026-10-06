@@ -113,6 +113,7 @@ export default function HexadQuestionnairePage() {
   };
 
   if (isLoading || questions.length === 0) {
+    console.log(`isLoading=${isLoading}, questions.length=${questions.length}`);
     return (
       <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: "#f5f8fc" }}>
         <Stack spacing={2} alignItems="center">

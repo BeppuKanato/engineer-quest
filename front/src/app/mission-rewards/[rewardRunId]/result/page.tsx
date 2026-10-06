@@ -35,6 +35,7 @@ import {
   AchievementUnlockModal,
   AchievementUnlockSnackbar,
 } from "../../_components/achievementNotification";
+import { KnowledgeCardUnlockModal } from "../../_components/knowledgeCardNotification";
 
 const learnedIcons = [StarIcon, SecurityIcon, TrendingUpIcon];
 const ACHIEVEMENT_SNACKBAR_DELAY_MS = 700;
@@ -59,6 +60,8 @@ export default function MissionRewardResultPage() {
   const [activeAchievementIndex, setActiveAchievementIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalClosing, setIsModalClosing] = useState(false);
+  const [canShowKnowledgeCard, setCanShowKnowledgeCard] = useState(false);
+  const [isKnowledgeCardModalOpen, setIsKnowledgeCardModalOpen] = useState(false);
   const [visibleSnackbarAchievementIds, setVisibleSnackbarAchievementIds] =
     useState<string[]>([]);
   const notificationInitializedRef = useRef(false);
@@ -71,6 +74,8 @@ export default function MissionRewardResultPage() {
     setActiveAchievementIndex(0);
     setIsModalOpen(false);
     setIsModalClosing(false);
+    setCanShowKnowledgeCard(false);
+    setIsKnowledgeCardModalOpen(false);
     setVisibleSnackbarAchievementIds([]);
   }, [rewardRunId]);
 
@@ -138,13 +143,13 @@ export default function MissionRewardResultPage() {
     notificationInitializedRef.current = true;
 
     if (rewardRun.unlockedAchievements.length === 0) {
-      playResultFanfareOnce();
+      setCanShowKnowledgeCard(true);
       return;
     }
 
     const notificationKey = `achievement-notification-shown:${rewardRunId}`;
     if (window.sessionStorage.getItem(notificationKey) === "shown") {
-      playResultFanfareOnce();
+      setCanShowKnowledgeCard(true);
       return;
     }
     window.sessionStorage.setItem(notificationKey, "shown");
@@ -155,10 +160,11 @@ export default function MissionRewardResultPage() {
       return;
     }
 
-    playResultFanfareOnce();
     if (achievementNotificationMode === "snackbar") {
       setNotificationType("snackbar");
+      return;
     }
+    setCanShowKnowledgeCard(true);
   }, [
     achievementNotificationMode,
     isAchievementNotificationModeReady,
@@ -180,7 +186,11 @@ export default function MissionRewardResultPage() {
         rewardRun?.unlockedAchievements.map((achievement) => achievement.id) ?? []
       );
       playAchievementSoundOnce();
-      snackbarTimeoutRef.current = null;
+      snackbarTimeoutRef.current = window.setTimeout(() => {
+        setVisibleSnackbarAchievementIds([]);
+        setCanShowKnowledgeCard(true);
+        snackbarTimeoutRef.current = null;
+      }, 1800);
     }, ACHIEVEMENT_SNACKBAR_DELAY_MS);
 
     return () => {
@@ -209,6 +219,29 @@ export default function MissionRewardResultPage() {
 
     setIsModalClosing(true);
     setIsModalOpen(false);
+    window.setTimeout(() => setCanShowKnowledgeCard(true), 220);
+  };
+
+  useEffect(() => {
+    if (!rewardRun || !canShowKnowledgeCard) return;
+    if (!rewardRun.awardedKnowledgeCard) {
+      playResultFanfareOnce();
+      return;
+    }
+
+    const notificationKey = `knowledge-card-notification-shown:${rewardRunId}`;
+    if (window.sessionStorage.getItem(notificationKey) === "shown") {
+      playResultFanfareOnce();
+      return;
+    }
+
+    window.sessionStorage.setItem(notificationKey, "shown");
+    setIsKnowledgeCardModalOpen(true);
+    play("cardAcquired");
+  }, [canShowKnowledgeCard, play, playResultFanfareOnce, rewardRun, rewardRunId]);
+
+  const handleKnowledgeCardModalClose = () => {
+    setIsKnowledgeCardModalOpen(false);
     playResultFanfareOnce();
   };
 
@@ -548,6 +581,11 @@ export default function MissionRewardResultPage() {
         achievements={rewardRun?.unlockedAchievements ?? []}
         visibleAchievementIds={visibleSnackbarAchievementIds}
         onClose={handleSnackbarClose}
+      />
+      <KnowledgeCardUnlockModal
+        open={isKnowledgeCardModalOpen}
+        card={rewardRun?.awardedKnowledgeCard ?? null}
+        onClose={handleKnowledgeCardModalClose}
       />
     </Box>
   );

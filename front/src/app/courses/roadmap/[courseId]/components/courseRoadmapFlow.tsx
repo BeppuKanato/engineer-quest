@@ -21,8 +21,8 @@ type CourseRoadmapFlowProps = {
   onMissionDetailClick: (missionId: string) => void;
 };
 
-const NODE_WIDTH = 132;
-const NODE_GAP = 110;
+const NODE_WIDTH = 114;
+const NODE_GAP = 14;
 const MAIN_LINE_TOP = 70;
 const CHALLENGE_TOP = 232;
 const CHALLENGE_CONNECTOR_TOP = 142;
@@ -290,10 +290,12 @@ export const CourseRoadmapFlow = ({
                 <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: "#0057e7" }} />
                 <Typography variant="body2" fontWeight={800}>必須ミッション</Typography>
               </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: "#f97316" }} />
-                <Typography variant="body2" fontWeight={800}>挑戦ミッション</Typography>
-              </Stack>
+              {hasChallenges && (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: "#f97316" }} />
+                  <Typography variant="body2" fontWeight={800}>挑戦ミッション</Typography>
+                </Stack>
+              )}
               <Stack direction="row" spacing={1} alignItems="center">
                 <Box sx={{ width: 12, height: 12, borderRadius: 1, bgcolor: "#d97706" }} />
                 <Typography variant="body2" fontWeight={800}>コース完了課題</Typography>
@@ -304,7 +306,7 @@ export const CourseRoadmapFlow = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gridTemplateColumns: { xs: "1fr", md: hasChallenges ? "1fr 1fr" : "1fr" },
               gap: 3,
             }}
           >
@@ -324,22 +326,24 @@ export const CourseRoadmapFlow = ({
                 }}
               />
             </Stack>
-            <Stack spacing={1}>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography fontWeight={900}>挑戦ミッション</Typography>
-                <Typography fontWeight={900}>{course.completedChallengeMissionCount} / {course.challengeMissionCount}</Typography>
+            {hasChallenges && (
+              <Stack spacing={1}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography fontWeight={900}>挑戦ミッション</Typography>
+                  <Typography fontWeight={900}>{course.completedChallengeMissionCount} / {course.challengeMissionCount}</Typography>
+                </Stack>
+                <LinearProgress
+                  variant="determinate"
+                  value={challengeProgress}
+                  sx={{
+                    height: 10,
+                    borderRadius: 999,
+                    bgcolor: "#ffedd5",
+                    "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#f97316" },
+                  }}
+                />
               </Stack>
-              <LinearProgress
-                variant="determinate"
-                value={challengeProgress}
-                sx={{
-                  height: 10,
-                  borderRadius: 999,
-                  bgcolor: "#ffedd5",
-                  "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#f97316" },
-                }}
-              />
-            </Stack>
+            )}
           </Box>
 
           <Box sx={{ overflowX: "auto", overflowY: "hidden", pb: 2, scrollbarWidth: "thin" }}>

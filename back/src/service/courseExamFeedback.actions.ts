@@ -17,38 +17,38 @@ export const COURSE_EXAM_FEEDBACK_ACTION_CATALOG: Record<
   },
   SOLVE_PRACTICE_PROBLEM: {
     actionType: "SOLVE_PRACTICE_PROBLEM",
-    label: "練習問題に取り組む",
-    description: "利用可能な練習問題に取り組む。",
+    label: "「作る」課題に取り組む",
+    description: "利用可能な「作る」課題に取り組む。",
   },
   CREATE_LEARNING_MEMO: {
     actionType: "CREATE_LEARNING_MEMO",
     label: "学習メモを作成する",
-    description: "クエストボードに学習内容をメモとして投稿する。",
+    description: "掲示板に学習内容をメモとして投稿する。",
   },
   CREATE_QUESTION_POST: {
     actionType: "CREATE_QUESTION_POST",
     label: "質問を投稿する",
-    description: "クエストボードに質問を投稿する。",
+    description: "掲示板に質問を投稿する。",
   },
   CREATE_ERROR_HELP_POST: {
     actionType: "CREATE_ERROR_HELP_POST",
     label: "エラー相談を投稿する",
-    description: "クエストボードにエラー相談を投稿する。",
+    description: "掲示板にエラー相談を投稿する。",
   },
   CREATE_WORK_POST: {
     actionType: "CREATE_WORK_POST",
     label: "作品を共有する",
-    description: "作成済みの作品をクエストボードで共有する。",
+    description: "作成済みの作品を掲示板で共有する。",
   },
   VIEW_BOARD_POSTS: {
     actionType: "VIEW_BOARD_POSTS",
-    label: "クエストボードを見る",
-    description: "クエストボードの投稿を閲覧する。",
+    label: "掲示板を見る",
+    description: "掲示板の投稿を閲覧する。",
   },
   ANSWER_BOARD_POST: {
     actionType: "ANSWER_BOARD_POST",
     label: "投稿へ回答する",
-    description: "回答可能なクエストボード投稿へ回答する。",
+    description: "回答可能な掲示板投稿へ回答する。",
   },
   REVIEW_KNOWLEDGE_CARDS: {
     actionType: "REVIEW_KNOWLEDGE_CARDS",
@@ -83,7 +83,7 @@ export const COURSE_EXAM_FEEDBACK_ACTION_CATALOG: Record<
   SHARE_CREATE_QUEST: {
     actionType: "SHARE_CREATE_QUEST",
     label: "作った機能を共有する",
-    description: "提出コードと達成要件をクエストボードで共有する。",
+    description: "提出コードと達成要件を掲示板で共有する。",
   },
 };
 

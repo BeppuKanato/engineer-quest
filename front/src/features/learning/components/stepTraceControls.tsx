@@ -38,16 +38,17 @@ export const StepTraceControls = ({
 }) => {
   const atStart = stepIndex <= 0;
   const atEnd = stepCount === 0 || stepIndex >= stepCount - 1;
+  const hasMultipleSteps = stepCount > 1;
 
   return (
     <Stack direction="row" gap={1} flexWrap="wrap" alignItems="center" aria-label="STEP TRACE操作">
-      <Button startIcon={<ReplayIcon />} onClick={onReset}>最初から</Button>
-      {showStepButtons && (
+      {hasMultipleSteps && <Button startIcon={<ReplayIcon />} onClick={onReset}>最初から</Button>}
+      {hasMultipleSteps && showStepButtons && (
         <Button aria-label="前のステップ" disabled={atStart} onClick={onPrevious}>
           <SkipPreviousIcon />
         </Button>
       )}
-      {showPlayback && onPlayingChange && (
+      {hasMultipleSteps && showPlayback && onPlayingChange && (
         <Button
           variant="contained"
           startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
@@ -57,7 +58,7 @@ export const StepTraceControls = ({
           {playing ? "一時停止" : "再生"}
         </Button>
       )}
-      {showStepButtons && (
+      {hasMultipleSteps && showStepButtons && (
         <Button
           aria-label={nextLabel ?? "次のステップ"}
           disabled={atEnd}
@@ -67,7 +68,7 @@ export const StepTraceControls = ({
           {nextLabel ?? <SkipNextIcon />}
         </Button>
       )}
-      {speed !== undefined && onSpeedChange && (
+      {hasMultipleSteps && speed !== undefined && onSpeedChange && (
         <Select
           size="small"
           value={speed}

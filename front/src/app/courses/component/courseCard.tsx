@@ -257,7 +257,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         <Stack direction="row" spacing={1} flexWrap="wrap">
           <Chip label={`必須 ${completedRequiredMissionCount}/${requiredMissionCount}`} size="small" sx={{ fontWeight: 800, bgcolor: "#eff6ff", color: "#1d4ed8" }} />
-          <Chip label={`挑戦 ${completedChallengeMissionCount}/${challengeMissionCount}`} size="small" sx={{ fontWeight: 800, bgcolor: "#fff7ed", color: "#c2410c" }} />
+          {challengeMissionCount > 0 && <Chip label={`挑戦 ${completedChallengeMissionCount}/${challengeMissionCount}`} size="small" sx={{ fontWeight: 800, bgcolor: "#fff7ed", color: "#c2410c" }} />}
           <Chip label={`全${totalMissionCount}ミッション`} size="small" sx={{ fontWeight: 800, bgcolor: "#f1f5f9", color: "#475569" }} />
         </Stack>
 

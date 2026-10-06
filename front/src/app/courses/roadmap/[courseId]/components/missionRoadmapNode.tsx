@@ -33,7 +33,7 @@ export const MissionRoadmapNode = ({
   const labelColor = isCompleted ? "#15803d" : isCourseExam ? "#a16207" : isChallenge ? "#ea580c" : "#1d4ed8";
 
   return (
-    <Stack spacing={1} alignItems="center" sx={{ width: 132, position: "relative", zIndex: 2 }}>
+    <Stack spacing={1} alignItems="center" sx={{ width: 114, position: "relative", zIndex: 2 }}>
       <Box sx={{ position: "relative" }}>
         {isNext && (
           <Chip
@@ -138,7 +138,7 @@ export const MissionRoadmapNode = ({
           </Box>
           <Typography
             sx={{
-              maxWidth: 118,
+              maxWidth: 102,
               color: isCourseExam ? "#a16207" : isChallenge ? "#ea580c" : "#111827",
               fontSize: 14,
               fontWeight: 900,

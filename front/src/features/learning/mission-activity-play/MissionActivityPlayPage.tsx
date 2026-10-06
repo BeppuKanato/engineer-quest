@@ -352,7 +352,10 @@ const AnswerInput = ({
           selectedIndices={selectedIndices}
           disabled={disabled}
           showCorrect={activityResult?.isCorrect === true || revealCorrectAnswer}
-          onChange={(next) => onAnswerChange({ selectedIndices: next })}
+          onChange={(next, locallyVerified) => onAnswerChange({
+            selectedIndices: next,
+            localVerificationPassed: locallyVerified,
+          })}
         />
       );
     }
@@ -375,7 +378,10 @@ const AnswerInput = ({
           disabled={disabled}
           showCorrect={activityResult?.isCorrect === true || revealCorrectAnswer}
           sequenceMode={activity.content.data.sequenceMode === "TRACE" ? "TRACE" : "QUESTIONS"}
-          onChange={(next) => onAnswerChange({ selectedRegions: next })}
+          onChange={(next, locallyVerified) => onAnswerChange({
+            selectedRegions: next,
+            localVerificationPassed: locallyVerified,
+          })}
         />
       );
     }
@@ -504,7 +510,10 @@ const AnswerInput = ({
           correctAnswers={correctAnswers}
           disabled={disabled}
           showCorrect={activityResult?.isCorrect === true || revealCorrectAnswer}
-          onChange={(nextValues) => onAnswerChange({ values: nextValues })}
+          onChange={(nextValues, locallyVerified) => onAnswerChange({
+            values: nextValues,
+            localVerificationPassed: locallyVerified,
+          })}
         />
       );
     }
@@ -642,7 +651,7 @@ const ActivityContext = ({ activity }: { activity: MissionActivity }) => {
   return (
     <Stack spacing={2} sx={{ minWidth: 0 }}>
       {body && (
-        <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.75, color: "#334155", fontWeight: 700, fontSize: { xs: 15, sm: 16 } }}>
+        <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.8, color: "#0f172a", fontWeight: 700, fontSize: { xs: 15, sm: 16 } }}>
           {body}
         </Typography>
       )}
@@ -745,7 +754,7 @@ const ActivityContext = ({ activity }: { activity: MissionActivity }) => {
                   />
                 )}
               </Stack>
-              <Typography sx={{ lineHeight: 1.8, color: "#334155", fontWeight: 700, fontSize: { xs: 15, sm: 16 } }}>
+              <Typography sx={{ lineHeight: 1.8, color: "#0f172a", fontWeight: 700, fontSize: { xs: 15, sm: 16 } }}>
                 {section.body}
               </Typography>
             </Box>
@@ -969,9 +978,12 @@ const hasAnswer = (activity: MissionActivity, answer: unknown) => {
         answerRenderer === "LOOP_ROLE" ||
         answerRenderer === "CODE_REPAIR"
       ) {
-        const requiredCount = Array.isArray(activity.content.data.decisionPairs)
-          ? activity.content.data.decisionPairs.length
-          : 0;
+        const questionSource = answerRenderer === "LOOP_ROLE"
+          ? activity.content.data.roleQuestions
+          : answerRenderer === "CODE_REPAIR"
+            ? activity.content.data.repairQuestions
+            : activity.content.data.decisionPairs;
+        const requiredCount = Array.isArray(questionSource) ? questionSource.length : 0;
         return Boolean(
           values &&
           typeof values === "object" &&
@@ -1701,6 +1713,39 @@ export function MissionActivityPlayPage() {
     }
   };
 
+  const handleCompleteLocallyVerifiedActivity = async () => {
+    if (!mission || !currentActivity) return;
+    const verifiedAnswer = answerMap[currentActivity.id];
+    if (!isPlainRecord(verifiedAnswer) || verifiedAnswer.localVerificationPassed !== true) return;
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      const result = await answerMissionActivity(
+        await getCurrentLearningToken(),
+        mission.id,
+        currentActivity.id,
+        verifiedAnswer,
+      );
+      setAnswerResultMap((current) => ({ ...current, [currentActivity.id]: result }));
+      if (result.isCorrect !== true) {
+        setAnswerMap((current) => ({
+          ...current,
+          [currentActivity.id]: { ...verifiedAnswer, localVerificationPassed: false },
+        }));
+        play("answerIncorrect");
+        return;
+      }
+      play("answerCorrect");
+      await handleCompleteActivity();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("回答の保存に失敗しました。もう一度お試しください。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
@@ -1724,6 +1769,7 @@ export function MissionActivityPlayPage() {
   const answerRequired = isAnswerRequired(currentActivity);
   const answerResult = currentActivityResult;
   const currentAnswer = answerMap[currentActivity.id];
+  const isLocallyVerified = isPlainRecord(currentAnswer) && currentAnswer.localVerificationPassed === true;
   const hasCurrentAnswer = !answerRequired || hasAnswer(currentActivity, currentAnswer);
   const feedbackPolicy = currentActivity.content.feedbackPolicy;
   const incorrectAttemptCount = answerResult?.incorrectAttemptCount ?? currentActivity.incorrectAttemptCount;
@@ -1736,7 +1782,7 @@ export function MissionActivityPlayPage() {
   const shouldRetry = answerResult?.isCorrect === false;
   const isCurrentCompleted = completedActivityIds.has(currentActivity.id);
   const isCorrect = answerResult?.isCorrect === true || isCurrentCompleted;
-  const canGoNext = !answerRequired || isCorrect;
+  const canGoNext = !answerRequired || isCorrect || isLocallyVerified;
   const remainingActivityCount = Math.max(
     mission.activities.length - completedCount - (isCurrentCompleted ? 0 : 1),
     0
@@ -2114,7 +2160,7 @@ export function MissionActivityPlayPage() {
                   戻る
                 </Button>
 
-                {answerRequired && !isCorrect ? (
+                {answerRequired && !isCorrect && !isLocallyVerified ? (
                   <Button
                     variant="contained"
                     disabled={isSubmitting || (!shouldRetry && !hasCurrentAnswer)}
@@ -2130,13 +2176,15 @@ export function MissionActivityPlayPage() {
                     disabled={isSubmitting || !canGoNext}
                     startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined}
                     endIcon={isSubmitting ? undefined : <PlayArrowIcon />}
-                    onClick={handleCompleteActivity}
+                    onClick={isLocallyVerified && !isCorrect ? handleCompleteLocallyVerifiedActivity : handleCompleteActivity}
                     sx={{ fontWeight: 950, borderRadius: 2, minWidth: 150, minHeight: 48 }}
                   >
                     {isSubmitting
                       ? "保存中..."
                       : isCorrect && isCourseCompletionActivity
                         ? "Course Missionを完了"
+                        : isLocallyVerified
+                          ? (currentActivityIndex === mission.activities.length - 1 ? "Missionを完了" : "次へ")
                         : isCorrect && typeof currentActivity.content.data.completionLabel === "string"
                         ? currentActivity.content.data.completionLabel
                         : answerRequired || currentActivityIndex === mission.activities.length - 1
