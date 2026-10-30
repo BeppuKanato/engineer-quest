@@ -24,6 +24,20 @@ front_account="engineer-quest-dev-front@${GCP_PROJECT_ID}.iam.gserviceaccount.co
 gcloud_flags=(--project "$GCP_PROJECT_ID" --quiet)
 run_flags=("${gcloud_flags[@]}" --region "$REGION")
 
+get_front_origins() {
+  local service_url="$1" project_number deterministic_url
+  project_number="$(gcloud run services describe "$FRONT_SERVICE" "${run_flags[@]}" --format='value(metadata.namespace)')" || return 1
+  if [[ ! "$project_number" =~ ^[0-9]+$ ]]; then
+    echo '::error::Cloud Run did not return a numeric project namespace.' >&2
+    return 1
+  fi
+  deterministic_url="https://${FRONT_SERVICE}-${project_number}.${REGION}.run.app"
+  printf '%s' "$service_url"
+  if [[ "$deterministic_url" != "$service_url" ]]; then
+    printf ',%s' "$deterministic_url"
+  fi
+}
+
 wait_for_build() {
   local build_id="$1" status
   [[ -n "$build_id" ]]
@@ -47,7 +61,10 @@ wait_for_build() {
 # frontend origin after the frontend has been created below.
 front_url="$(gcloud run services list "${run_flags[@]}" \
   --filter="metadata.name=${FRONT_SERVICE}" --format='value(status.url)')"
-allowed_origin="${front_url:-https://development-not-configured.invalid}"
+allowed_origins="https://development-not-configured.invalid"
+if [[ -n "$front_url" ]]; then
+  allowed_origins="$(get_front_origins "$front_url")"
+fi
 
 back_build_id="$(gcloud builds submit ./back "${gcloud_flags[@]}" \
   --tag "$back_image" --timeout=1200s --async --format='value(id)')"
@@ -59,7 +76,7 @@ gcloud run deploy "$BACK_SERVICE" "${run_flags[@]}" \
   --platform managed --allow-unauthenticated --ingress all \
   --port 8080 --cpu 1 --memory 512Mi --min 0 --max 2 \
   --concurrency 20 --timeout 300 --cpu-throttling \
-  --update-env-vars "NODE_ENV=production,GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID},ALLOWED_ORIGINS=${allowed_origin}" \
+  --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}" \
   --update-secrets "DATABASE_URL=DATABASE_URL_DEV:latest,OPENAI_API_KEY=OPENAI_API_KEY_DEV:latest"
 
 back_url="$(gcloud run services describe "$BACK_SERVICE" "${run_flags[@]}" --format='value(status.url)')"
@@ -82,12 +99,14 @@ gcloud run deploy "$FRONT_SERVICE" "${run_flags[@]}" \
 
 front_url="$(gcloud run services describe "$FRONT_SERVICE" "${run_flags[@]}" --format='value(status.url)')"
 [[ "$front_url" == https://* ]]
+allowed_origins="$(get_front_origins "$front_url")"
 gcloud run services update "$BACK_SERVICE" "${run_flags[@]}" \
-  --update-env-vars "ALLOWED_ORIGINS=${front_url}"
+  --update-env-vars "^@^ALLOWED_ORIGINS=${allowed_origins}"
 
 curl --fail --silent --show-error --retry 5 --retry-all-errors --max-time 60 "${back_url}/health"
 curl --fail --silent --show-error --retry 5 --retry-all-errors --max-time 60 \
   --output /dev/null "${front_url}/auth/login"
+bash .github/scripts/check-dev-cors.sh "$back_url" "$allowed_origins"
 
 echo "url=${front_url}" >> "$GITHUB_OUTPUT"
 {
@@ -95,6 +114,7 @@ echo "url=${front_url}" >> "$GITHUB_OUTPUT"
   echo "- Commit: ${SOURCE_SHA}"
   echo "- Frontend: ${front_url}"
   echo "- Backend: ${back_url}"
+  echo "- Allowed frontend origins: ${allowed_origins}"
   echo '- Database: existing Neon engineer-quest-dev via DATABASE_URL_DEV'
   echo '- Firebase: existing project; add the frontend hostname to authorized domains.'
   echo '- Database migrations and seeds are not run by this workflow.'

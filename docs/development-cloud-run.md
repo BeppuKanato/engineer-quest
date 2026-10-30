@@ -25,7 +25,10 @@ Next.js は開発環境でも本番ビルドを使用するので `NODE_ENV=prod
 - 同時デプロイを直列化する。進行中のデプロイを途中でキャンセルしない。
 - 手動実行も `develop` のみ。対象コミットの push CI 成功が必要。
 - バックを作成して URL を取得し、フロントのビルドに `/api` 付き URL を渡す。
-- フロント作成後、その URL をバックの CORS 許可元に自動設定する。
+- フロント作成後、`status.url` の URL と `サービス名-プロジェクト番号.リージョン.run.app`
+  の両方をバックの CORS 許可元に自動設定する。Cloud Console の URL から開いても利用できる。
+- 認証 API の OPTIONS リクエストで両方の Origin が許可されること、無関係な Origin は
+  許可されないことを確認する。HTTP 200 の起動確認だけで完了としない。
 - `/health` と `/auth/login` の HTTP 応答を確認し、Actions の Summary に URL を表示する。
 - DB マイグレーション・seed・リセットは実行しない。
 
@@ -128,6 +131,7 @@ Cloud Run IAM による限定公開は、この初期構成には含めない。
 初回デプロイの Actions Summary に表示されたフロント URL を確認する。
 Firebase Console → 既存プロジェクト → Authentication → Settings → Authorized domains
 に、フロント URL の **ホスト名だけ**を追加する。`https://` とパスは付けない。
+Cloud Console に表示される数字入りのフロント URL からも開く場合は、そのホスト名も追加する。
 既存の本番ドメイン・localhost は残す。
 
 今回は Firebase ユーザーを既存環境と共用し、学習データの保存先を Neon dev に分ける。
