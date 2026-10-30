@@ -1,73 +1,54 @@
 @startuml
-title Engineer Quest - コンポーネント構成
+title Engineer Quest - Course・Mission・Activity構成
 
 skinparam componentStyle rectangle
 skinparam linetype ortho
 
 actor "学習者" as Learner
 
-node "Browser" {
-  component "Next.js App Router" as NextApp
-  component "Firebase Client SDK" as FirebaseClient
-  component "MUI UI Components" as MUI
-  component "Lesson Renderer" as LessonRenderer
-  component "Exam Editor\nand Diff UI" as ExamEditor
+node "Next.js Frontend" {
+  component "App Router\n薄いpage.tsx" as RouteEntry
+  component "MissionActivityPlayPage\n回答・進捗オーケストレーション" as PlayFeature
+  component "Activity Renderer Registry" as FrontRegistry
+  component "Problem Type Inputs" as Inputs
+  component "Algorithm Visualizations" as Visualizations
+  component "Shared Activity Components" as SharedComponents
+  component "Course Mission Python Editor" as CourseEditor
 }
 
-cloud "Firebase" {
-  component "Firebase Authentication" as FirebaseAuth
-}
-
-node "Backend Container" {
-  component "Express App" as Express
-  component "Auth Middleware" as AuthMiddleware
-  component "Auth Controller/Service" as AuthModule
-  component "Course Controller/Service" as CourseModule
-  component "Mission Controller/Service" as MissionModule
-  component "Lesson Controller/Service" as LessonModule
-  component "MissionExam Controller/Service" as ExamModule
+node "Express Backend" {
+  component "Mission Router / Controller" as MissionHttp
+  component "Mission Service" as MissionService
+  component "ActivityContent Schema / Registry" as BackRegistry
+  component "Course Router / Controller / Service" as CourseModule
   component "Prisma Client" as Prisma
 }
 
 database "PostgreSQL" as Postgres
 
-Learner --> NextApp : アプリを利用する
-NextApp --> MUI : UI を描画する
-NextApp --> LessonRenderer : レッスン活動を表示する
-NextApp --> ExamEditor : コード入力、プレビュー、差分確認を扱う
-NextApp --> FirebaseClient : サインアップ、ログイン、トークン取得を行う
-FirebaseClient --> FirebaseAuth : 認証する
+Learner --> RouteEntry
+RouteEntry --> PlayFeature
+PlayFeature --> FrontRegistry : rendererKeyを解決
+PlayFeature --> Inputs : 回答UIを表示
+PlayFeature --> Visualizations : 教材可視化を表示
+PlayFeature --> SharedComponents : Shell・配列・feedback
+PlayFeature --> CourseEditor : Course Mission時のみ
+PlayFeature --> MissionHttp : REST API
 
-NextApp --> Express : REST API を呼び出す\nAuthorization: Bearer token
-Express --> AuthMiddleware : 保護されたルートで認証を確認する
-AuthMiddleware --> FirebaseAuth : ID token を検証する
-AuthMiddleware --> Prisma : アプリ側 User を読み込む
+MissionHttp --> MissionService
+MissionService --> BackRegistry : data検証・採点方式
+MissionService --> Prisma
+CourseModule --> Prisma
+Prisma --> Postgres
 
-Express --> AuthModule : /api/auth/*
-Express --> CourseModule : /api/courses
-Express --> MissionModule : /api/missions/{id}/overview
-Express --> LessonModule : /api/missions/lesson/*
-Express --> ExamModule : /api/missions/{id}/exam/*
-
-AuthModule --> Prisma : User を作成・取得する
-CourseModule --> Prisma : Course と進捗を取得する
-MissionModule --> Prisma : Mission 概要を取得する
-LessonModule --> Prisma : Lesson と進捗を扱う
-ExamModule --> Prisma : Exam と進捗を扱う
-Prisma --> Postgres : SQL を実行する
-
-note right of ExamEditor
-  完全一致型の確認テストでは、
-  クライアント側で answerCode と比較して
-  ユーザーへ即時フィードバックを返す。
-  進捗更新前にサーバ側でも再判定する。
+note bottom of FrontRegistry
+  Course IDやMission番号ではなく、
+  rendererKeyと問題型で表示を選ぶ。
 end note
 
-note bottom of ExamModule
-  正解提出時の処理:
-  - 難易度別進捗を passed にする
-  - ミッション進捗を完了にする
-  - 次のミッションを返す
+note bottom of BackRegistry
+  seed・API・採点が同じ登録表と
+  Zod schemaを参照する。
 end note
 
 @enduml

@@ -9,6 +9,12 @@ declare global {
         id: string;
         firebaseUid: string;
         displayName: string | null;
+        experience: number;
+        knowledgeCardTableNumber: number;
+        selectedProfileAchievementId: string | null;
+        selectedMascotId: string;
+        selectedTargetAchievementId: string | null;
+        hasHexadResponse: boolean;
       };
       firebaseUser?: DecodedIdToken;
     }

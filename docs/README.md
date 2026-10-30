@@ -6,7 +6,7 @@
 
 - `er-learning-domain.puml` - Prisma schema をもとにした学習ドメインの ER 図。
 - `sequence-auth-and-user-sync.puml` - Firebase 認証とアプリユーザー同期のシーケンス図。
-- `sequence-course-lesson-flow.puml` - コース一覧からレッスン完了までのシーケンス図。
+- `sequence-course-mission-activity-flow.puml` - コース一覧から Mission・Activity 完了までのシーケンス図。
 - `sequence-exam-submit-result.puml` - 確認テストの開始、提出、結果取得のシーケンス図。
 - `component-architecture.puml` - フロントエンド、バックエンド、Firebase、DB のコンポーネント構成図。
 - `state-progress.puml` - ミッション、レッスン、確認テスト難易度ごとの進捗状態図。

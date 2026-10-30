@@ -1,0 +1,48 @@
+@startuml
+title Course・Mission・Activityの現行学習フロー
+
+actor "学習者" as Learner
+participant "Next.js\n/mission/[missionId]/play" as Frontend
+participant "Express Mission API" as API
+participant "Auth Middleware" as Auth
+participant "Mission Service" as MissionService
+participant "ActivityContent\nRegistry / Schema" as Registry
+database "PostgreSQL\nvia Prisma" as DB
+
+Learner -> Frontend : Missionを開始する
+Frontend -> API : GET /api/missions/{missionId}/play
+API -> Auth : Firebase tokenを検証する
+Auth --> API : req.authUserを設定する
+API -> MissionService : Mission・Activity・進捗を取得する
+MissionService -> Registry : contentとrendererKeyを検証する
+MissionService -> DB : MissionActivityとユーザー進捗を取得する
+DB --> MissionService : 学習データを返す
+MissionService --> Frontend : Activity一覧と現在位置を返す
+Frontend --> Learner : 共通Activity Shellとrendererを表示する
+
+Learner -> Frontend : 回答する
+Frontend -> API : POST .../activities/{activityId}/answer
+API -> MissionService : 回答を採点する
+MissionService -> Registry : answer rendererを解決する
+MissionService -> DB : ActivityAnswerLogを保存する
+MissionService --> Frontend : 正誤・feedback・誤答回数
+Frontend --> Learner : 共通feedbackと再回答UIを表示する
+
+Learner -> Frontend : Activityを完了する
+Frontend -> API : POST .../activities/{activityId}/complete
+API -> MissionService : Activity進捗を完了する
+MissionService -> DB : UserMissionActivityProgressをupsertする
+MissionService --> Frontend : 次ActivityとMission完了状態
+
+Learner -> Frontend : 最後のActivityを完了する
+Frontend -> API : POST /api/missions/{missionId}/complete
+API -> MissionService : Mission完了・報酬を確定する
+MissionService -> DB : 進捗・EXP・報酬をトランザクション保存する
+MissionService --> Frontend : rewardRunIdと次の画面
+
+note bottom
+  Course Missionも同じ/playルートとActivity完了フローを使い、
+  CODE_EDITOR rendererとCourse Mission試行APIだけを追加で利用する。
+end note
+
+@enduml

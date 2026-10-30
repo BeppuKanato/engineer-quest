@@ -15,7 +15,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getApiBaseUrl } from "@/lib/api";
+import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
+import { ensureUser } from "@/api/auth.api";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -25,11 +28,12 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
-  const apiBaseUrl = getApiBaseUrl();
+  const { isNavigating, showOverlay, startNavigation } =
+    useNavigationFeedback();
+  const { setAppUser } = useUserSession();
 
-  console.log("API Base URL:", apiBaseUrl);
   const handleLogin = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || isNavigating) return;
 
     const trimmedEmail = email.trim();
 
@@ -50,23 +54,16 @@ export default function Login() {
 
       const token = await credential.user.getIdToken();
 
-      const res = await fetch(`${apiBaseUrl}/auth/ensure`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          displayName: credential.user.displayName ?? null,
-        }),
-      });
+      const data = await ensureUser(
+        token,
+        credential.user.displayName ?? null
+      );
 
-      if (!res.ok) {
-        throw new Error("ユーザー情報の確認に失敗しました");
-      }
-
+      setAppUser(data.user);
       setMessage("ログイン成功");
-      router.push("/home");
+      startNavigation(() => {
+        router.push(data.user.hasHexadResponse ? "/home" : "/hexad");
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(err.message);
@@ -112,7 +109,7 @@ export default function Login() {
               type="email"
               fullWidth
               value={email}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               onChange={(e) => setEmail(e.target.value)}
             />
 
@@ -121,7 +118,7 @@ export default function Login() {
               type="password"
               fullWidth
               value={password}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               onChange={(e) => setPassword(e.target.value)}
             />
 
@@ -129,7 +126,7 @@ export default function Login() {
               variant="contained"
               fullWidth
               onClick={handleLogin}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isNavigating}
               startIcon={
                 isSubmitting ? <CircularProgress size={18} /> : undefined
               }
@@ -157,6 +154,8 @@ export default function Login() {
           </Stack>
         </CardContent>
       </Card>
+
+      <PageTransitionOverlay open={showOverlay} />
     </Box>
   );
 }

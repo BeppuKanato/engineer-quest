@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from "@/lib/api";
+
 export type ApiErrorResponse = {
   message: string;
   code: string;
@@ -21,16 +23,6 @@ export class ApiError extends Error {
 type FetcherOptions = Omit<RequestInit, "headers"> & {
   token?: string;
   headers?: HeadersInit;
-};
-
-const getApiBaseUrl = (): string => {
-//   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const baseUrl = "http://localhost:8080/api";
-    if (!baseUrl) {
-        throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
-    }
-
-    return baseUrl;
 };
 
 const parseErrorResponse = async (
@@ -58,7 +50,6 @@ export const fetcher = async <T>(
   options: FetcherOptions = {}
 ): Promise<T> => {
     const baseUrl = getApiBaseUrl();
-    console.log(`${baseUrl}${path}`)
     const { token, headers, ...requestOptions } = options;
 
     const response = await fetch(`${baseUrl}${path}`, {

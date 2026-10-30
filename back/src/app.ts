@@ -8,6 +8,16 @@ import dotenv from 'dotenv';
 import authRouter from './router/auth.router';
 import courseRouter from './router/course.router';
 import missionRouter from './router/mission.router';
+import achievementRouter from './router/achievement.router';
+import collectionRouter from './router/collection.router';
+import createQuestRouter from './router/createQuest.router';
+import historyRouter from './router/history.router';
+import homeRouter from './router/home.router';
+import profileRouter from './router/profile.router';
+import questBoardRouter from './router/questBoard.router';
+import missionRewardRouter from './router/missionReward.router';
+import courseResultRouter from './router/courseResult.router';
+import hexadRouter from './router/hexad.router';
 import { errorHandler } from './middleware/errorHandler';
 // import shareRouter from './router/shareRouter';
 
@@ -34,8 +44,18 @@ app.get("/health", (req: Request, res: Response) => {
 
 //ユーザ認証
 app.use('/api/auth', authRouter);
+app.use('/api/home', homeRouter);
+app.use('/api/profile', profileRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/missions', missionRouter);
+app.use('/api/achievements', achievementRouter);
+app.use('/api/collection', collectionRouter);
+app.use('/api/history', historyRouter);
+app.use('/api/quest-board', questBoardRouter);
+app.use('/api/mission-rewards', missionRewardRouter);
+app.use('/api/course-results', courseResultRouter);
+app.use('/api/hexad', hexadRouter);
+app.use('/api', createQuestRouter);
 
 app.use(errorHandler)
 

@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import {
   ensureUserService,
-  getUserByFirebaseUidService,
 } from "../service/auth.service";
 
 export const ensureUserController = async (req: Request, res: Response) => {
@@ -29,17 +28,11 @@ export const ensureUserController = async (req: Request, res: Response) => {
 };
 
 export const getMeController = async (req: Request, res: Response) => {
-  if (!req.firebaseUser) {
-    return res.status(401).json({
-      error: "Unauthorized",
-    });
-  }
-
-  const user = await getUserByFirebaseUidService(req.firebaseUser.uid);
+  const user = req.authUser;
 
   if (!user) {
-    return res.status(404).json({
-      error: "User is not registered in app database",
+    return res.status(401).json({
+      error: "Unauthorized",
     });
   }
 

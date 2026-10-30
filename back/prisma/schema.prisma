@@ -14,19 +14,93 @@ datasource db {
 // =========================
 
 model User {
-  id          String  @id @default(cuid())
-  firebaseUid String  @unique
-  displayName String?
+  id                          String  @id @default(cuid())
+  firebaseUid                 String  @unique
+  displayName                 String?
+  experience                  Int     @default(0)
+  knowledgeCardTableNumber    Int     @default(1)
+  selectedMascotId            String  @default("red-panda")
+  selectedTargetAchievementId String?
+  selectedProfileAchievementId String?
 
-  missionProgresses UserMissionProgress[]
-  lessonProgresses  UserLessonProgress[]
-  examProgresses    UserMissionExamProgress[]
+  missionProgresses         UserMissionProgress[]
+  activityProgresses        UserMissionActivityProgress[]
+  achievements              UserAchievement[]
+  knowledgeCards            UserKnowledgeCard[]
+  selectedTargetAchievement Achievement?                  @relation("SelectedTargetAchievement", fields: [selectedTargetAchievementId], references: [id], onDelete: SetNull)
+  selectedProfileAchievement Achievement?                 @relation("SelectedProfileAchievement", fields: [selectedProfileAchievementId], references: [id], onDelete: SetNull)
+  createQuestAttempts       CreateQuestAttempt[]
+  questPosts                QuestPost[]
+  questComments             QuestComment[]
+  questReactions            QuestReaction[]
+  missionRewardRuns         MissionRewardRun[]
+  courseExamAttempts        CourseExamAttempt[]
+  hexadResponse             HexadResponse?
+  experimentAssignments     ExperimentAssignment[]
 
-  activityAnswerLogs     ActivityAnswerLog[]
-  missionExamSubmissions MissionExamSubmission[]
+  activityAnswerLogs ActivityAnswerLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// =========================
+// HEXAD Questionnaire
+// =========================
+
+model HexadResponse {
+  id                   String @id @default(cuid())
+  userId               String @unique
+  questionnaireVersion String
+
+  q1  Int
+  q2  Int
+  q3  Int
+  q4  Int
+  q5  Int
+  q6  Int
+  q7  Int
+  q8  Int
+  q9  Int
+  q10 Int
+  q11 Int
+  q12 Int
+  q13 Int
+  q14 Int
+  q15 Int
+  q16 Int
+  q17 Int
+  q18 Int
+  q19 Int
+  q20 Int
+  q21 Int
+  q22 Int
+  q23 Int
+  q24 Int
+
+  philanthropistScore Int
+  socialiserScore     Int
+  freeSpiritScore     Int
+  achieverScore       Int
+  disruptorScore      Int
+  playerScore         Int
+
+  completedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ExperimentAssignment {
+  id            String            @id @default(cuid())
+  userId        String
+  experimentKey String
+  condition     FeedbackCondition
+  assignedAt    DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, experimentKey])
+  @@index([experimentKey, condition])
 }
 
 // =========================
@@ -43,8 +117,13 @@ model Course {
   isPublished         Boolean @default(true)
   version             Int     @default(1)
 
-  missions   Mission[]
-  categories CourseCategoryMap[]
+  missions         Mission[]
+  categories       CourseCategoryMap[]
+  achievements     Achievement[]
+  knowledgeCards   KnowledgeCard[]
+  knowledgeCardScheduleEntries KnowledgeCardScheduleEntry[]
+  createQuestLinks CreateQuestCourse[]
+  questPosts       QuestPost[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -71,7 +150,7 @@ model CourseCategoryMap {
 }
 
 // =========================
-// Mission / Lesson Master
+// Mission Master
 // =========================
 
 model Mission {
@@ -87,11 +166,22 @@ model Mission {
   // Course内での順番。Missionのロック判定に使う
   order Int
 
+  // MAIN: 基礎ミッション
+  // CHALLENGE: 挑戦ミッション
+  // COURSE_EXAM: コース完了ミッション
   type                          MissionType @default(MAIN)
   isRequiredForCourseCompletion Boolean     @default(true)
-  parentMissionId               String?
-  roadmapLane                   Int         @default(0)
-  branchOrder                   Int         @default(0)
+
+  // 挑戦Missionがどの基礎Missionから生えるか
+  parentMissionId String?
+
+  // ロードマップ表示用
+  roadmapLane Int @default(0)
+  branchOrder Int @default(0)
+
+  // Mission完了時の表示用
+  rewardExp    Int      @default(100)
+  learnedItems String[] @default([])
 
   isPublished Boolean @default(true)
 
@@ -100,12 +190,14 @@ model Mission {
   parentMission  Mission?  @relation("MissionBranch", fields: [parentMissionId], references: [id], onDelete: SetNull)
   branchMissions Mission[] @relation("MissionBranch")
 
-  lessons Lesson[]
-  exam    MissionExam?
+  activities MissionActivity[]
 
-  progresses UserMissionProgress[]
-
-  missionExamSubmissions MissionExamSubmission[]
+  progresses   UserMissionProgress[]
+  achievements Achievement[]
+  knowledgeCardScheduleEntries KnowledgeCardScheduleEntry[]
+  questPosts   QuestPost[]
+  rewardRuns   MissionRewardRun[]
+  examAttempts CourseExamAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,101 +207,44 @@ model Mission {
   @@index([parentMissionId])
 }
 
-model Lesson {
-  id          String @id @default(cuid())
-  missionId   String
-  title       String
-  description String
+// =========================
+// Activity Master
+// =========================
 
-  // Mission内での順番。Lessonのロック判定に使う
-  order Int
+model MissionActivity {
+  id        String @id @default(cuid())
+  missionId String
 
-  rewardExp Int @default(30)
+  type  MissionActivityType
+  title String
 
-  learnedItems String[] @default([])
+  // 問題文・指示文。TUTORIALでも空にしない方針
+  instruction String
 
-  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
-
-  activities LessonActivity[]
-
-  progresses UserLessonProgress[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([missionId, order])
-}
-
-model LessonActivity {
-  id            String         @id @default(cuid())
-  lessonId      String
-  type          LessonStepType
-  title         String
-  instruction   String
+  // メンターの一言、説明、補足
   mentorMessage String
 
-  // choices, blanks, blankChoices, input, summary, starterCode, sampleCode などをまとめる
+  // choices, matchItems, orderedSteps, checkItems, body, summary などをまとめる
   content Json
 
   // preview type, title, html, caption, previewKey, minHeight などをまとめる
-  preview Json
+  preview Json?
 
   actionLabel String
 
-  // Lesson内での活動順
+  // Mission全体でのActivity順
   order Int
 
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
+  progresses UserMissionActivityProgress[]
   answerLogs ActivityAnswerLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([lessonId, order])
-}
-
-// =========================
-// Mission Exam Master
-// =========================
-
-model MissionExam {
-  id        String @id @default(cuid())
-  missionId String @unique
-
-  title       String
-  description String
-
-  thumbnailUrl String?
-  previewCss   String?
-
-  estimatedTime String
-  rewardExp     Int    @default(100)
-
-  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
-
-  variants    MissionExamVariant[]
-  progresses  UserMissionExamProgress[]
-  submissions MissionExamSubmission[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model MissionExamVariant {
-  id            String         @id @default(cuid())
-  missionExamId String
-  difficulty    ExamDifficulty
-
-  initialCode String
-  answerCode  String
-
-  missionExam MissionExam @relation(fields: [missionExamId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([missionExamId, difficulty])
+  @@unique([missionId, order])
+  @@index([missionId])
 }
 
 // =========================
@@ -221,7 +256,16 @@ model UserMissionProgress {
   userId    String
   missionId String
 
-  status ProgressStatus @default(IN_PROGRESS)
+  status     ProgressStatus @default(IN_PROGRESS)
+  awardedExp Int            @default(0)
+
+  selectedExamDifficulty       CourseDifficulty?
+  highestClearedExamDifficulty CourseDifficulty?
+  examAttemptCount             Int               @default(0)
+  examHintCount                Int               @default(0)
+
+  // 続きから再開用
+  currentActivityId String?
 
   startedAt   DateTime?
   completedAt DateTime?
@@ -233,90 +277,542 @@ model UserMissionProgress {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, missionId])
+  @@index([userId])
+  @@index([missionId])
 }
 
-model UserLessonProgress {
-  id       String @id @default(cuid())
-  userId   String
-  lessonId String
+// =========================
+// COURSE_EXAM Attempts
+// =========================
+
+model CourseExamAttempt {
+  id        String @id @default(cuid())
+  userId    String
+  missionId String
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user           User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission        Mission                   @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  hintViews      CourseExamHintView[]
+  testExecutions CourseExamTestExecution[]
+  submissions    CourseExamSubmission[]
+  rewardRun      MissionRewardRun?
+  feedback       CourseExamFeedback?
+
+  @@index([userId, missionId])
+  @@index([missionId])
+  @@index([startedAt])
+}
+
+model CourseExamHintView {
+  id        String @id @default(cuid())
+  attemptId String
+  hintId    String
+
+  viewedAt DateTime @default(now())
+
+  attempt CourseExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, hintId])
+  @@index([attemptId])
+}
+
+model CourseExamTestExecution {
+  id        String @id @default(cuid())
+  attemptId String
+  code      String
+
+  testResults  Json
+  runtimeError String?
+
+  executedAt DateTime @default(now())
+
+  attempt CourseExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, executedAt])
+}
+
+model CourseExamSubmission {
+  id        String @id @default(cuid())
+  attemptId String
+  code      String
+
+  passed      Boolean
+  testResults Json
+
+  submittedAt DateTime @default(now())
+
+  attempt CourseExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, submittedAt])
+}
+
+model CourseExamFeedback {
+  id        String @id @default(cuid())
+  attemptId String @unique
+
+  status    CourseExamFeedbackStatus
+  condition FeedbackCondition
+
+  currentState String?
+  nextGoal     String?
+  nextStep     String?
+  actionType   CourseExamFeedbackActionType?
+  actionLabel  String?
+
+  learningAnalysis  Json?
+  selectionAnalysis Json?
+  inputSnapshot     Json
+
+  model            String
+  openAiResponseId String?
+  usage            Json?
+  failureCode      String?
+  generatedAt      DateTime?
+
+  attempt CourseExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([condition])
+  @@index([createdAt])
+}
+
+// =========================
+// Achievement
+// =========================
+
+model Achievement {
+  id          String              @id @default(cuid())
+  title       String
+  description String
+  category    AchievementCategory
+  rarity      AchievementRarity   @default(COMMON)
+  iconKey     String              @default("achievement")
+
+  conditionType  AchievementConditionType
+  conditionValue Int?
+  missionId      String?
+  courseId       String?
+  createQuestId  String?
+
+  isSecret  Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  mission Mission? @relation(fields: [missionId], references: [id], onDelete: SetNull)
+  course  Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  createQuest CreateQuest? @relation(fields: [createQuestId], references: [id], onDelete: SetNull)
+
+  userAchievements        UserAchievement[]
+  selectedAsTargetByUsers User[]            @relation("SelectedTargetAchievement")
+  selectedForProfileByUsers User[]           @relation("SelectedProfileAchievement")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([conditionType])
+  @@index([missionId])
+  @@index([courseId])
+  @@index([createQuestId])
+}
+
+model UserAchievement {
+  id            String @id @default(cuid())
+  userId        String
+  achievementId String
+
+  achievedAt DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+// =========================
+// Knowledge Card
+// =========================
+
+model KnowledgeCard {
+  id          String              @id @default(cuid())
+  courseId    String
+  label       String
+  title       String
+  description String
+  connection  String
+  useCase     String
+  searchKeywords String[] @default([])
+  catalogNumber Int
+  rarity      KnowledgeCardRarity @default(COMMON)
+  sortOrder   Int                 @default(0)
+  isPublished Boolean             @default(true)
+
+  course             Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userKnowledgeCards UserKnowledgeCard[]
+  scheduleEntries    KnowledgeCardScheduleEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([rarity])
+  @@unique([courseId, catalogNumber])
+}
+
+model UserKnowledgeCard {
+  id              String @id @default(cuid())
+  userId          String
+  knowledgeCardId String
+
+  collectedAt DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  knowledgeCard KnowledgeCard @relation(fields: [knowledgeCardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, knowledgeCardId])
+  @@index([userId])
+  @@index([knowledgeCardId])
+}
+
+// =========================
+// Knowledge Card Schedule
+// =========================
+
+model KnowledgeCardScheduleEntry {
+  id              String @id
+  courseId        String
+  courseVersion   Int
+  tableNumber     Int
+  missionId       String
+  knowledgeCardId String
+
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  mission       Mission       @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  knowledgeCard KnowledgeCard @relation(fields: [knowledgeCardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([courseId, courseVersion, tableNumber, missionId], map: "KnowledgeSchedule_course_version_table_mission_key")
+  @@unique([courseId, courseVersion, tableNumber, knowledgeCardId], map: "KnowledgeSchedule_course_version_table_card_key")
+  @@index([missionId])
+  @@index([knowledgeCardId])
+}
+
+// =========================
+// Mission Reward Flow
+// =========================
+
+model MissionRewardRun {
+  id String @id @default(cuid())
+
+  userId              String
+  missionId           String
+  courseExamAttemptId String? @unique
+
+  awardedKnowledgeCardId String?
+  knowledgeCardAwardedAt DateTime?
+
+  unlockedAchievementIds String[] @default([])
+
+  awardedExp Int @default(0)
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission           Mission            @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  courseExamAttempt CourseExamAttempt? @relation(fields: [courseExamAttemptId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([missionId])
+  @@index([createdAt])
+}
+
+// =========================
+// Create Quest
+// =========================
+
+model CreateQuest {
+  id               String   @id
+  title            String
+  description      String
+  scenario         String
+  problemType      String
+  functionName     String
+  starterCode      String
+  estimatedMinutes Int      @default(45)
+  tags             String[] @default([])
+  thumbnailUrl     String?
+  previewData      Json
+  sortOrder        Int      @default(0)
+  isPublished      Boolean  @default(true)
+
+  requirements   CreateQuestRequirement[]
+  relatedCourses CreateQuestCourse[]
+  attempts       CreateQuestAttempt[]
+  achievements   Achievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+  @@index([problemType])
+}
+
+model CreateQuestRequirement {
+  id          String                         @id
+  questId     String
+  title       String
+  description String
+  kind        CreateQuestRequirementKind
+  category    CreateQuestRequirementCategory
+  points      Int
+  order       Int                            @default(0)
+  tests       Json
+  hints       Json
+
+  quest     CreateQuest           @relation(fields: [questId], references: [id], onDelete: Cascade)
+  hintViews CreateQuestHintView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questId, order])
+  @@index([kind])
+}
+
+model CreateQuestCourse {
+  questId  String
+  courseId String
+  reason   String
+  order    Int    @default(0)
+
+  quest  CreateQuest @relation(fields: [questId], references: [id], onDelete: Cascade)
+  course Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([questId, courseId])
+  @@index([courseId])
+}
+
+model CreateQuestAttempt {
+  id                     String                   @id @default(cuid())
+  userId                 String
+  questId                String
+  code                   String
+  selectedRequirementIds String[]                 @default([])
+  status                 CreateQuestAttemptStatus @default(IN_PROGRESS)
+  bestScore              Int                      @default(0)
+  startedAt              DateTime                 @default(now())
+  completedAt            DateTime?
+
+  user        User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest       CreateQuest                @relation(fields: [questId], references: [id], onDelete: Cascade)
+  executions  CreateQuestTestExecution[]
+  submissions CreateQuestSubmission[]
+  hintViews   CreateQuestHintView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, questId])
+  @@index([userId, updatedAt])
+  @@index([questId])
+}
+
+model CreateQuestTestExecution {
+  id           String   @id @default(cuid())
+  attemptId    String
+  code         String
+  score        Int
+  basicPassed  Boolean
+  results      Json
+  runtimeError String?
+  executedAt   DateTime @default(now())
+
+  attempt CreateQuestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, executedAt])
+}
+
+model CreateQuestSubmission {
+  id          String   @id @default(cuid())
+  attemptId   String
+  code        String
+  score       Int
+  maxScore    Int
+  basicPassed Boolean
+  results     Json
+  submittedAt DateTime @default(now())
+
+  attempt  CreateQuestAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  feedback CreateQuestFeedback?
+
+  @@index([attemptId, submittedAt])
+}
+
+model CreateQuestHintView {
+  id            String   @id @default(cuid())
+  attemptId     String
+  requirementId String
+  hintId        String
+  viewedAt      DateTime @default(now())
+
+  attempt     CreateQuestAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  requirement CreateQuestRequirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, requirementId, hintId])
+  @@index([attemptId, viewedAt])
+}
+
+model CreateQuestFeedback {
+  id           String @id @default(cuid())
+  submissionId String @unique
+
+  status    CourseExamFeedbackStatus
+  condition FeedbackCondition
+
+  currentState String?
+  nextGoal     String?
+  nextStep     String?
+  actionType   CourseExamFeedbackActionType?
+  actionLabel  String?
+
+  learningAnalysis  Json?
+  selectionAnalysis Json?
+  inputSnapshot     Json
+
+  model            String
+  openAiResponseId String?
+  usage            Json?
+  failureCode      String?
+  generatedAt      DateTime?
+
+  submission CreateQuestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([condition])
+}
+
+// =========================
+// Quest Board
+// =========================
+
+model QuestPost {
+  id           String              @id @default(cuid())
+  userId       String
+  category     QuestPostCategory
+  title        String
+  body         String
+  code         String?
+  referenceUrl String?
+  courseId     String?
+  missionId    String?
+  status       QuestPostStatus     @default(OPEN)
+  visibility   QuestPostVisibility @default(PUBLIC)
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course  Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  mission Mission? @relation(fields: [missionId], references: [id], onDelete: SetNull)
+
+  comments  QuestComment[]
+  reactions QuestReaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([status])
+  @@index([courseId])
+  @@index([missionId])
+  @@index([createdAt])
+}
+
+model QuestComment {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+  body   String
+
+  post QuestPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model QuestReaction {
+  id     String            @id @default(cuid())
+  postId String
+  userId String
+  type   QuestReactionType
+
+  post QuestPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId, type])
+  @@index([postId])
+  @@index([userId])
+  @@index([type])
+}
+
+model UserMissionActivityProgress {
+  id         String @id @default(cuid())
+  userId     String
+  activityId String
 
   status ProgressStatus @default(IN_PROGRESS)
 
   startedAt   DateTime?
   completedAt DateTime?
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity MissionActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, lessonId])
-}
-
-model UserMissionExamProgress {
-  id            String         @id @default(cuid())
-  userId        String
-  missionExamId String
-  difficulty    ExamDifficulty
-
-  passed Boolean @default(false)
-
-  startedAt   DateTime?
-  completedAt DateTime?
-
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  missionExam MissionExam @relation(fields: [missionExamId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, missionExamId, difficulty])
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
 }
 
 // =========================
-// Logs / Submissions
+// Logs
 // =========================
 
 model ActivityAnswerLog {
-  id               String @id @default(cuid())
-  userId           String
-  lessonActivityId String
+  id         String @id @default(cuid())
+  userId     String
+  activityId String
 
-  // selectedChoiceId, userAnswer などを保存
+  // selectedChoiceId, selectedIds, orderedIds, matchPairs, userAnswer などを保存
   answer Json
 
   isCorrect Boolean?
 
   answeredAt DateTime @default(now())
 
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lessonActivity LessonActivity @relation(fields: [lessonActivityId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity MissionActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([lessonActivityId])
-}
-
-model MissionExamSubmission {
-  id            String         @id @default(cuid())
-  userId        String
-  missionId     String
-  missionExamId String
-  difficulty    ExamDifficulty
-
-  submittedCode String
-  isCorrect     Boolean
-
-  submittedAt DateTime @default(now())
-
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mission     Mission     @relation(fields: [missionId], references: [id], onDelete: Cascade)
-  missionExam MissionExam @relation(fields: [missionExamId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([missionId])
-  @@index([missionExamId])
-  @@index([difficulty])
+  @@index([activityId])
 }
 
 // =========================
@@ -329,15 +825,43 @@ enum CourseDifficulty {
   HARD
 }
 
+enum FeedbackCondition {
+  STANDARD
+  PERSONALIZED
+}
+
+enum CourseExamFeedbackStatus {
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+enum CourseExamFeedbackActionType {
+  RETRY_COURSE_EXAM
+  SOLVE_PRACTICE_PROBLEM
+  CREATE_LEARNING_MEMO
+  CREATE_QUESTION_POST
+  CREATE_ERROR_HELP_POST
+  CREATE_WORK_POST
+  VIEW_BOARD_POSTS
+  ANSWER_BOARD_POST
+  REVIEW_KNOWLEDGE_CARDS
+  VIEW_ACHIEVEMENTS
+  SET_TARGET_ACHIEVEMENT
+  USE_BADGE_TICKET
+  VIEW_BADGE_COLLECTION
+  SET_PROFILE_BADGE
+  VIEW_PROFILE
+  RETRY_CREATE_QUEST
+  OPEN_RELATED_COURSE
+  SHARE_CREATE_QUEST
+  NO_APP_ACTION
+}
+
 enum MissionType {
   MAIN
   CHALLENGE
-}
-
-enum ExamDifficulty {
-  EASY
-  NORMAL
-  HARD
+  COURSE_EXAM
 }
 
 enum CourseCategoryType {
@@ -346,17 +870,107 @@ enum CourseCategoryType {
   TOOL
   UI
   DATA
+  SORT
+  SEARCH
+  GRAPH
+  DATA_STRUCTURE
+  DYNAMIC_PROGRAMMING
 }
 
-enum LessonStepType {
-  TRY_CODE
+enum CreateQuestRequirementKind {
+  BASIC
+  OPTIONAL
+}
+
+enum CreateQuestRequirementCategory {
+  FUNCTIONAL
+  QUALITY
+  PERFORMANCE
+  IMPLEMENTATION
+}
+
+enum CreateQuestAttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum MissionActivityType {
   TUTORIAL
   VIEW
   CHOICE
+  MATCH
+  ORDERED_STEPS
   SELECT_FILL
+  TRY_CODE
 }
 
 enum ProgressStatus {
   IN_PROGRESS
   COMPLETED
+}
+
+enum AchievementCategory {
+  MISSION_COUNT
+  MISSION_CLEAR
+  MISSION_COMPLETE
+  COURSE_EXAM
+  LEARNING_ACTION
+  COURSE_COMPLETE
+  STREAK
+  CREATE_QUEST
+  COLLECTION
+}
+
+enum AchievementConditionType {
+  MISSION_COUNT
+  SPECIFIC_MISSION_CLEAR
+  COURSE_REQUIRED_MISSION_COMPLETE
+  COURSE_ALL_MISSION_COMPLETE
+  COURSE_EXAM_HARD_CLEAR
+  ACTIVITY_COUNT
+  COURSE_COMPLETE
+  STREAK_DAYS
+  CREATE_QUEST_SCORE
+  CREATE_QUEST_COMPLETED_COUNT
+  CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT
+  CREATE_QUEST_PERFECT_COUNT
+  KNOWLEDGE_CARD_COUNT
+  COURSE_COMPLETED_COUNT
+}
+
+enum AchievementRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum KnowledgeCardRarity {
+  COMMON
+  RARE
+  EPIC
+}
+
+enum QuestPostCategory {
+  QUESTION
+  ERROR_HELP
+  WORK_SHARE
+  CODE_SHARE
+  MEMO
+  REFERENCE
+}
+
+enum QuestPostStatus {
+  OPEN
+  RESOLVED
+}
+
+enum QuestPostVisibility {
+  PUBLIC
+}
+
+enum QuestReactionType {
+  LIKE
+  HELPFUL
+  SAVED_ME
 }

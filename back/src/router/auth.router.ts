@@ -5,11 +5,11 @@ import {
   getMeController,
   ensureUserController,
 } from "../controller/auth.controller";
-import { verifyFirebaseToken } from "../middleware/authMiddleware";
+import { verifyFirebaseTokenOnly, verifyFirebaseToken } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post("/ensure", verifyFirebaseToken, ensureUserController);
+router.post("/ensure", verifyFirebaseTokenOnly, ensureUserController);
 router.get("/me", verifyFirebaseToken, getMeController);
 
 export default router;

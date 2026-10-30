@@ -30,6 +30,14 @@ const setAuthUserByFirebaseUid = async (
       id: true,
       firebaseUid: true,
       displayName: true,
+      experience: true,
+      knowledgeCardTableNumber: true,
+      selectedProfileAchievementId: true,
+      selectedMascotId: true,
+      selectedTargetAchievementId: true,
+      hexadResponse: {
+        select: { id: true },
+      },
     },
   });
 
@@ -37,9 +45,47 @@ const setAuthUserByFirebaseUid = async (
     return false;
   }
 
-  req.authUser = user;
+  req.authUser = {
+    id: user.id,
+    firebaseUid: user.firebaseUid,
+    displayName: user.displayName,
+    experience: user.experience,
+    knowledgeCardTableNumber: user.knowledgeCardTableNumber,
+    selectedProfileAchievementId: user.selectedProfileAchievementId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
+  };
 
   return true;
+};
+
+export const verifyFirebaseTokenOnly = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = extractBearerToken(req.headers.authorization);
+
+  if (!token) {
+    return res.status(401).json({
+      error: "No token provided",
+    });
+  }
+
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+
+    req.firebaseUser = decoded;
+
+    return next();
+  } catch (error) {
+    console.error("Firebase token verification failed:", error);
+
+    return res.status(401).json({
+      error: "Invalid token",
+    });
+  }
 };
 
 export const verifyFirebaseToken = async (
@@ -48,6 +94,7 @@ export const verifyFirebaseToken = async (
   next: NextFunction
 ) => {
   const devFirebaseUid = req.headers["x-dev-firebase-uid"];
+
   if (
     process.env.ENABLE_DEV_AUTH === "true" &&
     typeof devFirebaseUid === "string"
@@ -88,7 +135,7 @@ export const verifyFirebaseToken = async (
   } catch (error) {
     console.error("Firebase token verification failed:", error);
 
-    return res.status(403).json({
+    return res.status(401).json({
       error: "Invalid token",
     });
   }

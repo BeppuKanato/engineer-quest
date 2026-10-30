@@ -18,7 +18,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { getApiBaseUrl } from "@/lib/api";
+import { ensureUser } from "@/api/auth.api";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function Signup() {
   const [displayName, setDisplayName] = useState("");
@@ -30,7 +31,7 @@ export default function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
-  const apiBaseUrl = getApiBaseUrl();
+  const { setAppUser } = useUserSession();
 
   const handleSignup = async () => {
     if (isSubmitting) return;
@@ -64,23 +65,11 @@ export default function Signup() {
 
       const token = await credential.user.getIdToken();
 
-      const res = await fetch(`${apiBaseUrl}/auth/ensure`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          displayName: trimmedDisplayName,
-        }),
-      });
+      const data = await ensureUser(token, trimmedDisplayName);
 
-      if (!res.ok) {
-        throw new Error("ユーザー情報の作成に失敗しました");
-      }
-
+      setAppUser(data.user);
       setMessage("サインアップ成功");
-      router.push("/home");
+      router.push(data.user.hasHexadResponse ? "/home" : "/hexad");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(err.message);

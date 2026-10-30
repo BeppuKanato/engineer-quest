@@ -1,27 +1,46 @@
+/** Course一覧・ロードマップAPIのHTTP境界。永続化と解除判定はCourse serviceへ委譲する。 */
 import { NextFunction, Request, Response } from "express";
-import { getCoursesByFirebaseUid } from "../service/course.service";
+import {
+  getCourseRoadmapByUserId,
+  getCoursesByUserId,
+} from "../service/course.service";
 import { AppError } from "../error/appError";
 
-type AuthenticatedRequest = Request & {
-  firebaseUser?: {
-    uid: string;
-  };
+const getUserId = (req: Request): string => {
+  const userId = req.authUser?.id;
+  if (!userId) throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
+  return userId;
 };
 
 export const getCoursesController = async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   try {
-    const firebaseUid = req.firebaseUser?.uid;
-    if (!firebaseUid) {
-      throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
-    }
-
-    const courses = await getCoursesByFirebaseUid(firebaseUid);
+    const courses = await getCoursesByUserId(getUserId(req));
 
     res.status(200).json(courses);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCourseRoadmapController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const courseId = req.params.courseId;
+
+    if (!courseId) {
+      throw new AppError(400, "BAD_REQUEST", "Course ID is required");
+    }
+
+    const course = await getCourseRoadmapByUserId(getUserId(req), courseId);
+
+    res.status(200).json(course);
   } catch (error) {
     next(error);
   }

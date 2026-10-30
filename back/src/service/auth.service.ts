@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { randomInt } from "node:crypto";
 
 type EnsureUserInput = {
   firebaseUid: string;
@@ -19,6 +20,12 @@ export const ensureUserService = async ({
     create: {
       firebaseUid,
       displayName: displayName ?? null,
+      knowledgeCardTableNumber: randomInt(1, 16),
+    },
+    include: {
+      hexadResponse: {
+        select: { id: true },
+      },
     },
   });
 
@@ -26,6 +33,12 @@ export const ensureUserService = async ({
     id: user.id,
     firebaseUid: user.firebaseUid,
     displayName: user.displayName,
+    experience: user.experience,
+    knowledgeCardTableNumber: user.knowledgeCardTableNumber,
+    selectedProfileAchievementId: user.selectedProfileAchievementId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
   };
 };
 
@@ -33,6 +46,11 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
   const user = await prisma.user.findUnique({
     where: {
       firebaseUid,
+    },
+    include: {
+      hexadResponse: {
+        select: { id: true },
+      },
     },
   });
 
@@ -44,5 +62,11 @@ export const getUserByFirebaseUidService = async (firebaseUid: string) => {
     id: user.id,
     firebaseUid: user.firebaseUid,
     displayName: user.displayName,
+    experience: user.experience,
+    knowledgeCardTableNumber: user.knowledgeCardTableNumber,
+    selectedProfileAchievementId: user.selectedProfileAchievementId,
+    selectedMascotId: user.selectedMascotId,
+    selectedTargetAchievementId: user.selectedTargetAchievementId,
+    hasHexadResponse: user.hexadResponse !== null,
   };
 };

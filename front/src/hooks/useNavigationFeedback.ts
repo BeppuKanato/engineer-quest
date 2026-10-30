@@ -7,7 +7,7 @@ type UseNavigationFeedbackOptions = {
 export const useNavigationFeedback = (
   options: UseNavigationFeedbackOptions = {}
 ) => {
-  const { delayMs = 300 } = options;
+  const { delayMs = 0 } = options;
 
   const [isNavigating, setIsNavigating] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
