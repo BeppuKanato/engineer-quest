@@ -179,57 +179,6 @@ const getResumeMission = async (userId: string) => {
   return toHomeMission(progress.mission, userId, "前回の続き", "続きから始める", "前回の続き");
 };
 
-const getRecommendedMission = async (
-  userId: string,
-  completedMissionIds: Set<string>
-) => {
-  const courses = await prisma.course.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: "asc" },
-    include: {
-      missions: {
-        where: {
-          isPublished: true,
-          type: MissionType.MAIN,
-          isRequiredForCourseCompletion: true,
-        },
-        orderBy: { order: "asc" },
-      },
-    },
-  });
-
-  for (const course of courses) {
-    const nextMission = course.missions.find(
-      (mission, index) =>
-        !completedMissionIds.has(mission.id) &&
-        (index === 0 || completedMissionIds.has(course.missions[index - 1].id))
-    );
-
-    if (nextMission) {
-      return toHomeMission(nextMission, userId, "次におすすめ", "学習を始める", "現在のコースで次に進めるミッション");
-    }
-  }
-
-  const challengeMission = await prisma.mission.findFirst({
-    where: {
-      isPublished: true,
-      type: MissionType.CHALLENGE,
-      parentMissionId: { in: [...completedMissionIds] },
-      progresses: {
-        none: {
-          userId,
-          status: PrismaProgressStatus.COMPLETED,
-        },
-      },
-    },
-    orderBy: [{ courseId: "asc" }, { branchOrder: "asc" }],
-  });
-
-  return challengeMission
-    ? toHomeMission(challengeMission, userId, "挑戦ミッション", "挑戦する", "解放済みの挑戦ミッション")
-    : null;
-};
-
 const getRecommendedMissions = async (
   userId: string,
   completedMissionIds: Set<string>,

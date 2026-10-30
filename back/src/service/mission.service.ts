@@ -741,36 +741,6 @@ const awardMissionExperience = async (
   };
 };
 
-const isCourseRequiredMissionsComplete = async (
-  userId: string,
-  courseId: string
-) => {
-  const requiredMissions = await prisma.mission.findMany({
-    where: {
-      courseId,
-      isPublished: true,
-      isRequiredForCourseCompletion: true,
-    },
-    select: {
-      id: true,
-      progresses: {
-        where: {
-          userId,
-          status: PrismaProgressStatus.COMPLETED,
-        },
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
-
-  return (
-    requiredMissions.length > 0 &&
-    requiredMissions.every((candidate) => candidate.progresses.length > 0)
-  );
-};
-
 export const getMissionPlayService = async ({
   missionId,
   firebaseUid,
