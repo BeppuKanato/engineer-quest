@@ -67,7 +67,12 @@ const main = async () => {
         assertEqual(activity.order, expectedActivity.order, `${activity.id}.order`);
         assertEqual(activity.type, expectedActivity.type, `${activity.id}.type`);
         assertEqual(activity.title, expectedActivity.title, `${activity.id}.title`);
-        assertEqual(activity.content, expectedActivity.content, `${activity.id}.content`);
+        // Prisma JSON columns omit `undefined` values from seed helpers.
+        assertEqual(
+          activity.content,
+          JSON.parse(JSON.stringify(expectedActivity.content)),
+          `${activity.id}.content`,
+        );
       }
     }
   }

@@ -85,14 +85,15 @@ const mapping = (
   body: string,
   source: string,
   mappings: { id: string; label: string; lines: number[]; role: string; state: string }[],
+  trace?: { rendererKey: "DIVIDE_COMBINE_TRACE" | "TWO_LIST_MERGE_TRACE"; data: Record<string, unknown> },
 ) => a(
   id,
   title,
-  "役割カードを選び、色がつくコード行と状態変化を見比べましょう。",
+  trace ? "コード行とリストの変化を一手ずつ見比べましょう。" : "役割カードを選び、色がつくコード行と状態変化を見比べましょう。",
   body,
-  "CODE_STATE_MAPPING",
-  { code: source, mappings },
-  "コード行を、分割・停止・結合のどの動きか結びつけよう。",
+  trace?.rendererKey ?? "CODE_STATE_MAPPING",
+  trace ? { ...trace.data, code: source } : { code: source, mappings },
+  "青くなったコード行が、直上のリストをどう変えるか、一手ずつ確かめよう。",
   MissionActivityType.VIEW,
   "CODE_MAPPING",
 );
@@ -244,7 +245,11 @@ const divide = m("divide", "リストを中央で左右へ分けよう", "中央
       { id: "middle", label: "左右の境界を求める", lines: [2], role: "要素数5を2で割り、境界位置2を得る", state: "middle=2" },
       { id: "left", label: "境界より前を取り出す", lines: [3], role: "先頭から終了位置middleの直前まで", state: "left_part=[9, 4]" },
       { id: "right", label: "境界から末尾を取り出す", lines: [4], role: "開始位置middleを含めて末尾まで", state: "right_part=[7, 1, 6]" },
-    ]),
+    ], { rendererKey: "DIVIDE_COMBINE_TRACE", data: { levels: [
+      { label: "元の5件", phase: "DIVIDE", groups: [[9, 4, 7, 1, 6]], activeCodeLines: [1, 2], message: "len(numbers)=5、5//2=2なのでmiddleは位置2です。", nextLabel: "左を取り出す" },
+      { label: "位置2より前", phase: "DIVIDE", groups: [[9, 4], [7, 1, 6]], activeCodeLines: [3], activeGroupIndex: 0, message: "numbers[:2]は位置0、1の[9, 4]です。終了位置2は含みません。", nextLabel: "右を取り出す" },
+      { label: "位置2から末尾", phase: "DIVIDE", groups: [[9, 4], [7, 1, 6]], activeCodeLines: [4], activeGroupIndex: 1, message: "numbers[2:]は位置2から末尾の[7, 1, 6]です。5件すべてを元の順序で残せました。" },
+    ] } }),
   build("split-build", "左右へ分けるコードを完成させよう", "numbers=[8, 3, 6, 2, 5]を、境界位置を使って左と右へ分けます。スライスで値の順番を変えません。",
     "def merge_sort(numbers):", [
       { label: "中央の境界位置", indent: 1 },
@@ -272,7 +277,10 @@ const recursion = m("recursion", "1要素で止め、左右にも同じ処理を
     code("def merge_sort(numbers):", "    if len(numbers) <= 1:", "        return numbers"), [
       { id: "check", label: "要素数が1以下か調べる", lines: [2], role: "空または1要素なら分割不要と判断", state: "条件が成立すれば次の分割行へ進まない" },
       { id: "return", label: "整列済みとして返す", lines: [3], role: "現在のリストを呼び出し元へ返す", state: "[7]なら[7]、空なら[]が返る" },
-    ]),
+    ], { rendererKey: "DIVIDE_COMBINE_TRACE", data: { levels: [
+      { label: "1件で呼び出す", phase: "DIVIDE", groups: [[7]], activeCodeLines: [1, 2], message: "[7]の長さは1。len(numbers) <= 1 が成立します。", nextLabel: "そのまま返す" },
+      { label: "分割を止める", phase: "COMBINE", groups: [[7]], activeCodeLines: [3], message: "[7]をそのまま返します。この呼び出しでは中央の計算や分割を実行しません。" },
+    ] } }),
   build("base-build", "止まる条件を完成させよう", "2要素以上だけを分割するため、空または1要素では現在のリストを返します。",
     "def merge_sort(numbers):", [
       { label: "分割しなくてよい要素数を判定", indent: 1 },
@@ -291,7 +299,12 @@ const recursion = m("recursion", "1要素で止め、左右にも同じ処理を
     code("middle = len(numbers) // 2", "left = merge_sort(numbers[:middle])", "right = merge_sort(numbers[middle:])"), [
       { id: "left", label: "左側を最後まで整列", lines: [2], role: "左部分へ同じ処理を使い、返り値を記録", state: "[7, 2]からleft=[2, 7]が返る" },
       { id: "right", label: "右側を最後まで整列", lines: [3], role: "右部分へ同じ処理を使い、返り値を記録", state: "[5, 1]からright=[1, 5]が返る" },
-    ]),
+    ], { rendererKey: "DIVIDE_COMBINE_TRACE", data: { levels: [
+      { label: "境界を決める", phase: "DIVIDE", groups: [[7, 2, 5, 1]], activeCodeLines: [1], message: "numbers=[7, 2, 5, 1]なのでmiddle=2です。", nextLabel: "左の呼び出し" },
+      { label: "左を1件まで分ける", phase: "DIVIDE", groups: [[7], [2], [5, 1]], activeCodeLines: [2], message: "まず左[7, 2]をmerge_sortへ渡します。左の呼び出しが終わるまで、右の行へは進みません。", nextLabel: "左の結果を受け取る" },
+      { label: "左の返り値", phase: "DIVIDE", groups: [[2, 7], [5, 1]], activeCodeLines: [2], message: "左の呼び出しが戻り、left=[2, 7]を受け取ります。右はまだ整列前です。", nextLabel: "右の呼び出し" },
+      { label: "右の返り値", phase: "COMBINE", groups: [[2, 7], [1, 5]], activeCodeLines: [3], message: "次に右[5, 1]を整列してright=[1, 5]を受け取ります。これで2列の結合に進めます。" },
+    ] } }),
   build("recursion-build", "左右を整列する呼び出しを置こう", "middleは求め終えています。左右のスライスを同じmerge_sortへ渡し、返ってきた整列済みリストを記録します。",
     code("def merge_sort(numbers):", "    # 停止条件", "    middle = len(numbers) // 2"), [
       { label: "左側を整列して記録", indent: 1 },
@@ -330,12 +343,20 @@ const merge = m("merge", "整列済みの2列を、小さい順に結合しよ�
     "TEXT", { comparison: { headers: ["現在の結果", "左の残り", "右の残り", "完成"], rows: [{ cells: ["[1, 2, 5]", "[7]", "[]", "[1, 2, 5, 7]"] }, { cells: ["[2, 3, 4]", "[6]", "[]", "[2, 3, 4, 6]"] }] } },
     "比較が終わっても、残った値を結果へ入れてから完成だよ。"),
   mapping("merge-code", "2つの位置を使って先頭を比べよう", "iはleftで次に使う位置、jはrightで次に使う位置です。追加した側の位置だけを1つ進めます。等しい場合は左を先に追加し、右の同じ値も後で残ります。",
-    code("merged = []", "i = 0", "j = 0", "while i < len(left) and j < len(right):", "    if left[i] <= right[j]:", "        merged.append(left[i])", "        i += 1", "    else:", "        merged.append(right[j])", "        j += 1"), [
+    code("merged = []", "i = 0", "j = 0", "while i < len(left) and j < len(right):", "    if left[i] <= right[j]:", "        merged.append(left[i])", "        i += 1", "    else:", "        merged.append(right[j])", "        j += 1", "merged.extend(left[i:])", "merged.extend(right[j:])"), [
       { id: "prepare", label: "結果と2つの位置を準備", lines: [1, 2, 3], role: "結果は空、左右とも先頭から開始", state: "merged=[]、i=0、j=0" },
       { id: "continue", label: "両方に未使用の値がある間", lines: [4], role: "どちらかが空になるまで比較", state: "iとjが各リストの長さ未満か確認" },
       { id: "left", label: "左が小さいか等しければ左を追加", lines: [5, 6, 7], role: "left[i]を追加し、iだけ進める", state: "右の位置jはそのまま" },
       { id: "right", label: "右が小さければ右を追加", lines: [8, 9, 10], role: "right[j]を追加し、jだけ進める", state: "左の位置iはそのまま" },
-    ]),
+      { id: "remainder", label: "片方が空になった後の残りを追加", lines: [11, 12], role: "比較せず未使用部分を結果へ追加", state: "右が空なら左の残りを使う" },
+    ], { rendererKey: "TWO_LIST_MERGE_TRACE", data: { left: [2, 7], right: [1, 5], showVariableNames: true, steps: [
+      { leftIndex: 0, rightIndex: 0, result: [], activeCodeLines: [1, 2, 3], message: "merged=[]、i=0、j=0を準備。左の2と右の1が未使用の先頭です。", nextLabel: "両方に値があるか" },
+      { leftIndex: 0, rightIndex: 0, result: [], activeCodeLines: [4, 5], message: "両方に未使用の値があり、2 <= 1は偽です。右の1を選びます。", nextLabel: "右を追加" },
+      { leftIndex: 0, rightIndex: 1, result: [1], activeCodeLines: [8, 9, 10], message: "右の1を追加してjだけ1へ進めます。左のiは0のままです。", nextLabel: "左を追加" },
+      { leftIndex: 1, rightIndex: 1, result: [1, 2], activeCodeLines: [4, 5, 6, 7], message: "次は左2 <= 右5が真。2を追加してiだけ1へ進めます。", nextLabel: "右を追加" },
+      { leftIndex: 1, rightIndex: 2, result: [1, 2, 5], activeCodeLines: [4, 5, 8, 9, 10], message: "左7より右5が小さいので5を追加。j=2となり右は空です。", nextLabel: "残りを追加" },
+      { leftIndex: 2, rightIndex: 2, result: [1, 2, 5, 7], activeCodeLines: [11, 12], message: "whileを抜け、左の残り[7]を追加します。右の空の残りを追加しても変化しません。" },
+    ] } }),
   build("merge-loop-build", "比較して1つ移す処理を完成させよう", "leftとrightは整列済みです。両方に未使用の値がある間、先頭の小さい方をmergedへ追加し、追加した側の位置だけを進めます。",
     code("merged = []", "i = 0", "j = 0"), [
       { label: "両方に未使用の値がある間", indent: 0 },
@@ -407,7 +428,15 @@ const assemble = m("assemble", "マージソートのコードを組み立てよ
       { id: "prepare", label: "結合の記録を準備", lines: [7, 8, 9], role: "結果と左右の位置を初期化", state: "merged=[]、i=0、j=0" },
       { id: "compare", label: "未使用の先頭を比較", lines: [10, 11, 12, 13, 14, 15, 16], role: "小さい側を追加し、その側だけ進める", state: "片方が空になるまでmergedが伸びる" },
       { id: "finish", label: "残りを追加して返す", lines: [17, 18, 19], role: "未使用部分をすべて末尾へ置く", state: "全値を小さい順にしたリストを返す" },
-    ]),
+    ], { rendererKey: "DIVIDE_COMBINE_TRACE", data: { levels: [
+      { label: "4件なので続ける", phase: "DIVIDE", groups: [[7, 2, 5, 1]], activeCodeLines: [1, 2], message: "長さ4は1より大きいので、停止条件では返りません。", nextLabel: "左右を分ける" },
+      { label: "左右へ分ける", phase: "DIVIDE", groups: [[7, 2], [5, 1]], activeCodeLines: [4, 5, 6], message: "middle=2。左の呼び出しが整列を終えてから、右の呼び出しへ進みます。", nextLabel: "1件まで分ける" },
+      { label: "1件で止まる", phase: "DIVIDE", groups: [[7], [2], [5], [1]], activeCodeLines: [1, 2, 3], message: "各1件の呼び出しはそのまま返ります。ここから小さな結果を結合します。", nextLabel: "左右の結果を受け取る" },
+      { label: "左右が整列済み", phase: "COMBINE", groups: [[2, 7], [1, 5]], activeCodeLines: [5, 6], message: "再帰からleft=[2, 7]、right=[1, 5]を受け取ります。", nextLabel: "結合を準備" },
+      { label: "結果と位置を準備", phase: "COMBINE", groups: [[2, 7], [1, 5]], activeCodeLines: [7, 8, 9], message: "merged=[]、i=0、j=0から先頭比較を始めます。", nextLabel: "小さい値から追加" },
+      { label: "先頭を順に比較", phase: "COMBINE", groups: [[1, 2, 5], [7]], activeCodeLines: [10, 11, 12, 13, 14, 15, 16], message: "1、2、5を順にmergedへ追加し、残りは左の7です。", nextLabel: "残りを追加" },
+      { label: "全値を返す", phase: "COMBINE", groups: [[1, 2, 5, 7]], activeCodeLines: [17, 18, 19], message: "左の残り7を追加して、整列済みの[1, 2, 5, 7]を返します。" },
+    ] } }),
   a("section-order", "5つの処理を実行順に並べよう", "関数の大きな処理単位を、実行される順に並べましょう。",
     "停止条件を最初に確認した後の処理です。左右が整列済みになる前に先頭比較はできません。",
     "BLOCK_ORDER", {

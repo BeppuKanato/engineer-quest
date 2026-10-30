@@ -323,9 +323,11 @@ const divideCombineTraceDataSchema = z.object({
     groups: z.array(z.array(z.number()).min(1)).min(1),
     message: z.string().min(1),
     nextLabel: z.string().optional(),
+    activeCodeLines: z.array(z.number().int().positive()).optional(),
   }).passthrough()).min(1),
   intervalMs: z.number().int().positive().optional(),
   finalMessage: z.string().optional(),
+  code: z.string().optional(),
 }).passthrough();
 const twoListMergeTraceDataSchema = z.object({
   left: z.array(z.number()).min(1),
@@ -336,10 +338,12 @@ const twoListMergeTraceDataSchema = z.object({
     result: z.array(z.number()),
     message: z.string().min(1),
     nextLabel: z.string().optional(),
+    activeCodeLines: z.array(z.number().int().positive()).optional(),
   }).passthrough()).min(1),
   intervalMs: z.number().int().positive().optional(),
   finalMessage: z.string().optional(),
   showVariableNames: z.boolean().optional(),
+  code: z.string().optional(),
 }).passthrough().superRefine((data, context) => {
   data.steps.forEach((step, index) => {
     if (step.leftIndex > data.left.length || step.rightIndex > data.right.length) {

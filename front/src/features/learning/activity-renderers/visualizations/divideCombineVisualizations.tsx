@@ -3,7 +3,7 @@
 import { Chip, Paper, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { AlgorithmArray, StepTraceControls, type AlgorithmCellState } from "@/features/learning/components";
+import { AlgorithmArray, CodeLines, StepTraceControls, type AlgorithmCellState } from "@/features/learning/components";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
@@ -16,6 +16,8 @@ type DivideCombineLevel = {
   groups: number[][];
   message: string;
   nextLabel?: string;
+  activeCodeLines?: number[];
+  activeGroupIndex?: number;
 };
 
 const parseDivideCombine = (content: Record<string, unknown>) => {
@@ -32,12 +34,15 @@ const parseDivideCombine = (content: Record<string, unknown>) => {
       groups: groups as number[][],
       message: item.message,
       ...(typeof item.nextLabel === "string" ? { nextLabel: item.nextLabel } : {}),
+      ...(Array.isArray(item.activeCodeLines) ? { activeCodeLines: item.activeCodeLines.filter((line): line is number => Number.isInteger(line)) } : {}),
+      ...(Number.isInteger(item.activeGroupIndex) ? { activeGroupIndex: item.activeGroupIndex as number } : {}),
     }];
   });
   return levels.length > 0 ? {
     levels,
     intervalMs: typeof content.intervalMs === "number" && content.intervalMs > 0 ? content.intervalMs : 1800,
     finalMessage: typeof content.finalMessage === "string" ? content.finalMessage : undefined,
+    code: typeof content.code === "string" ? content.code : undefined,
   } : null;
 };
 
@@ -86,7 +91,14 @@ export const DivideCombineTraceVisualization = ({ content }: { content: Record<s
           <Paper
             key={`${stepIndex}-${index}-${group.join("-")}`}
             elevation={0}
-            sx={{ p: 1.5, borderRadius: 2.5, border: "1px solid #cbd5e1", maxWidth: "100%", overflowX: "auto" }}
+            sx={{
+              p: 1.5,
+              borderRadius: 2.5,
+              border: `2px solid ${level.activeGroupIndex === index ? "#2563eb" : "#cbd5e1"}`,
+              bgcolor: level.activeGroupIndex === index ? "#eff6ff" : "#fff",
+              maxWidth: "100%",
+              overflowX: "auto",
+            }}
           >
             <Typography textAlign="center" fontSize={12} fontWeight={850} color="text.secondary" sx={{ mb: 1 }}>
               {level.groups.length === 1 ? "リスト" : `部分 ${index + 1}`}
@@ -101,6 +113,7 @@ export const DivideCombineTraceVisualization = ({ content }: { content: Record<s
           <Typography sx={{ mt: 0.75, color: "#1d4ed8", fontWeight: 850 }}>{data.finalMessage}</Typography>
         )}
       </Paper>
+      {data.code && <CodeLines code={data.code} activeLines={level.activeCodeLines ?? []} showLineNumbers wrapLongLines />}
       <StepTraceControls
         stepIndex={stepIndex}
         stepCount={data.levels.length}
@@ -126,6 +139,7 @@ type MergeStep = {
   result: number[];
   message: string;
   nextLabel?: string;
+  activeCodeLines?: number[];
 };
 
 const parseTwoListMerge = (content: Record<string, unknown>) => {
@@ -142,6 +156,7 @@ const parseTwoListMerge = (content: Record<string, unknown>) => {
       result,
       message: item.message,
       ...(typeof item.nextLabel === "string" ? { nextLabel: item.nextLabel } : {}),
+      ...(Array.isArray(item.activeCodeLines) ? { activeCodeLines: item.activeCodeLines.filter((line): line is number => Number.isInteger(line)) } : {}),
     }];
   });
   return steps.length > 0 ? {
@@ -151,6 +166,7 @@ const parseTwoListMerge = (content: Record<string, unknown>) => {
     intervalMs: typeof content.intervalMs === "number" && content.intervalMs > 0 ? content.intervalMs : 1800,
     finalMessage: typeof content.finalMessage === "string" ? content.finalMessage : undefined,
     showVariableNames: content.showVariableNames === true,
+    code: typeof content.code === "string" ? content.code : undefined,
   } : null;
 };
 
@@ -215,6 +231,7 @@ export const TwoListMergeTraceVisualization = ({ content }: { content: Record<st
           <Typography sx={{ mt: 0.75, color: "#1d4ed8", fontWeight: 850 }}>{data.finalMessage}</Typography>
         )}
       </Paper>
+      {data.code && <CodeLines code={data.code} activeLines={step.activeCodeLines ?? []} showLineNumbers wrapLongLines />}
       <StepTraceControls
         stepIndex={stepIndex}
         stepCount={data.steps.length}

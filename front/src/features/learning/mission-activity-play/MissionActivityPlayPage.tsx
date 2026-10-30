@@ -603,7 +603,8 @@ const AnswerInput = ({
 };
 
 const ActivityContext = ({ activity }: { activity: MissionActivity }) => {
-  const body = activity.content.data.body ?? activity.content.data.text;
+  const body = activity.content.data.body
+    ?? (activity.content.rendererKey === "TEXT" ? activity.content.data.text : undefined);
   const summary = activity.content.data.summary ?? [];
   const sections = Array.isArray(activity.content.data.sections)
     ? activity.content.data.sections.flatMap((section) => {

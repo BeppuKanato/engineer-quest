@@ -38,8 +38,8 @@ const build = (id: string, title: string, body: string, prefix: string, slots: {
     executionResult: feedback, correctFeedback: feedback, incorrectFeedback: hint,
     previewWaitingMessage: "コードと役割を見比べてから、答えを確認しましょう。",
   }, "何のための処理かを、空欄の説明と照らし合わせよう。", MissionActivityType.SELECT_FILL, "GUIDED_PRACTICE");
-const mapping = (id: string, title: string, body: string, source: string, mappings: { id: string; label: string; lines: number[]; role: string; state: string }[]) =>
-  a(id, title, "役割カードを選び、色がつくコード行と状態変化を見比べましょう。", body, "CODE_STATE_MAPPING", { code: source, mappings }, "コードの名前を、覚えたい場所の役割とつなげよう。", MissionActivityType.VIEW, "CODE_MAPPING");
+const mapping = (id: string, title: string, body: string, source: string, mappings: { id: string; label: string; lines: number[]; role: string; state: string }[], trace?: Record<string, unknown>) =>
+  a(id, title, trace ? "コード行と配列の状態がどう変わるか、一手ずつ確認しましょう。" : "役割カードを選び、色がつくコード行と状態変化を見比べましょう。", body, trace ? "ARRAY_TRACE" : "CODE_STATE_MAPPING", trace ? { ...trace, code: source } : { code: source, mappings }, "コードの名前を、覚えたい場所の役割とつなげよう。", MissionActivityType.VIEW, "CODE_MAPPING");
 const indices = (id: string, title: string, body: string, questions: Record<string, unknown>[], feedback: string, hint: string) =>
   a(id, title, "配列のカードを1つ選び、答えを確認しましょう。問題は1問ずつ進みます。", body, "INDEX_SELECT", {
     indexSelectionQuestions: questions, correctFeedback: feedback, incorrectFeedback: hint,
@@ -92,7 +92,11 @@ const candidate = m("find-candidate", "最小値の候補を、一つずつ調�
     { id: "initial", label: "最初の候補を覚える", lines: [3], role: "今回の先頭iを候補にする", state: "min_index=0、候補の値はnumbers[0]の7" },
     { id: "compare", label: "2つの場所の値を比べる", lines: [5], role: "調べる値が候補の値より小さいか判定する", state: "numbers[1]の4とnumbers[0]の7を比べる" },
     { id: "update", label: "小さい値の位置を記録する", lines: [6], role: "候補をjへ更新する", state: "min_indexは0から1へ。4という値を代入するのではない。リストは変わらない" },
-  ]),
+  ], { values: [7, 4, 6, 2], steps: [
+    { pointers: [pointer(0, "i / 最小候補")], activeCodeLines: [1, 2, 3], message: "i=0をmin_indexへ記録。候補は位置0の7で、まだ値は動きません。", nextLabel: "位置1を比べる" },
+    { comparingIndices: [0, 1], pointers: [pointer(0, "最小候補"), pointer(1, "j")], activeCodeLines: [4, 5], message: "j=1の4と、min_index=0の7を比較。4の方が小さいです。", nextLabel: "候補を更新する" },
+    { pointers: [pointer(1, "最小候補")], activeCodeLines: [6], message: "min_indexへ値4ではなく位置1を入れます。配列[7, 4, 6, 2]は変わりません。" },
+  ] }),
   build("candidate-build", "候補を更新するコードを埋めよう", "numbers=[9, 6, 8, 2]。min_index=0は候補の位置、j=1は調べる位置です。必要なら候補の位置を覚え直す処理を作ります。", code("numbers = [9, 6, 8, 2]", "min_index = 0", "j = 1"),
     [{ label: "値を比較する条件", indent: 0 }, { label: "候補の位置を更新", indent: 1 }],
     [["update", "min_index = j"], ["greater", "if numbers[j] > numbers[min_index]:"], ["value", "min_index = numbers[j]"], ["condition", condition]], ["condition", "update"],
@@ -100,7 +104,14 @@ const candidate = m("find-candidate", "最小値の候補を、一つずつ調�
   mapping("scan-code", "調べる位置を右へ進めよう", "候補の準備と更新はできました。今度は末尾まで比較します。nは要素数、iは今回の先頭、jは調べる位置です。range(開始, 終わり) は終わりの番号を含みません。i=0、n=4ならjは1、2、3。位置4へはアクセスしません。", code("numbers = [7, 4, 6, 2]", "n = len(numbers)", "i = 0", "min_index = i", "for j in range(i + 1, n):", `    ${condition}`, "        min_index = j"), [
     { id: "length", label: "要素数を求める", lines: [2], role: "リストの長さをnに記録する", state: "n=4。有効な位置は0〜3" },
     { id: "scan", label: "候補の右隣から末尾まで調べる", lines: [5], role: "先頭iは候補として見たので、i+1から比べる", state: "jが1→2→3と進み、それぞれの値をその時点の候補と比べる" },
-  ]),
+  ], { values: [7, 4, 6, 2], steps: [
+    { pointers: [pointer(0, "i / 最小候補")], activeCodeLines: [2, 3, 4], message: "n=4、今回の先頭i=0を候補にします。forはその右隣j=1から始まります。", nextLabel: "j=1を比較" },
+    { comparingIndices: [0, 1], pointers: [pointer(1, "j"), pointer(0, "最小候補")], activeCodeLines: [5, 6], message: "j=1の4は候補7より小さいため、if条件が成立します。", nextLabel: "候補を更新" },
+    { pointers: [pointer(1, "最小候補")], activeCodeLines: [7], message: "min_indexを1へ更新します。値はまだ交換しません。", nextLabel: "j=2を比較" },
+    { comparingIndices: [1, 2], pointers: [pointer(2, "j"), pointer(1, "最小候補")], activeCodeLines: [5, 6], message: "j=2の6は候補4より大きいので、候補は位置1のままです。", nextLabel: "j=3を比較" },
+    { comparingIndices: [1, 3], pointers: [pointer(3, "j"), pointer(1, "最小候補")], activeCodeLines: [5, 6], message: "j=3の2は候補4より小さいため、if条件が成立します。", nextLabel: "候補を更新" },
+    { pointers: [pointer(3, "最小候補")], activeCodeLines: [7], message: "min_indexを3へ更新。次のj=4はrangeに含まれないので、この周の比較は終わりです。" },
+  ] }),
   build("scan-build", "途中の範囲から候補探しを始めよう", "numbers=[1, 8, 5, 3]。位置0の1は確定済みです。i=1から右を調べます。nは要素数、min_indexは候補の位置、jは調べる位置です。まず候補を準備し、その右隣から末尾まで見るコードを置きましょう。", code("numbers = [1, 8, 5, 3]", "n = len(numbers)", "i = 1"),
     [{ label: "今回の候補を準備", indent: 0 }, { label: "調べる位置を順に動かす（この下に比較処理が続く）", indent: 0 }],
     [["zero", "min_index = 0"], ["loop", "for j in range(i + 1, n):"], ["last", "for j in range(i + 1, n - 1):"], ["init", "min_index = i"]], ["init", "loop"],
@@ -119,7 +130,10 @@ const exchange = m("exchange", "見つけた最小値を、先頭と交換しよ
     "位置0の8と位置3の1だけを交換するので [1, 3, 6, 8] です。元の8も残ります。", "今回動かす2つの場所と、残しておく値を確認しましょう。"),
   mapping("swap-code", "交換をPythonの1行で表そう", "numbersはリスト、iは確定する位置、min_indexは全件を調べ終えた最小値の位置です。Pythonの同時代入は、右側の値を先に両方読み、左側へ順に入れます。だから元の値を失わずに交換できます。", code("numbers = [7, 4, 6, 2]", "i = 0", "min_index = 3", swap), [
     { id: "swap", label: "元の2つの値を交換する", lines: [4], role: "右辺の2と7を読み、左辺の位置0と3へ入れる", state: "位置0は7→2、位置3は2→7。結果は [2, 4, 6, 7]" },
-  ]),
+  ], { values: [7, 4, 6, 2], steps: [
+    { swappingIndices: [0, 3], pointers: [pointer(0, "i"), pointer(3, "min_index")], activeCodeLines: [4], message: "右辺から位置3の2と位置0の7を両方読みます。2つの元の値はまだ失われません。", nextLabel: "同時に交換" },
+    { values: [2, 4, 6, 7], confirmedIndices: [0], activeCodeLines: [4], message: "左辺の位置0へ2、位置3へ7を入れました。位置0が確定し、4と6は動きません。" },
+  ] }),
   build("swap-build", "値を失わない交換行を選ぼう", "numbers=[1, 9, 4, 6]。位置0は確定済み。i=1が今回確定する位置、min_index=2が最小値の位置です。調査済みの2つの値を交換してください。", code("numbers = [1, 9, 4, 6]", "i = 1", "min_index = 2"),
     [{ label: "2つの値を交換", indent: 0 }], [["overwrite", "numbers[i] = numbers[min_index]"], ["swap", swap], ["keep", "numbers[i], numbers[min_index] = numbers[i], numbers[min_index]"]], ["swap"],
     "9と4を交換し、[1, 4, 9, 6] になります。位置0の1はそのままです。", "元の値を2つとも使い、右側の順序を反対にします。"),
@@ -147,7 +161,11 @@ const repeat = m("repeat", "確定した左側を残して、繰り返そう", "
   mapping("outer-code", "確定する位置を、外側のforで進めよう", "nは要素数、iは今回確定する位置です。4件なら位置0、1、2を確定すれば残り1件も決まるので3周です。range(n - 1) は0からn-2まで。各周でmin_indexをiにし直し、その内側でjによる走査を行います。", code("numbers = [6, 4, 7, 2]", "n = len(numbers)", "for i in range(n - 1):", "    min_index = i"), [
     { id: "outer", label: "確定する位置を右へ進める", lines: [3], role: "候補探しと交換を繰り返す外側のループ", state: "n=4なのでiは0→1→2。各回で右側の範囲が1件ずつ短くなる" },
     { id: "reset", label: "その周の最初の候補を準備する", lines: [4], role: "外側のforの中なので毎周実行される", state: "i=1の周ならmin_index=1、i=2の周ならmin_index=2" },
-  ]),
+  ], { values: [6, 4, 7, 2], steps: [
+    { pointers: [pointer(0, "i / 最小候補")], activeCodeLines: [2, 3, 4], message: "n=4なのでiは0から始まり、この周のmin_indexも0です。内側の走査と交換はこの後に続きます。", nextLabel: "1周目の後" },
+    { values: [2, 4, 7, 6], confirmedIndices: [0], pointers: [pointer(1, "i / 最小候補")], activeCodeLines: [3, 4], message: "1周目で2を確定。次はi=1となり、min_indexを1に準備し直します。", nextLabel: "2周目の後" },
+    { values: [2, 4, 7, 6], confirmedIndices: [0, 1], pointers: [pointer(2, "i / 最小候補")], activeCodeLines: [3, 4], message: "2周目で4を確定。次はi=2、min_index=2です。i=3の周は不要です。" },
+  ] }),
   build("outer-build", "毎周の候補を、どこで準備する？", "nはリストの要素数。iで今回確定する位置を動かし、min_indexへその周の先頭を記録します。この後にjの走査と交換が続きます。", code("numbers = [5, 2, 8, 1]", "n = len(numbers)"),
     [{ label: "確定する位置を動かす", indent: 0 }, { label: "毎周の最初の候補", indent: 1 }],
     [["fixed", "min_index = 0"], ["init", "min_index = i"], ["short", "for i in range(n - 2):"], ["outer", "for i in range(n - 1):"]], ["outer", "init"],
@@ -155,7 +173,10 @@ const repeat = m("repeat", "確定した左側を残して、繰り返そう", "
   mapping("boundary-return", "空でも1件でも、リストを返そう", "nは要素数です。空リストならrange(-1)、1件ならrange(0)となり、どちらもループは0回です。候補の値を読まず、そのまま返せます。returnは呼び出し元へ値を返して関数を終えるため、全周の後に置きます。numbers.sort()やsorted()を使わず、学んだ処理を関数にまとめます。", selectionSortAnswerCode, [
     { id: "empty", label: "0件・1件なら周回しない", lines: [2, 3], role: "nが0または1ならforの中は実行しない", state: "[]や[5]は、値へのアクセスも交換も行わない" },
     { id: "return", label: "全周が終わったリストを返す", lines: [9], role: "外側のforと同じ深さに置き、処理後のnumbersを返す", state: "[6, 4, 7, 2]なら[2, 4, 6, 7]。[]なら[]、[5]なら[5]" },
-  ]),
+  ], { values: [5], steps: [
+    { values: [5], activeCodeLines: [1, 2, 3, 9], message: "numbers=[5]ならn=1、range(0)は空です。値を読んだり交換したりせず[5]を返します。空リストでもループは0回です。", nextLabel: "複数件の場合" },
+    { values: [2, 4, 6, 7], confirmedIndices: [0, 1, 2, 3], activeCodeLines: [9], message: "複数件ならすべての周が終わった後でreturnを実行します。この例は[2, 4, 6, 7]です。" },
+  ] }),
   choice("repeat-check", "1周だけで返してもよい？", "[4, 3, 2, 1] の1周目では最小の1を先頭と交換し、[1, 3, 2, 4] になりました。この直後にreturnで返すコードについて、正しい判断は？", ["先頭だけ確定しており、残りの周も必要", "最小値が先頭なので常に全体が完成", "4件なら4回の追加交換が必須"], 0,
     "3と2の順番がまだ逆です。returnは外側のforの後に置き、残りも確定してから返します。", "左端以外も小さい順か、残りのリストを確認しましょう。"),
 ], ["確定範囲の拡大", "候補の再初期化", "二重ループの役割", "空・1件と戻り値"]);

@@ -152,6 +152,8 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
 
   return (
     <Stack spacing={2.25} sx={{ minWidth: 0 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: data.code ? { xs: "minmax(0, 1fr)", lg: "minmax(0, 1.1fr) minmax(0, 1fr)" } : "minmax(0, 1fr)", gap: 2.25, alignItems: "start" }}>
+      <Stack spacing={2.25} sx={{ minWidth: 0 }}>
       <Paper variant="outlined" sx={{ p: { xs: 1, sm: 2 }, borderRadius: 3, bgcolor: "#f8fafc", overflow: "hidden" }}>
         <Box sx={{ width: "100%", maxWidth: 680, mx: "auto" }}>
           <svg viewBox="0 0 100 68" role="img" aria-label={`つながりの図。${step.message}`} style={{ width: "100%", height: "auto", display: "block" }}>
@@ -222,14 +224,19 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
         </Paper>
       )}
 
+      </Stack>
+      <Stack spacing={2.25} sx={{ minWidth: 0, position: data.code ? { lg: "sticky" } : "static", top: 100 }}>
+
       <Typography aria-live="polite" fontWeight={900} color="#1e293b" sx={{ lineHeight: 1.75 }}>{step.message}</Typography>
-      {data.code && <CodeLines code={data.code} activeLines={step.activeCodeLines ?? []} />}
+      {data.code && <CodeLines code={data.code} activeLines={step.activeCodeLines ?? []} showLineNumbers wrapLongLines />}
       <StepTraceControls
         stepIndex={stepIndex}
         stepCount={data.steps.length}
         playing={playing}
         speed={speed}
         nextLabel={step.nextLabel}
+        showPlayback={data.steps.length > 1}
+        showStepButtons={data.steps.length > 1}
         onReset={() => { setStepIndex(0); setPlaying(false); }}
         onPrevious={() => { setStepIndex((current) => Math.max(0, current - 1)); setPlaying(false); }}
         onNext={() => { setStepIndex((current) => Math.min(data.steps.length - 1, current + 1)); setPlaying(false); }}
@@ -239,6 +246,8 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
         }}
         onSpeedChange={setSpeed}
       />
+      </Stack>
+      </Box>
       {stepIndex === data.steps.length - 1 && data.finalMessage && (
         <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2.5, bgcolor: "#ecfdf5", border: "1px solid #86efac" }}>
           <Typography color="#166534" fontWeight={900}>{data.finalMessage}</Typography>

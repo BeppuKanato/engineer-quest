@@ -158,7 +158,7 @@ const CharacterRow = ({
 }) => (
   <Box sx={{ overflowX: "auto", py: 0.5 }}>
     <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ minWidth: "max-content" }}>
-      <Typography sx={{ width: 72, pt: 1.5, flexShrink: 0, fontWeight: 950, color: "#334155" }}>
+      <Typography sx={{ width: 176, pt: 1.5, flexShrink: 0, whiteSpace: "nowrap", fontWeight: 950, color: "#334155" }}>
         {label}
       </Typography>
       {Array.from({ length: offset }, (_, index) => (
