@@ -301,7 +301,7 @@ const missionTwo: MissionSeed = {
       instruction:
         "別のデータでも、中央との比較から次に探す範囲を判断しましょう。",
       mentorMessage:
-        "中央との比較から、次に探す範囲を正しく選べたね！",
+        "中央の値と探す値を比べて、次に探す範囲を選ぼう！",
       content: {
         learningRole: "INDEPENDENT_PRACTICE",
         rendererKey: "ARRAY_REGION_SELECT",
