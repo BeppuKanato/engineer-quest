@@ -194,6 +194,15 @@ const twoNodeGraph = (steps: Record<string, unknown>[]) => ({
   containerTrailingLabel: "現在の呼び出し",
   activeContainerItem: "LAST",
 });
+// Mission3前半専用:Fの隣をDだけにして「行き止まり」を正しく示す小グラフ。EはBの隣として残し、戻った後に調べられる状態にする。
+const deadEndGraph = {
+  nodes: nodes.filter((node) => node.id !== "C"),
+  edges: [
+    { from: "A", to: "B" }, { from: "B", to: "D" },
+    { from: "B", to: "E" }, { from: "D", to: "F" },
+  ],
+  adjacency: { A: ["B"], B: ["A", "D", "E"], D: ["B", "F"], E: ["B"], F: ["D"] },
+};
 
 const orientation = m("orientation", "一つの道を奥までたどる探索を知ろう", "深さ優先探索が解決する問題と、BFSとの違いを確認します。", [
   a("goal", "つながりを奥までたどって、届く場所を探そう", "DFSがどのように進むか全体像を確認しましょう。",
@@ -242,8 +251,8 @@ const depth = m("depth", "最初の未発見の隣へ、奥まで進もう", "�
 
 const recursion = m("recursion", "行き止まりで一つ前へ戻ろう", "戻り先を残す呼び出しの積み重なりと、再帰を学びます。", [
   a("dead-end", "Fで未発見の隣がなくなった", "進めないときに必要な情報を考えましょう。",
-    "A→B→D→Fと進みました。Fの隣Dは発見済みで、ほかに進めません。しかし探索全体は終わりではなく、DやBにまだ確認途中の隣があります。Fへ来るまでのA、B、Dを戻り先として残す必要があります。",
-    "GRAPH_TRACE", graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fから進めないので、右から一つ戻ってDの続きへ移ります。" }]),
+    "ここでは戻る動きに集中するため、A―B、B―D、B―E、D―Fだけの小さな図で確認します。A→B→D→Fと進みました。Fの隣はDだけで、すでに発見済みなので、ほかに進めません。しかし探索全体は終わりではなく、Bにはまだ未発見のEが残っています。Fへ来るまでのA、B、Dを戻り先として残す必要があります。",
+    "GRAPH_TRACE", graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fから進めないので、右から一つ戻ってDの続きへ移ります。" }], deadEndGraph),
     "右端が現在地F、その左のDが一つ前の戻り先だよ。"),
   a("call-stack", "調べる途中の場所を積み重ねよう", "進むときと戻るときの変化を追いましょう。",
     "Aを調べている途中でBへ進むと、Aの続きは待ったままです。同様にBの途中でD、Dの途中でFを調べます。Fが終わるとFの呼び出しだけがなくなりDへ戻ります。Dも終わればBへ戻ります。",
