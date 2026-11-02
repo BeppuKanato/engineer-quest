@@ -108,8 +108,8 @@ const parseData = (content: Record<string, unknown>): GraphTraceData | null => {
   };
 };
 
-const nodeColors = (nodeId: string, step: GraphStep) => {
-  if (nodeId === step.currentNode) return { fill: "#2563eb", stroke: "#1d4ed8", text: "#ffffff", label: "現在取り出した場所" };
+const nodeColors = (nodeId: string, step: GraphStep, currentNodeLabel?: string) => {
+  if (nodeId === step.currentNode) return { fill: "#2563eb", stroke: "#1d4ed8", text: "#ffffff", label: currentNodeLabel ?? "現在取り出した場所" };
   if (nodeId === step.inspectingNode || step.inspectingNodes?.includes(nodeId)) return { fill: "#c4b5fd", stroke: "#7c3aed", text: "#3b0764", label: "今確認している隣" };
   if (step.processedNodes.includes(nodeId)) return { fill: "#bbf7d0", stroke: "#16a34a", text: "#14532d", label: "確認済み" };
   if (step.discoveredNodes.includes(nodeId)) return { fill: "#fde68a", stroke: "#d97706", text: "#78350f", label: "発見済み" };
@@ -173,7 +173,7 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
               );
             })}
             {data.nodes.map((node) => {
-              const colors = nodeColors(node.id, step);
+              const colors = nodeColors(node.id, step, data.currentNodeLabel);
               return (
                 <g key={node.id} aria-label={`${node.label}：${colors.label}`}>
                   <circle cx={node.x} cy={node.y} r="7.2" fill={colors.fill} stroke={colors.stroke} strokeWidth="1.5" />
@@ -215,7 +215,7 @@ export const GraphTraversalVisualization = ({ content }: { content: Record<strin
             {step.queue.length > 0
               ? step.queue.map((node, index) => {
                 const activeIndex = data.activeContainerItem === "LAST" ? step.queue.length - 1 : 0;
-                const colors = nodeColors(node, step);
+                const colors = nodeColors(node, step, data.currentNodeLabel);
                 return <Chip key={`${node}-${index}`} label={node} sx={{ height: 42, minWidth: 48, fontSize: 17, fontWeight: 950, color: colors.text, bgcolor: colors.fill, border: `${index === activeIndex ? 3 : 2}px solid ${colors.stroke}`, boxShadow: index === activeIndex ? `0 0 0 3px ${colors.fill}` : "none" }} />;
               })
               : <Chip label="空" variant="outlined" />}
