@@ -28,6 +28,8 @@ const regionLabel: Record<ArrayRegion, string> = {
   right: "右側",
 };
 
+const regionOptions: readonly ArrayRegion[] = ["left", "center", "right"];
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
@@ -167,7 +169,7 @@ export const ArrayRegionSelect = ({
           {question.stepLabel ? `${question.stepLabel}　` : ""}探す値：{question.target}
         </Typography>
         <Typography color="text.secondary" fontWeight={800} sx={{ mb: 1 }}>
-          配列カードを選んで、次に残す範囲を答えてください。
+          配列カードを選ぶか、下のボタンで、次に残す範囲を答えてください。
         </Typography>
         <AlgorithmArray
           values={question.values}
@@ -178,6 +180,22 @@ export const ArrayRegionSelect = ({
           onSelectIndex={selectIndex}
           ariaLabel={`探す値${question.target}の探索範囲`}
         />
+        {!showCorrect && (
+          <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 1 }} aria-label="残す範囲の選択">
+            {regionOptions.map((region) => (
+              <Button
+                key={region}
+                variant={selected === region ? "contained" : "outlined"}
+                disabled={disabled}
+                onClick={() => selectRegion(region)}
+                aria-pressed={selected === region}
+                sx={{ minHeight: 44, fontWeight: 900 }}
+              >
+                {regionLabel[region]}
+              </Button>
+            ))}
+          </Stack>
+        )}
         {typeof selected === "string" && !showCorrect && (
           <Box sx={{ mt: 1 }}><Chip color="primary" label={`選択：${regionLabel[selected as ArrayRegion]}`} sx={{ fontWeight: 900 }} /></Box>
         )}
