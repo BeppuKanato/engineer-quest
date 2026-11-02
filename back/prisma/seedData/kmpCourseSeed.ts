@@ -21,7 +21,7 @@ const completeKmpCode = joinCode([
 
 const labels = {
   text: "長い文字列 =", pattern: "探す文字列 =", alignmentStart: "開始位置",
-  textPointer: "比較位置", patternPointer: "比較位置", textActive: "比較する文字",
+  textPointer: "テキストの比較位置", patternPointer: "パターンの比較位置", textActive: "比較する文字",
   patternActive: "比較する文字", textMatched: "一致", patternMatched: "一致", lpsTable: "LPS表",
 };
 const codeLabels = {
