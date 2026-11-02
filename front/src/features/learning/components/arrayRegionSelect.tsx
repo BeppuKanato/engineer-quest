@@ -122,15 +122,19 @@ export const ArrayRegionSelect = ({
     else states[index] = "active";
   });
 
-  const selectIndex = (index: number) => {
-    if (disabled || index < leftIndex || index > rightIndex) return;
-    const region: ArrayRegion = index < question.midIndex ? "left" : index === question.midIndex ? "center" : "right";
+  const selectRegion = (region: ArrayRegion) => {
+    if (disabled) return;
     setDrafts((current) => ({ ...current, [question.id]: region }));
     setChecked((current) => {
       const next = { ...current };
       delete next[question.id];
       return next;
     });
+  };
+  const selectIndex = (index: number) => {
+    if (disabled || index < leftIndex || index > rightIndex) return;
+    const region: ArrayRegion = index < question.midIndex ? "left" : index === question.midIndex ? "center" : "right";
+    selectRegion(region);
   };
   const isChecked = checked[question.id] === selected && Boolean(selected);
   const isCorrect = isChecked && selected === question.correctRegion;
