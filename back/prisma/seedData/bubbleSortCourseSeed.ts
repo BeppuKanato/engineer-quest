@@ -1218,7 +1218,7 @@ const missionSix: MissionSeed = {
       id: "algorithm-v2-bubble-sort-python-repair-v2",
       type: MissionActivityType.SELECT_FILL,
       title: "間違っているコードを修正しよう",
-      instruction: "コードにある2か所の誤りを見つけ、正しいコードへ修正してください。",
+      instruction: "コードにある2か所の誤りを見つけ、Mission 5で学んだ比較範囲の調整まで含めた完成コードの形へ修正してください。",
       mentorMessage: "昇順の条件と、比較する範囲に注目してみよう！",
       content: {
         learningRole: "SYNTHESIS",
@@ -1235,7 +1235,7 @@ const missionSix: MissionSeed = {
           ],
           correctAnswers: { range: "range(n - 1 - i)", operator: ">" },
           correctFeedback: "range(n - 1 - i)で比較範囲を調整し、>で昇順の交換条件を表せました。",
-          incorrectFeedback: "range(n)ではj + 1が範囲外になります。<では大きい値が左へ移動するため、昇順の条件と範囲を両方見直そう。",
+          incorrectFeedback: "range(n)はj + 1が範囲外になります。range(n - 1)でも整列はできますが、確定済みの右側を毎回比べ直してしまいます。Mission 5で学んだ通り、周回数iを使って範囲を狭めたn - 1 - iが完成形です。比較演算子は、昇順では左の値が大きいときに交換する>を使います。",
           completionLabel: "次へ",
         },
       },
