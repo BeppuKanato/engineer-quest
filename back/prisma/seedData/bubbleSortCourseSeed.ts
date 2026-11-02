@@ -1369,11 +1369,11 @@ const courseMission: MissionSeed = {
             # ここにバブルソートの処理を書こう
             pass`,
             testCases: [
-            { id: "basic-1", label: "基本ケース 1", input: [5, 2, 4, 1], expected: [1, 2, 4, 5] },
-            { id: "basic-2", label: "基本ケース 2", input: [8, 3, 6, 2, 7], expected: [2, 3, 6, 7, 8] },
-            { id: "duplicates", label: "重複を含むケース", input: [4, 2, 4, 1, 2], expected: [1, 2, 2, 4, 4] },
-            { id: "reverse", label: "逆順ケース", input: [9, 7, 5, 3, 1], expected: [1, 3, 5, 7, 9] },
-            { id: "boundary", label: "境界ケース", input: [], expected: [] },
+            { id: "basic-1", label: "基本ケース 1", input: [5, 2, 4, 1], displayInput: "numbers=[5, 2, 4, 1]", expected: [1, 2, 4, 5] },
+            { id: "basic-2", label: "基本ケース 2", input: [8, 3, 6, 2, 7], displayInput: "numbers=[8, 3, 6, 2, 7]", expected: [2, 3, 6, 7, 8] },
+            { id: "duplicates", label: "重複を含むケース", input: [4, 2, 4, 1, 2], displayInput: "numbers=[4, 2, 4, 1, 2]", expected: [1, 2, 2, 4, 4] },
+            { id: "reverse", label: "逆順ケース", input: [9, 7, 5, 3, 1], displayInput: "numbers=[9, 7, 5, 3, 1]", expected: [1, 3, 5, 7, 9] },
+            { id: "boundary", label: "境界ケース", input: [], displayInput: "numbers=[]", expected: [] },
             ],
             hints: [
             {
