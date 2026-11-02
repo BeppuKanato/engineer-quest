@@ -417,6 +417,7 @@ const missionThree: MissionSeed = {
           { id: "pair-2-3", label: "位置2と位置3（5と2）" },
           ],
           afterMessage: "位置を1つ右へ動かしたので、次は位置1と位置2を比較します。",
+          correctFeedback: "正解です。比較位置を1つ右へ動かし、次は位置1と位置2（3と5）を比較します。",
           },
           {
           currentPair: [1, 2],
@@ -427,6 +428,7 @@ const missionThree: MissionSeed = {
           { id: "pair-2-3", label: "位置2と位置3（5と2）" },
           ],
           afterMessage: "さらに1つ右へ動かし、位置2と位置3を比較します。",
+          correctFeedback: "正解です。さらに1つ右へ動かし、次は位置2と位置3（5と2）を比較します。",
           },
           {
           currentPair: [2, 3],
@@ -436,6 +438,7 @@ const missionThree: MissionSeed = {
           { id: "no", label: "ない" },
           ],
           afterMessage: "位置3は配列の右端なので、これ以上右側に比較できる組はありません。これで一周分の比較が終わります。",
+          correctFeedback: "正解です。位置3は配列の右端なので、これ以上右側に比較できる組はありません。比較位置を1つずつ右へ動かし、配列の右端まで確認できました。",
           },
           ],
           correctAnswers: ["pair-1-2", "pair-2-3", "no"],
