@@ -455,7 +455,7 @@ const missionThree: MissionSeed = {
       type: MissionActivityType.CHOICE,
       title: "別の配列でleft・right・midを確認しよう",
       instruction: "新しい配列の探索範囲を、3つの位置で表しましょう。",
-      mentorMessage: "left、right、midを位置として正しく表せたね！",
+      mentorMessage: "新しい配列でも、left・right・midの位置を確認しよう！",
       content: {
         learningRole: "INDEPENDENT_PRACTICE",
         rendererKey: "INDEX_SELECT",
@@ -698,7 +698,7 @@ const missionFive: MissionSeed = {
       type: MissionActivityType.CHOICE,
       title: "別の配列で最後まで探索しよう",
       instruction: "これまでと同じ手順で、目的の値を発見するまで探索を進めましょう。",
-      mentorMessage: "比較と範囲更新を繰り返して、目的の値を見つけられたね！",
+      mentorMessage: "比較と範囲更新を繰り返して、目的の値を最後まで探そう！",
       content: {
         learningRole: "INDEPENDENT_PRACTICE",
         rendererKey: "ARRAY_REGION_SELECT",
