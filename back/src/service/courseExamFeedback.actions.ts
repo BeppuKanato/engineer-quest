@@ -22,8 +22,8 @@ export const COURSE_EXAM_FEEDBACK_ACTION_CATALOG: Record<
   },
   CREATE_LEARNING_MEMO: {
     actionType: "CREATE_LEARNING_MEMO",
-    label: "学習メモを作成する",
-    description: "掲示板に学習内容をメモとして投稿する。",
+    label: "掲示板に学習メモを投稿する",
+    description: "学習内容をメモとして掲示板へ投稿する。投稿したメモは他のユーザーにも公開される。",
   },
   CREATE_QUESTION_POST: {
     actionType: "CREATE_QUESTION_POST",
