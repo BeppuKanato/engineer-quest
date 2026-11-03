@@ -89,8 +89,8 @@ export default function KnowledgeCardsPage() {
   }, [activeCourse, cards, sort]);
 
   const selectedCard = useMemo(
-    () => cards.find((card) => card.id === selectedCardId) ?? shownCards[0] ?? null,
-    [cards, selectedCardId, shownCards]
+    () => cards.find((card) => card.id === selectedCardId) ?? null,
+    [cards, selectedCardId]
   );
 
   const collectedCount = collection?.knowledgeTips.collectedCount ?? 0;
