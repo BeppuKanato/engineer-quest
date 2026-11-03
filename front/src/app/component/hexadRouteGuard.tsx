@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useUserSession } from "./userSession";
 
 const isGuardExempt = (pathname: string) =>
+  pathname === "/" ||
   pathname.startsWith("/auth/") ||
   pathname === "/hexad" ||
   pathname === "/profile";
