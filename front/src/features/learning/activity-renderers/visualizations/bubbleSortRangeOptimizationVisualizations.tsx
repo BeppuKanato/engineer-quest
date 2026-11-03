@@ -76,7 +76,7 @@ const RangeRedundancyScene = ({ content }: { content: SceneContent }) => {
       <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2.5, border: "1px solid #bfdbfe", bgcolor: "#f8fbff" }}>
         <Typography color="primary" fontWeight={950} sx={{ mb: 1 }}>同じ範囲で二周目を行うと…</Typography>
         <PairChips items={comparisonPairs} />
-        <Typography sx={{ mt: 1.25 }} fontWeight={850}>最後に位置2の1と、すでに確定した位置3の5を再び比較します。</Typography>
+        <Typography sx={{ mt: 1.25 }} fontWeight={850}>最後に位置2の4と、すでに確定した位置3の5を再び比較します。</Typography>
       </Paper>
       <HighlightNote>{typeof content.emphasis === "string" ? content.emphasis : "一周ごとに右側から位置が決まります。"}</HighlightNote>
     </Stack>
