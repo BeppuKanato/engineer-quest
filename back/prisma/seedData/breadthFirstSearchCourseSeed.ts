@@ -56,7 +56,7 @@ const choice = (
 ) => a(
   id,
   title,
-  "図と現在の状態を確認し、当てはまるものを1つ選びましょう。",
+  graphData ? "図と現在の状態を確認し、当てはまるものを1つ選びましょう。" : "当てはまるものを1つ選びましょう。",
   body,
   graphData ? "GRAPH_CHOICE" : "SINGLE_CHOICE",
   {
