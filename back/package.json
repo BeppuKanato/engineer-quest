@@ -25,7 +25,10 @@
     "lint": "eslint src --ext .ts",
     "verify:feedback-v1": "ts-node src/scripts/verifyFeedbackV1.ts",
     "verify:feedback-v1-storage": "ts-node src/scripts/verifyFeedbackV1Storage.ts",
-    "verify:feedback-v1-context": "ts-node src/scripts/verifyFeedbackV1Context.ts"
+    "verify:feedback-v1-context": "ts-node src/scripts/verifyFeedbackV1Context.ts",
+    "seed:preserve": "ts-node prisma/seed.ts --preserve-existing",
+    "verify:seed-preservation": "ts-node src/scripts/verifyPreservingSeed.ts",
+    "verify:master-db": "ts-node src/scripts/verifySeededMasterData.ts"
   },
   "keywords": [],
   "author": "",
