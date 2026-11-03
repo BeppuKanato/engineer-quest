@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
@@ -203,7 +204,7 @@ export default function NewQuestPostPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!optionsError} ready={!isOptionsLoading && !optionsError} />
       <PageTransitionOverlay
         open={isNavigatingAfterSubmit}
         title="投稿詳細へ移動しています"

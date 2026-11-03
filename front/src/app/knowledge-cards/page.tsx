@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -88,6 +89,11 @@ export default function KnowledgeCardsPage() {
     });
   }, [activeCourse, cards, sort]);
 
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("cardId");
+    if (id && cards.some(card => card.id === id && card.isCollected)) setSelectedCardId(id);
+  }, [cards]);
+
   const selectedCard = useMemo(
     () => cards.find((card) => card.id === selectedCardId) ?? null,
     [cards, selectedCardId]
@@ -102,7 +108,7 @@ export default function KnowledgeCardsPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} targetId={selectedCard?.id} />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={2.5}>
           <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "知識カード" }]} />

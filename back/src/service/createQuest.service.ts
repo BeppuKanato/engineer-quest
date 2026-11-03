@@ -1,18 +1,13 @@
+import { feedbackV1 } from "./feedbackV1.service";
 import {
   CourseExamFeedbackActionType as PrismaActionType,
   CourseExamFeedbackStatus,
-  FeedbackCondition,
   Prisma,
   ProgressStatus,
 } from "@prisma/client";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
-import {
-  generateCourseExamFeedbackWithOpenAI,
-  getCourseExamFeedbackModel,
-} from "./courseExamFeedback.openai";
-import { buildCourseExamFeedbackPrompt } from "./courseExamFeedback.prompt";
 import { evaluateAchievementsForUser } from "./achievement.service";
 
 type RequirementResultInput = {
@@ -476,174 +471,6 @@ export const submitCreateQuestByFirebaseUid = async ({
   return { submissionId: submission.id, score: normalized.score, maxScore, unlockedAchievements };
 };
 
-export const startCreateQuestFeedbackByFirebaseUid = async ({
-  firebaseUid,
-  submissionId,
-}: {
-  firebaseUid: string;
-  submissionId: string;
-}) => {
-  const user = await getUser(firebaseUid);
-  const submission = await prisma.createQuestSubmission.findFirst({
-    where: { id: submissionId, attempt: { userId: user.id } },
-    include: {
-      feedback: true,
-      attempt: {
-        include: {
-          quest: { include: questInclude },
-          executions: { orderBy: { executedAt: "asc" } },
-          hintViews: { orderBy: { viewedAt: "asc" } },
-          submissions: { orderBy: { submittedAt: "asc" } },
-        },
-      },
-    },
-  });
-  if (!submission) throw new AppError(404, "CREATE_QUEST_SUBMISSION_NOT_FOUND", "Submission not found");
-  if (!submission.basicPassed) throw new AppError(409, "CREATE_QUEST_NOT_COMPLETED", "Basic requirements are required");
-  if (submission.feedback) return feedbackResponse(submission.feedback);
-
-  const condition = user.experimentAssignments[0]?.condition ?? FeedbackCondition.STANDARD;
-  if (condition === FeedbackCondition.PERSONALIZED && !user.hexadResponse) {
-    throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "PERSONALIZED feedback requires a HEXAD response");
-  }
-  const attempt = submission.attempt;
-  const requirementById = new Map(attempt.quest.requirements.map((item) => [item.id, item]));
-  const learningLog = {
-    activityType: "CREATE_QUEST",
-    quest: { id: attempt.quest.id, title: attempt.quest.title, scenario: attempt.quest.scenario },
-    startedAt: attempt.startedAt.toISOString(),
-    completedAt: attempt.completedAt?.toISOString() ?? null,
-    selectedRequirementIds: attempt.selectedRequirementIds,
-    requirements: attempt.quest.requirements.map((item) => ({
-      id: item.id,
-      title: item.title,
-      kind: item.kind,
-      category: item.category,
-      points: item.points,
-    })),
-    testExecutions: attempt.executions.map((item) => ({
-      executedAt: item.executedAt.toISOString(),
-      code: item.code,
-      score: item.score,
-      basicPassed: item.basicPassed,
-      results: item.results,
-      runtimeError: item.runtimeError,
-    })),
-    hintViews: attempt.hintViews.map((item) => ({
-      requirementId: item.requirementId,
-      requirementTitle: requirementById.get(item.requirementId)?.title ?? item.requirementId,
-      hintId: item.hintId,
-      viewedAt: item.viewedAt.toISOString(),
-    })),
-    submissions: attempt.submissions.map((item) => ({
-      submittedAt: item.submittedAt.toISOString(),
-      code: item.code,
-      score: item.score,
-      maxScore: item.maxScore,
-      results: item.results,
-    })),
-  };
-  const availableActions = [
-    { actionType: "RETRY_CREATE_QUEST", label: "この作る課題を改善する", description: "未達成の追加要件へ再挑戦します。" },
-    ...attempt.quest.relatedCourses.map((item) => ({
-      actionType: "OPEN_RELATED_COURSE",
-      label: `${item.course.title}を学ぶ`,
-      description: item.reason,
-      courseId: item.course.id,
-    })),
-    { actionType: "SHARE_CREATE_QUEST", label: "掲示板で作品を共有する", description: "提出コードと達成要件を作品として共有します。" },
-    { actionType: "VIEW_BOARD_POSTS", label: "掲示板を見る", description: "他の学習者の作品や考え方を確認します。" },
-  ];
-  const hexad = user.hexadResponse;
-  const context = {
-    condition,
-    learningLog,
-    appState: {
-      experience: user.experience,
-      knowledgeCardCount: user._count.knowledgeCards,
-      achievementCount: user._count.achievements,
-      thisSubmission: { score: submission.score, maxScore: submission.maxScore },
-    },
-    availableActions,
-    hexadProfile:
-      condition === FeedbackCondition.PERSONALIZED && hexad
-        ? {
-            questionnaireVersion: hexad.questionnaireVersion,
-            Philanthropist: hexad.philanthropistScore,
-            Socialiser: hexad.socialiserScore,
-            "Free Spirit": hexad.freeSpiritScore,
-            Achiever: hexad.achieverScore,
-            Disruptor: hexad.disruptorScore,
-            Player: hexad.playerScore,
-          }
-        : null,
-  };
-  const prompt = buildCourseExamFeedbackPrompt(context);
-  const created = await prisma.createQuestFeedback.create({
-    data: {
-      submissionId,
-      status: CourseExamFeedbackStatus.GENERATING,
-      condition,
-      model: getCourseExamFeedbackModel(),
-      inputSnapshot: toJson({
-        learningLog: context.learningLog,
-        appState: context.appState,
-        availableActions,
-        ...(context.hexadProfile ? { hexadProfile: context.hexadProfile } : {}),
-      }),
-    },
-  });
-
-  void (async () => {
-    try {
-      const result = await generateCourseExamFeedbackWithOpenAI(prompt, condition);
-      const validActions = new Set(availableActions.map((item) => item.actionType));
-      if (result.feedback.actionType !== "NO_APP_ACTION" && !validActions.has(result.feedback.actionType)) {
-        throw new Error(`Unavailable action returned: ${result.feedback.actionType}`);
-      }
-      await prisma.createQuestFeedback.update({
-        where: { id: created.id },
-        data: {
-          status: CourseExamFeedbackStatus.COMPLETED,
-          currentState: result.feedback.currentState,
-          nextGoal: result.feedback.nextGoal,
-          nextStep: result.feedback.nextStep,
-          actionType: result.feedback.actionType as PrismaActionType,
-          actionLabel: result.feedback.actionLabel,
-          learningAnalysis: toJson(result.feedback.learningAnalysis),
-          selectionAnalysis: toJson(result.feedback.selectionAnalysis),
-          openAiResponseId: result.responseId,
-          model: result.model,
-          usage: toJson(result.usage),
-          generatedAt: new Date(),
-        },
-      });
-    } catch (error) {
-      console.error("create_quest_feedback_generation_failed", error);
-      await prisma.createQuestFeedback.update({
-        where: { id: created.id },
-        data: { status: CourseExamFeedbackStatus.FAILED, failureCode: "GENERATION_FAILED" },
-      });
-    }
-  })();
-
-  return feedbackResponse(created);
-};
-
-export const getCreateQuestFeedbackByFirebaseUid = async ({
-  firebaseUid,
-  submissionId,
-}: {
-  firebaseUid: string;
-  submissionId: string;
-}) => {
-  const feedback = await prisma.createQuestFeedback.findFirst({
-    where: { submissionId, submission: { attempt: { user: { firebaseUid } } } },
-  });
-  if (!feedback) throw new AppError(404, "CREATE_QUEST_FEEDBACK_NOT_FOUND", "Feedback not found");
-  return feedbackResponse(feedback);
-};
-
 export const getCreateQuestAttemptsByFirebaseUid = async (firebaseUid: string) => {
   const user = await getUser(firebaseUid);
   return prisma.createQuestAttempt.findMany({
@@ -660,3 +487,6 @@ export const getCreateQuestAttemptsByFirebaseUid = async (firebaseUid: string) =
     },
   });
 };
+
+export const startCreateQuestFeedbackByFirebaseUid = ({firebaseUid, submissionId}: {firebaseUid:string;submissionId:string}) => feedbackV1(firebaseUid, "create", submissionId, true);
+export const getCreateQuestFeedbackByFirebaseUid = ({firebaseUid, submissionId}: {firebaseUid:string;submissionId:string}) => feedbackV1(firebaseUid, "create", submissionId);

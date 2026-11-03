@@ -1,5 +1,7 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
+import { FeedbackObservation } from "@/app/component/feedbackV1";
 import Editor from "@monaco-editor/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ForumIcon from "@mui/icons-material/Forum";
@@ -72,7 +74,7 @@ export default function CreateQuestWorkPage() {
     setResults(data.attempt?.latestExecution?.requirementResults ?? []);
     const latestSubmission = data.attempt?.latestSubmission;
     setSubmission(latestSubmission ? { id: latestSubmission.id, score: latestSubmission.score, maxScore: latestSubmission.maxScore } : null);
-    setFeedback(latestSubmission?.feedback ?? null);
+    setFeedback(latestSubmission ? (latestSubmission.feedback ?? await startCreateQuestFeedback(idToken, latestSubmission.id)) : null);
   }, [questId]);
 
   useEffect(() => onAuthStateChanged(auth, async (user) => {
@@ -159,6 +161,7 @@ export default function CreateQuestWorkPage() {
   const feedbackActionHref = useMemo(() => {
     const action = feedback?.feedback;
     if (!action || !quest) return null;
+    if (action.actionHref) return action.actionHref;
     if (action.actionType === "SHARE_CREATE_QUEST") return shareHref;
     if (action.actionType === "VIEW_BOARD_POSTS") return "/quest-board";
     if (action.actionType === "OPEN_RELATED_COURSE") {
@@ -170,7 +173,7 @@ export default function CreateQuestWorkPage() {
     return null;
   }, [feedback?.feedback, quest, shareHref]);
 
-  if (!quest) return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}><AppHeader /><Container sx={{ py: 4 }}>{error ? <Alert severity="error">{error}</Alert> : <Skeleton variant="rounded" height={760} />}</Container></Box>;
+  if (!quest) return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}><AppHeader /><FeedbackDestination failed={!!error} ready={!!quest && !error} /><Container sx={{ py: 4 }}>{error ? <Alert severity="error">{error}</Alert> : <Skeleton variant="rounded" height={760} />}</Container></Box>;
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}><AppHeader /><Container maxWidth={false} sx={{ maxWidth: 1440, py: 3 }}><Stack spacing={2.5}>
     <CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest.title, href: `/create/quests/${quest.id}` }, { label: "実装" }]} />
@@ -196,7 +199,7 @@ export default function CreateQuestWorkPage() {
 
       <Stack spacing={2}><CreateQuestPreview quest={quest} results={results} />
         <Paper elevation={0} sx={{ p: 2, border: "1px solid #dbe3ef", borderRadius: 2 }}><Stack direction="row" spacing={1}><InfoOutlinedIcon color="primary" /><Typography fontWeight={950}>{quest.previewData.guidanceTitle ?? "実装方法は自由です"}</Typography></Stack><Typography fontSize={13} color="text.secondary" sx={{ mt: 0.8, lineHeight: 1.7 }}>{quest.previewData.guidanceBody ?? "基本要件を満たす方法から始め、追加要件に合わせて実装を改善できます。"}</Typography></Paper>
-        {submission && <Paper elevation={0} sx={{ p: 2, border: "2px solid #86efac", bgcolor: "#f0fdf4", borderRadius: 2 }}><Typography variant="h5" fontWeight={950}>提出完了 {submission.score} / {submission.maxScore}点</Typography>{unlockedAchievements.length > 0 && <Alert severity="success" sx={{ mt: 1 }}>実績を解除しました：{unlockedAchievements.map((item) => `${item.title}（${item.rarity}）`).join("、")}</Alert>}{feedback?.status === "GENERATING" && <Alert severity="info" sx={{ mt: 1 }}>AIレビューを生成しています。</Alert>}{feedback?.status === "FAILED" && <Alert severity="error" sx={{ mt: 1 }}>AIレビューを生成できませんでした。</Alert>}{feedback?.feedback && <Stack spacing={1.2} sx={{ mt: 1.5 }}><Box><Typography fontWeight={950}>現在の状態</Typography><Typography fontSize={13}>{feedback.feedback.currentState}</Typography></Box><Box><Typography fontWeight={950}>次の目標</Typography><Typography fontSize={13}>{feedback.feedback.nextGoal}</Typography></Box><Box><Typography fontWeight={950}>次の一歩</Typography><Typography fontSize={13}>{feedback.feedback.nextStep}</Typography></Box>{feedback.feedback.actionType === "RETRY_CREATE_QUEST" ? <Button variant="contained" onClick={() => { setSubmission(null); setFeedback(null); setUnlockedAchievements([]); }} sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : feedbackActionHref ? <Button component={Link} href={feedbackActionHref} variant="contained" sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : null}</Stack>}<Button component={Link} href={shareHref} startIcon={<ForumIcon />} variant="outlined" sx={{ mt: 1.5, fontWeight: 900 }}>掲示板で共有する</Button></Paper>}
+        {submission && <Paper elevation={0} sx={{ p: 2, border: "2px solid #86efac", bgcolor: "#f0fdf4", borderRadius: 2 }}><Typography variant="h5" fontWeight={950}>提出完了 {submission.score} / {submission.maxScore}点</Typography>{unlockedAchievements.length > 0 && <Alert severity="success" sx={{ mt: 1 }}>実績を解除しました：{unlockedAchievements.map((item) => `${item.title}（${item.rarity}）`).join("、")}</Alert>}{feedback?.status === "GENERATING" && <Alert severity="info" sx={{ mt: 1 }}>AIレビューを生成しています。</Alert>}{feedback?.status === "FAILED" && <Alert severity="error" sx={{ mt: 1 }}>AIレビューを生成できませんでした。</Alert>}{feedback?.id && feedback.feedback && <FeedbackObservation id={feedback.id} href={feedback.feedback.actionHref} />}{feedback?.feedback && <Stack spacing={1.2} sx={{ mt: 1.5 }}><Box><Typography fontWeight={950}>現在の状態</Typography><Typography fontSize={13}>{feedback.feedback.currentState}</Typography></Box><Box><Typography fontWeight={950}>次の目標</Typography><Typography fontSize={13}>{feedback.feedback.nextGoal}</Typography></Box><Box><Typography fontWeight={950}>次の一歩</Typography><Typography fontSize={13}>{feedback.feedback.nextStep}</Typography></Box>{feedback.feedback.actionType === "RETRY_CREATE_QUEST" ? <Button variant="contained" onClick={() => { setSubmission(null); setFeedback(null); setUnlockedAchievements([]); }} sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : feedbackActionHref ? <Button component={Link} href={feedbackActionHref} variant="contained" sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : null}</Stack>}<Button component={Link} href={shareHref} startIcon={<ForumIcon />} variant="outlined" sx={{ mt: 1.5, fontWeight: 900 }}>掲示板で共有する</Button></Paper>}
       </Stack>
     </Box>
   </Stack></Container></Box>;

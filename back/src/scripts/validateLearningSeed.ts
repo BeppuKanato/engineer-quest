@@ -194,8 +194,11 @@ for (const course of learningSeed.courses) {
         if (tests.length === 0 || hints.length === 0 || typeof content.data.functionName !== "string") {
           throw new Error(`${activity.id}: Course Mission requires functionName, tests, and hints`);
         }
-        if (tests.length < 5 || tests.length > 7) {
-          throw new Error(`${activity.id}: Course Mission requires 5-7 tests, got ${tests.length}`);
+        // KMP includes the additional regression cases from the implementation review.
+        const allowsTenTests = activity.id === "algorithm-kmp-course-mission-implementation";
+        if ((tests.length < 5 || tests.length > 7) && !(allowsTenTests && tests.length === 10)) {
+          const expectedCount = allowsTenTests ? "5-7 or 10" : "5-7";
+          throw new Error(`${activity.id}: Course Mission requires ${expectedCount} tests, got ${tests.length}`);
         }
         if (requiresCurrentGuidelineChecks) {
           const forbiddenCode = Array.isArray(content.data.forbiddenCode) ? content.data.forbiddenCode : [];

@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LockIcon from "@mui/icons-material/Lock";
@@ -239,6 +240,13 @@ function AchievementsPageContent() {
     }
   }, [selectedSeriesKey, shownSeries]);
 
+  const focusId = searchParams.get("focus");
+  useEffect(() => {
+    if (!focusId) return;
+    const series = allSeries.find(s => s.levels.some(a => a.id === focusId));
+    if (series) { setActiveCategory("all"); setSelectedSeriesKey(series.key); }
+  }, [focusId, allSeries]);
+
   const achievedCount = allAchievements.filter((achievement) => achievement.status === "achieved").length;
   const visibleLockedCount = allSeries.filter((series) => !series.isMaxLevel && !series.isSecret).length;
   const secretLockedCount = allSeries.filter((series) => series.isSecret).length;
@@ -289,7 +297,7 @@ function AchievementsPageContent() {
   };
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "実績" }]} />

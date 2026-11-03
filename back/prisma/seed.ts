@@ -12,6 +12,7 @@ import {
   knowledgeCardSeed,
 } from "./seedData/knowledgeCardSeed";
 import { learningSeed } from "./seedData/learningSeed";
+import { assertPreservingSeedOperation } from "./preservingSeedPolicy";
 import { parseActivityContent } from "../src/learning/activity-content/activityContentSchema";
 
 const prisma = new PrismaClient();
@@ -19,6 +20,7 @@ const activeCourseIds = learningSeed.courses.map((course) => course.id);
 const activeCourseIdSet = new Set(activeCourseIds);
 const courseIdArgument = process.argv.find((argument) => argument.startsWith("--course-id="));
 const selectedCourseId = courseIdArgument?.slice("--course-id=".length);
+const preserveExisting = process.argv.includes("--preserve-existing");
 const createQuestsOnly = process.argv.includes("--create-quests-only");
 
 async function seedCourseCategory(
@@ -65,7 +67,7 @@ async function seedCourse(
     where: { name: { in: course.categories } },
     select: { id: true },
   });
-  await client.courseCategoryMap.deleteMany({
+  if (!preserveExisting) await client.courseCategoryMap.deleteMany({
     where: {
       courseId: course.id,
       categoryId: { notIn: activeCategories.map((category) => category.id) },
@@ -188,6 +190,9 @@ async function seedCourse(
       });
     }
 
+    // Preservation mode never mutates progress or deletes activities and their logs.
+    if (preserveExisting) continue;
+
     const staleActivities = await client.missionActivity.findMany({
       where: {
         missionId: mission.id,
@@ -262,7 +267,7 @@ async function seedCourse(
 
   }
 
-  await client.mission.deleteMany({
+  if (!preserveExisting) await client.mission.deleteMany({
     where: {
       courseId: course.id,
       id: { notIn: activeMissionIds },
@@ -296,14 +301,14 @@ async function seedLearningData() {
   );
 }
 
-async function seedAchievements() {
+async function seedAchievements(client: Prisma.TransactionClient = prisma) {
   const activeAchievementIds = achievementSeed.map((achievement) => String(achievement.id));
-  await prisma.achievement.deleteMany({
+  if (!preserveExisting) await client.achievement.deleteMany({
     where: { id: { notIn: activeAchievementIds } },
   });
 
   for (const achievement of achievementSeed) {
-    await prisma.achievement.upsert({
+    await client.achievement.upsert({
       where: { id: achievement.id },
       update: achievement,
       create: achievement,
@@ -311,19 +316,19 @@ async function seedAchievements() {
   }
 }
 
-async function seedKnowledgeCards() {
+async function seedKnowledgeCards(client: Prisma.TransactionClient = prisma) {
   const activeCardIds = knowledgeCardSeed.map((card) => String(card.id));
   const activeScheduleIds = knowledgeCardScheduleSeed.map((entry) => entry.id);
 
-  await prisma.knowledgeCardScheduleEntry.deleteMany({
+  if (!preserveExisting) await client.knowledgeCardScheduleEntry.deleteMany({
     where: { id: { notIn: activeScheduleIds } },
   });
-  await prisma.knowledgeCard.deleteMany({
+  if (!preserveExisting) await client.knowledgeCard.deleteMany({
     where: { id: { notIn: activeCardIds } },
   });
 
   for (const card of knowledgeCardSeed) {
-    await prisma.knowledgeCard.upsert({
+    await client.knowledgeCard.upsert({
       where: { id: card.id },
       update: card,
       create: card,
@@ -331,7 +336,7 @@ async function seedKnowledgeCards() {
   }
 
   for (const entry of knowledgeCardScheduleSeed) {
-    await prisma.knowledgeCardScheduleEntry.upsert({
+    await client.knowledgeCardScheduleEntry.upsert({
       where: { id: entry.id },
       update: entry,
       create: entry,
@@ -339,12 +344,12 @@ async function seedKnowledgeCards() {
   }
 }
 
-async function seedCreateQuests() {
+async function seedCreateQuests(client: Prisma.TransactionClient = prisma) {
   const activeQuestIds = createQuestSeed.map((quest) => quest.id);
 
-  await prisma.createQuest.deleteMany({ where: { id: { notIn: activeQuestIds } } });
+  if (!preserveExisting) await client.createQuest.deleteMany({ where: { id: { notIn: activeQuestIds } } });
   for (const quest of createQuestSeed) {
-    await prisma.createQuest.upsert({
+    await client.createQuest.upsert({
       where: { id: quest.id },
       update: {
         title: quest.title,
@@ -377,11 +382,16 @@ async function seedCreateQuests() {
       },
     });
 
-    await prisma.createQuestRequirement.deleteMany({ where: { questId: quest.id } });
-    await prisma.createQuestCourse.deleteMany({ where: { questId: quest.id } });
+    if (!preserveExisting) await client.createQuestRequirement.deleteMany({ where: { questId: quest.id } });
+    if (!preserveExisting) await client.createQuestCourse.deleteMany({ where: { questId: quest.id } });
     for (const requirement of quest.requirements) {
-      await prisma.createQuestRequirement.create({
-        data: {
+      await client.createQuestRequirement.upsert({
+        where: { id: requirement.id },
+        update: {
+          questId: quest.id, title: requirement.title, description: requirement.description, kind: requirement.kind, category: requirement.category, points: requirement.points, order: requirement.order,
+          tests: requirement.tests as unknown as Prisma.InputJsonValue, hints: requirement.hints as unknown as Prisma.InputJsonValue,
+        },
+        create: {
           id: requirement.id,
           questId: quest.id,
           title: requirement.title,
@@ -396,14 +406,35 @@ async function seedCreateQuests() {
       });
     }
     for (const relatedCourse of quest.relatedCourses) {
-      await prisma.createQuestCourse.create({
-        data: { questId: quest.id, ...relatedCourse },
+      await client.createQuestCourse.upsert({
+        where: { questId_courseId: { questId: quest.id, courseId: relatedCourse.courseId } },
+        update: relatedCourse,
+        create: { questId: quest.id, ...relatedCourse },
       });
     }
   }
 }
 
 async function main() {
+  if (preserveExisting) {
+    if (selectedCourseId || createQuestsOnly) throw new Error("Preservation mode requires a full master-data update");
+    const guarded = prisma.$extends({ query: { $allModels: {
+      $allOperations({ model, operation, args, query }) {
+        assertPreservingSeedOperation(model, operation);
+        return query(args);
+      },
+    } } });
+    await guarded.$transaction(async (guardedTransaction) => {
+      // Query-only extensions retain the standard transaction operations at runtime.
+      const client = guardedTransaction as unknown as Prisma.TransactionClient;
+      for (const course of learningSeed.courses) await seedCourse(client, course);
+      await seedCreateQuests(client);
+      await seedAchievements(client);
+      await seedKnowledgeCards(client);
+    }, { maxWait: 10_000, timeout: 900_000 });
+    console.log("Preserving seed completed: master rows upserted; no deletions or learner/progress/assignment writes.");
+    return;
+  }
   if (createQuestsOnly) {
     console.log("Start seeding Create quests...");
     await seedCreateQuests();

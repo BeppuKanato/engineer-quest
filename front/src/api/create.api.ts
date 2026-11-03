@@ -86,10 +86,11 @@ export type ExecutionResult = {
   requirementResults: RequirementResult[];
 };
 export type CreateQuestFeedbackResponse = {
+  id?: string;
   status: "GENERATING" | "COMPLETED" | "FAILED";
   requestedAt: string;
   completedAt: string | null;
-  feedback: null | { currentState: string; nextGoal: string; nextStep: string; actionType: string; actionLabel: string };
+  feedback: null | { currentState: string; nextGoal: string; nextStep: string; actionType: string; actionLabel: string; actionHref?: string | null };
 };
 
 export const getCreateQuests = (token: string): Promise<CreateQuest[]> =>

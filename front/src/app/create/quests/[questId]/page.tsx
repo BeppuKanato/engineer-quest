@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -33,7 +34,7 @@ export default function CreateQuestDetailPage() {
   }), [questId]);
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
-    <AppHeader />
+    <AppHeader /><FeedbackDestination failed={!!error} ready={!!quest && !error} />
     <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
       {loading ? <Skeleton variant="rounded" height={700} /> : <Stack spacing={3}>
         <CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest?.title ?? "課題" }]} />

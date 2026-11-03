@@ -1,6 +1,7 @@
 import { fetcher } from "@/lib/fetcher";
 
 export type CourseResultActionType =
+  | "V1_ACTION"
   | "RETRY_COURSE_EXAM"
   | "SOLVE_PRACTICE_PROBLEM"
   | "CREATE_LEARNING_MEMO"
@@ -65,6 +66,7 @@ export type CourseResultResponse = {
 };
 
 export type CourseResultFeedbackResponse = {
+  id?: string;
   status: "GENERATING" | "COMPLETED" | "FAILED";
   source: "GENERATED";
   requestedAt: string;
@@ -75,6 +77,7 @@ export type CourseResultFeedbackResponse = {
     nextStep: string;
     actionType: CourseResultActionType;
     actionLabel: string;
+    actionHref?: string | null;
     learningAnalysis: {
       achieved: string[];
       likelyDifficulties: {

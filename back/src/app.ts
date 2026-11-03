@@ -1,3 +1,4 @@
+import feedbackV1Router from "./router/feedbackV1.router";
 import express from 'express';
 import { Request, Response } from 'express';
 import cors from 'cors';
@@ -57,6 +58,7 @@ app.use('/api/course-results', courseResultRouter);
 app.use('/api/hexad', hexadRouter);
 app.use('/api', createQuestRouter);
 
+app.use('/api/feedback-v1', feedbackV1Router);
 app.use(errorHandler)
 
 // //問題機能

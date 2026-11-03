@@ -6,7 +6,7 @@ const mascotIds = ["red-panda", "penguin", "owl"] as const;
 export type MascotId = (typeof mascotIds)[number];
 export const isMascotId = (value: string): value is MascotId => mascotIds.includes(value as MascotId);
 const requiredExp = (level: number) => Math.floor(100 * Math.pow(level, 1.5));
-const deriveLevel = (exp: number) => { let level = 1; while (exp >= requiredExp(level + 1)) level += 1; return level; };
+export const deriveLevel = (exp: number) => { let level = 1; while (exp >= requiredExp(level + 1)) level += 1; return level; };
 const deriveRank = (n: number) => n >= 24 ? "Master" : n >= 14 ? "Lead" : n >= 6 ? "Senior" : "Junior";
 
 const completedCourses = async (userId: string) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -172,7 +173,7 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!profile && !errorMessage} />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "プロフィール" }]} />

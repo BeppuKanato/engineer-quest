@@ -38,6 +38,7 @@ model User {
   hexadResponse             HexadResponse?
   experimentAssignments     ExperimentAssignment[]
 
+  feedbackV1Records FeedbackV1[]
   activityAnswerLogs ActivityAnswerLog[]
 
   createdAt DateTime @default(now())
@@ -973,4 +974,37 @@ enum QuestReactionType {
   LIKE
   HELPFUL
   SAVED_ME
+}
+
+model FeedbackV1 {
+ user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ id String @id @default(cuid())
+ userId String
+ eventKey String @unique
+ condition FeedbackCondition
+ status CourseExamFeedbackStatus
+ input Json
+ result Json?
+ failureCode String?
+ createdAt DateTime @default(now())
+ generatedAt DateTime?
+ calls FeedbackV1Call[]
+ interactions FeedbackV1Interaction[]
+ @@index([userId, createdAt])
+}
+model FeedbackV1Call {
+ id String @id @default(cuid())
+ feedbackId String
+ data Json
+ createdAt DateTime @default(now())
+ feedback FeedbackV1 @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+model FeedbackV1Interaction {
+ id String @id
+ feedbackId String
+ type String
+ data Json
+ createdAt DateTime @default(now())
+ feedback FeedbackV1 @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+ @@index([feedbackId, createdAt])
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import AddIcon from "@mui/icons-material/Add";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -221,7 +222,7 @@ export default function QuestBoardPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
       <PageTransitionOverlay
         open={showOverlay}
         title="投稿画面を開いています"
