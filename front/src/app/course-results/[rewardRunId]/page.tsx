@@ -88,12 +88,22 @@ const actionRouteMap: Record<
 
 const resolveActionRoute = (
   actionType: CourseResultActionType,
-  fallbackMissionId: string
+  fallbackMissionId: string,
+  course?: { id: string; title: string }
 ) => {
   if (actionType === "RETRY_COURSE_EXAM") {
     return `/mission/${encodeURIComponent(fallbackMissionId)}/play?review=1`;
   }
   if (actionType === "NO_APP_ACTION") return null;
+  if (actionType === "CREATE_LEARNING_MEMO" && course) {
+    const params = new URLSearchParams({
+      category: "MEMO",
+      courseId: course.id,
+      missionId: fallbackMissionId,
+      title: `${course.title.replace("の動きを理解する", "")}の学習メモ`,
+    });
+    return `/quest-board/new?${params.toString()}`;
+  }
   return actionRouteMap[actionType];
 };
 
@@ -570,7 +580,8 @@ export default function CourseCompletionResultPage() {
                             : (() => {
                                 const route = resolveActionRoute(
                                   primaryAction.type,
-                                  result.mission.id
+                                  result.mission.id,
+                                  result.course
                                 );
                                 if (route) navigate(route, true);
                               })()
