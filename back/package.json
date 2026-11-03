@@ -22,7 +22,10 @@
     "test:e2e:collections": "ts-node src/scripts/e2eCollectionRewards.ts",
     "test:e2e:create-achievements": "ts-node src/scripts/e2eCreateQuestAchievements.ts",
     "start": "node dist/src/app.js",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "verify:feedback-v1": "ts-node src/scripts/verifyFeedbackV1.ts",
+    "verify:feedback-v1-storage": "ts-node src/scripts/verifyFeedbackV1Storage.ts",
+    "verify:feedback-v1-context": "ts-node src/scripts/verifyFeedbackV1Context.ts"
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackV1 } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -360,6 +361,7 @@ export default function MissionRewardResultPage() {
                   おつかれさま！<br />今回もよく頑張ったね！
                 </Paper>
 
+                <FeedbackV1 kind="mission" eventId={rewardRunId} />
                 <Stack spacing={1.3} alignItems="center" textAlign="center" sx={{ px: { md: 24 } }}>
                   <Chip
                     icon={<StarIcon />}
@@ -475,7 +477,7 @@ export default function MissionRewardResultPage() {
                   <Button
                     variant="outlined"
                     startIcon={<EmojiEventsIcon />}
-                    onClick={goAchievements}
+                    data-feedback-href={`/achievements${rewardRun.unlockedAchievements.length ? `?new=${encodeURIComponent(rewardRun.unlockedAchievements.map(a => a.id).join(","))}` : ""}`} onClick={goAchievements}
                     sx={{ mt: 2, fontWeight: 900, borderRadius: 2, bgcolor: "#fff" }}
                   >
                     実績一覧で確認する
@@ -546,7 +548,7 @@ export default function MissionRewardResultPage() {
                   variant="outlined"
                   size="large"
                   startIcon={<RouteIcon />}
-                  onClick={goRoadmap}
+                  data-feedback-href={`/courses/roadmap/${encodeURIComponent(rewardRun.mission.courseId)}`} onClick={goRoadmap}
                   sx={{ minHeight: 56, px: 6, fontWeight: 900, borderRadius: 2, bgcolor: "rgba(255,255,255,0.72)" }}
                 >
                   ミッションロードマップへ
@@ -556,7 +558,7 @@ export default function MissionRewardResultPage() {
                   size="large"
                   endIcon={rewardRun.nextMission ? <NavigateNextIcon /> : undefined}
                   startIcon={rewardRun.nextMission ? <PlayArrowIcon /> : undefined}
-                  onClick={goNextMission}
+                  data-feedback-href={rewardRun.nextMission ? `/mission/${encodeURIComponent(rewardRun.nextMission.id)}/play` : `/courses/roadmap/${encodeURIComponent(rewardRun.mission.courseId)}`} onClick={goNextMission}
                   sx={{ minHeight: 56, px: 7, fontWeight: 900, borderRadius: 2, boxShadow: "0 18px 40px rgba(37, 99, 235, 0.28)" }}
                 >
                   {rewardRun.nextMission ? "次のミッションへ" : "コース完了"}

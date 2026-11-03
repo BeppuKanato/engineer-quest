@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackObservation } from "@/app/component/feedbackV1";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -70,7 +71,7 @@ const formatDuration = (seconds: number) => {
 };
 
 const actionRouteMap: Record<
-  Exclude<CourseResultActionType, "RETRY_COURSE_EXAM" | "NO_APP_ACTION">,
+  Exclude<CourseResultActionType, "RETRY_COURSE_EXAM" | "NO_APP_ACTION" | "V1_ACTION">,
   string
 > = {
   SOLVE_PRACTICE_PROBLEM: "/courses",
@@ -94,7 +95,7 @@ const resolveActionRoute = (
   if (actionType === "RETRY_COURSE_EXAM") {
     return `/mission/${encodeURIComponent(fallbackMissionId)}/play?review=1`;
   }
-  if (actionType === "NO_APP_ACTION") return null;
+  if (actionType === "NO_APP_ACTION" || actionType === "V1_ACTION") return null;
   if (actionType === "CREATE_LEARNING_MEMO" && course) {
     const params = new URLSearchParams({
       category: "MEMO",
@@ -121,7 +122,7 @@ export default function CourseCompletionResultPage() {
   const [token, setToken] = useState<string | null>(null);
   const [result, setResult] = useState<CourseResultResponse | null>(null);
   const [feedback, setFeedback] = useState<CourseResultFeedbackResponse | null>(null);
-  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
+  const [isFeedbackVisible, setIsFeedbackVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
@@ -511,6 +512,7 @@ export default function CourseCompletionResultPage() {
                 <MetricCard icon={<FlagIcon />} label="コース完了" value={result.course.title.replace("の動きを理解する", "")} tone="purple" />
               </Box>
 
+              {feedback?.id && feedback.feedback && <FeedbackObservation id={feedback.id} href={feedback.feedback.actionHref} />}
               {!isFeedbackVisible ? (
                 <Stack spacing={2}>
                   <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 3, border: "1px solid #bfdbfe", bgcolor: "rgba(248,251,255,0.9)" }}>
@@ -545,7 +547,7 @@ export default function CourseCompletionResultPage() {
                     >
                       {isStartingRetry ? "再挑戦を準備中..." : "もう一度挑戦する"}
                     </Button>
-                    <Button variant="outlined" startIcon={<FormatListBulletedIcon />} onClick={() => navigate("/courses")} sx={{ minHeight: 50, px: 5, fontWeight: 900 }}>
+                    <Button variant="outlined" startIcon={<FormatListBulletedIcon />} data-feedback-href="/courses" onClick={() => navigate("/courses")} sx={{ minHeight: 50, px: 5, fontWeight: 900 }}>
                       コース一覧へ
                     </Button>
                   </Stack>
@@ -570,6 +572,7 @@ export default function CourseCompletionResultPage() {
                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" spacing={1.5}>
                     {primaryAction && (
                       <Button
+                        data-feedback-href={feedback?.feedback?.actionHref}
                         variant="contained"
                         size="large"
                         startIcon={isStartingRetry ? <CircularProgress size={18} color="inherit" /> : <ReplayIcon />}
@@ -578,7 +581,7 @@ export default function CourseCompletionResultPage() {
                           primaryAction.type === "RETRY_COURSE_EXAM"
                             ? void handleStartRetry()
                             : (() => {
-                                const route = resolveActionRoute(
+                                const route = feedback?.feedback?.actionHref ?? resolveActionRoute(
                                   primaryAction.type,
                                   result.mission.id,
                                   result.course
@@ -593,7 +596,7 @@ export default function CourseCompletionResultPage() {
                           : primaryAction.label}
                       </Button>
                     )}
-                    <Button variant="outlined" size="large" startIcon={<FormatListBulletedIcon />} onClick={() => navigate("/courses")} sx={{ minHeight: 54, px: 6, fontWeight: 900 }}>
+                    <Button variant="outlined" size="large" startIcon={<FormatListBulletedIcon />} data-feedback-href="/courses" onClick={() => navigate("/courses")} sx={{ minHeight: 54, px: 6, fontWeight: 900 }}>
                       コース一覧へ
                     </Button>
                   </Stack>

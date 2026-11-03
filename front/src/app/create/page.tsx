@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CodeIcon from "@mui/icons-material/Code";
@@ -60,7 +61,7 @@ export default function CreatePage() {
   }), []);
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
-    <AppHeader />
+    <AppHeader /><FeedbackDestination failed={!!error} ready={!loading && !error} />
     <Container maxWidth={false} sx={{ maxWidth: 1180, py: 4 }}>
       <Stack spacing={3}>
         <CreateBreadcrumbs items={[{ label: "作る" }]} />

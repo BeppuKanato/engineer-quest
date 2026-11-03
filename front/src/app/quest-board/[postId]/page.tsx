@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -257,7 +258,7 @@ export default function QuestPostDetailPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!post && !errorMessage} />
       <Container maxWidth={false} sx={{ maxWidth: 960, py: 4 }}>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "掲示板", href: "/quest-board" }, { label: post?.title ?? "投稿詳細" }]} />
@@ -434,6 +435,7 @@ export default function QuestPostDetailPage() {
                     <>
                       <TextField
                         label="コメントを書く"
+                        id="reply"
                         value={commentBody}
                         onChange={(event) => setCommentBody(event.target.value)}
                         error={commentBody.trim().length > 0 && commentBody.trim().length < 2}

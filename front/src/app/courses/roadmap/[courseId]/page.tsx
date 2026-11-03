@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
@@ -101,7 +102,7 @@ export default function CourseRoadmapPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!course && !errorMessage} />
       <PageTransitionOverlay open={showOverlay} message="ミッションを準備しています..." />
 
       <Container maxWidth={false} sx={{ maxWidth: 1480, py: 4 }}>

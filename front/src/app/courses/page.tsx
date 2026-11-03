@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StarIcon from "@mui/icons-material/Star";
@@ -108,7 +109,7 @@ export default function CoursesPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
       <PageTransitionOverlay open={showOverlay} message="コースロードマップを準備しています..." />
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>

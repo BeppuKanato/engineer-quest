@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -240,7 +241,7 @@ export default function HistoryPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "履歴" }]} />

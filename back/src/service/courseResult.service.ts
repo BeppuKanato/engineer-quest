@@ -6,7 +6,7 @@ import { parseActivityContent } from "../learning/activity-content/activityConte
 export {
   getCourseExamFeedbackByFirebaseUid as getCourseResultFeedbackByFirebaseUid,
   startCourseExamFeedbackByFirebaseUid as startCourseResultFeedbackByFirebaseUid,
-} from "./courseExamFeedback.service";
+} from "./feedbackV1.compat";
 
 const acceptedEventIds = new Set<string>();
 

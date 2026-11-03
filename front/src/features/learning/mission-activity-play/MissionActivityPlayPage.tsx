@@ -7,6 +7,7 @@
  */
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import {
   Alert,
   Box,
@@ -1750,7 +1751,7 @@ export function MissionActivityPlayPage() {
   if (isLoading) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#F7F8FC" }}>
-        <AppHeader />
+        <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!mission && !errorMessage} />
         <MissionPlayLoadingSkeleton />
       </Box>
     );

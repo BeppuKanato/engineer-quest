@@ -1,5 +1,6 @@
 "use client";
 
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
@@ -97,7 +98,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
-        <AppHeader />
+        <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
         <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
           <HomeSkeleton />
         </Container>
@@ -108,7 +109,7 @@ export default function HomePage() {
   if (!homeData) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
-        <AppHeader />
+        <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
         <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
           <Alert severity="error">{errorMessage ?? "ホーム情報がありません。"}</Alert>
         </Container>
@@ -141,7 +142,7 @@ export default function HomePage() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
-      <AppHeader />
+      <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         {errorMessage && (
