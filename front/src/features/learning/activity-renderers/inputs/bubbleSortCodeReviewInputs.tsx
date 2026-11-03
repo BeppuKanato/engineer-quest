@@ -77,7 +77,7 @@ export const LoopRoleInput = ({ activity, answer, disabled, showExplanation, onA
         </Paper>
       {!disabled && !showExplanation && !isCorrect && <Button variant="outlined" disabled={!selected} onClick={check}>この問題の答えを確認する</Button>}
       {isCorrect && safeIndex < questions.length - 1 && <Button variant="contained" onClick={() => setQuestionIndex(safeIndex + 1)}>次の問題へ</Button>}
-      {allCorrect && <Typography color="#166534" fontWeight={900}>{questions.length}問すべてに正解しました。下の「次へ」から進みましょう。</Typography>}
+      {allCorrect && <Typography color="#166534" fontWeight={900}>{questions.length}問すべてに正解しました。下のボタンから次へ進みましょう。</Typography>}
     </Stack>
   );
 };
@@ -134,7 +134,7 @@ export const CodeRepairInput = ({ activity, answer, disabled, showCorrect, onAns
         </Paper>
       {!disabled && !showCorrect && !isCorrect && <Button variant="outlined" disabled={!selected} onClick={check}>この問題の答えを確認する</Button>}
       {isCorrect && safeIndex < questions.length - 1 && <Button variant="contained" onClick={() => setQuestionIndex(safeIndex + 1)}>次の問題へ</Button>}
-      {allCorrect && <Typography color="#166534" fontWeight={900}>{questions.length}問すべてに正解しました。下の「次へ」から進みましょう。</Typography>}
+      {allCorrect && <Typography color="#166534" fontWeight={900}>{questions.length}問すべてに正解しました。下のボタンから次へ進みましょう。</Typography>}
     </Stack>
   );
 };

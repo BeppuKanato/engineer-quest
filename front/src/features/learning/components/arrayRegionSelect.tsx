@@ -209,7 +209,7 @@ export const ArrayRegionSelect = ({
       )}
       {questions.every((item) => Boolean(selectedRegions[item.id])) && (
         <Typography color="#166534" fontWeight={900}>
-          {questions.length}問すべてに正解しました。下の「次へ」から進みましょう。
+          {questions.length}問すべてに正解しました。下のボタンから次へ進みましょう。
         </Typography>
       )}
     </Stack>
