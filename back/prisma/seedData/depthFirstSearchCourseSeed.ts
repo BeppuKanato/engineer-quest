@@ -194,6 +194,15 @@ const twoNodeGraph = (steps: Record<string, unknown>[]) => ({
   containerTrailingLabel: "現在の呼び出し",
   activeContainerItem: "LAST",
 });
+// Mission3前半専用:Fの隣をDだけにして「行き止まり」を正しく示す小グラフ。EはBの隣として残し、戻った後に調べられる状態にする。
+const deadEndGraph = {
+  nodes: nodes.filter((node) => node.id !== "C"),
+  edges: [
+    { from: "A", to: "B" }, { from: "B", to: "D" },
+    { from: "B", to: "E" }, { from: "D", to: "F" },
+  ],
+  adjacency: { A: ["B"], B: ["A", "D", "E"], D: ["B", "F"], E: ["B"], F: ["D"] },
+};
 
 const orientation = m("orientation", "一つの道を奥までたどる探索を知ろう", "深さ優先探索が解決する問題と、BFSとの違いを確認します。", [
   a("goal", "つながりを奥までたどって、届く場所を探そう", "DFSがどのように進むか全体像を確認しましょう。",
@@ -242,8 +251,8 @@ const depth = m("depth", "最初の未発見の隣へ、奥まで進もう", "�
 
 const recursion = m("recursion", "行き止まりで一つ前へ戻ろう", "戻り先を残す呼び出しの積み重なりと、再帰を学びます。", [
   a("dead-end", "Fで未発見の隣がなくなった", "進めないときに必要な情報を考えましょう。",
-    "A→B→D→Fと進みました。Fの隣Dは発見済みで、ほかに進めません。しかし探索全体は終わりではなく、DやBにまだ確認途中の隣があります。Fへ来るまでのA、B、Dを戻り先として残す必要があります。",
-    "GRAPH_TRACE", graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fから進めないので、右から一つ戻ってDの続きへ移ります。" }]),
+    "ここでは戻る動きに集中するため、A―B、B―D、B―E、D―Fだけの小さな図で確認します。A→B→D→Fと進みました。Fの隣はDだけで、すでに発見済みなので、ほかに進めません。しかし探索全体は終わりではなく、Bにはまだ未発見のEが残っています。Fへ来るまでのA、B、Dを戻り先として残す必要があります。",
+    "GRAPH_TRACE", graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fから進めないので、右から一つ戻ってDの続きへ移ります。" }], deadEndGraph),
     "右端が現在地F、その左のDが一つ前の戻り先だよ。"),
   a("call-stack", "調べる途中の場所を積み重ねよう", "進むときと戻るときの変化を追いましょう。",
     "Aを調べている途中でBへ進むと、Aの続きは待ったままです。同様にBの途中でD、Dの途中でFを調べます。Fが終わるとFの呼び出しだけがなくなりDへ戻ります。Dも終わればBへ戻ります。",
@@ -254,11 +263,11 @@ const recursion = m("recursion", "行き止まりで一つ前へ戻ろう", "戻
       { currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], activeEdge: { from: "D", to: "F" }, message: "Dの途中でFを調べ始めました。", nextLabel: "Fから戻る" },
       { currentNode: "D", queue: ["A", "B", "D"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: ["F"], message: "Fが終わり、Dの残りの隣を確認します。", nextLabel: "Dから戻る" },
       { currentNode: "B", queue: ["A", "B"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: ["D", "F"], message: "Dが終わり、Bの次の未発見の隣を探します。" },
-    ]),
+    ], deadEndGraph),
     "進むと右へ積み、終わると右端を一つ外して戻るよ。"),
   choice("return-from-f", "Fが終わったら、どこへ戻る？", "呼び出しの積み重なりはA、B、D、Fの順です。Fに未発見の隣がありません。次の現在地は？", ["A", "B", "D"], 2,
     "右端Fの呼び出しが終わると、一つ前のDへ戻って残りの隣を確認します。", "Fのすぐ左にある、Fを呼び出した場所を確認しましょう。",
-    graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fの呼び出しが終わる直前です。" }])),
+    graph([{ currentNode: "F", queue: ["A", "B", "D", "F"], discoveredNodes: ["A", "B", "D", "F"], processedNodes: [], message: "Fの呼び出しが終わる直前です。" }], deadEndGraph)),
   a("recursive-name", "同じ調べ方を、進んだ先でも呼び出す", "再帰という言葉とコードを結びつけましょう。",
     "場所を調べる処理をvisitとします。visit(A)の途中でBへ進むときvisit(B)を呼び、visit(B)の途中でvisit(D)を呼びます。このように、関数の中から同じ関数を呼ぶことを再帰と呼びます。呼び出した処理が終わると、呼び出した行の次へ戻ります。",
     "TEXT", { code: code("def visit(node):", "    # nodeの隣を調べる", "    visit(neighbor)"), conclusion: "visit(neighbor)が終わると、現在のnodeのforの続きへ戻ります。" },
