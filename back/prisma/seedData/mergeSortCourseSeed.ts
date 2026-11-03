@@ -442,11 +442,11 @@ const assemble = m("assemble", "マージソートのコードを組み立てよ
     "BLOCK_ORDER", {
       question: "処理の順序を並べてください。",
       steps: [
-        { id: "base", label: "1要素以下なら返す" },
-        { id: "divide", label: "中央で左右へ分ける" },
         { id: "recurse", label: "左右を再帰的に整列する" },
-        { id: "merge", label: "整列済みの先頭を比べて結合する" },
+        { id: "base", label: "1要素以下なら返す" },
         { id: "rest", label: "残りを追加して結果を返す" },
+        { id: "divide", label: "中央で左右へ分ける" },
+        { id: "merge", label: "整列済みの先頭を比べて結合する" },
       ],
       answerOrder: ["base", "divide", "recurse", "merge", "rest"],
       correctFeedback: "停止→分割→左右の整列→先頭比較→残り追加の順に整理できました。",
