@@ -366,6 +366,7 @@ const missionSix = mission({
               { id: "q1w", label: "length=2、lps[3]は未記録、i=3" },
               { id: "q1z", label: "length=0、lps[3]=0、i=4" },
             ],
+            correctFeedback: "正解です。一致したのでlength=2になり、lps[3]=2を記録してi=4へ進みます。",
           },
           {
             question: "i=5、length=3で不一致でした。lps[2]=1です。",
@@ -374,6 +375,7 @@ const missionSix = mission({
               { id: "q2w", label: "length=1、i=6、lps[5]は未記録" },
               { id: "q2z", label: "length=0、lps[5]=0、i=6" },
             ],
+            correctFeedback: "正解です。不一致ですが候補があるので、lps[2]=1を使ってlength=1へ戻します。lps[5]はまだ記録せず、i=5のまま調べ直します。",
           },
           {
             question: "i=1、length=0で、BとAが不一致でした。",
@@ -382,6 +384,7 @@ const missionSix = mission({
               { id: "q3w", label: "length=0、lps[1]は未記録、i=1" },
               { id: "q3o", label: "length=1、lps[1]=1、i=2" },
             ],
+            correctFeedback: "正解です。候補がない不一致なので、lps[1]=0を記録してi=2へ進みます。一致時と2種類の不一致時を正しく更新できました。",
           },
         ],
         correctAnswers: ["q1", "q2", "q3"],
