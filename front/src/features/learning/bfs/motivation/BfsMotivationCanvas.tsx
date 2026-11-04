@@ -82,7 +82,7 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
         </AnimatePresence>
         {state.trail.slice(1).map((id, index) => {
           const from = point(state.trail[index]), to = point(id);
-          return <motion.line key={`${state.trail[index]}-${id}`} initial={{ pathLength: 0 }}
+          return <motion.line key={`${state.trail[index]}-${id}`} initial={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y, pathLength: 0 }}
             animate={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y, pathLength: 1 }}
             stroke={playerTokens.focus} strokeWidth={6} transition={transition} />;
         })}
