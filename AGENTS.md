@@ -33,8 +33,8 @@ Engineer Quest は、プログラミングとアルゴリズムの学習を支�
    - 新フロー教材: `docs/concept/learning-materials-v2.md` と、そこから参照する Google Drive の教材指針全文
    - フィードバック v1: Google Drive の「フィードバック要件_v1」、`docs/feedback-v1-implementation.md`
    - デプロイと開発環境: `docs/development-cloud-run.md`
-   - 従来フローの教材: `docs/concept/course-creation-guidelines.md` と対象コースの `docs/course-designs/` 配下の設計票
-   - ゲーミフィケーション: `docs/concept/game-elements-design.md`。ただし実装済みかどうかはコードと Prisma schema で確認する
+   - 従来フローの教材・画面: 設計文書は残していない。`back/prisma/seedData/` の seed、`back/src/learning/activity-content/` の schema と registry、`front/src/app/mission/[missionId]/README.md` のコード案内を実行仕様として確認する
+   - ゲーミフィケーション: 設計文書は残していない。実装済みかどうかはコードと Prisma schema で確認する
 
 ## 4. 文書と実装の優先順位
 

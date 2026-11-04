@@ -7,10 +7,7 @@
 - 状態の意味:
   - **正本**: その領域の判断に使う現行の基準。
   - **現行**: 現在も使う手順・仕様。
-  - **従来フロー専用**: Course / Mission / Activity で構成する現行アプリの保守・作成にだけ使う。新フローへ流用しない。
-  - **検討資料**: 設計判断の材料。実装済み状態はコードと schema で確認する。
   - **記録**: 特定時点の設計・実装の経緯。現在の仕様判断には直接使わない。
-  - **旧版**: 現在の目的や設計を表さない履歴資料。
 
 ## 実装ルール・運用
 
@@ -24,31 +21,8 @@
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
 | [concept/learning-materials-v2.md](concept/learning-materials-v2.md) | 正本（要約） | 7フェーズ新フローの確定事項と実装上の含意。全文の正本は Google Drive の教材指針 |
-| [concept/course-creation-guidelines.md](concept/course-creation-guidelines.md) | 従来フロー専用 | 従来の Course / Mission / Activity 教材の作成・保守基準 |
-| [concept/visual-data-format.md](concept/visual-data-format.md) | 従来フロー専用 | 従来 Activity の `MissionActivity.content` に格納する Visual JSON 形式 |
 
-## 概念・設計検討
-
-| 文書 | 状態 | 用途 |
-| --- | --- | --- |
-| [concept/game-elements-design.md](concept/game-elements-design.md) | 検討資料 | ゲーミフィケーション要素の候補、過去の実装状況、方針の対応表。実装済み確認はコードで行う |
-| [concept/learning-experience-concept.md](concept/learning-experience-concept.md) | 旧版 | Web アプリ開発の授業補助として構想した初期コンセプトの記録 |
-
-## コース設計記録
-
-次は、従来フローで実装された現行コースの設計判断とレビュー記録である。新フローの単元設計には直接使わない。
-
-| 文書 | 状態 |
-| --- | --- |
-| [course-designs/course-algorithm-breadth-first-search-v1.md](course-designs/course-algorithm-breadth-first-search-v1.md) | 記録 |
-| [course-designs/course-algorithm-breadth-first-search-v1-review.md](course-designs/course-algorithm-breadth-first-search-v1-review.md) | 記録 |
-| [course-designs/course-algorithm-depth-first-search-v1.md](course-designs/course-algorithm-depth-first-search-v1.md) | 記録 |
-| [course-designs/course-algorithm-depth-first-search-v1-review.md](course-designs/course-algorithm-depth-first-search-v1-review.md) | 記録 |
-| [course-designs/course-algorithm-kmp-v1.md](course-designs/course-algorithm-kmp-v1.md) | 記録 |
-| [course-designs/course-algorithm-merge-sort-v1.md](course-designs/course-algorithm-merge-sort-v1.md) | 記録 |
-| [course-designs/course-algorithm-merge-sort-v1-review.md](course-designs/course-algorithm-merge-sort-v1-review.md) | 記録 |
-| [course-designs/course-algorithm-selection-sort-v1.md](course-designs/course-algorithm-selection-sort-v1.md) | 記録 |
-| [course-designs/course-algorithm-selection-sort-v1-review.md](course-designs/course-algorithm-selection-sort-v1-review.md) | 記録 |
+従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
 ## 実装報告
 

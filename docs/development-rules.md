@@ -114,14 +114,14 @@ back/src/app.ts
 
 - 学習コースの正は `back/prisma/seedData/` であり、`learningSeed.ts` が各コース seed を集約する。
 - Activity の `content` は `back/src/learning/activity-content/` の schema で検証できる形にする。任意 JSON を検証なしで入れない。
-- seed を変えたら、対象コースの設計票、seed validation、対象コース verify を確認する。
+- seed を変えたら、seed validation と対象コース verify を確認する。
 - 通常 seed は既存データの同期や削除を伴い得る。学習進捗を保持する環境では `back/prisma/preservingSeedPolicy.ts` と `seed:preserve` を先に確認する。
 
 ### 5.2 新フロー
 
 - 7フェーズ単元の教材を、従来の MissionActivity JSON へ無理に変換しない。
 - 新しい教材形式を作るときは、バージョン、判別子、ステップ、問い、論点タグ、コード、テストケースを機械検証できる schema を先に定義する。
-- 色は教材データへ HEX 値で散らさず、意味を表す tone や状態名で表し、描画側が実際の色へ変換する。従来 Visual 形式の設計原則を参考にする。
+- 色は教材データへ HEX 値で散らさず、意味を表す tone や状態名で表し、描画側が実際の色へ変換する。
 
 ## 6. 検証
 

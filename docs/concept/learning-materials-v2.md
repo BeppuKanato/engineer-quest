@@ -10,11 +10,9 @@
 
 新しい単元では、従来の「Mission を細分化し、Activity ごとに1概念を扱う」構造を使わない。1つのアルゴリズムを、図と文章が同期した連続ステップで理解し、確認、コード接続、応用、自力実装までを1単元として扱う。
 
-従来フローは現行アプリで動作しているため、直ちに削除しない。
+従来フローは現行アプリで動作しているが、その学習設計文書、概念検討文書、コース設計記録は 2026-11-04 の判断でリポジトリから削除した。
 
-- `course-creation-guidelines.md` は従来フローの保守・修正にだけ使う。
-- `visual-data-format.md` は従来 Activity の `MissionActivity.content` 形式にだけ使う。
-- `docs/course-designs/` の各設計票は、現行コースの設計記録として保持する。
+- 従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。従来 Activity の JSON 形式は `back/src/learning/activity-content/` の schema が定義する。
 - 新フロー側のデータ形式、画面、進捗モデルは、この文書と正本に基づいて新規に設計する。従来の Mission / Activity へ無理に押し込まない。
 
 ## 2. 共通制約
