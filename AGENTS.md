@@ -30,7 +30,7 @@ Engineer Quest は、プログラミングとアルゴリズムの学習を支�
 2. `docs/README.md`（全ドキュメントの索引と状態）
 3. `docs/development-rules.md`（実装の型と検証ルール）
 4. 作業領域に応じて、次の正本または要約を読む。
-   - 新フロー教材: `docs/concept/learning-materials-v2.md` と、そこから参照する Google Drive の教材指針全文
+   - 新フロー教材: `docs/concept/learning-materials-guideline.md`（教材指針全文）と `docs/concept/learning-materials-v2.md`（要約）
    - フィードバック v1: Google Drive の「フィードバック要件_v1」、`docs/feedback-v1-implementation.md`
    - デプロイと開発環境: `docs/development-cloud-run.md`
    - 従来フローの教材・画面: 設計文書は残していない。`back/prisma/seedData/` の seed、`back/src/learning/activity-content/` の schema と registry、`front/src/app/mission/[missionId]/README.md` のコード案内を実行仕様として確認する

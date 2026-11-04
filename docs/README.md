@@ -20,7 +20,8 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
-| [concept/learning-materials-v2.md](concept/learning-materials-v2.md) | 正本（要約） | 7フェーズ新フローの確定事項と実装上の含意。全文の正本は Google Drive の教材指針 |
+| [concept/learning-materials-guideline.md](concept/learning-materials-guideline.md) | 正本（全文） | アルゴリズム学習教材・汎用設計ガイドラインの全文。編集の原典は Google Drive の文書で、確定した内容を取り込んだもの |
+| [concept/learning-materials-v2.md](concept/learning-materials-v2.md) | 要約 | 7フェーズ新フローの確定事項と実装上の含意。全文は `learning-materials-guideline.md` |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
