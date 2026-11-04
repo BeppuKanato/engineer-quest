@@ -149,6 +149,8 @@ npm run verify:static
 
 `verify:static` は DB、起動中サーバー、外部 API を必要としない検証をまとめたものである。対象は `back/package.json` を正とする。
 
+既知の例外: `verify:selection-course` は DB 不要だが、現行 develop の教材トレース（1つの Activity 内で複数例を切り替える `selection-boundary-return`）に対して検証前提が合わず失敗するため、`verify:static` には含めていない。検証スクリプト側の前提と教材側の表現のどちらを直すかは、教材修正として別途判断する。
+
 ### 6.2 DB や外部環境が必要な検証
 
 次は CI の基本検証とは分ける。対象 DB と環境を明示し、結果を PR に記録する。
