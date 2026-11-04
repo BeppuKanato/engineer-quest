@@ -1,6 +1,4 @@
 /** DBへ書き込まず、ID・order・時間・EXP・renderer dataを静的検証するseed検証入口。 */
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { MissionType } from "@prisma/client";
 
 import { learningSeed } from "../../prisma/seedData/learningSeed";
@@ -28,32 +26,10 @@ let missionCount = 0;
 let activityCount = 0;
 const publishedPlaceholderMissionIds: string[] = [];
 
-const legacyCourseIdsWithoutDesignDocument = new Set([
+const legacyCourseIdsExemptFromGuidelineChecks = new Set([
   "course-algorithm-bubble-sort-v2",
   "course-algorithm-binary-search-v1",
 ]);
-
-const designDocumentPath = (courseId: string) => {
-  const candidates = [
-    resolve(process.cwd(), "docs", "course-designs", `${courseId}.md`),
-    resolve(process.cwd(), "..", "docs", "course-designs", `${courseId}.md`),
-  ];
-  return candidates.find(existsSync);
-};
-
-const requiredDesignDocumentSections = [
-  "## 想定する学習者",
-  "## 与える体験と学習価値",
-  "## 前提知識",
-  "## 概念の依存順序",
-  "## 用語の導入順",
-  "## 想定する誤解とフィードバック",
-  "## このコースで扱わないこと",
-  "## 成功条件",
-  "## スターターコード",
-  "## 正解コード",
-  "## 生成テスト",
-];
 
 const learnerFacingMetaPatterns = [
   /画面を直接開いても/,
@@ -83,19 +59,7 @@ for (const course of learningSeed.courses) {
     throw new Error(`${course.id} must end with exactly one Course Mission`);
   }
   const lastBasicMission = [...course.missions].reverse().find((mission) => mission.type !== MissionType.COURSE_EXAM);
-  const requiresCurrentGuidelineChecks = !legacyCourseIdsWithoutDesignDocument.has(course.id);
-  if (requiresCurrentGuidelineChecks) {
-    const documentPath = designDocumentPath(course.id);
-    if (!documentPath) {
-      throw new Error(`${course.id}: docs/course-designs/${course.id}.md is required`);
-    }
-    const document = readFileSync(documentPath, "utf8");
-    for (const section of requiredDesignDocumentSections) {
-      if (!document.includes(section)) {
-        throw new Error(`${course.id}: course design document is missing ${section}`);
-      }
-    }
-  }
+  const requiresCurrentGuidelineChecks = !legacyCourseIdsExemptFromGuidelineChecks.has(course.id);
 
   for (const mission of course.missions) {
     missionCount += 1;

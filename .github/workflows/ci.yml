@@ -42,6 +42,18 @@ jobs:
         working-directory: ./back
         run: npm run lint
       
+      - name: Typecheck front
+        working-directory: ./front
+        run: npm run typecheck
+      
+      - name: Typecheck back
+        working-directory: ./back
+        run: npm run typecheck
+      
+      - name: Static verify back
+        working-directory: ./back
+        run: npm run verify:static
+      
       - name: Build front
         working-directory: ./front
         run: npm run build
