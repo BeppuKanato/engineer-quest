@@ -1,73 +1,130 @@
-import { Box, Stack, Typography } from "@mui/material";
+"use client";
+
+import { Box } from "@mui/material";
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 import type { GraphCanvasState } from "./graphCanvas.types";
+import { layoutGraphCanvas } from "./graphLayout";
 import { playerTokens } from "./player.tokens";
 
+type StructureItem = ReturnType<typeof layoutGraphCanvas>["structures"][number]["items"][number];
+type Point = { x: number; y: number };
+
+/** 同じ SVG 座標内で、図→キューの出現・並び替え・キュー→図の退出を繋ぐ。 */
+function AnimatedItem({ item, source, highlighted, leading, duration, unit }: {
+  item: StructureItem; source: Point; highlighted: boolean; leading: boolean; duration: number; unit: number;
+}) {
+  const present = useIsPresent();
+  const tone = playerTokens.states[item.status];
+  return (
+    <motion.g role={present ? "listitem" : undefined} aria-hidden={!present || undefined}
+      aria-label={`${item.value}：${tone.label}${leading ? "、先頭" : ""}`}
+      initial={{ x: source.x, y: source.y, scale: 0.7, opacity: 0 }}
+      animate={{ x: item.x, y: item.y, scale: 1, opacity: 1 }}
+      exit={{ x: source.x, y: source.y, scale: 0.7, opacity: 0 }}
+      transition={{ duration, ease: "easeInOut" }}>
+      <g transform={`scale(${unit})`}>
+      <rect x={-28} y={-22} width={56} height={44} rx={4} fill={tone.fill} stroke={tone.stroke} strokeWidth={2} />
+      {highlighted && <rect x={-33} y={-27} width={66} height={54} rx={6}
+        fill="none" stroke={playerTokens.focus} strokeWidth={2} strokeDasharray="5 4" />}
+      <text textAnchor="middle" y={7} fill={item.status === "processing" ? playerTokens.surface : playerTokens.text} fontSize={20} fontWeight={700}>
+        {leading ? `← ${item.value}` : item.value}
+      </text>
+      </g>
+    </motion.g>
+  );
+}
+
 export function GraphCanvas({ canvas }: { canvas: GraphCanvasState }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 600, height: 400 });
+  const reducedMotion = useReducedMotion();
+  const duration = reducedMotion ? 0 : playerTokens.transitionMs / 1000;
+  const transition = { duration, ease: "easeInOut" } as const;
+
+  useEffect(() => {
+    if (!host.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setSize((current) =>
+        current.width === width && current.height === height ? current : { width, height });
+    });
+    observer.observe(host.current);
+    return () => observer.disconnect();
+  }, []);
+
   const { data, state, highlights } = canvas;
-  const highlightFor = (kind: "node" | "edge" | "item", id: string) =>
-    highlights.find((highlight) => highlight.kind === kind && highlight.id === id);
+  const layout = layoutGraphCanvas(canvas, size.width, size.height);
+  const highlighted = (kind: "node" | "edge" | "item", id: string) =>
+    highlights.some((highlight) => highlight.kind === kind && highlight.id === id);
+  const radius = Math.max(22, Math.min(40, size.width * 0.045));
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 640, mx: "auto" }}>
-      <svg viewBox="0 0 600 300" role="img" aria-label="対象データと各ノードの状態" style={{ display: "block", width: "100%" }}>
+    <Box ref={host} sx={{ width: "100%", height: "100%", minHeight: 280 }}>
+      <svg viewBox={`0 0 ${size.width} ${size.height}`} role="img" aria-label="対象データと内部状態"
+        style={{ display: "block", width: "100%", height: "100%", overflow: "visible" }}>
         {data.layers.map((layer) => (
           <g key={layer.id}>
-            <rect x={90} y={layer.y} width={420} height={layer.height} rx={24} fill={playerTokens.layers[layer.tone]} />
-            <text x={105} y={layer.y + 24} fill={playerTokens.text} fontSize={13}>{layer.label}</text>
+            <motion.rect initial={false} x={size.width * 0.08} width={size.width * 0.84} rx={8}
+              animate={{ y: layer.y / 300 * layout.graphHeight, height: layer.height / 300 * layout.graphHeight }}
+              fill={playerTokens.layers[layer.tone]} transition={transition} />
+            <text x={size.width * 0.09} y={layer.y / 300 * layout.graphHeight + 25 * layout.unit}
+              fill={playerTokens.text} fontSize={16 * layout.unit}>{layer.label}</text>
           </g>
         ))}
         {data.edges.map((edge) => {
-          const from = data.nodes.find((node) => node.id === edge.from)!;
-          const to = data.nodes.find((node) => node.id === edge.to)!;
-          const highlight = highlightFor("edge", edge.id);
-          return <line key={edge.id} x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-            stroke={playerTokens.states[highlight?.tone ?? "idle"].stroke} strokeWidth={highlight ? 5 : 2} />;
+          const from = layout.nodes.find((node) => node.id === edge.from)!;
+          const to = layout.nodes.find((node) => node.id === edge.to)!;
+          return <motion.line key={edge.id} initial={false}
+            animate={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y,
+              stroke: highlighted("edge", edge.id) ? playerTokens.focus : playerTokens.states.idle.stroke,
+              strokeWidth: highlighted("edge", edge.id) ? 5 : 2 }} transition={transition} />;
         })}
-        {data.nodes.map((node) => {
+        {layout.nodes.map((node) => {
           const status = state.nodes.find((entry) => entry.id === node.id)!.status;
-          const highlight = highlightFor("node", node.id);
-          const tone = playerTokens.states[highlight?.tone ?? status];
-          const label = `${node.label}：${playerTokens.states[status].label}${highlight ? "、強調" : ""}`;
+          const tone = playerTokens.states[status];
+          const focus = highlighted("node", node.id);
+          const label = `${node.label}：${tone.label}${focus ? "、強調" : ""}`;
           return (
-            <g key={node.id} role="img" aria-label={label}>
+            <motion.g key={node.id} role="img" aria-label={label} initial={false}
+              animate={{ x: node.x, y: node.y, scale: focus ? 1.06 : 1 }} transition={transition}>
               <title>{label}</title>
-              {highlight && <circle cx={node.x} cy={node.y} r={34} fill="none" stroke={tone.stroke} strokeWidth={2} strokeDasharray="4 4" />}
-              <circle cx={node.x} cy={node.y} r={27} fill={tone.fill} stroke={tone.stroke} strokeWidth={3} />
-              <text x={node.x} y={node.y + 7} textAnchor="middle" fill={playerTokens.text} fontSize={21} fontWeight={700}>{node.label}</text>
-              <text x={node.x} y={node.y + 49} textAnchor="middle" fill={playerTokens.text} fontSize={12}>
-                {playerTokens.states[status].marker} {playerTokens.states[status].label}
-              </text>
-            </g>
+              <g transform={`scale(${layout.unit})`}>
+              <AnimatePresence initial={false}>
+                {focus && <motion.circle key="focus" r={radius + 7} fill="none" stroke={playerTokens.focus}
+                  strokeWidth={3} strokeDasharray="5 4" initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={transition} />}
+              </AnimatePresence>
+              <motion.circle r={radius} initial={false} animate={{ fill: tone.fill, stroke: tone.stroke }} strokeWidth={3} transition={transition} />
+              <text y={8} textAnchor="middle" fill={status === "processing" ? playerTokens.surface : playerTokens.text}
+                fontSize={24} fontWeight={700}>{node.label}</text>
+              </g>
+            </motion.g>
           );
         })}
-      </svg>
-      <Stack spacing={2} alignItems="center" sx={{ minHeight: 120 }}>
-        {state.structures.map((structure) => (
-          <Stack key={structure.id} spacing={0.75} alignItems="center" role="group" aria-label={structure.label}>
-            <Typography component="span" sx={{ fontSize: 13, fontWeight: 600 }}>{structure.label}</Typography>
-            <Stack component="ol" direction="row" alignItems="center" sx={{ p: 0, m: 0, gap: 1, listStyle: "none", minHeight: 42, flexWrap: "wrap", justifyContent: "center" }}>
-              {structure.items.length === 0 && <Typography component="li" sx={{ color: playerTokens.control }}>∅</Typography>}
-              {structure.items.map((item, i) => {
-                const highlight = highlightFor("item", item.id);
-                const tone = playerTokens.states[highlight?.tone ?? item.status];
-                return (
-                  <Box component="li" key={item.id} aria-label={`${item.value}：${playerTokens.states[item.status].label}${i === 0 && structure.kind === "queue" ? "、先頭" : ""}`}
-                    sx={{ bgcolor: tone.fill, border: `2px solid ${tone.stroke}`, outline: highlight ? `2px dashed ${tone.stroke}` : undefined,
-                      outlineOffset: 3, px: 1.75, py: 0.5, borderRadius: 1, fontWeight: 700 }}>
-                    {i === 0 && structure.kind === "queue" && <span aria-hidden="true">← </span>}{item.value}
-                  </Box>
-                );
-              })}
-            </Stack>
-          </Stack>
+        {layout.structures.map((structure) => (
+          <g key={structure.id} role="group" aria-label={structure.label}>
+            <text x={size.width / 2} y={structure.y + 15 * layout.unit} textAnchor="middle" fill={playerTokens.text} fontSize={16 * layout.unit} fontWeight={600}>
+              {structure.label}
+            </text>
+            <g role="list" aria-label={structure.label}>
+              {structure.items.length === 0 && <text role="listitem" aria-label="空" x={size.width / 2} y={structure.y + 64 * layout.unit}
+                textAnchor="middle" fill={playerTokens.text} fontSize={20 * layout.unit}>∅</text>}
+              <AnimatePresence initial={false}>
+                {structure.items.map((item, index) => (
+                  <AnimatedItem key={item.id} item={item}
+                    source={layout.nodes.find((node) => node.id === item.nodeId) ?? { x: item.x, y: item.y - 48 }}
+                    highlighted={highlighted("item", item.id)} leading={index === 0 && structure.kind === "queue"} duration={duration} unit={layout.unit} />
+                ))}
+              </AnimatePresence>
+            </g>
+          </g>
         ))}
-        <Stack direction="row" gap={2} flexWrap="wrap" justifyContent="center">
-          {state.variables.map((variable) => <Typography component="span" key={variable.name} sx={{ fontSize: 14 }}>
-            {variable.name} = {variable.value ?? "∅"}
-          </Typography>)}
-        </Stack>
-      </Stack>
+        <text x={size.width / 2} y={layout.variableY} textAnchor="middle" fill={playerTokens.text} fontSize={18 * layout.unit}>
+          {state.variables.map((variable) => `${variable.name} = ${variable.value ?? "∅"}`).join("　")}
+        </text>
+      </svg>
     </Box>
   );
 }

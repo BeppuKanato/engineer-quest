@@ -10,7 +10,7 @@ import { playerTokens } from "./player.tokens";
 export function LearningPlayerPreview({ contentId }: { contentId: "step-demo" | "scene-demo" }) {
   const content = contentId === "scene-demo" ? scenePreviewContent : stepPreviewContent;
   return (
-    <Box component="main" sx={{ minHeight: "100dvh", bgcolor: playerTokens.background, display: "grid", alignItems: "center", p: { xs: 1, sm: 4 } }}>
+    <Box component="main" sx={{ height: "100dvh", minHeight: 440, bgcolor: playerTokens.background, display: "flex" }}>
       <LearningPlayer content={content} renderCanvas={(canvas) => <GraphCanvas canvas={canvas} />} />
     </Box>
   );

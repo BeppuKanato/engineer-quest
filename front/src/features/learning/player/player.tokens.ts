@@ -1,21 +1,22 @@
 /**
  * 教材専用。アプリの success/primary 等には接続しない。
- * 正本は同じ意味への同じ色と同期強調を要求するが、具体的な状態色は未指定。
- * 以下の配色は #68 の暫定割り当て（README / PR に判断点を記録）。
+ * 正本: docs/concept/learning-player-ui.md §2・4。
  */
 export const playerTokens = {
   text: "#111827",
   surface: "#ffffff",
-  background: "#f8fafc",
-  control: "#334155",
+  background: "#ffffff",
+  control: "#111827",
+  focus: "#2563eb",
+  transitionMs: 300,
   states: {
-    idle: { fill: "#ffffff", stroke: "#64748b", label: "未処理", marker: "○" },
-    processing: { fill: "#fef3c7", stroke: "#92400e", label: "処理中", marker: "▶" },
-    queued: { fill: "#dbeafe", stroke: "#1e40af", label: "キュー待ち", marker: "…" },
-    completed: { fill: "#dcfce7", stroke: "#166534", label: "完了", marker: "✓" },
+    idle: { fill: "#ffffff", stroke: "#9ca3af", label: "未処理" },
+    processing: { fill: "#2563eb", stroke: "#1d4ed8", label: "処理中" },
+    queued: { fill: "#f5e7c1", stroke: "#c9a227", label: "キュー待ち" },
+    completed: { fill: "#e5e7eb", stroke: "#9ca3af", label: "完了" },
   },
   // 層の背景と状態の輪郭を別の視覚チャンネルにする。
-  layers: { layer0: "#f1f5f9", layer1: "#ede9fe", layer2: "#fce7f3" },
+  layers: { layer0: "#f3f4f6", layer1: "#e5e7eb", layer2: "#f3f4f6" },
 } as const;
 
 export type PlayerStatus = keyof typeof playerTokens.states;

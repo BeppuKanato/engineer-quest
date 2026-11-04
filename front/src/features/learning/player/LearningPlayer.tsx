@@ -36,30 +36,44 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
     if (!playback.playing) return;
     const timer = window.setTimeout(() => {
       setPlayback((current) => advancePlayback(current, { type: "tick" }, count));
-    }, content.intervalMs);
+    }, Math.max(content.intervalMs, playerTokens.transitionMs + 50));
     return () => window.clearTimeout(timer);
   }, [content, count, playback]);
 
   return (
-    <Box component="section" aria-label="学習プレイヤー" sx={{
-      width: "100%", maxWidth: 880, mx: "auto", bgcolor: playerTokens.surface,
-      color: playerTokens.text, borderRadius: 3, px: { xs: 1.5, sm: 4 }, py: { xs: 2, sm: 4 },
+    <Box component="section" aria-label="学習プレイヤー" tabIndex={0}
+      onKeyDown={(event) => {
+        // スライダー等の入力部品は自身のキー操作を優先する。
+        if (event.altKey || event.ctrlKey || event.metaKey ||
+          (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]'))) return;
+        const positions: Partial<Record<string, number>> = {
+          ArrowLeft: playback.index - 1, ArrowRight: playback.index + 1, Home: 0, End: count - 1,
+        };
+        const index = positions[event.key];
+        if (index === undefined) return;
+        event.preventDefault();
+        dispatch({ type: "seek", index });
+      }} sx={{
+      width: "100%", flex: 1, minWidth: 0, minHeight: 0, bgcolor: playerTokens.surface,
+      color: playerTokens.text, p: { xs: 1, sm: 2 }, display: "flex", flexDirection: "column",
     }}>
-      <Box aria-live="polite" aria-atomic="true">
+      <Box aria-live="polite" aria-atomic="true" sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <Typography component="p" sx={{
-          color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: { xs: 18, sm: 22 },
-          minHeight: "3.2em", display: "grid", alignItems: "center", mb: 2,
+          color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
+          minHeight: "2.8em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1,
         }}>{step.caption}</Typography>
-        {renderCanvas(step.canvas)}
+        <Box sx={{ flex: 1, minHeight: 0 }}>{renderCanvas(step.canvas)}</Box>
       </Box>
       <Stack direction="row" alignItems="center" gap={{ xs: 0.5, sm: 1.5 }} role="group" aria-label="再生操作"
-        sx={{ mt: 3, color: playerTokens.control, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
-        <IconButton aria-label="前のステップ" disabled={playback.index === 0}
-          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })}><SkipPreviousIcon /></IconButton>
+        sx={{ mt: 1, flexShrink: 0, color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
         <IconButton aria-label={playback.playing ? "一時停止" : playback.index === count - 1 ? "最初から再生" : "再生"}
           disabled={count < 2} onClick={() => dispatch({ type: "toggle" })}>
           {playback.playing ? <PauseIcon /> : playback.index === count - 1 ? <ReplayIcon /> : <PlayArrowIcon />}
         </IconButton>
+        <IconButton aria-label="前のステップ" disabled={playback.index === 0}
+          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })}><SkipPreviousIcon /></IconButton>
+        <IconButton aria-label="次のステップ" disabled={playback.index === count - 1}
+          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })}><SkipNextIcon /></IconButton>
         <Box component="input" type="range" aria-label="ステップ位置" min={1} max={count} step={1}
           value={playback.index + 1} aria-valuetext={`${playback.index + 1} / ${count}`} disabled={count < 2}
           onChange={(event) => dispatch({ type: "seek", index: Number(event.target.value) - 1 })}
@@ -67,8 +81,6 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
         <Typography component="span" sx={{ fontSize: 14, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
           {playback.index + 1} / {count}
         </Typography>
-        <IconButton aria-label="次のステップ" disabled={playback.index === count - 1}
-          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })}><SkipNextIcon /></IconButton>
       </Stack>
     </Box>
   );
