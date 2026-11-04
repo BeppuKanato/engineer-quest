@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LearningPlayerPreview } from "@/features/learning/player/LearningPlayerPreview";
 import { BfsMotivationPreview } from "@/features/learning/bfs/motivation/BfsMotivationPreview";
 import { BfsExecutionPreview } from "@/features/learning/bfs/execution/BfsExecutionPreview";
+import { BfsCheckPreview } from "@/features/learning/bfs/check/BfsCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -14,6 +15,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   const { contentId } = await params;
   if (contentId === "bfs-motivation") return <BfsMotivationPreview />;
   if (contentId === "bfs-execution") return <BfsExecutionPreview />;
+  if (contentId === "bfs-check") return <BfsCheckPreview />;
   if (contentId !== "step-demo" && contentId !== "scene-demo") notFound();
   return <LearningPlayerPreview contentId={contentId} />;
 }
