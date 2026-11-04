@@ -52,6 +52,17 @@ assert.deepEqual(get("method-transition"), get("rail-utility"), "Method cue must
 
 // 図の接続から最短距離を独立計算し、実用例と手数を確認する（教材の実行ロジックではない）。
 const { graph, maze, routes } = steps[0].canvas.data;
+// #91: 全7辺の隣接一致だけでなく、左右の流れ・方向キャプションも固定する。
+assert.equal(maze.rows, 2);
+assert.equal(maze.columns, 3);
+assert.deepEqual(JSON.parse(JSON.stringify(maze.places)).sort((a, b) => a.row - b.row || a.column - b.column)
+  .map(place => place.id), ["A", "B", "D", "C", "E", "F"]);
+for (const [id, caption] of [
+  ["walk-one", "まず右へ1マス進みます。"], ["walk-two", "もう1マス下へ進みます。"],
+  ["new-goal-one", "右へ1マス進みます。"], ["new-goal-two", "右へ進むと、今度のゴールには2手で着きます。"],
+]) assert.equal(steps.find(step => step.id === id).caption, caption);
+assert.equal(routes.find(route => route.id === "direct").places.join(), "A,B,E,F");
+assert.equal(routes.find(route => route.id === "detour").places.join(), "A,C,E,B,D,F");
 const distances = { A: 0 }, waiting = ["A"];
 for (let i = 0; i < waiting.length; i++) {
   const current = waiting[i];
