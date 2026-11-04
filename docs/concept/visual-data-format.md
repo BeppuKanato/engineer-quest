@@ -1,5 +1,9 @@
 # Visualデータ形式
 
+> **状態: 従来フロー実装仕様（最終確認日: 2026-11-04）**
+>
+> 本書は、従来 Activity の `MissionActivity.content` に格納する Visual JSON の形式である。7フェーズ単元の新しい教材データ形式ではない。新フローでは [`learning-materials-v2.md`](learning-materials-v2.md) を起点に、別途データ形式を設計する。
+
 ## 目的
 
 Activityの説明を文章だけに依存させず、学習内容に適した図解を表示する。
