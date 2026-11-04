@@ -1,4 +1,4 @@
-/** マージソート。概念順・標準コードはdocs/course-designsの設計票を参照。 */
+/** マージソートコースのseed。概念順と標準コードはこのファイルと検証スクリプトを正とする。 */
 import { CourseCategoryType, CourseDifficulty, MissionActivityType, MissionType } from "@prisma/client";
 
 import type { ActivitySeed, CourseSeed, MissionSeed } from "./learningSeedTypes";
