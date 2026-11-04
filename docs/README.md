@@ -26,6 +26,7 @@
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
 | [BFS フェーズ1](../front/src/features/learning/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
 | [BFS フェーズ2](../front/src/features/learning/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
+| [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 

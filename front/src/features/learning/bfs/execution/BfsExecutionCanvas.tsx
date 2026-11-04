@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { playerTokens } from "../../player/player.tokens";
 import type { BfsExecutionCanvasState } from "./execution.types";
@@ -32,7 +32,11 @@ function QueueItem({ nodeId, distance, position, source, first, highlighted, dur
 }
 
 /** フェーズ3の復習、フェーズ4の図にも同じ snapshot と renderer を渡せる。 */
-export function BfsExecutionCanvas({ canvas }: { canvas: BfsExecutionCanvasState }) {
+export function BfsExecutionCanvas({ canvas, renderNodeOverlay }: {
+  canvas: BfsExecutionCanvasState;
+  /** 同じノードの座標内に操作領域だけを重ねる。図の描画・状態は変更しない。 */
+  renderNodeOverlay?: (nodeId: string, radius: number) => ReactNode;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 600, height: 450 });
   const reducedMotion = useReducedMotion();
@@ -67,7 +71,7 @@ export function BfsExecutionCanvas({ canvas }: { canvas: BfsExecutionCanvasState
 
   return (
     <Box ref={host} sx={{ width: "100%", height: "100%", minHeight: 320 }}>
-      <svg viewBox={`0 0 ${size.width} ${size.height}`} role="img" aria-label="BFSのグラフ・距離層・待ち行列"
+      <svg viewBox={`0 0 ${size.width} ${size.height}`} role={renderNodeOverlay ? "group" : "img"} aria-label="BFSのグラフ・距離層・待ち行列"
         style={{ width: "100%", height: "100%", display: "block" }}>
         {data.graph.layers.map((layer, index) => {
           const active = state.activeDistance === layer.distance;
@@ -94,7 +98,7 @@ export function BfsExecutionCanvas({ canvas }: { canvas: BfsExecutionCanvasState
           const tone = playerTokens.states[value.status];
           const point = position(node.id);
           const focus = focused("node", node.id);
-          return <motion.g key={node.id} role="img" aria-label={`${node.id}：${tone.label}${value.distance === null ? "" : `、${value.distance}歩`}`}
+          return <motion.g key={node.id} role={renderNodeOverlay ? "group" : "img"} aria-label={`${node.id}：${tone.label}${value.distance === null ? "" : `、${value.distance}歩`}`}
             initial={false} animate={{ x: point.x, y: point.y, scale: focus ? 1.06 : 1 }} transition={transition}>
             <AnimatePresence initial={false}>
               {focus && <motion.circle key="focus" r={radius + 6} fill="none" stroke={playerTokens.focus} strokeWidth={3}
@@ -104,6 +108,7 @@ export function BfsExecutionCanvas({ canvas }: { canvas: BfsExecutionCanvasState
             <text y={7} textAnchor="middle" fontSize={22} fontWeight={700}
               fill={value.status === "processing" ? playerTokens.surface : playerTokens.text}>{node.id}</text>
             {value.distance !== null && <text y={radius + 24} textAnchor="middle" fill={playerTokens.text} fontSize={15}>{value.distance}歩</text>}
+            {renderNodeOverlay?.(node.id, radius)}
           </motion.g>;
         })}
         <g role="group" aria-label={state.queueLabel}>
