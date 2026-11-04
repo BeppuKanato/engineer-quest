@@ -4,14 +4,13 @@ import { validateMotivationCanvas, type MotivationCanvasState, type MotivationCo
 
 /**
  * 格子の配置は、正本グラフ（../bfsGraph）の辺がすべて隣接マス間の移動になるように置く。
- * A C / B E / D F の2列3行で、全7辺が上下左右の1マス移動と1対1に対応する（#88）。
+ * A B D / C E F の2行3列で、全7辺が上下左右の1マス移動と1対1に対応する（#91）。
  */
 const maze: MotivationCanvasState["data"]["maze"] = {
-  rows: 3, columns: 2,
+  rows: 2, columns: 3,
   places: [
-    { id: "A", row: 0, column: 0 }, { id: "C", row: 0, column: 1 },
-    { id: "B", row: 1, column: 0 }, { id: "E", row: 1, column: 1 },
-    { id: "D", row: 2, column: 0 }, { id: "F", row: 2, column: 1 },
+    { id: "A", row: 0, column: 0 }, { id: "B", row: 0, column: 1 }, { id: "D", row: 0, column: 2 },
+    { id: "C", row: 1, column: 0 }, { id: "E", row: 1, column: 1 }, { id: "F", row: 1, column: 2 },
   ],
 };
 
@@ -19,12 +18,12 @@ const routes: MotivationCanvasState["data"]["routes"] = [
   {
     id: "detour", places: ["A", "C", "E", "B", "D", "F"],
     labels: { maze: "5手", graph: "5本", rail: "5区間", social: "つながり5つ" },
-    labelPosition: { maze: { x: 115, y: 185 }, graph: { x: 300, y: 290 } },
+    labelPosition: { maze: { x: 115, y: 290 }, graph: { x: 300, y: 290 } },
   },
   {
     id: "direct", places: ["A", "B", "E", "F"],
     labels: { maze: "3手", graph: "3本", rail: "3区間", social: "つながり3つ" },
-    labelPosition: { maze: { x: 490, y: 185 }, graph: { x: 450, y: 35 } },
+    labelPosition: { maze: { x: 490, y: 290 }, graph: { x: 450, y: 35 } },
   },
 ];
 
@@ -87,11 +86,11 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene("maze", { shownRoutes: ["detour", "direct"] }, [{ kind: "route", id: "direct" }]),
     },
     {
-      id: "walk-one", caption: "まず下へ1マス進みます。",
+      id: "walk-one", caption: "まず右へ1マス進みます。",
       canvas: scene("maze", { current: "B", trail: ["A", "B"] }, [{ kind: "node", id: "B" }]),
     },
     {
-      id: "walk-two", caption: "もう1マス右へ進みます。",
+      id: "walk-two", caption: "もう1マス下へ進みます。",
       canvas: scene("maze", { current: "E", trail: ["A", "B", "E"] }, [{ kind: "node", id: "E" }]),
     },
     {
@@ -107,11 +106,11 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene("maze", { goal: "D" }),
     },
     {
-      id: "new-goal-one", caption: "下へ1マス進みます。",
+      id: "new-goal-one", caption: "右へ1マス進みます。",
       canvas: scene("maze", { goal: "D", current: "B", trail: ["A", "B"] }, [{ kind: "node", id: "B" }]),
     },
     {
-      id: "new-goal-two", caption: "下へ進むと、今度のゴールには2手で着きます。",
+      id: "new-goal-two", caption: "右へ進むと、今度のゴールには2手で着きます。",
       canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "B", "D"] }, [{ kind: "node", id: "D" }]),
     },
     {

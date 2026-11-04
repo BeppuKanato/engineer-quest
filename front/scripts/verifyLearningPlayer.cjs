@@ -83,6 +83,18 @@ for (const [width, height] of [[358, 680], [1334, 600], [2510, 1100]]) {
     }
   }
 }
+// 横長・縦長でも辺とノードの比率を同じ倍率で保つ（横だけの引き伸ばしを拒否）。
+for (const [width, height] of [[358, 680], [1334, 600], [2510, 1100]]) {
+  const layout = layoutGraphCanvas(canvas, width, height);
+  for (const [index, node] of layout.nodes.entries()) {
+    for (const [otherIndex, other] of layout.nodes.entries()) {
+      for (const axis of ["x", "y"]) {
+        const logical = canvas.data.nodes[index][axis] - canvas.data.nodes[otherIndex][axis];
+        assert(Math.abs(node[axis] - other[axis] - logical * layout.unit) < 1e-8);
+      }
+    }
+  }
+}
 const longQueue = { ...canvas, state: { ...canvas.state, structures: [{
   ...canvas.state.structures[0], items: Array.from({ length: 12 }, (_, i) => ({ id: `item-${i}`, value: String(i), status: "queued" })),
 }] } };
@@ -90,3 +102,52 @@ const wrapped = layoutGraphCanvas(longQueue, 358, 680).structures[0].items;
 assert(new Set(wrapped.map(item => item.y)).size > 1, "A long queue should wrap");
 assert.equal(new Set(wrapped.map(item => `${item.x}:${item.y}`)).size, 12, "Items must not overlap");
 console.log("Learning player: playback, snapshots, reference validation and responsive canvas layout passed.");
+
+// 実際の3キャンバスを描画し、共通SVG・半径・枠・辺・文字・リングの回帰を検出する。
+const { renderToStaticMarkup } = require("react-dom/server");
+const { createElement } = require("react");
+const renderCache = new Map();
+function loadRenderer(filename) {
+  if (renderCache.has(filename)) return renderCache.get(filename);
+  const exports = {};
+  renderCache.set(filename, exports);
+  const source = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
+  }).outputText;
+  vm.runInNewContext(source, { exports, require: name => {
+    if (!name.startsWith(".")) return require(name);
+    const base = path.resolve(path.dirname(filename), name);
+    return loadRenderer([`${base}.ts`, `${base}.tsx`].find(candidate => fs.existsSync(candidate)));
+  } }, { filename });
+  return exports;
+}
+const sourceRoot = path.resolve(__dirname, "../src/features/learning");
+const { bfsMotivationContent } = loadRenderer(`${sourceRoot}/bfs/motivation/motivation.content.ts`);
+const { bfsExecutionContent } = loadRenderer(`${sourceRoot}/bfs/execution/execution.content.ts`);
+const { bfsGraph } = loadRenderer(`${sourceRoot}/bfs/bfsGraph.ts`);
+const { BfsMotivationCanvas } = loadRenderer(`${sourceRoot}/bfs/motivation/BfsMotivationCanvas.tsx`);
+const { BfsExecutionCanvas } = loadRenderer(`${sourceRoot}/bfs/execution/BfsExecutionCanvas.tsx`);
+const { GraphCanvas } = loadRenderer(`${sourceRoot}/player/GraphCanvas.tsx`);
+const generic = { data: bfsGraph, state: { nodes: bfsGraph.nodes.map(node => ({ id: node.id, status: "idle" })), structures: [], variables: [] },
+  highlights: [{ kind: "node", id: "B", tone: "processing" }, { kind: "edge", id: "ab", tone: "processing" }] };
+const motivation = bfsMotivationContent.steps.find(step => step.id === "bridge-entrance").canvas;
+const execution = bfsExecutionContent.steps.find(step => step.id === "discover-b").canvas;
+for (const [Component, canvas] of [[GraphCanvas, generic], [BfsMotivationCanvas, motivation], [BfsExecutionCanvas, execution]]) {
+  const html = renderToStaticMarkup(createElement(Component, { canvas }));
+  assert.match(html, /viewBox="0 0 600 450"/);
+  assert.match(html, /preserveAspectRatio="xMidYMid meet"/);
+  assert.equal((html.match(/data-node-id=/g) || []).length, 6);
+  assert.equal((html.match(/data-edge-id=/g) || []).length, 7);
+  assert.equal((html.match(/r="30"[^>]*stroke-width="2"/g) || []).length, 6);
+  assert.equal((html.match(/font-size="24" font-weight="700"/g) || []).length, 6);
+  assert.match(html, /r="37"[^>]*stroke-width="3" stroke-dasharray="5 4"/);
+  assert.match(html, /data-edge-id="ab"[^>]*stroke-width="5"/);
+  assert.match(html, /data-edge-id="df"[^>]*stroke-width="2"/);
+}
+const overlayHtml = renderToStaticMarkup(createElement(BfsExecutionCanvas, { canvas: execution,
+  renderNodeOverlay: (id, radius) => createElement("foreignObject", { width: radius * 2, height: radius * 2 },
+    createElement("button", { "aria-label": `${id}を選ぶ` })),
+}));
+assert.equal((overlayHtml.match(/<foreignObject width="60" height="60"/g) || []).length, 6);
+assert.equal((overlayHtml.match(/role="group" aria-label="[A-F]：/g) || []).length, 6);
+console.log("Shared graph drawing: all three renderers, uniform geometry and phase-3 overlay coordinates passed.");
