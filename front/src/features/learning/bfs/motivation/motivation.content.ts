@@ -31,7 +31,6 @@ export const bfsVocabulary: readonly VocabularyEntry[] = [
   { concept: "place", everyday: "場所", technical: "ノード", firstStepId: "map-to-graph", usage: "初出の図上タグは場所（ノード）。格子とグラフでA〜Fの同一IDを使う。" },
   { concept: "connection", everyday: "つながり", technical: "辺", firstStepId: "map-to-graph", usage: "初出はつながり（辺）。通れる隣接マス間の移動と1対1で対応。" },
   { concept: "rail-distance", everyday: "駅と駅の間", technical: "区間", firstStepId: "rail-utility", usage: "駅間1本を1区間と数える最少区間数であり、所要時間や乗換回数ではない。" },
-  { concept: "social-distance", everyday: "人と人の関係", technical: "つながり", firstStepId: "social-utility", usage: "人の数ではなく関係の線の数を数え、AさんからFさんへはつながり3つ。" },
   { concept: "distance-layer", everyday: "出発点から何マス先か", technical: "○歩", firstStepId: "grid-origin", usage: "出発点は0歩、直接つながる場所は1歩。回り道の実際の手数と区別。" },
   { concept: "algorithm", everyday: "近い場所から順に調べる方法", technical: "幅優先探索", firstStepId: "name-and-exit", usage: "最終コマで初めて名称を示す。キューや探索全過程はフェーズ2以降。" },
 ];
@@ -112,16 +111,28 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "C", "D"] }, [{ kind: "node", id: "D" }]),
     },
     {
+      id: "label-maze", caption: "この迷路の各マスに、AからFの名前を付けます。",
+      canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }),
+    },
+    {
       id: "map-to-graph", caption: "マスの場所とつながりを、点と線の図に置き換えてみます。",
       canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true, annotations: terms }),
     },
     {
-      id: "rail-utility", caption: "駅と駅を1区間で結ぶと、A駅からF駅までは最少3区間で着きます。",
-      canvas: scene("rail", { current: null, trail: [], showNames: true, shownRoutes: ["direct"] }, [{ kind: "route", id: "direct" }]),
+      id: "graph-restart", caption: "グラフでもAに戻り、迷路と同じ道をたどります。",
+      canvas: scene("graph", { goal: "D", showNames: true }),
     },
     {
-      id: "social-utility", caption: "SNSでも、AさんからFさんまでは最少でつながり3つをたどれます。",
-      canvas: scene("social", { current: null, trail: [], showNames: true, shownRoutes: ["direct"] }, [{ kind: "route", id: "direct" }]),
+      id: "graph-walk-one", caption: "AからCへ、1本の辺をたどります。",
+      canvas: scene("graph", { goal: "D", current: "C", trail: ["A", "C"], showNames: true }, [{ kind: "node", id: "C" }]),
+    },
+    {
+      id: "graph-walk-two", caption: "CからDへ進むと、迷路と同じ2手でゴールに着きます。",
+      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
+    },
+    {
+      id: "rail-utility", caption: "駅と駅を1区間で結ぶと、A駅からF駅までは最少3区間で着きます。",
+      canvas: scene("rail", { current: null, trail: [], showNames: true, shownRoutes: ["direct"] }, [{ kind: "route", id: "direct" }]),
     },
     {
       id: "grid-origin", caption: "出発点を0歩として、近い場所から調べてみます。",

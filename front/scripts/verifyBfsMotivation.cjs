@@ -25,7 +25,13 @@ const get = (id) => {
   return step.canvas;
 };
 assert.equal(content.phase, 1);
-assert.equal(steps.length, 17);
+assert.equal(steps.length, 20);
+assert.equal(steps.slice(10).map(step => step.id).join(), [
+  "label-maze", "map-to-graph", "graph-restart", "graph-walk-one", "graph-walk-two",
+  "rail-utility", "grid-origin", "first-wave", "bridge-entrance", "name-and-exit",
+].join(), "The revised scenes must keep labels, graph replay, rail and the entrance in order");
+assert(!steps.some(step => step.id === "social-utility" || step.canvas.data.view === "social"));
+assert(!vocabulary.some(entry => entry.firstStepId === "social-utility"));
 assert(content.intervalMs >= 2500);
 assert(!steps.slice(0, -1).some(step => /幅優先探索|BFS/u.test(step.caption)), "Name must not appear early");
 assert.match(steps.at(-1).caption, /幅優先探索/u);
@@ -62,20 +68,31 @@ for (const step of [...steps].reverse()) {
   assert.equal(step.canvas.data.graph, graph, "All graph scenes must share the A–F topology");
   for (const entry of step.canvas.state.distances) assert.equal(entry.value, distances[entry.id]);
 }
-for (const group of [["restart", "new-goal-one", "new-goal-two"], ["maze-question", "walk-one", "walk-two", "walk-three"]]) {
+for (const group of [["restart", "new-goal-one", "new-goal-two"], ["graph-restart", "graph-walk-one", "graph-walk-two"], ["maze-question", "walk-one", "walk-two", "walk-three"]]) {
   const lengths = group.map(id => get(id).state.trail.length);
   for (let i = 1; i < lengths.length; i++) assert.equal(lengths[i] - lengths[i - 1], 1, "Each move is exactly one square");
 }
 assert.equal(get("goal-changes").state.current, get("walk-three").state.current, "Moving the goal must not move the learner");
 assert.equal(get("new-goal-two").state.current, get("new-goal-two").state.goal);
+const labeled = get("label-maze");
+assert.equal(labeled.data.view, "maze");
+assert(labeled.state.showNames, "Place names must appear while the maze is still visible");
+assert.equal(labeled.state.current, get("new-goal-two").state.current);
+assert.equal(labeled.state.goal, get("new-goal-two").state.goal);
+assert.equal(labeled.state.trail.join(), get("new-goal-two").state.trail.join());
+assert.equal(labeled.data.graph.nodes.map(node => labeled.data.labels.nodeNames[node.id]).sort().join(), "A,B,C,D,E,F");
 assert.equal(get("map-to-graph").state.trail.join(), get("new-goal-two").state.trail.join());
+for (const [mazeId, graphId] of [["restart", "graph-restart"], ["new-goal-one", "graph-walk-one"], ["new-goal-two", "graph-walk-two"]]) {
+  assert.equal(get(graphId).data.view, "graph");
+  for (const field of ["current", "goal"]) assert.equal(get(graphId).state[field], get(mazeId).state[field]);
+  assert.equal(get(graphId).state.trail.join(), get(mazeId).state.trail.join(), "Graph replay must follow exactly the same A–C–D path");
+}
 assert.equal(get("first-wave").state.distances.map(entry => entry.id).sort().join(), "A,B,C");
 assert.equal(get("first-wave").highlights.map(entry => `${entry.kind}:${entry.id}`).sort().join(), get("bridge-entrance").highlights.map(entry => `${entry.kind}:${entry.id}`).sort().join());
 assert.equal(get("name-and-exit").data.view, "graph");
 assert.equal(get("rail-utility").data.routes.find(route => route.id === "direct").labels.rail, "3区間");
-assert.equal(get("social-utility").data.routes.find(route => route.id === "direct").labels.social, "つながり3つ");
 const first = steps[0].canvas;
 assert.throws(() => validateMotivationCanvas({ ...first, state: { ...first.state, trail: ["A", "F"], current: "F" } }), /Disconnected/);
 assert.throws(() => validateMotivationCanvas({ ...first, data: { ...first.data, maze: { ...maze, places: maze.places.slice(1) } } }), /correspondence/);
 assert.throws(() => validateMotivationCanvas({ ...first, highlights: [{ kind: "node", id: "unknown" }] }), /highlight/);
-console.log("BFS motivation: 17 scenes, shortest routes, one-move steps, grid/graph correspondence, vocabulary, entrance and exit passed.");
+console.log("BFS motivation: 20 scenes, labeled maze, graph replay, shortest routes, vocabulary, entrance and exit passed.");
