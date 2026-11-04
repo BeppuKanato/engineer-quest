@@ -25,6 +25,7 @@ const { advancePlayback } = load("../src/features/learning/player/playback.ts");
 const { defineLearningContent } = load("../src/features/learning/player/content.types.ts");
 const { validateGraphCanvas } = load("../src/features/learning/player/graphCanvas.types.ts");
 const { stepPreviewContent, scenePreviewContent } = load("../src/features/learning/player/content/previewContent.ts");
+const { layoutGraphCanvas } = load("../src/features/learning/player/graphLayout.ts");
 const equalState = (actual, expected) => assert.deepEqual(JSON.parse(JSON.stringify(actual)), expected);
 
 let state = advancePlayback({ index: 0, playing: false }, { type: "toggle" }, 3);
@@ -62,4 +63,30 @@ const enqueueB = stepPreviewContent.steps.find((step) => step.id === "enqueue-b"
 assert.equal(enqueueB.canvas.state.structures[0].items[0].nodeId, "B");
 assert(enqueueB.canvas.highlights.some((target) => target.kind === "node" && target.id === "B"));
 assert(enqueueB.canvas.highlights.some((target) => target.kind === "item" && target.id === "queue-B"));
-console.log("Learning player: playback boundaries, pause, seek, replay, single-step, fixtures and reference validation passed.");
+
+// 表示枠に追従しつつ、図と内部状態は重ならず、長いキューも折り返せる。
+for (const [width, height] of [[358, 680], [1334, 600], [2510, 1100]]) {
+  for (const content of [stepPreviewContent, scenePreviewContent]) {
+    for (const step of content.steps) {
+      const layout = layoutGraphCanvas(step.canvas, width, height);
+      for (const node of layout.nodes) {
+        assert(node.x > 0 && node.x < width && node.y > 0 && node.y < layout.graphHeight);
+      }
+      for (const structure of layout.structures) {
+        assert(structure.y >= layout.graphHeight);
+        for (const item of structure.items) {
+          assert(item.x >= 28 && item.x <= width - 28);
+          assert(item.y > layout.graphHeight && item.y + 22 < height);
+        }
+      }
+      if (step.canvas.state.variables.length) assert(layout.variableY < height);
+    }
+  }
+}
+const longQueue = { ...canvas, state: { ...canvas.state, structures: [{
+  ...canvas.state.structures[0], items: Array.from({ length: 12 }, (_, i) => ({ id: `item-${i}`, value: String(i), status: "queued" })),
+}] } };
+const wrapped = layoutGraphCanvas(longQueue, 358, 680).structures[0].items;
+assert(new Set(wrapped.map(item => item.y)).size > 1, "A long queue should wrap");
+assert.equal(new Set(wrapped.map(item => `${item.x}:${item.y}`)).size, 12, "Items must not overlap");
+console.log("Learning player: playback, snapshots, reference validation and responsive canvas layout passed.");
