@@ -2,25 +2,29 @@ import { defineLearningContent } from "../../player/content.types";
 import { bfsGraph } from "../bfsGraph";
 import { validateMotivationCanvas, type MotivationCanvasState, type MotivationContent, type VocabularyEntry } from "./motivation.types";
 
+/**
+ * 格子の配置は、正本グラフ（../bfsGraph）の辺がすべて隣接マス間の移動になるように置く。
+ * A C / B E / D F の2列3行で、全7辺が上下左右の1マス移動と1対1に対応する（#88）。
+ */
 const maze: MotivationCanvasState["data"]["maze"] = {
-  rows: 2, columns: 4,
+  rows: 3, columns: 2,
   places: [
-    { id: "A", row: 0, column: 0 }, { id: "B", row: 0, column: 1 },
-    { id: "E", row: 0, column: 2 }, { id: "F", row: 0, column: 3 },
-    { id: "C", row: 1, column: 0 }, { id: "D", row: 1, column: 1 },
+    { id: "A", row: 0, column: 0 }, { id: "C", row: 0, column: 1 },
+    { id: "B", row: 1, column: 0 }, { id: "E", row: 1, column: 1 },
+    { id: "D", row: 2, column: 0 }, { id: "F", row: 2, column: 1 },
   ],
 };
 
 const routes: MotivationCanvasState["data"]["routes"] = [
   {
-    id: "detour", places: ["A", "C", "D", "B", "E", "F"],
+    id: "detour", places: ["A", "C", "E", "B", "D", "F"],
     labels: { maze: "5手", graph: "5本", rail: "5区間", social: "つながり5つ" },
-    labelPosition: { maze: { x: 200, y: 300 }, graph: { x: 300, y: 290 } },
+    labelPosition: { maze: { x: 115, y: 185 }, graph: { x: 300, y: 290 } },
   },
   {
     id: "direct", places: ["A", "B", "E", "F"],
     labels: { maze: "3手", graph: "3本", rail: "3区間", social: "つながり3つ" },
-    labelPosition: { maze: { x: 350, y: 70 }, graph: { x: 450, y: 35 } },
+    labelPosition: { maze: { x: 490, y: 185 }, graph: { x: 450, y: 35 } },
   },
 ];
 
@@ -75,15 +79,15 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene(),
     },
     {
-      id: "compare-five", caption: "下を回る道（ルート）では、ゴールまで5手かかります。",
+      id: "compare-five", caption: "遠回りの道（ルート）では、ゴールまで5手かかります。",
       canvas: scene("maze", { shownRoutes: ["detour"] }, [{ kind: "route", id: "detour" }]),
     },
     {
-      id: "compare-three", caption: "まっすぐ進むルートなら、3手でゴールに着けます。",
+      id: "compare-three", caption: "こちらのルートなら、3手でゴールに着けます。",
       canvas: scene("maze", { shownRoutes: ["detour", "direct"] }, [{ kind: "route", id: "direct" }]),
     },
     {
-      id: "walk-one", caption: "まず右へ1マス進みます。",
+      id: "walk-one", caption: "まず下へ1マス進みます。",
       canvas: scene("maze", { current: "B", trail: ["A", "B"] }, [{ kind: "node", id: "B" }]),
     },
     {
@@ -104,35 +108,35 @@ const sequence = defineLearningContent<MotivationCanvasState>({
     },
     {
       id: "new-goal-one", caption: "下へ1マス進みます。",
-      canvas: scene("maze", { goal: "D", current: "C", trail: ["A", "C"] }, [{ kind: "node", id: "C" }]),
+      canvas: scene("maze", { goal: "D", current: "B", trail: ["A", "B"] }, [{ kind: "node", id: "B" }]),
     },
     {
-      id: "new-goal-two", caption: "右へ進むと、今度のゴールには2手で着きます。",
-      canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "C", "D"] }, [{ kind: "node", id: "D" }]),
+      id: "new-goal-two", caption: "下へ進むと、今度のゴールには2手で着きます。",
+      canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "B", "D"] }, [{ kind: "node", id: "D" }]),
     },
     {
       id: "label-maze", caption: "この迷路の各マスに、AからFの名前を付けます。",
-      canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }),
+      canvas: scene("maze", { goal: "D", current: "D", trail: ["A", "B", "D"], showNames: true }),
     },
     {
       id: "map-to-graph", caption: "マスの場所とつながりを、点と線の図に置き換えてみます。",
-      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true, annotations: terms }),
+      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "B", "D"], showNames: true, annotations: terms }),
     },
     {
       id: "graph-restart", caption: "グラフでもAに戻り、迷路と同じ道をたどります。",
       canvas: scene("graph", { goal: "D", showNames: true }),
     },
     {
-      id: "graph-walk-one", caption: "AからCへ、1本の辺をたどります。",
-      canvas: scene("graph", { goal: "D", current: "C", trail: ["A", "C"], showNames: true }, [{ kind: "node", id: "C" }]),
+      id: "graph-walk-one", caption: "AからBへ、1本の辺をたどります。",
+      canvas: scene("graph", { goal: "D", current: "B", trail: ["A", "B"], showNames: true }, [{ kind: "node", id: "B" }]),
     },
     {
-      id: "graph-walk-two", caption: "CからDへ進むと、迷路と同じ2手でゴールに着きます。",
-      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
+      id: "graph-walk-two", caption: "BからDへ進むと、迷路と同じ2手でゴールに着きます。",
+      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "B", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
     },
     {
       id: "rail-transition", caption: "同じ形の図を駅のつながりと見立てると、A駅からF駅までの最少区間も同じように調べられます。",
-      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
+      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "B", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
     },
     {
       id: "rail-utility", caption: "駅と駅を1区間で結ぶと、A駅からF駅までは最少3区間で着きます。",

@@ -94,7 +94,7 @@ assert.equal(get("map-to-graph").state.trail.join(), get("new-goal-two").state.t
 for (const [mazeId, graphId] of [["restart", "graph-restart"], ["new-goal-one", "graph-walk-one"], ["new-goal-two", "graph-walk-two"]]) {
   assert.equal(get(graphId).data.view, "graph");
   for (const field of ["current", "goal"]) assert.equal(get(graphId).state[field], get(mazeId).state[field]);
-  assert.equal(get(graphId).state.trail.join(), get(mazeId).state.trail.join(), "Graph replay must follow exactly the same A–C–D path");
+  assert.equal(get(graphId).state.trail.join(), get(mazeId).state.trail.join(), "Graph replay must follow exactly the same A–B–D path");
 }
 assert.equal(get("first-wave").state.distances.map(entry => entry.id).sort().join(), "A,B,C");
 assert.equal(get("first-wave").highlights.map(entry => `${entry.kind}:${entry.id}`).sort().join(), get("bridge-entrance").highlights.map(entry => `${entry.kind}:${entry.id}`).sort().join());

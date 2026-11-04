@@ -41,10 +41,16 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
   const wallId = useId();
   const reducedMotion = useReducedMotion();
   const transition = { duration: reducedMotion ? 0 : 0.6, ease: "easeInOut" } as const;
+  // 格子は行数・列数に応じて 600x360 に収まるよう中央へ配置する（2列3行でもはみ出さない）。
+  const cell = Math.min(100, 440 / data.maze.columns, 240 / data.maze.rows);
+  const mazeOrigin = {
+    x: (600 - cell * data.maze.columns) / 2,
+    y: (360 - cell * data.maze.rows) / 2,
+  };
   const point = (id: string) => {
     if (!isMaze) return data.graph.nodes.find((node) => node.id === id)!;
     const place = data.maze.places.find((node) => node.id === id)!;
-    return { x: 100 + (place.column + 0.5) * 100, y: 80 + (place.row + 0.5) * 100 };
+    return { x: mazeOrigin.x + (place.column + 0.5) * cell, y: mazeOrigin.y + (place.row + 0.5) * cell };
   };
   const focus = (kind: "node" | "edge" | "route", id: string) => highlights.some((target) => target.kind === kind && target.id === id);
   const goal = point(state.goal);
@@ -64,7 +70,7 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
             const row = Math.floor(index / data.maze.columns);
             const column = index % data.maze.columns;
             const wall = !data.maze.places.some((place) => place.row === row && place.column === column);
-            return <rect key={index} x={100 + column * 100} y={80 + row * 100} width={100} height={100}
+            return <rect key={index} x={mazeOrigin.x + column * cell} y={mazeOrigin.y + row * cell} width={cell} height={cell}
               fill={wall ? `url(#${wallId})` : playerTokens.surface} stroke={playerTokens.states.idle.stroke} />;
           })}
         </motion.g>
@@ -94,9 +100,9 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
             <motion.rect x={-30} y={-30} width={60} height={60} rx={30} initial={false}
               animate={{ opacity: isMaze ? 0 : 1 }} fill={playerTokens.surface} stroke={playerTokens.states.idle.stroke} strokeWidth={2} transition={transition} />
             <motion.rect initial={false} fill="none" stroke={playerTokens.focus} strokeWidth={3} strokeDasharray="5 4"
-              animate={{ x: isMaze ? -43 : -37, y: isMaze ? -43 : -37, width: isMaze ? 86 : 74,
-                height: isMaze ? 86 : 74, rx: isMaze ? 4 : 37, opacity: focus("node", node.id) ? 1 : 0 }} transition={transition} />
-            {distance && <text y={isMaze ? 44 : 55} textAnchor="middle" fill={playerTokens.text} fontSize={20}>
+              animate={{ x: isMaze ? -(cell - 14) / 2 : -37, y: isMaze ? -(cell - 14) / 2 : -37, width: isMaze ? cell - 14 : 74,
+                height: isMaze ? cell - 14 : 74, rx: isMaze ? 4 : 37, opacity: focus("node", node.id) ? 1 : 0 }} transition={transition} />
+            {distance && <text y={isMaze ? cell * 0.44 : 55} textAnchor="middle" fill={playerTokens.text} fontSize={20}>
               {distance.value}{data.labels.distanceUnit}
             </text>}
           </motion.g>;
