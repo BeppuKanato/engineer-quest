@@ -8,6 +8,7 @@ import { useUserSession } from "./userSession";
 const isGuardExempt = (pathname: string) =>
   pathname === "/" ||
   pathname.startsWith("/auth/") ||
+  pathname.startsWith("/learning-preview/") ||
   pathname === "/hexad" ||
   pathname === "/profile";
 
