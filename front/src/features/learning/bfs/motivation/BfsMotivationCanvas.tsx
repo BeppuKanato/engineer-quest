@@ -4,6 +4,8 @@ import { Box, Button } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 
+import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
+import { graphGeometry } from "../../player/graphGeometry";
 import { playerTokens } from "../../player/player.tokens";
 import type { MotivationCanvasState } from "./motivation.types";
 
@@ -26,11 +28,11 @@ function CandidateRoute({ route, view, point, focused, transition }: {
   </motion.g>;
 }
 
-function CurrentPlace({ position, isMaze, transition }: { position: Point; isMaze: boolean; transition: Transition }) {
+function CurrentPlace({ position, transition }: { position: Point; transition: Transition }) {
   const present = useIsPresent();
   return <motion.circle role="img" aria-label="現在地" aria-hidden={!present || undefined}
-    initial={{ cx: position.x, cy: position.y, r: isMaze ? 22 : 27, opacity: 0 }}
-    animate={{ cx: position.x, cy: position.y, r: isMaze ? 22 : 27, opacity: 1 }} exit={{ opacity: 0 }} transition={transition}
+    initial={{ cx: position.x, cy: position.y, r: 22, opacity: 0 }}
+    animate={{ cx: position.x, cy: position.y, r: 22, opacity: 1 }} exit={{ opacity: 0 }} transition={transition}
     fill={playerTokens.states.processing.fill} stroke={playerTokens.states.processing.stroke} strokeWidth={2} />;
 }
 
@@ -41,7 +43,7 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
   const wallId = useId();
   const reducedMotion = useReducedMotion();
   const transition = { duration: reducedMotion ? 0 : 0.6, ease: "easeInOut" } as const;
-  // 格子は行数・列数に応じて 600x360 に収まるよう中央へ配置する（2列3行でもはみ出さない）。
+  // 迷路はグラフ領域（600×360）の中へ中央配置する。
   const cell = Math.min(100, 440 / data.maze.columns, 240 / data.maze.rows);
   const mazeOrigin = {
     x: (600 - cell * data.maze.columns) / 2,
@@ -57,9 +59,8 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
   const current = state.current === null ? null : point(state.current);
 
   return (
-    <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "minmax(0, 1fr) 48px" }}>
-      <svg viewBox="0 0 600 360" role="img" aria-label={isMaze ? "格子の迷路と現在の場所" : "AからFの場所とつながり"}
-        style={{ width: "100%", height: "100%", minHeight: 220 }}>
+    <Box sx={{ height: "100%", minHeight: 220 }}>
+      <GraphViewport label={isMaze ? "格子の迷路と現在の場所" : "AからFの場所とつながり"}>
         <defs>
           <pattern id={wallId} width={8} height={8} patternUnits="userSpaceOnUse">
             <path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke={playerTokens.states.idle.stroke} />
@@ -74,14 +75,9 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
               fill={wall ? `url(#${wallId})` : playerTokens.surface} stroke={playerTokens.states.idle.stroke} />;
           })}
         </motion.g>
-        {data.graph.edges.map((edge) => {
-          const from = point(edge.from), to = point(edge.to);
-          return <motion.line key={edge.id} initial={false} animate={{
-            x1: from.x, y1: from.y, x2: to.x, y2: to.y, opacity: isMaze && !focus("edge", edge.id) ? 0 : 1,
-            stroke: focus("edge", edge.id) ? playerTokens.focus : playerTokens.states.idle.stroke,
-            strokeWidth: focus("edge", edge.id) ? 5 : 2,
-          }} transition={transition} />;
-        })}
+        <GraphEdges transition={transition} position={point} edges={data.graph.edges.map(edge => ({
+          ...edge, highlighted: focus("edge", edge.id), hidden: isMaze && !focus("edge", edge.id),
+        }))} />
         <AnimatePresence initial={false}>
           {data.routes.filter((route) => state.shownRoutes.includes(route.id)).map((route) =>
             <CandidateRoute key={route.id} route={route} view={data.view} point={point} focused={focus("route", route.id)} transition={transition} />)}
@@ -92,28 +88,39 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
             animate={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y, pathLength: 1 }}
             stroke={playerTokens.focus} strokeWidth={6} transition={transition} />;
         })}
-        {data.graph.nodes.map((node) => {
-          const p = point(node.id);
-          const distance = state.distances.find((entry) => entry.id === node.id);
-          return <motion.g key={node.id} role="img" aria-label={`${data.labels.nodeNames[node.id]}${node.id === state.goal ? `、${data.labels.goal}` : ""}${node.id === state.current ? "、現在地" : ""}`}
+        {!isMaze && <GraphNodes transition={transition} nodes={data.graph.nodes.map(node => ({
+          ...node, label: state.showNames ? data.labels.nodeNames[node.id] : "",
+          status: node.id === state.current ? "processing" : "idle",
+          highlighted: focus("node", node.id),
+          ariaLabel: `${data.labels.nodeNames[node.id]}${node.id === state.goal ? `、${data.labels.goal}` : ""}${node.id === state.current ? "、現在地" : ""}`,
+        }))} renderNodeDecoration={id => {
+          const distance = state.distances.find(entry => entry.id === id);
+          return distance && <text y={55} textAnchor="middle" fill={playerTokens.text} fontSize={20}>
+            {distance.value}{data.labels.distanceUnit}
+          </text>;
+        }} />}
+        {isMaze && data.maze.places.map(place => {
+          const p = point(place.id);
+          const distance = state.distances.find(entry => entry.id === place.id);
+          return <motion.g key={place.id} role="img" aria-label={`${data.labels.nodeNames[place.id]}${place.id === state.goal ? `、${data.labels.goal}` : ""}${place.id === state.current ? "、現在地" : ""}`}
             initial={false} animate={{ x: p.x, y: p.y }} transition={transition}>
-            <motion.rect x={-30} y={-30} width={60} height={60} rx={30} initial={false}
-              animate={{ opacity: isMaze ? 0 : 1 }} fill={playerTokens.surface} stroke={playerTokens.states.idle.stroke} strokeWidth={2} transition={transition} />
-            <motion.rect initial={false} fill="none" stroke={playerTokens.focus} strokeWidth={3} strokeDasharray="5 4"
-              animate={{ x: isMaze ? -(cell - 14) / 2 : -37, y: isMaze ? -(cell - 14) / 2 : -37, width: isMaze ? cell - 14 : 74,
-                height: isMaze ? cell - 14 : 74, rx: isMaze ? 4 : 37, opacity: focus("node", node.id) ? 1 : 0 }} transition={transition} />
-            {distance && <text y={isMaze ? cell * 0.44 : 55} textAnchor="middle" fill={playerTokens.text} fontSize={20}>
+            <motion.rect x={-(cell - 14) / 2} y={-(cell - 14) / 2} width={cell - 14} height={cell - 14} rx={4}
+              fill="none" stroke={playerTokens.focus} strokeWidth={graphGeometry.ringStrokeWidth} strokeDasharray={graphGeometry.ringDasharray}
+              initial={false} animate={{ opacity: focus("node", place.id) ? 1 : 0 }} transition={transition} />
+            {distance && <text y={cell * 0.44} textAnchor="middle" fill={playerTokens.text} fontSize={20}>
               {distance.value}{data.labels.distanceUnit}
             </text>}
           </motion.g>;
         })}
         <AnimatePresence initial={false}>
-          {current && <CurrentPlace key="current" position={current} isMaze={isMaze} transition={transition} />}
+          {isMaze && current && <CurrentPlace key="current" position={current} transition={transition} />}
         </AnimatePresence>
-        {data.graph.nodes.map((node) => {
+        {data.graph.nodes.map(node => {
           const p = point(node.id);
           return <motion.g key={node.id} initial={false} animate={{ x: p.x, y: p.y }} transition={transition}>
-            {state.showNames && <text y={7} textAnchor="middle" fontSize={data.view === "social" ? 20 : 24}
+            {isMaze && state.showNames && <rect x={-16} y={-18} width={32} height={36} rx={4}
+              fill={node.id === state.current ? playerTokens.states.processing.fill : playerTokens.surface} />}
+            {isMaze && state.showNames && <text y={7} textAnchor="middle" fontSize={24}
               fill={node.id === state.current ? playerTokens.surface : playerTokens.text} fontWeight={700}>
               {data.labels.nodeNames[node.id]}
             </text>}
@@ -136,13 +143,15 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
         {isMaze && state.trail.length > 1 && <text x={300} y={340} textAnchor="middle" fill={playerTokens.text} fontSize={24}>
           {state.trail.length - 1}{data.labels.moveUnit}
         </text>}
-      </svg>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-        {state.exit && <Button variant="outlined" disabled sx={{ "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
-          aria-label={`${state.exit.label}（接続は後続Issueで実装）`}>
-          {state.exit.label}
-        </Button>}
-      </Box>
+        <foreignObject x={0} y={390} width={600} height={48}>
+          <Box sx={{ height: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+            {state.exit && <Button variant="outlined" disabled sx={{ "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
+              aria-label={`${state.exit.label}（接続は後続Issueで実装）`}>
+              {state.exit.label}
+            </Button>}
+          </Box>
+        </foreignObject>
+      </GraphViewport>
     </Box>
   );
 }
