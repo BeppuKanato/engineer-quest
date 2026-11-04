@@ -25,10 +25,10 @@ const get = (id) => {
   return step.canvas;
 };
 assert.equal(content.phase, 1);
-assert.equal(steps.length, 20);
+assert.equal(steps.length, 22);
 assert.equal(steps.slice(10).map(step => step.id).join(), [
   "label-maze", "map-to-graph", "graph-restart", "graph-walk-one", "graph-walk-two",
-  "rail-utility", "grid-origin", "first-wave", "bridge-entrance", "name-and-exit",
+  "rail-transition", "rail-utility", "method-transition", "grid-origin", "first-wave", "bridge-entrance", "name-and-exit",
 ].join(), "The revised scenes must keep labels, graph replay, rail and the entrance in order");
 assert(!steps.some(step => step.id === "social-utility" || step.canvas.data.view === "social"));
 assert(!vocabulary.some(entry => entry.firstStepId === "social-utility"));
@@ -40,6 +40,15 @@ assert.equal(steps.at(-1).canvas.state.exit.nextPhase, 2);
 assert(steps.every(step => (step.caption.match(/[。？]/gu) ?? []).length === 1), "One caption sentence per scene");
 assert.equal(new Set(vocabulary.map(entry => entry.concept)).size, vocabulary.length);
 assert(vocabulary.every(entry => steps.some(step => step.id === entry.firstStepId)));
+assert.equal(vocabulary.find(entry => entry.concept === "rail-distance").firstStepId, "rail-transition");
+assert.equal(steps.findIndex(step => step.id === "rail-transition") + 1, 16);
+assert.equal(steps.findIndex(step => step.id === "grid-origin") + 1, 19);
+
+// クッションは予告のキャプションのみ。図・目標・現在地・道筋・強調・距離を変えない。
+assert.deepEqual(get("rail-transition"), get("graph-walk-two"), "Rail cue must preserve the plain graph without starting the station task");
+assert.equal(get("rail-transition").data.labels.nodeNames.F, "F");
+assert.equal(get("rail-utility").data.labels.nodeNames.F, "F駅");
+assert.deepEqual(get("method-transition"), get("rail-utility"), "Method cue must preserve the station example without starting the distance layers");
 
 // 図の接続から最短距離を独立計算し、実用例と手数を確認する（教材の実行ロジックではない）。
 const { graph, maze, routes } = steps[0].canvas.data;
@@ -95,4 +104,4 @@ const first = steps[0].canvas;
 assert.throws(() => validateMotivationCanvas({ ...first, state: { ...first.state, trail: ["A", "F"], current: "F" } }), /Disconnected/);
 assert.throws(() => validateMotivationCanvas({ ...first, data: { ...first.data, maze: { ...maze, places: maze.places.slice(1) } } }), /correspondence/);
 assert.throws(() => validateMotivationCanvas({ ...first, highlights: [{ kind: "node", id: "unknown" }] }), /highlight/);
-console.log("BFS motivation: 20 scenes, labeled maze, graph replay, shortest routes, vocabulary, entrance and exit passed.");
+console.log("BFS motivation: 22 scenes, unchanged transition snapshots, graph replay, vocabulary, entrance and exit passed.");

@@ -30,7 +30,7 @@ export const bfsVocabulary: readonly VocabularyEntry[] = [
   { concept: "move-count", everyday: "上下左右に1マス進む回数", technical: "手", firstStepId: "compare-five", usage: "出発点は数えず、隣のマスへ進むごとに1手。候補は5手と3手。" },
   { concept: "place", everyday: "場所", technical: "ノード", firstStepId: "map-to-graph", usage: "初出の図上タグは場所（ノード）。格子とグラフでA〜Fの同一IDを使う。" },
   { concept: "connection", everyday: "つながり", technical: "辺", firstStepId: "map-to-graph", usage: "初出はつながり（辺）。通れる隣接マス間の移動と1対1で対応。" },
-  { concept: "rail-distance", everyday: "駅と駅の間", technical: "区間", firstStepId: "rail-utility", usage: "駅間1本を1区間と数える最少区間数であり、所要時間や乗換回数ではない。" },
+  { concept: "rail-distance", everyday: "駅と駅の間", technical: "区間", firstStepId: "rail-transition", usage: "駅への切替予告で初出。駅間1本を1区間と数える最少区間数であり、所要時間や乗換回数ではない。" },
   { concept: "distance-layer", everyday: "出発点から何マス先か", technical: "○歩", firstStepId: "grid-origin", usage: "出発点は0歩、直接つながる場所は1歩。回り道の実際の手数と区別。" },
   { concept: "algorithm", everyday: "近い場所から順に調べる方法", technical: "幅優先探索", firstStepId: "name-and-exit", usage: "最終コマで初めて名称を示す。キューや探索全過程はフェーズ2以降。" },
 ];
@@ -131,7 +131,15 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
     },
     {
+      id: "rail-transition", caption: "同じ形の図を駅のつながりと見立てると、A駅からF駅までの最少区間も同じように調べられます。",
+      canvas: scene("graph", { goal: "D", current: "D", trail: ["A", "C", "D"], showNames: true }, [{ kind: "node", id: "D" }]),
+    },
+    {
       id: "rail-utility", caption: "駅と駅を1区間で結ぶと、A駅からF駅までは最少3区間で着きます。",
+      canvas: scene("rail", { current: null, trail: [], showNames: true, shownRoutes: ["direct"] }, [{ kind: "route", id: "direct" }]),
+    },
+    {
+      id: "method-transition", caption: "では、どうやって最少の手数を調べればよいのでしょうか？",
       canvas: scene("rail", { current: null, trail: [], showNames: true, shownRoutes: ["direct"] }, [{ kind: "route", id: "direct" }]),
     },
     {
