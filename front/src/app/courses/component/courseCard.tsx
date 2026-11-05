@@ -119,13 +119,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   difficulty,
   status,
   progressRate,
-  missionCount,
-  completedMissionCount,
-  totalMissionCount,
-  requiredMissionCount,
-  completedRequiredMissionCount,
-  challengeMissionCount,
-  completedChallengeMissionCount,
   onCourseClick,
   onCoursePrefetch,
   featured = false,
@@ -236,9 +229,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             <Typography variant="caption" color="text.secondary" fontWeight={900}>
               進捗
             </Typography>
-            <Typography variant="caption" color="text.secondary" fontWeight={900}>
-              {completedMissionCount} / {missionCount}
-            </Typography>
           </Stack>
           <LinearProgress
             variant="determinate"
@@ -255,11 +245,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           />
         </Box>
 
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          <Chip label={`必須 ${completedRequiredMissionCount}/${requiredMissionCount}`} size="small" sx={{ fontWeight: 800, bgcolor: "#eff6ff", color: "#1d4ed8" }} />
-          {challengeMissionCount > 0 && <Chip label={`挑戦 ${completedChallengeMissionCount}/${challengeMissionCount}`} size="small" sx={{ fontWeight: 800, bgcolor: "#fff7ed", color: "#c2410c" }} />}
-          <Chip label={`全${totalMissionCount}ミッション`} size="small" sx={{ fontWeight: 800, bgcolor: "#f1f5f9", color: "#475569" }} />
-        </Stack>
+        
 
         <Button
           variant="contained"
