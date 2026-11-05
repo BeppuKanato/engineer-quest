@@ -44,6 +44,10 @@ production buildでは `npm run build` 後に `node node_modules/next/dist/bin/n
 行番号はコード欄の補助表示であり、キャプションには付けない。`bfsCodeLineNumber` は検証等で行番号を導出するために維持する。フェーズ5は数値の行番号や画面上のインデックスではなく、コードID・version・意味IDを参照すること。
 このIssueでは穴埋めの候補・設問・正解データは追加していない。
 
+## コード表示の共用（#73）
+
+`BfsCodeDisplay.tsx` が11行のコード描画を担当し、フェーズ4の実行行・Dimと、フェーズ5の対象箇所だけの空欄表示を同じ部品で描く。フェーズ4のコード契約・62フレーム・変数表示は変更しない。
+
 ## 対応データと図の再利用
 
 - `codeMapping.content.ts`: 共通の `LearningContent<CodeMappingCanvasState>` に載せる62フレーム。コンポーネントへコードや場面列を埋め込まない。
