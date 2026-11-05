@@ -4,6 +4,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer } from "../../assessment/assessment";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
@@ -15,7 +18,7 @@ import { bfsConsolidationContent as content, type ConsolidationQuestion } from "
 
 /** embedded / onComplete / onNext は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。
  * このフェーズのリザルトは診断画面そのものなので、完了通知とは別に、診断画面から次へ進む導線（onNext）を足す。 */
-export function BfsConsolidationPreview({ embedded = false, onComplete, onNext, nextLabel }: {
+export function BfsConsolidationPreview({ embedded = false, onLearningEvent, active = true, onComplete, onNext, nextLabel }: LearningInstrumentation & {
   embedded?: boolean;
   onComplete?: (summary: BfsUnitPhaseSummary) => void;
   onNext?: () => void;
@@ -27,6 +30,7 @@ export function BfsConsolidationPreview({ embedded = false, onComplete, onNext, 
   const completedRef = useRef(false);
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
+  useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
   const diagnosis = complete ? diagnoseAssessment(content, session) : null;
@@ -91,7 +95,7 @@ export function BfsConsolidationPreview({ embedded = false, onComplete, onNext, 
         </Box>}
       </>}
     </Box>
-    {review && <LearningReviewDialog content={bfsCodeMappingContent} stepIds={review.reviewStepIds}
+    {review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsCodeMappingContent} stepIds={review.reviewStepIds}
       renderCanvas={canvas => <BfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}
   </Box>;
 }

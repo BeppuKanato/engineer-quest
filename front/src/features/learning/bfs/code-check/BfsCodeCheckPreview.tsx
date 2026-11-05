@@ -4,6 +4,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { BfsCodeDisplay } from "../code-mapping/BfsCodeDisplay";
@@ -13,7 +16,7 @@ import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { bfsCodeCheckContent as content } from "./codeCheck.content";
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BfsCodeCheckPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
+export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active = true, onComplete }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
@@ -21,6 +24,7 @@ export function BfsCodeCheckPreview({ embedded = false, onComplete }: { embedded
   const codeRef = useRef<HTMLDivElement>(null);
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
+  useAssessmentObservation(content, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
   const latest = [...session.records].reverse().find(record => record.attemptCount > 0);
@@ -85,7 +89,7 @@ export function BfsCodeCheckPreview({ embedded = false, onComplete }: { embedded
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>
       </Box>}
     </Box>
-    {reviewOpen && question && <LearningReviewDialog content={bfsCodeMappingContent} stepIds={question.reviewStepIds}
+    {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsCodeMappingContent} stepIds={question.reviewStepIds}
       renderCanvas={canvas => <BfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
   </Box>;
 }
