@@ -73,7 +73,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
       correctAnswer: { kind: "order", lineIds: bfsCode.lines.map(line => line.id) }, requires: null,
       interchangeableLineGroups: [["initialize-distances", "initialize-queue"]],
       stepId: firstFrame.id, reviewStepIds: [firstFrame.id, ...remainingFrames.map(frame => frame.id)], tags: ["コード全体の流れ"],
-      instruction: "行をタップした順に並べる。並べた行をタップすると戻せます。",
+      instruction: "行をドラッグ、または↑↓ボタンで並び替える",
       correctFeedback: "正解。初期化から探索、結果を返すまでのコードの流れを組み立てられました。",
       incorrectFeedback: "不正解。初期化、取り出し、未発見判定、距離代入と追加、結果を返す流れを確かめてみましょう。",
     },
