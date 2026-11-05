@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { playerTokens } from "../../player/player.tokens";
 import { BfsExecutionCanvas } from "../execution/BfsExecutionCanvas";
+import { BfsCodeDisplay } from "./BfsCodeDisplay";
 import { bfsCodeMappingContent } from "./codeMapping.content";
 import { codeVariableRows } from "./codeMapping.presentation";
 import type { CodeMappingCanvasState } from "./codeMapping.types";
@@ -39,19 +40,7 @@ export function BfsCodeMappingCanvas({ canvas }: { canvas: CodeMappingCanvasStat
         <BfsExecutionCanvas canvas={execution} />
       </Box>
       <Box sx={{ width: codeWidth, px: 1, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "safe center", minHeight: 0, overflowY: "auto" }}>
-        <Box component="ol" aria-label="bfs_distancesのコード" sx={{ m: 0, p: 0, listStyle: "none", flexShrink: 0,
-          fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.8 }}>
-          {canvas.data.code.lines.map((line, index) => {
-            const active = line.id === activeLineId;
-            return <Box component="li" key={line.id} data-code-line-id={line.id} aria-current={active ? "step" : undefined}
-              sx={{ display: "flex", whiteSpace: "pre", color: active ? playerTokens.surface : playerTokens.text,
-                bgcolor: active ? playerTokens.focus : "transparent", opacity: active ? 1 : 0.55,
-                transition: "background-color 600ms, opacity 600ms", "@media (prefers-reduced-motion: reduce)": { transition: "none" } }}>
-              <Box component="span" aria-hidden sx={{ width: "3ch", pr: 1, textAlign: "right", flexShrink: 0 }}>{index + 1}</Box>
-              <Box component="code">{line.text}</Box>
-            </Box>;
-          })}
-        </Box>
+        <BfsCodeDisplay code={canvas.data.code} activeLineId={activeLineId} />
         <Box component="dl" aria-label="コードの変数" sx={{ mt: 2, mb: 0, display: "grid", gridTemplateColumns: "max-content minmax(0, 1fr)",
           columnGap: 1, rowGap: 0.5, fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", color: playerTokens.text, flexShrink: 0 }}>
           {rows.map(({ name, value, changed }) => <Box key={name} sx={{ display: "contents" }}>
