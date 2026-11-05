@@ -8,7 +8,9 @@ export const playerTokens = {
   background: "#ffffff",
   control: "#111827",
   focus: "#2563eb",
-  transitionMs: 300,
+  transitionMs: 600,
+  // 自動再生の最小間隔。コンテンツが短く指定してもプレイヤー側でこの下限を守る（UI定義 §4）。
+  autoplayFloorMs: 2500,
   states: {
     idle: { fill: "#ffffff", stroke: "#9ca3af", label: "未処理" },
     processing: { fill: "#2563eb", stroke: "#1d4ed8", label: "処理中" },
