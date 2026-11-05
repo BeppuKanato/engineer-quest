@@ -5,7 +5,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import { useEffect, useState, type ReactNode } from "react";
 
 import type { CanvasSnapshot, LearningContent } from "./content.types";
@@ -15,6 +15,8 @@ import { playerTokens } from "./player.tokens";
 export type LearningPlayerProps<TCanvas extends CanvasSnapshot> = {
   content: LearningContent<TCanvas>;
   renderCanvas: (canvas: TCanvas) => ReactNode;
+  /** 最終ステップでのみ操作バーに出す接続用アクション（単元フローでの次フェーズへの遷移など）。未指定なら従来どおり出さない。 */
+  endAction?: { label: string; onClick: () => void };
 };
 
 /** コンテンツの差し替えは再生セッションを作り直す。再生制御は図の形式を知らない。 */
@@ -22,7 +24,7 @@ export function LearningPlayer<TCanvas extends CanvasSnapshot>(props: LearningPl
   return <PlaybackSession key={`${props.content.id}:${props.content.version}`} {...props} />;
 }
 
-function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas }: LearningPlayerProps<TCanvas>) {
+function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas, endAction }: LearningPlayerProps<TCanvas>) {
   const [playback, setPlayback] = useState<PlaybackState>({ index: 0, playing: false });
   const count = content.steps.length;
   const step = content.steps[Math.min(playback.index, count - 1)];
@@ -81,6 +83,13 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
         <Typography component="span" sx={{ fontSize: 14, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
           {playback.index + 1} / {count}
         </Typography>
+        {endAction && playback.index === count - 1 && (
+          <Button variant="contained" onClick={endAction.onClick}
+            sx={{ minHeight: 44, ml: 1, whiteSpace: "nowrap", bgcolor: playerTokens.focus, color: playerTokens.surface,
+              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
+            {endAction.label}
+          </Button>
+        )}
       </Stack>
     </Box>
   );

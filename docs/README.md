@@ -32,6 +32,7 @@
 | [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート |
 | [BFS 視覚的デバッグ](../front/src/features/learning/bfs/trace/README.md) | 現行 | Issue #76 のD1限定トレース・共通キャンバス再生・停止／上限／最終状態と対応範囲 |
 | [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の図と距離による5テスト結果・試行版4段階ヒント・全通過リザルトと確認手順 |
+| [BFS 単元フロー](../front/src/features/learning/bfs/unit/README.md) | 現行 | Issue #77 のフェーズ1〜7の接続、遷移3類型、リザルト画面、単元内ナビゲーションと確認手順 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
@@ -39,6 +40,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |
 | [bfs-visual-debug-76.md](bfs-visual-debug-76.md) | 記録 | Issue #76／PR #100 の型・内容による検出、D1呼び出し分離、部分再生、実行／テスト導線と確認画像 |
 | [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75／PR #99 の結果図示・4段階ヒント・タイムアウト分類、PR #100のボタン構成に追随した実Pyodide確認画像 |
 | [bfs-code-check-73.md](bfs-code-check-73.md) | 記録 | Issue #73 の穴埋め2問、共通基盤の再利用、構文・再挑戦・復習の検証と確認画像 |

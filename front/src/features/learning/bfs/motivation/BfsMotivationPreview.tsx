@@ -7,10 +7,11 @@ import { playerTokens } from "../../player/player.tokens";
 import { BfsMotivationCanvas } from "./BfsMotivationCanvas";
 import { bfsMotivationContent } from "./motivation.content";
 
-export function BfsMotivationPreview() {
+/** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
+export function BfsMotivationPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: () => void }) {
   return (
-    <Box component="main" sx={{ height: "100dvh", minHeight: 440, bgcolor: playerTokens.background, display: "flex" }}>
-      <LearningPlayer content={bfsMotivationContent} renderCanvas={(canvas) => <BfsMotivationCanvas canvas={canvas} />} />
+    <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: embedded ? 0 : 440, bgcolor: playerTokens.background, display: "flex" }}>
+      <LearningPlayer content={bfsMotivationContent} renderCanvas={(canvas) => <BfsMotivationCanvas canvas={canvas} onExit={onComplete} />} />
     </Box>
   );
 }
