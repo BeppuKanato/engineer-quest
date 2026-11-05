@@ -3,7 +3,6 @@ import {
   CourseExamFeedbackActionType as PrismaActionType,
   CourseExamFeedbackStatus,
   Prisma,
-  ProgressStatus,
 } from "@prisma/client";
 
 import { AppError } from "../error/appError";
@@ -93,31 +92,10 @@ function feedbackResponse(feedback: {
 }
 
 const completedCourseIds = async (userId: string, courseIds: string[]) => {
-  if (courseIds.length === 0) return new Set<string>();
-  const courses = await prisma.course.findMany({
-    where: { id: { in: courseIds } },
-    select: {
-      id: true,
-      missions: {
-        where: { isPublished: true, isRequiredForCourseCompletion: true },
-        select: {
-          progresses: {
-            where: { userId, status: ProgressStatus.COMPLETED },
-            select: { id: true },
-          },
-        },
-      },
-    },
-  });
-  return new Set(
-    courses
-      .filter(
-        (course) =>
-          course.missions.length > 0 &&
-          course.missions.every((mission) => mission.progresses.length > 0),
-      )
-      .map((course) => course.id),
-  );
+  // Course completion is redefined on the new-flow progress model in #78.
+  void userId;
+  void courseIds;
+  return new Set<string>();
 };
 
 const mapQuest = (
