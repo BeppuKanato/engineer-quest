@@ -3,14 +3,16 @@ import { Box, Typography } from "@mui/material";
 import { playerTokens } from "../../player/player.tokens";
 import { ConsolidationGraph } from "../consolidation/ConsolidationGraph";
 import { bfsImplementationContent as content } from "./implementation.content";
-import { distanceEntries, isDistanceMap, resultKinds, type TestOutcome } from "./implementation";
+import { resultKinds, type TestOutcome } from "./implementation";
+
+import { DistanceOutput, formatDistance as distance } from "./DistanceOutput";
+import { editorTokens } from "./editor.tokens";
 
 const labels = content.display;
-const distance = (value: unknown) => typeof value === "number" ? `${value}${labels.unit}` : typeof value === "string" ? `「${value}」（${labels.invalidValue}）` : labels.invalidValue;
 
-export function ImplementationResults({ outcomes, diagnostics = outcomes }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[] }) {
+export function ImplementationResults({ outcomes, diagnostics = outcomes, dark = false }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[]; dark?: boolean }) {
   const kinds = resultKinds(diagnostics);
-  return <Box>
+  return <Box sx={{ color: dark ? editorTokens.text : playerTokens.text }}>
     {kinds.length > 0 && <Box role="status" aria-label={labels.errorLabel} sx={{ mb: 2 }}>
       {kinds.map(kind => <Typography component="p" key={kind} data-error-kind={kind}>{labels.messages[kind]}</Typography>)}
     </Box>}
@@ -24,19 +26,13 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes }: { ou
           {test.visibility === "display" && <>
             {scene && <>
               <Typography component="p">{labels.startLabel}：{scene.start}</Typography>
-              <Box sx={{ height: 210, display: "flex" }}><ConsolidationGraph graph={scene.graph} start={scene.start} minHeight={0} /></Box>
+              <Box sx={{ height: 210, display: "flex", bgcolor: playerTokens.surface, borderRadius: dark ? 1 : 0, my: dark ? 1 : 0 }}><ConsolidationGraph graph={scene.graph} start={scene.start} minHeight={0} /></Box>
             </>}
             <Typography component="p" sx={{ fontSize: 16 }}>{labels.expectedLabel}：
               {Object.entries(test.expected).map(([node, value]) => <Box component="span" key={node} sx={{ display: "inline-block", mr: 1 }}>{node}：{distance(value)}</Box>)}
             </Typography>
             <Typography component="p" sx={{ fontSize: 16 }}>{labels.actualLabel}：
-              {!outcome || outcome.error ? labels.noOutput : !isDistanceMap(outcome.actual) ? labels.invalid :
-                distanceEntries(test.expected, outcome.actual).map(entry => <Box component="span" key={entry.node} data-distance-state={entry.state}
-                  sx={{ display: "inline-block", mr: 1, fontWeight: entry.state === "same" ? 400 : 700,
-                    borderBottom: entry.state === "same" ? "none" : `2px solid ${playerTokens.focus}` }}>
-                  {entry.node}：{entry.state === "missing" ? labels.missing : distance(entry.actual)}
-                  {entry.state === "different" ? `（${labels.different}・${labels.expectedLabel} ${distance(entry.expected)}）` : entry.state === "extra" ? `（${labels.extra}）` : ""}
-                </Box>)}
+              {!outcome || outcome.error ? labels.noOutput : <DistanceOutput expected={test.expected} actual={outcome.actual} />}
             </Typography>
           </>}
         </Box>;

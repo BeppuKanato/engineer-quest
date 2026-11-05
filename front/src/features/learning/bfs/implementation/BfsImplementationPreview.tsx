@@ -1,8 +1,8 @@
 "use client";
 
 import Editor, { type OnMount } from "@monaco-editor/react";
-import { Box, Button, LinearProgress, Typography } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Box, Button, LinearProgress, Tab, Tabs, Typography } from "@mui/material";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import { playerTokens } from "../../player/player.tokens";
@@ -12,6 +12,10 @@ import { convertBfsTrace } from "../trace/convertTrace";
 import { bfsTraceText } from "../trace/trace.content";
 import type { BfsTracePlayback } from "../trace/trace.types";
 import type { BfsUnitPhaseSummary } from "../unit/unit.types";
+import { FreeExecutionConsole } from "./FreeExecutionConsole";
+import { runBfsFreeCode, type FreeExecutionResult } from "./freeExecution";
+import { bfsEditorText as text } from "./editor.content";
+import { editorTokens as colors } from "./editor.tokens";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent as content } from "./implementation.content";
@@ -23,6 +27,13 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
   const [tracing, setTracing] = useState(false);
+  const [freeStatus, setFreeStatus] = useState<"idle" | "preparing" | "running">("idle");
+  const [freeResult, setFreeResult] = useState<FreeExecutionResult | null>(null);
+  const [panel, setPanel] = useState<"tests" | "console">("tests");
+  const freeRunning = freeStatus !== "idle";
+  const busy = running || tracing || freeRunning;
+  const panelId = useId();
+  const sidePanel = useRef<HTMLElement>(null);
   const [tracePlayback, setTracePlayback] = useState<BfsTracePlayback | null>(null);
   const [traceError, setTraceError] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
@@ -58,10 +69,29 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
     }
     if (!complete) completedRef.current = false;
   }, [complete, onComplete, runs, usage]);
+  useEffect(() => {
+    if (panel === "console" && freeRunning && window.matchMedia("(max-width: 899px)").matches) sidePanel.current?.scrollIntoView({ block: "start" });
+  }, [panel, freeRunning]);
+  const runFree = async () => {
+    if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
+    lock.current = true;
+    const current = generation.current;
+    setFreeStatus("preparing"); setFreeResult(null); setPanel("console");
+    try {
+      const result = await runBfsFreeCode(code, () => { if (current === generation.current) setFreeStatus("running"); }, () => current === generation.current);
+      if (current === generation.current) setFreeResult(result);
+    } catch {
+      if (current === generation.current) setFreeResult({ stdout: "", outputTruncated: false, returned: false, error: "unavailable" });
+    } finally {
+      lock.current = false;
+      if (current === generation.current) setFreeStatus("idle");
+    }
+  };
   const run = async () => {
     if (lock.current || runtime !== "ready" || complete || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
+    setPanel("tests");
     setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
@@ -86,11 +116,14 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
       if (current === generation.current) setTracing(false);
     }
   };
-  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void runTrace()}
-    sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>{complete ? bfsTraceText.resultButton : bfsTraceText.button}</Button>;
+  const outlinedButton = { minHeight: 44, color: colors.text, borderColor: colors.border,
+    "&:hover": { borderColor: colors.text, bgcolor: colors.button },
+    "&.Mui-disabled": { color: colors.text, borderColor: colors.border, opacity: 0.45 } };
+  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
+    sx={outlinedButton}>{complete ? bfsTraceText.resultButton : bfsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
-    if (!instance || !selection || running || tracing) return;
+    if (!instance || !selection || busy) return;
     instance.pushUndoStop();
     instance.executeEdits("bfs-token", [{ range: selection, text: token, forceMoveMarkers: true }]);
     instance.pushUndoStop(); instance.focus();
@@ -99,15 +132,15 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
     if (level > 1 && usage[level - 2] === 0) return;
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
-  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+  return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
     <Box component="section" aria-label={complete ? "BFS自力実装の完了" : "BFSの自力実装"}
-      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", p: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
-      <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 30px)", outline: "none" }}>
+      sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
+      <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", outline: "none", flexShrink: 0 }}>
         {complete ? content.result.title : content.caption}
       </Typography>
-      <Typography component="p" role="status" aria-live="polite" sx={{ textAlign: "center", fontSize: 16 }}>{passed}/{content.tests.length} 本通過</Typography>
+      <Typography component="p" role="status" aria-live="polite" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0 }}>{passed}/{content.tests.length} 本通過</Typography>
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
-        sx={{ flexShrink: 0, bgcolor: playerTokens.layers.layer0, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
+        sx={{ flexShrink: 0, bgcolor: colors.button, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
       {complete ? <Box sx={{ my: "auto", textAlign: "center", overflowY: "auto" }}>
         <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
         {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
@@ -115,39 +148,57 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
         <Box sx={{ mt: 2 }}>{traceButton}</Box>
         {tracing && <Typography component="p" role="status">{bfsTraceText.loading}</Typography>}
       </Box> : <>
-        <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 2 }}>
-          <Box sx={{ minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <Box sx={{ flex: { xs: "none", md: 1 }, height: { xs: 260, md: "auto" }, minHeight: 200 }}>
-              <Editor height="100%" language="python" theme="light" value={code} loading={content.status.editorLoading}
+        <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 2.4fr) minmax(300px, 1fr)", gap: 2 }}>
+          <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `1px solid ${colors.border}` }}>
+            <Box role="group" aria-label={text.panel} sx={{ flexShrink: 0, p: 1, bgcolor: colors.panel, display: "flex", flexWrap: "wrap", gap: 1 }}>
+              <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runFree()} sx={outlinedButton}>{text.freeRun}</Button>
+              {traceButton}
+              <Button variant="contained" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void run()}
+                sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke }, "&.Mui-disabled": { bgcolor: colors.button, color: colors.text, opacity: 0.45 } }}>{content.controls.run}</Button>
+            </Box>
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+              <Editor height="100%" language="python" theme="vs-dark" value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); }}
+                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
-                  readOnly: running || tracing, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
+                  readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
           </Box>
-          <Box sx={{ minWidth: 0, minHeight: 0, mt: { xs: 2, md: 0 }, overflowY: { md: "auto" } }}><ImplementationResults outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} /></Box>
+          <Box component="aside" ref={sidePanel} sx={{ minWidth: 0, minHeight: 0, mt: { xs: 2, md: 0 }, height: { xs: "74dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `1px solid ${colors.border}`, bgcolor: colors.panel }}>
+            <Tabs value={panel} onChange={(_, value: "tests" | "console") => setPanel(value)} textColor="inherit" aria-label={text.panel}
+              sx={{ flexShrink: 0, borderBottom: `1px solid ${colors.border}`, "& .MuiTabs-indicator": { bgcolor: colors.focus }, "& .MuiTab-root": { fontSize: 16 } }}>
+              <Tab value="tests" label={text.testsTab} id={`${panelId}-tests`} aria-controls={`${panelId}-tests-panel`} />
+              <Tab value="console" label={text.consoleTab} id={`${panelId}-console`} aria-controls={`${panelId}-console-panel`} />
+            </Tabs>
+            <Box role="tabpanel" hidden={panel !== "tests"} id={`${panelId}-tests-panel`} aria-labelledby={`${panelId}-tests`}
+              sx={{ display: panel === "tests" ? "block" : "none", flex: 1, minHeight: 0, overflowY: "auto", p: 1.5 }}>
+              <ImplementationResults dark outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} />
+            </Box>
+            <Box role="tabpanel" hidden={panel !== "console"} id={`${panelId}-console-panel`} aria-labelledby={`${panelId}-console`}
+              sx={{ display: panel === "console" ? "block" : "none", flex: 1, minHeight: 0, overflowY: "auto" }}>
+              <FreeExecutionConsole result={freeResult} busy={freeRunning} />
+            </Box>
+            <Box role="group" aria-label={content.hints.groupLabel} sx={{ p: 1, flexShrink: 0, borderTop: `1px solid ${colors.border}` }}>
+              <Typography component="p" sx={{ fontSize: 16, mb: 0.5 }}>{text.hints}</Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
+                {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} title={label} variant="outlined" disabled={busy || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
+                  sx={{ ...outlinedButton, minWidth: 0, display: "block", textTransform: "none", fontSize: 14, py: 0.5, px: 0.5 }}>
+                  <Box component="span" sx={{ display: "block" }}>{content.hints.compactLabels[index]}</Box>
+                  <Box component="span" sx={{ display: "block" }}>{text.hintNames[index]}</Box>
+                </Button>)}
+              </Box>
+            </Box>
+          </Box>
         </Box>
         <Box sx={{ flexShrink: 0 }}>
-          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{tracing ? bfsTraceText.loading : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{freeStatus === "preparing" ? text.preparing : freeStatus === "running" ? text.running : tracing ? bfsTraceText.loading : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-            {runtime === "error" && <Button onClick={() => void prepare()} sx={{ color: playerTokens.control }}>{content.controls.reload}</Button>}
-            {traceButton}
-            <Button variant="contained" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void run()}
-              sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.controls.run}</Button>
-            <Box role="group" aria-label={content.hints.groupLabel} sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-              {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || tracing || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
-                sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>
-                <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>{label}</Box>
-                <Box component="span" sx={{ display: { xs: "inline", md: "none" } }}>{content.hints.compactLabels[index]}</Box>
-              </Button>)}
-            </Box>
-          </Box>
+          {runtime === "error" && <Button onClick={() => void prepare()} sx={outlinedButton}>{content.controls.reload}</Button>}
         </Box>
       </>}
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
     {tracePlayback && <BfsTraceDialog playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
-    {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
+    {hint && <ImplementationHints dark level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }

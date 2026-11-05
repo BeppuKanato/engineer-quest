@@ -111,7 +111,7 @@ export function BfsUnitPreview() {
       </Box>
     </Box>
     <Box sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
-      <Box sx={{ width: "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
             {renderPhase(index)}
