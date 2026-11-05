@@ -34,6 +34,11 @@ const conditionLabel = (a: Achievement) => {
     case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT: return `追加要件を累計${n}種類クリア`;
     case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT: return `作る課題で${n}回100点を獲得`;
     case AchievementConditionType.KNOWLEDGE_CARD_COUNT: return `知識カードを${n}枚発見`;
+    case AchievementConditionType.UNIT_COMPLETE: return "指定された単元を完了";
+    case AchievementConditionType.UNIT_COMPLETED_COUNT: return `単元を${n}個完了`;
+    case AchievementConditionType.PHASE_COMPLETED: return "指定されたフェーズを完了";
+    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT: return "確認問題を初回で全問正解";
+    case AchievementConditionType.PHASE_NO_HINT_COMPLETE: return "ヒントを使わずにフェーズを完了";
     case AchievementConditionType.STREAK_DAYS: return `${n}日連続で学習`;
   }
 };
@@ -52,27 +57,34 @@ const targetLink = (a: Achievement) => {
   return { href: "/courses", actionLabel: "学習を続ける" };
 };
 
+type PhaseStat = { status: string; summary: unknown };
 type Stats = {
   completedCourses: Set<string>;
   completedQuests: number; perfectQuests: number; optionalRequirements: number;
   cardCount: number; questScores: Map<string, number>;
+  completedUnits: Set<string>;
+  phases: Map<string, PhaseStat>;
 };
 const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> =>
   Array.isArray(value) ? value.filter((v) => Boolean(v) && typeof v === "object" && !Array.isArray(v)) as Array<Record<string, unknown>> : [];
 
 const loadStats = async (userId: string): Promise<Stats> => {
-  const [attempts, submissions, cardCount] = await Promise.all([
+  const [attempts, submissions, cardCount, unitProgress, phaseProgress] = await Promise.all([
     prisma.createQuestAttempt.findMany({ where: { userId }, select: { questId: true, status: true, bestScore: true } }),
     prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true } }),
     prisma.userKnowledgeCard.count({ where: { userId } }),
+    prisma.unitLearningProgress.findMany({ where: { userId }, select: { courseId: true, status: true } }),
+    prisma.phaseLearningProgress.findMany({ where: { userId }, select: { courseId: true, phaseKey: true, status: true, summary: true } }),
   ]);
   const optionalIds = new Set<string>();
   submissions.flatMap((s) => asResultArray(s.results)).forEach((r) => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
   return {
-    // Course completion is redefined on the new-flow progress model in #78.
-    completedCourses: new Set<string>(),
+    // Course completion on the new flow means unit completion (#78 / #108).
+    completedCourses: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
+    completedUnits: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
+    phases: new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }])),
     completedQuests: attempts.filter((a) => a.status === "COMPLETED").length,
     perfectQuests: attempts.filter((a) => a.bestScore >= 100).length,
     optionalRequirements: optionalIds.size, cardCount,
@@ -83,13 +95,34 @@ const loadStats = async (userId: string): Promise<Stats> => {
 const progressFor = async (a: Achievement, userId: string, s: Stats) => {
   const goal = a.conditionValue ?? 1;
   switch (a.conditionType) {
-    // Legacy mission/activity/exam-based conditions can no longer progress;
-    // new-flow conditions are added in #78.
+    case AchievementConditionType.UNIT_COMPLETE: return { goal: 1, progress: a.courseId && s.completedUnits.has(a.courseId) ? 1 : 0 };
+    case AchievementConditionType.UNIT_COMPLETED_COUNT: return { goal, progress: s.completedUnits.size };
+    case AchievementConditionType.PHASE_COMPLETED: {
+      if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
+      return { goal: 1, progress: s.phases.get(`${a.courseId}:${a.phaseKey}`)?.status === "COMPLETED" ? 1 : 0 };
+    }
+    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT: {
+      if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
+      const keys = a.phaseKey.split(",").map((k) => k.trim()).filter(Boolean);
+      const perfect = keys.length > 0 && keys.every((key) => {
+        const summary = s.phases.get(`${a.courseId}:${key}`)?.summary as { firstAttemptCorrect?: number; totalQuestions?: number } | null | undefined;
+        return typeof summary?.totalQuestions === "number" && summary.totalQuestions > 0 && summary.firstAttemptCorrect === summary.totalQuestions;
+      });
+      return { goal: 1, progress: perfect ? 1 : 0 };
+    }
+    case AchievementConditionType.PHASE_NO_HINT_COMPLETE: {
+      if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
+      const phase = s.phases.get(`${a.courseId}:${a.phaseKey}`);
+      const hintUsage = (phase?.summary as { hintUsage?: number[] } | null | undefined)?.hintUsage;
+      const noHint = phase?.status === "COMPLETED" && (!hintUsage || hintUsage.every((count) => count === 0));
+      return { goal: 1, progress: noHint ? 1 : 0 };
+    }
+    // Legacy mission/activity/exam-based conditions can no longer progress.
     case AchievementConditionType.MISSION_COUNT:
     case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
     case AchievementConditionType.ACTIVITY_COUNT:
+    case AchievementConditionType.COURSE_COMPLETE: return { goal: 1, progress: a.courseId && s.completedCourses.has(a.courseId) ? 1 : 0 };
     case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
-    case AchievementConditionType.COURSE_COMPLETE:
     case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
     case AchievementConditionType.COURSE_EXAM_HARD_CLEAR: return { goal, progress: 0 };
     case AchievementConditionType.COURSE_COMPLETED_COUNT: return { goal, progress: s.completedCourses.size };
