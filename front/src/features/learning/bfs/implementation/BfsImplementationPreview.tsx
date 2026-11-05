@@ -9,7 +9,7 @@ import { playerTokens } from "../../player/player.tokens";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent as content } from "./implementation.content";
-import { allTestsPassed, runImplementationTests, recordHintUsage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
+import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
 export function BfsImplementationPreview() {
   const [code, setCode] = useState<string>(content.template);
@@ -18,7 +18,7 @@ export function BfsImplementationPreview() {
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
   const [runs, setRuns] = useState(0);
-  const [usage, setUsage] = useState<HintUsage>([0, 0, 0]);
+  const [usage, setUsage] = useState<HintUsage>([0, 0, 0, 0]);
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
   const editor = useRef<Parameters<OnMount>[0] | null>(null);
@@ -73,8 +73,8 @@ export function BfsImplementationPreview() {
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
         sx={{ flexShrink: 0, bgcolor: playerTokens.layers.layer0, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
       {complete ? <Box sx={{ my: "auto", textAlign: "center", overflowY: "auto" }}>
-        <Typography component="p">実行回数：{runs}回</Typography>
-        {usage.map((count, index) => <Typography component="p" key={index}>ヒントレベル{index + 1}：{count}回</Typography>)}
+        <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
+        {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
         <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
       </Box> : <>
         <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 2 }}>
@@ -86,22 +86,18 @@ export function BfsImplementationPreview() {
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: running, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
-            <Typography component="p" sx={{ mt: 1, fontSize: 16 }}>{content.chipInstruction}</Typography>
-            <Box role="group" aria-label="コード補助チップ" sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {content.chips.map(token => <Button key={token} variant="outlined" disabled={!editorReady || running} onClick={() => insert(token)}
-                sx={{ fontFamily: "monospace", fontSize: 16, minHeight: 44, px: 1, textTransform: "none", color: playerTokens.text, border: `2px solid ${playerTokens.focus}` }}>{token}</Button>)}
-            </Box>
           </Box>
-          <Box sx={{ minWidth: 0, minHeight: 0, mt: { xs: 2, md: 0 }, overflowY: { md: "auto" } }}><ImplementationResults outcomes={outcomes} /></Box>
+          <Box sx={{ minWidth: 0, minHeight: 0, mt: { xs: 2, md: 0 }, overflowY: { md: "auto" } }}><ImplementationResults outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} /></Box>
         </Box>
         <Box sx={{ flexShrink: 0 }}>
-          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{running ? content.status.running : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-            {runtime === "error" && <Button onClick={() => void prepare()} sx={{ color: playerTokens.control }}>実行環境を再読込</Button>}
+            {runtime === "error" && <Button onClick={() => void prepare()} sx={{ color: playerTokens.control }}>{content.controls.reload}</Button>}
             <Button variant="contained" disabled={runtime !== "ready" || running || !editorReady || !code.trim()} onClick={() => void run()}
-              sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>実行する</Button>
-            <Box role="group" aria-label="段階式ヒント" sx={{ display: "flex", gap: 1 }}>
-              {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
+              sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.controls.run}</Button>
+            <Box role="group" aria-label={content.hints.groupLabel} sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+              {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
                 sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>
                 <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>{label}</Box>
                 <Box component="span" sx={{ display: { xs: "inline", md: "none" } }}>{content.hints.compactLabels[index]}</Box>
@@ -111,6 +107,6 @@ export function BfsImplementationPreview() {
         </Box>
       </>}
     </Box>
-    {hint && <ImplementationHints level={hint} code={code} outcomes={lastOutcomes} onClose={() => setHint(null)} />}
+    {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }
