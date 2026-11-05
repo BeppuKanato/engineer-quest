@@ -36,8 +36,9 @@ function CurrentPlace({ position, transition }: { position: Point; transition: T
     fill={playerTokens.states.processing.fill} stroke={playerTokens.states.processing.stroke} strokeWidth={2} />;
 }
 
-/** 教材固有の図のみを描画する。再生、キャプション、操作バーは共通プレイヤーへ委譲。 */
-export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState }) {
+/** 教材固有の図のみを描画する。再生、キャプション、操作バーは共通プレイヤーへ委譲。
+ * onExit が渡された場合だけ、最終場面の終了ボタンを実際に押せるようにする（単元フローでの意思確認の区切り）。 */
+export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanvasState; onExit?: () => void }) {
   const { data, state, highlights } = canvas;
   const isMaze = data.view === "maze";
   const wallId = useId();
@@ -145,8 +146,11 @@ export function BfsMotivationCanvas({ canvas }: { canvas: MotivationCanvasState 
         </text>}
         <foreignObject x={0} y={390} width={600} height={48}>
           <Box sx={{ height: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            {state.exit && <Button variant="outlined" disabled sx={{ "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
-              aria-label={`${state.exit.label}（接続は後続Issueで実装）`}>
+            {state.exit && <Button variant="outlined" disabled={!onExit} onClick={onExit}
+              sx={onExit
+                ? { color: playerTokens.text, borderColor: playerTokens.focus, minHeight: 44 }
+                : { "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
+              aria-label={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`}>
               {state.exit.label}
             </Button>}
           </Box>
