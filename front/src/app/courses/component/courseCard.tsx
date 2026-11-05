@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import type React from "react";
+import Link from "next/link";
 
 import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
@@ -248,6 +249,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         
 
         <Button
+          component={Link}
+          href={`/courses/roadmap/${encodeURIComponent(id)}`}
           variant="contained"
           fullWidth={!featured}
           startIcon={actionIcon}

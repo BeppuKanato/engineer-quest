@@ -8,6 +8,9 @@ import { Box, Container, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 
+import { getLearningProgress } from "@/api/learning.api";
+import { findLearningUnit } from "@/features/learning/app/unitRegistry";
+
 import { getCourses } from "@/api/courses.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { ApiError } from "@/lib/fetcher";
@@ -32,9 +35,12 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
+    let currentRequest = 0;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const request = ++currentRequest;
       try {
         setIsLoading(true);
+        setCourses([]);
         setErrorMessage(null);
 
         if (!user) {
@@ -46,8 +52,18 @@ export default function CoursesPage() {
         const token = await user.getIdToken();
         const data = await getCourses(token);
 
-        setCourses(data);
+        const progress = await Promise.allSettled(data.map(async course => {
+          const unit = findLearningUnit(course.id);
+          if (!unit) return course;
+          const saved = await getLearningProgress(token, course.id);
+          const completed = saved.phases.filter(phase => phase.status === "COMPLETED" && unit.phases.some(item => item.id === phase.phaseKey)).length;
+          return { ...course, status: saved.unit?.status === "COMPLETED" ? "completed" as const : saved.unit ? "in_progress" as const : "not_started" as const,
+            progressRate: completed / unit.phases.length * 100 };
+        }));
+        if (request !== currentRequest) return;
+        setCourses(data.map((course, index) => progress[index].status === "fulfilled" ? progress[index].value : course));
       } catch (error) {
+        if (request !== currentRequest) return;
         if (error instanceof ApiError) {
           if (error.status === 401) {
             setErrorMessage("ログインの有効期限が切れました。再ログインしてください。");
@@ -64,11 +80,11 @@ export default function CoursesPage() {
         }
         setErrorMessage("コース情報の取得に失敗しました。");
       } finally {
-        setIsLoading(false);
+        if (request === currentRequest) setIsLoading(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => { currentRequest++; unsubscribe(); };
   }, []);
 
   const filteredCourses = useMemo(() => {

@@ -2,7 +2,9 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+
+import type { LearningRewards } from "../../app/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
 import { bfsImplementationContent } from "../implementation/implementation.content";
@@ -56,7 +58,9 @@ function summaryLine(index: number, summary?: BfsUnitPhaseSummary): string | nul
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ summaries, onReviewPhase, onBackToStart }: {
+export function UnitFinalResult({ summaries, onReviewPhase, onBackToStart, rewards, renderRewards }: {
+  rewards?: LearningRewards;
+  renderRewards?: (rewards: LearningRewards) => ReactNode;
   summaries: Readonly<Record<number, BfsUnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
   onBackToStart: () => void;
@@ -82,6 +86,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, onBackToStart }: {
       })}
     </Box>
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{bfsImplementationContent.result.closing}</Typography>
+    {rewards && renderRewards?.(rewards)}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{bfsUnitText.reviewNote}</Typography>
     <Button variant="contained" onClick={onBackToStart} sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToStart}</Button>
   </Box>;
