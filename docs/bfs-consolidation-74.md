@@ -9,7 +9,7 @@
 ## 実装と判断点
 
 出発点Fで最後のノードをタップ、新しいG〜Lでキューの状態を選択、孤立Zと再発見Aの境界ケース、元コード全11行のParsonsを実装した。
-図は既存のGraphDrawing／graphGeometryを使い、基準グラフは変更しない。コードは`bfsCode`（`bfs-distances-deque`、version 1）の本文・意味ID・インデントを直接参照し、契約を変更しない。
+図は既存のGraphDrawing／graphGeometryを使い、基準グラフは変更しない。コードは`bfsCode`（`bfs-distances-deque`、version 1）の本文・意味ID・インデントを直接参照し、契約を変更しない。PR #96のレビュー修正・新しい画像は末尾に記載する。
 コンテンツと追加グラフはデータとして分離し、UIに正解・タグ・復習先を埋め込まない。
 
 進行・試行記録は共通assessment。フェーズ6は初回正誤を保持し、誤答のままでも全問回答後に完了する。回答後はその場で再挑戦するか「次の問題へ」を選ぶ。最終問も「診断結果を見る」まで再挑戦できる。
@@ -69,7 +69,7 @@ Parsonsの指定された固定提示順・全11行の順列・正解順との�
 
 既存のworkspace root・ESLint module type警告は残るが、全コマンドは成功。DB・外部認証を伴う検証は変更範囲外。
 
-## 確認画像
+## 初回実装時の確認画像（PR #96のレビュー修正前）
 
 | 画面 | 1366×768 | 390×844 |
 | --- | --- | --- |
@@ -81,3 +81,32 @@ Parsonsの指定された固定提示順・全11行の順列・正解順との�
 | 基本例の復習 | ![復習](figures/bfs-consolidation-74/1366-review.png) | ![復習](figures/bfs-consolidation-74/390-review.png) |
 
 DB適用なし。migration・seed・アプリ組み込み・Mission/Activity・進捗／ログ保存・他フェーズの実装・フェーズ間接続は対象外。
+
+## PR #96 レビュー修正
+
+起点は`feat/bfs-consolidation-74`の`fb3eb84`。設問の文言・選択肢・正解・タグ・復習先、ソフトゲートと初回診断、コード契約、共通描画・色・リングは変更しない。
+
+- 図の設問を84vw × 84dvh（最小高さ500px）のflex配置にし、キャプション・選択肢・フィードバックを除いた残りの高さを図へ割り当てる。高さの上限を撤去し、SVG内部の比率を維持した。
+- Parsonsは1列構成にして全幅を使う。全行を選ぶと元の領域を閉じる。コードはフェーズ4と同じ等幅・16〜18px・行高1.8・左揃え、元のインデントを維持する。
+- 行の追加・削除と並び替えは既存framer-motionのレイアウトアニメーション。↕ハンドルでマウス／タッチのドラッグ、↑↓ボタンでキーボードを含む移動、従来どおり行タップで戻す・リセットが可能。動きを減らす設定にも対応する。
+- コンテンツの`interchangeableLineGroups`で初期化2行だけを順不同に指定。共通判定はParsonsだけを正規化して比較し、他の行は厳密に見る。距離代入→キュー追加は固定する。試行記録の回答順と初回結果はそのまま保持する。
+
+追加verifyで初期化2行の交換が正解、距離代入／キュー追加の交換が不正解、他の隣接行交換も不正解、グループ未指定の完全一致と不正グループ拒否を確認した。lint・typecheck・buildと既存verify一式を含む上記10コマンドはすべてexit 0。
+
+production buildのChromiumで1366×768・390×844を確認。1366px幅ではSVGの倍率がフェーズ3の1.060倍に対しフェーズ6は1.173倍で、ノード直径は約64px／70px。390px幅では両方0.519倍で同じ比率・大きさになる。
+1366px幅のParsonsは選べる側・並べた側とも最長行を含む全文を横スクロールなしで表示し、選べる側が空になれば領域も消える。390px幅のコード列内の局所スクロールは維持する。
+実際のマウスドラッグ／タッチイベントとキーボードのSpace／Enterで並び替え、初期化交換の正解・距離代入と追加の交換の不正解、取り消し・リセット、初回診断の維持を確認した。
+動きを減らす設定でも全問誤答0/5・全問正解5/5・再挑戦後の初回結果保持・任意復習を確認し、既存フェーズ3・5の再挑戦と完了も再確認した。ページ全体の横はみ出し・ブラウザ例外はない。
+
+確認URLは`http://localhost:3000/learning-preview/bfs-consolidation`。問1の図をフェーズ3の`/learning-preview/bfs-check`と同じ画面幅で比較し、問5で全行を並べて全文表示・空領域の消滅を確認する。初期化2行を↕でドラッグまたは↑↓で交換して回答すると正解、距離代入とキュー追加を交換すると不正解になる。再回答しても初回診断は変わらない。
+
+以下は指定viewportで撮影した全ページ画像（縦に長いParsonsは縦スクロールを含む）。
+
+| 画面 | 1366×768 | 390×844 |
+| --- | --- | --- |
+| 比較用フェーズ3 | ![フェーズ3](figures/bfs-consolidation-74/review96/1366-phase3.png) | ![フェーズ3](figures/bfs-consolidation-74/review96/390-phase3.png) |
+| 大きくした設問の図 | ![フェーズ6](figures/bfs-consolidation-74/review96/1366-question1.png) | ![フェーズ6](figures/bfs-consolidation-74/review96/390-question1.png) |
+| 選べる全11行 | ![提示](figures/bfs-consolidation-74/review96/1366-available.png) | ![提示](figures/bfs-consolidation-74/review96/390-available.png) |
+| 全行の全文・元の領域なし | ![全行](figures/bfs-consolidation-74/review96/1366-parsons-all.png) | ![全行](figures/bfs-consolidation-74/review96/390-parsons-all.png) |
+| ドラッグ中 | ![ドラッグ](figures/bfs-consolidation-74/review96/1366-parsons-drag.png) | タッチイベントで検証 |
+| 代入と追加の交換は不正解 | ![不正解](figures/bfs-consolidation-74/review96/1366-parsons-invalid.png) | ![不正解](figures/bfs-consolidation-74/review96/390-parsons-invalid.png) |
