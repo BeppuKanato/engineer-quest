@@ -48,16 +48,24 @@ export function UnitOverview({ courseId }: { courseId: string }) {
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : progress && <>
           <Typography sx={{ mt: 2 }}>フェーズ {completed}/{unit.phases.length} 完了</Typography>
           <LinearProgress aria-label="単元の進捗" variant="determinate" value={completed / unit.phases.length * 100} sx={{ my: 2, height: 8, borderRadius: 4 }} />
-          <Box component="ol" aria-label="フェーズ一覧" sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))", lg: "repeat(7, minmax(0, 1fr))" }, gap: 2, p: 0, listStyle: "none", my: 3 }}>
+          <Box component="ol" aria-label="フェーズ一覧" sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, columnGap: 2, rowGap: { xs: 2, sm: 3 }, p: 0, listStyle: "none", my: 3 }}>
             {unit.phases.map((phase, index) => {
               const done = progress.phases.some(item => item.phaseKey === phase.id && item.status === "COMPLETED");
               const current = index === next, reachable = index <= (next ?? unit.phases.length - 1), Icon = icons[index];
               const status = done ? "完了" : current && progress.unit ? "進行中" : "未着手";
-              return <Box component={motion.li} layout key={phase.id} sx={{ minWidth: 0, textAlign: "center", pt: 7, position: "relative" }}>
+              // sm 以上では蛇行配置にする（上段 1→4、下段は右から 5→7）。xs は通常の折り返し。
+              const snake = index < 4 ? { gridRow: 1, gridColumn: index + 1 } : { gridRow: 2, gridColumn: 4 - (index - 4) };
+              const connector = index === unit.phases.length - 1 ? null : index === 3 ? "turn" : index < 3 ? "right" : "left";
+              const connectorColor = done ? tokens.progress.next : tokens.progress.stroke;
+              return <Box component={motion.li} layout key={phase.id} sx={{ minWidth: 0, textAlign: "center", pt: 7, position: "relative", gridRow: { sm: snake.gridRow }, gridColumn: { sm: snake.gridColumn } }}>
+                {connector && <Box aria-hidden sx={{ display: { xs: "none", sm: "block" }, position: "absolute", bgcolor: connectorColor, zIndex: 0,
+                  ...(connector === "right" ? { top: 104, left: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
+                    connector === "left" ? { top: 104, right: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
+                    { top: 156, left: "calc(50% - 2px)", width: 4, height: "calc(100% - 156px + 24px + 56px)" }) }} />}
                 {current && <Box component={motion.img} layoutId="learning-next-mascot" src={getMascotImagePath(mascot, "cheer")} alt="次にやるフェーズ" sx={{ position: "absolute", top: 0, left: "calc(50% - 28px)", width: 56, height: 56, objectFit: "contain" }} />}
                 <Button aria-label={`フェーズ${phase.phase} ${phase.formalName}：${status}`} aria-current={current ? "step" : undefined} disabled={!reachable || starting}
                   onClick={() => void start(current ? undefined : index)} sx={{ width: 100, maxWidth: "100%", height: 100, borderRadius: "50%", border: `3px solid ${current ? tokens.progress.next : tokens.progress.stroke}`,
-                    bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle, color: current ? tokens.surface : tokens.text, position: "relative",
+                    bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle, color: current ? tokens.surface : tokens.text, position: "relative", zIndex: 1,
                     transition: "background-color 200ms, transform 200ms", "&:hover": { transform: "translateY(-3px)", bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle } }}>
                   <Icon sx={{ fontSize: 44 }} />{done && <CheckCircleIcon aria-hidden sx={{ position: "absolute", right: 0, bottom: 0, fontSize: 28 }} />}
                 </Button>
