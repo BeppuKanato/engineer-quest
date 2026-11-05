@@ -72,9 +72,9 @@ export const bfsImplementationContent = {
     unavailable: "Python実行環境を読み込めませんでした。再読込して試してください。",
     editorLoading: "コードエディタを読み込み中です。",
   },
-  controls: { run: "実行する", reload: "実行環境を再読込" },
+  controls: { run: "テストを実行する", reload: "実行環境を再読込" },
   result: {
-    runsLabel: "実行回数：{count}回", hintLabel: "ヒントレベル{level}：{count}回",
+    runsLabel: "テスト実行回数：{count}回", hintLabel: "ヒントレベル{level}：{count}回",
     title: "幅優先探索（BFS）マスター！",
     closing: "幅優先探索のコードを完成させ、基本ケースと境界ケースのすべてのテストを通過しました。この単元の学習は完了です。",
   },

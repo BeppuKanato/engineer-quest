@@ -76,7 +76,7 @@ export function BfsImplementationPreview() {
     }
   };
   const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void runTrace()}
-    sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>{bfsTraceText.button}</Button>;
+    sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>{complete ? bfsTraceText.resultButton : bfsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
     if (!instance || !selection || running || tracing) return;
@@ -121,9 +121,9 @@ export function BfsImplementationPreview() {
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {runtime === "error" && <Button onClick={() => void prepare()} sx={{ color: playerTokens.control }}>{content.controls.reload}</Button>}
+            {traceButton}
             <Button variant="contained" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void run()}
               sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.controls.run}</Button>
-            {traceButton}
             <Box role="group" aria-label={content.hints.groupLabel} sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
               {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || tracing || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
                 sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>

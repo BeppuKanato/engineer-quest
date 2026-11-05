@@ -1,5 +1,5 @@
 export const bfsTraceText = {
-  button: "自分のコードの動きを見る",
+  button: "実行する", resultButton: "動きを確認する",
   loading: "表示用のグラフで自分のコードを実行しています。",
   close: "動きの表示を閉じる", dialog: "自分のコードの動き（表示用グラフ）",
   variables: "実行中の変数", line: "観測行", unset: "—",
