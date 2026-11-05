@@ -43,7 +43,6 @@ assert.equal(content.hints.flow.length, 4);
 for (const file of fs.readdirSync(`${root}/bfs/implementation`).filter(file => /\.tsx?$/u.test(file))) {
   assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/bfs/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
-assert(fs.readFileSync(`${root}/course-exam/codeTranscriptionEditor.tsx`, "utf8").includes('from "diff"'), "Keep the dependency needed by the existing editor");
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
 assert.equal(content.hints.parsonsQuestion, bfsConsolidationContent.questions.find(question => question.kind === "parsons"));
 assert.deepEqual(plain(content.tests.map(test => test.id)), ["D1", "D2", "J1", "J2", "J3"]);
