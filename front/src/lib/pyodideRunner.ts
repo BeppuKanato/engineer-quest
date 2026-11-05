@@ -1,3 +1,5 @@
+import type { PythonTraceRequest, PythonTraceResult } from "./pythonTrace.types";
+
 export type PythonTestCase = {
   id: string;
   label: string;
@@ -64,6 +66,10 @@ const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000) =>
 export const preparePyodide = () => request<{ ready: true }>({ kind: "ping" }, 120_000);
 export const runCourseMissionTests = (code: string, tests: PythonTestCase[]) =>
   request<{ done: true; results: PythonTestResult[]; stdout: string; stderr: string }>({ kind: "run", code, tests });
+
+/** 既存と同じ15秒の実行上限。生のstdout/stderrはtrace経路では配信しない。 */
+export const tracePythonFunction = (options: PythonTraceRequest) =>
+  request<{ done: true; trace: PythonTraceResult }>({ ...options, kind: "trace" });
 
 export type CreateQuestRequirementResult = {
   requirementId: string;
