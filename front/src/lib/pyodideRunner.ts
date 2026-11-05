@@ -13,6 +13,12 @@ export type PythonTestResult = PythonTestCase & {
   passed: boolean;
 };
 
+/** 出力を表示する表示用実行だけで使う。既存の採点呼び出しは未指定のまま。 */
+export type PythonRunOutputOptions = {
+  onStdout?: (line: string) => void;
+  maxOutputChars?: number;
+};
+
 let worker: Worker | null = null;
 let requestId = 0;
 const pendingRequests = new Map<number, () => void>();
@@ -22,12 +28,19 @@ const getWorker = () => {
   return worker;
 };
 
-const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000) =>
+const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000, output?: PythonRunOutputOptions) =>
   new Promise<T>((resolve, reject) => {
     const currentWorker = getWorker();
     const id = ++requestId;
     const stdout: string[] = [];
     const stderr: string[] = [];
+    const limit = output?.maxOutputChars === undefined ? Infinity : Math.max(0, output.maxOutputChars);
+    let stdoutSize = 0, stderrSize = 0, stdoutLines = 0, stderrLines = 0;
+    const append = (parts: string[], line: string, size: number, lines: number) => {
+      const chunk = (lines ? "\n" : "") + line;
+      if (size < limit) parts.push(chunk.slice(0, limit - size));
+      return Math.min(limit, size + chunk.length);
+    };
     const cleanup = () => {
       window.clearTimeout(timer);
       currentWorker.removeEventListener("message", listener);
@@ -42,11 +55,18 @@ const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000) =>
     }, timeoutMs);
     const listener = (event: MessageEvent) => {
       if (event.data?.id !== id) return;
-      if (event.data?.stdout) { stdout.push(event.data.stdout); return; }
-      if (event.data?.stderr) { stderr.push(event.data.stderr); return; }
+      if (typeof event.data?.stdout === "string") {
+        stdoutSize = append(stdout, event.data.stdout, stdoutSize, stdoutLines++);
+        output?.onStdout?.(event.data.stdout);
+        return;
+      }
+      if (typeof event.data?.stderr === "string") {
+        stderrSize = append(stderr, event.data.stderr, stderrSize, stderrLines++);
+        return;
+      }
       cleanup();
       if (event.data?.error) reject(new Error(event.data.error));
-      else resolve({ ...event.data, stdout: stdout.join("\n"), stderr: stderr.join("\n") } as T);
+      else resolve({ ...event.data, stdout: stdout.join(""), stderr: stderr.join("") } as T);
     };
     const errorListener = (event: ErrorEvent) => {
       cleanup();
@@ -64,8 +84,8 @@ const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000) =>
   });
 
 export const preparePyodide = () => request<{ ready: true }>({ kind: "ping" }, 120_000);
-export const runCourseMissionTests = (code: string, tests: PythonTestCase[]) =>
-  request<{ done: true; results: PythonTestResult[]; stdout: string; stderr: string }>({ kind: "run", code, tests });
+export const runCourseMissionTests = (code: string, tests: PythonTestCase[], output?: PythonRunOutputOptions) =>
+  request<{ done: true; results: PythonTestResult[]; stdout: string; stderr: string }>({ kind: "run", code, tests }, 15_000, output);
 
 /** 既存と同じ15秒の実行上限。生のstdout/stderrはtrace経路では配信しない。 */
 export const tracePythonFunction = (options: PythonTraceRequest) =>
