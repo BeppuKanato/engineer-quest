@@ -14,8 +14,6 @@ export type Mission = {
   href: string;
 };
 
-export type MissionTab = "today" | "achievement"
-
 export type Status = "complete" | "incomplete";
 
 export type TargetAchievement = {
