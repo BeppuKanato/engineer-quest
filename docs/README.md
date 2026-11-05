@@ -30,7 +30,7 @@
 | [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
 | [BFS フェーズ5](../front/src/features/learning/bfs/code-check/README.md) | 現行 | Issue #73 の独立した穴埋め2問、共有コード表示・設問セッション・任意復習、結果と確認手順 |
 | [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート |
-| [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75 のMonaco自由記述・Pyodideの5テスト・段階式ヒント・全通過リザルトと単品確認手順 |
+| [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の図と距離による5テスト結果・試行版4段階ヒント・全通過リザルトと確認手順 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
@@ -38,7 +38,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
-| [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75 の自力実装・5ケース・3段階ヒント、実Pyodideの確認画像とCDN読込の環境制約 |
+| [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75／PR #99 の結果図示・4段階ヒント・タイムアウト分類、実Pyodideの確認画像と環境制約 |
 | [bfs-code-check-73.md](bfs-code-check-73.md) | 記録 | Issue #73 の穴埋め2問、共通基盤の再利用、構文・再挑戦・復習の検証と確認画像 |
 | [bfs-consolidation-74.md](bfs-consolidation-74.md) | 記録 | Issue #74 の5問と初回診断、PR #96 の図サイズ・Parsonsドラッグ／初期化行交換の修正、独立BFS検証と確認画像 |
 | [bfs-parsons-single-list-97.md](bfs-parsons-single-list-97.md) | 記録 | Issue #97 の Parsons 盤面の1リスト直接並び替え化（2リスト方式からの再設計、実行確認は #76 と合わせて判断） |
