@@ -27,6 +27,7 @@
 | [BFS フェーズ1](../front/src/features/learning/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
 | [BFS フェーズ2](../front/src/features/learning/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
 | [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
+| [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
@@ -34,6 +35,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [bfs-code-mapping-72.md](bfs-code-mapping-72.md) | 記録 | Issue #72 のコード契約・62フレーム、Pythonトレース検証、PR #93 の可読性・変数差分表示と確認画像 |
 | [graph-unify-91.md](graph-unify-91.md) | 記録 | Issue #91 の共通描画・迷路配置、検証結果と同じ画面幅でのフェーズ1・2・3比較 |
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
 

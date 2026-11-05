@@ -1,0 +1,66 @@
+"use client";
+
+import { Box } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+
+import { playerTokens } from "../../player/player.tokens";
+import { BfsExecutionCanvas } from "../execution/BfsExecutionCanvas";
+import { bfsCodeMappingContent } from "./codeMapping.content";
+import { codeVariableRows } from "./codeMapping.presentation";
+import type { CodeMappingCanvasState } from "./codeMapping.types";
+
+export function BfsCodeMappingCanvas({ canvas }: { canvas: CodeMappingCanvasState }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 1200, height: 450 });
+  useEffect(() => {
+    if (!host.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setSize(previous => previous.width === width && previous.height === height ? previous : { width, height });
+    });
+    observer.observe(host.current);
+    return () => observer.disconnect();
+  }, []);
+  // 文字の可読性を優先してコード幅を確保し、図は共通SVGの比率を保って縮小する。
+  // 390px級では図＋コード領域内だけの横スクロールを維持する。
+  const codeWidth = Math.max(620, size.width * 0.48);
+  const graphWidth = Math.max(Math.min(size.width, 480), size.width - codeWidth);
+  const { execution, variables } = canvas.state;
+  const activeLineId = canvas.highlights[0].id;
+  // 再描画やシークの経路に依存させず、そのステップの直前フレームとの差分を示す。
+  const frameIndex = bfsCodeMappingContent.steps.findIndex(step => step.canvas === canvas);
+  const previous = bfsCodeMappingContent.steps[frameIndex - 1]?.canvas.state.variables;
+  const rows = codeVariableRows(variables, previous);
+
+  return <Box ref={host} role="group" aria-label="BFSの図とコードの対応" data-frame-id={canvas.state.executionStepId}
+    sx={{ width: "100%", height: "100%", overflowX: "auto", overflowY: "hidden" }}>
+    <Box sx={{ width: graphWidth + codeWidth, height: "100%", display: "flex" }}>
+      <Box data-code-graph sx={{ width: graphWidth, height: "100%", flexShrink: 0 }}>
+        <BfsExecutionCanvas canvas={execution} />
+      </Box>
+      <Box sx={{ width: codeWidth, px: 1, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "safe center", minHeight: 0, overflowY: "auto" }}>
+        <Box component="ol" aria-label="bfs_distancesのコード" sx={{ m: 0, p: 0, listStyle: "none", flexShrink: 0,
+          fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.8 }}>
+          {canvas.data.code.lines.map((line, index) => {
+            const active = line.id === activeLineId;
+            return <Box component="li" key={line.id} data-code-line-id={line.id} aria-current={active ? "step" : undefined}
+              sx={{ display: "flex", whiteSpace: "pre", color: active ? playerTokens.surface : playerTokens.text,
+                bgcolor: active ? playerTokens.focus : "transparent", opacity: active ? 1 : 0.55,
+                transition: "background-color 600ms, opacity 600ms", "@media (prefers-reduced-motion: reduce)": { transition: "none" } }}>
+              <Box component="span" aria-hidden sx={{ width: "3ch", pr: 1, textAlign: "right", flexShrink: 0 }}>{index + 1}</Box>
+              <Box component="code">{line.text}</Box>
+            </Box>;
+          })}
+        </Box>
+        <Box component="dl" aria-label="コードの変数" sx={{ mt: 2, mb: 0, display: "grid", gridTemplateColumns: "max-content minmax(0, 1fr)",
+          columnGap: 1, rowGap: 0.5, fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", color: playerTokens.text, flexShrink: 0 }}>
+          {rows.map(({ name, value, changed }) => <Box key={name} sx={{ display: "contents" }}>
+            <Box component="dt">{name} =</Box>
+            <Box component="dd" data-variable={name} data-variable-changed={changed}
+              sx={{ m: 0, overflowWrap: "anywhere", color: changed ? playerTokens.focus : playerTokens.text, fontWeight: changed ? 700 : 400 }}>{value}</Box>
+          </Box>)}
+        </Box>
+      </Box>
+    </Box>
+  </Box>;
+}
