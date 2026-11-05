@@ -36,11 +36,11 @@ for (const step of [...content.steps].reverse()) {
   assert.equal(state.execution, execution.steps.find(reference => reference.id === state.executionStepId).canvas, "Reference the actual snapshot, never a clone");
   assert.equal(data.code, bfsCode);
   assert.equal((step.caption.match(/[。？]/gu) || []).length, 1);
-  assert(step.caption.startsWith(`${bfsCodeLineNumber(step.canvas.highlights[0].id)}行目：`));
+  assert(!/^\d+行目[：:]/u.test(step.caption), "Captions must not have line-number prefixes");
   assert(["structure", "evaluation", "assignment"].includes(state.captionKind));
   if (state.frameKind === "execution") {
     const reference = execution.steps.find(reference => reference.id === state.executionStepId);
-    assert(step.caption.endsWith(reference.caption), "Keep the phase-2 caption correspondence");
+    assert.equal(step.caption, reference.caption, "Keep the original phase-2 caption unchanged");
   }
 }
 for (const line of bfsCode.lines) assert(content.steps.some(step => step.canvas.highlights[0].id === line.id), `Unvisited line: ${line.id}`);
@@ -100,6 +100,24 @@ for (const [index, step] of functionFrames.entries()) {
   assert.equal(bfsCodeLineNumber(step.canvas.highlights[0].id), actual.trace[index].line, `Frame ${step.id}: executed line`);
   assert.deepEqual(plain(step.canvas.state.variables), actual.trace[index].variables, `Frame ${step.id}: actual Python variables`);
 }
+// 直前フレームの実際のPython変数と比較して、初出・代入・不変を検証する。
+const { codeVariableRows } = load(`${root}/bfs/code-mapping/codeMapping.presentation.ts`);
+for (const [index, step] of functionFrames.entries()) {
+  const rows = codeVariableRows(step.canvas.state.variables, content.steps[index + 1].canvas.state.variables);
+  const before = index === 0 ? content.steps[1].canvas.state.variables : actual.trace[index - 1].variables;
+  const keys = { start: "start", node: "node", "distances[node]": "nodeDistance", neighbor: "neighbor", "distances[neighbor]": "neighborDistance", queue: "queue", distances: "distances" };
+  for (const row of rows) {
+    const key = keys[row.name];
+    assert.equal(row.changed, JSON.stringify(actual.trace[index].variables[key]) !== JSON.stringify(before[key]), `${step.id}: ${row.name} change highlight`);
+  }
+}
+const assignedRow = content.steps.find(step => step.id === "assign-a-b");
+const assignedIndex = content.steps.indexOf(assignedRow);
+const changes = codeVariableRows(assignedRow.canvas.state.variables, content.steps[assignedIndex - 1].canvas.state.variables);
+assert.deepEqual(plain(changes.filter(row => row.changed).map(row => row.name)), ["distances[neighbor]", "distances"]);
+assert(codeVariableRows(content.steps[2].canvas.state.variables, content.steps[1].canvas.state.variables).find(row => row.name === "distances").changed, "First assignment from — is a change");
+assert(codeVariableRows(content.steps[3].canvas.state.variables, content.steps[2].canvas.state.variables).find(row => row.name === "queue").changed, "First queue initialization is a change");
+assert(codeVariableRows(content.steps[1].canvas.state.variables, content.steps[0].canvas.state.variables).every(row => !row.changed), "Unchanged values remain normal");
 assert.deepEqual(actual.result, { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 });
 const assigned = content.steps.filter(step => step.canvas.highlights[0].id === "assign-distance");
 assert.equal(assigned.length, 5);

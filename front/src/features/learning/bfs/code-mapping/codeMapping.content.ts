@@ -1,6 +1,6 @@
 import type { LearningStep } from "../../player/content.types";
 import { bfsExecutionContent } from "../execution/execution.content";
-import { bfsCode, bfsCodeLineNumber, type BfsCodeLineId } from "./bfsCode";
+import { bfsCode, type BfsCodeLineId } from "./bfsCode";
 import { codeVariables, defineCodeMappingContent, executionStep, type CodeLocals, type CodeMappingCanvasState } from "./codeMapping.types";
 
 /** コード側フレームだけを構成する。BFSの図の状態・キュー・距離を再実装しない。 */
@@ -12,7 +12,7 @@ function frames(): [LearningStep<CodeMappingCanvasState>, ...LearningStep<CodeMa
   const add = (id: string, lineId: BfsCodeLineId, caption: string,
     captionKind: CodeMappingCanvasState["state"]["captionKind"], frameKind: "code" | "execution" = "code") => {
     const execution = executionStep(reference).canvas;
-    result.push({ id, caption: `${bfsCodeLineNumber(lineId)}行目：${caption}`, canvas: {
+    result.push({ id, caption, canvas: {
       data: { kind: "bfs-code-mapping", code: bfsCode },
       state: { executionStepId: reference, execution, frameKind, captionKind, locals, variables: codeVariables(execution, locals) },
       highlights: [{ kind: "code-line", id: lineId }],
