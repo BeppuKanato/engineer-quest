@@ -1,9 +1,6 @@
-/** Course一覧・ロードマップAPIのHTTP境界。永続化と解除判定はCourse serviceへ委譲する。 */
+/** Course一覧APIのHTTP境界。永続化と解除判定はCourse serviceへ委譲する。 */
 import { NextFunction, Request, Response } from "express";
-import {
-  getCourseRoadmapByUserId,
-  getCoursesByUserId,
-} from "../service/course.service";
+import { getCoursesByUserId } from "../service/course.service";
 import { AppError } from "../error/appError";
 
 const getUserId = (req: Request): string => {
@@ -21,26 +18,6 @@ export const getCoursesController = async (
     const courses = await getCoursesByUserId(getUserId(req));
 
     res.status(200).json(courses);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getCourseRoadmapController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const courseId = req.params.courseId;
-
-    if (!courseId) {
-      throw new AppError(400, "BAD_REQUEST", "Course ID is required");
-    }
-
-    const course = await getCourseRoadmapByUserId(getUserId(req), courseId);
-
-    res.status(200).json(course);
   } catch (error) {
     next(error);
   }
