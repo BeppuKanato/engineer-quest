@@ -4,7 +4,6 @@ import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import { Alert, Box, Chip, Container, Dialog, DialogContent, IconButton, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
@@ -15,13 +14,10 @@ import type { ReactNode } from "react";
 import { getCollection, type CollectionKnowledgeTip, type CollectionResponse } from "@/api/collection.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
+import { sortKnowledgeCards } from "@/features/collection/knowledgeCards";
+import { UnknownKnowledgeCard } from "@/features/collection/UnknownKnowledgeCard";
+import { knowledgeCardTones as rarityStyle } from "@/features/collection/knowledgeCard.tokens";
 import { auth } from "@/lib/firebase";
-
-const rarityStyle = {
-  COMMON: { label: "Common", color: "#0f766e", bgcolor: "#e6fffb", border: "#99f6e4" },
-  RARE: { label: "Rare", color: "#1d4ed8", bgcolor: "#dbeafe", border: "#93c5fd" },
-  EPIC: { label: "Epic", color: "#7e22ce", bgcolor: "#f3e8ff", border: "#d8b4fe" },
-} as const;
 
 export default function KnowledgeCardsPage() {
   const [collection, setCollection] = useState<CollectionResponse | null>(null);
@@ -79,14 +75,7 @@ export default function KnowledgeCardsPage() {
 
   const shownCards = useMemo(() => {
     const filtered = activeCourse === "all" ? cards : cards.filter((card) => card.courseId === activeCourse);
-    return [...filtered].sort((a, b) => {
-      if (sort === "rarity") {
-        const order = { EPIC: 3, RARE: 2, COMMON: 1 };
-        return order[b.rarity] - order[a.rarity];
-      }
-      if (sort === "course") return a.courseTitle.localeCompare(b.courseTitle, "ja");
-      return new Date(b.collectedAt ?? 0).getTime() - new Date(a.collectedAt ?? 0).getTime();
-    });
+    return sortKnowledgeCards(filtered, sort);
   }, [activeCourse, cards, sort]);
 
   useEffect(() => {
@@ -95,7 +84,7 @@ export default function KnowledgeCardsPage() {
   }, [cards]);
 
   const selectedCard = useMemo(
-    () => cards.find((card) => card.id === selectedCardId) ?? null,
+    () => cards.find((card) => card.id === selectedCardId && card.isCollected) ?? null,
     [cards, selectedCardId]
   );
 
@@ -121,7 +110,7 @@ export default function KnowledgeCardsPage() {
                 <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 52 } }}>知識カード</Typography>
                 <Typography color="text.secondary" sx={{ mt: 1, fontSize: 17 }}>コースで学んだ考え方から、次に調べてみたい世界へつながるカードです。</Typography>
               </Box>
-              <Chip icon={<InfoOutlinedIcon />} label="学習完了時に獲得" sx={{ alignSelf: { xs: "flex-start", md: "center" }, px: 1, py: 2.3, fontWeight: 900, color: "#0052d9", bgcolor: "#fff", border: "1px solid #bfdbfe" }} />
+              <Chip icon={<InfoOutlinedIcon />} label="フェーズ完了時に獲得" sx={{ alignSelf: { xs: "flex-start", md: "center" }, px: 1, py: 2.3, fontWeight: 900, color: "#0052d9", bgcolor: "#fff", border: "1px solid #bfdbfe" }} />
             </Stack>
 
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -136,6 +125,7 @@ export default function KnowledgeCardsPage() {
                     <LinearProgress variant="determinate" value={progress} sx={{ flex: 1, height: 10, borderRadius: 999 }} />
                     <Typography fontWeight={900}>{progress}%</Typography>
                   </Stack>
+                  <Typography sx={{ mt: 1 }}>あと{Math.max(0, totalCount - collectedCount)}枚でコンプリート</Typography>
                 </Box>
                 <RarityCount label="Common" value={commonCount} color="#0f766e" bg="#e6fffb" />
                 <RarityCount label="Rare" value={rareCount} color="#1d4ed8" bg="#dbeafe" />
@@ -171,7 +161,7 @@ export default function KnowledgeCardsPage() {
                           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
                             <MenuBookIcon sx={{ color: "#0052d9" }} />
                             <Typography variant="h5" fontWeight={900} sx={{ flex: 1 }}>{course.title}</Typography>
-                            <Chip label={`${courseCollected} / ${courseCards.length} 枚`} sx={{ fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
+                            <Chip label={`${courseCollected} / ${courseCards.length} 枚・あと${courseCards.length - courseCollected}枚`} sx={{ fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
                           </Stack>
                           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 1.5 }}>
                             {courseCards.map((card) => (
@@ -202,12 +192,13 @@ const RarityCount = ({ label, value, color, bg }: { label: string; value: number
 );
 
 const KnowledgeCardTile = ({ card, selected, onClick }: { card: CollectionKnowledgeTip; selected: boolean; onClick: () => void }) => {
+  if (!card.isCollected) return <UnknownKnowledgeCard />;
   const style = rarityStyle[card.rarity];
   return (
     <Paper component="button" type="button" elevation={0} onClick={onClick} sx={{ appearance: "none", textAlign: "left", p: 1.5, minHeight: 112, borderRadius: 2, border: selected ? "2px solid #0052d9" : "1px solid #dbe3ef", bgcolor: card.isCollected ? "#fff" : "#f8fafc", opacity: card.isCollected ? 1 : 0.72, cursor: "pointer" }}>
       <Stack direction="row" spacing={1.5}>
         <Box sx={{ width: 54, height: 54, borderRadius: 2, display: "grid", placeItems: "center", color: card.isCollected ? style.color : "#94a3b8", bgcolor: card.isCollected ? style.bgcolor : "#f1f5f9", flexShrink: 0 }}>
-          {card.isCollected ? <MenuBookIcon /> : <LockIcon />}
+          <MenuBookIcon />
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={0.6} flexWrap="wrap" sx={{ mb: 0.7 }}>
@@ -234,7 +225,7 @@ const KnowledgeDetailModal = ({ card, onClose }: { card: CollectionKnowledgeTip 
         </Stack>
         <Stack spacing={1.5} alignItems="center" textAlign="center">
           <Box sx={{ width: 128, height: 128, borderRadius: 3, display: "grid", placeItems: "center", color: card.isCollected ? style.color : "#94a3b8", bgcolor: card.isCollected ? style.bgcolor : "#f1f5f9", border: `1px solid ${card.isCollected ? style.border : "#e2e8f0"}` }}>
-            {card.isCollected ? <MenuBookIcon sx={{ fontSize: 72 }} /> : <LockIcon sx={{ fontSize: 58 }} />}
+            <MenuBookIcon sx={{ fontSize: 72 }} />
           </Box>
           <Stack direction="row" spacing={1} justifyContent="center">
             <Chip label={`No.${String(card.catalogNumber).padStart(2, "0")}`} sx={{ fontWeight: 900 }} />

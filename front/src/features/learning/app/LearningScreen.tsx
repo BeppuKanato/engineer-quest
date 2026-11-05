@@ -9,6 +9,10 @@ import { completeLearningPhase, completeLearningUnit, startLearningUnit, type Le
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
 import type { BfsUnitPhaseSummary } from "../bfs/unit/unit.types";
+import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
+import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
+import { phaseBoundaryAchievements } from "../rewards/presentation";
+import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { LearningRewardsContext } from "./LearningRewardsContext";
 import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
@@ -35,6 +39,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const [draft, setDraft] = useState<{ code?: string } | null>(null), [draftError, setDraftError] = useState(false);
   const [ready, setReady] = useState(false), [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
   const [rewards, setRewards] = useState(emptyLearningRewards);
+  const { boundary, present, finish } = useRewardBoundary();
   const [finalShown, setFinalShown] = useState(false), [unitSaved, setUnitSaved] = useState(progress.unit?.status === "COMPLETED");
   const [unitError, setUnitError] = useState(false), [unitRevision, setUnitRevision] = useState(0);
   const completedUnitRequest = useRef(false);
@@ -60,8 +65,12 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   }, [getToken, courseId, unit, initialPhase, log, progress.unit, entryRevision]);
   const completePhase = useCallback(async (phaseKey: string, summary?: BfsUnitPhaseSummary) => {
     const result = await completeLearningPhase(await getToken(), courseId, phaseKey, summary);
-    if (auth.currentUser?.uid === uid) setRewards(current => mergeLearningRewards(current, result));
-  }, [getToken, courseId, uid]);
+    if (auth.currentUser?.uid !== uid) return;
+    setRewards(current => mergeLearningRewards(current, result));
+    // onPhaseCompleteの既存Promise内で、次フェーズへ移る前に提示する。エラー時はここへ到達しない。
+    const achievements = phaseBoundaryAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
+    if (result.awardedCard || achievements.length) await present({ phaseKey, achievements });
+  }, [getToken, courseId, uid, unit, present]);
   const onFinalResult = useCallback(() => setFinalShown(true), []);
   useEffect(() => {
     if (!finalShown || unitSaved || completedUnitRequest.current) return;
@@ -83,6 +92,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
     <BfsUnitPreview embedded initialPhaseIndex={initialPhase} initialFurthestIndex={next ?? unit.phases.length - 1} initialUnitComplete={progress.unit?.status === "COMPLETED"}
       initialCompletedPhases={progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey)} initialSummaries={savedPhaseSummaries(unit, progress)}
-      initialCode={draft.code} onCodeChange={saveCode} onPhaseComplete={completePhase} onFinalResult={onFinalResult} onLearningEvent={log} rewards={rewards} />
+      initialCode={draft.code} onCodeChange={saveCode} onPhaseComplete={completePhase} onFinalResult={onFinalResult} onLearningEvent={log} rewards={rewards} renderRewards={value => <FinalLearningRewards rewards={value} onEvent={log} />} />
+    {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
   </LearningRewardsContext.Provider>;
 }
