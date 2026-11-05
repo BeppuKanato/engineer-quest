@@ -19,12 +19,10 @@ export const queryTags = {
   profile: "profile",
   home: "home",
   courses: "courses",
-  roadmap: "roadmap",
   collection: "collection",
   achievements: "achievements",
   history: "history",
   missionOverview: "mission-overview",
-  missionRewards: "mission-rewards",
   questBoard: "quest-board",
   works: "works",
 } as const;

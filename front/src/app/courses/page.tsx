@@ -6,16 +6,12 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StarIcon from "@mui/icons-material/Star";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { getCourseRoadmap, getCourses } from "@/api/courses.api";
+import { getCourses } from "@/api/courses.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
-import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
-import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ApiError } from "@/lib/fetcher";
 import { auth } from "@/lib/firebase";
-import { useUserSession } from "@/app/component/userSession";
 
 import { AppHeader } from "../component/appHeader";
 import { CourseCard } from "./component/courseCard";
@@ -34,25 +30,6 @@ export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
-
-  const router = useRouter();
-  const { showOverlay, startNavigation } = useNavigationFeedback();
-  const { token: sessionToken } = useUserSession();
-
-  const handleCourseClick = (courseId: string) => {
-    startNavigation(() => {
-      router.push(`/courses/roadmap/${courseId}`);
-    });
-  };
-
-  const handleCoursePrefetch = (courseId: string) => {
-    router.prefetch(`/courses/roadmap/${encodeURIComponent(courseId)}`);
-    if (sessionToken) {
-      void getCourseRoadmap(sessionToken, courseId).catch(() => {
-        // Hover/focus prefetch is best-effort; normal navigation handles errors.
-      });
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -110,7 +87,6 @@ export default function CoursesPage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
       <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
-      <PageTransitionOverlay open={showOverlay} message="コースロードマップを準備しています..." />
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <Stack spacing={3}>
@@ -143,7 +119,7 @@ export default function CoursesPage() {
                       <StarIcon sx={{ color: "#f59e0b" }} />
                       <Typography variant="h5" fontWeight={950}>おすすめ</Typography>
                     </Stack>
-                    <CourseCard {...recommendedCourse} featured onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
+                    <CourseCard {...recommendedCourse} featured />
                   </Stack>
                 )}
 
@@ -153,7 +129,7 @@ export default function CoursesPage() {
                       <AutoAwesomeIcon sx={{ color: "#f59e0b" }} />
                       <Typography variant="h5" fontWeight={950}>続きから</Typography>
                     </Stack>
-                    <CourseCard {...continueCourse} featured onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
+                    <CourseCard {...continueCourse} featured />
                   </Stack>
                 )}
               </Box>
@@ -184,7 +160,7 @@ export default function CoursesPage() {
                     }}
                   >
                     {filteredCourses.map((course) => (
-                      <CourseCard key={course.id} {...course} onCourseClick={handleCourseClick} onCoursePrefetch={handleCoursePrefetch} />
+                      <CourseCard key={course.id} {...course} />
                     ))}
                   </Box>
                 ) : (

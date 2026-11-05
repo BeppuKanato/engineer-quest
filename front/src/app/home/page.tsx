@@ -4,8 +4,6 @@ import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import StarIcon from "@mui/icons-material/Star";
 import {
   Alert,
   Box,
@@ -28,9 +26,6 @@ import { AppHeader } from "@/app/component/appHeader";
 import { getMascotImagePath, isMascotId, type MascotId } from "@/app/component/mascot";
 import { auth } from "@/lib/firebase";
 
-import { MissionHeroCard } from "./component/missionHeroCard";
-import type { MissionTab } from "./type";
-
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
   const today = new Date(calendar.year, calendar.month, calendar.date);
@@ -51,7 +46,6 @@ const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
 };
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<MissionTab>("today");
   const [homeData, setHomeData] = useState<HomeResponse | null>(null);
   const [mascotId, setMascotId] = useState<MascotId>("red-panda");
   const [isLoading, setIsLoading] = useState(true);
@@ -118,27 +112,12 @@ export default function HomePage() {
   }
 
   const userData = homeData.user;
-  const resumeMission = homeData.missions.resume ?? homeData.missions.recommended;
-  const recommendedMission = homeData.missions.recommended;
-  const targetAchievement = homeData.targetAchievement;
   const weekEntries = buildCurrentWeek(homeData.calendar);
   const levelProgress =
     userData.requireNextLevelExp === 0
       ? 0
       : Math.min(100, (userData.exp / userData.requireNextLevelExp) * 100);
-  const nextRankMissions = homeData.nextRankCondition.mission ?? [];
-  const nextRankCompletedMissionCount = nextRankMissions.filter((condition) => condition.status === "complete").length;
-  const rankProgress =
-    nextRankMissions.length === 0
-      ? 100
-      : Math.min(100, Math.round((nextRankCompletedMissionCount / nextRankMissions.length) * 100));
   const displayName = userData.displayName?.trim() || "Engineer";
-  const recommendedMissions = [
-    ...(homeData.missions.recommendedList ?? []),
-    ...(recommendedMission ? [recommendedMission] : []),
-  ]
-    .filter((mission, index, missions) => missions.findIndex((item) => item.id === mission.id) === index)
-    .slice(0, 3);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
@@ -219,16 +198,11 @@ export default function HomePage() {
                       <Typography sx={{ fontSize: 24, fontWeight: 950 }}>{userData.rank}</Typography>
                       <Typography color="text.secondary">
                         {homeData.nextRank
-                          ? `次のランク「${homeData.nextRank.name}」まで ${nextRankCompletedMissionCount} / ${nextRankMissions.length} ミッション`
+                          ? `次のランクは「${homeData.nextRank.name}」`
                           : "最高ランクに到達済み"}
                       </Typography>
                     </Box>
                   </Stack>
-                  <LinearProgress
-                    variant="determinate"
-                    value={rankProgress}
-                    sx={{ height: 10, borderRadius: 999, bgcolor: "#fde68a", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#f59e0b" } }}
-                  />
                 </Stack>
               </CardContent>
             </Card>
@@ -285,85 +259,19 @@ export default function HomePage() {
           </Stack>
 
           <Stack spacing={3}>
-            <MissionHeroCard
-              mission={resumeMission}
-              recommendedMission={recommendedMission}
-              targetAchievement={targetAchievement}
-              mascotId={mascotId}
-              tab={activeTab}
-              onChangeTab={setActiveTab}
-            />
-
-            {resumeMission && (
             <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
               <CardContent sx={{ p: 3 }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ xs: "stretch", md: "center" }} justifyContent="space-between">
-                  <Stack spacing={1} sx={{ flex: 1 }}>
-                    <Typography variant="h5" fontWeight={950}>続きから再開</Typography>
-                    <Typography fontWeight={800}>{resumeMission.title}</Typography>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <LinearProgress
-                        variant="determinate"
-                        value={resumeMission.progress ?? 0}
-                        sx={{ flex: 1, height: 10, borderRadius: 999, bgcolor: "#e5e7eb", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#0057e7" } }}
-                      />
-                      <Typography color="text.secondary" fontWeight={900}>{resumeMission.progress ?? 0}%</Typography>
-                    </Stack>
-                  </Stack>
-                  <Button component={Link} href={resumeMission.href} variant="contained" startIcon={<PlayArrowIcon />} sx={{ minHeight: 56, px: 4, borderRadius: 2, fontWeight: 950 }}>
-                    続きから始める
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-            )}
-
-            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Stack spacing={2.5}>
-                  <Stack direction="row" spacing={1.25} alignItems="center">
-                    <StarIcon sx={{ color: "#f59e0b" }} />
-                    <Typography variant="h5" fontWeight={950}>おすすめミッション</Typography>
-                  </Stack>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-                      gap: 2,
-                    }}
-                  >
-                    {recommendedMissions.length === 0 ? (
-                      <Alert severity="info" sx={{ gridColumn: "1 / -1" }}>おすすめできる未完了ミッションはありません。</Alert>
-                    ) : recommendedMissions.map((mission) => (
-                      <Box key={mission.id} sx={{ p: 2, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#fff" }}>
-                        <Stack spacing={1.5}>
-                          <Chip label={mission.badgeLabel || "次におすすめ"} size="small" sx={{ alignSelf: "flex-start", fontWeight: 900, bgcolor: "#eff6ff", color: "#0057e7" }} />
-                          <Box
-                            component="img"
-                            src={mission.goalImg}
-                            alt={mission.title}
-                            sx={{ width: 64, height: 64, objectFit: "cover", borderRadius: 2 }}
-                          />
-                          <Typography fontWeight={950}>{mission.title}</Typography>
-                          <Typography color="text.secondary" variant="body2">{mission.reason}</Typography>
-                          <Stack direction="row" spacing={1} flexWrap="wrap">
-                            <Chip label={`約${mission.estimatedMinutes}分`} size="small" sx={{ fontWeight: 900 }} />
-                            {mission.activityCount > 0 && <Chip label={`${mission.activityCount}活動`} size="small" sx={{ fontWeight: 900 }} />}
-                            {mission.rewardExp > 0 && <Chip label={`${mission.rewardExp} EXP`} size="small" sx={{ fontWeight: 900, color: "#b45309", bgcolor: "#fff7ed" }} />}
-                          </Stack>
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Box>
-
-                  <Button component={Link} href="/courses" sx={{ width: "fit-content", alignSelf: "center", fontWeight: 950 }}>
+                <Stack spacing={2}>
+                  <Typography variant="h5" fontWeight={950}>学習をはじめる</Typography>
+                  <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                    学習フローは新しい形式へ移行中です。コース一覧から学習を始められます。
+                  </Typography>
+                  <Button component={Link} href="/courses" variant="contained" sx={{ width: "fit-content", fontWeight: 950 }}>
                     コース一覧を見る
                   </Button>
                 </Stack>
               </CardContent>
             </Card>
-
           </Stack>
         </Box>
       </Container>
@@ -379,9 +287,7 @@ const HomeSkeleton = () => (
       <Skeleton variant="rounded" height={280} sx={{ borderRadius: 3 }} />
     </Stack>
     <Stack spacing={3}>
-      <Skeleton variant="rounded" height={380} sx={{ borderRadius: 3 }} />
-      <Skeleton variant="rounded" height={118} sx={{ borderRadius: 3 }} />
-      <Skeleton variant="rounded" height={300} sx={{ borderRadius: 3 }} />
+      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
     </Stack>
   </Box>
 );

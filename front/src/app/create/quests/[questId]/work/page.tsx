@@ -164,12 +164,7 @@ export default function CreateQuestWorkPage() {
     if (action.actionHref) return action.actionHref;
     if (action.actionType === "SHARE_CREATE_QUEST") return shareHref;
     if (action.actionType === "VIEW_BOARD_POSTS") return "/quest-board";
-    if (action.actionType === "OPEN_RELATED_COURSE") {
-      const relatedCourse = quest.relatedCourses.find((course) =>
-        action.actionLabel.includes(course.title),
-      ) ?? quest.relatedCourses[0];
-      return relatedCourse ? `/courses/roadmap/${encodeURIComponent(relatedCourse.id)}` : "/courses";
-    }
+    if (action.actionType === "OPEN_RELATED_COURSE") return "/courses";
     return null;
   }, [feedback?.feedback, quest, shareHref]);
 
@@ -187,7 +182,7 @@ export default function CreateQuestWorkPage() {
           <AccordionSummary><Stack sx={{ width: "100%" }} spacing={0.6}><Stack direction="row" justifyContent="space-between" gap={1}><Stack direction="row" spacing={1} alignItems="center">{result?.passed ? <CheckCircleIcon color="success" /> : <Box sx={{ width: 20, height: 20, border: "2px solid #cbd5e1", borderRadius: "50%" }} />}<Typography fontWeight={950}>{requirement.title}</Typography></Stack><Chip icon={<StarIcon />} label={`+${requirement.points}`} size="small" color={result?.passed ? "success" : "default"} /></Stack><Stack direction="row" spacing={0.7}><Chip label={requirement.kind === "BASIC" ? "基本" : "追加"} size="small" color={requirement.kind === "BASIC" ? "primary" : "default"} /><Chip label={categoryLabel[requirement.category]} size="small" variant="outlined" /></Stack></Stack></AccordionSummary>
           <AccordionDetails><Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>{requirement.description}</Typography>{requirement.kind === "OPTIONAL" && <FormControlLabel control={<Checkbox checked={selected} onChange={() => setSelectedIds((current) => selected ? current.filter((id) => id !== requirement.id) : [...current, requirement.id])} />} label="目標に設定" />}
             {result && <Stack spacing={0.7} sx={{ mt: 1 }}>{result.testResults.map((test) => <Paper key={test.id} elevation={0} sx={{ p: 1.2, border: `1px solid ${test.passed ? "#bbf7d0" : "#fecaca"}`, bgcolor: test.passed ? "#f0fdf4" : "#fef2f2" }}><Typography fontSize={13} fontWeight={900}>{test.passed ? "通過" : "未通過"}：{test.label}</Typography>{!test.passed && test.expected !== undefined && <Typography fontSize={12} color="#475569">期待 {formatValue(test.expected)} ／ 実行 {formatValue(test.actual)}</Typography>}{test.metric?.comparisons !== undefined && <Typography fontSize={12}>比較 {test.metric.comparisons} / 上限 {test.metric.maxComparisons}</Typography>}{test.metric?.accesses !== undefined && <Typography fontSize={12}>通路参照 {test.metric.accesses} / 上限 {test.metric.maxAccesses}</Typography>}{test.error && <Typography fontSize={12} color="error">{test.error}</Typography>}</Paper>)}</Stack>}
-            <Divider sx={{ my: 1.5 }} /><Stack spacing={1}>{requirement.hints.map((hint) => { const key = `${requirement.id}:${hint.id}`; const open = revealedHints.has(key); return <Paper key={hint.id} elevation={0} sx={{ p: 1.2, border: "1px solid #dbeafe", bgcolor: "#f8fbff" }}><Button size="small" startIcon={<LightbulbOutlinedIcon />} onClick={() => void revealHint(requirement.id, hint.id)} disabled={open} sx={{ fontWeight: 900 }}>{open ? hint.title : `${hint.title}を見る`}</Button>{open && <><Typography fontSize={13} sx={{ mt: 0.7, lineHeight: 1.7 }}>{hint.body}</Typography>{hint.courseId && <Button component={Link} href={`/courses/roadmap/${hint.courseId}`} size="small" sx={{ mt: 0.5 }}>関連コースを開く</Button>}</>}</Paper>; })}</Stack>
+            <Divider sx={{ my: 1.5 }} /><Stack spacing={1}>{requirement.hints.map((hint) => { const key = `${requirement.id}:${hint.id}`; const open = revealedHints.has(key); return <Paper key={hint.id} elevation={0} sx={{ p: 1.2, border: "1px solid #dbeafe", bgcolor: "#f8fbff" }}><Button size="small" startIcon={<LightbulbOutlinedIcon />} onClick={() => void revealHint(requirement.id, hint.id)} disabled={open} sx={{ fontWeight: 900 }}>{open ? hint.title : `${hint.title}を見る`}</Button>{open && <><Typography fontSize={13} sx={{ mt: 0.7, lineHeight: 1.7 }}>{hint.body}</Typography>{hint.courseId && <Button component={Link} href="/courses" size="small" sx={{ mt: 0.5 }}>関連コースを開く</Button>}</>}</Paper>; })}</Stack>
           </AccordionDetails>
         </Accordion>;
       })}</Stack>

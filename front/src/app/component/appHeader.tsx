@@ -27,7 +27,7 @@ import { PageTransitionOverlay } from "./pageTransitionOverlay";
 
 const pages = [
   { label: "ホーム", href: "/home", icon: HomeRoundedIcon, match: ["/home"] },
-  { label: "コース", href: "/courses", icon: MenuBookRoundedIcon, match: ["/courses", "/mission"] },
+  { label: "コース", href: "/courses", icon: MenuBookRoundedIcon, match: ["/courses"] },
   { label: "作る", href: "/create", icon: CreateRoundedIcon, match: ["/create", "/my-works"] },
   { label: "掲示板", href: "/quest-board", icon: SchoolRoundedIcon, match: ["/quest-board"] },
   { label: "履歴", href: "/history", icon: ArticleIcon, match: ["/history"] },
@@ -35,7 +35,7 @@ const pages = [
     label: "コレクション",
     href: "/collection",
     icon: CollectionsBookmarkIcon,
-    match: ["/collection", "/knowledge-cards", "/achievements", "/mission-rewards"],
+    match: ["/collection", "/knowledge-cards", "/achievements"],
   },
   { label: "プロフィール", href: "/profile", icon: AccountCircleIcon, match: ["/profile"] },
 ];
