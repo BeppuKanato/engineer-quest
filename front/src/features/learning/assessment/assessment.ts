@@ -43,6 +43,8 @@ export type ParsonsQuestion = Omit<ChoiceQuestion, "kind" | "choices" | "correct
   readonly kind: "parsons";
   readonly lineIds: readonly string[];
   readonly correctAnswer: OrderAnswer;
+  /** 正解順で隣接する、グループ内だけ順不同の行。未指定なら完全一致。 */
+  readonly interchangeableLineGroups?: readonly (readonly string[])[];
 };
 export type DiagnosticAssessment = {
   readonly version: 1;
@@ -87,6 +89,18 @@ export function sameAnswer(left: AssessmentAnswer, right: AssessmentAnswer): boo
 function isCodeBlank(question: Question): question is CodeBlankQuestion {
   return "kind" in question && question.kind === "code-blank";
 }
+function normalizeParsonsOrder(question: ParsonsQuestion, answer: OrderAnswer): OrderAnswer {
+  const lineIds = [...answer.lineIds];
+  for (const group of question.interchangeableLineGroups ?? []) {
+    const canonical = question.correctAnswer.lineIds.filter(id => group.includes(id));
+    const positions = lineIds.flatMap((id, index) => group.includes(id) ? [index] : []);
+    // 離れた行や他の行を飛び越えた移動は許容しない。
+    if (positions.length === canonical.length && positions.every((position, index) => position === positions[0] + index)) {
+      positions.forEach((position, index) => { lineIds[position] = canonical[index]; });
+    }
+  }
+  return { kind: "order", lineIds };
+}
 function allowed(question: Question, answer: AssessmentAnswer): boolean {
   if ("kind" in question && question.kind === "parsons") return answer.kind === "order" &&
     answer.lineIds.length === question.lineIds.length && new Set(answer.lineIds).size === question.lineIds.length && answer.lineIds.every(id => question.lineIds.includes(id));
@@ -113,6 +127,13 @@ export function validateAssessment(content: AssessmentContent): void {
     } else if ("kind" in question && question.kind === "parsons") {
       if (content.kind !== "diagnostic-check" || question.requires !== null || question.lineIds.length < 2 ||
         new Set(question.lineIds).size !== question.lineIds.length || question.lineIds.some(id => !id.trim())) throw new Error("Invalid Parsons question");
+      const grouped = new Set<string>();
+      for (const group of question.interchangeableLineGroups ?? []) {
+        const positions = group.map(id => question.correctAnswer.lineIds.indexOf(id)).sort((a, b) => a - b);
+        if (group.length < 2 || group.some(id => grouped.has(id) || !question.lineIds.includes(id)) ||
+          new Set(group).size !== group.length || positions.some((position, index) => position !== positions[0] + index)) throw new Error("Invalid interchangeable line group");
+        group.forEach(id => grouped.add(id));
+      }
     } else if (content.kind === "code-blank-check" || !question.nodeIds.length || new Set(question.nodeIds).size !== question.nodeIds.length) {
       throw new Error("Invalid node-tap question");
     }
@@ -146,7 +167,8 @@ export function assessmentComplete(content: AssessmentContent, state: Assessment
 export function answerQuestion(content: AssessmentContent, state: AssessmentState, questionId: string, answer: AssessmentAnswer): AssessmentState {
   const question = activeQuestion(content, state);
   if (!question || question.id !== questionId || !allowed(question, answer)) return state;
-  const correct = sameAnswer(answer, question.correctAnswer);
+  const comparable = "kind" in question && question.kind === "parsons" && answer.kind === "order" ? normalizeParsonsOrder(question, answer) : answer;
+  const correct = sameAnswer(comparable, question.correctAnswer);
   return { ...state, records: state.records.map(record => record.questionId !== questionId ? record : {
     questionId, attemptCount: record.attemptCount + 1, firstCorrect: record.firstCorrect ?? correct, solved: record.solved || correct,
     attempts: [...record.attempts, { number: record.attemptCount + 1, answer: answer.kind === "order" ? { ...answer, lineIds: [...answer.lineIds] } : { ...answer }, correct }],

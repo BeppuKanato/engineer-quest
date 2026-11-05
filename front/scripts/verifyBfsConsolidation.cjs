@@ -91,6 +91,7 @@ assert.deepEqual([...q5.lineIds].sort(), [...canonicalIds].sort());
 assert.notDeepEqual(plain(q5.lineIds), canonicalIds);
 assert.deepEqual(plain(q5.lineIds), ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"]);
 assert.deepEqual(plain(q5.correctAnswer.lineIds), canonicalIds);
+assert.deepEqual(plain(q5.interchangeableLineGroups), [["initialize-distances", "initialize-queue"]]);
 for (const question of content.questions) {
   const review = selectReviewContent(mapping, question.reviewStepIds);
   review.steps.forEach((step, index) => assert.equal(step, mapping.steps.find(frame => frame.id === question.reviewStepIds[index])));
@@ -149,6 +150,25 @@ mutable.reverse();
 assert.deepEqual(plain(answered.records[4].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
 assert(sameAnswer(q5.correctAnswer, answered.records[4].attempts[0].answer));
 assert(!sameAnswer(q5.correctAnswer, wrong(q5)));
+const swap = (ids, first, second) => {
+  const result = [...ids], a = result.indexOf(first), b = result.indexOf(second);
+  [result[a], result[b]] = [result[b], result[a]];
+  return result;
+};
+const swappedInitializers = swap(canonicalIds, "initialize-distances", "initialize-queue");
+const swappedRecord = answerQuestion(content, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[4];
+assert.equal(swappedRecord.firstCorrect, true, "Independent initializers may be swapped");
+assert.deepEqual(plain(swappedRecord.attempts[0].answer.lineIds), swappedInitializers, "Keep the actual submitted order in the attempt");
+assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, "assign-distance", "enqueue-neighbor") }).records[4].firstCorrect,
+  false, "Distance must be assigned before enqueueing");
+assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(swappedInitializers, "assign-distance", "enqueue-neighbor") }).records[4].firstCorrect, false);
+for (let index = 0; index < canonicalIds.length - 1; index++) {
+  const first = canonicalIds[index], second = canonicalIds[index + 1];
+  assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, first, second) }).records[4].firstCorrect,
+    first === "initialize-distances" && second === "initialize-queue", `Only the initializer pair may be swapped: ${first}/${second}`);
+}
+const strictContent = { ...content, questions: content.questions.map(question => question.kind === "parsons" ? { ...question, interchangeableLineGroups: undefined } : question) };
+assert.equal(answerQuestion(strictContent, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[4].firstCorrect, false, "Missing groups retain exact comparison");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateConsolidation(broken)); }
 rejects(broken => broken.questions[4].lineIds.pop());
 rejects(broken => broken.questions[4].lineIds[1] = broken.questions[4].lineIds[0]);
@@ -159,4 +179,8 @@ rejects(broken => broken.questions[0].scene.start = "missing");
 rejects(broken => broken.questions[2].scene.graph.edges.push({ id: "bad", from: "Z", to: "missing" }));
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[0].tags = []);
-console.log("BFS consolidation: independent BFS on all four graphs, corrected J timing, 11-line Parsons, shared rendering/review, 0/5 completion and immutable first-attempt diagnosis passed.");
+rejects(broken => broken.questions[4].interchangeableLineGroups = [["missing", "initialize-queue"]]);
+rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-queue", "initialize-queue"]]);
+rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-distances", "while-queue"]]);
+rejects(broken => broken.questions[4].interchangeableLineGroups.push(["initialize-distances", "initialize-queue"]));
+console.log("BFS consolidation: independent BFS on all four graphs, corrected J timing, 11-line Parsons with interchangeable initializers only, shared rendering/review, 0/5 completion and immutable first-attempt diagnosis passed.");

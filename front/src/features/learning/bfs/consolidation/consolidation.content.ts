@@ -71,6 +71,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
       kind: "parsons", id: "whole-code-order", prompt: "幅優先探索のコードを、実行の流れに合う順序に並べてください。",
       lineIds: ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"],
       correctAnswer: { kind: "order", lineIds: bfsCode.lines.map(line => line.id) }, requires: null,
+      interchangeableLineGroups: [["initialize-distances", "initialize-queue"]],
       stepId: firstFrame.id, reviewStepIds: [firstFrame.id, ...remainingFrames.map(frame => frame.id)], tags: ["コード全体の流れ"],
       instruction: "行をタップした順に並べる。並べた行をタップすると戻せます。",
       correctFeedback: "正解。初期化から探索、結果を返すまでのコードの流れを組み立てられました。",
