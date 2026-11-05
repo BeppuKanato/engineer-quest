@@ -39,6 +39,7 @@
 | --- | --- | --- |
 | [bfs-code-check-73.md](bfs-code-check-73.md) | 記録 | Issue #73 の穴埋め2問、共通基盤の再利用、構文・再挑戦・復習の検証と確認画像 |
 | [bfs-consolidation-74.md](bfs-consolidation-74.md) | 記録 | Issue #74 の5問と初回診断、PR #96 の図サイズ・Parsonsドラッグ／初期化行交換の修正、独立BFS検証と確認画像 |
+| [bfs-parsons-single-list-97.md](bfs-parsons-single-list-97.md) | 記録 | Issue #97 の Parsons 盤面の1リスト直接並び替え化（2リスト方式からの再設計、実行確認は #76 と合わせて判断） |
 | [bfs-code-mapping-72.md](bfs-code-mapping-72.md) | 記録 | Issue #72 のコード契約・62フレーム、Pythonトレース検証、PR #93 の可読性・変数差分表示と確認画像 |
 | [graph-unify-91.md](graph-unify-91.md) | 記録 | Issue #91 の共通描画・迷路配置、検証結果と同じ画面幅でのフェーズ1・2・3比較 |
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
