@@ -39,8 +39,8 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
-| [bfs-visual-debug-76.md](bfs-visual-debug-76.md) | 記録 | Issue #76 の正準状態比較・D1限定のWorker分離・再生／エラー／最終状態の確認画像 |
-| [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75／PR #99 の結果図示・4段階ヒント・タイムアウト分類、実Pyodideの確認画像と環境制約 |
+| [bfs-visual-debug-76.md](bfs-visual-debug-76.md) | 記録 | Issue #76／PR #100 の型・内容による検出、D1呼び出し分離、部分再生、実行／テスト導線と確認画像 |
+| [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75／PR #99 の結果図示・4段階ヒント・タイムアウト分類、PR #100のボタン構成に追随した実Pyodide確認画像 |
 | [bfs-code-check-73.md](bfs-code-check-73.md) | 記録 | Issue #73 の穴埋め2問、共通基盤の再利用、構文・再挑戦・復習の検証と確認画像 |
 | [bfs-consolidation-74.md](bfs-consolidation-74.md) | 記録 | Issue #74 の5問と初回診断、PR #96 の図サイズ・Parsonsドラッグ／初期化行交換の修正、独立BFS検証と確認画像 |
 | [bfs-parsons-single-list-97.md](bfs-parsons-single-list-97.md) | 記録 | Issue #97 の Parsons 盤面の1リスト直接並び替え化（2リスト方式からの再設計、実行確認は #76 と合わせて判断） |

@@ -5,7 +5,12 @@
 - 起点: `develop` `262cc2b`。レビュー修正の起点: `feat/bfs-implementation-75` `cc93757`。
 - 正本: [PR #99とユーザーレビュー](https://github.com/BeppuKanato/engineer-quest/pull/99)、[Issue #75](https://github.com/BeppuKanato/engineer-quest/issues/75)、[教材指針フェーズ7](concept/learning-materials-guideline.md)、[UI定義](concept/learning-player-ui.md)。詳細は[フェーズ7 README](../front/src/features/learning/bfs/implementation/README.md)。
 
-## 今回の変更
+## PR #100で追随した画面
+
+現在は「実行する」でD1の再生を開き、「テストを実行する」で以下の5件を採点する。全通過リザルトは「テスト実行回数」を表示し、「動きを確認する」で再生を再度開ける。再生はテスト実行回数に含めない。テスト内容・4段階ヒント・編集領域は変更していない。
+この文書の画像も1366×768・390×844で撮り直した。PR #99当時の実装範囲・検証記録は以下に残し、視覚的デバッグの現行仕様・検証は[Issue #76実装報告](bfs-visual-debug-76.md)を参照する。以下のテスト確認手順の「実行」は「テストを実行する」を指す。
+
+## PR #99での変更
 
 テストの見出しから内部IDを除き、ラベルとアイコン＋「通過／未通過／未実行」で表示する。表示用テストの入力JSONを、既存ConsolidationGraphで描く小さいグラフと出発点に置き換えた。D1は正準bfsGraph、D2はフェーズ6のtransferGraphそのものを参照する。描画・座標・色・比率は共通資産に従う。
 期待と実際の距離は「A：0歩」の並びで表示し、値違い・項目不足・余分なキーを文言と下線で識別する。判定用は引き続き種別と合否だけを表示する。
@@ -68,7 +73,7 @@ npm run verify:bfs-implementation
 初回実装と同じく、このクラウドのChromiumはCDNへの直接読込に証明書制約がある。検証時のみ、HTTPS検証して取得した実Pyodide 0.27.7と、既存node_modulesの同一バージョンMonaco 0.54.0を一時ローカル配信し、資産URLだけを差し替える検証用プロキシを使う。Python実行や判定結果はスタブ化しない。
 リポジトリのCDN設定・pyodideRunner・Workerは変更しない。標準CDNからの直接読込は本環境では未確認として区別する。
 
-## PR #99 修正後の確認画像
+## PR #100のボタン構成に追随した確認画像
 
 画像は指定viewportで撮影した全ページ画像。枠内の結果一覧は必要に応じてスクロールしている。
 
