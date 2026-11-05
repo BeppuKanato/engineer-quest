@@ -36,7 +36,7 @@ async function main() {
   const failures: unknown[] = [];
   await assert.rejects(generate(input, async () => { throw new Error("MODEL_DOWN"); }, async entry => { failures.push(entry); }), /MODEL_DOWN/);
   assert.equal(failures.length, 1);
-  for (const route of ["knowledge-cards", "courses/roadmap/[courseId]", "quest-board/[postId]", "mission/[missionId]/play", "create/quests/[questId]/work", "history", "achievements", "profile"]) assert(existsSync(`../front/src/app/${route}/page.tsx`), route);
+  for (const route of ["knowledge-cards", "courses", "quest-board/[postId]", "create/quests/[questId]/work", "history", "achievements", "profile"]) assert(existsSync(`../front/src/app/${route}/page.tsx`), route);
   await assert.rejects(generate(input, async () => ({ output: { ...analysis, evidence: [{ sourceId: "invented", fact: "fact", inference: false }] }, model: "test", responseId: "test", usage: null })), /UNKNOWN_EVIDENCE_SOURCE/);
   const choice = { type: "NAVIGATION_SELECTED", data: { choiceId: "first", selectedAt: "2026-11-03T01:00:00Z", expected: "/knowledge-cards?cardId=one" } };
   const arrival = { type: "ARRIVED", data: { choiceId: "first", actual: "/knowledge-cards?cardId=one" } };

@@ -50,7 +50,6 @@ export const listQuestPostsController = async (
       q: getQueryString(req, "q"),
       category: getQueryString(req, "category"),
       courseId: getQueryString(req, "courseId"),
-      missionId: getQueryString(req, "missionId"),
       status: getQueryString(req, "status"),
       mine: getQueryString(req, "mine"),
     });

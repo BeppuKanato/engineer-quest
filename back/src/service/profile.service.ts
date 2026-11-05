@@ -1,4 +1,3 @@
-import { ProgressStatus } from "@prisma/client";
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
@@ -9,26 +8,23 @@ const requiredExp = (level: number) => Math.floor(100 * Math.pow(level, 1.5));
 export const deriveLevel = (exp: number) => { let level = 1; while (exp >= requiredExp(level + 1)) level += 1; return level; };
 const deriveRank = (n: number) => n >= 24 ? "Master" : n >= 14 ? "Lead" : n >= 6 ? "Senior" : "Junior";
 
+// Course completion is redefined on the new-flow progress model in #78.
 const completedCourses = async (userId: string) => {
-  const courses = await prisma.course.findMany({ where: { isPublished: true }, select: { missions: { where: { isPublished: true, isRequiredForCourseCompletion: true }, select: { progresses: { where: { userId, status: ProgressStatus.COMPLETED }, select: { id: true } } } } } });
-  return courses.filter((c) => c.missions.length > 0 && c.missions.every((m) => m.progresses.length)).length;
+  void userId;
+  return 0;
 };
 
 export const getProfileByUser = async (user: { id: string; displayName: string | null; experience: number; selectedMascotId: string; selectedProfileAchievementId: string | null }) => {
-  const [hexad, missions, achievements, activities, works, courseCount, missionCount, achievementCount, cardCount, selectedAchievement] = await Promise.all([
+  const [hexad, achievements, works, courseCount, missionCount, achievementCount, cardCount, selectedAchievement] = await Promise.all([
     prisma.hexadResponse.findUnique({ where: { userId: user.id } }),
-    prisma.userMissionProgress.findMany({ where: { userId: user.id, status: ProgressStatus.COMPLETED, completedAt: { not: null } }, orderBy: { completedAt: "desc" }, take: 30, include: { mission: { select: { id: true, title: true, course: { select: { title: true } } } } } }),
     prisma.userAchievement.findMany({ where: { userId: user.id }, orderBy: { achievedAt: "desc" }, take: 30, include: { achievement: true } }),
-    prisma.userMissionActivityProgress.findMany({ where: { userId: user.id, status: ProgressStatus.COMPLETED, completedAt: { not: null } }, orderBy: { completedAt: "desc" }, take: 30, include: { activity: { select: { title: true, missionId: true, mission: { select: { title: true } } } } } }),
     prisma.createQuestAttempt.findMany({ where: { userId: user.id }, orderBy: { updatedAt: "desc" }, take: 3, select: { id: true, bestScore: true, updatedAt: true, quest: { select: { title: true, description: true } } } }),
-    completedCourses(user.id), prisma.userMissionProgress.count({ where: { userId: user.id, status: ProgressStatus.COMPLETED } }),
+    completedCourses(user.id), Promise.resolve(0),
     prisma.userAchievement.count({ where: { userId: user.id } }), prisma.userKnowledgeCard.count({ where: { userId: user.id } }),
     user.selectedProfileAchievementId ? prisma.userAchievement.findUnique({ where: { userId_achievementId: { userId: user.id, achievementId: user.selectedProfileAchievementId } }, include: { achievement: true } }) : Promise.resolve(null),
   ]);
   const history = [
-    ...missions.map((p) => ({ id: `mission:${p.id}`, type: "mission_completed", title: p.mission.title, description: `${p.mission.course.title} / Mission完了`, occurredAt: p.completedAt!.toISOString(), href: `/mission/${encodeURIComponent(p.mission.id)}/overview` })),
     ...achievements.map((x) => ({ id: `achievement:${x.id}`, type: "achievement_unlocked", title: x.achievement.title, description: x.achievement.description, occurredAt: x.achievedAt.toISOString(), href: "/achievements" })),
-    ...activities.map((p) => ({ id: `activity:${p.id}`, type: "activity_completed", title: p.activity.title, description: `${p.activity.mission.title} / Activity完了`, occurredAt: p.completedAt!.toISOString(), href: `/mission/${encodeURIComponent(p.activity.missionId)}/play` })),
   ].sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt)).slice(0, 50);
   return {
     user: { displayName: user.displayName, rank: deriveRank(missionCount), level: deriveLevel(user.experience), exp: user.experience,

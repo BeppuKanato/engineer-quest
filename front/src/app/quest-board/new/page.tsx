@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
 import {
@@ -76,7 +76,6 @@ export default function NewQuestPostPage() {
   const [code, setCode] = useState("");
   const [referenceUrl, setReferenceUrl] = useState("");
   const [courseId, setCourseId] = useState("");
-  const [missionId, setMissionId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigatingAfterSubmit, setIsNavigatingAfterSubmit] =
     useState(false);
@@ -85,10 +84,6 @@ export default function NewQuestPostPage() {
   const [optionsError, setOptionsError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const selectedCourse = useMemo(
-    () => courses.find((course) => course.id === courseId) ?? null,
-    [courses, courseId]
-  );
 
   const titleError = getLengthError(
     title,
@@ -112,7 +107,6 @@ export default function NewQuestPostPage() {
     const nextCode = searchParams.get("code") ?? "";
     const nextReferenceUrl = searchParams.get("referenceUrl") ?? "";
     const nextCourseId = searchParams.get("courseId") ?? "";
-    const nextMissionId = searchParams.get("missionId") ?? "";
 
     if (
       nextCategory &&
@@ -125,7 +119,6 @@ export default function NewQuestPostPage() {
     if (nextCode) setCode(nextCode);
     if (nextReferenceUrl) setReferenceUrl(nextReferenceUrl);
     if (nextCourseId) setCourseId(nextCourseId);
-    if (nextMissionId) setMissionId(nextMissionId);
   }, []);
 
   useEffect(() => {
@@ -185,7 +178,6 @@ export default function NewQuestPostPage() {
         code: code.trim() || undefined,
         referenceUrl: referenceUrl.trim() || undefined,
         courseId: courseId || undefined,
-        missionId: missionId || undefined,
       });
 
       play("saveSuccess");
@@ -293,7 +285,6 @@ export default function NewQuestPostPage() {
                     disabled={isOptionsLoading || courses.length === 0}
                     onChange={(event) => {
                       setCourseId(event.target.value);
-                      setMissionId("");
                     }}
                   >
                     <MenuItem value="">なし</MenuItem>
@@ -314,33 +305,7 @@ export default function NewQuestPostPage() {
                   </FormHelperText>
                 </FormControl>
 
-                <FormControl
-                  fullWidth
-                  disabled={
-                    !selectedCourse || (selectedCourse?.missions ?? []).length === 0
-                  }
-                >
-                  <InputLabel>関連ミッション</InputLabel>
-                  <Select
-                    label="関連ミッション"
-                    value={missionId}
-                    onChange={(event) => setMissionId(event.target.value)}
-                  >
-                    <MenuItem value="">なし</MenuItem>
-                    {(selectedCourse?.missions ?? []).map((mission) => (
-                      <MenuItem key={mission.id} value={mission.id}>
-                        {mission.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>
-                    {!selectedCourse
-                      ? "コースを選ぶとミッションを選択できます。"
-                      : selectedCourse.missions.length === 0
-                        ? "このコースには選択できるミッションがありません。"
-                        : "選択したコースのミッションだけを表示しています。"}
-                  </FormHelperText>
-                </FormControl>
+                
               </Stack>
 
               <TextField

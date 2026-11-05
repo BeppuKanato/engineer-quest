@@ -1,5 +1,3 @@
-import { ProgressStatus as PrismaProgressStatus } from "@prisma/client";
-
 import { prisma } from "../lib/prisma";
 
 export type HistoryEventType =
@@ -32,106 +30,15 @@ const toDateKey = (value: string) =>
     day: "2-digit",
   });
 
-const getCourseCompletedEvents = async (
-  userId: string
-): Promise<HistoryEvent[]> => {
-  const courses = await prisma.course.findMany({
-    where: { isPublished: true },
-    select: {
-      id: true,
-      title: true,
-      missions: {
-        where: {
-          isPublished: true,
-          isRequiredForCourseCompletion: true,
-        },
-        select: {
-          id: true,
-          progresses: {
-            where: {
-              userId,
-              status: PrismaProgressStatus.COMPLETED,
-              completedAt: { not: null },
-            },
-            select: { completedAt: true },
-          },
-        },
-      },
-    },
-  });
-
-  return courses.flatMap((course) => {
-    if (course.missions.length === 0) return [];
-
-    const completedDates = course.missions
-      .map((mission) => mission.progresses[0]?.completedAt ?? null)
-      .filter((date): date is Date => date !== null);
-
-    if (completedDates.length !== course.missions.length) return [];
-
-    const occurredAt = new Date(
-      Math.max(...completedDates.map((date) => date.getTime()))
-    );
-
-    return [
-      {
-        id: `course:${course.id}`,
-        type: "course_completed" as const,
-        title: course.title,
-        description: "Courseの必須Missionをすべて完了しました。",
-        occurredAt: occurredAt.toISOString(),
-        href: `/courses/roadmap/${encodeURIComponent(course.id)}`,
-      },
-    ];
-  });
-};
-
 export const getHistoryByUserId = async (userId: string) => {
+  // Legacy mission/activity history sources were removed with the old flow;
+  // new-flow learning events join history in #78.
   const [
-    activityProgresses,
-    missionProgresses,
     userKnowledgeCards,
     userAchievements,
     createQuestSubmissions,
     createQuestFeedbacks,
-    courseCompletedEvents,
   ] = await Promise.all([
-    prisma.userMissionActivityProgress.findMany({
-      where: {
-        userId,
-        status: PrismaProgressStatus.COMPLETED,
-        completedAt: { not: null },
-      },
-      orderBy: { completedAt: "desc" },
-      take: 120,
-      include: {
-        activity: {
-          select: {
-            title: true,
-            missionId: true,
-            mission: { select: { title: true } },
-          },
-        },
-      },
-    }),
-    prisma.userMissionProgress.findMany({
-      where: {
-        userId,
-        status: PrismaProgressStatus.COMPLETED,
-        completedAt: { not: null },
-      },
-      orderBy: { completedAt: "desc" },
-      take: 80,
-      include: {
-        mission: {
-          select: {
-            id: true,
-            title: true,
-            course: { select: { title: true } },
-          },
-        },
-      },
-    }),
     prisma.userKnowledgeCard.findMany({
       where: { userId },
       orderBy: { collectedAt: "desc" },
@@ -156,52 +63,9 @@ export const getHistoryByUserId = async (userId: string) => {
       take: 80,
       include: { submission: { include: { attempt: { include: { quest: { select: { title: true } } } } } } },
     }),
-    getCourseCompletedEvents(userId),
   ]);
 
   const events: HistoryEvent[] = [
-    ...activityProgresses
-      .filter((progress) => progress.completedAt)
-      .map((progress) => ({
-        id: `activity:${progress.id}`,
-        type: "activity_completed" as const,
-        title: progress.activity.title,
-        description: `${progress.activity.mission.title} / Activity completed`,
-        occurredAt: progress.completedAt!.toISOString(),
-        href: `/mission/${encodeURIComponent(progress.activity.missionId)}/play`,
-      })),
-    ...missionProgresses
-      .filter((progress) => progress.completedAt)
-      .flatMap((progress) => {
-        const occurredAt = progress.completedAt!.toISOString();
-        const base = {
-          href: `/mission/${encodeURIComponent(progress.mission.id)}/overview`,
-          occurredAt,
-        };
-
-        const missionEvent: HistoryEvent = {
-          id: `mission:${progress.id}`,
-          type: "mission_completed",
-          title: progress.mission.title,
-          description: `${progress.mission.course.title} / Mission completed`,
-          ...base,
-        };
-
-        const expEvent: HistoryEvent | null =
-          progress.awardedExp > 0
-            ? {
-                id: `exp:${progress.id}`,
-                type: "exp_gained",
-                title: `EXP +${progress.awardedExp}`,
-                description: `${progress.mission.title} の報酬EXPを獲得しました。`,
-                amount: progress.awardedExp,
-                ...base,
-              }
-            : null;
-
-        return expEvent ? [missionEvent, expEvent] : [missionEvent];
-      }),
-    ...courseCompletedEvents,
     ...userKnowledgeCards.map((userCard) => ({
       id: `knowledge:${userCard.id}`,
       type: "knowledge_tip_acquired" as const,

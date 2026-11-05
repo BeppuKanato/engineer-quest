@@ -47,9 +47,10 @@ for (const line of bfsCode.lines) assert(content.steps.some(step => step.canvas.
 assert.equal(new Set(bfsCode.lines.map(line => line.id)).size, 11);
 // フェーズ5が使う意味IDと本文の契約を固定する。
 assert.deepEqual(plain(bfsCode.lines.map(line => line.id)), ["import-deque", "define-function", "initialize-distances", "initialize-queue", "while-queue", "dequeue-node", "for-neighbor", "if-undiscovered", "assign-distance", "enqueue-neighbor", "return-distances"]);
-const seed = fs.readFileSync(path.resolve(__dirname, "../../back/prisma/seedData/breadthFirstSearchCourseSeed.ts"), "utf8");
-const sourceBlock = seed.match(/export const breadthFirstSearchAnswerCode = code\(([\s\S]*?)\n\);/)[1];
-const originalLines = [...sourceBlock.matchAll(/"(?:[^"\\]|\\.)*"/g)].map(match => JSON.parse(match[0]));
+const seed = fs.readFileSync(path.resolve(__dirname, "../../back/prisma/seedData/courseSeed.ts"), "utf8");
+const sourceBlock = seed.match(/export const breadthFirstSearchAnswerCode =\s*([\s\S]*?);/)[1];
+const originalCode = [...sourceBlock.matchAll(/"(?:[^"\\]|\\.)*"/g)].map(match => JSON.parse(match[0])).join("");
+const originalLines = originalCode.split("\n");
 assert.deepEqual(plain(bfsCode.lines.map(line => line.text)), originalLines, "Do not silently change the source Python code");
 
 // 実際のPythonをトレースし、生成処理とは独立に全実行行・変数を検証する。

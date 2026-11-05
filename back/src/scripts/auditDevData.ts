@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const masterTables = new Set(["Course", "CourseCategory", "CourseCategoryMap", "Mission", "MissionActivity", "Achievement", "KnowledgeCard", "KnowledgeCardScheduleEntry", "CreateQuest", "CreateQuestRequirement", "CreateQuestCourse", "_prisma_migrations"]);
+const masterTables = new Set(["Course", "CourseCategory", "CourseCategoryMap", "Achievement", "KnowledgeCard", "CreateQuest", "CreateQuestRequirement", "CreateQuestCourse", "_prisma_migrations"]);
 type Snapshot = Record<string, { count: number; hashes: string[] }>;
 const canonical = (value: unknown): string => {
   if (value instanceof Date) return JSON.stringify(value.toISOString());
