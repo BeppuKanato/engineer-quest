@@ -1,6 +1,6 @@
 "use client";
 import { Alert, Box, Button, Typography } from "@mui/material";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/app/component/appHeader";
@@ -19,10 +19,9 @@ import { useLearningLog } from "./useLearningLog";
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
-  const reduce = useReducedMotion();
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
     <Box sx={{ flexShrink: 0 }}><AppHeader /><Button component={Link} href={unitUrl(courseId)}>単元画面へ戻る</Button></Box>
-    <Box component={motion.main} initial={{ opacity: 0, y: reduce ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+    <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <Typography role="status">進捗を読み込んでいます。</Typography> :
           <LearningRun key={`${firebaseUser.uid}:${courseId}`} unit={unit} progress={progress} reviewPhaseKey={reviewPhaseKey} />}

@@ -7,7 +7,7 @@ import QuizIcon from "@mui/icons-material/Quiz";
 import CodeIcon from "@mui/icons-material/Code";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,7 +26,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
   const { firebaseUser } = useUserSession();
   const { progress, loading, error, reload, authenticated } = useLearningProgress(unit?.courseId);
   const [starting, setStarting] = useState(false), [startError, setStartError] = useState<string | null>(null);
-  const log = useLearningLog(courseId), reduce = useReducedMotion();
+  const log = useLearningLog(courseId);
   const next = unit && progress ? resumePhaseIndex(unit, progress) : null;
   const completed = progress?.phases.filter(phase => unit?.phases.some(item => item.id === phase.phaseKey) && phase.status === "COMPLETED").length ?? 0;
   const start = async (reviewIndex?: number) => {
@@ -41,7 +41,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
   };
   return <Box sx={{ minHeight: "100dvh", bgcolor: tokens.background, color: tokens.text }}>
     <AppHeader />
-    <Container component={motion.main} initial={{ opacity: 0, y: reduce ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} sx={{ py: 3, maxWidth: 1200 }}>
+    <Container component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ py: 3, maxWidth: 1200 }}>
       <Button component={Link} href="/courses">コース一覧へ</Button>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt: 2 }}>{unit?.title ?? "単元"}</Typography>
       {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <Typography role="status" sx={{ my: 4 }}>進捗を読み込んでいます。</Typography> : error ?
