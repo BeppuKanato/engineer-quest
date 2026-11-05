@@ -167,7 +167,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
     {saving && <Typography role="status" sx={{ textAlign: "center" }}>進捗を保存しています。</Typography>}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
     <Box inert={saving || !!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
-      <Box sx={{ width: "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
             {renderPhase(index)}

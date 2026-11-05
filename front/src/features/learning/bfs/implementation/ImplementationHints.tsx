@@ -3,16 +3,20 @@
 import { Box, Button, Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 import { playerTokens } from "../../player/player.tokens";
+import { editorTokens } from "./editor.tokens";
+
 import { bfsCode } from "../code-mapping/bfsCode";
 import { ParsonsBoard } from "../consolidation/ParsonsBoard";
 import { bfsImplementationContent as content } from "./implementation.content";
 import type { HintLevel } from "./implementation";
 
-export function ImplementationHints({ level, onInsert, onClose }: {
+export function ImplementationHints({ level, onInsert, onClose, dark = false }: {
+  dark?: boolean;
   level: HintLevel; onInsert: (token: string) => void; onClose: () => void;
 }) {
+  const textColor = dark ? editorTokens.text : playerTokens.text;
   return <Dialog open onClose={onClose} maxWidth={false} aria-labelledby="implementation-hint-title"
-    slotProps={{ paper: { sx: { width: "90vw", maxHeight: "90dvh", m: 1, bgcolor: playerTokens.surface, color: playerTokens.text } } }}>
+    slotProps={{ paper: { sx: { width: "90vw", maxHeight: "90dvh", m: 1, bgcolor: dark ? editorTokens.panel : playerTokens.surface, color: textColor } } }}>
     <DialogTitle id="implementation-hint-title">{content.hints.labels[level - 1]}</DialogTitle>
     <DialogContent>
       {level === 1 && <>
@@ -20,7 +24,7 @@ export function ImplementationHints({ level, onInsert, onClose }: {
         <Typography component="p" sx={{ my: 1 }}>{content.hints.tokenInstruction}</Typography>
         <Box role="group" aria-label={content.hints.tokenGroupLabel} sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {content.hints.tokens.map(token => <Button key={token} variant="outlined" onClick={() => onInsert(token)}
-            sx={{ fontFamily: "monospace", fontSize: 16, minHeight: 44, px: 1, textTransform: "none", color: playerTokens.text, border: `2px solid ${playerTokens.focus}` }}>{token}</Button>)}
+            sx={{ fontFamily: "monospace", fontSize: 16, minHeight: 44, px: 1, textTransform: "none", color: textColor, border: `2px solid ${playerTokens.focus}` }}>{token}</Button>)}
         </Box>
       </>}
       {level === 2 && <Box component="ol" sx={{ pl: 3 }}>{content.hints.flow.map(step => <Typography component="li" key={step} sx={{ mb: 2 }}>{step}</Typography>)}</Box>}
@@ -29,9 +33,9 @@ export function ImplementationHints({ level, onInsert, onClose }: {
       </Box>}
       {level === 4 && <>
         <Typography component="p" sx={{ mb: 1 }}>{content.hints.parsonsQuestion.instruction}</Typography>
-        <ParsonsBoard question={content.hints.parsonsQuestion} code={bfsCode} />
+        <Box sx={{ bgcolor: playerTokens.surface, color: playerTokens.text, p: dark ? 1 : 0 }}><ParsonsBoard question={content.hints.parsonsQuestion} code={bfsCode} /></Box>
       </>}
-      <Button onClick={onClose} sx={{ mt: 2, minHeight: 44, color: playerTokens.control }}>{content.hints.closeLabel}</Button>
+      <Button onClick={onClose} sx={{ mt: 2, minHeight: 44, color: dark ? editorTokens.text : playerTokens.control }}>{content.hints.closeLabel}</Button>
     </DialogContent>
   </Dialog>;
 }

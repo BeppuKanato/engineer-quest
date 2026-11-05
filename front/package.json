@@ -18,6 +18,7 @@
     "verify:bfs-implementation": "node scripts/verifyBfsImplementation.cjs",
     "verify:bfs-trace": "node scripts/verifyBfsTrace.cjs",
     "verify:bfs-unit": "node scripts/verifyBfsUnitFlow.cjs",
+    "verify:bfs-free-execution": "node scripts/verifyBfsFreeExecution.cjs",
     "verify:learning-screens": "node scripts/verifyLearningScreens.cjs"
   },
   "dependencies": {
