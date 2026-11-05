@@ -1,0 +1,20 @@
+import type { UnlockedAchievement } from "../../../api/learning.api";
+import { knowledgeCardTones } from "../../collection/knowledgeCard.tokens";
+
+export type RewardStage = "anticipation" | "appearance" | "praise";
+export const rewardStages: readonly RewardStage[] = ["anticipation", "appearance", "praise"];
+export const cardPresentation = {
+  COMMON: { durations: [350, 450, 800], scale: 0.96, turns: 0, rays: 0, glow: 0, tone: knowledgeCardTones.COMMON },
+  RARE: { durations: [450, 600, 950], scale: 0.88, turns: 4, rays: 4, glow: 16, tone: knowledgeCardTones.RARE },
+  EPIC: { durations: [550, 750, 1100], scale: 0.8, turns: 8, rays: 8, glow: 28, tone: knowledgeCardTones.EPIC },
+} as const;
+export const presentationFor = (rarity: string) => cardPresentation[rarity as keyof typeof cardPresentation] ?? cardPresentation.COMMON;
+export const phaseBoundaryAchievements = (phaseKey: string, finalPhaseKey: string | undefined, items: readonly UnlockedAchievement[]) => phaseKey === finalPhaseKey ? [] : items;
+export type RewardBoundary = { phaseKey: string; achievements: readonly UnlockedAchievement[] };
+export const rewardText = {
+  title: "学びの発見", anticipation: "学びの先に、新しいつながりが…", appearance: "知識カードを発見！",
+  praise: "学んだ考え方から、知識のつながりが広がりました。", saved: "カードの内容はコレクションでいつでも確認できます。",
+  achievement: "実績を獲得しました", achievementPraise: "今回の学習で達成したことが、証として残りました。",
+  skip: "演出をスキップ", close: "学習を続ける", finalTitle: "この単元で獲得した実績", finalEmpty: "獲得済みの実績は実績一覧で確認できます。",
+  collection: "コレクションを見る", achievements: "実績一覧を見る",
+} as const;
