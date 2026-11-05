@@ -19,6 +19,8 @@ export type PythonTraceResult = {
   readonly stoppedLine: number | null;
   readonly eventCount: number;
   readonly limit: number;
+  /** 型・内容で候補を一意に選べなかった場合は、部分再生でも推測しない。 */
+  readonly ambiguous: boolean;
 };
 export type PythonTraceRequest = {
   readonly code: string;

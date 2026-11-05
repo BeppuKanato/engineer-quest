@@ -90,9 +90,44 @@ const dedupe = values => values.filter((value, index) => index === 0 || JSON.str
   assert(!JSON.stringify(unsupportedError).includes("DO_NOT_EXPOSE_THIS"));
   const swallowed = trace("def bfs_distances(graph, start):\n    try:\n        while True:\n            pass\n    except BaseException:\n        return {}", 20);
   assert.equal(swallowed.status, "truncated", "Catching the limit must not turn a cut trace into a successful execution");
-  const topLoop = trace("while True:\n    pass\ndef bfs_distances(graph, start):\n    pass", 20);
-  assert.equal(topLoop.status, "truncated"); assert.equal(topLoop.events.length, 0);
-  assert.equal(convertBfsTrace(topLoop).mode, "final");
+  for (const renamed of [code.replace(/\bqueue\b/gu, "que"), code.replace(/\bqueue\b/gu, "q").replace(/\bdistances\b/gu, "dist")]) {
+    const result = trace(renamed), view = convertBfsTrace(result);
+    assert.equal(result.ambiguous, false); assert.equal(view.mode, "replay");
+    assert.deepEqual(plain(view.content.steps.map(step => projected(step.canvas))), expected, "Shape-detected variables and while boundaries preserve canonical states");
+  }
+  const canonicalPriority = trace(code.replace("    while queue:", "    another_queue = []\n    another_distances = {}\n    while queue:"));
+  assert.equal(canonicalPriority.ambiguous, false, "Canonical names take priority over other shape-compatible locals");
+  assert.deepEqual(plain(convertBfsTrace(canonicalPriority).content.steps.map(step => projected(step.canvas))), expected);
+  for (const source of [
+    code.replace(/\bqueue\b/gu, "q").replace("    while q:", "    other = []\n    while q:"),
+    code.replace(/\bdistances\b/gu, "dist").replace("    while queue:", "    other = {}\n    while queue:"),
+  ]) {
+    const result = trace(source);
+    assert.equal(result.ambiguous, true); assert.equal(convertBfsTrace(result).mode, "final", "Ambiguous candidates must not produce even a guessed partial replay");
+  }
+  const trialCall = trace(code + '\nbfs_distances({"A": []}, "A")');
+  assert.deepEqual(trialCall.result, plain(d1.expected));
+  assert.deepEqual(trialCall.events, trace(code).events, "Only the harness D1 call is recorded");
+  const topWork = trace(code + '\nfor _ in range(1000):\n    bfs_distances({"A": []}, "A")');
+  assert.equal(topWork.eventCount, trace(code).eventCount, "Top-level work cannot consume the D1 budget");
+  assert.deepEqual(topWork.events, trace(code).events);
+  const topError = trace(code + '\nraise RuntimeError("PRIVATE_TOP_LEVEL_ERROR")');
+  assert.equal(topError.status, "returned"); assert.deepEqual(topError.events, trace(code).events);
+  assert(!JSON.stringify(topError).includes("PRIVATE_TOP_LEVEL_ERROR"));
+  const missingFunction = trace('raise ValueError("PRIVATE_TOP_LEVEL_ERROR")\n' + code);
+  assert.equal(missingFunction.status, "error"); assert.equal(missingFunction.error.line, 1);
+  assert.equal(missingFunction.error.kind, "ValueError"); assert.equal(missingFunction.events.length, 0);
+  assert(!JSON.stringify(missingFunction).includes("PRIVATE_TOP_LEVEL_ERROR"));
+  // Invalid tails retain real, drawable frames rather than discarding the entire replay.
+  const invalidTail = trace(code.replace("    return distances", '    queue.extend(["A", "A"])\n    return distances'));
+  const partial = convertBfsTrace(invalidTail);
+  assert.equal(partial.mode, "replay"); assert(partial.notice.includes("途中まで"));
+  assert(partial.content.steps.at(-1).caption.includes("途中まで"));
+  assert.deepEqual(plain(partial.content.steps.map(step => projected(step.canvas))), expected);
+  assert.deepEqual(plain(partial.content.steps.at(-1).canvas.trace.variables.queue), [], "The last displayed variables come from a drawable snapshot");
+  assert.equal(partial.content.steps.at(-1).canvas.trace.line, 5, "Retain the last displayed while-boundary line instead of pairing valid variables with the invalid return line");
+  const recovered = trace(code.replace("    return distances", '    queue.extend(["A", "A"])\n    queue.clear()\n    return distances'));
+  assert.equal(convertBfsTrace(recovered).mode, "replay"); assert.equal(convertBfsTrace(recovered).notice, null, "An individual invalid snapshot may be skipped when the tail is drawable");
   const wrongDistances = trace(code.replace("distances[node] + 1", "distances[node] - 1"));
   const wrongView = convertBfsTrace(wrongDistances);
   assert.equal(wrongView.mode, "replay");
@@ -114,5 +149,5 @@ const dedupe = values => values.filter((value, index) => index === 0 || JSON.str
   assert.equal(await traceBfsCode("current editor code"), unsupported);
   await assert.rejects(() => traceBfsCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
-  console.log("BFS trace: real CPython harness, canonical phase-2 normalized states, copied locals, stop line, recursive final-only fallback, truncation, syntax/runtime redaction and isolated D1-only acquisition passed.");
+  console.log("BFS trace: real CPython harness, canonical phase-2 normalized states, copied locals, renamed/ambiguous locals, D1-only root and event budget, partial invalid tails, stop line, recursive final-only fallback, truncation, syntax/runtime redaction and isolated D1-only acquisition passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

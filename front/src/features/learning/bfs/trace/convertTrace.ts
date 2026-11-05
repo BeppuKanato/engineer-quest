@@ -99,7 +99,8 @@ export function convertBfsTrace(trace: PythonTraceResult): BfsTracePlayback {
     emit(state, event);
   }
   if (pending) emit(pending.state, pending.event);
-  const mode = steps.length && !invalidFinal ? "replay" : "final";
+  const mode = steps.length && !trace.ambiguous ? "replay" : "final";
+  const partial = mode === "replay" && invalidFinal;
   const finalEvent: PythonTraceEvent = lastEvent ?? { line: trace.stoppedLine ?? 0, event: "return", boundary: "line", locals: {} };
   if (mode === "final") {
     steps.length = 0; checkpoint.value = null;
@@ -108,10 +109,10 @@ export function convertBfsTrace(trace: PythonTraceResult): BfsTracePlayback {
     emit({ queue: [], distances, current: null }, finalEvent, text.final);
   }
   const last = steps[steps.length - 1];
-  const caption = trace.status === "error" ? stoppedCaption(trace) : trace.status === "truncated" ? text.truncated : mode === "final" ? text.final : text.ended;
-  steps[steps.length - 1] = { ...last, caption, canvas: { ...last.canvas, highlights: mode === "final" ? [] : last.canvas.highlights, trace: { ...last.canvas.trace, line: trace.error?.line ?? trace.stoppedLine ?? last.canvas.trace.line, terminal: true } } };
+  const caption = trace.status === "error" ? stoppedCaption(trace) : trace.status === "truncated" ? text.truncated : partial ? text.partial : mode === "final" ? text.final : text.ended;
+  steps[steps.length - 1] = { ...last, caption, canvas: { ...last.canvas, highlights: mode === "final" ? [] : last.canvas.highlights, trace: { ...last.canvas.trace, line: trace.error?.line ?? (partial ? last.canvas.trace.line : trace.stoppedLine ?? last.canvas.trace.line), terminal: true } } };
   return {
-    mode, notice: mode === "final" ? text.unsupported : trace.status === "truncated" ? text.truncated : null,
+    mode, notice: mode === "final" ? text.unsupported : trace.status === "truncated" ? text.truncated : partial ? text.partial : null,
     content: defineLearningContent({ version: 1, kind: "step-sequence", id: "bfs-own-trace", phase: 7, intervalMs: 3500,
       steps: steps as [LearningStep<BfsTraceCanvas>, ...LearningStep<BfsTraceCanvas>[]] }, validateTraceCanvas),
   };
