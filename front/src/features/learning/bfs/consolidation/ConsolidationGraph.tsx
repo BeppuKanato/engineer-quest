@@ -12,7 +12,7 @@ export function ConsolidationGraph({ graph, start, onSelect }: { graph: Graph; s
   const reduced = useReducedMotion();
   const transition = { duration: reduced ? 0 : 0.6, ease: "easeInOut" } as const;
   const source = graph.nodes.find(node => node.id === start)!;
-  return <Box sx={{ width: "100%", height: "clamp(250px, 45vh, 420px)" }}>
+  return <Box sx={{ width: "100%", flex: 1, minHeight: 320, position: "relative", "& > svg": { position: "absolute", inset: 0 } }}>
     <GraphViewport interactive={!!onSelect} label={`出発点${start}のグラフ`}>
       <GraphEdges edges={graph.edges.map(edge => ({ ...edge, highlighted: false }))} position={id => graph.nodes.find(node => node.id === id)!} transition={transition} />
       <GraphNodes nodes={graph.nodes.map(node => ({ ...node, status: "idle", highlighted: false, ariaLabel: `${node.label}${node.id === start ? "、出発点" : ""}` }))}

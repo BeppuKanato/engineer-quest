@@ -28,14 +28,16 @@ export function BfsConsolidationPreview() {
 
   return <Box component="main" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "応用・総括の診断結果" : "BFSの応用・総括"}
-      sx={{ width: "84vw", minHeight: "84dvh", p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      sx={{ width: "84vw", height: question && question.kind !== "parsons" ? "84dvh" : "auto",
+        minHeight: question && question.kind !== "parsons" ? 500 : "84dvh", p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
-        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none",
+        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
+        minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
       }}>{diagnosis ? `初回正解 ${diagnosis.correct}/${diagnosis.total}問` : question?.prompt}</Typography>
       {question && <>
         {question.kind !== "parsons" && <ConsolidationGraph {...question.scene} onSelect={question.kind === "node" ? id => submit({ kind: "node", nodeId: id }) : undefined} />}
-        <Typography component="p" sx={{ textAlign: "center", fontSize: 16, mb: 1 }}>{question.instruction}</Typography>
-        {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+        <Typography component="p" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0, mb: 1 }}>{question.instruction}</Typography>
+        {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
           {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
             onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
               color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, minHeight: 48, px: 2, textTransform: "none",
