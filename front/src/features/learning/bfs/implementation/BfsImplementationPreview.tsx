@@ -5,6 +5,8 @@ import { Box, Button, LinearProgress, Tab, Tabs, Typography } from "@mui/materia
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+
 import { playerTokens } from "../../player/player.tokens";
 import { BfsTraceDialog } from "../trace/BfsTraceDialog";
 import { traceBfsCode } from "../trace/acquireTrace";
@@ -22,8 +24,8 @@ import { bfsImplementationContent as content } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BfsImplementationPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
-  const [code, setCode] = useState<string>(content.template);
+export function BfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void }) {
+  const [code, setCode] = useState<string>(initialCode ?? content.template);
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
   const [tracing, setTracing] = useState(false);
@@ -39,6 +41,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
   const [runs, setRuns] = useState(0);
+  const traceRuns = useRef(0);
   const [usage, setUsage] = useState<HintUsage>([0, 0, 0, 0]);
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
@@ -92,10 +95,15 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
     lock.current = true;
     const current = generation.current;
     setPanel("tests");
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code } });
     setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
-      if (current === generation.current) setLastOutcomes(result);
+      if (current === generation.current) {
+        setLastOutcomes(result);
+        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
+        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage } });
+      }
     } finally {
       lock.current = false;
       if (current === generation.current) setRunning(false);
@@ -105,11 +113,18 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
     if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
+    traceRuns.current++;
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code } });
     setTracing(true); setTraceError(null);
     try {
       const trace = await traceBfsCode(code, () => current === generation.current);
-      if (current === generation.current) setTracePlayback(convertBfsTrace(trace));
+      if (current === generation.current) {
+        const playback = convertBfsTrace(trace);
+        setTracePlayback(playback);
+        onLearningEvent?.({ eventType: "trace_result", payload: { mode: playback.mode, states: playback.content.steps.length, status: trace.status, partial: !!playback.notice, errorKind: trace.error?.kind ?? null } });
+      }
     } catch (error) {
+      onLearningEvent?.({ eventType: "trace_result", payload: { status: "failed", states: 0, timeout: error instanceof Error && error.message.includes("タイムアウト") } });
       if (current === generation.current) setTraceError(error instanceof Error && error.message.includes("タイムアウト") ? bfsTraceText.timeout : bfsTraceText.unavailable);
     } finally {
       lock.current = false;
@@ -124,12 +139,14 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
     if (!instance || !selection || busy) return;
+    onLearningEvent?.({ eventType: "hint_token_insert", payload: { level: 1, token } });
     instance.pushUndoStop();
     instance.executeEdits("bfs-token", [{ range: selection, text: token, forceMoveMarkers: true }]);
     instance.pushUndoStop(); instance.focus();
   };
   const openHint = (level: HintLevel) => {
     if (level > 1 && usage[level - 2] === 0) return;
+    onLearningEvent?.({ eventType: "hint_open", payload: { level, count: usage[level - 1] + 1 } });
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
@@ -159,7 +176,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
             <Box sx={{ flex: 1, minHeight: 0 }}>
               <Editor height="100%" language="python" theme="vs-dark" value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
+                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
@@ -198,7 +215,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete }: { emb
       </>}
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
-    {tracePlayback && <BfsTraceDialog playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
+    {tracePlayback && <BfsTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
     {hint && <ImplementationHints dark level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }

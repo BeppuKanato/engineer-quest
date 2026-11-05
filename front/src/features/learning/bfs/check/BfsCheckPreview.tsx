@@ -4,6 +4,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { getLearningStep } from "../../review/reviewContent";
@@ -13,13 +16,14 @@ import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { bfsCheckContent } from "./check.content";
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BfsCheckPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
+export function BfsCheckPreview({ embedded = false, onLearningEvent, active = true, onComplete }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
   const [session, setSession] = useState(() => createAssessmentState(bfsCheckContent));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
   const completedRef = useRef(false);
   const question = activeQuestion(bfsCheckContent, session);
   const complete = assessmentComplete(bfsCheckContent, session);
+  useAssessmentObservation(bfsCheckContent, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
   const caption = complete ? bfsCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
@@ -71,7 +75,7 @@ export function BfsCheckPreview({ embedded = false, onComplete }: { embedded?: b
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
       </Box>
     </Box>
-    {reviewOpen && question && <LearningReviewDialog content={bfsExecutionContent} stepIds={question.reviewStepIds}
+    {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsExecutionContent} stepIds={question.reviewStepIds}
       renderCanvas={canvas => <BfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
   </Box>;
 }

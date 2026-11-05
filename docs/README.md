@@ -42,6 +42,7 @@
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
 | [bfs-editor-110.md](bfs-editor-110.md) | 記録 | Issue #110 のエディタ拡大・ダーク化、D1限定フリー実行とstdout、採点・トレースとの分離、実Pyodide確認画像 |
+| [learning-screens-109.md](learning-screens-109.md) | 記録 | Issue #109の単元・学習・ホーム接続、認証進捗API、下書き、報酬の受け口と計装イベント一覧 |
 | [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |
 | [bfs-visual-debug-76.md](bfs-visual-debug-76.md) | 記録 | Issue #76／PR #100 の型・内容による検出、D1呼び出し分離、部分再生、実行／テスト導線と確認画像 |
 | [bfs-implementation-75.md](bfs-implementation-75.md) | 記録 | Issue #75／PR #99 の結果図示・4段階ヒント・タイムアウト分類、PR #100のボタン構成に追随した実Pyodide確認画像 |

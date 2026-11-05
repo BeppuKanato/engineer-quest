@@ -3,7 +3,7 @@
 - 目的: 自力実装の編集面積と読みやすさを確保し、表示用データでprintと戻り値を確認できるようにする。
 - 適用範囲・状態: フェーズ7単品プレビューと既存の単元フロー内表示の実装記録。学習画面への組み込み・保存・ログ計装は含めない。
 - 最終確認日: 2026-11-05。
-- 起点: 最新の`develop` `416b244`（PR #112マージ済み）から`feat/bfs-editor-110`。
+- 起点: 最新の`develop` `416b244`（PR #112マージ済み）から`feat/bfs-editor-110`。作業中にマージされたPR #113（#109）の`develop` `b2aca22`も取り込み済み。
 - 正本: [Issue #110](https://github.com/BeppuKanato/engineer-quest/issues/110)、[Issue #78 設計決定10](https://github.com/BeppuKanato/engineer-quest/issues/78)、[教材指針フェーズ7](concept/learning-materials-guideline.md)、[UI定義](concept/learning-player-ui.md)、[開発ルール](development-rules.md)。現在の機能案内は[implementation README](../front/src/features/learning/bfs/implementation/README.md)。
 
 ## 変更範囲
@@ -22,11 +22,11 @@ Pythonの実行環境には直前の採点変数が残り得るため、`freeExe
 
 stdoutは先頭16,000文字までに制限して省略を明記する。戻り値は既存の距離整形を`DistanceOutput`として共用し、値違い・不足・余分を示す。エラーは既存の分類を使い、文法／実行時／結果不一致／タイムアウトの文言を表示する。Pyodideの準備失敗は再実行を促す文言に分ける。
 
-Issue本文には表示用D1・D2の例があるが、今回の明示依頼に従いフリー実行はD1に限定した。#109とは並行ブランチであり、学習画面・API接続・下書き保存・計装は追加していない。#109と統合する際は同じコンポーネントに加わる任意コールバックと下書き用プロパティを保持する必要がある。
+Issue本文には表示用D1・D2の例があるが、今回の明示依頼に従いフリー実行はD1に限定した。#109のPR #113が作業中にdevelopへマージされたため、最新developを取り込み、競合箇所の下書き用プロパティ・変更通知・既存の実行／ヒント／トレース計装を保持した。このIssueによる新しい学習画面・API接続・保存・計装の実装は加えていない。
 
 ## 検証結果
 
-`front/`で`lint`、`typecheck`、`build`、既存の`verify:learning-player`とBFS系9本（motivation / execution / check / code-mapping / code-check / consolidation / implementation / trace / unit）、追加の`verify:bfs-free-execution`がすべて成功した。DB適用なし。依存パッケージの追加なし。
+`front/`で`lint`、`typecheck`、`build`、既存の`verify:learning-player`とBFS系9本（motivation / execution / check / code-mapping / code-check / consolidation / implementation / trace / unit）、追加の`verify:bfs-free-execution`がすべて成功した。#109取り込み後にこれらを再実行し、`verify:learning-screens`も成功した。DB適用なし。依存パッケージの追加なし。
 
 追加verifyは実runnerのメッセージ処理をFake Workerで検証し、空stdout、リクエストIDの分離、既存出力の互換性、出力上限、エラー直前のprint、15秒タイムアウトを確認する。機能境界では新しいWorkerとD1限定、準備失敗・キャンセル・エラーの秘匿、距離の差分表示、教材データの不変を確認する。
 
@@ -39,6 +39,8 @@ Chromiumの実画面では実際のMonacoとPyodide 0.27.7を使い、1366×768�
 - 採点で4/5になった後のフリー実行でも、新しいWorkerにD1だけが渡り、以前の採点グローバルが空であること。
 - 既存の19状態トレース、テスト2回で5/5完了、ヒント各1回の記録。フリー実行はテスト回数に含まれないこと。
 - 単元フローをフェーズ1から進め、フェーズ7が拡大表示されること。フリー実行では単元完了せず、採点全通過で最終リザルトへ進み「テスト実行1回」となること。
+
+#109の取り込み後は、既存APIの応答をモックしたブラウザ補足確認で、初期下書き・変更時保存・再読込復元、既存のテスト／ヒント／トレース通知、完了時のサマリー受け渡しも確認した。認証・バックエンド・DBの実接続検証はこのIssueでは実施していない。
 
 この環境のブラウザは外部CDNへ直接到達できないため、ブラウザ検証時だけ、取得済みの同じMonaco／Pyodide配布資産をローカル配信先へ向けた。Python実行や判定のモックは使っていない。アプリにローカル配信先の設定変更は含めず、公開・デプロイもしていない。
 
