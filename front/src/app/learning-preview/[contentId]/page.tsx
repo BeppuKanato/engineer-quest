@@ -9,6 +9,7 @@ import { BfsCodeMappingPreview } from "@/features/learning/bfs/code-mapping/BfsC
 import { BfsCodeCheckPreview } from "@/features/learning/bfs/code-check/BfsCodeCheckPreview";
 import { BfsConsolidationPreview } from "@/features/learning/bfs/consolidation/BfsConsolidationPreview";
 import { BfsImplementationPreview } from "@/features/learning/bfs/implementation/BfsImplementationPreview";
+import { BfsUnitPreview } from "@/features/learning/bfs/unit/BfsUnitPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function LearningPreviewPage({ params }: { params: Promise<{ contentId: string }> }) {
   const { contentId } = await params;
+  if (contentId === "bfs-unit") return <BfsUnitPreview />;
   if (contentId === "bfs-motivation") return <BfsMotivationPreview />;
   if (contentId === "bfs-execution") return <BfsExecutionPreview />;
   if (contentId === "bfs-consolidation") return <BfsConsolidationPreview />;
