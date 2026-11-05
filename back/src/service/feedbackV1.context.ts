@@ -3,7 +3,6 @@ import { summarizeReaction } from "./feedbackV1.observation";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { getAchievementsByUser } from "./achievement.service";
-import { getCourseRoadmapByUserId } from "./course.service";
 import { HEXAD_FEEDBACK_EXPERIMENT_KEY } from "./experimentAssignment.service";
 import type { Action, Input, Target } from "./feedbackV1.engine";
 
@@ -67,22 +66,13 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     prisma.feedbackV1.findMany({ where: { userId: user.id, createdAt: { gte: assignment.assignedAt, lte: cutoff } }, orderBy: { createdAt: "asc" }, select: { id: true, result: true, interactions: true, status: true } }),
   ]);
   const legacyWhere = { createdAt: { gte: assignment.assignedAt, lte: cutoff } };
-  const [legacyCourseHistory, legacyCreateHistory] = await Promise.all([
-    prisma.courseExamFeedback.findMany({ where: { ...legacyWhere, attempt: { userId: user.id } }, select: { id: true, actionType: true, status: true, generatedAt: true } }),
-    prisma.createQuestFeedback.findMany({ where: { ...legacyWhere, submission: { attempt: { userId: user.id } } }, select: { id: true, actionType: true, status: true, generatedAt: true } }),
-  ]);
+  const legacyCreateHistory = await prisma.createQuestFeedback.findMany({ where: { ...legacyWhere, submission: { attempt: { userId: user.id } } }, select: { id: true, actionType: true, status: true, generatedAt: true } });
   const achievementProgress = await getAchievementsByUser(user);
-  const courses = await Promise.all(courseRows.map(c => getCourseRoadmapByUserId(user.id, c.id)));
+  // Legacy courses/missions no longer exist; course-related actions (ids 1-5) simply
+  // have no available targets until the new flow is connected. Action ids are not renumbered.
+  const courses = courseRows.map(c => ({ id: c.id, status: "not_started", missions: [] as never[] }));
   const targets: Record<number, Target[]> = Object.fromEntries(definitions.map((_, i) => [i + 1, []]));
   const add = (id: number, targetId: string, href: string) => targets[id].push({ id: targetId, href });
-  for (const c of courses) {
-    const available = c.missions.filter(m => !m.isLocked);
-    if (available.length) add(c.status === "completed" ? 3 : c.status === "not_started" ? 1 : 2, c.id, `/courses/roadmap/${encodeURIComponent(c.id)}`);
-    for (const m of available) {
-      if (m.type === "course_exam") add(5, m.id, `/mission/${encodeURIComponent(m.id)}/play${m.status === "completed" ? "?review=1" : ""}`);
-      else if (m.status === "completed") add(4, m.id, `/mission/${encodeURIComponent(m.id)}/play?review=1`);
-    }
-  }
   for (const q of quests) {
     const a = q.attempts[0];
     add(!a ? 6 : a.status === "COMPLETED" ? 8 : 7, q.id, `/create/quests/${encodeURIComponent(q.id)}/work`);
@@ -107,8 +97,8 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores: { Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore, FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore, Disruptor: h.disruptorScore, Player: h.playerScore } } : null;
   const input: Input = { learning, targets, actions, hexad, state: {
     courses, quests: quests.map(({ attempts, id, title, description, scenario, requirements, relatedCourses }) => ({ id, title, description, scenario, requirements, relatedCourses, attempts: attempts.map(({ code, ...a }) => ({ ...a, hasSavedCode: Boolean(code) })) })), cards: cards.map(c => ({ ...withoutFields(c, ["createdAt", "updatedAt"]), acquired: true, viewed: history.some(h => h.interactions.some(i => i.type === "ARRIVED" && (i.data as Record<string, unknown>).targetId === c.id)) ? "observed_arrival" : "not_observed" })),
-    achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: [...legacyCourseHistory, ...legacyCreateHistory].map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
-    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, missionId: p.missionId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: history.map(h => {
+    achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
+    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: history.map(h => {
       const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string }; validation?: { actionHref: string | null } } | null;
       const s = result?.selection;
       return { id: h.id, status: h.status, observation: summarizeReaction(h.interactions), recommendation: s ? { actionId: s.actionId, targetId: s.targetId, purpose: s.purpose, reason: s.reason } : null, interactions: h.interactions };

@@ -1,6 +1,5 @@
 import {
-  Achievement, AchievementCategory, AchievementConditionType, CourseDifficulty,
-  MissionType, Prisma, ProgressStatus,
+  Achievement, AchievementCategory, AchievementConditionType, Prisma,
 } from "@prisma/client";
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
@@ -40,14 +39,12 @@ const conditionLabel = (a: Achievement) => {
 };
 const stripLevel = (title: string) => title.replace(/\s*Lv\.\d+\s*$/, "").trim();
 const levelOf = (title: string) => Number(title.match(/Lv\.(\d+)/)?.[1] ?? 1);
-const seriesKey = (a: Achievement) => [a.category, a.conditionType, a.courseId ?? "all", a.missionId ?? "all", a.createQuestId ?? "all", stripLevel(a.title)].join(":");
+const seriesKey = (a: Achievement) => [a.category, a.conditionType, a.courseId ?? "all", "all", a.createQuestId ?? "all", stripLevel(a.title)].join(":");
 const targetLink = (a: Achievement) => {
-  if (a.conditionType === AchievementConditionType.SPECIFIC_MISSION_CLEAR && a.missionId)
-    return { href: `/mission/${encodeURIComponent(a.missionId)}/overview`, actionLabel: "対象ミッションを見る" };
   if (a.createQuestId)
     return { href: `/create/quests/${encodeURIComponent(a.createQuestId)}`, actionLabel: "対象の作る課題を見る" };
   if (a.courseId)
-    return { href: `/courses/roadmap/${encodeURIComponent(a.courseId)}`, actionLabel: "対象コースを見る" };
+    return { href: "/courses", actionLabel: "対象コースを見る" };
   if (a.conditionType === AchievementConditionType.KNOWLEDGE_CARD_COUNT)
     return { href: "/collection", actionLabel: "コレクションを見る" };
   if (([AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT, AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT, AchievementConditionType.CREATE_QUEST_PERFECT_COUNT] as AchievementConditionType[]).includes(a.conditionType))
@@ -56,7 +53,7 @@ const targetLink = (a: Achievement) => {
 };
 
 type Stats = {
-  missions: Set<string>; activities: number; completedCourses: Set<string>;
+  completedCourses: Set<string>;
   completedQuests: number; perfectQuests: number; optionalRequirements: number;
   cardCount: number; questScores: Map<string, number>;
 };
@@ -64,10 +61,7 @@ const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> 
   Array.isArray(value) ? value.filter((v) => Boolean(v) && typeof v === "object" && !Array.isArray(v)) as Array<Record<string, unknown>> : [];
 
 const loadStats = async (userId: string): Promise<Stats> => {
-  const [missionProgress, activities, courses, attempts, submissions, cardCount] = await Promise.all([
-    prisma.userMissionProgress.findMany({ where: { userId, status: ProgressStatus.COMPLETED }, select: { missionId: true } }),
-    prisma.userMissionActivityProgress.count({ where: { userId, status: ProgressStatus.COMPLETED } }),
-    prisma.course.findMany({ where: { isPublished: true }, select: { id: true, missions: { where: { isPublished: true, isRequiredForCourseCompletion: true }, select: { id: true, progresses: { where: { userId, status: ProgressStatus.COMPLETED }, select: { id: true } } } } } }),
+  const [attempts, submissions, cardCount] = await Promise.all([
     prisma.createQuestAttempt.findMany({ where: { userId }, select: { questId: true, status: true, bestScore: true } }),
     prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true } }),
     prisma.userKnowledgeCard.count({ where: { userId } }),
@@ -77,8 +71,8 @@ const loadStats = async (userId: string): Promise<Stats> => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
   return {
-    missions: new Set(missionProgress.map((p) => p.missionId)), activities,
-    completedCourses: new Set(courses.filter((c) => c.missions.length > 0 && c.missions.every((m) => m.progresses.length > 0)).map((c) => c.id)),
+    // Course completion is redefined on the new-flow progress model in #78.
+    completedCourses: new Set<string>(),
     completedQuests: attempts.filter((a) => a.status === "COMPLETED").length,
     perfectQuests: attempts.filter((a) => a.bestScore >= 100).length,
     optionalRequirements: optionalIds.size, cardCount,
@@ -86,26 +80,18 @@ const loadStats = async (userId: string): Promise<Stats> => {
   };
 };
 
-const courseAllProgress = async (userId: string, courseId: string | null, requiredOnly: boolean) => {
-  if (!courseId) return { goal: 1, progress: 0 };
-  const missions = await prisma.mission.findMany({
-    where: { courseId, isPublished: true, ...(requiredOnly ? { isRequiredForCourseCompletion: true } : {}) },
-    select: { progresses: { where: { userId, status: ProgressStatus.COMPLETED }, select: { id: true } } },
-  });
-  return { goal: Math.max(1, missions.length), progress: missions.filter((m) => m.progresses.length).length };
-};
-const hardExam = async (userId: string, courseId: string | null) => Boolean(courseId && await prisma.userMissionProgress.findFirst({ where: { userId, status: ProgressStatus.COMPLETED, highestClearedExamDifficulty: CourseDifficulty.HARD, mission: { courseId, type: MissionType.COURSE_EXAM, isPublished: true } }, select: { id: true } }));
-
 const progressFor = async (a: Achievement, userId: string, s: Stats) => {
   const goal = a.conditionValue ?? 1;
   switch (a.conditionType) {
-    case AchievementConditionType.MISSION_COUNT: return { goal, progress: s.missions.size };
-    case AchievementConditionType.SPECIFIC_MISSION_CLEAR: return { goal: 1, progress: a.missionId && s.missions.has(a.missionId) ? 1 : 0 };
-    case AchievementConditionType.ACTIVITY_COUNT: return { goal, progress: s.activities };
+    // Legacy mission/activity/exam-based conditions can no longer progress;
+    // new-flow conditions are added in #78.
+    case AchievementConditionType.MISSION_COUNT:
+    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
+    case AchievementConditionType.ACTIVITY_COUNT:
     case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
-    case AchievementConditionType.COURSE_COMPLETE: return courseAllProgress(userId, a.courseId, true);
-    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE: return courseAllProgress(userId, a.courseId, false);
-    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR: return { goal: 1, progress: await hardExam(userId, a.courseId) ? 1 : 0 };
+    case AchievementConditionType.COURSE_COMPLETE:
+    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
+    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR: return { goal, progress: 0 };
     case AchievementConditionType.COURSE_COMPLETED_COUNT: return { goal, progress: s.completedCourses.size };
     case AchievementConditionType.CREATE_QUEST_SCORE: return { goal, progress: a.createQuestId ? s.questScores.get(a.createQuestId) ?? 0 : 0 };
     case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT: return { goal, progress: s.completedQuests };
