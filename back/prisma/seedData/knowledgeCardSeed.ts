@@ -84,7 +84,9 @@ const SLOT_BY_LETTER: Record<string, (typeof BFS_CARD_PHASE_SLOTS)[number]> = {
 
 export const KNOWLEDGE_CARD_TABLE_COUNT = TABLE_SUBSETS.length;
 
-export const knowledgeCardPhaseScheduleSeed: Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput[] =
+export const knowledgeCardPhaseScheduleSeed: Array<
+  Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput & { id: string }
+> =
   TABLE_SUBSETS.flatMap((subset, index) => {
     const tableNumber = index + 1;
     return subset.map((letter) => {
