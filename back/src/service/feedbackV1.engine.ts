@@ -4,7 +4,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import type { AutoParseableTextFormat } from "openai/lib/parser";
 import type { ZodTypeAny } from "zod";
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
-import { getCourseExamFeedbackModel } from "./courseExamFeedback.openai";
+const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-5.4-mini";
 
 const text = z.string().trim().min(1);
 export const analysisSchema = z.object({
@@ -55,7 +55,7 @@ export type Call = (stage: "analysis" | "selection", prompt: string, personalize
 export const openAiCall: Call = async (stage, prompt, personalized) => {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120_000, maxRetries: 0 });
   const schema = stage === "analysis" ? analysisSchema : selectionSchema.extend({ personalizationAdjustment: personalized ? adjustmentSchema : z.null() });
-  const response = await client.responses.parse({ model: getCourseExamFeedbackModel(), input: prompt, reasoning: { effort: "medium" }, text: { format: format(schema, stage) } });
+  const response = await client.responses.parse({ model: getFeedbackModel(), input: prompt, reasoning: { effort: "medium" }, text: { format: format(schema, stage) } });
   if (!response.output_parsed) throw new Error("EMPTY_LLM_RESPONSE");
   return { output: response.output_parsed, model: response.model, responseId: response.id, usage: response.usage ?? null };
 };
@@ -65,10 +65,10 @@ export async function generate(input: Input, call: Call = openAiCall, log: (entr
     const started = Date.now();
     try {
       const result = await call(stage, prompt, stage === "selection" && input.hexad !== null);
-      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getCourseExamFeedbackModel(), sdkRetries: 0 }, input: prompt, ...result, durationMs: Date.now() - started, error: null });
+      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, ...result, durationMs: Date.now() - started, error: null });
       return result.output;
     } catch (error) {
-      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getCourseExamFeedbackModel(), sdkRetries: 0 }, input: prompt, durationMs: Date.now() - started, error: error instanceof Error ? error.message : "UNKNOWN" });
+      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, durationMs: Date.now() - started, error: error instanceof Error ? error.message : "UNKNOWN" });
       throw error;
     }
   };

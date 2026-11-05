@@ -12,10 +12,6 @@ export async function feedbackV1(firebaseUid: string, kind: "mission" | "create"
   if (kind === "create") {
     const legacy = await prisma.createQuestFeedback.findFirst({ where: { submissionId: eventId, submission: { attempt: { userId: user.id } }, status: "COMPLETED" } });
     if (legacy) return { id: undefined, status: legacy.status, source: "GENERATED", requestedAt: legacy.createdAt.toISOString(), completedAt: legacy.generatedAt?.toISOString() ?? null, feedback: { currentState: legacy.currentState, nextGoal: legacy.nextGoal, nextStep: legacy.nextStep, actionType: legacy.actionType, actionLabel: legacy.actionLabel } };
-  } else {
-    const legacy = await prisma.missionRewardRun.findFirst({ where: { id: eventId, userId: user.id }, select: { courseExamAttempt: { select: { feedback: true } } } });
-    const f = legacy?.courseExamAttempt?.feedback;
-    if (f?.status === "COMPLETED") return { id: undefined, status: f.status, source: "GENERATED", requestedAt: f.createdAt.toISOString(), completedAt: f.generatedAt?.toISOString() ?? null, feedback: { currentState: f.currentState, nextGoal: f.nextGoal, nextStep: f.nextStep, actionType: f.actionType, actionLabel: f.actionLabel } };
   }
   const key = `${kind}:${eventId}`;
   let row = await prisma.feedbackV1.findUnique({ where: { eventKey: key } });

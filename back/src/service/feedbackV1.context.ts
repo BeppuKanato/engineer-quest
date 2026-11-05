@@ -48,15 +48,8 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   const cutoff = new Date();
   let learning: unknown;
   if (kind === "mission") {
-    const event = await prisma.missionRewardRun.findFirst({ where: { id: eventId, userId: user.id }, include: { mission: { include: { activities: true } } } });
-    if (!event) throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
-    const missions = await prisma.mission.findMany({ where: { courseId: event.mission.courseId }, orderBy: { order: "asc" }, include: { activities: { orderBy: { order: "asc" } } } });
-    const answers = await prisma.activityAnswerLog.findMany({ where: { userId: user.id, activity: { mission: { courseId: event.mission.courseId } }, answeredAt: { lte: cutoff } }, orderBy: [{ answeredAt: "asc" }, { id: "asc" }], select: { id: true, activityId: true, answer: true, isCorrect: true, answeredAt: true } });
-    const attempts = await prisma.courseExamAttempt.findMany({ where: { userId: user.id, mission: { courseId: event.mission.courseId }, startedAt: { lte: cutoff } }, orderBy: { startedAt: "asc" }, include: { testExecutions: { orderBy: { executedAt: "asc" } }, hintViews: { orderBy: { viewedAt: "asc" } }, submissions: { orderBy: { submittedAt: "asc" } } } });
-    learning = { currentMissionId: event.missionId, missions: missions.map(m => ({ id: m.id, title: m.title, description: m.description, learnedItems: m.learnedItems, activities: m.activities.map(a => ({ id: a.id, title: a.title, instruction: a.instruction, content: a.content })) })), answers: answers.map(a => withoutFields(a, ["answeredAt"])), sequence: sequence([
-      ...answers.map(a => ({ id: a.id, type: "answer", at: a.answeredAt })),
-      ...attempts.flatMap(a => [...a.testExecutions.map(t => ({ id: t.id, type: "test", at: t.executedAt })), ...a.hintViews.map(t => ({ id: t.id, type: "hint", at: t.viewedAt })), ...a.submissions.map(t => ({ id: t.id, type: "submission", at: t.submittedAt }))]),
-    ]), attempts: attempts.map(a => ({ id: a.id, missionId: a.missionId, tests: a.testExecutions.map(v => withoutFields(v, ["executedAt"])), hints: a.hintViews.map(v => withoutFields(v, ["viewedAt"])), submissions: a.submissions.map(v => withoutFields(v, ["submittedAt"])) })) };
+    // Mission completion events no longer exist; mission-kind feedback is redefined with the new flow.
+    throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
   } else {
     const event = await prisma.createQuestSubmission.findFirst({ where: { id: eventId, attempt: { userId: user.id } }, include: { attempt: { include: { quest: { include: { requirements: true } }, executions: { orderBy: { executedAt: "asc" } }, hintViews: { orderBy: { viewedAt: "asc" } }, submissions: { orderBy: { submittedAt: "asc" } } } } } });
     if (!event) throw new AppError(404, "EVENT_NOT_FOUND", "Submission not found");
