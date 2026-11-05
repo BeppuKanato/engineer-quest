@@ -47,7 +47,7 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
     if (!playback.playing || !active) return;
     const timer = window.setTimeout(() => {
       setPlayback((current) => advancePlayback(current, { type: "tick" }, count));
-    }, Math.max(content.intervalMs, playerTokens.transitionMs + 50));
+    }, Math.max(content.intervalMs, playerTokens.autoplayFloorMs, playerTokens.transitionMs + 50));
     return () => window.clearTimeout(timer);
   }, [content, count, playback, active]);
 
@@ -78,17 +78,32 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
       <Stack direction="row" alignItems="center" gap={{ xs: 0.5, sm: 1.5 }} role="group" aria-label="再生操作"
         sx={{ mt: 1, flexShrink: 0, color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
         <IconButton aria-label={playback.playing ? "一時停止" : playback.index === count - 1 ? "最初から再生" : "再生"}
-          disabled={count < 2} onClick={() => dispatch({ type: "toggle" })}>
+          disabled={count < 2} onClick={() => dispatch({ type: "toggle" })}
+          sx={{ width: 48, height: 48, "& .MuiSvgIcon-root": { fontSize: 32 } }}>
           {playback.playing ? <PauseIcon /> : playback.index === count - 1 ? <ReplayIcon /> : <PlayArrowIcon />}
         </IconButton>
         <IconButton aria-label="前のステップ" disabled={playback.index === 0}
-          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })}><SkipPreviousIcon /></IconButton>
+          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })} sx={{ width: 40, height: 40 }}><SkipPreviousIcon /></IconButton>
         <IconButton aria-label="次のステップ" disabled={playback.index === count - 1}
-          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })}><SkipNextIcon /></IconButton>
-        <Box component="input" type="range" aria-label="ステップ位置" min={1} max={count} step={1}
-          value={playback.index + 1} aria-valuetext={`${playback.index + 1} / ${count}`} disabled={count < 2}
-          onChange={(event) => dispatch({ type: "seek", index: Number(event.target.value) - 1 })}
-          sx={{ flex: 1, minWidth: 40, height: 32, accentColor: playerTokens.control, cursor: "pointer" }} />
+          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })} sx={{ width: 40, height: 40 }}><SkipNextIcon /></IconButton>
+        <Box role="slider" aria-label="ステップ位置" aria-valuemin={1} aria-valuemax={count}
+          aria-valuenow={playback.index + 1} aria-valuetext={`${playback.index + 1} / ${count}`}
+          aria-disabled={count < 2} tabIndex={count < 2 ? -1 : 0} data-seek-bar
+          onClick={(event) => {
+            const segment = (event.target as Element).closest("[data-seek-index]");
+            if (!segment) return;
+            dispatch({ type: "seek", index: Number(segment.getAttribute("data-seek-index")) });
+          }}
+          sx={{ flex: "1 1 auto", maxWidth: 320, minWidth: 40, height: 32, display: "flex", alignItems: "center", gap: "3px",
+            cursor: count < 2 ? "default" : "pointer", outlineOffset: 2,
+            "&:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
+          {content.steps.map((item, i) => (
+            <Box key={item.id} data-seek-index={i} aria-hidden
+              sx={{ flex: 1, height: 8, borderRadius: 4,
+                bgcolor: i <= playback.index ? playerTokens.control : "#d1d5db",
+                transition: `background-color ${playerTokens.transitionMs}ms` }} />
+          ))}
+        </Box>
         <Typography component="span" sx={{ fontSize: 14, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
           {playback.index + 1} / {count}
         </Typography>
