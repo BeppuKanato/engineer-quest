@@ -17,7 +17,8 @@
     "verify:bfs-consolidation": "node scripts/verifyBfsConsolidation.cjs",
     "verify:bfs-implementation": "node scripts/verifyBfsImplementation.cjs",
     "verify:bfs-trace": "node scripts/verifyBfsTrace.cjs",
-    "verify:bfs-unit": "node scripts/verifyBfsUnitFlow.cjs"
+    "verify:bfs-unit": "node scripts/verifyBfsUnitFlow.cjs",
+    "verify:bfs-free-execution": "node scripts/verifyBfsFreeExecution.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
