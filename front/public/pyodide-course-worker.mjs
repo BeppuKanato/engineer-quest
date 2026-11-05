@@ -1,3 +1,5 @@
+import { buildPythonTraceHarness } from "./python-trace-harness.mjs";
+
 const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.mjs";
 let readyPromise;
 
@@ -16,6 +18,13 @@ self.onmessage = async ({ data }) => {
     const pyodide = await getPyodide();
     if (kind === "ping") {
       self.postMessage({ id, ready: true });
+      return;
+    }
+    if (kind === "trace") {
+      pyodide.setStdout({ batched: () => {} });
+      pyodide.setStderr({ batched: () => {} });
+      const traced = await pyodide.runPythonAsync(buildPythonTraceHarness({ code, functionName: data.functionName, args: data.args, maxEvents: data.maxEvents }));
+      self.postMessage({ id, done: true, trace: JSON.parse(traced) });
       return;
     }
     pyodide.setStdout({ batched: (text) => self.postMessage({ id, stdout: text }) });
