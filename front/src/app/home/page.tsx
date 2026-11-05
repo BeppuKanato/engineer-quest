@@ -21,6 +21,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
+
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { getMascotImagePath, isMascotId, type MascotId } from "@/app/component/mascot";
@@ -94,6 +96,7 @@ export default function HomePage() {
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
         <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
         <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+          <ContinueLearning />
           <HomeSkeleton />
         </Container>
       </Box>
@@ -105,6 +108,7 @@ export default function HomePage() {
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
         <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
         <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+          <ContinueLearning />
           <Alert severity="error">{errorMessage ?? "ホーム情報がありません。"}</Alert>
         </Container>
       </Box>
@@ -124,6 +128,7 @@ export default function HomePage() {
       <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+        <ContinueLearning />
         {errorMessage && (
           <Alert severity="warning" sx={{ mb: 3 }}>
             {errorMessage}
@@ -262,9 +267,9 @@ export default function HomePage() {
             <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
               <CardContent sx={{ p: 3 }}>
                 <Stack spacing={2}>
-                  <Typography variant="h5" fontWeight={950}>学習をはじめる</Typography>
+                  <Typography variant="h5" fontWeight={950}>ほかの単元を探す</Typography>
                   <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                    学習フローは新しい形式へ移行中です。コース一覧から学習を始められます。
+                    コース一覧から学びたい単元を選べます。
                   </Typography>
                   <Button component={Link} href="/courses" variant="contained" sx={{ width: "fit-content", fontWeight: 950 }}>
                     コース一覧を見る

@@ -8,11 +8,13 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
+
 import type { CanvasSnapshot, LearningContent } from "./content.types";
 import { advancePlayback, type PlaybackAction, type PlaybackState } from "./playback";
 import { playerTokens } from "./player.tokens";
 
-export type LearningPlayerProps<TCanvas extends CanvasSnapshot> = {
+export type LearningPlayerProps<TCanvas extends CanvasSnapshot> = LearningInstrumentation & {
   content: LearningContent<TCanvas>;
   renderCanvas: (canvas: TCanvas) => ReactNode;
   /** 最終ステップでのみ操作バーに出す接続用アクション（単元フローでの次フェーズへの遷移など）。未指定なら従来どおり出さない。 */
@@ -24,23 +26,30 @@ export function LearningPlayer<TCanvas extends CanvasSnapshot>(props: LearningPl
   return <PlaybackSession key={`${props.content.id}:${props.content.version}`} {...props} />;
 }
 
-function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas, endAction }: LearningPlayerProps<TCanvas>) {
+function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas, endAction, onLearningEvent, active = true }: LearningPlayerProps<TCanvas>) {
   const [playback, setPlayback] = useState<PlaybackState>({ index: 0, playing: false });
   const count = content.steps.length;
   const step = content.steps[Math.min(playback.index, count - 1)];
-  const dispatch = (action: PlaybackAction) => setPlayback((current) => advancePlayback(current, action, count));
+  useLearningVisit(onLearningEvent, active, "player_step_view", step.id, { contentId: content.id, position: playback.index });
+  const dispatch = (action: PlaybackAction) => {
+    const next = advancePlayback(playback, action, count);
+    if (active) onLearningEvent?.({ eventType: "player_action", targetId: step.id, payload: { contentId: content.id,
+      action: action.type === "toggle" ? next.playing ? "play" : "pause" : action.type, from: step.id, to: content.steps[next.index].id } });
+    setPlayback(current => advancePlayback(current, action, count));
+  };
+  useEffect(() => { if (active && playback.index === count - 1) onLearningEvent?.({ eventType: "player_end_reached", targetId: step.id, payload: { contentId: content.id } }); }, [active, playback.index, count, step.id, content.id, onLearningEvent]);
 
   useEffect(() => {
     setPlayback({ index: 0, playing: false });
   }, [content]);
 
   useEffect(() => {
-    if (!playback.playing) return;
+    if (!playback.playing || !active) return;
     const timer = window.setTimeout(() => {
       setPlayback((current) => advancePlayback(current, { type: "tick" }, count));
     }, Math.max(content.intervalMs, playerTokens.transitionMs + 50));
     return () => window.clearTimeout(timer);
-  }, [content, count, playback]);
+  }, [content, count, playback, active]);
 
   return (
     <Box component="section" aria-label="学習プレイヤー" tabIndex={0}
@@ -84,7 +93,7 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
           {playback.index + 1} / {count}
         </Typography>
         {endAction && playback.index === count - 1 && (
-          <Button variant="contained" onClick={endAction.onClick}
+          <Button variant="contained" onClick={() => { onLearningEvent?.({ eventType: "player_end_action", targetId: step.id, payload: { contentId: content.id } }); endAction.onClick(); }}
             sx={{ minHeight: 44, ml: 1, whiteSpace: "nowrap", bgcolor: playerTokens.focus, color: playerTokens.surface,
               "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
             {endAction.label}
