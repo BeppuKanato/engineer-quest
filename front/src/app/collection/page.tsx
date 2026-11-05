@@ -31,7 +31,7 @@ export default function CollectionPage() {
     {error && <Alert severity="error">{error}</Alert>}
     {!data ? <Skeleton variant="rounded" height={300} /> : <>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
-        <CollectionCard icon={<MenuBookIcon sx={{ fontSize: 60 }} />} color="#7e22ce" title="知識カード" description="コースから一歩外へ学びを広げる、番号付きの発見カードです。" count={`${data.knowledgeTips.collectedCount} / ${data.knowledgeTips.totalCount} 枚`} action="カードを見る" onClick={() => router.push("/knowledge-cards")} />
+        <CollectionCard icon={<MenuBookIcon sx={{ fontSize: 60 }} />} color="#7e22ce" title="知識カード" description="コースから一歩外へ学びを広げる、番号付きの発見カードです。" count={`${data.knowledgeTips.collectedCount} / ${data.knowledgeTips.totalCount} 枚・あと${data.knowledgeTips.totalCount - data.knowledgeTips.collectedCount}枚`} action="カードを見る" onClick={() => router.push("/knowledge-cards")} />
         <CollectionCard icon={<EmojiEventsIcon sx={{ fontSize: 60 }} />} color="#b45309" title="実績" description="学習や作る課題で達成したことを、レアリティ付きの証として残します。" count={`${data.achievements.achievedCount} / ${data.achievements.totalCount} 件`} action="実績を見る" onClick={() => router.push("/achievements")} />
       </Box>
       <Paper elevation={0} sx={{ p: 3, border: "1px solid #dbe3ef", borderRadius: 3 }}><Typography variant="h5" fontWeight={900} mb={2}>最近の獲得</Typography><Stack spacing={1}>
