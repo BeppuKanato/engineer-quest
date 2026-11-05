@@ -1,4 +1,4 @@
-import { KnowledgeCard, Prisma } from "@prisma/client";
+import { KnowledgeCard } from "@prisma/client";
 
 export type KnowledgeCardSummary = {
   id: string;
@@ -12,20 +12,19 @@ export type KnowledgeCardSummary = {
   rarity: string;
 };
 
-const CARD_FIELDS = {
-  id: true,
-  catalogNumber: true,
-  label: true,
-  title: true,
-  description: true,
-  connection: true,
-  useCase: true,
-  searchKeywords: true,
-  rarity: true,
-} satisfies Prisma.KnowledgeCardSelect;
-
 export const toKnowledgeCardSummary = (
-  card: Pick<KnowledgeCard, keyof typeof CARD_FIELDS>
+  card: Pick<
+    KnowledgeCard,
+    | "id"
+    | "catalogNumber"
+    | "label"
+    | "title"
+    | "description"
+    | "connection"
+    | "useCase"
+    | "searchKeywords"
+    | "rarity"
+  >
 ): KnowledgeCardSummary => ({
   id: card.id,
   catalogNumber: card.catalogNumber,
