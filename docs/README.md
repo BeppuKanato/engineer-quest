@@ -41,6 +41,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [learning-rewards-111.md](learning-rewards-111.md) | 記録 | Issue #111 のカード3段階演出・区切りと最終リザルトの実績・未所持カードの影、テーブル別再現手順と確認画像 |
 | [bfs-editor-110.md](bfs-editor-110.md) | 記録 | Issue #110 のエディタ拡大・ダーク化、D1限定フリー実行とstdout、採点・トレースとの分離、実Pyodide確認画像 |
 | [learning-screens-109.md](learning-screens-109.md) | 記録 | Issue #109の単元・学習・ホーム接続、認証進捗API、下書き、報酬の受け口と計装イベント一覧 |
 | [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |
