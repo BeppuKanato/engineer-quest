@@ -6,6 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import { playerTokens } from "../../player/player.tokens";
+import { BfsTraceDialog } from "../trace/BfsTraceDialog";
+import { traceBfsCode } from "../trace/acquireTrace";
+import { convertBfsTrace } from "../trace/convertTrace";
+import { bfsTraceText } from "../trace/trace.content";
+import type { BfsTracePlayback } from "../trace/trace.types";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent as content } from "./implementation.content";
@@ -15,6 +20,9 @@ export function BfsImplementationPreview() {
   const [code, setCode] = useState<string>(content.template);
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
+  const [tracing, setTracing] = useState(false);
+  const [tracePlayback, setTracePlayback] = useState<BfsTracePlayback | null>(null);
+  const [traceError, setTraceError] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
   const [runs, setRuns] = useState(0);
@@ -43,7 +51,7 @@ export function BfsImplementationPreview() {
     if (lock.current || runtime !== "ready" || complete || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
-    setRunning(true); setRuns(count => count + 1); setOutcomes([]);
+    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
       if (current === generation.current) setLastOutcomes(result);
@@ -52,9 +60,26 @@ export function BfsImplementationPreview() {
       if (current === generation.current) setRunning(false);
     }
   };
+  const runTrace = async () => {
+    if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
+    lock.current = true;
+    const current = generation.current;
+    setTracing(true); setTraceError(null);
+    try {
+      const trace = await traceBfsCode(code, () => current === generation.current);
+      if (current === generation.current) setTracePlayback(convertBfsTrace(trace));
+    } catch (error) {
+      if (current === generation.current) setTraceError(error instanceof Error && error.message.includes("タイムアウト") ? bfsTraceText.timeout : bfsTraceText.unavailable);
+    } finally {
+      lock.current = false;
+      if (current === generation.current) setTracing(false);
+    }
+  };
+  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void runTrace()}
+    sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>{bfsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
-    if (!instance || !selection || running) return;
+    if (!instance || !selection || running || tracing) return;
     instance.pushUndoStop();
     instance.executeEdits("bfs-token", [{ range: selection, text: token, forceMoveMarkers: true }]);
     instance.pushUndoStop(); instance.focus();
@@ -76,28 +101,31 @@ export function BfsImplementationPreview() {
         <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
         {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
         <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
+        <Box sx={{ mt: 2 }}>{traceButton}</Box>
+        {tracing && <Typography component="p" role="status">{bfsTraceText.loading}</Typography>}
       </Box> : <>
         <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 2 }}>
           <Box sx={{ minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <Box sx={{ flex: { xs: "none", md: 1 }, height: { xs: 260, md: "auto" }, minHeight: 200 }}>
               <Editor height="100%" language="python" theme="light" value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { setCode(next ?? ""); setOutcomes([]); }}
+                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
-                  readOnly: running, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
+                  readOnly: running || tracing, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
           </Box>
           <Box sx={{ minWidth: 0, minHeight: 0, mt: { xs: 2, md: 0 }, overflowY: { md: "auto" } }}><ImplementationResults outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} /></Box>
         </Box>
         <Box sx={{ flexShrink: 0 }}>
-          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{tracing ? bfsTraceText.loading : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {runtime === "error" && <Button onClick={() => void prepare()} sx={{ color: playerTokens.control }}>{content.controls.reload}</Button>}
-            <Button variant="contained" disabled={runtime !== "ready" || running || !editorReady || !code.trim()} onClick={() => void run()}
+            <Button variant="contained" disabled={runtime !== "ready" || running || tracing || !editorReady || !code.trim()} onClick={() => void run()}
               sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.controls.run}</Button>
+            {traceButton}
             <Box role="group" aria-label={content.hints.groupLabel} sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-              {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
+              {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} variant="outlined" disabled={running || tracing || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
                 sx={{ minHeight: 44, color: playerTokens.text, borderColor: playerTokens.control }}>
                 <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>{label}</Box>
                 <Box component="span" sx={{ display: { xs: "inline", md: "none" } }}>{content.hints.compactLabels[index]}</Box>
@@ -106,7 +134,9 @@ export function BfsImplementationPreview() {
           </Box>
         </Box>
       </>}
+      {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
+    {tracePlayback && <BfsTraceDialog playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
     {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }
