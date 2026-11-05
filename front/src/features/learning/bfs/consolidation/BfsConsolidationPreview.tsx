@@ -8,14 +8,23 @@ import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
+import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { ConsolidationGraph } from "./ConsolidationGraph";
 import { ParsonsBoard } from "./ParsonsBoard";
 import { bfsConsolidationContent as content, type ConsolidationQuestion } from "./consolidation.content";
 
-export function BfsConsolidationPreview() {
+/** embedded / onComplete / onNext は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。
+ * このフェーズのリザルトは診断画面そのものなので、完了通知とは別に、診断画面から次へ進む導線（onNext）を足す。 */
+export function BfsConsolidationPreview({ embedded = false, onComplete, onNext, nextLabel }: {
+  embedded?: boolean;
+  onComplete?: (summary: BfsUnitPhaseSummary) => void;
+  onNext?: () => void;
+  nextLabel?: string;
+}) {
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [review, setReview] = useState<ConsolidationQuestion | null>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
+  const completedRef = useRef(false);
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   const record = session.records.find(record => record.questionId === question?.id);
@@ -25,11 +34,19 @@ export function BfsConsolidationPreview() {
     if (question) setSession(current => answerQuestion(content, current, question.id, answer));
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
+  // 診断が出た瞬間だけ単元フローへ通知する。
+  useEffect(() => {
+    if (diagnosis && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.({ firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
+    }
+    if (!diagnosis) completedRef.current = false;
+  }, [diagnosis, onComplete]);
 
-  return <Box component="main" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "応用・総括の診断結果" : "BFSの応用・総括"}
-      sx={{ width: "84vw", height: question && question.kind !== "parsons" ? "84dvh" : "auto",
-        minHeight: question && question.kind !== "parsons" ? 500 : "84dvh", p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      sx={{ width: embedded ? "100%" : "84vw", height: question && question.kind !== "parsons" ? (embedded ? "100%" : "84dvh") : "auto",
+        minHeight: question && question.kind !== "parsons" ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -66,6 +83,12 @@ export function BfsConsolidationPreview() {
           </Box>)}
         </Box>
         <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
+        {onNext && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Button variant="contained" onClick={onNext}
+            sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
+            {nextLabel ?? "次のフェーズへ進む"}
+          </Button>
+        </Box>}
       </>}
     </Box>
     {review && <LearningReviewDialog content={bfsCodeMappingContent} stepIds={review.reviewStepIds}

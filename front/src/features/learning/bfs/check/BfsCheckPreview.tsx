@@ -9,12 +9,15 @@ import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { getLearningStep } from "../../review/reviewContent";
 import { BfsExecutionCanvas } from "../execution/BfsExecutionCanvas";
 import { bfsExecutionContent } from "../execution/execution.content";
+import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { bfsCheckContent } from "./check.content";
 
-export function BfsCheckPreview() {
+/** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
+export function BfsCheckPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
   const [session, setSession] = useState(() => createAssessmentState(bfsCheckContent));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
+  const completedRef = useRef(false);
   const question = activeQuestion(bfsCheckContent, session);
   const complete = assessmentComplete(bfsCheckContent, session);
   const record = session.records.find(record => record.questionId === question?.id);
@@ -25,9 +28,20 @@ export function BfsCheckPreview() {
     if (question) setSession(current => answerQuestion(bfsCheckContent, current, question.id, answer));
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
+  // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
+  useEffect(() => {
+    if (complete && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.({
+        firstAttemptCorrect: session.records.filter(entry => entry.attempts[0]?.correct).length,
+        totalQuestions: bfsCheckContent.questions.length,
+      });
+    }
+    if (!complete) completedRef.current = false;
+  }, [complete, onComplete, session.records]);
 
-  return <Box component="main" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label="BFSの理解度確認" sx={{ width: "84vw", height: "84dvh", minHeight: 500, p: 1, display: "flex", flexDirection: "column" }}>
+  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+    <Box component="section" aria-label="BFSの理解度確認" sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -53,6 +67,8 @@ export function BfsCheckPreview() {
             "&:hover": { border: `3px dashed ${playerTokens.focus}` } }}>どれも入らない</Button>}
         {retry && <Button variant="outlined" onClick={() => setReviewOpen(true)}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control }}>該当ステップの動きを確認する</Button>}
+        {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bfsCheckContent))}
+          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
       </Box>
     </Box>
     {reviewOpen && question && <LearningReviewDialog content={bfsExecutionContent} stepIds={question.reviewStepIds}

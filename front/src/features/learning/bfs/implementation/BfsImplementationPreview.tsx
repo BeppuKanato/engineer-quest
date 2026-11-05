@@ -11,12 +11,14 @@ import { traceBfsCode } from "../trace/acquireTrace";
 import { convertBfsTrace } from "../trace/convertTrace";
 import { bfsTraceText } from "../trace/trace.content";
 import type { BfsTracePlayback } from "../trace/trace.types";
+import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent as content } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
-export function BfsImplementationPreview() {
+/** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
+export function BfsImplementationPreview({ embedded = false, onComplete }: { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void }) {
   const [code, setCode] = useState<string>(content.template);
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
@@ -32,6 +34,7 @@ export function BfsImplementationPreview() {
   const editor = useRef<Parameters<OnMount>[0] | null>(null);
   const lock = useRef(false);
   const generation = useRef(0);
+  const completedRef = useRef(false);
   const resultRef = useRef<HTMLParagraphElement>(null);
   const passed = outcomes.filter(outcome => outcome.passed).length;
   const complete = !running && allTestsPassed(content.tests, outcomes);
@@ -47,6 +50,14 @@ export function BfsImplementationPreview() {
     return () => { lifetime.current++; disposePyodideRunner(); };
   }, [prepare]);
   useEffect(() => { if (complete) resultRef.current?.focus(); }, [complete]);
+  // 全テスト通過した瞬間だけ単元フローへ通知する。
+  useEffect(() => {
+    if (complete && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.({ testRuns: runs, hintUsage: usage });
+    }
+    if (!complete) completedRef.current = false;
+  }, [complete, onComplete, runs, usage]);
   const run = async () => {
     if (lock.current || runtime !== "ready" || complete || !code.trim()) return;
     lock.current = true;
@@ -88,9 +99,9 @@ export function BfsImplementationPreview() {
     if (level > 1 && usage[level - 2] === 0) return;
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
-  return <Box component="main" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "BFS自力実装の完了" : "BFSの自力実装"}
-      sx={{ width: "84vw", height: "84dvh", p: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
+      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", p: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
       <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 30px)", outline: "none" }}>
         {complete ? content.result.title : content.caption}
       </Typography>
