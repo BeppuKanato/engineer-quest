@@ -32,7 +32,7 @@ function SortableLine({ id, text, index, count, duration, onMove }: SortableLine
 }
 
 /** 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。 */
-export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQuestion; code: typeof bfsCode; onAnswer: (answer: OrderAnswer) => void }) {
+export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQuestion; code: typeof bfsCode; onAnswer?: (answer: OrderAnswer) => void }) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
@@ -57,8 +57,8 @@ export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQu
     </Box>
     <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
       <Button onClick={() => setOrdered([...question.lineIds])} disabled={isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
-      <Button variant="outlined" onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
-        sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>この順序で回答する</Button>
+      {onAnswer && <Button variant="outlined" onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
+        sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>この順序で回答する</Button>}
     </Box>
   </Box>;
 }
