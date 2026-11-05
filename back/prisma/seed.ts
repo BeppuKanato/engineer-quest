@@ -8,6 +8,10 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 import { achievementSeed } from "./seedData/achievementSeed";
 import { courseSeed } from "./seedData/courseSeed";
+import {
+  knowledgeCardPhaseScheduleSeed,
+  knowledgeCardSeed,
+} from "./seedData/knowledgeCardSeed";
 import { createQuestSeed } from "./seedData/createQuestSeed";
 import { assertPreservingSeedOperation } from "./preservingSeedPolicy";
 
@@ -129,6 +133,34 @@ async function seedAchievements(client: Prisma.TransactionClient = prisma) {
   }
 }
 
+async function seedKnowledgeCards(client: Prisma.TransactionClient = prisma) {
+  const activeCardIds = knowledgeCardSeed.map((card) => String(card.id));
+  const activeScheduleIds = knowledgeCardPhaseScheduleSeed.map((entry) => entry.id);
+
+  if (!preserveExisting) await client.knowledgeCardPhaseScheduleEntry.deleteMany({
+    where: { id: { notIn: activeScheduleIds } },
+  });
+  if (!preserveExisting) await client.knowledgeCard.deleteMany({
+    where: { id: { notIn: activeCardIds } },
+  });
+
+  for (const card of knowledgeCardSeed) {
+    await client.knowledgeCard.upsert({
+      where: { id: card.id },
+      update: card,
+      create: card,
+    });
+  }
+
+  for (const entry of knowledgeCardPhaseScheduleSeed) {
+    await client.knowledgeCardPhaseScheduleEntry.upsert({
+      where: { id: entry.id },
+      update: entry,
+      create: entry,
+    });
+  }
+}
+
 async function seedCreateQuests(client: Prisma.TransactionClient = prisma) {
   const activeQuestIds = createQuestSeed.map((quest) => quest.id);
 
@@ -215,6 +247,7 @@ async function main() {
       for (const course of courseSeed) await seedCourse(client, course);
       await seedCreateQuests(client);
       await seedAchievements(client);
+      await seedKnowledgeCards(client);
     }, { maxWait: 10_000, timeout: 900_000 });
     console.log("Preserving seed completed: master rows upserted; no deletions or learner/progress/assignment writes.");
     return;
@@ -237,6 +270,7 @@ async function main() {
   }
   await seedCreateQuests();
   await seedAchievements();
+  await seedKnowledgeCards();
 
   console.log("Seeding finished.");
 }

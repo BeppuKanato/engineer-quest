@@ -114,6 +114,11 @@ const calculateAchievementProgress = async (achievement: Achievement) => {
     case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT:
     case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
     case AchievementConditionType.COURSE_COMPLETED_COUNT:
+    case AchievementConditionType.UNIT_COMPLETE:
+    case AchievementConditionType.UNIT_COMPLETED_COUNT:
+    case AchievementConditionType.PHASE_COMPLETED:
+    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT:
+    case AchievementConditionType.PHASE_NO_HINT_COMPLETE:
       return { name: achievement.title, goal: achievement.conditionValue ?? 1, progress: 0 };
   }
 };
@@ -142,6 +147,12 @@ const buildAchievementTargetLink = (
       return { href: "/create", actionLabel: "作る課題に挑戦する" };
     case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
       return { href: "/collection", actionLabel: "コレクションを見る" };
+    case AchievementConditionType.UNIT_COMPLETE:
+    case AchievementConditionType.UNIT_COMPLETED_COUNT:
+    case AchievementConditionType.PHASE_COMPLETED:
+    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT:
+    case AchievementConditionType.PHASE_NO_HINT_COMPLETE:
+      return { href: "/courses", actionLabel: "学習を続ける" };
   }
 };
 

@@ -35,6 +35,9 @@ model User {
   experimentAssignments     ExperimentAssignment[]
 
   feedbackV1Records FeedbackV1[]
+  unitProgresses    UnitLearningProgress[]
+  phaseProgresses   PhaseLearningProgress[]
+  learningEvents    LearningEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,6 +120,9 @@ model Course {
   achievements     Achievement[]
   knowledgeCards   KnowledgeCard[]
   createQuestLinks CreateQuestCourse[]
+  unitProgresses   UnitLearningProgress[]
+  phaseProgresses  PhaseLearningProgress[]
+  knowledgeCardPhaseScheduleEntries KnowledgeCardPhaseScheduleEntry[]
   questPosts       QuestPost[]
 
   createdAt DateTime @default(now())
@@ -174,6 +180,7 @@ model Achievement {
   conditionValue Int?
   courseId       String?
   createQuestId  String?
+  phaseKey       String?
 
   isSecret  Boolean @default(false)
   sortOrder Int     @default(0)
@@ -229,6 +236,7 @@ model KnowledgeCard {
 
   course             Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
   userKnowledgeCards UserKnowledgeCard[]
+  phaseScheduleEntries KnowledgeCardPhaseScheduleEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -599,6 +607,11 @@ enum AchievementConditionType {
   CREATE_QUEST_PERFECT_COUNT
   KNOWLEDGE_CARD_COUNT
   COURSE_COMPLETED_COUNT
+  UNIT_COMPLETE
+  UNIT_COMPLETED_COUNT
+  PHASE_COMPLETED
+  PHASE_FIRST_ATTEMPT_PERFECT
+  PHASE_NO_HINT_COMPLETE
 }
 
 enum AchievementRarity {
@@ -669,4 +682,84 @@ model FeedbackV1Interaction {
  createdAt DateTime @default(now())
  feedback FeedbackV1 @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
  @@index([feedbackId, createdAt])
+}
+
+// =========================
+// New-flow learning progress / events
+// =========================
+
+enum LearningProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model UnitLearningProgress {
+  id           String                 @id @default(cuid())
+  userId       String
+  courseId     String
+  status       LearningProgressStatus @default(IN_PROGRESS)
+  lastPhaseKey String?
+  startedAt    DateTime               @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+}
+
+model PhaseLearningProgress {
+  id          String                 @id @default(cuid())
+  userId      String
+  courseId    String
+  phaseKey    String
+  status      LearningProgressStatus @default(IN_PROGRESS)
+  summary     Json?
+  startedAt   DateTime               @default(now())
+  completedAt DateTime?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, phaseKey])
+  @@index([userId, courseId])
+}
+
+model LearningEvent {
+  id              String   @id @default(cuid())
+  userId          String
+  sessionId       String
+  eventType       String
+  courseId        String?
+  phaseKey        String?
+  targetId        String?
+  payload         Json?
+  clientTimestamp DateTime
+  serverTimestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sessionId, serverTimestamp])
+  @@index([userId, courseId])
+}
+
+model KnowledgeCardPhaseScheduleEntry {
+  id              String @id @default(cuid())
+  courseId        String
+  courseVersion   Int
+  tableNumber     Int
+  phaseKey        String
+  knowledgeCardId String
+
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  knowledgeCard KnowledgeCard @relation(fields: [knowledgeCardId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, courseVersion, tableNumber, phaseKey])
+  @@index([courseId, tableNumber])
 }
