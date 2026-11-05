@@ -7,6 +7,7 @@ import { BfsExecutionPreview } from "@/features/learning/bfs/execution/BfsExecut
 import { BfsCheckPreview } from "@/features/learning/bfs/check/BfsCheckPreview";
 import { BfsCodeMappingPreview } from "@/features/learning/bfs/code-mapping/BfsCodeMappingPreview";
 import { BfsCodeCheckPreview } from "@/features/learning/bfs/code-check/BfsCodeCheckPreview";
+import { BfsConsolidationPreview } from "@/features/learning/bfs/consolidation/BfsConsolidationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -17,6 +18,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   const { contentId } = await params;
   if (contentId === "bfs-motivation") return <BfsMotivationPreview />;
   if (contentId === "bfs-execution") return <BfsExecutionPreview />;
+  if (contentId === "bfs-consolidation") return <BfsConsolidationPreview />;
   if (contentId === "bfs-code-check") return <BfsCodeCheckPreview />;
   if (contentId === "bfs-code-mapping") return <BfsCodeMappingPreview />;
   if (contentId === "bfs-check") return <BfsCheckPreview />;
