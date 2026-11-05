@@ -13,7 +13,8 @@
     "verify:bfs-execution": "node scripts/verifyBfsExecution.cjs",
     "verify:bfs-check": "node scripts/verifyBfsCheck.cjs",
     "verify:bfs-code-mapping": "node scripts/verifyBfsCodeMapping.cjs",
-    "verify:bfs-code-check": "node scripts/verifyBfsCodeCheck.cjs"
+    "verify:bfs-code-check": "node scripts/verifyBfsCodeCheck.cjs",
+    "verify:bfs-consolidation": "node scripts/verifyBfsConsolidation.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
