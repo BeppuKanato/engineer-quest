@@ -6,7 +6,7 @@ import {
 } from "@prisma/client";
 
 import { createQuestSeed } from "./createQuestSeed";
-import { learningSeed } from "./learningSeed";
+import { courseSeed } from "./courseSeed";
 
 const levelRarity = [
   AchievementRarity.COMMON,
@@ -47,20 +47,6 @@ const countSeries = ({
     sortOrder: sortOrder + index,
   }));
 
-const courseAchievements: Prisma.AchievementUncheckedCreateInput[] =
-  learningSeed.courses.map((course, index) => ({
-    id: `ach-course-${course.id.replace("course-algorithm-", "")}-complete`,
-    category: AchievementCategory.COURSE_COMPLETE,
-    conditionType: AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE,
-    courseId: course.id,
-    title: `${course.title}を修得した`,
-    description: `${course.title}の必須ミッションをすべて完了した証です。`,
-    rarity: AchievementRarity.RARE,
-    iconKey: "course",
-    isSecret: false,
-    sortOrder: 100 + index,
-  }));
-
 const createQuestAchievements: Prisma.AchievementUncheckedCreateInput[] =
   createQuestSeed.flatMap((quest, index) => [
     {
@@ -92,13 +78,9 @@ const createQuestAchievements: Prisma.AchievementUncheckedCreateInput[] =
   ]);
 
 export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
-  ...countSeries({ id: "ach-mission-clear", title: "ミッション挑戦者", description: "{count}個のミッションを完了した証です。", category: AchievementCategory.MISSION_COUNT, conditionType: AchievementConditionType.MISSION_COUNT, values: [1, 10, 25, 49], sortOrder: 10, iconKey: "mission" }),
-  ...countSeries({ id: "ach-activity-clear", title: "学習ステップ", description: "{count}個のアクティビティを完了した証です。", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.ACTIVITY_COUNT, values: [25, 100, 200], sortOrder: 30, iconKey: "steps" }),
-  ...countSeries({ id: "ach-course-count", title: "アルゴリズム探究者", description: "{count}種類のコースを完了した証です。", category: AchievementCategory.COURSE_COMPLETE, conditionType: AchievementConditionType.COURSE_COMPLETED_COUNT, values: [1, 3, learningSeed.courses.length], sortOrder: 50, iconKey: "course" }),
-  ...courseAchievements,
   ...countSeries({ id: "ach-create-complete", title: "機能ビルダー", description: "{count}種類の作る課題で基本要件を達成した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT, values: [1, 3, createQuestSeed.length], sortOrder: 200, iconKey: "build" }),
   ...countSeries({ id: "ach-create-optional", title: "追加要件ハンター", description: "異なる追加要件を{count}件達成した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT, values: [5, 10, createQuestSeed.reduce((sum, quest) => sum + quest.requirements.filter((requirement) => requirement.kind === "OPTIONAL").length, 0)], sortOrder: 220, iconKey: "challenge" }),
   ...countSeries({ id: "ach-create-perfect", title: "パーフェクトビルダー", description: "{count}種類の作る課題で100点を獲得した証です。", category: AchievementCategory.CREATE_QUEST, conditionType: AchievementConditionType.CREATE_QUEST_PERFECT_COUNT, values: [1, 3, createQuestSeed.length], sortOrder: 240, iconKey: "perfect" }),
   ...createQuestAchievements,
-  ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, 10, learningSeed.courses.length * 5], sortOrder: 400, iconKey: "knowledge" }),
+  ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, 10, courseSeed.length * 5], sortOrder: 400, iconKey: "knowledge" }),
 ];

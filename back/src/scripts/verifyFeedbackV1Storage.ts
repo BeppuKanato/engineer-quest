@@ -15,7 +15,6 @@ async function main() {
   const input: Input = { learning: { id: "a1" }, state: {}, actions: [{ id: 15, label: "XP確認", purpose: "達成の実感", condition: "表示可能", targetIds: ["profile"] }], targets: { 15: [{ id: "profile", href: "/profile" }] }, hexad: null };
   (contextModule as { buildFeedbackV1Context: unknown }).buildFeedbackV1Context = async () => ({ userId: "pseudonym-1", condition: "STANDARD", input });
   db.user.findUnique = async () => ({ id: "pseudonym-1" });
-  db.missionRewardRun.findFirst = async () => null;
   db.createQuestFeedback.findFirst = async () => null;
   db.feedbackV1.findUnique = async ({ where }: { where: { eventKey: string } }) => rows.get(where.eventKey) ?? null;
   db.feedbackV1.findUniqueOrThrow = db.feedbackV1.findUnique;
