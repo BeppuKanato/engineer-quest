@@ -188,7 +188,6 @@ export default function QuestPostDetailPage() {
         code: editCode.trim() || undefined,
         referenceUrl: editReferenceUrl.trim() || undefined,
         courseId: post.courseId ?? undefined,
-        missionId: post.missionId ?? undefined,
       });
       setPost(result.post);
       setOptions(result.options);
@@ -306,7 +305,6 @@ export default function QuestPostDetailPage() {
                       />
                     )}
                     {post.courseTitle && <Chip label={post.courseTitle} variant="outlined" />}
-                    {post.missionTitle && <Chip label={post.missionTitle} variant="outlined" />}
                   </Stack>
 
                   <Box>

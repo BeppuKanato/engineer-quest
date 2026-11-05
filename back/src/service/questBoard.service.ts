@@ -16,7 +16,6 @@ type CreateQuestPostInput = {
   code: string | null;
   referenceUrl: string | null;
   courseId: string | null;
-  missionId: string | null;
 };
 
 type UpdateQuestPostInput = CreateQuestPostInput & {
@@ -28,7 +27,6 @@ type ListQuestPostsInput = {
   q?: string;
   category?: string;
   courseId?: string;
-  missionId?: string;
   status?: string;
   mine?: string;
 };
@@ -133,13 +131,7 @@ const assertPostPayload = ({
   }
 };
 
-const validateCourseAndMission = async ({
-  courseId,
-  missionId,
-}: {
-  courseId: string | null;
-  missionId: string | null;
-}) => {
+const validateCourse = async ({ courseId }: { courseId: string | null }) => {
   if (courseId) {
     const course = await prisma.course.findFirst({
       where: { id: courseId, isPublished: true },
@@ -148,25 +140,6 @@ const validateCourseAndMission = async ({
 
     if (!course) {
       throw new AppError(404, "COURSE_NOT_FOUND", "Course not found");
-    }
-  }
-
-  if (missionId) {
-    const mission = await prisma.mission.findFirst({
-      where: { id: missionId, isPublished: true },
-      select: { id: true, courseId: true },
-    });
-
-    if (!mission) {
-      throw new AppError(404, "MISSION_NOT_FOUND", "Mission not found");
-    }
-
-    if (courseId && mission.courseId !== courseId) {
-      throw new AppError(
-        400,
-        "MISSION_COURSE_MISMATCH",
-        "Mission does not belong to selected course"
-      );
     }
   }
 };
@@ -199,7 +172,6 @@ type QuestPostWithRelations = Prisma.QuestPostGetPayload<{
   include: {
     user: { select: { displayName: true } };
     course: { select: { title: true } };
-    mission: { select: { title: true } };
     comments: { select: { id: true } };
     reactions: { select: { type: true; userId: true } };
   };
@@ -221,8 +193,6 @@ const toPostSummary = (post: QuestPostWithRelations, userId: string) => {
     authorName: isDeleted ? "削除済み投稿" : post.user.displayName ?? "Learner",
     courseId: post.courseId,
     courseTitle: post.course?.title ?? null,
-    missionId: post.missionId,
-    missionTitle: post.mission?.title ?? null,
     commentCount: post.comments.length,
     reactions: reactionCounts(post.reactions, userId),
     canResolve: !isDeleted && post.userId === userId,
@@ -253,7 +223,6 @@ export const listQuestPostsByFirebaseUid = async ({
   q,
   category,
   courseId,
-  missionId,
   status,
   mine,
 }: ListQuestPostsInput) => {
@@ -263,7 +232,6 @@ export const listQuestPostsByFirebaseUid = async ({
     visibility: "PUBLIC",
     ...(category ? { category: parseCategory(category) } : {}),
     ...(courseId ? { courseId } : {}),
-    ...(missionId ? { missionId } : {}),
     ...(status ? { status: parseStatus(status) } : {}),
     ...(mine === "true" ? { userId: user.id } : {}),
     ...(query
@@ -273,7 +241,6 @@ export const listQuestPostsByFirebaseUid = async ({
             { body: { contains: query, mode: "insensitive" } },
             { code: { contains: query, mode: "insensitive" } },
             { course: { title: { contains: query, mode: "insensitive" } } },
-            { mission: { title: { contains: query, mode: "insensitive" } } },
           ],
         }
       : {}),
@@ -286,7 +253,6 @@ export const listQuestPostsByFirebaseUid = async ({
     include: {
       user: { select: { displayName: true } },
       course: { select: { title: true } },
-      mission: { select: { title: true } },
       comments: { select: { id: true } },
       reactions: { select: { type: true, userId: true } },
     },
@@ -306,7 +272,6 @@ export const createQuestPostByFirebaseUid = async ({
   code,
   referenceUrl,
   courseId,
-  missionId,
 }: CreateQuestPostInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   const normalizedTitle = normalizeText(title);
@@ -314,7 +279,7 @@ export const createQuestPostByFirebaseUid = async ({
   const normalizedCategory = parseCategory(category);
 
   assertPostPayload({ title: normalizedTitle, body: normalizedBody });
-  await validateCourseAndMission({ courseId, missionId });
+  await validateCourse({ courseId });
 
   const post = await prisma.$transaction(async (tx) => {
     const createdPost = await tx.questPost.create({
@@ -326,7 +291,6 @@ export const createQuestPostByFirebaseUid = async ({
         code,
         referenceUrl,
         courseId,
-        missionId,
       },
       select: { id: true },
     });
@@ -350,7 +314,6 @@ export const getQuestPostByFirebaseUid = async ({
     include: {
       user: { select: { displayName: true } },
       course: { select: { title: true } },
-      mission: { select: { title: true } },
       comments: {
         orderBy: { createdAt: "asc" },
         include: {
@@ -564,7 +527,6 @@ export const updateQuestPostByFirebaseUid = async ({
   code,
   referenceUrl,
   courseId,
-  missionId,
 }: UpdateQuestPostInput) => {
   const user = await getUserByFirebaseUid(firebaseUid);
   const post = await prisma.questPost.findFirst({
@@ -589,7 +551,7 @@ export const updateQuestPostByFirebaseUid = async ({
   const normalizedCategory = parseCategory(category);
 
   assertPostPayload({ title: normalizedTitle, body: normalizedBody });
-  await validateCourseAndMission({ courseId, missionId });
+  await validateCourse({ courseId });
 
   await prisma.questPost.update({
     where: { id: post.id },
@@ -600,7 +562,6 @@ export const updateQuestPostByFirebaseUid = async ({
       code,
       referenceUrl,
       courseId,
-      missionId,
     },
   });
 
@@ -656,6 +617,5 @@ export const buildCreateQuestPostPayload = (body: unknown) => {
     code: normalizeNullableText(payload?.code),
     referenceUrl: normalizeNullableText(payload?.referenceUrl),
     courseId: normalizeNullableText(payload?.courseId),
-    missionId: normalizeNullableText(payload?.missionId),
   };
 };

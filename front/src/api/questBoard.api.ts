@@ -37,8 +37,6 @@ export type QuestPostSummary = {
   authorName: string;
   courseId: string | null;
   courseTitle: string | null;
-  missionId: string | null;
-  missionTitle: string | null;
   commentCount: number;
   reactions: QuestBoardReactionSummary;
   canResolve: boolean;
@@ -83,14 +81,12 @@ export type CreateQuestPostPayload = {
   code?: string;
   referenceUrl?: string;
   courseId?: string;
-  missionId?: string;
 };
 
 export type QuestBoardListParams = {
   q?: string;
   category?: QuestPostCategory | "ALL";
   courseId?: string;
-  missionId?: string;
   status?: QuestPostStatus | "ALL";
   mine?: boolean;
 };
@@ -101,7 +97,6 @@ const buildQuery = (params: QuestBoardListParams = {}) => {
   if (params.q) search.set("q", params.q);
   if (params.category && params.category !== "ALL") search.set("category", params.category);
   if (params.courseId) search.set("courseId", params.courseId);
-  if (params.missionId) search.set("missionId", params.missionId);
   if (params.status && params.status !== "ALL") search.set("status", params.status);
   if (params.mine) search.set("mine", "true");
 

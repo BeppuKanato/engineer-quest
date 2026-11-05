@@ -104,7 +104,6 @@ const PostCard = ({ post }: { post: QuestPostSummary }) => {
             />
           )}
           {post.courseTitle && <Chip label={post.courseTitle} size="small" variant="outlined" />}
-          {post.missionTitle && <Chip label={post.missionTitle} size="small" variant="outlined" />}
         </Stack>
 
         <Box>
