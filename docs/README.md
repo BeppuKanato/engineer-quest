@@ -51,6 +51,7 @@
 | [response-feedback-151.md](response-feedback-151.md) | 記録 | Issue #151 のテーマ4対応（画面遷移の保持表示・キャッシュ・オーバーレイ廃止、フェーズ保存の非凍結化、学習画面入り口の非ゲート化） |
 | [card-presentation-147.md](card-presentation-147.md) | 記録 | Issue #147 の知識カード提示の作り直し（クリック開示型の段階演出、発見への称賛、保存と演出の分離） |
 | [seek-and-variable-highlight-145.md](seek-and-variable-highlight-145.md) | 記録 | Issue #145 のシーク表示のスライダー統一と変化変数の背景ハイライト統一 |
+| [transition-buttons-142.md](transition-buttons-142.md) | 記録 | Issue #142 のフェーズ間遷移ボタンの共通化（共通部品と「次の段階の名称＋へ進む」の文言導出） |
 | [bfs-editor-110.md](bfs-editor-110.md) | 記録 | Issue #110 のエディタ拡大・ダーク化、D1限定フリー実行とstdout、採点・トレースとの分離、実Pyodide確認画像 |
 | [learning-screens-109.md](learning-screens-109.md) | 記録 | Issue #109の単元・学習・ホーム接続、認証進捗API、下書き、報酬の受け口と計装イベント一覧 |
 | [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |
