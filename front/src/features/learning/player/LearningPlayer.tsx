@@ -5,10 +5,11 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import { Box, Button, IconButton, Slider, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Slider, Stack, Typography } from "@mui/material";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
+import { PhaseNextButton } from "../app/PhaseNextButton";
 
 import type { CanvasSnapshot, LearningContent } from "./content.types";
 import { advancePlayback, type PlaybackAction, type PlaybackState } from "./playback";
@@ -98,11 +99,10 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
           {playback.index + 1} / {count}
         </Typography>
         {endAction && playback.index === count - 1 && (
-          <Button variant="contained" onClick={() => { onLearningEvent?.({ eventType: "player_end_action", targetId: step.id, payload: { contentId: content.id } }); endAction.onClick(); }}
-            sx={{ minHeight: 44, ml: 1, whiteSpace: "nowrap", bgcolor: playerTokens.focus, color: playerTokens.surface,
-              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
-            {endAction.label}
-          </Button>
+          <Box sx={{ ml: 1, flexShrink: 0 }}>
+            <PhaseNextButton label={endAction.label}
+              onClick={() => { onLearningEvent?.({ eventType: "player_end_action", targetId: step.id, payload: { contentId: content.id } }); endAction.onClick(); }} />
+          </Box>
         )}
       </Stack>
     </Box>

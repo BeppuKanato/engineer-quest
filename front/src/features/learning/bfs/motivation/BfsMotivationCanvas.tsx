@@ -1,11 +1,12 @@
 "use client";
 
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 
 import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
 import { graphGeometry } from "../../player/graphGeometry";
+import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
 import type { MotivationCanvasState } from "./motivation.types";
 
@@ -146,13 +147,8 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
         </text>}
         <foreignObject x={0} y={390} width={600} height={48}>
           <Box sx={{ height: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            {state.exit && <Button variant="outlined" disabled={!onExit} onClick={onExit}
-              sx={onExit
-                ? { color: playerTokens.text, borderColor: playerTokens.focus, minHeight: 44 }
-                : { "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
-              aria-label={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`}>
-              {state.exit.label}
-            </Button>}
+            {state.exit && <PhaseNextButton label={state.exit.label} disabled={!onExit} onClick={() => onExit?.()}
+              ariaLabel={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`} />}
           </Box>
         </foreignObject>
       </GraphViewport>
