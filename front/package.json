@@ -14,6 +14,7 @@
     "verify:wall-extension-motivation": "node scripts/verifyWallExtensionMotivation.cjs",
     "verify:wall-extension-execution": "node scripts/verifyWallExtensionExecution.cjs",
     "verify:wall-extension-check": "node scripts/verifyWallExtensionCheck.cjs",
+    "verify:wall-extension-code-mapping": "node scripts/verifyWallExtensionCodeMapping.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
