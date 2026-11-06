@@ -7,7 +7,6 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardContent,
   Chip,
@@ -17,10 +16,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
+import { HomeUnitGrid } from "@/features/learning/app/HomeUnitGrid";
 
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
@@ -258,21 +257,7 @@ export default function HomePage() {
             </Card>
           </Stack>
 
-          <Stack spacing={3}>
-            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                  <Typography variant="h5" fontWeight={950}>ほかの単元を探す</Typography>
-                  <Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                    コース一覧から学びたい単元を選べます。
-                  </Typography>
-                  <Button component={Link} href="/courses" variant="contained" sx={{ width: "fit-content", fontWeight: 950 }}>
-                    コース一覧を見る
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Stack>
+          <HomeUnitGrid />
         </Box>
       </Container>
     </Box>
@@ -286,8 +271,13 @@ const HomeSkeleton = () => (
       <Skeleton variant="rounded" height={190} sx={{ borderRadius: 3 }} />
       <Skeleton variant="rounded" height={280} sx={{ borderRadius: 3 }} />
     </Stack>
-    <Stack spacing={3}>
-      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
-    </Stack>
+    <Box>
+      <Skeleton variant="text" width={120} height={36} sx={{ mb: 2 }} />
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 2.5 }}>
+        {[0, 1, 2, 3].map((index) => (
+          <Skeleton key={index} variant="rounded" height={320} sx={{ borderRadius: 2 }} />
+        ))}
+      </Box>
+    </Box>
   </Box>
 );
