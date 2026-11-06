@@ -94,6 +94,8 @@ state = answerQuestion(content, state, q1.id, answer("C"));
 assert.equal(previous.records[0].attemptCount, 2, "Past records are immutable");
 assert.equal(state.records[0].attemptCount, 3);
 assert.equal(state.records[0].firstCorrect, false, "Retry success must preserve first failure");
+assert.equal(activeQuestion(content, state).id, q1.id, "A correct answer does not advance on its own");
+state = advanceAssessment(content, state, q1.id);
 assert.equal(activeQuestion(content, state).id, q2.id);
 assert.equal(answerQuestion(content, state, q1.id, answer("C")), state, "Stale / double answer cannot spill into next question");
 for (const id of q2.nodeIds) {
@@ -102,6 +104,7 @@ for (const id of q2.nodeIds) {
   assert(!assessmentComplete(content, state));
 }
 state = answerQuestion(content, state, q2.id, none);
+state = advanceAssessment(content, state, q2.id);
 assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert.equal(state.records[1].firstCorrect, false);
@@ -110,7 +113,9 @@ assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1
 assert.equal(answerQuestion(content, state, q2.id, none), state, "Complete session does not accept more answers");
 let firstTry = createAssessmentState(content);
 firstTry = answerQuestion(content, firstTry, q1.id, answer("C"));
+firstTry = advanceAssessment(content, firstTry, q1.id);
 firstTry = answerQuestion(content, firstTry, q2.id, none);
+firstTry = advanceAssessment(content, firstTry, q2.id);
 assert(assessmentComplete(content, firstTry));
 assert(firstTry.records.every(record => record.firstCorrect === true && record.attemptCount === 1));
 
