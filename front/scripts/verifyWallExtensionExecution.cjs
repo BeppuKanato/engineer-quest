@@ -96,7 +96,7 @@ for (const step of steps) {
 
 // 盤面の積み上がり: 空→外周（32）→柱（+9）→伸長ごとにちょうど1マス→完成。
 const wallCounts = steps.map(step => step.canvas.state.walls.length);
-assert.deepEqual(wallCounts, [0, 32, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50]);
+assert.deepEqual(plain(wallCounts), [0, 32, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50]);
 steps.forEach((step, index) => {
   if (index === 0) return;
   const before = keySet(steps[index - 1].canvas.state.walls), after = keySet(step.canvas.state.walls);
@@ -115,7 +115,7 @@ expectedTrace.forEach((expected, i) => {
   assert.deepEqual(plain(step.canvas.highlights), [{ kind: "cell", id: expected.target }], `Step ${step.id}: highlight`);
   const before = keySet(steps[2 + i].canvas.state.walls);
   const added = step.canvas.state.walls.filter(key => !before.has(key));
-  assert.deepEqual(added, [expected.target], `Step ${step.id}: exactly one new wall`);
+  assert.deepEqual(plain(added), [expected.target], `Step ${step.id}: exactly one new wall`);
 });
 for (const step of [steps[0], steps[1], steps[2], steps[12]]) {
   assert.equal(step.canvas.state.processing, null, `Step ${step.id}: no processing`);
