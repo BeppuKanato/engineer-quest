@@ -30,6 +30,8 @@
 | [BFS フェーズ1](../front/src/features/learning/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
 | [DFS 導入](../front/src/features/learning/dfs/motivation/README.md) | 現行 | Issue #121の宝探し18場面、BFSと共有する迷路・グラフ、A→B→D→F→E→Cの歩行と確認手順 |
 | [DFS 動きの説明](../front/src/features/learning/dfs/execution/README.md) | 現行 | Issue #122の17ステップ、共有グラフ、スタックと訪問順、Python実行トレース検証と確認手順 |
+| [DFS 動きの確認問題](../front/src/features/learning/dfs/check/README.md) | 現行 | Issue #123の連動2問（F/E）、共通assessmentと回答操作面、任意復習・初回結果・確認手順 |
+| [DFS 動きとコードの対応](../front/src/features/learning/dfs/code-mapping/README.md) | 現行 | Issue #124の68フレーム、コード契約、17場面への参照、実Pythonとの全行照合・確認手順 |
 | [BFS フェーズ2](../front/src/features/learning/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
 | [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
 | [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
@@ -47,6 +49,8 @@
 | --- | --- | --- |
 | [dfs-motivation-121.md](dfs-motivation-121.md) | 記録 | Issue #121のDFS導入、共通描画の抽出、18場面と訪問順の検証、基準案の留保 |
 | [dfs-execution-122.md](dfs-execution-122.md) | 記録 | Issue #122のDFS動きの説明、BFS/DFS共有グラフの切り出し、17状態のPython実行照合と確認手順 |
+| [dfs-check-123.md](dfs-check-123.md) | 記録 | Issue #123のDFS理解度確認、回答操作のBFS/DFS共通化、現行ソフトゲートと旧基準書の差・検証・確認手順 |
+| [dfs-code-mapping-124.md](dfs-code-mapping-124.md) | 記録 | Issue #124の全行と図の同期、字下げの明確化、逆順投入・mark-at-pushの説明案、検証と確認手順 |
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
@@ -55,6 +59,9 @@
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
 | [home-target-achievement-183.md](home-target-achievement-183.md) | 記録 | Issue #183の目標実績のホーム表示（API既存の targetAchievement を左カラムに描画） |
+| [phase5-preview-unify-181.md](phase5-preview-unify-181.md) | 記録 | Issue #181のフェーズ5単品画面のフェーズ3単品への統一（再回答の合図とボタンの出方） |
+| [phase7-result-presentation-180.md](phase7-result-presentation-180.md) | 記録 | Issue #180のフェーズ7テスト結果の作り直し（通過ごとの描き込みチェックと全通過時の祝福） |
+| [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
 | [progress-loading-175.md](progress-loading-175.md) | 記録 | Issue #175の読み込み中表示の改善（進捗読み込みを素のテキストからスケルトンへ） |

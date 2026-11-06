@@ -367,17 +367,19 @@ BFS の問2は「キューに新しく入るもの（正解: どれも入らな�
 | 行 | 意味ID | 本文 |
 | --- | --- | --- |
 | 1 | define-function | `def dfs_order(graph, start):` |
-| 2 | initialize-visited | ` visited = {start}` |
-| 3 | initialize-order | ` order = []` |
-| 4 | initialize-stack | ` stack = [start]` |
-| 5 | while-stack | ` while stack:` |
-| 6 | pop-node | ` node = stack.pop()` |
-| 7 | append-order | ` order.append(node)` |
-| 8 | for-neighbor-reversed | ` for neighbor in reversed(graph.get(node, [])):` |
-| 9 | if-unvisited | ` if neighbor not in visited:` |
-| 10 | mark-visited | ` visited.add(neighbor)` |
-| 11 | append-stack | ` stack.append(neighbor)` |
-| 12 | return-order | ` return order` |
+| 2 | initialize-visited | `    visited = {start}` |
+| 3 | initialize-order | `    order = []` |
+| 4 | initialize-stack | `    stack = [start]` |
+| 5 | while-stack | `    while stack:` |
+| 6 | pop-node | `        node = stack.pop()` |
+| 7 | append-order | `        order.append(node)` |
+| 8 | for-neighbor-reversed | `        for neighbor in reversed(graph.get(node, [])):` |
+| 9 | if-unvisited | `            if neighbor not in visited:` |
+| 10 | mark-visited | `                visited.add(neighbor)` |
+| 11 | append-stack | `                stack.append(neighbor)` |
+| 12 | return-order | `    return order` |
+
+2026-11-06 #124 実装補足: 表で1空白に省略されていた字下げを、既に§2の実行検証で使うPythonのブロック構造（4空白単位）に展開した。行本文・意味ID・処理順は変更していない。表示・実行コードはこの12行（改行LF・末尾改行なし）とバイト単位で照合する。
 
 約束事（このコードの意味を決める2点。フェーズ4で教える対象、§9-12）:
 

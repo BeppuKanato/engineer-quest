@@ -28,12 +28,14 @@ assert(!overview.includes('復習する'), 'the standalone review button must be
 assert(overview.includes('ここから始める'), 'the current node must carry the start chip');
 assert(overview.includes('スタート') && overview.includes('ゴール'), 'the path must have start and goal flags');
 
-// 4. Card badges come from the unit content, on the phases whose boundaries can present a card.
+// 4. Card awards stay recorded in the unit content, but stages must not advertise them:
+//    which card (if any) is presented is a table outcome, not a per-stage promise (#178).
 const content = readFront('src/features/learning/bfs/unit/unit.content.ts');
 for (const rarity of ['RARE', 'COMMON', 'EPIC']) {
   assert(content.includes(`cardRarity: "${rarity}"`), `a phase must declare cardRarity ${rarity}`);
 }
-assert(overview.includes('knowledgeCardTones'), 'badges must use the shared knowledge-card tones');
+assert(!overview.includes('knowledgeCardTones'), 'stages must not render card-rarity badges');
+assert(!overview.includes('知識カードが手に入る'), 'stage labels must not promise a knowledge card');
 
 // 5. Achievements preview shows only this unit's achievements, via the API courseId.
 assert(overview.includes('getAchievements'), 'the overview must load achievements for the preview');
