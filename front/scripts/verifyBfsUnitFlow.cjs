@@ -76,6 +76,7 @@ assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by ar
 // 単元画面は共通パンくず AppBreadcrumbs を使い、教材内（学習画面）にはパンくずを置かない（#139, #140）。
 assert.match(read(`${root}/app/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overview uses the shared breadcrumbs");
 assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
+assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
 const finalResult = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 assert.doesNotMatch(finalResult, /overflowY: "auto"/, "final result does not own an inner scroll area");
