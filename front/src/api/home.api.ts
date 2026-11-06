@@ -42,6 +42,6 @@ export const getHome = async (token: string): Promise<HomeResponse> => {
   return fetchClientQuery(
     "home",
     () => fetcher<HomeResponse>("/home", { method: "GET", token }),
-    { staleTimeMs: 15_000, tags: [queryTags.home] }
+    { staleTimeMs: 300_000, tags: [queryTags.home] }
   );
 };

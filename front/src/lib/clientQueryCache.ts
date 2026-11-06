@@ -71,6 +71,10 @@ export const fetchClientQuery = async <T>(
   return promise;
 };
 
+export const peekClientQueryData = <T>(key: string): T | undefined => {
+  return entries.get(key)?.data as T | undefined;
+};
+
 export const setClientQueryData = <T>(key: string, data: T, tags: string[]) => {
   entries.set(key, {
     data,

@@ -6,6 +6,6 @@ export const getCourses = async (token: string): Promise<Course[]> => {
     return fetchClientQuery(
       "courses",
       () => fetcher<Course[]>("/courses", { method: "GET", token }),
-      { staleTimeMs: 30_000, tags: [queryTags.courses] }
+      { staleTimeMs: 300_000, tags: [queryTags.courses] }
     );
 };
