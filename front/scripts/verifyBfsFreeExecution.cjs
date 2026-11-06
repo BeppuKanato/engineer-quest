@@ -11,6 +11,7 @@ class FakeWorker {
   emit(message) { for(const listener of [...this.listeners.get('message')??[]]) listener({data:message}); }
 }
 function load(filename) {
+  filename = path.resolve(filename);
   if(cache.has(filename))return cache.get(filename);
   const exports={};cache.set(filename,exports);
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,

@@ -7,6 +7,7 @@ const { spawnSync } = require("node:child_process");
 
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
@@ -90,7 +91,7 @@ result = namespace['bfs_distances'](graph, payload['start'])
 sys.settrace(None)
 print(json.dumps(dict(trace=trace, result=result)))
 `;
-const run = spawnSync("python3", ["-c", python], {
+const run = spawnSync(process.env.PYTHON || "python3", ["-c", python], {
   input: JSON.stringify({ code: bfsCode.lines.map(line => line.text).join("\n"), graph: execution.steps[0].canvas.data.graph, start: "A" }), encoding: "utf8",
 });
 assert.equal(run.status, 0, run.stderr);

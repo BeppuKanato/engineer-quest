@@ -6,6 +6,7 @@ const ts = require("typescript");
 const { spawnSync } = require("node:child_process");
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
@@ -71,7 +72,7 @@ for (const question of content.questions) {
   assert(!html.includes(line.text), "The hidden answer must not leak into visible code");
 }
 // 誤答も全文の中で構文として成立することを確認。誤答は実行しない。
-const syntax = spawnSync("python3", ["-c", "import ast,json,sys\nprograms=json.load(sys.stdin)\nfor code in programs: ast.parse(code)\nprint(len(programs))"], { input: JSON.stringify(programs), encoding: "utf8" });
+const syntax = spawnSync(process.env.PYTHON || "python3", ["-c", "import ast,json,sys\nprograms=json.load(sys.stdin)\nfor code in programs: ast.parse(code)\nprint(len(programs))"], { input: JSON.stringify(programs), encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
 assert.equal(Number(syntax.stdout), 6, "All six alternatives must be parsed");
 
