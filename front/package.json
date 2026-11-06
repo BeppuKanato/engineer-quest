@@ -17,6 +17,7 @@
     "verify:wall-extension-code-mapping": "node scripts/verifyWallExtensionCodeMapping.cjs",
     "verify:wall-extension-code-check": "node scripts/verifyWallExtensionCodeCheck.cjs",
     "verify:wall-extension-consolidation": "node scripts/verifyWallExtensionConsolidation.cjs",
+    "verify:wall-extension-implementation": "node scripts/verifyWallExtensionImplementation.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
