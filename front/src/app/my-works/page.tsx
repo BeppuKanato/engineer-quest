@@ -3,7 +3,6 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -11,18 +10,25 @@ import { getCreateQuestAttempts, type CreateQuestAttemptListItem } from "@/api/c
 import { AppHeader } from "@/app/component/appHeader";
 import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateThumbnail } from "@/app/create/_components/createThumbnail";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function MyWorksPage() {
-  const [attempts, setAttempts] = useState<CreateQuestAttemptListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { status, token } = useUserSession();
+  const [cachedAttempts] = useState(() => peekClientQueryData<CreateQuestAttemptListItem[]>("my-works"));
+  const [attempts, setAttempts] = useState<CreateQuestAttemptListItem[]>(cachedAttempts ?? []);
+  const [loading, setLoading] = useState(!cachedAttempts);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => onAuthStateChanged(auth, async (user) => {
-    if (!user) { setError("ログインが必要です。"); setLoading(false); return; }
-    try { setAttempts(await getCreateQuestAttempts(await user.getIdToken())); }
-    catch (cause) { console.error(cause); setError("挑戦中の課題を取得できませんでした。"); }
-    finally { setLoading(false); }
-  }), []);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) { if (!cachedAttempts) { setError("ログインが必要です。"); setLoading(false); } return; }
+    let active = true;
+    fetchClientQuery("my-works", () => getCreateQuestAttempts(token), { staleTimeMs: 300_000, tags: [queryTags.works] })
+      .then(next => { if (active) { setAttempts(next); setError(null); } })
+      .catch(cause => { console.error(cause); if (active && !cachedAttempts) setError("挑戦中の課題を取得できませんでした。"); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [status, token, cachedAttempts]);
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}><AppHeader /><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}><CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: "挑戦中・提出済み" }]} /></Container><Container maxWidth={false} sx={{ maxWidth: 1080, pt: 3, pb: 4 }}><Stack spacing={3}>
     <Box><Typography variant="h3" fontWeight={950}>挑戦中・提出済み</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>保存したコード、自己ベスト、提出状況を確認できます。</Typography></Box>
     {error && <Alert severity="error">{error}</Alert>}
