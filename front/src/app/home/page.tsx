@@ -3,10 +3,12 @@
 import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import FlagIcon from "@mui/icons-material/Flag";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -16,6 +18,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
@@ -255,6 +258,40 @@ export default function HomePage() {
                 </Stack>
               </CardContent>
             </Card>
+
+            {homeData.targetAchievement && (
+              <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={2.5}>
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                      <FlagIcon sx={{ color: "#0057e7" }} />
+                      <Typography variant="h6" fontWeight={950}>目標の実績</Typography>
+                    </Stack>
+                    <Typography sx={{ fontSize: 18, fontWeight: 900 }}>{homeData.targetAchievement.title}</Typography>
+                    {homeData.targetAchievement.factor.map((factor) => (
+                      <Box key={factor.name}>
+                        <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Typography fontWeight={900}>{factor.name}</Typography>
+                          <Typography color="text.secondary" fontWeight={800}>
+                            {factor.progress} / {factor.goal}
+                          </Typography>
+                        </Stack>
+                        <LinearProgress
+                          variant="determinate"
+                          value={factor.goal === 0 ? 0 : Math.min(100, (factor.progress / factor.goal) * 100)}
+                          sx={{ height: 10, borderRadius: 999, bgcolor: "#e5e7eb", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#0057e7" } }}
+                        />
+                      </Box>
+                    ))}
+                    {homeData.targetAchievement.href && homeData.targetAchievement.actionLabel && (
+                      <Button component={Link} href={homeData.targetAchievement.href} variant="outlined" sx={{ fontWeight: 900, alignSelf: "flex-start" }}>
+                        {homeData.targetAchievement.actionLabel}
+                      </Button>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
           </Stack>
 
           <HomeUnitGrid />

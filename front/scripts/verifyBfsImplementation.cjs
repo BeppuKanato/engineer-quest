@@ -127,6 +127,11 @@ const mismatchedHtml = renderToStaticMarkup(createElement(ImplementationResults,
 for (const state of ["different", "missing", "extra"]) assert(mismatchedHtml.includes(`data-distance-state="${state}"`));
 assert(mismatchedHtml.includes(content.display.statuses.failed.icon));
 assert(mismatchedHtml.includes("期待と異なる")); assert(mismatchedHtml.includes("項目なし")); assert(mismatchedHtml.includes("余分な項目"));
+// 通過したテストには描き込まれるチェックが1件ずつ付く（#180）。未実施・未通過には付かない。
+const passedHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: content.tests.map(test => ({ id: test.id, passed: true, actual: test.expected })) }));
+assert.equal((passedHtml.match(/data-phase-result-check/g) || []).length, content.tests.length, "each passed test draws in its own check");
+assert(!(unchangedHtml.includes("data-phase-result-check")), "unexecuted tests have no drawn check");
+assert(!(mismatchedHtml.includes("data-phase-result-check")), "failed tests have no drawn check");
 const review = renderToStaticMarkup(createElement(ParsonsBoard, { question: content.hints.parsonsQuestion, code: bfsCode }));
 assert.equal((review.match(/data-parsons-line-id=/g) || []).length, 11);
 assert(!review.includes("この順序で回答する"), "Hint Parsons has no scoring action");
@@ -166,6 +171,11 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(resultsSource, /component=\{motion\.span\} key=\{statusKey\}/, "a status change mounts its own short animation");
   assert.match(resultsSource, /initial=\{reducedMotion \? false/, "reduced motion skips the initial animation state");
   assert.match(resultsSource, /duration: reducedMotion \? 0 : 0\.3/, "reduced motion removes the transition");
+  // 画面契約（#180）: 通過は描き込まれるチェックで積み上がり、全通過時は完了表示で紙吹雪と大きなチェックで祝う。
+  assert.match(resultsSource, /DrawnCheck/, "passed tests show the shared drawn check");
+  assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
+  assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
+  assert.match(previewSource, /DrawnCheck size=\{76\}/, "the completion view leads with a large drawn check");
   const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
   assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
   console.log("BFS implementation: independent BFS on five cases, canonical skeleton, hint-1 tokens, four staged hints, mini graphs and distance differences, timeout classification, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
