@@ -10,6 +10,7 @@ import type { LearningInstrumentation } from "../../instrumentation/useLearningV
 
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
+import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
@@ -88,10 +89,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         </Box>
         <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
         {onNext && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <Button variant="contained" onClick={onNext}
-            sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
-            {nextLabel ?? "次のフェーズへ進む"}
-          </Button>
+          <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />
         </Box>}
       </>}
     </Box>

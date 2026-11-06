@@ -13,6 +13,6 @@ import { bfsCodeMappingContent } from "./codeMapping.content";
 export function BfsCodeMappingPreview({ embedded = false, onLearningEvent, active = true, onComplete, nextLabel }: LearningInstrumentation & { embedded?: boolean; onComplete?: () => void; nextLabel?: string }) {
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: embedded ? 0 : 480, bgcolor: playerTokens.background, display: "flex" }}>
     <LearningPlayer onLearningEvent={onLearningEvent} active={active} content={bfsCodeMappingContent} renderCanvas={canvas => <BfsCodeMappingCanvas canvas={canvas} />}
-      endAction={onComplete ? { label: nextLabel ?? "次のフェーズへ進む", onClick: onComplete } : undefined} />
+      endAction={onComplete ? { label: nextLabel ?? "次へ進む", onClick: onComplete } : undefined} />
   </Box>;
 }

@@ -18,7 +18,7 @@ import { BfsConsolidationPreview } from "../consolidation/BfsConsolidationPrevie
 import { BfsExecutionPreview } from "../execution/BfsExecutionPreview";
 import { BfsImplementationPreview } from "../implementation/BfsImplementationPreview";
 import { BfsMotivationPreview } from "../motivation/BfsMotivationPreview";
-import { bfsUnitPhases, bfsUnitText, bfsUnitTitle } from "./unit.content";
+import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
 
@@ -116,11 +116,11 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   const renderPhase = (index: number): ReactNode => {
     switch (index) {
       case 0: return <BfsMotivationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 0} onLearningEvent={onLearningEvent ? phaseObservers[0] : undefined} onComplete={completeHandlers[0]} />;
-      case 1: return <BfsExecutionPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 1} onLearningEvent={onLearningEvent ? phaseObservers[1] : undefined} onComplete={completeHandlers[1]} nextLabel={bfsUnitPhases[1].nextLabel} />;
+      case 1: return <BfsExecutionPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 1} onLearningEvent={onLearningEvent ? phaseObservers[1] : undefined} onComplete={completeHandlers[1]} nextLabel={nextPhaseLabel(bfsUnitPhases[1])} />;
       case 2: return <BfsCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 2} onLearningEvent={onLearningEvent ? phaseObservers[2] : undefined} onComplete={completeHandlers[2]} />;
-      case 3: return <BfsCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={bfsUnitPhases[3].nextLabel} />;
+      case 3: return <BfsCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(bfsUnitPhases[3])} />;
       case 4: return <BfsCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
-      case 5: return <BfsConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => goToPhase(6)} nextLabel={bfsUnitPhases[5].nextLabel} />;
+      case 5: return <BfsConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => goToPhase(6)} nextLabel={nextPhaseLabel(bfsUnitPhases[5])} />;
       case 6: return <BfsImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} />;
       default: return null;
     }

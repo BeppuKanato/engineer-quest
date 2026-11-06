@@ -4,11 +4,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { PhaseNextButton } from "../../app/PhaseNextButton";
 import type { LearningRewards } from "../../app/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
 import { bfsImplementationContent } from "../implementation/implementation.content";
-import { bfsUnitPhases, bfsUnitText, type BfsUnitPhase } from "./unit.content";
+import { bfsUnitPhases, bfsUnitText, nextPhaseLabel, type BfsUnitPhase } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 
 const headingSx = {
@@ -40,7 +41,7 @@ export function UnitResultScreen({ phase, summary, onNext }: {
       </Typography>
     )}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{phase.result.nextPreview}</Typography>
-    <Button variant="contained" onClick={onNext} sx={nextButtonSx}>{bfsUnitText.resultNext}</Button>
+    <PhaseNextButton label={nextPhaseLabel(phase)} onClick={onNext} />
   </Box>;
 }
 

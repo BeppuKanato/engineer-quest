@@ -1,11 +1,12 @@
 "use client";
 
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 
 import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
 import { graphGeometry } from "../../player/graphGeometry";
+import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
 import type { MotivationCanvasState } from "./motivation.types";
 
@@ -60,7 +61,7 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
   const current = state.current === null ? null : point(state.current);
 
   return (
-    <Box sx={{ height: "100%", minHeight: 220 }}>
+    <Box sx={{ height: "100%", minHeight: 220, position: "relative" }}>
       <GraphViewport label={isMaze ? "格子の迷路と現在の場所" : "AからFの場所とつながり"}>
         <defs>
           <pattern id={wallId} width={8} height={8} patternUnits="userSpaceOnUse">
@@ -144,18 +145,12 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
         {isMaze && state.trail.length > 1 && <text x={300} y={340} textAnchor="middle" fill={playerTokens.text} fontSize={24}>
           {state.trail.length - 1}{data.labels.moveUnit}
         </text>}
-        <foreignObject x={0} y={390} width={600} height={48}>
-          <Box sx={{ height: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            {state.exit && <Button variant="outlined" disabled={!onExit} onClick={onExit}
-              sx={onExit
-                ? { color: playerTokens.text, borderColor: playerTokens.focus, minHeight: 44 }
-                : { "&.Mui-disabled": { color: playerTokens.text, borderColor: playerTokens.states.idle.stroke } }}
-              aria-label={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`}>
-              {state.exit.label}
-            </Button>}
-          </Box>
-        </foreignObject>
       </GraphViewport>
+      {/* 出口ボタンは SVG の外に置く。foreignObject 内では SVG の拡大率に引きずられ、指定した大きさで表示されない（#157）。 */}
+      {state.exit && <Box sx={{ position: "absolute", right: 16, bottom: 12 }}>
+        <PhaseNextButton label={state.exit.label} disabled={!onExit} onClick={() => onExit?.()}
+          ariaLabel={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`} />
+      </Box>}
     </Box>
   );
 }

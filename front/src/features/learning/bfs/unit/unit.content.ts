@@ -21,7 +21,6 @@ export type BfsUnitPhase = {
   /** このフェーズの完了後にどう進むか */
   transitionOut: BfsUnitTransition;
   /** プレイヤー最終ステップのアクションや、フェーズ6診断画面の次へボタンの文言 */
-  nextLabel?: string;
   /** transitionOut が "result" のときのリザルト画面の文言 */
   result?: {
     heading: string;
@@ -34,7 +33,7 @@ export const bfsUnitTitle = "幅優先探索（BFS）";
 
 export const bfsUnitPhases: readonly BfsUnitPhase[] = [
   { phase: 1, id: "bfs-motivation", shortName: "動機づけ", formalName: "動機づけ", transitionOut: "choice" },
-  { phase: 2, id: "bfs-execution", shortName: "説明", formalName: "アルゴリズム説明", transitionOut: "seamless", nextLabel: "理解度を確認する" },
+  { phase: 2, id: "bfs-execution", shortName: "説明", formalName: "アルゴリズム説明", transitionOut: "seamless" },
   {
     phase: 3, id: "bfs-check", shortName: "概念確認", formalName: "理解度確認", transitionOut: "result",
     result: {
@@ -42,7 +41,7 @@ export const bfsUnitPhases: readonly BfsUnitPhase[] = [
       nextPreview: "次はフェーズ4「コードとの対応付け」です。フェーズ2と同じ動きを、コードと並べて確かめます。",
     },
   },
-  { phase: 4, id: "bfs-code-mapping", shortName: "コード対応", formalName: "コードとの対応付け", transitionOut: "seamless", nextLabel: "コードの確認問題へ進む" },
+  { phase: 4, id: "bfs-code-mapping", shortName: "コード対応", formalName: "コードとの対応付け", transitionOut: "seamless" },
   {
     phase: 5, id: "bfs-code-check", shortName: "コード確認", formalName: "理解度確認（コード）", transitionOut: "result",
     result: {
@@ -50,14 +49,19 @@ export const bfsUnitPhases: readonly BfsUnitPhase[] = [
       nextPreview: "次はフェーズ6「応用・総括」です。別のグラフや例外ケースで、理解を確かめます。",
     },
   },
-  { phase: 6, id: "bfs-consolidation", shortName: "応用・総括", formalName: "応用・総括", transitionOut: "result-in-phase", nextLabel: "フェーズ7：自力実装へ進む" },
+  { phase: 6, id: "bfs-consolidation", shortName: "応用・総括", formalName: "応用・総括", transitionOut: "result-in-phase" },
   { phase: 7, id: "bfs-implementation", shortName: "自力実装", formalName: "自力実装", transitionOut: "final" },
 ] as const;
+
+/** 遷移ボタンの文言は「次の段階の正式名称＋へ進む」で統一する（#142）。「フェーズ」は画面に出さない。 */
+export const nextPhaseLabel = (phase: BfsUnitPhase): string => {
+  const next = bfsUnitPhases[phase.phase];
+  return next ? `${next.formalName}へ進む` : "次へ進む";
+};
 
 export const bfsUnitText = {
   navLabel: "単元のフェーズ",
   finalChip: "単元リザルト",
-  resultNext: "次のフェーズへ進む",
   summaryHeading: "この単元の到達状況",
   reviewNote: "気になるフェーズは、上のナビゲーションからいつでも戻って復習できます。",
   backToStart: "単元の先頭に戻る",
