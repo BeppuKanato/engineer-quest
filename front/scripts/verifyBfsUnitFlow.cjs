@@ -92,6 +92,10 @@ assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
 assert.match(finalResultOnly, /<DrawnCheck/, "final result mark uses the same drawn check as phase results");
 assert.match(finalResultOnly, /data-final-result-mark/, "final result mark pops in like the phase mark");
+const miniMapSource = read(`${root}/app/UnitPathMiniMap.tsx`);
+assert.match(miniMapSource, /motion\.path/, "mini map draws its path with motion");
+assert.match(miniMapSource, /pathLength/, "mini map path draws in over time");
+assert.match(miniMapSource, /scale: \[1, 1\.05, 1\.03\]/, "mini map grows once the path completes");
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
