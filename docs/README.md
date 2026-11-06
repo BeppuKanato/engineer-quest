@@ -76,6 +76,7 @@
 | [bubble-sort-phase1-227.md](bubble-sort-phase1-227.md) | 記録 | Issue #227の配列描画基盤とバブルソートフェーズ1（導入）、検証済みトレースとの照合と場面圧縮・基準データ未取り込みの留保 |
 | [bubble-sort-phase2-228.md](bubble-sort-phase2-228.md) | 記録 | Issue #228のバブルソートフェーズ2（動きの説明）16ステップ、検証済みトレースとの照合と比較・交換・確定の表現、確定キャプションと基準データ未取り込みの留保 |
 | [bubble-sort-phase3-229.md](bubble-sort-phase3-229.md) | 記録 | Issue #229のバブルソートフェーズ3（動きの確認問題）連結2問、フェーズ2場面の参照と検証済みトレースとの正解照合 |
+| [bubble-sort-phase4-230.md](bubble-sort-phase4-230.md) | 記録 | Issue #230のバブルソートフェーズ4（動きとコードの対応）39フレーム、CPythonトレースとの全行・変数照合と交換行チェックポイント、基準データ未取り込みの留保 |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
