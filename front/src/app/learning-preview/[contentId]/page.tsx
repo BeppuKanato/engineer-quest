@@ -25,6 +25,7 @@ import { BubbleSortMotivationPreview } from "@/features/learning/bubble-sort/mot
 import { BubbleSortExecutionPreview } from "@/features/learning/bubble-sort/execution/BubbleSortExecutionPreview";
 import { BubbleSortCheckPreview } from "@/features/learning/bubble-sort/check/BubbleSortCheckPreview";
 import { BubbleSortCodeMappingPreview } from "@/features/learning/bubble-sort/code-mapping/BubbleSortCodeMappingPreview";
+import { BubbleSortCodeCheckPreview } from "@/features/learning/bubble-sort/code-check/BubbleSortCodeCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -37,6 +38,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "bubble-sort-execution") return <BubbleSortExecutionPreview />;
   if (contentId === "bubble-sort-check") return <BubbleSortCheckPreview />;
   if (contentId === "bubble-sort-code-mapping") return <BubbleSortCodeMappingPreview />;
+  if (contentId === "bubble-sort-code-check") return <BubbleSortCodeCheckPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
