@@ -24,6 +24,7 @@
 | [concept/learning-materials-v2.md](concept/learning-materials-v2.md) | 要約 | 7フェーズ新フローの確定事項と実装上の含意。全文は `learning-materials-guideline.md` |
 | [concept/learning-player-ui.md](concept/learning-player-ui.md) | 正本 | 学習プレイヤー UI の実装定義（画面構成と占有率、色とテキストの規則、操作系の配置、アニメーション、共通グラフの描画数値と等倍比の拡縮） |
 | [concept/dfs-unit-baseline.md](concept/dfs-unit-baseline.md) | 正本 | DFS 単元の基準データ設計書（グラフ、実行トレース、各フェーズの問題、正解コード契約 dfs-order-stack、テスト、知識カード案）。実装（#121 以降）は本書を正本として参照する |
+| [concept/wall-extension-unit-baseline.md](concept/wall-extension-unit-baseline.md) | 正本 | 棒倒し法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 wall-extension-v1、各フェーズの問題、グリッド描画基盤、知識カード案）。実装（#206 以降）は本書を正本として参照する |
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
