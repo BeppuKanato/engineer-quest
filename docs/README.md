@@ -84,6 +84,7 @@
 | [bubble-sort-phase7-233.md](bubble-sort-phase7-233.md) | 記録 | Issue #233のバブルソートフェーズ7（自分で実装）5テストと4段ヒント、試し実行の配列表示、入力不変と範囲の縮小が結果ベース判定で検出できない留保 |
 | [bubble-sort-trace-234.md](bubble-sort-trace-234.md) | 記録 | Issue #234のバブルソートフェーズ7視覚デバッグ（共通トレース基盤への数値リスト記録の追加、フェーズ2正準16コマと一致する遡及変換、候補が曖昧な場合の最終状態表示） |
 | [bubble-sort-unit-235.md](bubble-sort-unit-235.md) | 記録 | Issue #235のバブルソートフェーズ接続・単元コンテナ接続、フェーズ1・2・4への接続ポート追加、unitRegistry登録（既存コース course-algorithm-bubble-sort-v2）とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [bubble-sort-integration-236.md](bubble-sort-integration-236.md) | 記録 | Issue #236のバブルソートアプリ統合、知識カード3枚（安定なソート／値の交換／計算量）と実績6件のシード追加、配布スケジュールとコレクション検証の単元ごと汎用化（シード再実行が必要） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
