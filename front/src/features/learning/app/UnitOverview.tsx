@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppHeader } from "@/app/component/appHeader";
-import { getMascotImagePath, useUserMascot } from "@/app/component/mascot";
 import { useUserSession } from "@/app/component/userSession";
 import { startLearningUnit } from "@/api/learning.api";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
@@ -22,7 +21,7 @@ import { useLearningLog } from "./useLearningLog";
 
 const icons = [LightbulbIcon, RouteIcon, QuizIcon, CodeIcon, QuizIcon, ExtensionIcon, TerminalIcon];
 export function UnitOverview({ courseId }: { courseId: string }) {
-  const unit = findLearningUnit(courseId), router = useRouter(), mascot = useUserMascot();
+  const unit = findLearningUnit(courseId), router = useRouter();
   const { firebaseUser } = useUserSession();
   const { progress, loading, error, reload, authenticated } = useLearningProgress(unit?.courseId);
   const [starting, setStarting] = useState(false), [startError, setStartError] = useState<string | null>(null);
@@ -57,12 +56,11 @@ export function UnitOverview({ courseId }: { courseId: string }) {
               const snake = index < 4 ? { gridRow: 1, gridColumn: index + 1 } : { gridRow: 2, gridColumn: 4 - (index - 4) };
               const connector = index === unit.phases.length - 1 ? null : index === 3 ? "turn" : index < 3 ? "right" : "left";
               const connectorColor = done ? tokens.progress.next : tokens.progress.stroke;
-              return <Box component={motion.li} layout key={phase.id} sx={{ minWidth: 0, textAlign: "center", pt: 7, position: "relative", gridRow: { sm: snake.gridRow }, gridColumn: { sm: snake.gridColumn } }}>
+              return <Box component={motion.li} layout key={phase.id} sx={{ minWidth: 0, textAlign: "center", position: "relative", gridRow: { sm: snake.gridRow }, gridColumn: { sm: snake.gridColumn } }}>
                 {connector && <Box aria-hidden sx={{ display: { xs: "none", sm: "block" }, position: "absolute", bgcolor: connectorColor, zIndex: 0,
-                  ...(connector === "right" ? { top: 104, left: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
-                    connector === "left" ? { top: 104, right: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
-                    { top: 156, left: "calc(50% - 2px)", width: 4, height: "calc(100% - 156px + 24px + 56px)" }) }} />}
-                {current && <Box component={motion.img} layoutId="learning-next-mascot" src={getMascotImagePath(mascot, "cheer")} alt="次にやるフェーズ" sx={{ position: "absolute", top: 0, left: "calc(50% - 28px)", width: 56, height: 56, objectFit: "contain" }} />}
+                  ...(connector === "right" ? { top: 48, left: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
+                    connector === "left" ? { top: 48, right: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
+                    { top: 100, left: "calc(50% - 2px)", width: 4, height: "calc(100% - 100px + 24px)" }) }} />}
                 <Button aria-label={`フェーズ${phase.phase} ${phase.formalName}：${status}`} aria-current={current ? "step" : undefined} disabled={!reachable || starting}
                   onClick={() => void start(current ? undefined : index)} sx={{ width: 100, maxWidth: "100%", height: 100, borderRadius: "50%", border: `3px solid ${current ? tokens.progress.next : tokens.progress.stroke}`,
                     bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle, color: current ? tokens.surface : tokens.text, position: "relative", zIndex: 1,
