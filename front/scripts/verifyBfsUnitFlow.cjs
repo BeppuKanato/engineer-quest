@@ -36,6 +36,10 @@ for (const phase of bfsUnitPhases) {
     assert.ok(phase.result && phase.result.heading.length > 0 && phase.result.nextPreview.length > 0, `phase ${phase.phase} result content`);
   }
 }
+// 段階の表示名はテーマ2で採用した共通名に固定する（DFS以降の単元も同じ名称セットを使う）。
+assert.deepEqual(plain(bfsUnitPhases.map(phase => phase.formalName)), [
+  "導入", "動きの説明", "動きの確認問題", "動きとコードの対応", "コードの確認問題", "応用問題", "自分で実装",
+]);
 // 遷移ボタンの文言は「次の段階の正式名称＋へ進む」で導出され、「フェーズ」を含まない（#142）。
 for (const phase of bfsUnitPhases.slice(0, -1)) {
   const next = bfsUnitPhases[phase.phase];
@@ -46,7 +50,7 @@ for (const phase of bfsUnitPhases.slice(0, -1)) {
 for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCanvas.tsx", "bfs/unit/UnitResultScreens.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
   assert.match(read(`${root}/${file}`), /PhaseNextButton/, `${file} uses the shared transition button`);
 }
-assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "アルゴリズム説明へ進む"/, "motivation exit label names the destination");
+assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "動きの説明へ進む"/, "motivation exit label names the destination");
 // フェーズ1の出口ボタンは SVG の外に置き、拡大率で大きさが変わらないようにする（#157）。
 assert.doesNotMatch(read(`${root}/bfs/motivation/BfsMotivationCanvas.tsx`), /<foreignObject/, "motivation exit button stays outside the SVG");
 

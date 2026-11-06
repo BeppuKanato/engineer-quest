@@ -44,8 +44,8 @@ assert.deepEqual(plain(q2.choices.map(option => option.text)), ["not in", "in", 
 assert.equal(q1.prompt, `調べた隣の場所をキュー（待ち行列）の末尾に加えるために、${bfsCodeLineNumber(q1.lineId)}行目の空欄に入る正しいコードを選んでください。`);
 assert.equal(q2.prompt, `隣の場所の距離がまだ決まっていないことを確かめるために、${bfsCodeLineNumber(q2.lineId)}行目の空欄に入る正しいコードを選んでください。`);
 assert.match(content.instruction, /空欄に入るものを選ぶ/u);
-assert.equal(content.reviewLabel, "💡 この処理の動作（フェーズ4）をもう一度見る");
-assert.match(content.completion.caption, /次は【応用・総括】（別パターンや例外ケースの3〜5問）/u);
+assert.equal(content.reviewLabel, "💡 この処理の動きをもう一度見る");
+assert.match(content.completion.caption, /次は【応用問題】（別パターンや例外ケースの3〜5問）/u);
 assert(!/完璧|マスター/u.test(content.completion.caption));
 const programs = [];
 for (const question of content.questions) {
