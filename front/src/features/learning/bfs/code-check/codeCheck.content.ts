@@ -38,7 +38,7 @@ export const bfsCodeCheckContent: BfsCodeCheckContent = {
   version: 1, kind: "code-blank-check", id: "bfs-code-check", phase: 5, code: bfsCode,
   instruction: "空欄に入るものを選ぶ",
   retryFeedback: "不正解。もう一度、処理の目的に合うコードを選んでみよう。",
-  reviewLabel: "💡 この処理の動作（フェーズ4）をもう一度見る",
+  reviewLabel: "💡 この処理の動きをもう一度見る",
   questions: [
     {
       kind: "code-blank", id: "enqueue-method", lineId: "enqueue-neighbor",
@@ -59,7 +59,7 @@ export const bfsCodeCheckContent: BfsCodeCheckContent = {
       tags: ["undiscovered-test"], correctFeedback: "正解！距離がまだ決まっていない場所を確かめる条件を選べました。",
     },
   ],
-  completion: { caption: "基本コードの役割が確認できました！次は【応用・総括】（別パターンや例外ケースの3〜5問）で、自力実装に向けた最後の土台を固めます。" },
+  completion: { caption: "基本コードの役割が確認できました！次は【応用問題】（別パターンや例外ケースの3〜5問）で、自分で実装に向けた最後の土台を固めます。" },
 };
 
 export function validateBfsCodeCheck(content: BfsCodeCheckContent): void {

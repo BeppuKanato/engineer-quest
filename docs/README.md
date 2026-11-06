@@ -54,6 +54,7 @@
 | [transition-buttons-142.md](transition-buttons-142.md) | 記録 | Issue #142 のフェーズ間遷移ボタンの共通化（共通部品と「次の段階の名称＋へ進む」の文言導出） |
 | [consolidation-buttons-148.md](consolidation-buttons-148.md) | 記録 | Issue #148 のフェーズ6のボタンの近さ（図の高さ上限）と主な操作の主ボタン化 |
 | [leftover-fixes-139-140-150.md](leftover-fixes-139-140-150.md) | 記録 | Issues #139・#140・#150 の残り個別修正（共通パンくず適用、フロー表示の矢印、単元リザルトのスクロール外側化とコース一覧導線） |
+| [user-terminology-rename.md](user-terminology-rename.md) | 記録 | テーマ2のユーザ向け用語付け替え（段階の共通名、「フェーズ」を画面に出さない、実装画面の用語、実績シードの文言） |
 | [bfs-editor-110.md](bfs-editor-110.md) | 記録 | Issue #110 のエディタ拡大・ダーク化、D1限定フリー実行とstdout、採点・トレースとの分離、実Pyodide確認画像 |
 | [learning-screens-109.md](learning-screens-109.md) | 記録 | Issue #109の単元・学習・ホーム接続、認証進捗API、下書き、報酬の受け口と計装イベント一覧 |
 | [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |

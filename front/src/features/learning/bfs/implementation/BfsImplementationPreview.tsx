@@ -150,7 +150,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
-    <Box component="section" aria-label={complete ? "BFS自力実装の完了" : "BFSの自力実装"}
+    <Box component="section" aria-label={complete ? "BFS 自分で実装の完了" : "BFSの自分で実装"}
       sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
       <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", outline: "none", flexShrink: 0 }}>
         {complete ? content.result.title : content.caption}

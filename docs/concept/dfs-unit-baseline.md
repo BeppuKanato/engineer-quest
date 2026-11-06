@@ -24,6 +24,7 @@
 | 7 自力実装 | `dfs-implementation` | `bfs-implementation` |
 
 - 単元タイトル: 「深さ優先探索（DFS）」
+- ユーザ向けの段階表示名は、テーマ2で採用した共通名を使う（2026-11-06 決定）: 1 導入 / 2 動きの説明 / 3 動きの確認問題 / 4 動きとコードの対応 / 5 コードの確認問題 / 6 応用問題 / 7 自分で実装。画面に「フェーズ」という語は出さない。本書内の「フェーズN」表記は設計用語として従来どおり使う。
 - 対象コース: 既存コース `course-algorithm-depth-first-search-v1`（develop の `courseSeed.ts` に存在）に対応づける想定。
 - コード契約（§7）: id `dfs-order-stack`、version 1（案）。
 

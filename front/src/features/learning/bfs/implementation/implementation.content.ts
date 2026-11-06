@@ -18,8 +18,8 @@ export const bfsImplementationContent = {
   caption: "出発点から各場所までの距離を返すコードを完成させ、実行して確かめましょう。",
   template: "from collections import deque\ndef bfs_distances(graph, start):\n    # ここに、出発点からの距離を返すコードを書く\n    pass",
   tests: [
-    { id: "D1", label: "基本（フェーズ2のグラフ）", visibility: "display", functionName: "bfs_distances", args: [basic, "A"], expected: distances },
-    { id: "D2", label: "転移（フェーズ6のグラフ）", visibility: "display", functionName: "bfs_distances", args: [transfer, "G"], expected: { G: 0, H: 1, I: 1, J: 2, K: 2, L: 3 } },
+    { id: "D1", label: "基本（動きの説明のグラフ）", visibility: "display", functionName: "bfs_distances", args: [basic, "A"], expected: distances },
+    { id: "D2", label: "転移（応用問題のグラフ）", visibility: "display", functionName: "bfs_distances", args: [transfer, "G"], expected: { G: 0, H: 1, I: 1, J: 2, K: 2, L: 3 } },
     { id: "J1", label: "たどり着けない場所を含む", visibility: "judgement", functionName: "bfs_distances", args: [{ ...basic, Z: [] }, "A"], expected: distances },
     { id: "J2", label: "出発点だけのグラフ", visibility: "judgement", functionName: "bfs_distances", args: [{ A: [] }, "A"], expected: { A: 0 } },
     { id: "J3", label: "隣の情報が未登録の場所を含む", visibility: "judgement", functionName: "bfs_distances", args: [{ A: ["B"] }, "A"], expected: { A: 0, B: 1 } },
