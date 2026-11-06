@@ -23,7 +23,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const { bfsCodeCheckContent: content, validateBfsCodeCheck, fillCodeBlank } = load(`${root}/bfs/code-check/codeCheck.content.ts`);
 const { bfsCode, bfsCodeLineNumber } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
 const { bfsCodeMappingContent: mapping } = load(`${root}/bfs/code-mapping/codeMapping.content.ts`);
-const { createAssessmentState, activeQuestion, answerQuestion, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
+const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
 const { bfsCheckContent: nodeContent } = load(`${root}/bfs/check/check.content.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { BfsCodeDisplay } = load(`${root}/bfs/code-mapping/BfsCodeDisplay.tsx`);
@@ -88,24 +88,43 @@ state = answerQuestion(content, state, q1.id, q1.correctAnswer);
 assert.equal(previous.records[0].solved, false, "Records are immutable");
 assert.equal(state.records[0].firstCorrect, false);
 assert.equal(state.records[0].attemptCount, 3);
+assert.equal(activeQuestion(content, state), q1, "A correct answer does not advance on its own");
+state = advanceAssessment(content, state, q1.id);
 assert.equal(activeQuestion(content, state), q2);
 assert(!assessmentComplete(content, state), "One correct answer does not complete phase 5");
 assert.equal(answerQuestion(content, state, q1.id, q1.correctAnswer), state, "Stale answers do not spill into question 2");
 for (const option of q2.choices.filter(option => option.id !== q2.correctAnswer.choiceId)) state = answerQuestion(content, state, q2.id, choice(option.id));
 assert.equal(activeQuestion(content, state), q2);
 state = answerQuestion(content, state, q2.id, q2.correctAnswer);
+state = advanceAssessment(content, state, q2.id);
 assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert(state.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 3));
 assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1,2,3");
+
+// 「次の問題へ」で正解せず進める（ソフトゲート）。全問未正解でも完了し、結果は初回回答のまま。
+let skipped = createAssessmentState(content);
+assert.equal(advanceAssessment(content, skipped, q1.id), skipped, "Cannot advance before answering");
+skipped = answerQuestion(content, skipped, q1.id, choice(q1.choices.find(option => option.id !== q1.correctAnswer.choiceId).id));
+skipped = advanceAssessment(content, skipped, q1.id);
+assert.equal(activeQuestion(content, skipped), q2, "Skipping question 1 reaches question 2");
+skipped = answerQuestion(content, skipped, q2.id, choice(q2.choices.find(option => option.id !== q2.correctAnswer.choiceId).id));
+skipped = advanceAssessment(content, skipped, q2.id);
+assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
+assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
+
+const codeCheckPreviewSource = fs.readFileSync(`${root}/bfs/code-check/BfsCodeCheckPreview.tsx`, "utf8");
+assert.match(codeCheckPreviewSource, /advanceAssessment\(content, current, question\.id\)/);
+assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);
 assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state);
 let firstTry = createAssessmentState(content);
-for (const question of content.questions) firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer);
+for (const question of content.questions) { firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer); firstTry = advanceAssessment(content, firstTry, question.id); }
 assert(assessmentComplete(content, firstTry));
 assert(firstTry.records.every(record => record.firstCorrect && record.attemptCount === 1));
 // 問2の正解判定は問1の値に依存せず、共通基盤上で単独でも成立する。
 const independent = { ...content, id: "standalone-question-2", questions: [q2] };
-assert(assessmentComplete(independent, answerQuestion(independent, createAssessmentState(independent), q2.id, q2.correctAnswer)));
+const independentDone = answerQuestion(independent, createAssessmentState(independent), q2.id, q2.correctAnswer);
+assert(assessmentComplete(independent, advanceAssessment(independent, independentDone, q2.id)));
 const nodeSession = createAssessmentState(nodeContent);
 assert.equal(answerQuestion(nodeContent, nodeSession, nodeContent.questions[0].id, choice("append")), nodeSession, "Choice answers cannot affect node questions");
 assert.throws(() => activeQuestion(content, nodeSession), /mismatch/);

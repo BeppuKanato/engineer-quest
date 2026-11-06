@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
@@ -30,6 +30,7 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
   useAssessmentFeedback(bfsCheckContent, session, active && !reviewOpen);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
+  const attempt = record?.attempts.at(-1);
   const caption = complete ? bfsCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const step = getLearningStep(bfsExecutionContent, question?.stepId ?? bfsCheckContent.completion.stepId);
   const submit = (answer: NodeAnswer) => {
@@ -59,9 +60,13 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
         図の丸いボタン{question.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう
       </Typography>}
       <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
-        allowNone={question?.allowNone} onAnswer={submit} />
+        allowNone={question?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
+      {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
       <Box sx={{ minHeight: 44, mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center" }}>
         {retry && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label="該当ステップの動きを確認する" />}
+        {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(bfsCheckContent, current, question.id))}
+          sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+            "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === bfsCheckContent.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
         {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bfsCheckContent))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
       </Box>

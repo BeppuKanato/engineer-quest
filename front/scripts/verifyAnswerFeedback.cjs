@@ -46,10 +46,12 @@ assert.equal(newAnswerFeedback(concept, firstError, after).attempt, 2, "The same
 before = after;
 after = answerQuestion(concept, before, concept.questions[0].id, concept.questions[0].correctAnswer);
 assert.equal(newAnswerFeedback(concept, before, after).message, "正解！", "Do not invent broader praise for phase 3");
+after = advanceAssessment(concept, after, concept.questions[0].id);
 before = after;
 after = answerQuestion(concept, before, concept.questions[1].id, { kind: "none" });
-assert(assessmentComplete(concept, after));
 assert.equal(newAnswerFeedback(concept, before, after).correct, true, "The final accepted answer still produces feedback");
+after = advanceAssessment(concept, after, concept.questions[1].id);
+assert(assessmentComplete(concept, after));
 assert.equal(after.records[0].firstCorrect, false, "Presentation does not rewrite first-attempt diagnosis");
 
 for (const question of code.questions) {
@@ -59,6 +61,7 @@ for (const question of code.questions) {
   for (const earlier of code.questions) {
     if (earlier.id === question.id) break;
     current = answerQuestion(code, current, earlier.id, earlier.correctAnswer);
+    current = advanceAssessment(code, current, earlier.id);
   }
   const correct = answerQuestion(code, current, question.id, question.correctAnswer);
   assert.equal(newAnswerFeedback(code, current, correct).message, question.correctFeedback);

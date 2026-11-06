@@ -15,24 +15,24 @@ const rowStyle = {
 const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5 } as const;
 
 type SortableLineProps = {
-  id: string; text: string; index: number; count: number; duration: number;
+  id: string; text: string; index: number; count: number; duration: number; disabled?: boolean;
   onMove: (offset: -1 | 1) => void;
 };
-function SortableLine({ id, text, index, count, duration, onMove }: SortableLineProps) {
+function SortableLine({ id, text, index, count, duration, disabled = false, onMove }: SortableLineProps) {
   const controls = useDragControls();
   return <Reorder.Item as="div" value={id} dragListener={false} dragControls={controls}
     data-parsons-line-id={id} style={{ ...rowStyle, position: "relative" }} transition={{ duration }}
     whileDrag={{ zIndex: 1 }}>
-    <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え"
-      onPointerDown={event => controls.start(event)} sx={{ ...controlStyle, cursor: "grab", touchAction: "none" }}>↕</Button>
+    <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え" disabled={disabled}
+      onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: "grab", touchAction: "none" }}>↕</Button>
     <Box component="code" sx={{ flex: 1, whiteSpace: "pre", textAlign: "left", px: 1 }}>{text}</Box>
-    <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
-    <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
+    <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={disabled || index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
+    <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={disabled || index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
   </Reorder.Item>;
 }
 
 /** 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。 */
-export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQuestion; code: typeof bfsCode; onAnswer?: (answer: OrderAnswer) => void }) {
+export function ParsonsBoard({ question, code, onAnswer, disabled = false }: { question: ParsonsQuestion; code: typeof bfsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean }) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
@@ -48,16 +48,16 @@ export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQu
   return <Box sx={{ minWidth: 0 }}>
     <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.8 }}>
       <Box sx={{ overflowX: "auto" }}>
-        <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={setOrdered}
+        <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
           style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration}
+          {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
             onMove={offset => move(id, offset)} />)}
         </Reorder.Group>
       </Box>
     </Box>
     <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-      <Button onClick={() => setOrdered([...question.lineIds])} disabled={isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
-      {onAnswer && <Button variant="contained" onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
+      <Button onClick={() => setOrdered([...question.lineIds])} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
+      {onAnswer && <Button variant="contained" disabled={disabled} onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
         sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
           "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>この順序で回答する</Button>}
     </Box>

@@ -190,5 +190,9 @@ const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/l
 const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)"/);
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
-assert.match(parsonsSource, /variant="contained" onClick=\{\(\) => onAnswer/);
+assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\{\(\) => onAnswer/);
+// 正解後の固定契約: 正解した問題は選択肢・ノード・Parsons のいずれも選び直せない。
+assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "choices lock after a correct answer");
+assert.match(previewSource, /question.kind === "node" && !attempt\?\.correct/, "graph locks after a correct answer");
+assert.match(previewSource, /disabled=\{attempt\?\.correct === true\} \/>/, "parsons locks after a correct answer");
 console.log("BFS consolidation: primary-action buttons and graph-height cap contract passed.");

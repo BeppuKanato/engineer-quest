@@ -87,18 +87,19 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
-          <ConsolidationGraph {...question.scene} onSelect={question.kind === "node" ? id => submit({ kind: "node", nodeId: id }) : undefined} />
+          <ConsolidationGraph {...question.scene} onSelect={question.kind === "node" && !attempt?.correct ? id => submit({ kind: "node", nodeId: id }) : undefined} />
         </Box>}
         <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
         {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
           {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+            disabled={attempt?.correct === true}
             onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
               color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
               "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
         </Box>}
-        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} />}
+        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} disabled={attempt?.correct === true} />}
         {attempt && <>
-          <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>
+          {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
             <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}

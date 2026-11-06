@@ -76,7 +76,7 @@ export type QuestionRecord = {
 export type AssessmentState = {
   readonly assessmentId: string;
   readonly records: readonly QuestionRecord[];
-  /** 診断型のみ、回答後の任意再挑戦と「次へ」を分離する。 */
+  /** 現在の問題の位置。全形式共通で、回答後の再挑戦と「次へ」を分離する。 */
   readonly position?: number;
 };
 
@@ -147,21 +147,17 @@ export function validateAssessment(content: AssessmentContent): void {
 }
 export function createAssessmentState(content: AssessmentContent): AssessmentState {
   validateAssessment(content);
-  return { assessmentId: content.id, ...(content.kind === "diagnostic-check" ? { position: 0 } : {}), records: content.questions.map(question => ({ questionId: question.id, attemptCount: 0, firstCorrect: null, solved: false, attempts: [] })) };
+  return { assessmentId: content.id, position: 0, records: content.questions.map(question => ({ questionId: question.id, attemptCount: 0, firstCorrect: null, solved: false, attempts: [] })) };
 }
+/** 進行は全形式で位置ベース。正解しても止まらない問題（確認問題）も、位置が進んだ問題へは戻らない。 */
 export function activeQuestion<T extends AssessmentContent>(content: T, state: AssessmentState): T["questions"][number] | null {
   if (state.assessmentId !== content.id) throw new Error("Assessment session mismatch");
-  if (content.kind === "diagnostic-check") return content.questions[state.position ?? 0] ?? null;
-  const next = content.questions.find(question => !state.records.some(record => record.questionId === question.id && record.solved));
-  if (!next) return null;
-  if (next.requires && !state.records.some(record => record.questionId === next.requires!.questionId && record.solved &&
-    record.attempts.some(attempt => attempt.correct && sameAnswer(attempt.answer, next.requires!.answer)))) return null;
-  return next;
+  return content.questions[state.position ?? 0] ?? null;
 }
+/** 完了は全形式共通：最後まで進み、全問に1回以上回答していること（正解は問わない）。結果は初回回答から導く。 */
 export function assessmentComplete(content: AssessmentContent, state: AssessmentState): boolean {
-  if (content.kind === "diagnostic-check") return state.assessmentId === content.id && state.position === content.questions.length &&
+  return state.assessmentId === content.id && state.position === content.questions.length &&
     content.questions.every(question => state.records.some(record => record.questionId === question.id && record.attemptCount > 0));
-  return state.assessmentId === content.id && content.questions.every(question => state.records.some(record => record.questionId === question.id && record.solved));
 }
 /** questionId を照合するため、連打・古い画面のイベントが次問の回答として記録されない。 */
 export function answerQuestion(content: AssessmentContent, state: AssessmentState, questionId: string, answer: AssessmentAnswer): AssessmentState {
@@ -169,14 +165,15 @@ export function answerQuestion(content: AssessmentContent, state: AssessmentStat
   if (!question || question.id !== questionId || !allowed(question, answer)) return state;
   const comparable = "kind" in question && question.kind === "parsons" && answer.kind === "order" ? normalizeParsonsOrder(question, answer) : answer;
   const correct = sameAnswer(comparable, question.correctAnswer);
+  // 進行は全形式で統一する：回答（正解・不正解とも）では進まず、「次へ」（advanceAssessment）を押して初めて次の問題へ進む。
   return { ...state, records: state.records.map(record => record.questionId !== questionId ? record : {
     questionId, attemptCount: record.attemptCount + 1, firstCorrect: record.firstCorrect ?? correct, solved: record.solved || correct,
     attempts: [...record.attempts, { number: record.attemptCount + 1, answer: answer.kind === "order" ? { ...answer, lineIds: [...answer.lineIds] } : { ...answer }, correct }],
   }) };
 }
 
-/** 正誤では止めない診断型の進行。回答直後は同じ問で再挑戦できる。 */
-export function advanceAssessment(content: DiagnosticAssessment, state: AssessmentState, questionId: string): AssessmentState {
+/** 正誤では止めない進行。回答直後は同じ問で再挑戦でき、「次へ」で正解していなくても進める。 */
+export function advanceAssessment(content: AssessmentContent, state: AssessmentState, questionId: string): AssessmentState {
   const question = activeQuestion(content, state);
   if (!question || question.id !== questionId || !state.records.some(record => record.questionId === questionId && record.attemptCount > 0)) return state;
   return { ...state, position: (state.position ?? 0) + 1 };
