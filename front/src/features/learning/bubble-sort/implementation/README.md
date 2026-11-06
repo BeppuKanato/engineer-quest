@@ -18,7 +18,7 @@
 - テスト結果は表示用だけ入力・期待する並び・実際の並びを示す。実際の並びは期待と違う場所をフォーカス青の枠で示し、件数を併記する。判定用の値・標準出力・生の例外は画面状態へ渡さない。
 - 試しに実行は D1 だけを Worker を作り直して実行し、戻り値のリストを棒グラフで示す。通過数・実行回数・完了判定は変えない。
 - ヒントは1→2→3→4の順に解放する。レベル3の骨格は参照コード（契約 bubble-sort-v1）の意味ID `for-pass`／`for-compare`／`if-larger` の3行を原文のまま示し、レベル4はフェーズ6の Parsons 盤面を同じ `ParsonsBoard` で練習モード表示する（採点しない）。
-- 視覚デバッグ（学習者のコードの比較・交換過程のステップ表示）は Issue #234 の対象で、このモジュールには含めない。
+- 視覚デバッグ（Issue #234）: 「配列で動きを見る」で現在のコードを D1 でトレースし、`../trace/` のダイアログでフェーズ2と同じ配列キャンバスのステップ再生を表示する。取得中は編集・採点・試し実行・ヒントを無効にし、トレースは採点回数・ヒント回数を変えない。全通過後の完了表示からも同じコードを確認できる。詳細は `../trace/README.md`。
 
 ファイル:
 
@@ -27,4 +27,4 @@
 - `BubbleSortImplementationPreview.tsx`: エディタ（ライトテーマ＋フォーカス色2px枠＋「Pythonコード」見出し）、テスト／コンソールのタブ、ヒント導線、全通過時の完了表示（紙吹雪と大きな描画チェック）。
 - `ImplementationResults.tsx` / `ArrayOutput.tsx` / `FreeExecutionConsole.tsx` / `ImplementationHints.tsx` / `freeExecution.ts` / `editor.content.ts` / `editor.tokens.ts`: 結果表示、戻り値の配列表示、試しに実行のコンソール、ヒントダイアログ、D1専用フリー実行、画面文言、エディタ専用トークン。
 
-検証: `npm run verify:bubble-sort-implementation`。単元フローへの接続・進捗保存は後続Issueの対象で、このモジュールは保存処理を持たない。
+検証: `npm run verify:bubble-sort-implementation`、`npm run verify:bubble-sort-trace`。単元フローへの接続・進捗保存は後続Issueの対象で、このモジュールは保存処理を持たない。

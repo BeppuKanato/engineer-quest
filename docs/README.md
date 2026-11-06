@@ -83,6 +83,7 @@
 | [bubble-sort-phase5-231.md](bubble-sort-phase5-231.md) | 記録 | Issue #231のバブルソートフェーズ5（コードの確認問題）独立2問、空欄の式だけを覆う位置決めとバイト単位の原文復元、全候補のPython構文確認、基準データ未取り込みの留保 |
 | [bubble-sort-phase6-232.md](bubble-sort-phase6-232.md) | 記録 | Issue #232のバブルソートフェーズ6（応用問題）転移タップ・並び済み配列と右端の理由の選択・8行Parsons、独立トレースとの正解照合と誤答の反証、初回診断、基準データ未取り込みの留保 |
 | [bubble-sort-phase7-233.md](bubble-sort-phase7-233.md) | 記録 | Issue #233のバブルソートフェーズ7（自分で実装）5テストと4段ヒント、試し実行の配列表示、入力不変と範囲の縮小が結果ベース判定で検出できない留保 |
+| [bubble-sort-trace-234.md](bubble-sort-trace-234.md) | 記録 | Issue #234のバブルソートフェーズ7視覚デバッグ（共通トレース基盤への数値リスト記録の追加、フェーズ2正準16コマと一致する遡及変換、候補が曖昧な場合の最終状態表示） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |

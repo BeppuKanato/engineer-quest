@@ -124,7 +124,8 @@ export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensi
     emit(grid, size, event);
   }
 
-  const mode = steps.length && !trace.ambiguous ? "replay" : "final";
+  const ambiguous = trace.ambiguousKinds ? trace.ambiguousKinds.includes("grid") : trace.ambiguous;
+  const mode = steps.length && !ambiguous ? "replay" : "final";
   const partial = mode === "replay" && invalidTail;
   const finalEvent: PythonTraceEvent = lastEvent ?? { line: trace.stoppedLine ?? 0, event: "return", boundary: "line", locals: {} };
   if (mode === "final") {
