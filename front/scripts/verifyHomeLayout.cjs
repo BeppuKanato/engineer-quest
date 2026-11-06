@@ -30,6 +30,9 @@ for (const courseId of [
 }
 const courseCard = read('app/courses/component/courseCard.tsx');
 assert(courseCard.includes('CourseThumbnail'), 'CourseCard must render the course thumbnail');
+// 完了表示は StatusChip の「クリア済み」に一本化し、同じ意味のチップを重ねない（#176）。
+assert(!courseCard.includes('コースクリア'), 'CourseCard must not duplicate the completed badge');
+assert(courseCard.includes('<StatusChip status={status} />'), 'CourseCard keeps the shared status chip');
 assert(courseCard.includes('COURSE_VISUAL_STYLE'), 'CourseCard must keep the category visual as the fallback');
 
 // 3. Home unit grid: capped, personally ordered (in progress -> not started -> completed).
