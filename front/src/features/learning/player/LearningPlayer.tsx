@@ -5,7 +5,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Button, IconButton, Slider, Stack, Typography } from "@mui/material";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
@@ -13,6 +13,11 @@ import { useLearningVisit, type LearningInstrumentation } from "../instrumentati
 import type { CanvasSnapshot, LearningContent } from "./content.types";
 import { advancePlayback, type PlaybackAction, type PlaybackState } from "./playback";
 import { playerTokens } from "./player.tokens";
+
+/** UI 定義 §3 の前提（ステップ数は目安25以下）に収まる間はセグメント表示を使い、
+ * 超える教材（フェーズ4の62フレーム等）ではセグメントが潰れて別 UI に見えるため、
+ * 定義が許容するスライダー形式（幅320px以下）に切り替える。 */
+const SEGMENT_SEEK_MAX_STEPS = 25;
 
 export type LearningPlayerProps<TCanvas extends CanvasSnapshot> = LearningInstrumentation & {
   content: LearningContent<TCanvas>;
@@ -56,7 +61,7 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
       onKeyDown={(event) => {
         // スライダー等の入力部品は自身のキー操作を優先する。
         if (event.altKey || event.ctrlKey || event.metaKey ||
-          (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]'))) return;
+          (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"], [role="slider"]'))) return;
         const positions: Partial<Record<string, number>> = {
           ArrowLeft: playback.index - 1, ArrowRight: playback.index + 1, Home: 0, End: count - 1,
         };
@@ -86,24 +91,35 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
           onClick={() => dispatch({ type: "seek", index: playback.index - 1 })} sx={{ width: 40, height: 40 }}><SkipPreviousIcon /></IconButton>
         <IconButton aria-label="次のステップ" disabled={playback.index === count - 1}
           onClick={() => dispatch({ type: "seek", index: playback.index + 1 })} sx={{ width: 40, height: 40 }}><SkipNextIcon /></IconButton>
-        <Box role="slider" aria-label="ステップ位置" aria-valuemin={1} aria-valuemax={count}
-          aria-valuenow={playback.index + 1} aria-valuetext={`${playback.index + 1} / ${count}`}
-          aria-disabled={count < 2} tabIndex={count < 2 ? -1 : 0} data-seek-bar
-          onClick={(event) => {
-            const segment = (event.target as Element).closest("[data-seek-index]");
-            if (!segment) return;
-            dispatch({ type: "seek", index: Number(segment.getAttribute("data-seek-index")) });
-          }}
-          sx={{ flex: "1 1 auto", maxWidth: 320, minWidth: 40, height: 32, display: "flex", alignItems: "center", gap: "3px",
-            cursor: count < 2 ? "default" : "pointer", outlineOffset: 2,
-            "&:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
-          {content.steps.map((item, i) => (
-            <Box key={item.id} data-seek-index={i} aria-hidden
-              sx={{ flex: 1, height: 8, borderRadius: 4,
-                bgcolor: i <= playback.index ? playerTokens.control : "#d1d5db",
-                transition: `background-color ${playerTokens.transitionMs}ms` }} />
-          ))}
-        </Box>
+        {count <= SEGMENT_SEEK_MAX_STEPS ? (
+          <Box role="slider" aria-label="ステップ位置" aria-valuemin={1} aria-valuemax={count}
+            aria-valuenow={playback.index + 1} aria-valuetext={`${playback.index + 1} / ${count}`}
+            aria-disabled={count < 2} tabIndex={count < 2 ? -1 : 0} data-seek-bar
+            onClick={(event) => {
+              const segment = (event.target as Element).closest("[data-seek-index]");
+              if (!segment) return;
+              dispatch({ type: "seek", index: Number(segment.getAttribute("data-seek-index")) });
+            }}
+            sx={{ flex: "1 1 auto", maxWidth: 320, minWidth: 40, height: 32, display: "flex", alignItems: "center", gap: "3px",
+              cursor: count < 2 ? "default" : "pointer", outlineOffset: 2,
+              "&:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
+            {content.steps.map((item, i) => (
+              <Box key={item.id} data-seek-index={i} aria-hidden
+                sx={{ flex: 1, height: 8, borderRadius: 4,
+                  bgcolor: i <= playback.index ? playerTokens.control : "#d1d5db",
+                  transition: `background-color ${playerTokens.transitionMs}ms` }} />
+            ))}
+          </Box>
+        ) : (
+          <Slider aria-label="ステップ位置" data-seek-slider value={playback.index}
+            min={0} max={Math.max(count - 1, 0)} step={1} disabled={count < 2}
+            getAriaValueText={(value) => `${value + 1} / ${count}`}
+            onChange={(_, value) => dispatch({ type: "seek", index: Array.isArray(value) ? value[0] : value })}
+            sx={{ flex: "1 1 auto", maxWidth: 320, minWidth: 40, mx: 0.5, color: playerTokens.control,
+              "& .MuiSlider-rail": { bgcolor: "#d1d5db", opacity: 1 },
+              "& .MuiSlider-thumb": { width: 18, height: 18 },
+              "&:focus-visible": { outline: `2px solid ${playerTokens.control}`, outlineOffset: 2 } }} />
+        )}
         <Typography component="span" sx={{ fontSize: 14, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
           {playback.index + 1} / {count}
         </Typography>
