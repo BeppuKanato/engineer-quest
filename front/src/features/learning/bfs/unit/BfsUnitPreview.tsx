@@ -19,12 +19,15 @@ import { BfsConsolidationPreview } from "../consolidation/BfsConsolidationPrevie
 import { BfsExecutionPreview } from "../execution/BfsExecutionPreview";
 import { BfsImplementationPreview } from "../implementation/BfsImplementationPreview";
 import { BfsMotivationPreview } from "../motivation/BfsMotivationPreview";
-import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle } from "./unit.content";
+import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle, type BfsUnitPhase } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "./PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
 
 type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
+
+/** フィードバックの対象になる確認フェーズ（3・5・6）。#202 */
+const isCheckPhase = (phase: BfsUnitPhase) => phase.phase === 3 || phase.phase === 5 || phase.phase === 6;
 
 /**
  * BFS 単元フロー（Issue #77）。単品ページで確認済みのフェーズ1〜7を、1つの単元として通して学べるよう接続する。
@@ -46,8 +49,13 @@ export type BfsUnitPreviewProps = {
   onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
+  // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
+  // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
+  onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
+  renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
+  renderUnitFeedback?: () => ReactNode;
 };
-export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards }: BfsUnitPreviewProps = {}) {
+export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BfsUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, bfsUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -101,6 +109,10 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
     busy.current = true; setSaving(true); setFailed(null);
     try {
       if (onPhaseComplete) await onPhaseComplete(bfsUnitPhases[index].id, summary);
+      // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+      if (onCheckPhaseCompleted && isCheckPhase(bfsUnitPhases[index])) {
+        onCheckPhaseCompleted(bfsUnitPhases[index].id, bfsUnitPhases[index + 1]?.id ?? null);
+      }
       observer.current?.({ eventType: "phase_complete", phaseKey: bfsUnitPhases[index].id, payload: { summary } });
       if (summary) setSummaries(current => ({ ...current, [index]: summary }));
       setCompleted(current => new Set(current).add(bfsUnitPhases[index].id));
@@ -117,7 +129,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       }
     } catch { setFailed({ index, summary }); }
     finally { busy.current = false; setSaving(false); }
-  }, [goToPhase, onPhaseComplete]);
+  }, [goToPhase, onPhaseComplete, onCheckPhaseCompleted]);
 
   const completeHandlers = useMemo(
     () => bfsUnitPhases.map((_, index) => (summary?: BfsUnitPhaseSummary) => { void handleComplete(index, summary); }),
@@ -198,13 +210,17 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
           </Box>
         ))}
         {screen.kind === "result" && (
-          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })} />
+          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            feedback={isCheckPhase(bfsUnitPhases[screen.index]) && renderPhaseFeedback ? renderPhaseFeedback(bfsUnitPhases[screen.index].id, bfsUnitPhases[screen.index + 1]?.id ?? null, {
+              goToPhase: key => { const target = bfsUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
+              goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
+            }) : undefined} />
         )}
         {screen.kind === "bridge" && (
           <PhaseBridgeScreen phase={bfsUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} />
+          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
         )}
       </Box>
     </Box>

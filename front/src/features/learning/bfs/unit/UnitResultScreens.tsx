@@ -31,10 +31,11 @@ const nextButtonSx = {
 } as const;
 
 /** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。 */
-export function UnitResultScreen({ phase, summary, onNext }: {
+export function UnitResultScreen({ phase, summary, onNext, feedback }: {
   phase: BfsUnitPhase;
   summary?: BfsUnitPhaseSummary;
   onNext: () => void;
+  feedback?: ReactNode;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
@@ -52,6 +53,7 @@ export function UnitResultScreen({ phase, summary, onNext }: {
       </>
     )}
     <PhaseNextButton label="次へ進む" onClick={onNext} />
+    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
   </Box>;
 }
 
@@ -77,11 +79,12 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards }: {
+export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards, feedback }: {
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
   summaries: Readonly<Record<number, BfsUnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
+  feedback?: ReactNode;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
   const reduced = useReducedMotion();
@@ -128,6 +131,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
     </Box>
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{bfsImplementationContent.result.closing}</Typography>
     {rewards && renderRewards?.(rewards)}
+    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{bfsUnitText.reviewNote}</Typography>
     <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToCourses}</Button>
   </Box>;
