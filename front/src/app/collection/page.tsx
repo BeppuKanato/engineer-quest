@@ -5,22 +5,29 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getCollection, type CollectionResponse } from "@/api/collection.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function CollectionPage() {
   const router = useRouter();
-  const [data, setData] = useState<CollectionResponse | null>(null);
+  const { status, token } = useUserSession();
+  const [cachedCollection] = useState(() => peekClientQueryData<CollectionResponse>("collection"));
+  const [data, setData] = useState<CollectionResponse | null>(cachedCollection ?? null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => onAuthStateChanged(auth, async (user) => {
-    if (!user) return setError("ログインが必要です。");
-    try { setData(await getCollection(await user.getIdToken())); } catch { setError("コレクションを取得できませんでした。"); }
-  }), []);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) { if (!cachedCollection) setError("ログインが必要です。"); return; }
+    let active = true;
+    fetchClientQuery("collection", () => getCollection(token), { staleTimeMs: 300_000, tags: [queryTags.collection] })
+      .then(next => { if (active) { setData(next); setError(null); } })
+      .catch(() => { if (active && !cachedCollection) setError("コレクションを取得できませんでした。"); });
+    return () => { active = false; };
+  }, [status, token, cachedCollection]);
   const recent = useMemo(() => data ? [
     ...data.knowledgeTips.items.filter((x) => x.collectedAt).map((x) => ({ id: x.id, title: x.title, type: "知識カード", at: x.collectedAt! })),
     ...data.achievements.items.filter((x) => x.achievedAt).map((x) => ({ id: x.id, title: x.title, type: `${x.rarity} 実績`, at: x.achievedAt! })),

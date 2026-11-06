@@ -26,7 +26,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -43,7 +42,8 @@ import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import type { Course } from "@/app/courses/type";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 const categoryColor: Record<QuestPostCategory, "primary" | "secondary" | "success" | "warning" | "info" | "default"> = {
@@ -135,15 +135,17 @@ const PostCard = ({ post }: { post: QuestPostSummary }) => {
 export default function QuestBoardPage() {
   const router = useRouter();
   const { showOverlay, startNavigation } = useNavigationFeedback();
-  const [token, setToken] = useState<string | null>(null);
-  const [board, setBoard] = useState<QuestBoardListResponse | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { status: sessionStatus, token } = useUserSession();
+  const [cachedBoard] = useState(() => peekClientQueryData<QuestBoardListResponse>("quest-board"));
+  const [cachedBoardCourses] = useState(() => peekClientQueryData<Course[]>("quest-board-courses"));
+  const [board, setBoard] = useState<QuestBoardListResponse | null>(cachedBoard ?? null);
+  const [courses, setCourses] = useState<Course[]>(cachedBoardCourses ?? []);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<QuestPostCategory | "ALL">("ALL");
   const [status, setStatus] = useState<QuestPostStatus | "ALL">("ALL");
   const [courseId, setCourseId] = useState("");
   const [mineOnly, setMineOnly] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedBoard);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedCourse = useMemo(
@@ -163,46 +165,26 @@ export default function QuestBoardPage() {
   };
 
   useEffect(() => {
+    if (sessionStatus === "loading") return;
+    if (sessionStatus !== "authenticated" || !token) {
+      if (!cachedBoard) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+    Promise.all([
+      fetchClientQuery("quest-board", () => getQuestBoardPosts(token), { staleTimeMs: 300_000, tags: [queryTags.questBoard] }),
+      fetchClientQuery("quest-board-courses", () => getCourses(token), { staleTimeMs: 300_000, tags: [queryTags.questBoard] }),
+    ])
+      .then(([boardData, courseData]) => {
         if (!isMounted) return;
-        setToken(null);
-        setBoard(null);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const idToken = await user.getIdToken();
-        const [boardData, courseData] = await Promise.all([
-          getQuestBoardPosts(idToken),
-          getCourses(idToken),
-        ]);
-
-        if (!isMounted) return;
-        setToken(idToken);
         setBoard(boardData);
         setCourses(courseData);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("掲示板を取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+        setErrorMessage(null);
+      })
+      .catch(error => { console.error(error); if (isMounted && !cachedBoard) setErrorMessage("掲示板を取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [sessionStatus, token, cachedBoard]);
 
   const handleSearch = async () => {
     if (!token) return;
