@@ -11,6 +11,7 @@ import type { LearningInstrumentation } from "../../instrumentation/useLearningV
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
+import { ResultTagRow } from "../../app/ResultTagRow";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
@@ -52,13 +53,13 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   }, [diagnosis, onComplete]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label={complete ? "応用問題の診断結果" : "BFSの応用問題"}
+    <Box component="section" aria-label={complete ? "応用問題の結果" : "BFSの応用問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: question && question.kind !== "parsons" ? (embedded ? "100%" : "84dvh") : "auto",
         minHeight: question && question.kind !== "parsons" ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
-      }}>{diagnosis ? `初回正解 ${diagnosis.correct}/${diagnosis.total}問` : question?.prompt}</Typography>
+      }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
@@ -73,22 +74,30 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         </Box>}
         {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} />}
         {attempt && <>
-          <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。診断には初回の回答を使います。</Typography>
+          <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
             <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
               sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-                "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "診断結果を見る" : "次の問題へ"}</Button>
+                "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>
           </Box>
         </>}
       </>}
       {diagnosis && <>
-        <Box component="ul" aria-label="論点タグごとの初回結果" sx={{ pl: 3 }}>
-          {diagnosis.tags.map(result => <Box component="li" key={result.tag} data-diagnostic-tag={result.tag} sx={{ mb: 2 }}>
-            <Typography component="p">{result.tag}：{result.passed ? "初回正解" : "初回不正解"}</Typography>
-            {!result.passed && <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
-              onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} />}
-          </Box>)}
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, mt: 1 }}>
+          <Typography component="p" sx={{ fontSize: 15 }}>初回正解</Typography>
+          <Typography component="p" sx={{ fontSize: 44, fontWeight: 800, lineHeight: 1, color: playerTokens.focus }}>
+            {diagnosis.correct} / {diagnosis.total}<Typography component="span" sx={{ fontSize: 20, fontWeight: 700 }}> 問</Typography>
+          </Typography>
+          <Box aria-hidden sx={{ width: "min(420px, 80%)", height: 10, borderRadius: 999, overflow: "hidden", bgcolor: playerTokens.states.completed.fill }}>
+            <Box sx={{ width: `${diagnosis.total ? (diagnosis.correct / diagnosis.total) * 100 : 0}%`, height: "100%", bgcolor: playerTokens.focus }} />
+          </Box>
+        </Box>
+        <Box component="ul" aria-label="論点ごとの結果" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
+          {diagnosis.tags.map(result => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag}
+            passed={result.passed} correct={result.correct} total={result.total}
+            reviewAction={!result.passed ? <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
+              onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} /> : undefined} />)}
         </Box>
         <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
         {onNext && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
