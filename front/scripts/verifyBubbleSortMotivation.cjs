@@ -108,7 +108,9 @@ const canvasSource = fs.readFileSync(`${feature}/BubbleSortMotivationCanvas.tsx`
 assert(canvasSource.includes("ArrayDrawing") && canvasSource.includes("PhaseNextButton"));
 const previewSource = fs.readFileSync(`${feature}/BubbleSortMotivationPreview.tsx`, "utf8");
 assert.match(previewSource, /width: "84vw", height: "84dvh"/);
-assert.doesNotMatch(previewSource, /onLearningEvent|onComplete|fetch\(|localStorage/);
+// 接続ポートは単元フロー（#235）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
+assert.match(previewSource, /onComplete\?: \(\) => void/);
+assert.doesNotMatch(previewSource, /fetch\(|localStorage/);
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8").includes('contentId === "bubble-sort-motivation"'));
 
 // 基盤の検証は不正な配列を弾く。
