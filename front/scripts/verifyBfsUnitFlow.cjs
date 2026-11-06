@@ -117,7 +117,7 @@ const nodes = element => {
 const renderCelebration = () => nodes(UnitResultCelebration({ heading: "確認が終わりました", headingRef: null }));
 const animated = renderCelebration();
 // 紙吹雪は canvas-confetti ライブラリに任せ、発射専用コンポーネントとして一度だけマウントする。
-assert.ok(animated.some(node => node.type?.name === "PhaseResultConfetti"), "Confetti launcher mounts with the celebration");
+assert.ok(animated.some(node => node.type?.name === "ResultConfetti"), "Confetti launcher mounts with the celebration");
 
 for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"]) {
   const element = animated.find(node => Object.hasOwn(node.props, attribute));
@@ -130,7 +130,7 @@ assert.deepEqual(plain(renderCelebration().map(node => [node.key, node.props.ini
   plain(animated.map(node => [node.key, node.props.initial, node.props.animate])));
 reducedMotion = true;
 const still = renderCelebration();
-assert.ok(!still.some(node => node.type?.name === "PhaseResultConfetti"), "Reduced motion omits confetti");
+assert.ok(!still.some(node => node.type?.name === "ResultConfetti"), "Reduced motion omits confetti");
 for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"]) {
   const element = still.find(node => Object.hasOwn(node.props, attribute));
   assert.equal(element.props.initial, false, "Reduced motion starts in the completed state");
@@ -160,15 +160,17 @@ reducedMotion = false;
 const celebrationSource = read(`${root}/bfs/unit/UnitResultCelebration.tsx`);
 assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearningRewards|setTimeout|setInterval|whileInView|onAnimationComplete|Math\.random/);
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
-// 紙吹雪はライブラリ（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
-assert.match(celebrationSource, /from "canvas-confetti"/, "Confetti comes from the library");
-assert.doesNotMatch(celebrationSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
-assert.match(celebrationSource, /particleCount: 60/, "Each popper fires 60 pieces");
-assert.match(celebrationSource, /angle: 60, origin: \{ x: 0\.12, y: 0\.7 \}/, "Left popper fires up-right from the lower left");
-assert.match(celebrationSource, /angle: 120, origin: \{ x: 0\.88, y: 0\.7 \}/, "Right popper fires up-left from the lower right");
-assert.match(celebrationSource, /zIndex: 1200/, "Confetti stays below reward dialogs (1300)");
-assert.match(celebrationSource, /disableForReducedMotion: true/, "The library also honours reduced motion");
-assert.match(celebrationSource, /firedRef/, "Confetti fires once per mount, never on re-render or dialog close");
+// 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
+assert.match(celebrationSource, /<ResultConfetti/, "Phase results mount the shared confetti launcher");
+const confettiSource = read(`${root}/app/ResultConfetti.tsx`);
+assert.match(confettiSource, /from "canvas-confetti"/, "Confetti comes from the library");
+assert.doesNotMatch(confettiSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
+assert.match(confettiSource, /particleCount: 90/, "Each popper fires 90 pieces (strengthened phase preset)");
+assert.match(confettiSource, /angle: 60, origin: \{ x: 0\.12, y: 0\.7 \}/, "Left popper fires up-right from the lower left");
+assert.match(confettiSource, /angle: 120, origin: \{ x: 0\.88, y: 0\.7 \}/, "Right popper fires up-left from the lower right");
+assert.match(confettiSource, /zIndex: 1200/, "Confetti stays below reward dialogs (1300)");
+assert.match(confettiSource, /disableForReducedMotion: true/, "The library also honours reduced motion");
+assert.match(confettiSource, /firedRef/, "Confetti fires once per mount, never on re-render or dialog close");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
@@ -184,6 +186,7 @@ const consolidationSource = read(`${root}/bfs/consolidation/BfsConsolidationPrev
 assert.match(consolidationSource, /"応用問題の結果"/, "Phase 6 result screen is named as a result, not a diagnosis");
 assert.doesNotMatch(consolidationSource, /応用問題の診断結果|診断結果を見る|診断には初回の回答|初回不正解/, "No diagnosis wording or failure labels in phase 6 user-facing strings");
 assert.match(consolidationSource, /<ResultTagRow/, "Phase 6 renders per-tag result rows");
+assert.match(consolidationSource, /<ResultConfetti/, "Phase 6 results also celebrate with confetti");
 const tagRowSource = read(`${root}/app/ResultTagRow.tsx`);
 assert.match(tagRowSource, /復習で確認できます/, "Tags not reached on the first attempt point at review instead of blame");
 assert.doesNotMatch(tagRowSource, /初回不正解/, "Tag rows never label a first attempt as a failure");

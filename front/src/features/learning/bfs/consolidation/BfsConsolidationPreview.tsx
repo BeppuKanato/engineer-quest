@@ -11,6 +11,7 @@ import type { LearningInstrumentation } from "../../instrumentation/useLearningV
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
+import { ResultConfetti } from "../../app/ResultConfetti";
 import { ResultTagRow } from "../../app/ResultTagRow";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
@@ -84,6 +85,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         </>}
       </>}
       {diagnosis && <>
+        <ResultConfetti />
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, mt: 1 }}>
           <Typography component="p" sx={{ fontSize: 15 }}>初回正解</Typography>
           <Typography component="p" sx={{ fontSize: 44, fontWeight: 800, lineHeight: 1, color: playerTokens.focus }}>
