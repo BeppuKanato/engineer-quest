@@ -3,7 +3,6 @@ import { Alert, Box, Button, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { useUserSession } from "@/app/component/userSession";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress } from "@/api/learning.api";
@@ -25,7 +24,7 @@ export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string;
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
-    <Box sx={{ flexShrink: 0 }}><AppHeader /><Box sx={{ px: 2, py: 1 }}><AppBreadcrumbs compact items={[{ label: "コース", href: "/courses" }, { label: unit?.title ?? "単元", href: unitUrl(courseId) }, { label: "学習" }]} /></Box></Box>
+    <Box sx={{ flexShrink: 0 }}><AppHeader /><Button component={Link} href={unitUrl(courseId)}>単元画面へ戻る</Button></Box>
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <Typography role="status">進捗を読み込んでいます。</Typography> :

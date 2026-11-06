@@ -41,8 +41,10 @@ export function UnitOverview({ courseId }: { courseId: string }) {
   };
   return <Box sx={{ minHeight: "100dvh", bgcolor: tokens.background, color: tokens.text }}>
     <AppHeader />
-    <Container component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ py: 3, maxWidth: 1200 }}>
+    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
       <AppBreadcrumbs items={[{ label: "コース", href: "/courses" }, { label: unit?.title ?? "単元" }]} />
+    </Container>
+    <Container component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ pt: 1, pb: 3, maxWidth: 1200 }}>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt: 2 }}>{unit?.title ?? "単元"}</Typography>
       {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <Typography role="status" sx={{ my: 4 }}>進捗を読み込んでいます。</Typography> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : progress && <>
