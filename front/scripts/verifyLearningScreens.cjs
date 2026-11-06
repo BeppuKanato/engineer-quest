@@ -87,5 +87,13 @@ const plain = value => JSON.parse(JSON.stringify(value));
   now=110;globals.document.visibilityState='hidden';listeners.visibilitychange();now=1000;globals.document.visibilityState='visible';listeners.visibilitychange();now=1050;windowListeners.pagehide();stop();
   assert.deepEqual(observed.map(event=>event.eventType),['player_step_view','player_step_dwell','player_step_dwell']);
   assert.deepEqual(observed.slice(1).map(event=>event.payload.visibleMs),[100,50]);
-  console.log('Learning screens: authenticated API paths/summaries, resume gaps, account-scoped drafts, ordered reward handoff, 20-event batching, unload keepalive, one retry, byte budget and visible dwell passed.');
+  // 読み込み中は素のテキストではなく、形の近いスケルトンで示す（#175）。
+const skeletonSource = fs.readFileSync(path.join(root, "features/learning/app/ProgressLoadingSkeleton.tsx"), "utf8");
+assert(skeletonSource.includes('role="status"'), "loading skeleton keeps the status role");
+for (const screenFile of ["LearningScreen.tsx", "UnitOverview.tsx"]) {
+  const screenSource = fs.readFileSync(path.join(root, "features/learning/app", screenFile), "utf8");
+  assert(screenSource.includes("ProgressLoadingSkeleton"), `${screenFile} uses the progress loading skeleton`);
+  assert(!/<Typography role="status">進捗を読み込んでいます。<\/Typography>/.test(screenSource), `${screenFile} no longer shows the bare loading text`);
+}
+console.log('Learning screens: authenticated API paths/summaries, resume gaps, account-scoped drafts, ordered reward handoff, 20-event batching, unload keepalive, one retry, byte budget and visible dwell passed.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
