@@ -116,3 +116,7 @@ assert.throws(() => validateMotivationCanvas({ ...first, state: { ...first.state
 assert.throws(() => validateMotivationCanvas({ ...first, data: { ...first.data, maze: { ...maze, places: maze.places.slice(1) } } }), /correspondence/);
 assert.throws(() => validateMotivationCanvas({ ...first, highlights: [{ kind: "node", id: "unknown" }] }), /highlight/);
 console.log("BFS motivation: 22 scenes, unchanged transition snapshots, graph replay, vocabulary, entrance and exit passed.");
+
+// 出口ボタンは突然出さずフェードインさせる（#140）。
+const motivationCanvasSource = fs.readFileSync(path.join(__dirname, "../src/features/learning/bfs/motivation/BfsMotivationCanvas.tsx"), "utf8");
+assert.match(motivationCanvasSource, /component=\{motion\.div\}/, "motivation exit button fades in");
