@@ -8,7 +8,7 @@ const router = Router();
 router.use(verifyFirebaseToken);
 router.all("/:kind/:eventId", async (req, res, next) => {
   try {
-    const kind = z.enum(["mission", "create"]).parse(req.params.kind);
+    const kind = z.enum(["mission", "create", "phase", "unit"]).parse(req.params.kind);
     const uid = req.authUser?.firebaseUid;
     if (!uid) throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
     if (req.method !== "GET" && req.method !== "POST") { res.sendStatus(405); return; }
