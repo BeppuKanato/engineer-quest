@@ -79,7 +79,7 @@ export function DfsMotivationCanvas({ canvas }: { canvas: DfsMotivationCanvasSta
         <polyline points={points([...state.trail].reverse())} fill="none" stroke={playerTokens.text} strokeWidth={2} strokeDasharray="7 5" markerEnd={`url(#${returnArrow})`} />
       </>}
       {state.annotations && <>
-        <text x={point("A").x} y={point("A").y + 68} textAnchor="middle" fill={playerTokens.text} fontSize={18}>場所（ノード）</text>
+        <text x={point("A").x - maze.cell * 0.6} y={point("A").y + 7} textAnchor="end" fill={playerTokens.text} fontSize={18}>場所（ノード）</text>
         <text x={(point("A").x + point("B").x) / 2} y={point("A").y - 62} textAnchor="middle" fill={playerTokens.text} fontSize={18}>つながり（辺）</text>
       </>}
     </GraphViewport>
