@@ -121,13 +121,20 @@ const animated = renderCelebration();
 const confetti = animated.find(node => Object.hasOwn(node.props, "data-phase-result-confetti"));
 assert.equal(confetti.props["aria-hidden"], "true", "Confetti is decorative");
 assert.equal(confetti.props.sx.pointerEvents, "none", "Confetti never intercepts next / review actions");
-assert.ok(confetti.props.sx.maxWidth <= 360 && confetti.props.sx.height <= 180, "Phase praise stays local, leaving the final celebration a larger scope");
+assert.equal(confetti.props.sx.position, "fixed");
+assert.equal(confetti.props.sx.left, 0);
+assert.equal(confetti.props.sx.right, 0, "Confetti spans the screen, including outside the last-answer symbol");
+assert.equal(confetti.props.sx.height, "85dvh");
+assert.ok(confetti.props.sx.zIndex < 1300, "Reward dialogs remain above the confetti");
 const particles = animated.filter(node => Object.hasOwn(node.props, "data-confetti-piece"));
-assert.ok(particles.length > 0 && particles.length <= 20);
+assert.ok(particles.length >= 100 && particles.length <= 140, "Confetti must remain clearly visible on large screens");
+assert.ok(new Set(particles.map(node => node.props.sx.left)).size >= 50, "Spread particles across the width");
 for (const particle of particles) {
   assert.equal(particle.props.initial.opacity, 0);
   assert.equal(particle.props.animate.opacity.at(-1), 0, "Confetti ends invisible");
-  assert.ok(particle.props.transition.duration + particle.props.transition.delay <= 1.5);
+  assert.ok(particle.props.transition.duration >= 3 && particle.props.transition.duration + particle.props.transition.delay <= 5,
+    "Keep confetti visible beyond the 1.5-second answer symbol, then finish");
+  assert.ok(particle.props.sx.width >= 10 && particle.props.sx.height >= 14);
   assert.equal(particle.props.transition.repeat, 0);
 }
 for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"]) {

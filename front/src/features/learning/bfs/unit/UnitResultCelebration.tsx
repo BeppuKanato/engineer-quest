@@ -7,12 +7,14 @@ import type { Ref } from "react";
 
 import { playerTokens } from "../../player/player.tokens";
 
-// カードの光条・回転・段階演出より控えめな、中央の小さな一回の紙吹雪。
+// 回答直後の○に隠れず、大画面でも認識できる幅と余韻を持つ一回の紙吹雪。
 // ランダム値・タイマー・ダイアログ状態には依存せず、マウント時だけ開始する。
-const pieces = Array.from({ length: 18 }, (_, index) => ({
-  x: (index - 8.5) * 16,
-  turn: (index % 2 ? 1 : -1) * (90 + index * 13),
-  color: [playerTokens.focus, playerTokens.states.queued.stroke, playerTokens.states.completed.stroke][index % 3],
+const pieces = Array.from({ length: 120 }, (_, index) => ({
+  left: (index * 37) % 100,
+  drift: (index % 2 ? 1 : -1) * (32 + index % 7 * 12),
+  turn: (index % 2 ? 1 : -1) * (240 + index % 5 * 60),
+  delay: Math.floor(index / 20) * 0.14,
+  color: [playerTokens.focus, playerTokens.states.queued.stroke, playerTokens.states.processing.stroke][index % 3],
 }));
 const reducedStyle = {
   "@media (prefers-reduced-motion: reduce)": { transform: "none !important", opacity: "1 !important" },
@@ -23,13 +25,13 @@ export function UnitResultCelebration({ heading, headingRef }: { heading: string
   const reduced = useReducedMotion();
   return <Box data-phase-result-celebration sx={{ position: "relative", width: "100%", maxWidth: 640, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
     {!reduced && <Box aria-hidden="true" data-phase-result-confetti
-      sx={{ position: "absolute", top: -16, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 360, height: 180, overflow: "hidden", pointerEvents: "none",
+      sx={{ position: "fixed", top: "10dvh", left: 0, right: 0, height: "85dvh", overflow: "hidden", pointerEvents: "none", zIndex: 1200,
         "@media (prefers-reduced-motion: reduce)": { display: "none" } }}>
       {pieces.map((piece, index) => <Box key={index} component={motion.span} data-confetti-piece
         initial={{ opacity: 0, x: 0, y: 0, rotate: 0 }}
-        animate={{ opacity: [0, 1, 1, 0], x: [0, piece.x * 0.4, piece.x * 0.85, piece.x], y: [0, -16, 88, 150], rotate: [0, piece.turn * 0.3, piece.turn * 0.7, piece.turn] }}
-        transition={{ duration: 1.15, delay: index % 3 * 0.08, times: [0, 0.15, 0.8, 1], repeat: 0 }}
-        sx={{ position: "absolute", left: "50%", top: 24, width: 6, height: 10, borderRadius: 0.5, bgcolor: piece.color }} />)}
+        animate={{ opacity: [0, 1, 1, 0], x: [0, piece.drift * 0.3, piece.drift, piece.drift * 0.65], y: ["-4vh", "14vh", "48vh", "82vh"], rotate: [0, piece.turn * 0.3, piece.turn * 0.7, piece.turn] }}
+        transition={{ duration: 3.6, delay: piece.delay, times: [0, 0.08, 0.82, 1], repeat: 0, ease: "linear" }}
+        sx={{ position: "absolute", left: `${piece.left}%`, top: 0, width: 10 + index % 3 * 2, height: 14 + index % 4 * 3, borderRadius: index % 4 === 0 ? "50%" : 0.5, bgcolor: piece.color }} />)}
     </Box>}
     <Box component={motion.div} aria-hidden="true" data-phase-result-mark
       initial={reduced ? false : { scale: 0.8, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }}
