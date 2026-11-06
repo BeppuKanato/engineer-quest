@@ -23,7 +23,8 @@
     "verify:learning-rewards": "node scripts/verifyLearningRewards.cjs",
     "verify:mascot-presentation": "node scripts/verifyMascotPresentation.cjs",
     "verify:response-feedback": "node scripts/verifyResponseFeedback.cjs",
-    "verify:answer-feedback": "node scripts/verifyAnswerFeedback.cjs"
+    "verify:answer-feedback": "node scripts/verifyAnswerFeedback.cjs",
+    "verify:home-layout": "node scripts/verifyHomeLayout.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
