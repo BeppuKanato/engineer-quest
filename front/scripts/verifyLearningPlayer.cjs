@@ -152,11 +152,9 @@ assert.equal((overlayHtml.match(/<foreignObject width="60" height="60"/g) || [])
 assert.equal((overlayHtml.match(/role="group" aria-label="[A-F]：/g) || []).length, 6);
 console.log("Shared graph drawing: all three renderers, uniform geometry and phase-3 overlay coordinates passed.");
 
-// シーク表示の切替契約（UI 定義 §3・#145）: 目安25以下はセグメント、超過時は幅320px以下のスライダー。
+// シーク表示の統一契約（UI 定義 §3・#145）: 全教材で幅320px以下のスライダーに統一し、セグメント表示は持たない。
 const playerSource = fs.readFileSync(`${sourceRoot}/player/LearningPlayer.tsx`, "utf8");
-assert.match(playerSource, /SEGMENT_SEEK_MAX_STEPS = 25/);
-assert.match(playerSource, /count <= SEGMENT_SEEK_MAX_STEPS/);
-assert.match(playerSource, /data-seek-bar/);
 assert.match(playerSource, /data-seek-slider/);
 assert.match(playerSource, /maxWidth: 320/);
-console.log("Learning player: seek presentation switch (segments up to 25 steps, slider beyond) passed.");
+assert.doesNotMatch(playerSource, /data-seek-bar|SEGMENT_SEEK/);
+console.log("Learning player: unified slider seek presentation passed.");
