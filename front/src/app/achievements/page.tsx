@@ -22,7 +22,6 @@ import {
   Typography,
 } from "@mui/material";
 import type { AlertColor } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -30,10 +29,13 @@ import type { ReactNode } from "react";
 import {
   type AchievementCategoryGroup,
   type AchievementItem,
+  type AchievementsResponse,
   getAchievements,
   updateProfileAchievement,
   updateTargetAchievement,
 } from "@/api/achievements.api";
+import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
@@ -153,37 +155,33 @@ export default function AchievementsPage() {
 function AchievementsPageContent() {
   const { play } = useSoundEffect();
   const searchParams = useSearchParams();
-  const [groups, setGroups] = useState<AchievementCategoryGroup[]>([]);
+  const { status, token } = useUserSession();
+  const [cachedAchievements] = useState(() => peekClientQueryData<AchievementsResponse>("achievements"));
+  const [groups, setGroups] = useState<AchievementCategoryGroup[]>(cachedAchievements?.groups ?? []);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedSeriesKey, setSelectedSeriesKey] = useState<string | null>(null);
-  const [targetSeriesKey, setTargetSeriesKey] = useState<string | null>(null);
-  const [profileAchievementId, setProfileAchievementId] = useState<string | null>(null);
+  const [targetSeriesKey, setTargetSeriesKey] = useState<string | null>(() => {
+    if (!cachedAchievements?.targetAchievementId) return null;
+    return toSeries(cachedAchievements.groups).find((series) => series.levels.some((level) => level.id === cachedAchievements.targetAchievementId))?.key ?? null;
+  });
+  const [profileAchievementId, setProfileAchievementId] = useState<string | null>(cachedAchievements?.profileAchievementId ?? null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: AlertColor }>({
     open: false,
     message: "",
     severity: "success",
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedAchievements);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedAchievements) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setGroups([]);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const token = await user.getIdToken();
-        const data = await getAchievements(token);
-
+    fetchClientQuery("achievements", () => getAchievements(token), { staleTimeMs: 300_000, tags: [queryTags.achievements] })
+      .then(data => {
         if (!isMounted) return;
         setGroups(data.groups);
         setProfileAchievementId(data.profileAchievementId);
@@ -193,21 +191,12 @@ function AchievementsPageContent() {
             )
           : null;
         setTargetSeriesKey(targetSeries?.key ?? null);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("実績を取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+        setErrorMessage(null);
+      })
+      .catch(error => { console.error(error); if (isMounted && !cachedAchievements) setErrorMessage("実績を取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, cachedAchievements]);
 
   const allAchievements = useMemo(() => groups.flatMap((group) => group.achievements), [groups]);
   const allSeries = useMemo(() => toSeries(groups), [groups]);
@@ -266,6 +255,7 @@ function AchievementsPageContent() {
       if (isCurrentTarget) {
         setTargetSeriesKey(null);
         await updateTargetAchievement(token, null);
+        updateClientQueryData<AchievementsResponse>("achievements", current => ({ ...current, targetAchievementId: null }));
         setSnackbar({ open: true, message: "目標実績を解除しました", severity: "success" });
         play("saveSuccess");
         return;
@@ -274,6 +264,7 @@ function AchievementsPageContent() {
       const targetLevel = series.nextLevel ?? series.displayLevel;
       setTargetSeriesKey(series.key);
       await updateTargetAchievement(token, targetLevel.id);
+      updateClientQueryData<AchievementsResponse>("achievements", current => ({ ...current, targetAchievementId: targetLevel.id }));
       setSnackbar({ open: true, message: "目標実績に設定しました", severity: "success" });
       play("saveSuccess");
     } catch (error) {
@@ -289,6 +280,7 @@ function AchievementsPageContent() {
       const next = profileAchievementId === achievementId ? null : achievementId;
       await updateProfileAchievement(await user.getIdToken(), next);
       setProfileAchievementId(next);
+      updateClientQueryData<AchievementsResponse>("achievements", current => ({ ...current, profileAchievementId: next }));
       setSnackbar({ open: true, message: next ? "プロフィールに表示する実績を設定しました" : "プロフィール表示を解除しました", severity: "success" });
     } catch (error) {
       console.error(error);
