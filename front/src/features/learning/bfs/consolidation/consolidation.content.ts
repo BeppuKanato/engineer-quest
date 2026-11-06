@@ -25,8 +25,8 @@ export type ConsolidationContent = Omit<DiagnosticAssessment, "questions"> & {
 const [firstFrame, ...remainingFrames] = bfsCodeMappingContent.steps;
 export const bfsConsolidationContent: ConsolidationContent = {
   version: 1, kind: "diagnostic-check", id: "bfs-consolidation", phase: 6, code: bfsCode,
-  reviewLabel: "💡 基本例の動き・コード（フェーズ4）を見る",
-  completion: "理解の状況が確認できました。それでは【フェーズ7：自力実装】に進み、自分の手でコードを完成させましょう！",
+  reviewLabel: "💡 基本例の動き・コードをもう一度見る",
+  completion: "理解の状況が確認できました。それでは【自分で実装】に進み、自分の手でコードを完成させましょう！",
   questions: [
     {
       kind: "node", id: "last-from-f", prompt: "出発点をFに変えると、最後に取り出されるのはどれ？",

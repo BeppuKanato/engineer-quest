@@ -52,7 +52,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   }, [diagnosis, onComplete]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label={complete ? "応用・総括の診断結果" : "BFSの応用・総括"}
+    <Box component="section" aria-label={complete ? "応用問題の診断結果" : "BFSの応用問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: question && question.kind !== "parsons" ? (embedded ? "100%" : "84dvh") : "auto",
         minHeight: question && question.kind !== "parsons" ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
