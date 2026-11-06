@@ -128,9 +128,23 @@ assert.equal(confetti.props.sx.height, "85dvh");
 assert.ok(confetti.props.sx.zIndex < 1300, "Reward dialogs remain above the confetti");
 const particles = animated.filter(node => Object.hasOwn(node.props, "data-confetti-piece"));
 assert.ok(particles.length >= 100 && particles.length <= 140, "Confetti must remain clearly visible on large screens");
-assert.ok(new Set(particles.map(node => node.props.sx.left)).size >= 50, "Spread particles across the width");
+assert.deepEqual([...new Set(particles.map(node => node.props.sx.left))].sort(), ["12%", "88%"], "Exactly two party-popper origins");
+for (const side of ["left", "right"]) {
+  const burst = particles.filter(node => node.props["data-confetti-origin"] === side);
+  assert.equal(burst.length, 60);
+  assert.ok(burst.every(node => node.props.sx.top === "70%"), "Launch from the lower sides, not a rain band");
+  const horizontalSpread = burst.map(node => parseFloat(node.props.animate.x[2]));
+  assert.ok(Math.max(...horizontalSpread) - Math.min(...horizontalSpread) > 25, "Each popper opens into a fan");
+  assert.ok(burst.every(node => node.props.transition.delay <= 0.11), "Each pop is a simultaneous burst");
+}
 for (const particle of particles) {
   assert.equal(particle.props.initial.opacity, 0);
+  assert.equal(particle.props.animate.x[0], "0vw");
+  const vertical = particle.props.animate.y.map(parseFloat);
+  assert.equal(vertical[0], 0);
+  assert.ok(vertical[1] < 0 && vertical[2] < vertical[1], "Confetti shoots upwards first");
+  assert.ok(vertical[3] > vertical[2] && vertical.at(-1) > 0, "After the apex, confetti falls below its origin");
+  assert.ok(particle.props.transition.times[2] <= 0.2, "The upward pop is quick; the fall provides the afterglow");
   assert.equal(particle.props.animate.opacity.at(-1), 0, "Confetti ends invisible");
   assert.ok(particle.props.transition.duration >= 3 && particle.props.transition.duration + particle.props.transition.delay <= 5,
     "Keep confetti visible beyond the 1.5-second answer symbol, then finish");
