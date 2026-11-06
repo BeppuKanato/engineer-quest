@@ -148,9 +148,9 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
       </GraphViewport>
       {/* 出口ボタンは SVG の外に置く。foreignObject 内では SVG の拡大率に引きずられ、指定した大きさで表示されない（#157）。 */}
       {state.exit && <Box component={motion.div}
-        initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+        initial={reducedMotion ? false : { opacity: 0, y: 8, x: "-50%" }} animate={{ opacity: 1, y: 0, x: "-50%" }}
         transition={{ duration: reducedMotion ? 0 : 0.35, ease: "easeOut" }}
-        sx={{ position: "absolute", right: 16, bottom: 12 }}>
+        sx={{ position: "absolute", left: "50%", bottom: 12 }}>
         <PhaseNextButton label={state.exit.label} disabled={!onExit} onClick={() => onExit?.()}
           ariaLabel={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`} />
       </Box>}

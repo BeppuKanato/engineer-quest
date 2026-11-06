@@ -79,7 +79,7 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
         <Box sx={{ flex: 1, minHeight: 0 }}>{renderCanvas(step.canvas)}</Box>
       </Box>
       <Stack direction="row" alignItems="center" justifyContent="center" gap={{ xs: 0.5, sm: 1.5 }} role="group" aria-label="再生操作"
-        sx={{ mt: 1, flexShrink: 0, position: "relative", color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
+        sx={{ mt: 1, flexShrink: 0, color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
         <IconButton aria-label={playback.playing ? "一時停止" : playback.index === count - 1 ? "最初から再生" : "再生"}
           disabled={count < 2} onClick={() => dispatch({ type: "toggle" })}
           sx={{ width: 56, height: 56, "& .MuiSvgIcon-root": { fontSize: 40 } }}>
@@ -105,7 +105,7 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
           <Box component={motion.div}
             initial={reduced ? false : { opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: reduced ? 0 : 0.3, ease: "easeOut" }}
-            sx={{ position: "absolute", right: 0, top: 0, bottom: 0, display: "flex", alignItems: "center" }}>
+            sx={{ ml: 1.5, flexShrink: 0 }}>
             <PhaseNextButton label={endAction.label}
               onClick={() => { onLearningEvent?.({ eventType: "player_end_action", targetId: step.id, payload: { contentId: content.id } }); endAction.onClick(); }} />
           </Box>

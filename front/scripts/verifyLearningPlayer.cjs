@@ -157,10 +157,11 @@ const playerSource = fs.readFileSync(`${sourceRoot}/player/LearningPlayer.tsx`, 
 assert.match(playerSource, /data-seek-slider/);
 assert.match(playerSource, /maxWidth: 320/);
 assert.doesNotMatch(playerSource, /data-seek-bar|SEGMENT_SEEK/);
-// 操作系の配置契約（UI 定義 §3・#140）: グループは中央寄せ、再生56px・前後48pxに拡大し、最終ステップの次へボタンは右端でフェードインする。
+// 操作系の配置契約（UI 定義 §3・#140）: グループは中央寄せ、再生56px・前後48pxに拡大し、最終ステップの次へボタンはシークバーの隣でフェードインする。
 assert.match(playerSource, /justifyContent="center"/);
 assert.match(playerSource, /width: 56, height: 56/);
 assert.match(playerSource, /width: 48, height: 48/);
-assert.match(playerSource, /position: "absolute", right: 0/);
+assert.match(playerSource, /sx=\{\{ ml: 1\.5, flexShrink: 0 \}\}/, "end action sits next to the seek group");
+assert.doesNotMatch(playerSource, /position: "absolute", right: 0/, "end action is not stranded at the bar edge");
 assert.match(playerSource, /component=\{motion\.div\}/);
 console.log("Learning player: unified slider seek presentation passed.");
