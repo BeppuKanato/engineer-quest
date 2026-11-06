@@ -136,3 +136,9 @@ assert.throws(() => validateCodeMappingCanvas({ ...frame, highlights: [{ kind: "
 assert.throws(() => validateCodeMappingCanvas({ ...frame, state: { ...frame.state, locals: { ...frame.state.locals, pendingDistance: 99 } } }), /pending/);
 assert.throws(() => defineCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-dequeue-a") }), /19 execution/);
 console.log(`BFS code mapping: ${content.steps.length} frames, 19 snapshot identities, 11 stable source lines, complete Python trace and variables, reverse seek and invalid-data rejection passed.`);
+
+// 変化した変数は、コード行ハイライトと同じ背景ハイライト（focus 背景＋surface 文字）で示す（#145）。
+const canvasSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/code-mapping/BfsCodeMappingCanvas.tsx"), "utf8");
+assert.match(canvasSource, /bgcolor: changed \? playerTokens\.focus : "transparent"/);
+assert.match(canvasSource, /color: changed \? playerTokens\.surface : playerTokens\.text/);
+console.log("BFS code mapping: changed-variable background highlight contract passed.");

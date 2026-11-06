@@ -46,7 +46,11 @@ export function BfsCodeMappingCanvas({ canvas }: { canvas: CodeMappingCanvasStat
           {rows.map(({ name, value, changed }) => <Box key={name} sx={{ display: "contents" }}>
             <Box component="dt">{name} =</Box>
             <Box component="dd" data-variable={name} data-variable-changed={changed}
-              sx={{ m: 0, overflowWrap: "anywhere", color: changed ? playerTokens.focus : playerTokens.text, fontWeight: changed ? 700 : 400 }}>{value}</Box>
+              sx={{ m: 0, px: 0.75, borderRadius: 1, justifySelf: "start", overflowWrap: "anywhere",
+                bgcolor: changed ? playerTokens.focus : "transparent",
+                color: changed ? playerTokens.surface : playerTokens.text, fontWeight: changed ? 700 : 400,
+                transition: "background-color 600ms, color 600ms",
+                "@media (prefers-reduced-motion: reduce)": { transition: "none" } }}>{value}</Box>
           </Box>)}
         </Box>
       </Box>

@@ -151,3 +151,10 @@ const overlayHtml = renderToStaticMarkup(createElement(BfsExecutionCanvas, { can
 assert.equal((overlayHtml.match(/<foreignObject width="60" height="60"/g) || []).length, 6);
 assert.equal((overlayHtml.match(/role="group" aria-label="[A-F]：/g) || []).length, 6);
 console.log("Shared graph drawing: all three renderers, uniform geometry and phase-3 overlay coordinates passed.");
+
+// シーク表示の統一契約（UI 定義 §3・#145）: 全教材で幅320px以下のスライダーに統一し、セグメント表示は持たない。
+const playerSource = fs.readFileSync(`${sourceRoot}/player/LearningPlayer.tsx`, "utf8");
+assert.match(playerSource, /data-seek-slider/);
+assert.match(playerSource, /maxWidth: 320/);
+assert.doesNotMatch(playerSource, /data-seek-bar|SEGMENT_SEEK/);
+console.log("Learning player: unified slider seek presentation passed.");
