@@ -20,7 +20,8 @@
     "verify:bfs-unit": "node scripts/verifyBfsUnitFlow.cjs",
     "verify:bfs-free-execution": "node scripts/verifyBfsFreeExecution.cjs",
     "verify:learning-screens": "node scripts/verifyLearningScreens.cjs",
-    "verify:learning-rewards": "node scripts/verifyLearningRewards.cjs"
+    "verify:learning-rewards": "node scripts/verifyLearningRewards.cjs",
+    "verify:mascot-presentation": "node scripts/verifyMascotPresentation.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
