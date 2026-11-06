@@ -2,19 +2,30 @@
 
 import { Box } from "@mui/material";
 
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { LearningPlayer } from "../../player/LearningPlayer";
 import { playerTokens } from "../../player/player.tokens";
 import { bubbleSortMotivationContent } from "./motivation.content";
 import { BubbleSortMotivationCanvas } from "./BubbleSortMotivationCanvas";
 
-/** 単品の導入。接続・保存・学習ログのポートは持たない。 */
-export function BubbleSortMotivationPreview() {
+/** embedded / onComplete は単元フロー（#235）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
+export function BubbleSortMotivationPreview({ embedded = false, onLearningEvent, active = true, onComplete }: LearningInstrumentation & { embedded?: boolean; onComplete?: () => void }) {
+  const player = (
+    <LearningPlayer onLearningEvent={onLearningEvent} active={active} content={bubbleSortMotivationContent}
+      renderCanvas={(canvas) => <BubbleSortMotivationCanvas canvas={canvas} onExit={onComplete ? () => { onLearningEvent?.({ eventType: "phase_choice", payload: { choice: "continue" } }); onComplete(); } : undefined} />} />
+  );
+  if (embedded) {
+    return (
+      <Box component="div" sx={{ height: "100%", minHeight: 0, display: "flex", bgcolor: playerTokens.background }}>
+        {player}
+      </Box>
+    );
+  }
   return (
     <Box component="main" aria-label={bubbleSortMotivationContent.stageName}
       sx={{ height: "100dvh", minHeight: 440, display: "grid", placeItems: "center", bgcolor: playerTokens.background }}>
       <Box sx={{ width: "84vw", height: "84dvh", minHeight: 360, display: "flex" }}>
-        <LearningPlayer content={bubbleSortMotivationContent}
-          renderCanvas={(canvas) => <BubbleSortMotivationCanvas canvas={canvas} />} />
+        {player}
       </Box>
     </Box>
   );

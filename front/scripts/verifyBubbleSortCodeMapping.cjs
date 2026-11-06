@@ -172,5 +172,7 @@ assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u
 assert.match(renderer, /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/BubbleSortCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
-assert(!/onLearningEvent|onComplete|endAction|fetch\(|localStorage/u.test(entry));
+// 接続ポートは単元フロー（#235）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
+assert.match(entry, /onComplete\?: \(\) => void/u); assert.match(entry, /endAction/u);
+assert(!/fetch\(|localStorage/u.test(entry));
 console.log(`Bubble-sort code mapping verified: ${content.steps.length} frames, byte-exact 8-line contract bubble-sort-v1, all CPython lines/locals, 16 phase-2 checkpoints (swaps on the swap line, non-swaps on the condition line), shared rendering and standalone preview.`);

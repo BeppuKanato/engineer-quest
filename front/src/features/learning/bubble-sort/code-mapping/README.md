@@ -13,6 +13,6 @@
 - `codeMapping.types.ts`: Canvas 型と検証。盤面とコードは正本への参照同一を要求し、変数は result が参照コードの到達可能な配列であること等を検証する。
 - `codeMapping.presentation.ts`: 変数行の整形と変更判定。現在のペアは result と j の射影。
 - `BubbleSortCodeMappingCanvas.tsx`: 盤面（共通配列描画への委譲）＋コード表示（共通 `CodeDisplay`）＋変数表。
-- `BubbleSortCodeMappingPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
+- `BubbleSortCodeMappingPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#235）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。共通プレイヤーの endAction が onComplete につながる。
 
 検証: `npm run verify:bubble-sort-code-mapping`。参照コードを CPython で実際に実行したトレース（`front/scripts/fixtures/bubbleSortCodeMappingTrace.py`）と、全フレームの行・ローカル変数を突き合わせる。
