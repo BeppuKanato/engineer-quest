@@ -126,7 +126,7 @@ const present = tree.props.value;
 const response = { questionId: "q", attempt: 1, correct: true, message: "正解！" };
 present(response);
 assert.equal(played.join(), "answerCorrect");
-assert.equal(timers.get(1).ms, 600);
+assert.equal(timers.get(1).ms, 1500);
 assert.equal(state.correct, true, "A final answer remains present without its phase component");
 present({ ...response, correct: false, message: "不正解。もう一度考えてみよう。" });
 assert.equal(played.join(), "answerCorrect,answerIncorrect");
@@ -139,13 +139,15 @@ for (const correct of [true, false]) {
   assert.equal(overlay.props.sx.pointerEvents, "none", "Feedback must never block answering or navigation");
   assert.equal(overlay.props.role, "status");
   const panel = overlay.props.children;
-  assert.equal(panel.props.transition.duration, 0.6);
+  assert.equal(panel.props.transition.opacity.duration, 1.5, "Keep the response visible long enough to recognize");
+  assert.equal(panel.props.transition.scale.duration, 0.6, "Keep the zoom brief, then hold the result");
   assert.equal(panel.props.transition.repeat, undefined, "No loop");
   assert.equal(panel.props.children[0].props.children.type, correct ? "circle" : "path");
   if (!correct) assert.equal(panel.props.animate.scale, 1, "Incorrect answers do not zoom or shake");
   reduced = true;
   const quiet = uiModule.AnswerFeedbackPresentation({ feedback: { ...response, correct } }).props.children;
-  assert.equal(quiet.props.initial, false); assert.equal(quiet.props.transition.duration, 0);
+  assert.equal(quiet.props.initial, false); assert.equal(quiet.props.transition.opacity.duration, 0);
+  assert.equal(quiet.props.transition.scale.duration, 0);
   assert.equal(quiet.props.animate.scale, 1); assert.equal(quiet.props.animate.opacity, 1);
 }
 

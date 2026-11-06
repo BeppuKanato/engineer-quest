@@ -10,7 +10,7 @@ import type { AssessmentContent, AssessmentState } from "./assessment";
 import { newAnswerFeedback, type AnswerFeedback } from "./answerFeedbackState";
 
 const PresentFeedback = createContext<(feedback: AnswerFeedback) => void>(() => undefined);
-export const answerFeedbackDurationMs = playerTokens.transitionMs;
+export const answerFeedbackDurationMs = 1500;
 
 /** 画面の進行と独立した短い回答レスポンス。フェーズが閉じても最後の正解を提示できる。 */
 export function AnswerFeedbackProvider({ children }: { children: ReactNode }) {
@@ -60,8 +60,11 @@ export function AnswerFeedbackPresentation({ feedback }: { feedback: AnswerFeedb
     sx={{ position: "fixed", inset: 0, zIndex: 1400, pointerEvents: "none", display: "grid", placeItems: "center", p: 2 }}>
     <Box component={motion.div}
       initial={reduced ? false : { opacity: 0, scale: feedback.correct ? 0.65 : 1 }}
-      animate={reduced ? { opacity: 1, scale: 1 } : { opacity: [0, 1, 1, 0], scale: feedback.correct ? [0.65, 1.12, 1, 1] : 1 }}
-      transition={{ duration: reduced ? 0 : answerFeedbackDurationMs / 1000, times: [0, 0.3, 0.8, 1] }}
+      animate={reduced ? { opacity: 1, scale: 1 } : { opacity: [0, 1, 1, 0], scale: feedback.correct ? [0.65, 1.12, 1] : 1 }}
+      transition={{
+        opacity: { duration: reduced ? 0 : answerFeedbackDurationMs / 1000, times: [0, 0.12, 0.88, 1] },
+        scale: { duration: reduced ? 0 : playerTokens.transitionMs / 1000, times: [0, 0.5, 1] },
+      }}
       sx={{ bgcolor: playerTokens.surface, color: playerTokens.text, borderRadius: 3, p: 2, maxWidth: 560, textAlign: "center" }}>
       <Box component="svg" viewBox="0 0 120 120" aria-hidden="true"
         sx={{ width: "clamp(96px, 12vw, 176px)", height: "clamp(96px, 12vw, 176px)", display: "block", mx: "auto",
