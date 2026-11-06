@@ -150,5 +150,20 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   let active = true;
   const cancelled = await runImplementationTests("learner code", content.tests, () => { active = false; }, () => active);
   assert.equal(cancelled.length, 1, "Unmounting stops subsequent case requests");
+  // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
+  const impl = (file) => fs.readFileSync(`${root}/bfs/implementation/${file}`, "utf8");
+  const previewSource = impl("BfsImplementationPreview.tsx");
+  assert.match(previewSource, /theme="vs"/);
+  assert(!previewSource.includes("vs-dark"), "editor is light themed");
+  assert.match(previewSource, /border: `2px solid \$\{colors\.focus\}`/, "editor area is framed in the focus colour");
+  assert(!/Implementation(Results|Hints) dark/.test(previewSource), "no dark variants remain");
+  assert(!impl("editor.tokens.ts").includes("#1e1e1e"), "editor tokens are light");
+  const hintsSource = impl("ImplementationHints.tsx");
+  assert.match(hintsSource, /キューが空になるまでくり返し/, "hint 2 shows the loop as a flow");
+  assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");
+  const resultsSource = impl("ImplementationResults.tsx");
+  assert.match(resultsSource, /data-test-status/, "test status changes animate in");
+  const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
+  assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
   console.log("BFS implementation: independent BFS on five cases, canonical skeleton, hint-1 tokens, four staged hints, mini graphs and distance differences, timeout classification, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });
