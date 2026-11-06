@@ -4,6 +4,7 @@
 - 適用範囲: DFSの第3段階の単品ページと、BFS/DFS共通の回答操作面。状態: 記録。
 - 最終確認日: 2026-11-06
 - 起点: PR #188マージ後の最新develop `525859537d63cda2ca3a787ed043b9f7d7495046`、ブランチ`feat/dfs-check-123`。
+- 実装コミット: 回答操作の共通化 `9fa9a4d`、DFS連動2問・verify `fec05ad`。
 - 正本: [Issue #123](https://github.com/BeppuKanato/engineer-quest/issues/123)、[DFS基準データ §4](concept/dfs-unit-baseline.md)、[教材指針](concept/learning-materials-guideline.md)、[プレイヤーUI](concept/learning-player-ui.md)。
 
 ## 実装内容
