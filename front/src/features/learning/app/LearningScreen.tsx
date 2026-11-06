@@ -10,6 +10,7 @@ import { fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress } from "@/api/learning.api";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
+import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
 import type { BfsUnitPhaseSummary } from "../bfs/unit/unit.types";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
@@ -133,7 +134,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
-    {unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
+    {unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
   </LearningRewardsContext.Provider>;
 }
