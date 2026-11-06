@@ -18,6 +18,23 @@ export const bfsGraphEdges: readonly { id: string; from: string; to: string }[] 
   { id: "ce", from: "C", to: "E" }, { id: "df", from: "D", to: "F" }, { id: "ef", from: "E", to: "F" },
 ];
 
+/** 正本グラフの上で幅優先に距離を計算する。到達図のような静的表示が、距離を二重に持たないための導出。 */
+export function bfsDistancesFrom(startId: string): ReadonlyMap<string, number> {
+  const distances = new Map<string, number>([[startId, 0]]);
+  const queue = [startId];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const edge of bfsGraphEdges) {
+      const next = edge.from === current ? edge.to : edge.to === current ? edge.from : null;
+      if (next !== null && !distances.has(next)) {
+        distances.set(next, distances.get(current)! + 1);
+        queue.push(next);
+      }
+    }
+  }
+  return distances;
+}
+
 /** プレイヤーのグラフキャンバス形式に合わせた共有グラフ。 */
 export const bfsGraph: GraphCanvasState["data"] = {
   kind: "graph",

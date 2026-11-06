@@ -67,3 +67,4 @@
 - 再発射の防止: 発射済みフラグ（ref）で一度きりを保証し、再描画やカードダイアログの開閉では再発射しない。`prefers-reduced-motion` では `useReducedMotion` で発射自体を行わず、ライブラリ側でも `disableForReducedMotion: true` で止める二重化にした。到達アイコン・見出しの出現モーションと `phaseResultPraise` の称賛文は変更していない。
 - rebase: 起点を現行 develop（`8f83fa5`、PR #163・#164 マージ後）へ付け替えた。競合は `UnitResultScreens.tsx`（用語変更後の aria-label `${phase.formalName}のリザルト` を採用）と `verifyBfsUnitFlow.cjs`（#160 の最終リザルト契約と本 PR の称賛契約を併記。最終リザルトのスクロール契約は最終リザルト部分だけに範囲を絞った）。
 - verify の変更: 粒子単位の軌道・寸法の契約は、ライブラリの発射契約（import 元、発射点・角度・粒子数、zIndex、reduced-motion、再発射防止、自作粒子の不在）へ置き換えた。SSR 確認の「次へ」文言は、現行の遷移ラベル（`nextPhaseLabel`）に合わせた。
+- その後の変更（#165、2026-11-06）: 発射部品は共通部品 `app/ResultConfetti.tsx` へ切り出され、フェーズ用プリセットは各 90 片に強化された。フェーズ6の結果画面でも同じ紙吹雪を撃つ。詳細は `docs/phase-result-visuals-165.md` の追記を参照。
