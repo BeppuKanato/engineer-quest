@@ -2,9 +2,11 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { DrawnCheck } from "../../app/DrawnCheck";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { ResultConfetti } from "../../app/ResultConfetti";
 import { ResultScoreDots } from "../../app/ResultScoreDots";
@@ -83,6 +85,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
   onReviewPhase: (index: number) => void;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
+  const reduced = useReducedMotion();
   useEffect(() => { headingRef.current?.focus(); }, []);
   // 要約タイルはサマリにある記録だけから組み立てる（記録のない項目は出さない）。
   const assessed = bfsUnitPhases.map((_, index) => summaries[index])
@@ -99,7 +102,12 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
   return <Box component="section" aria-label="単元完了のリザルト"
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2 }}>
     <ResultConfetti preset="final" />
-    <CheckCircleIcon aria-hidden sx={{ fontSize: 56, color: playerTokens.focus, mt: 2 }} />
+    <Box component={motion.div} aria-hidden="true" data-final-result-mark
+      initial={reduced ? false : { scale: 0.8, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: reduced ? 0 : 0.6, repeat: 0, ease: "easeOut" }}
+      sx={{ width: 96, height: 96, borderRadius: "50%", bgcolor: playerTokens.layers.layer0, display: "grid", placeItems: "center", mt: 2 }}>
+      <DrawnCheck />
+    </Box>
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{bfsImplementationContent.result.title}</Typography>
     <UnitPathMiniMap count={bfsUnitPhases.length} />
     {tiles.length > 0 && <Box data-final-stats sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center", width: "100%", maxWidth: 640 }}>

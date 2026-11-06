@@ -90,6 +90,8 @@ assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not
 assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
 assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
+assert.match(finalResultOnly, /<DrawnCheck/, "final result mark uses the same drawn check as phase results");
+assert.match(finalResultOnly, /data-final-result-mark/, "final result mark pops in like the phase mark");
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
@@ -165,8 +167,10 @@ assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearning
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
 // 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
 assert.match(celebrationSource, /<ResultConfetti/, "Phase results mount the shared confetti launcher");
-assert.match(celebrationSource, /data-phase-result-check/, "The celebration mark draws its check");
-assert.match(celebrationSource, /pathLength/, "The mark's circle and check draw in with path animation");
+assert.match(celebrationSource, /<DrawnCheck/, "Phase results mount the shared drawn check");
+const drawnCheckSource = read(`${root}/app/DrawnCheck.tsx`);
+assert.match(drawnCheckSource, /data-phase-result-check/, "The shared mark draws its check");
+assert.match(drawnCheckSource, /pathLength/, "The mark's circle and check draw in with path animation");
 const confettiSource = read(`${root}/app/ResultConfetti.tsx`);
 assert.match(confettiSource, /from "canvas-confetti"/, "Confetti comes from the library");
 assert.doesNotMatch(confettiSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
