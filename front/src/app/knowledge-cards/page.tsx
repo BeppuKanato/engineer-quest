@@ -7,7 +7,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import { Alert, Box, Chip, Container, Dialog, DialogContent, IconButton, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -17,51 +16,32 @@ import { AppHeader } from "@/app/component/appHeader";
 import { sortKnowledgeCards } from "@/features/collection/knowledgeCards";
 import { UnknownKnowledgeCard } from "@/features/collection/UnknownKnowledgeCard";
 import { knowledgeCardTones as rarityStyle } from "@/features/collection/knowledgeCard.tokens";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 export default function KnowledgeCardsPage() {
-  const [collection, setCollection] = useState<CollectionResponse | null>(null);
+  const { status, token } = useUserSession();
+  const [cachedCollection] = useState(() => peekClientQueryData<CollectionResponse>("collection"));
+  const [collection, setCollection] = useState<CollectionResponse | null>(cachedCollection ?? null);
   const [activeCourse, setActiveCourse] = useState("all");
   const [sort, setSort] = useState("newest");
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedCollection);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedCollection) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setCollection(null);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const token = await user.getIdToken();
-        const data = await getCollection(token);
-
-        if (!isMounted) return;
-        setCollection(data);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("知識カードを取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+    fetchClientQuery("collection", () => getCollection(token), { staleTimeMs: 300_000, tags: [queryTags.collection] })
+      .then(data => { if (isMounted) { setCollection(data); setErrorMessage(null); } })
+      .catch(error => { console.error(error); if (isMounted && !cachedCollection) setErrorMessage("知識カードを取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, cachedCollection]);
 
   const cards = useMemo(
     () => collection?.knowledgeTips.items ?? [],

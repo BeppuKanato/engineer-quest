@@ -30,7 +30,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import { useParams, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -53,7 +52,8 @@ import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags, setClientQueryData } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 const reactionMeta: Record<QuestReactionType, { label: string; icon: ReactNode }> = {
   LIKE: { label: "いいね", icon: <FavoriteBorderIcon /> },
@@ -91,11 +91,14 @@ export default function QuestPostDetailPage() {
   const router = useRouter();
   const { play } = useSoundEffect();
   const postId = params.postId;
-  const [token, setToken] = useState<string | null>(null);
-  const [post, setPost] = useState<QuestPostDetail | null>(null);
-  const [options, setOptions] = useState<QuestBoardOptions | null>(null);
+  const { status, token } = useUserSession();
+  type QuestPostResponse = Awaited<ReturnType<typeof getQuestPost>>;
+  const detailKey = `quest-board-post:${postId}`;
+  const [cachedDetail] = useState(() => peekClientQueryData<QuestPostResponse>(detailKey));
+  const [post, setPost] = useState<QuestPostDetail | null>(cachedDetail?.post ?? null);
+  const [options, setOptions] = useState<QuestBoardOptions | null>(cachedDetail?.options ?? null);
   const [commentBody, setCommentBody] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedDetail);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -109,41 +112,26 @@ export default function QuestPostDetailPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (post) setClientQueryData<QuestPostResponse>(detailKey, { post, options: options ?? cachedDetail?.options ?? ({} as QuestBoardOptions) }, [queryTags.questBoard]);
+  }, [post, options, detailKey, cachedDetail]);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedDetail) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+    fetchClientQuery(detailKey, () => getQuestPost(token, postId), { staleTimeMs: 300_000, tags: [queryTags.questBoard] })
+      .then(data => {
         if (!isMounted) return;
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const idToken = await user.getIdToken();
-        const data = await getQuestPost(idToken, postId);
-
-        if (!isMounted) return;
-        setToken(idToken);
         setPost(data.post);
         setOptions(data.options);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("投稿を取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, [postId]);
+        setErrorMessage(null);
+      })
+      .catch(error => { console.error(error); if (isMounted && !cachedDetail) setErrorMessage("投稿を取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, postId, detailKey, cachedDetail]);
 
   const handleReaction = async (type: QuestReactionType) => {
     if (!token || !post) return;

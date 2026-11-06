@@ -28,7 +28,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -52,8 +51,9 @@ import {
   type AchievementNotificationMode,
 } from "@/hooks/useAchievementNotificationMode";
 import { auth } from "@/lib/firebase";
-import { HexadRadarChart } from "@/features/hexad/hexadRadarChart";
+import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
+import { HexadRadarChart } from "@/features/hexad/hexadRadarChart";
 
 const historyMeta: Record<
   ProfileHistoryType,
@@ -99,38 +99,32 @@ export default function ProfilePage() {
     mode: achievementNotificationMode,
     setMode: setAchievementNotificationMode,
   } = useAchievementNotificationMode();
-  const [profile, setProfile] = useState<ProfileResponse | null>(null);
-  const [collection, setCollection] = useState<CollectionResponse | null>(null);
-  const [selectedMascotId, setSelectedMascotId] = useState<MascotId>("red-panda");
-  const [draftMascotId, setDraftMascotId] = useState<MascotId>("red-panda");
+  const { status, token } = useUserSession();
+  const [cachedProfile] = useState(() => peekClientQueryData<ProfileResponse>("profile"));
+  const [cachedCollection] = useState(() => peekClientQueryData<CollectionResponse>("collection"));
+  const [profile, setProfile] = useState<ProfileResponse | null>(cachedProfile ?? null);
+  const [collection, setCollection] = useState<CollectionResponse | null>(cachedCollection ?? null);
+  const initialMascotId: MascotId = cachedProfile && isMascotId(cachedProfile.user.selectedMascotId) ? cachedProfile.user.selectedMascotId : "red-panda";
+  const [selectedMascotId, setSelectedMascotId] = useState<MascotId>(initialMascotId);
+  const [draftMascotId, setDraftMascotId] = useState<MascotId>(initialMascotId);
   const [isMascotDialogOpen, setIsMascotDialogOpen] = useState(false);
   const [isMascotSaving, setIsMascotSaving] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!(cachedProfile && cachedCollection));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedProfile) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setProfile(null);
-        setCollection(null);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const token = await user.getIdToken();
-        const [profileData, collectionData] = await Promise.all([
-          getProfile(token),
-          getCollection(token),
-        ]);
-
+    Promise.all([
+      fetchClientQuery("profile", () => getProfile(token), { staleTimeMs: 300_000, tags: [queryTags.profile] }),
+      fetchClientQuery("collection", () => getCollection(token), { staleTimeMs: 300_000, tags: [queryTags.collection] }),
+    ])
+      .then(([profileData, collectionData]) => {
         if (!isMounted) return;
         setProfile(profileData);
         setCollection(collectionData);
@@ -139,21 +133,12 @@ export default function ProfilePage() {
           : "red-panda";
         setSelectedMascotId(nextMascotId);
         setDraftMascotId(nextMascotId);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("プロフィール情報を取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+        setErrorMessage(null);
+      })
+      .catch(error => { console.error(error); if (isMounted && !cachedProfile) setErrorMessage("プロフィール情報を取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, cachedProfile]);
 
   const history = profile?.history ?? [];
   const user = profile?.user ?? null;
@@ -301,6 +286,7 @@ export default function ProfilePage() {
                   setSelectedMascotId(nextMascotId);
                   setDraftMascotId(nextMascotId);
                   updateAppUser({ selectedMascotId: nextMascotId });
+                  updateClientQueryData<ProfileResponse>("profile", current => ({ ...current, user: { ...current.user, selectedMascotId: nextMascotId } }));
                   setProfile((current) =>
                     current
                       ? {
