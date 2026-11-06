@@ -22,6 +22,12 @@ import { WallExtensionCodeCheckPreview } from "@/features/learning/wall-extensio
 import { WallExtensionConsolidationPreview } from "@/features/learning/wall-extension/consolidation/WallExtensionConsolidationPreview";
 import { WallExtensionImplementationPreview } from "@/features/learning/wall-extension/implementation/WallExtensionImplementationPreview";
 import { BubbleSortMotivationPreview } from "@/features/learning/bubble-sort/motivation/BubbleSortMotivationPreview";
+import { BubbleSortExecutionPreview } from "@/features/learning/bubble-sort/execution/BubbleSortExecutionPreview";
+import { BubbleSortCheckPreview } from "@/features/learning/bubble-sort/check/BubbleSortCheckPreview";
+import { BubbleSortCodeMappingPreview } from "@/features/learning/bubble-sort/code-mapping/BubbleSortCodeMappingPreview";
+import { BubbleSortCodeCheckPreview } from "@/features/learning/bubble-sort/code-check/BubbleSortCodeCheckPreview";
+import { BubbleSortConsolidationPreview } from "@/features/learning/bubble-sort/consolidation/BubbleSortConsolidationPreview";
+import { BubbleSortImplementationPreview } from "@/features/learning/bubble-sort/implementation/BubbleSortImplementationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -31,6 +37,12 @@ export const metadata: Metadata = {
 export default async function LearningPreviewPage({ params }: { params: Promise<{ contentId: string }> }) {
   const { contentId } = await params;
   if (contentId === "bubble-sort-motivation") return <BubbleSortMotivationPreview />;
+  if (contentId === "bubble-sort-execution") return <BubbleSortExecutionPreview />;
+  if (contentId === "bubble-sort-check") return <BubbleSortCheckPreview />;
+  if (contentId === "bubble-sort-code-mapping") return <BubbleSortCodeMappingPreview />;
+  if (contentId === "bubble-sort-code-check") return <BubbleSortCodeCheckPreview />;
+  if (contentId === "bubble-sort-consolidation") return <BubbleSortConsolidationPreview />;
+  if (contentId === "bubble-sort-implementation") return <BubbleSortImplementationPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
