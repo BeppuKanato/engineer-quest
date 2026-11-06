@@ -17,9 +17,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
 
@@ -27,7 +26,8 @@ import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { isMascotId, type MascotId } from "@/app/component/mascot";
 import { MascotFigure } from "@/app/component/mascotFigure";
-import { auth } from "@/lib/firebase";
+import { useUserSession } from "@/app/component/userSession";
+import { peekClientQueryData } from "@/lib/clientQueryCache";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
 const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
@@ -49,48 +49,47 @@ const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
 };
 
 export default function HomePage() {
-  const [homeData, setHomeData] = useState<HomeResponse | null>(null);
-  const [mascotId, setMascotId] = useState<MascotId>("red-panda");
-  const [isLoading, setIsLoading] = useState(true);
+  const { status, token } = useUserSession();
+  const [cachedHome] = useState(() => peekClientQueryData<HomeResponse>("home"));
+  const [homeData, setHomeData] = useState<HomeResponse | null>(cachedHome ?? null);
+  const [mascotId, setMascotId] = useState<MascotId>(() =>
+    cachedHome && isMascotId(cachedHome.user.selectedMascotId) ? cachedHome.user.selectedMascotId : "red-panda",
+  );
+  const [isLoading, setIsLoading] = useState(!cachedHome);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const homeDataRef = useRef(homeData);
+  homeDataRef.current = homeData;
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      setIsLoading(false);
+      if (!homeDataRef.current) setErrorMessage("ログインが必要です。");
+      return;
+    }
+
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setHomeData(null);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
+    void (async () => {
       try {
-        setIsLoading(true);
         setErrorMessage(null);
-        const token = await user.getIdToken();
         const data = await getHome(token);
-
         if (!isMounted) return;
         setHomeData(data);
         setMascotId(isMascotId(data.user.selectedMascotId) ? data.user.selectedMascotId : "red-panda");
       } catch (error) {
         console.error(error);
         if (!isMounted) return;
-        setHomeData(null);
+        // 前回データがある場合は保持したまま警告だけ出す（再訪時に画面を空にしない）。
         setErrorMessage("ホーム情報を取得できませんでした。");
       } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
-    });
+    })();
 
     return () => {
       isMounted = false;
-      unsubscribe();
     };
-  }, []);
+  }, [status, token]);
 
   if (isLoading) {
     return (

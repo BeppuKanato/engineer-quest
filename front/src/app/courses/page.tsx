@@ -5,16 +5,16 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StarIcon from "@mui/icons-material/Star";
 import { Box, Container, Stack, Typography } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getLearningProgress } from "@/api/learning.api";
 import { findLearningUnit } from "@/features/learning/app/unitRegistry";
 
 import { getCourses } from "@/api/courses.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { useUserSession } from "@/app/component/userSession";
+import { peekClientQueryData } from "@/lib/clientQueryCache";
 import { ApiError } from "@/lib/fetcher";
-import { auth } from "@/lib/firebase";
 
 import { AppHeader } from "../component/appHeader";
 import { CourseCard } from "./component/courseCard";
@@ -29,27 +29,28 @@ const initialFilter: CourseFilterState = {
 };
 
 export default function CoursesPage() {
+  const { status, token } = useUserSession();
+  const [cachedCourses] = useState(() => peekClientQueryData<Course[]>("courses"));
   const [filter, setFilter] = useState<CourseFilterState>(initialFilter);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedCourses);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>(cachedCourses ?? []);
+  const coursesRef = useRef(courses);
+  coursesRef.current = courses;
+  const requestRef = useRef(0);
 
   useEffect(() => {
-    let currentRequest = 0;
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      const request = ++currentRequest;
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      setIsLoading(false);
+      if (coursesRef.current.length === 0) setErrorMessage("ログインが必要です。");
+      return;
+    }
+
+    const request = ++requestRef.current;
+    void (async () => {
       try {
-        setIsLoading(true);
-        setCourses([]);
         setErrorMessage(null);
-
-        if (!user) {
-          setCourses([]);
-          setErrorMessage("ログインが必要です。");
-          return;
-        }
-
-        const token = await user.getIdToken();
         const data = await getCourses(token);
 
         const progress = await Promise.allSettled(data.map(async course => {
@@ -60,10 +61,15 @@ export default function CoursesPage() {
           return { ...course, status: saved.unit?.status === "COMPLETED" ? "completed" as const : saved.unit ? "in_progress" as const : "not_started" as const,
             progressRate: completed / unit.phases.length * 100 };
         }));
-        if (request !== currentRequest) return;
+        if (request !== requestRef.current) return;
         setCourses(data.map((course, index) => progress[index].status === "fulfilled" ? progress[index].value : course));
       } catch (error) {
-        if (request !== currentRequest) return;
+        if (request !== requestRef.current) return;
+        // 前回データがある場合は保持し、エラー表示で一覧を消さない。
+        if (coursesRef.current.length > 0) {
+          console.error(error);
+          return;
+        }
         if (error instanceof ApiError) {
           if (error.status === 401) {
             setErrorMessage("ログインの有効期限が切れました。再ログインしてください。");
@@ -80,12 +86,10 @@ export default function CoursesPage() {
         }
         setErrorMessage("コース情報の取得に失敗しました。");
       } finally {
-        if (request === currentRequest) setIsLoading(false);
+        if (request === requestRef.current) setIsLoading(false);
       }
-    });
-
-    return () => { currentRequest++; unsubscribe(); };
-  }, []);
+    })();
+  }, [status, token]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
