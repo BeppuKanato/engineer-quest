@@ -4,11 +4,13 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer } from "../../assessment/assessment";
+import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
+import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import type { BfsUnitPhaseSummary } from "../unit/unit.types";
@@ -31,6 +33,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
+  useAssessmentFeedback(content, session, active && !review);
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
   const diagnosis = complete ? diagnoseAssessment(content, session) : null;
@@ -55,6 +58,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
       }}>{diagnosis ? `初回正解 ${diagnosis.correct}/${diagnosis.total}問` : question?.prompt}</Typography>
+      {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         {question.kind !== "parsons" && <ConsolidationGraph {...question.scene} onSelect={question.kind === "node" ? id => submit({ kind: "node", nodeId: id }) : undefined} />}
         <Typography component="p" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0, mb: 1 }}>{question.instruction}</Typography>
@@ -66,12 +70,9 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         </Box>}
         {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} />}
         {attempt && <>
-          <Typography component="p" role="status" sx={{ mt: 2, color: playerTokens.text, textAlign: "center" }}>
-            {attempt.correct ? question.correctFeedback : question.incorrectFeedback}
-          </Typography>
           <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。診断には初回の回答を使います。</Typography>
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-            {!attempt.correct && <Button variant="outlined" onClick={() => setReview(question)} sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{content.reviewLabel}</Button>}
+            {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
             <Button variant="outlined" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
               sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{session.position === content.questions.length - 1 ? "診断結果を見る" : "次の問題へ"}</Button>
           </Box>
@@ -81,9 +82,8 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         <Box component="ul" aria-label="論点タグごとの初回結果" sx={{ pl: 3 }}>
           {diagnosis.tags.map(result => <Box component="li" key={result.tag} data-diagnostic-tag={result.tag} sx={{ mb: 2 }}>
             <Typography component="p">{result.tag}：{result.passed ? "初回正解" : "初回不正解"}</Typography>
-            {!result.passed && <Button variant="outlined" aria-label={`${result.tag}を復習する`}
-              onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)}
-              sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{content.reviewLabel}</Button>}
+            {!result.passed && <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
+              onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} />}
           </Box>)}
         </Box>
         <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>

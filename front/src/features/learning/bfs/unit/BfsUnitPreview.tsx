@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import type { LearningObserver } from "../../../../lib/learningEvents";
 import { useLearningVisit } from "../../instrumentation/useLearningVisit";
 import type { LearningRewards } from "../../app/rewards";
+import { AnswerFeedbackNotice } from "../../assessment/AnswerFeedback";
 
 import { playerTokens } from "../../player/player.tokens";
 import { BfsCheckPreview } from "../check/BfsCheckPreview";
@@ -173,6 +174,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
     <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
+        <AnswerFeedbackNotice assessmentId={phaseKey} />
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
             {renderPhase(index)}
