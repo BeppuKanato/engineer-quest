@@ -54,6 +54,7 @@
 | [phase-bridge-141.md](phase-bridge-141.md) | 記録 | Issue #141のフェーズ間ブリッジ追加（全遷移に目標提示のステップを統一、リザルト予告の廃止、教材指針の遷移モデル改訂） |
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
+| [progress-loading-175.md](progress-loading-175.md) | 記録 | Issue #175の読み込み中表示の改善（進捗読み込みを素のテキストからスケルトンへ） |
 | [response-rollout-174.md](response-rollout-174.md) | 記録 | Issue #174のレスポンス改善の横展開（全画面のセッション＋キャッシュ統一、掲示板の新規投稿の即時表示） |
 | [phase7-editor-hints-149.md](phase7-editor-hints-149.md) | 記録 | Issue #149のフェーズ7見直し（エディタのライトテーマ化と枠による分離、実行ボタンの文言、ヒント2のフロー表示、テスト結果のアニメーション） |
 | [breadcrumb-unify-161.md](breadcrumb-unify-161.md) | 記録 | Issue #161のパンくず配置のアプリ全体統一（ヘッダー直下の独立行・1440px基準、内容幅は不変） |
