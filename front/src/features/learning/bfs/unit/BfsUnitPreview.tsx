@@ -2,7 +2,7 @@
 
 import CheckIcon from "@mui/icons-material/Check";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { LearningObserver } from "../../../../lib/learningEvents";
@@ -129,7 +129,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result") && screen.index === index;
 
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="header" inert={saving || undefined} sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
+    <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
       <Typography component="h1" sx={{ fontSize: 16, fontWeight: 700, whiteSpace: "nowrap" }}>{bfsUnitTitle}</Typography>
       <Box role="navigation" aria-label={bfsUnitText.navLabel} sx={{ display: "flex", gap: 0.5, overflowX: "auto", flex: 1, py: 0.25 }}>
         {bfsUnitPhases.map((phase, index) => {
@@ -164,9 +164,14 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
         </Button>}
       </Box>
     </Box>
-    {saving && <Typography role="status" sx={{ textAlign: "center" }}>進捗を保存しています。</Typography>}
+    {saving && (
+      <Paper role="status" elevation={6} sx={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 1250, display: "flex", alignItems: "center", gap: 1.25, px: 2.25, py: 1.25, borderRadius: 999, pointerEvents: "none" }}>
+        <CircularProgress size={18} thickness={5} />
+        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…</Typography>
+      </Paper>
+    )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
-    <Box inert={saving || !!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
+    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
