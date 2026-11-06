@@ -11,6 +11,7 @@
     "verify:learning-player": "node scripts/verifyLearningPlayer.cjs",
     "verify:bfs-motivation": "node scripts/verifyBfsMotivation.cjs",
     "verify:dfs-motivation": "node scripts/verifyDfsMotivation.cjs",
+    "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:bfs-execution": "node scripts/verifyBfsExecution.cjs",
     "verify:bfs-check": "node scripts/verifyBfsCheck.cjs",
     "verify:bfs-code-mapping": "node scripts/verifyBfsCodeMapping.cjs",
