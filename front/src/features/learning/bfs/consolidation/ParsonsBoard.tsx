@@ -57,8 +57,9 @@ export function ParsonsBoard({ question, code, onAnswer }: { question: ParsonsQu
     </Box>
     <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
       <Button onClick={() => setOrdered([...question.lineIds])} disabled={isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
-      {onAnswer && <Button variant="outlined" onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
-        sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>この順序で回答する</Button>}
+      {onAnswer && <Button variant="contained" onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
+        sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+          "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>この順序で回答する</Button>}
     </Box>
   </Box>;
 }

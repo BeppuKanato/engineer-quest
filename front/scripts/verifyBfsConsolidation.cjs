@@ -184,3 +184,11 @@ rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-
 rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-distances", "while-queue"]]);
 rejects(broken => broken.questions[4].interchangeableLineGroups.push(["initialize-distances", "initialize-queue"]));
 console.log("BFS consolidation: independent BFS on all four graphs, corrected J timing, 11-line Parsons with interchangeable initializers only, shared rendering/review, 0/5 completion and immutable first-attempt diagnosis passed.");
+
+// ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
+const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
+const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+assert.match(previewSource, /height: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
+assert.match(parsonsSource, /variant="contained" onClick=\{\(\) => onAnswer/);
+console.log("BFS consolidation: primary-action buttons and graph-height cap contract passed.");
