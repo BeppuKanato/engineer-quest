@@ -89,21 +89,8 @@ const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("e
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
-// リザルトは常に全問正解への到達点。初回全正解だったかだけを事実どおりに称える。
-const { phaseResultPraise } = load(`${root}/bfs/unit/unitResult.presentation.ts`);
-assert.equal(phaseResultPraise({ totalQuestions: 2, firstAttemptCorrect: 2 }), "やった！ 全問、初回で正解しました！");
-for (const firstAttemptCorrect of [0, 1]) {
-  const summary = Object.freeze({ totalQuestions: 2, firstAttemptCorrect });
-  assert.equal(phaseResultPraise(summary), "最後まで取り組んで、全問正解にたどり着きました！");
-  assert.equal(summary.firstAttemptCorrect, firstAttemptCorrect, "Presentation does not rewrite the score");
-}
-const standardPraise = "やった！ 確認問題を最後まで解き切りました！";
-for (const summary of [undefined, {}, { totalQuestions: 2 }, { firstAttemptCorrect: 2 },
-  { totalQuestions: 0, firstAttemptCorrect: 0 }, { totalQuestions: 2, firstAttemptCorrect: 3 },
-  { totalQuestions: 2, firstAttemptCorrect: -1 }, { totalQuestions: 2, firstAttemptCorrect: 0.5 },
-  { totalQuestions: NaN, firstAttemptCorrect: 2 }]) {
-  assert.equal(phaseResultPraise(summary), standardPraise, "Missing / invalid counts must not invent first-attempt success");
-}
+// 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
+assert.ok(!fs.existsSync(`${root}/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
 
 // 実コンポーネントの宣言を検査する。限定された一度きりの演出で、操作や報酬と結び付けない。
 const { UnitResultCelebration } = load(`${root}/bfs/unit/UnitResultCelebration.tsx`);
@@ -146,7 +133,6 @@ for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "resul
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading) && html.includes(phase.result.nextPreview));
-    assert.ok(html.includes(phaseResultPraise(summary)), "Both phase screens use the same praise function");
     assert.ok(html.includes(nextPhaseLabel(phase)), "Next remains immediately available");
     assert.ok(!html.includes("<canvas"), "Confetti is an effect only; markup is complete without decoration");
     assert.doesNotMatch(html, /mascot|Mascot/);
@@ -169,7 +155,7 @@ const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
-assert.match(phaseResultSource, /phaseResultPraise\(summary\)/);
+assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
 assert.doesNotMatch(phaseResultSource, /mascot|Mascot|<UnitResultCelebration[^>]*key=/);
 assert.doesNotMatch(finalResultSource, /UnitResultCelebration|phaseResultPraise/, "The final result is outside #144");
 assert.match(container, /<UnitResultScreen phase=\{bfsUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);

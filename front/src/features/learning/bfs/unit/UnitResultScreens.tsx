@@ -13,7 +13,6 @@ import { bfsImplementationContent } from "../implementation/implementation.conte
 import { bfsUnitPhases, bfsUnitText, nextPhaseLabel, type BfsUnitPhase } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 import { UnitResultCelebration } from "./UnitResultCelebration";
-import { phaseResultPraise } from "./unitResult.presentation";
 
 const headingSx = {
   color: playerTokens.text, fontWeight: 700, textAlign: "center",
@@ -37,9 +36,6 @@ export function UnitResultScreen({ phase, summary, onNext }: {
   return <Box component="section" aria-label={`${phase.formalName}のリザルト`}
     sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "safe center", gap: 2, p: 2 }}>
     <UnitResultCelebration heading={phase.result.heading} headingRef={headingRef} />
-    <Typography component="p" data-phase-result-praise sx={{ textAlign: "center", textWrap: "balance", fontWeight: 700, color: playerTokens.text, fontSize: "clamp(20px, 2vw, 28px)", maxWidth: 640 }}>
-      {phaseResultPraise(summary)}
-    </Typography>
     {summary?.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined && (
       <Typography component="p" sx={{ textAlign: "center", fontSize: 17, fontWeight: 700 }}>
         全{summary.totalQuestions}問に正解しました（初回で{summary.firstAttemptCorrect}問正解）。
