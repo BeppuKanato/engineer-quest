@@ -74,6 +74,7 @@
 | [wall-extension-phase5-210.md](wall-extension-phase5-210.md) | 記録 | Issue #210の棒倒し法フェーズ5（コードの確認問題）独立2問、文脈で一意化する空欄位置と設問固有の解説フィードバック、フェーズ4参照コードとの照合 |
 | [wall-extension-phase6-211.md](wall-extension-phase6-211.md) | 記録 | Issue #211の棒倒し法フェーズ6（応用問題）転移タップ・性質と理由の選択・21行Parsons、完全迷路の独立検証と初回診断、ParsonsBoardの汎用化 |
 | [wall-extension-phase7-212.md](wall-extension-phase7-212.md) | 記録 | Issue #212の棒倒し法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保 |
+| [wall-extension-trace-213.md](wall-extension-trace-213.md) | 記録 | Issue #213の棒倒し法フェーズ7視覚デバッグ、フェーズ2盤面での生成過程再生と段階適用、トレース基盤へのgrid検出の最小拡張 |
 | [bubble-sort-phase1-227.md](bubble-sort-phase1-227.md) | 記録 | Issue #227の配列描画基盤とバブルソートフェーズ1（導入）、検証済みトレースとの照合と場面圧縮・基準データ未取り込みの留保 |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
