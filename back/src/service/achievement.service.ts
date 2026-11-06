@@ -170,7 +170,7 @@ export const getAchievementsByUser = async (user: { id: string; selectedTargetAc
       const status: AchievementStatus = achievedAt ? "achieved" : a.isSecret ? "secret_locked" : "visible_locked";
       const hidden = status === "secret_locked";
       const p = await progressFor(a, user.id, stats); const link = targetLink(a);
-      return { id: a.id, category: a.category, conditionType: a.conditionType, conditionValue: a.conditionValue,
+      return { id: a.id, category: a.category, conditionType: a.conditionType, conditionValue: a.conditionValue, courseId: a.courseId,
         seriesKey: seriesKey(a), seriesTitle: hidden ? "???" : stripLevel(a.title), level: levelOf(a.title), status,
         title: hidden ? "???" : a.title, description: hidden ? "条件を満たすと内容が表示されます。" : a.description,
         conditionLabel: hidden ? null : conditionLabel(a), goal: p.goal, progress: p.progress,

@@ -12,6 +12,7 @@ export type AchievementItem = {
   category: string;
   conditionType: string;
   conditionValue: number | null;
+  courseId: string | null;
   seriesKey: string;
   seriesTitle: string;
   level: number;

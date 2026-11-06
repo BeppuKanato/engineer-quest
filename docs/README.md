@@ -56,6 +56,7 @@
 | [leftover-fixes-139-140-150.md](leftover-fixes-139-140-150.md) | 記録 | Issues #139・#140・#150 の残り個別修正（共通パンくず適用、フロー表示の矢印、単元リザルトのスクロール外側化とコース一覧導線） |
 | [user-terminology-rename.md](user-terminology-rename.md) | 記録 | テーマ2のユーザ向け用語付け替え（段階の共通名、「フェーズ」を画面に出さない、実装画面の用語、実績シードの文言） |
 | [home-layout-137.md](home-layout-137.md) | 記録 | Issue #137 のホーム画面レイアウト変更（続きから始めるの主役化と非表示条件、単元グリッド上限6件、進捗オーバーレイ共通化、単元サムネイル） |
+| [unit-overview-139.md](unit-overview-139.md) | 記録 | Issue #139 の単元画面レイアウト変更（Sin カーブのマップ、開始ボタン廃止とノードの入口化、旗・カードバッジ・実績プレビュー、実績 API への courseId 追加） |
 | [bfs-editor-110.md](bfs-editor-110.md) | 記録 | Issue #110 のエディタ拡大・ダーク化、D1限定フリー実行とstdout、採点・トレースとの分離、実Pyodide確認画像 |
 | [learning-screens-109.md](learning-screens-109.md) | 記録 | Issue #109の単元・学習・ホーム接続、認証進捗API、下書き、報酬の受け口と計装イベント一覧 |
 | [bfs-unit-flow-77.md](bfs-unit-flow-77.md) | 記録 | Issue #77 の単元フロー接続（遷移3類型、リザルト画面、自由な戻り）と、各単品プレビューへの埋め込み受け口の追加 |
