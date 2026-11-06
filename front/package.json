@@ -23,6 +23,7 @@
     "verify:bubble-sort-check": "node scripts/verifyBubbleSortCheck.cjs",
     "verify:bubble-sort-code-mapping": "node scripts/verifyBubbleSortCodeMapping.cjs",
     "verify:bubble-sort-code-check": "node scripts/verifyBubbleSortCodeCheck.cjs",
+    "verify:bubble-sort-consolidation": "node scripts/verifyBubbleSortConsolidation.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
