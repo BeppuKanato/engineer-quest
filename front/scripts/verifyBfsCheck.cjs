@@ -26,7 +26,7 @@ const { bfsCheckContent: content } = load(path.join(root, "bfs/check/check.conte
 const { bfsExecutionContent: execution } = load(path.join(root, "bfs/execution/execution.content.ts"));
 const { bfsGraphNodes, bfsGraphEdges } = load(path.join(root, "bfs/bfsGraph.ts"));
 const { getLearningStep, selectReviewContent } = load(path.join(root, "review/reviewContent.ts"));
-const { validateAssessment, createAssessmentState, activeQuestion, answerQuestion, assessmentComplete } = load(path.join(root, "assessment/assessment.ts"));
+const { validateAssessment, createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete } = load(path.join(root, "assessment/assessment.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const answer = nodeId => ({ kind: "node", nodeId });
 const none = { kind: "none" };
@@ -113,6 +113,22 @@ firstTry = answerQuestion(content, firstTry, q1.id, answer("C"));
 firstTry = answerQuestion(content, firstTry, q2.id, none);
 assert(assessmentComplete(content, firstTry));
 assert(firstTry.records.every(record => record.firstCorrect === true && record.attemptCount === 1));
+
+// 「次の問題へ」で正解せず進める（ソフトゲート）。依存条件のある第2問にも未正解のまま到達でき、全問未正解でも完了する。
+let skipped = createAssessmentState(content);
+assert.equal(advanceAssessment(content, skipped, q1.id), skipped, "Cannot advance before answering");
+skipped = answerQuestion(content, skipped, q1.id, answer("D"));
+skipped = advanceAssessment(content, skipped, q1.id);
+assert.equal(activeQuestion(content, skipped).id, q2.id, "Skipping question 1 still reaches the linked question 2");
+skipped = answerQuestion(content, skipped, q2.id, answer(q2.nodeIds[0]));
+skipped = advanceAssessment(content, skipped, q2.id);
+assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
+assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
+
+// 画面側の契約：誤答後に「次の問題へ／結果を見る」で進める導線を持つ。
+const checkPreviewSource = fs.readFileSync(path.join(root, "bfs/check/BfsCheckPreview.tsx"), "utf8");
+assert.match(checkPreviewSource, /advanceAssessment\(bfsCheckContent, current, question\.id\)/);
+assert.match(checkPreviewSource, /"結果を見る" : "次の問題へ"/);
 
 function rejects(change) { const broken = plain(content); change(broken); assert.throws(() => verifyData(broken)); }
 rejects(broken => broken.questions[0].stepId = "missing");

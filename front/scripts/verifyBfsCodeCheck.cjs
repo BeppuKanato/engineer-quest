@@ -23,7 +23,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const { bfsCodeCheckContent: content, validateBfsCodeCheck, fillCodeBlank } = load(`${root}/bfs/code-check/codeCheck.content.ts`);
 const { bfsCode, bfsCodeLineNumber } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
 const { bfsCodeMappingContent: mapping } = load(`${root}/bfs/code-mapping/codeMapping.content.ts`);
-const { createAssessmentState, activeQuestion, answerQuestion, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
+const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
 const { bfsCheckContent: nodeContent } = load(`${root}/bfs/check/check.content.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { BfsCodeDisplay } = load(`${root}/bfs/code-mapping/BfsCodeDisplay.tsx`);
@@ -98,6 +98,21 @@ assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert(state.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 3));
 assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1,2,3");
+
+// 「次の問題へ」で正解せず進める（ソフトゲート）。全問未正解でも完了し、結果は初回回答のまま。
+let skipped = createAssessmentState(content);
+assert.equal(advanceAssessment(content, skipped, q1.id), skipped, "Cannot advance before answering");
+skipped = answerQuestion(content, skipped, q1.id, choice(q1.choices.find(option => option.id !== q1.correctAnswer.choiceId).id));
+skipped = advanceAssessment(content, skipped, q1.id);
+assert.equal(activeQuestion(content, skipped), q2, "Skipping question 1 reaches question 2");
+skipped = answerQuestion(content, skipped, q2.id, choice(q2.choices.find(option => option.id !== q2.correctAnswer.choiceId).id));
+skipped = advanceAssessment(content, skipped, q2.id);
+assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
+assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
+
+const codeCheckPreviewSource = fs.readFileSync(`${root}/bfs/code-check/BfsCodeCheckPreview.tsx`, "utf8");
+assert.match(codeCheckPreviewSource, /advanceAssessment\(content, current, question\.id\)/);
+assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);
 assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state);
 let firstTry = createAssessmentState(content);
 for (const question of content.questions) firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer);
