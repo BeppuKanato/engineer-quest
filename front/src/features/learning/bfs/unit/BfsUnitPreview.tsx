@@ -179,8 +179,8 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
-    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center" }}>
-      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: screen.kind === "final" ? "auto" : undefined }}>
+      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "final" ? "auto" : "100%", minHeight: "100%", display: "flex", flexDirection: "column" }}>
         <AnswerFeedbackNotice assessmentId={phaseKey} />
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -191,7 +191,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
           <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => goToPhase(screen.index + 1)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} onBackToStart={() => goToPhase(0)} />
+          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} />
         )}
       </Box>
     </Box>

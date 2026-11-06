@@ -2,6 +2,7 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
+import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { PhaseNextButton } from "../../app/PhaseNextButton";
@@ -59,17 +60,17 @@ function summaryLine(index: number, summary?: BfsUnitPhaseSummary): string | nul
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ summaries, onReviewPhase, onBackToStart, rewards, renderRewards }: {
+export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards }: {
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
   summaries: Readonly<Record<number, BfsUnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
-  onBackToStart: () => void;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
+  // スクロールはこの画面専用に持たず、外側（画面全幅）のスクロールに任せる（#150）。
   return <Box component="section" aria-label="単元完了のリザルト"
-    sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2 }}>
+    sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2 }}>
     <CheckCircleIcon aria-hidden sx={{ fontSize: 56, color: playerTokens.focus, mt: 2 }} />
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{bfsImplementationContent.result.title}</Typography>
     <Typography component="p" sx={{ fontWeight: 700, fontSize: 17 }}>{bfsUnitText.summaryHeading}</Typography>
@@ -89,6 +90,6 @@ export function UnitFinalResult({ summaries, onReviewPhase, onBackToStart, rewar
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{bfsImplementationContent.result.closing}</Typography>
     {rewards && renderRewards?.(rewards)}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{bfsUnitText.reviewNote}</Typography>
-    <Button variant="contained" onClick={onBackToStart} sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToStart}</Button>
+    <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToCourses}</Button>
   </Box>;
 }
