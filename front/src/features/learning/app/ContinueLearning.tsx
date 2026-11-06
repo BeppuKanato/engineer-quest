@@ -32,8 +32,8 @@ export function ContinueLearning() {
   const result = state?.uid === firebaseUser?.uid ? state : null;
   const loading = status === "loading" || (!!firebaseUser && !result);
 
-  // 進行中の単元がないときは、コース一覧への案内に化けるくらいならカード自体を出さない。
-  // 探す役割はホームの単元グリッドとコース一覧が担う（Issue #137 / ホーム画面レイアウト原案）。
+  // 進行中の単元がないときは、単元一覧への案内に化けるくらいならカード自体を出さない。
+  // 探す役割はホームの単元グリッドと単元一覧が担う（Issue #137 / ホーム画面レイアウト原案）。
   if (!loading && result && !result.resume && !result.failed) return null;
 
   const resume = result?.resume ?? null;
@@ -46,7 +46,7 @@ export function ContinueLearning() {
     <CardContent>
       <Typography component="h2" variant="h5" sx={{ fontWeight: 700 }}>続きから始める</Typography>
       {loading ? <Typography role="status" sx={{ mt: 1 }}>学習中の単元を確認しています。</Typography> : result?.failed && !resume ?
-        <Alert severity="warning" action={<Button onClick={() => setRevision(value => value + 1)}>再試行</Button>}>進捗を確認できませんでした。<Button component={Link} href="/courses">コース一覧へ</Button></Alert> :
+        <Alert severity="warning" action={<Button onClick={() => setRevision(value => value + 1)}>再試行</Button>}>進捗を確認できませんでした。<Button component={Link} href="/courses">単元一覧へ</Button></Alert> :
         resume && <Box sx={{ mt: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5 }}>{resume.unit.title}</Typography>
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>

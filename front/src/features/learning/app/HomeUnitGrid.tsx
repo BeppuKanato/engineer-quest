@@ -77,7 +77,7 @@ export function HomeUnitGrid() {
           ))}
         </Box>
       ) : failed ? (
-        <Alert severity="warning" action={<Button component={Link} href="/courses">コース一覧へ</Button>}>
+        <Alert severity="warning" action={<Button component={Link} href="/courses">単元一覧へ</Button>}>
           単元情報を取得できませんでした。
         </Alert>
       ) : (
@@ -96,7 +96,7 @@ export function HomeUnitGrid() {
           </Box>
           <Box sx={{ mt: 2, textAlign: "right" }}>
             <Button component={Link} href="/courses" sx={{ fontWeight: 800 }}>
-              {hasMore ? "残りの単元と絞り込みはコース一覧へ" : "絞り込みはコース一覧へ"}
+              {hasMore ? "残りの単元と絞り込みは単元一覧へ" : "絞り込みは単元一覧へ"}
             </Button>
           </Box>
         </>
