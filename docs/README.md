@@ -46,6 +46,7 @@
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
+| [unit-final-result-150.md](unit-final-result-150.md) | 記録 | Issue #150の単元最終リザルト視覚強化（一段強い紙吹雪、全灯ミニマップ、要約タイル、実績のコンパクト要約、獲得カードのタイル表示） |
 | [learning-rewards-111.md](learning-rewards-111.md) | 記録 | Issue #111 のカード3段階演出・区切りと最終リザルトの実績・未所持カードの影、テーブル別再現手順と確認画像 |
 | [unit-overview-layout-114.md](unit-overview-layout-114.md) | 記録 | Issue #114 の単元画面フェーズ配置の蛇行化と接続線（マスコットは保留） |
 | [mascot-presentation-apply-135.md](mascot-presentation-apply-135.md) | 記録 | Issue #135 のマスコット提示ガイドライン適用（共通表示部品と各画面への段階・接地・表情の適用） |
