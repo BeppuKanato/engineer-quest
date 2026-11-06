@@ -163,6 +163,9 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");
   const resultsSource = impl("ImplementationResults.tsx");
   assert.match(resultsSource, /data-test-status/, "test status changes animate in");
+  assert.match(resultsSource, /component=\{motion\.span\} key=\{statusKey\}/, "a status change mounts its own short animation");
+  assert.match(resultsSource, /initial=\{reducedMotion \? false/, "reduced motion skips the initial animation state");
+  assert.match(resultsSource, /duration: reducedMotion \? 0 : 0\.3/, "reduced motion removes the transition");
   const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
   assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
   console.log("BFS implementation: independent BFS on five cases, canonical skeleton, hint-1 tokens, four staged hints, mini graphs and distance differences, timeout classification, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
