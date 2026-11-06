@@ -21,9 +21,10 @@ import { BfsImplementationPreview } from "../implementation/BfsImplementationPre
 import { BfsMotivationPreview } from "../motivation/BfsMotivationPreview";
 import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
+import { PhaseBridgeScreen } from "./PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
 
-type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "final" };
+type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
 
 /**
  * BFS 単元フロー（Issue #77）。単品ページで確認済みのフェーズ1〜7を、1つの単元として通して学べるよう接続する。
@@ -67,6 +68,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   }), [onLearningEvent]);
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "phase", "phase_start", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "result", "phase_result_view", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "bridge", "phase_bridge_view", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent, screen.kind === "final", "unit_result_view");
   useEffect(() => { if (screen.kind === "final") onFinalResult?.(); }, [screen.kind, onFinalResult]);
   // 非表示への切替で閉じる滞在区間や、開始済みの非同期実行結果も元のフェーズへ記録する。
@@ -77,11 +79,19 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   const goToPhase = useCallback((index: number) => {
     if (busy.current) return;
     const previous = screenRef.current;
-    const reviewing = previous.kind === "final" || index <= previous.index;
+    const reviewing = previous.kind === "final" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
     const target = bfsUnitPhases[index].id;
     if (reviewing) reviewCounts.current[target] = (reviewCounts.current[target] ?? 0) + 1;
     observer.current?.({ eventType: "phase_move", phaseKey: bfsUnitPhases[index].id, payload: { from: previous.kind === "final" ? "final" : bfsUnitPhases[previous.index].id, to: bfsUnitPhases[index].id,
       direction: reviewing ? "review" : "forward", reviewCount: reviewCounts.current[target] ?? 0 } });
+    setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
+    setScreen({ kind: "phase", index });
+  }, []);
+
+  // ブリッジからの前進は phase_move（forward）として記録し、対象フェーズを開く。
+  const proceedFromBridge = useCallback((index: number) => {
+    observer.current?.({ eventType: "phase_move", phaseKey: bfsUnitPhases[index].id, payload: { from: bfsUnitPhases[index - 1].id, to: bfsUnitPhases[index].id,
+      direction: "forward", reviewCount: 0 } });
     setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
     setScreen({ kind: "phase", index });
   }, []);
@@ -101,9 +111,9 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       if (onPhaseComplete && (current.kind !== "phase" || current.index !== index)) return;
       if (transition === "final") setScreen({ kind: "final" });
       else if (transition === "result") setScreen({ kind: "result", index });
-      else if (transition !== "result-in-phase") {
+      else if (transition === "bridge") {
         busy.current = false;
-        goToPhase(index + 1);
+        setScreen({ kind: "bridge", index: index + 1 });
       }
     } catch { setFailed({ index, summary }); }
     finally { busy.current = false; setSaving(false); }
@@ -121,14 +131,14 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       case 2: return <BfsCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 2} onLearningEvent={onLearningEvent ? phaseObservers[2] : undefined} onComplete={completeHandlers[2]} />;
       case 3: return <BfsCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(bfsUnitPhases[3])} />;
       case 4: return <BfsCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
-      case 5: return <BfsConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => goToPhase(6)} nextLabel={nextPhaseLabel(bfsUnitPhases[5])} />;
+      case 5: return <BfsConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(bfsUnitPhases[5])} />;
       case 6: return <BfsImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} />;
       default: return null;
     }
   };
 
   const isCompleted = (index: number) => completed.has(bfsUnitPhases[index].id);
-  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result") && screen.index === index;
+  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge") && screen.index === index;
 
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
@@ -188,7 +198,10 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
           </Box>
         ))}
         {screen.kind === "result" && (
-          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => goToPhase(screen.index + 1)} />
+          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })} />
+        )}
+        {screen.kind === "bridge" && (
+          <PhaseBridgeScreen phase={bfsUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
           <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} />

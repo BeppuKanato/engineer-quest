@@ -15,7 +15,7 @@ import type { LearningRewards } from "../../app/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
 import { bfsImplementationContent } from "../implementation/implementation.content";
-import { bfsUnitPhases, bfsUnitText, nextPhaseLabel, type BfsUnitPhase } from "./unit.content";
+import { bfsUnitPhases, bfsUnitText, type BfsUnitPhase } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 import { BfsResultFigure } from "./BfsResultFigure";
 import { UnitResultCelebration } from "./UnitResultCelebration";
@@ -51,8 +51,7 @@ export function UnitResultScreen({ phase, summary, onNext }: {
         </Typography>
       </>
     )}
-    <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{phase.result.nextPreview}</Typography>
-    <PhaseNextButton label={nextPhaseLabel(phase)} onClick={onNext} />
+    <PhaseNextButton label="次へ進む" onClick={onNext} />
   </Box>;
 }
 

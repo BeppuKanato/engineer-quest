@@ -28,15 +28,18 @@ assert.deepEqual(plain(bfsUnitPhases.map(phase => phase.phase)), [1, 2, 3, 4, 5,
 assert.deepEqual(plain(bfsUnitPhases.map(phase => phase.id)), [
   "bfs-motivation", "bfs-execution", "bfs-check", "bfs-code-mapping", "bfs-code-check", "bfs-consolidation", "bfs-implementation",
 ]);
-// 遷移は指針の3類型どおり：1→2=意思確認、2→3と4→5=シームレス、3・5の後は単元リザルト、6は診断がリザルト、7の後は最終リザルト。
+// 遷移は #141 の統一モデルどおり：前進はすべてブリッジを挟み、3・5の後は単元リザルト（事実のみ）を経てブリッジ、6は内の結果からブリッジ、7の後は最終リザルト。
 assert.deepEqual(plain(bfsUnitPhases.map(phase => phase.transitionOut)), [
-  "choice", "seamless", "result", "seamless", "result", "result-in-phase", "final",
+  "bridge", "bridge", "result", "bridge", "result", "result-in-phase", "final",
 ]);
 for (const phase of bfsUnitPhases) {
   assert.ok(phase.shortName.length > 0 && phase.formalName.length > 0, `phase ${phase.phase} names`);
   if (phase.transitionOut === "result") {
-    assert.ok(phase.result && phase.result.heading.length > 0 && phase.result.nextPreview.length > 0, `phase ${phase.phase} result content`);
+    assert.ok(phase.result && phase.result.heading.length > 0, `phase ${phase.phase} result content`);
+    assert.ok(!("nextPreview" in phase.result), `phase ${phase.phase} result carries facts only; the bridge states the next goal`);
   }
+  if (phase.phase > 1) assert.ok(phase.bridge && phase.bridge.length > 0, `phase ${phase.phase} bridge text`);
+  else assert.ok(!phase.bridge, "phase 1 is the unit entry and has no bridge");
 }
 // 段階の表示名はテーマ2で採用した共通名に固定する（DFS以降の単元も同じ名称セットを使う）。
 assert.deepEqual(plain(bfsUnitPhases.map(phase => phase.formalName)), [
@@ -152,7 +155,7 @@ const { UnitResultScreen } = load(`${root}/bfs/unit/UnitResultScreens.tsx`);
 for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
-    assert.ok(html.includes(phase.result.heading) && html.includes(phase.result.nextPreview));
+    assert.ok(html.includes(phase.result.heading));
     if (summary?.totalQuestions !== undefined) {
       assert.ok(html.includes("data-score-dots"), "Phase results visualize the score as dots");
       assert.equal((html.match(/data-dot-state="first"/g) ?? []).length, summary.firstAttemptCorrect);
@@ -160,12 +163,23 @@ for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "resul
     } else {
       assert.ok(!html.includes("data-score-dots"), "No score dots without a recorded score");
     }
-    assert.ok(html.includes(nextPhaseLabel(phase)), "Next remains immediately available");
+    assert.ok(html.includes("次へ進む"), "Result screens advance toward the bridge; the destination-named button lives on the bridge");
     assert.ok(!html.includes("<canvas"), "Confetti is an effect only; markup is complete without decoration");
     assert.doesNotMatch(html, /mascot|Mascot/);
   }
 }
 reducedMotion = false;
+// ブリッジ画面は次のステージ名・つなぎ文・行き先ボタンだけを持つ（#141）。
+const { PhaseBridgeScreen } = load(`${root}/bfs/unit/PhaseBridgeScreen.tsx`);
+for (const phase of bfsUnitPhases.filter(phase => phase.phase > 1)) {
+  const html = renderToStaticMarkup(createElement(PhaseBridgeScreen, { phase, onProceed: () => {} }));
+  assert.ok(html.includes(`次は「${phase.formalName}」`), `bridge heading for phase ${phase.phase}`);
+  assert.ok(html.includes(phase.bridge), `bridge text for phase ${phase.phase}`);
+  assert.ok(html.includes(`${phase.formalName}へ進む`), `bridge button for phase ${phase.phase}`);
+}
+const previewSource = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+assert.match(previewSource, /kind: "bridge"/, "preview routes forward completion through the bridge screen");
+assert.match(previewSource, /"phase_bridge_view"/, "bridge views are logged with the target phase");
 const celebrationSource = read(`${root}/bfs/unit/UnitResultCelebration.tsx`);
 assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearningRewards|setTimeout|setInterval|whileInView|onAnimationComplete|Math\.random/);
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
