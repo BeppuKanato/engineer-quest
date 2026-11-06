@@ -2,11 +2,15 @@
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { DrawnCheck } from "../../app/DrawnCheck";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
+import { ResultConfetti } from "../../app/ResultConfetti";
 import { ResultScoreDots } from "../../app/ResultScoreDots";
+import { UnitPathMiniMap } from "../../app/UnitPathMiniMap";
 import type { LearningRewards } from "../../app/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
@@ -65,6 +69,14 @@ function summaryLine(index: number, summary?: BfsUnitPhaseSummary): string | nul
   return null;
 }
 
+/** 最終リザルトの要約タイル。値は記録（サマリ）からの事実だけを出す。 */
+function StatTile({ label, value }: { label: string; value: string }) {
+  return <Box sx={{ flex: "1 1 150px", maxWidth: 204, border: `1px solid ${playerTokens.layers.layer1}`, borderRadius: 2, bgcolor: playerTokens.surface, px: 1.5, py: 1.25, textAlign: "center" }}>
+    <Typography component="p" sx={{ fontSize: 26, fontWeight: 800, lineHeight: 1.2, color: playerTokens.focus }}>{value}</Typography>
+    <Typography component="p" sx={{ fontSize: 13 }}>{label}</Typography>
+  </Box>;
+}
+
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
 export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards }: {
   rewards?: LearningRewards;
@@ -73,12 +85,34 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
   onReviewPhase: (index: number) => void;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
+  const reduced = useReducedMotion();
   useEffect(() => { headingRef.current?.focus(); }, []);
+  // 要約タイルはサマリにある記録だけから組み立てる（記録のない項目は出さない）。
+  const assessed = bfsUnitPhases.map((_, index) => summaries[index])
+    .filter(summary => summary?.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined);
+  const firstCorrectTotal = assessed.reduce((sum, summary) => sum + (summary?.firstAttemptCorrect ?? 0), 0);
+  const questionTotal = assessed.reduce((sum, summary) => sum + (summary?.totalQuestions ?? 0), 0);
+  const implementation = summaries[bfsUnitPhases.length - 1];
+  const hintTotal = (implementation?.hintUsage ?? []).reduce((sum, count) => sum + count, 0);
+  const tiles: { label: string; value: string }[] = [];
+  if (questionTotal > 0) tiles.push({ label: "初回正解（確認問題・応用問題）", value: `${firstCorrectTotal} / ${questionTotal} 問` });
+  if (implementation?.testRuns !== undefined) tiles.push({ label: "自分で実装のテスト実行", value: `${implementation.testRuns} 回` });
+  if (implementation?.hintUsage !== undefined) tiles.push({ label: "ヒント使用", value: hintTotal > 0 ? `${hintTotal} 回` : "未使用" });
   // スクロールはこの画面専用に持たず、外側（画面全幅）のスクロールに任せる（#150）。
   return <Box component="section" aria-label="単元完了のリザルト"
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2 }}>
-    <CheckCircleIcon aria-hidden sx={{ fontSize: 56, color: playerTokens.focus, mt: 2 }} />
+    <ResultConfetti preset="final" />
+    <Box component={motion.div} aria-hidden="true" data-final-result-mark
+      initial={reduced ? false : { scale: 0.8, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: reduced ? 0 : 0.6, repeat: 0, ease: "easeOut" }}
+      sx={{ width: 96, height: 96, borderRadius: "50%", bgcolor: playerTokens.layers.layer0, display: "grid", placeItems: "center", mt: 2 }}>
+      <DrawnCheck />
+    </Box>
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{bfsImplementationContent.result.title}</Typography>
+    <UnitPathMiniMap count={bfsUnitPhases.length} />
+    {tiles.length > 0 && <Box data-final-stats sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center", width: "100%", maxWidth: 640 }}>
+      {tiles.map(tile => <StatTile key={tile.label} label={tile.label} value={tile.value} />)}
+    </Box>}
     <Typography component="p" sx={{ fontWeight: 700, fontSize: 17 }}>{bfsUnitText.summaryHeading}</Typography>
     <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, width: "100%", maxWidth: 560 }}>
       {bfsUnitPhases.map((phase, index) => {

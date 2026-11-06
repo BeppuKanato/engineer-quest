@@ -18,6 +18,6 @@ export const rewardText = {
   reveal: "カードを開く",
   praise: "学んだ考え方から、知識のつながりが広がりました。", saved: "カードの内容はコレクションでいつでも確認できます。",
   achievement: "実績を獲得しました", achievementPraise: "今回の学習で達成したことが、証として残りました。",
-  skip: "演出をスキップ", close: "学習を続ける", finalTitle: "この単元で獲得した実績", finalEmpty: "獲得済みの実績は実績一覧で確認できます。",
+  skip: "演出をスキップ", close: "学習を続ける", finalTitle: "この単元で獲得した実績", finalCards: "この単元で手に入れた知識カード", finalEmpty: "獲得済みの実績は実績一覧で確認できます。",
   collection: "コレクションを見る", achievements: "実績一覧を見る",
 } as const;

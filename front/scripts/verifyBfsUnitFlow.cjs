@@ -87,6 +87,15 @@ assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻�
 const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
+assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
+assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
+assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
+assert.match(finalResultOnly, /<DrawnCheck/, "final result mark uses the same drawn check as phase results");
+assert.match(finalResultOnly, /data-final-result-mark/, "final result mark pops in like the phase mark");
+const miniMapSource = read(`${root}/app/UnitPathMiniMap.tsx`);
+assert.match(miniMapSource, /motion\.path/, "mini map draws its path with motion");
+assert.match(miniMapSource, /pathLength/, "mini map path draws in over time");
+assert.match(miniMapSource, /scale: \[1, 1\.05, 1\.03\]/, "mini map grows once the path completes");
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
@@ -162,8 +171,10 @@ assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearning
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
 // 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
 assert.match(celebrationSource, /<ResultConfetti/, "Phase results mount the shared confetti launcher");
-assert.match(celebrationSource, /data-phase-result-check/, "The celebration mark draws its check");
-assert.match(celebrationSource, /pathLength/, "The mark's circle and check draw in with path animation");
+assert.match(celebrationSource, /<DrawnCheck/, "Phase results mount the shared drawn check");
+const drawnCheckSource = read(`${root}/app/DrawnCheck.tsx`);
+assert.match(drawnCheckSource, /data-phase-result-check/, "The shared mark draws its check");
+assert.match(drawnCheckSource, /pathLength/, "The mark's circle and check draw in with path animation");
 const confettiSource = read(`${root}/app/ResultConfetti.tsx`);
 assert.match(confettiSource, /from "canvas-confetti"/, "Confetti comes from the library");
 assert.doesNotMatch(confettiSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
@@ -173,6 +184,9 @@ assert.match(confettiSource, /angle: 120, origin: \{ x: 0\.88, y: 0\.7 \}/, "Rig
 assert.match(confettiSource, /zIndex: 1200/, "Confetti stays below reward dialogs (1300)");
 assert.match(confettiSource, /disableForReducedMotion: true/, "The library also honours reduced motion");
 assert.match(confettiSource, /firedRef/, "Confetti fires once per mount, never on re-render or dialog close");
+assert.match(confettiSource, /preset === "final"/, "The launcher carries a final-result preset");
+assert.match(confettiSource, /particleCount: 110/, "The final preset fires 110 pieces per popper");
+assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The final preset adds a centre popper");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));

@@ -9,8 +9,11 @@ const readRepo = (relative) => fs.readFileSync(path.join(frontRoot, '..', relati
 const overview = readFront('src/features/learning/app/UnitOverview.tsx');
 
 // 1. The path is a sine wave with the nodes on it, drawn as one SVG layer.
-assert(overview.includes('Math.sin'), 'unit path must be a sine curve');
-assert(overview.includes('wavePoint'), 'node positions must derive from the wave function');
+// The wave geometry is shared with the final result's mini map (unitPathGeometry).
+const geometry = readFront('src/features/learning/app/unitPathGeometry.ts');
+assert(geometry.includes('Math.sin'), 'unit path must be a sine curve');
+assert(geometry.includes('wavePoint'), 'node positions must derive from the wave function');
+assert(overview.includes('unitPathGeometry'), 'the overview must use the shared wave geometry');
 assert(overview.includes('motion.path'), 'the completed portion of the path must be drawn with entry motion');
 
 // 2. The map area is a border-only frame (no filled panel) with the unit figure as a faint backdrop.

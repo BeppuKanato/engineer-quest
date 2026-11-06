@@ -22,24 +22,13 @@ import { startLearningUnit } from "@/api/learning.api";
 import { knowledgeCardTones } from "@/features/collection/knowledgeCard.tokens";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
 import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";
+import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
 import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
 
 const icons = [LightbulbIcon, RouteIcon, QuizIcon, CodeIcon, QuizIcon, ExtensionIcon, TerminalIcon];
 
-/** Sin カーブの軌跡。t は 0〜1、段階 i のノードは t = i / (段階数 - 1) に乗る。 */
-const WAVE = { width: 1200, height: 480, margin: 90, center: 225, amplitude: 100 } as const;
-const wavePoint = (t: number) => ({
-  x: WAVE.margin + t * (WAVE.width - WAVE.margin * 2),
-  y: WAVE.center - WAVE.amplitude * Math.sin(t * Math.PI * 3),
-});
-const wavePath = (until: number) => {
-  const segments = Math.max(1, Math.round(72 * until));
-  return Array.from({ length: segments + 1 }, (_, i) => {
-    const point = wavePoint((i / segments) * until);
-    return `${i === 0 ? "M" : "L"}${point.x.toFixed(1)},${point.y.toFixed(1)}`;
-  }).join(" ");
-};
+// 波形の形状は unitPathGeometry に共通化（最終リザルトのミニマップと共有）。
 
 export function UnitOverview({ courseId }: { courseId: string }) {
   const unit = findLearningUnit(courseId), router = useRouter();
