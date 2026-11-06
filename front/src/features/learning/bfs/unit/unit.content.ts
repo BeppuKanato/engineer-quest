@@ -64,5 +64,5 @@ export const bfsUnitText = {
   finalChip: "単元リザルト",
   summaryHeading: "この単元の到達状況",
   reviewNote: "気になるフェーズは、上のナビゲーションからいつでも戻って復習できます。",
-  backToStart: "単元の先頭に戻る",
+  backToCourses: "コース一覧に戻る",
 } as const;

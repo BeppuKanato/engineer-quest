@@ -16,7 +16,7 @@ import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { LearningRewardsContext } from "./LearningRewardsContext";
 import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
-import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, unitUrl, type LearningUnit } from "./unitRegistry";
+import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
 import { learningErrorMessage, useLearningProgress } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
 
@@ -24,7 +24,7 @@ export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string;
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
-    <Box sx={{ flexShrink: 0 }}><AppHeader /><Button component={Link} href={unitUrl(courseId)}>単元画面へ戻る</Button></Box>
+    <Box sx={{ flexShrink: 0 }}><AppHeader /></Box>
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <Typography role="status">進捗を読み込んでいます。</Typography> :

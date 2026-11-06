@@ -17,7 +17,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { bfsUnitPhases, bfsUnitTitle, nextPhaseLabel } = load(`${root}/bfs/unit/unit.content.ts`);
+const { bfsUnitPhases, bfsUnitTitle, bfsUnitText, nextPhaseLabel } = load(`${root}/bfs/unit/unit.content.ts`);
 
 // 単元は幅優先探索（BFS）で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(bfsUnitTitle, "幅優先探索（BFS）");
@@ -70,5 +70,17 @@ for (const file of ["motivation/BfsMotivationPreview", "execution/BfsExecutionPr
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
 assert.match(read(`${root}/bfs/consolidation/BfsConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+
+// 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
+assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
+// 単元画面は共通パンくず AppBreadcrumbs を使い、教材内（学習画面）にはパンくずを置かない（#139, #140）。
+assert.match(read(`${root}/app/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overview uses the shared breadcrumbs");
+assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
+assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
+// 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
+const finalResult = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
+assert.doesNotMatch(finalResult, /overflowY: "auto"/, "final result does not own an inner scroll area");
+assert.match(finalResult, /href="\/courses"/, "final result exits to the course list");
+assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 
 console.log("verifyBfsUnitFlow: OK");
