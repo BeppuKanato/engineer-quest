@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 
+import { DrawnCheck } from "../../app/DrawnCheck";
 import { playerTokens } from "../../player/player.tokens";
 import { ConsolidationGraph } from "../consolidation/ConsolidationGraph";
 import { bfsImplementationContent as content } from "./implementation.content";
@@ -24,14 +25,17 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes }: { ou
         const statusKey = !outcome ? "unexecuted" : outcome.passed ? "passed" : "failed";
         const scene = content.displayScenes.find(scene => scene.testId === test.id);
         return <Box component="li" key={test.id} data-test-id={test.id} sx={{ mb: 2 }}>
-          <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：
-            <Box component={motion.span} key={statusKey} data-test-status={statusKey}
-              initial={reducedMotion ? false : { opacity: 0, scale: 0.86 }}
-              animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0 : 0.3 }}
-              sx={{ display: "inline-block", color: outcome?.passed ? playerTokens.focus : playerTokens.text }}>
-              <span aria-hidden="true">{status.icon} </span>{status.label}
-            </Box>
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            {outcome?.passed && <Box sx={{ flexShrink: 0 }}><DrawnCheck size={22} /></Box>}
+            <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：
+              <Box component={motion.span} key={statusKey} data-test-status={statusKey}
+                initial={reducedMotion ? false : { opacity: 0, scale: 0.86 }}
+                animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0 : 0.3 }}
+                sx={{ display: "inline-block", color: outcome?.passed ? playerTokens.focus : playerTokens.text }}>
+                <span aria-hidden="true">{status.icon} </span>{status.label}
+              </Box>
+            </Typography>
+          </Box>
           {test.visibility === "display" && <>
             {scene && <>
               <Typography component="p">{labels.startLabel}：{scene.start}</Typography>

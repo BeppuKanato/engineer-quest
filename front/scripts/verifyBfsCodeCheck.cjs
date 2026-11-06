@@ -117,6 +117,10 @@ assert(skipped.records.every(record => record.firstCorrect === false && !record.
 const codeCheckPreviewSource = fs.readFileSync(`${root}/bfs/code-check/BfsCodeCheckPreview.tsx`, "utf8");
 assert.match(codeCheckPreviewSource, /advanceAssessment\(content, current, question\.id\)/);
 assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);
+// 単品画面の仕組みはフェーズ3単品に揃える（#181）: 再回答時は見出しに「もう一度、」が付き、
+// 「もう一度解く」は回答後ボタンと同じ行に出る（別の行に独立させない）。
+assert.match(codeCheckPreviewSource, /retry \? "もう一度、" : ""/, "re-answering carries the same caption cue as phase 3");
+assert.equal((codeCheckPreviewSource.match(/もう一度解く/g) || []).length, 1, "the restart button appears exactly once, inside the shared action row");
 assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state);
 let firstTry = createAssessmentState(content);
 for (const question of content.questions) { firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer); firstTry = advanceAssessment(content, firstTry, question.id); }
