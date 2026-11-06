@@ -4,6 +4,7 @@ const ts = require("typescript");
 let reducedMotion = false;
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {}; cache.set(filename, exports);
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename, "utf8"), {
@@ -105,7 +106,7 @@ assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final resul
 assert.ok(!fs.existsSync(`${root}/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
 
 // 到達図の距離は正本グラフから導出し、教材の距離と一致する。
-const { bfsDistancesFrom } = load(`${root}/bfs/bfsGraph.ts`);
+const { bfsDistancesFrom } = load(`${root}/bfs/bfsDistances.ts`);
 assert.deepEqual(plain(Object.fromEntries(bfsDistancesFrom("A"))), { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 }, "Result figure distances derive from the canonical graph");
 // スコアのドットは件数の集計表示。初回正解が塗り、再挑戦分が輪郭。不正な件数では描かない。
 const { ResultScoreDots } = load(`${root}/app/ResultScoreDots.tsx`);

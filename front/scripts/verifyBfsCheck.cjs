@@ -24,7 +24,7 @@ function load(filename) {
 const root = path.resolve(__dirname, "../src/features/learning");
 const { bfsCheckContent: content } = load(path.join(root, "bfs/check/check.content.ts"));
 const { bfsExecutionContent: execution } = load(path.join(root, "bfs/execution/execution.content.ts"));
-const { bfsGraphNodes, bfsGraphEdges } = load(path.join(root, "bfs/bfsGraph.ts"));
+const { searchGraphNodes, searchGraphEdges } = load(path.join(root, "graphs/searchGraph.ts"));
 const { getLearningStep, selectReviewContent } = load(path.join(root, "review/reviewContent.ts"));
 const { validateAssessment, createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete } = load(path.join(root, "assessment/assessment.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -51,7 +51,7 @@ function verifyData(candidate) {
   assert.deepEqual(after.requires, { questionId: take.id, answer: take.correctAnswer });
   assert.equal(processing.state.current, take.correctAnswer.nodeId, "Question 2 must ask about the selected node");
   assert.deepEqual(plain(processing.state.queue), plain(before.state.queue.slice(1)));
-  const neighbors = bfsGraphEdges.flatMap(edge => edge.from === processing.state.current ? [edge.to] : edge.to === processing.state.current ? [edge.from] : []);
+  const neighbors = searchGraphEdges.flatMap(edge => edge.from === processing.state.current ? [edge.to] : edge.to === processing.state.current ? [edge.from] : []);
   const undiscovered = neighbors.filter(id => processing.state.nodes.find(node => node.id === id).status === "idle");
   assert.equal(undiscovered.length, 0, "Every neighbor is already discovered");
   assert.deepEqual(after.correctAnswer, none, "No new queue entry is possible");
@@ -62,9 +62,9 @@ function verifyData(candidate) {
   assert(!/完璧|マスター/u.test(candidate.completion.caption));
   for (const question of candidate.questions) {
     const step = getLearningStep(execution, question.stepId);
-    assert.equal(step.canvas.data.graph.nodes, bfsGraphNodes, "Use the canonical shared graph");
-    assert.equal(step.canvas.data.graph.edges, bfsGraphEdges);
-    assert.deepEqual(question.nodeIds, plain(bfsGraphNodes.map(node => node.id)));
+    assert.equal(step.canvas.data.graph.nodes, searchGraphNodes, "Use the canonical shared graph");
+    assert.equal(step.canvas.data.graph.edges, searchGraphEdges);
+    assert.deepEqual(question.nodeIds, plain(searchGraphNodes.map(node => node.id)));
     const review = selectReviewContent(execution, question.reviewStepIds);
     review.steps.forEach((step, i) => assert.equal(step, getLearningStep(execution, question.reviewStepIds[i]), "Reuse exact original step objects"));
   }

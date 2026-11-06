@@ -1,8 +1,8 @@
 import { defineLearningContent } from "../../player/content.types";
-import { bfsGraph, bfsMaze } from "../../bfs/bfsGraph";
+import { searchGraph, searchMaze } from "../../graphs/searchGraph";
 import { validateDfsMotivationCanvas, type DfsMotivationCanvasState, type DfsMotivationContent } from "./motivation.types";
 
-/** 基準データ§3。座標・辺・格子はBFSの正本から参照する。 */
+/** 基準データ§3。座標・辺・格子はBFS・DFS共通の正本から参照する。 */
 export const dfsMotivationWalk = ["A", "B", "D", "F", "E", "C"] as const;
 const initial: DfsMotivationCanvasState["state"] = {
   current: "A", trail: ["A"], movement: ["A"], visited: ["A"], showNames: false,
@@ -10,7 +10,7 @@ const initial: DfsMotivationCanvasState["state"] = {
 };
 function scene(view: DfsMotivationCanvasState["data"]["view"] = "maze", state: Partial<DfsMotivationCanvasState["state"]> = {},
   highlights: DfsMotivationCanvasState["highlights"] = []): DfsMotivationCanvasState {
-  return { data: { kind: "dfs-motivation", view, graph: bfsGraph, maze: bfsMaze, treasure: "C" }, state: { ...initial, ...state }, highlights };
+  return { data: { kind: "dfs-motivation", view, graph: searchGraph, maze: searchMaze, treasure: "C" }, state: { ...initial, ...state }, highlights };
 }
 function walk(count: number, movement: readonly string[]): Partial<DfsMotivationCanvasState["state"]> {
   const trail = dfsMotivationWalk.slice(0, count);

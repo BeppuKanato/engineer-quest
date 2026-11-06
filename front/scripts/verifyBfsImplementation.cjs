@@ -6,6 +6,7 @@ const { spawnSync } = require("node:child_process");
 const ts = require("typescript");
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
@@ -65,7 +66,7 @@ assert.deepEqual(plain(content.tests[1].args), [{ G: ["H", "I"], H: ["G", "J"], 
 assert.deepEqual(plain(content.tests[2].args), [{ ...plain(content.tests[0].args[0]), Z: [] }, "A"]);
 assert.deepEqual(plain(content.tests[3].args), [{ A: [] }, "A"]);
 assert.deepEqual(plain(content.tests[4].args), [{ A: ["B"] }, "A"]);
-const python = spawnSync("python3", ["-c", `import ast,json,sys\ndata=json.load(sys.stdin)\nast.parse(data['template'])\nns={}\nexec(data['code'],ns)\nfor test in data['tests']:\n assert ns[test['functionName']](*test['args']) == test['expected'], test['id']\n`], {
+const python = spawnSync(process.env.PYTHON || "python3", ["-c", `import ast,json,sys\ndata=json.load(sys.stdin)\nast.parse(data['template'])\nns={}\nexec(data['code'],ns)\nfor test in data['tests']:\n assert ns[test['functionName']](*test['args']) == test['expected'], test['id']\n`], {
   input: JSON.stringify({ template: content.template, code: referenceCode, tests: content.tests }), encoding: "utf8",
 });
 assert.equal(python.status, 0, python.stderr);
@@ -91,9 +92,9 @@ assert.deepEqual(plain(resultKinds([{ id: "D1", passed: false }, { id: "D2", pas
 for (let done = 0; done < 5; done++) assert.equal(runningMessage(done, 5), `テストを実行中です（${done + 1}/5件目）`);
 const entries = distanceEntries({ A: 0, B: 1, C: 1 }, { A: 0, B: 99, Z: 3 });
 assert.deepEqual(plain(entries.map(entry => [entry.node, entry.state])), [["A", "same"], ["B", "different"], ["C", "missing"], ["Z", "extra"]]);
-const { bfsGraph } = load(`${root}/bfs/bfsGraph.ts`);
+const { searchGraph } = load(`${root}/graphs/searchGraph.ts`);
 const { transferGraph } = load(`${root}/bfs/consolidation/consolidation.graphs.ts`);
-assert.equal(content.displayScenes[0].graph, bfsGraph); assert.equal(content.displayScenes[1].graph, transferGraph);
+assert.equal(content.displayScenes[0].graph, searchGraph); assert.equal(content.displayScenes[1].graph, transferGraph);
 for (const scene of content.displayScenes) {
   const test = content.tests.find(test => test.id === scene.testId), graph = scene.graph;
   assert.equal(scene.start, test.args[1]);

@@ -30,7 +30,7 @@
 | take-next | complete-b | C | なし | complete-b → dequeue-c |
 | after-c | dequeue-c | どれも入らない | take-nextでCに正解済み | dequeue-c → skip-e |
 
-`getLearningStep` が元のステップをIDで取得する。共有グラフの正本は `../bfsGraph.ts`。
+`getLearningStep` が元のステップをIDで取得する。共有グラフの正本は `../../graphs/searchGraph.ts`。
 描画は `BfsCheckCanvas` から `BfsExecutionCanvas` を再利用し、任意の `renderNodeOverlay` で既存ノードの座標内にタップ領域だけを置く。
 ノード・辺・層・キューの描画は増設していない。操作領域がある場合だけSVGのroleをgroupにし、内部ボタンを読み上げ・キーボード操作できるようにする。
 フェーズ2のデータ・キャプションと、操作領域なしの場合の描画は変更しない。
