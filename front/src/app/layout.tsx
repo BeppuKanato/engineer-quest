@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SoundProvider } from "./component/soundFeedback";
 import { HexadRouteGuard } from "./component/hexadRouteGuard";
 import { UserSessionProvider } from "./component/userSession";
+import { AnswerFeedbackProvider } from "@/features/learning/assessment/AnswerFeedback";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,8 +36,10 @@ export default function RootLayout({
       >
         <UserSessionProvider>
           <SoundProvider>
-            <HexadRouteGuard />
-            {children}
+            <AnswerFeedbackProvider>
+              <HexadRouteGuard />
+              {children}
+            </AnswerFeedbackProvider>
           </SoundProvider>
         </UserSessionProvider>
       </body>

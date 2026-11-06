@@ -4,6 +4,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer } from "../../assessment/assessment";
+import { AnswerFeedbackMessage, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
@@ -31,6 +32,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
+  useAssessmentFeedback(content, session, active && !review);
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
   const diagnosis = complete ? diagnoseAssessment(content, session) : null;
@@ -66,9 +68,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
         </Box>}
         {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} />}
         {attempt && <>
-          <Typography component="p" role="status" sx={{ mt: 2, color: playerTokens.text, textAlign: "center" }}>
-            {attempt.correct ? question.correctFeedback : question.incorrectFeedback}
-          </Typography>
+          <AnswerFeedbackMessage message={attempt.correct ? question.correctFeedback : question.incorrectFeedback} />
           <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。診断には初回の回答を使います。</Typography>
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {!attempt.correct && <Button variant="outlined" onClick={() => setReview(question)} sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{content.reviewLabel}</Button>}

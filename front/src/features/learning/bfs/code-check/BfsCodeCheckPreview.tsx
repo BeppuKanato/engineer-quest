@@ -4,6 +4,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
+import { AnswerFeedbackMessage, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
@@ -25,6 +26,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   useAssessmentObservation(content, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
+  useAssessmentFeedback(content, session, active && !reviewOpen);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
   const latest = [...session.records].reverse().find(record => record.attemptCount > 0);
@@ -79,7 +81,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
               "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
         </Box>
       </>}
-      {feedback && <Typography component="p" role="status" sx={{ color: playerTokens.text, textAlign: "center", mt: 2, fontSize: 16 }}>{feedback}</Typography>}
+      {feedback && <AnswerFeedbackMessage message={feedback} />}
       {retry && <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
         <Button variant="outlined" onClick={() => setReviewOpen(true)}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{content.reviewLabel}</Button>

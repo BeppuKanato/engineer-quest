@@ -4,6 +4,8 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { AnswerFeedbackMessage, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
+import { answerFeedbackText } from "../../assessment/answerFeedbackState";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
@@ -25,6 +27,7 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
   const question = activeQuestion(bfsCheckContent, session);
   const complete = assessmentComplete(bfsCheckContent, session);
   useAssessmentObservation(bfsCheckContent, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
+  useAssessmentFeedback(bfsCheckContent, session, active && !reviewOpen);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
   const caption = complete ? bfsCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
@@ -56,6 +59,7 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
       </Typography>}
       <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
         allowNone={question?.allowNone} onAnswer={submit} />
+      {retry && <AnswerFeedbackMessage message={answerFeedbackText.incorrect} />}
       <Box sx={{ minHeight: 44, mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center" }}>
         {retry && <Button variant="outlined" onClick={() => setReviewOpen(true)}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control }}>該当ステップの動きを確認する</Button>}
