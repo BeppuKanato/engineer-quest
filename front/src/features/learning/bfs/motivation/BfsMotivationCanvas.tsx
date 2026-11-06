@@ -61,7 +61,7 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
   const current = state.current === null ? null : point(state.current);
 
   return (
-    <Box sx={{ height: "100%", minHeight: 220 }}>
+    <Box sx={{ height: "100%", minHeight: 220, position: "relative" }}>
       <GraphViewport label={isMaze ? "格子の迷路と現在の場所" : "AからFの場所とつながり"}>
         <defs>
           <pattern id={wallId} width={8} height={8} patternUnits="userSpaceOnUse">
@@ -145,13 +145,12 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
         {isMaze && state.trail.length > 1 && <text x={300} y={340} textAnchor="middle" fill={playerTokens.text} fontSize={24}>
           {state.trail.length - 1}{data.labels.moveUnit}
         </text>}
-        <foreignObject x={0} y={390} width={600} height={48}>
-          <Box sx={{ height: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-            {state.exit && <PhaseNextButton label={state.exit.label} disabled={!onExit} onClick={() => onExit?.()}
-              ariaLabel={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`} />}
-          </Box>
-        </foreignObject>
       </GraphViewport>
+      {/* 出口ボタンは SVG の外に置く。foreignObject 内では SVG の拡大率に引きずられ、指定した大きさで表示されない（#157）。 */}
+      {state.exit && <Box sx={{ position: "absolute", right: 16, bottom: 12 }}>
+        <PhaseNextButton label={state.exit.label} disabled={!onExit} onClick={() => onExit?.()}
+          ariaLabel={onExit ? state.exit.label : `${state.exit.label}（接続は後続Issueで実装）`} />
+      </Box>}
     </Box>
   );
 }

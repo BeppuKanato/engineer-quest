@@ -47,6 +47,8 @@ for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCa
   assert.match(read(`${root}/${file}`), /PhaseNextButton/, `${file} uses the shared transition button`);
 }
 assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "アルゴリズム説明へ進む"/, "motivation exit label names the destination");
+// フェーズ1の出口ボタンは SVG の外に置き、拡大率で大きさが変わらないようにする（#157）。
+assert.doesNotMatch(read(`${root}/bfs/motivation/BfsMotivationCanvas.tsx`), /foreignObject/, "motivation exit button stays outside the SVG");
 
 // 単品プレビューのルートに単元フローが接続されている。
 const page = read(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"));
