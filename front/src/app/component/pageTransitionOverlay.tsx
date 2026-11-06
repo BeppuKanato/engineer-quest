@@ -4,21 +4,17 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { Box, LinearProgress, Paper, Typography, keyframes } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { getMascotImagePath, useUserMascot } from "./mascot";
+import { useUserMascot, type MascotState } from "./mascot";
+import { MascotFigure } from "./mascotFigure";
 
 type PageTransitionOverlayProps = {
   open: boolean;
   title?: string;
   description?: string;
   message?: string;
-  mascotState?: "normal" | "happy" | "cheer" | "thinking" | "surprise" | "celebrate";
+  mascotState?: Exclude<MascotState, "face" | "surprise" | "celebrate">;
   delayMs?: number;
 };
-
-const float = keyframes`
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.03); }
-`;
 
 const sparkle = keyframes`
   0%, 100% { opacity: 0.45; transform: scale(0.9); }
@@ -86,18 +82,7 @@ export const PageTransitionOverlay = ({
         />
         <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "96px 1fr", gap: 2.5, alignItems: "center" }}>
           <Box sx={{ position: "relative", display: "grid", placeItems: "center" }}>
-            <Box
-              component="img"
-              src={getMascotImagePath(mascotId, mascotState)}
-              alt="相棒マスコット"
-              sx={{
-                width: 88,
-                height: 88,
-                objectFit: "contain",
-                animation: `${float} 1300ms ease-in-out infinite`,
-                "@media (prefers-reduced-motion: reduce)": { animation: "none" },
-              }}
-            />
+            <MascotFigure mascotId={mascotId} state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="float" />
             {[0, 1, 2].map((index) => (
               <AutoAwesomeRoundedIcon
                 key={index}

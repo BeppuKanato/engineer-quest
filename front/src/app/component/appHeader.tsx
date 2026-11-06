@@ -9,7 +9,6 @@ import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import {
   AppBar,
-  Avatar,
   Box,
   Container,
   IconButton,
@@ -22,7 +21,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { getMascotImagePath, useUserMascotState } from "./mascot";
+import { useUserMascotState } from "./mascot";
+import { MascotFigure } from "./mascotFigure";
 import { PageTransitionOverlay } from "./pageTransitionOverlay";
 
 const pages = [
@@ -207,11 +207,7 @@ export const AppHeader: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <Avatar
-                    alt="ユーザーアイコン"
-                    src={getMascotImagePath(mascotId, "normal")}
-                    sx={{ width: { xs: 38, md: 48 }, height: { xs: 38, md: 48 } }}
-                  />
+                  <MascotFigure mascotId={mascotId} alt="ユーザーアイコン" size="S" presentation="circle" />
                 )}
               </IconButton>
             </Tooltip>

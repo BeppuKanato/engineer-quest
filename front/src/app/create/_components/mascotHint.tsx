@@ -1,20 +1,16 @@
 "use client";
 
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 
-import { getMascotImagePath, useUserMascot } from "@/app/component/mascot";
+import { useUserMascot } from "@/app/component/mascot";
+import { MascotFigure } from "@/app/component/mascotFigure";
 
 export const MascotHint = ({ text }: { text: string }) => {
   const mascotId = useUserMascot();
 
   return (
     <Stack direction="row" alignItems="center" spacing={1.5}>
-      <Box
-        component="img"
-        src={getMascotImagePath(mascotId, "cheer")}
-        alt="マスコット"
-        sx={{ width: 78, height: 78, objectFit: "contain", flexShrink: 0 }}
-      />
+      <MascotFigure mascotId={mascotId} state="cheer" alt="マスコット" size="M" grounding="disc" />
       <Paper
         elevation={0}
         sx={{
