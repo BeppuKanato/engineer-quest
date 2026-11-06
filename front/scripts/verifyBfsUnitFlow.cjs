@@ -87,6 +87,9 @@ assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻�
 const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
+assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
+assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
+assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
@@ -173,6 +176,9 @@ assert.match(confettiSource, /angle: 120, origin: \{ x: 0\.88, y: 0\.7 \}/, "Rig
 assert.match(confettiSource, /zIndex: 1200/, "Confetti stays below reward dialogs (1300)");
 assert.match(confettiSource, /disableForReducedMotion: true/, "The library also honours reduced motion");
 assert.match(confettiSource, /firedRef/, "Confetti fires once per mount, never on re-render or dialog close");
+assert.match(confettiSource, /preset === "final"/, "The launcher carries a final-result preset");
+assert.match(confettiSource, /particleCount: 110/, "The final preset fires 110 pieces per popper");
+assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The final preset adds a centre popper");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
