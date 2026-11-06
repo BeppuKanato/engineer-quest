@@ -18,6 +18,7 @@
     "verify:wall-extension-code-check": "node scripts/verifyWallExtensionCodeCheck.cjs",
     "verify:wall-extension-consolidation": "node scripts/verifyWallExtensionConsolidation.cjs",
     "verify:wall-extension-implementation": "node scripts/verifyWallExtensionImplementation.cjs",
+    "verify:wall-extension-trace": "node scripts/verifyWallExtensionTrace.cjs",
     "verify:bubble-sort-motivation": "node scripts/verifyBubbleSortMotivation.cjs",
     "verify:bubble-sort-execution": "node scripts/verifyBubbleSortExecution.cjs",
     "verify:bubble-sort-check": "node scripts/verifyBubbleSortCheck.cjs",

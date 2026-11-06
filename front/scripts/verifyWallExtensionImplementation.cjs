@@ -297,6 +297,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
   assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
   assert.match(previewSource, /DrawnCheck size=\{76\}/, "the completion view leads with a large drawn check");
-  assert(!previewSource.includes("Trace"), "visual debugging stays in issue #213");
+  assert(previewSource.includes("WallExtensionTraceDialog"), "visual debugging is wired in issue #213");
+  assert(previewSource.includes("traceWallExtensionCode"), "the preview acquires the learner trace");
   console.log("Wall-extension implementation: five cases verified against an independent generator and CPython reference, perfect-maze properties, typical-mistake mutations (pillar step, up-delta sign, four directions below the first row), canonical skeleton and Parsons reuse, hint gating, grid difference display, free-execution board rendering, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

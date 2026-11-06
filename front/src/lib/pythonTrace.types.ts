@@ -4,6 +4,10 @@ export type PythonTraceLocals = {
   readonly distances?: Readonly<Record<string, number>> | null;
   readonly node?: string | null;
   readonly neighbor?: string | null;
+  /** 盤面系の単元用。奇数の一辺を持つ正方形の整数グリッドだけをコピーする。 */
+  readonly grid?: readonly (readonly number[])[] | null;
+  readonly size?: number | null;
+  readonly choices?: readonly number[] | null;
 };
 export type PythonTraceEvent = {
   readonly line: number;
@@ -14,7 +18,7 @@ export type PythonTraceEvent = {
 export type PythonTraceResult = {
   readonly events: readonly PythonTraceEvent[];
   readonly status: "returned" | "error" | "truncated";
-  readonly result: Readonly<Record<string, number>> | null;
+  readonly result: Readonly<Record<string, number>> | readonly (readonly number[])[] | null;
   readonly error: { readonly line: number | null; readonly kind: string } | null;
   readonly stoppedLine: number | null;
   readonly eventCount: number;
