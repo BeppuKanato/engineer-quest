@@ -21,6 +21,7 @@ import { WallExtensionCodeMappingPreview } from "@/features/learning/wall-extens
 import { WallExtensionCodeCheckPreview } from "@/features/learning/wall-extension/code-check/WallExtensionCodeCheckPreview";
 import { WallExtensionConsolidationPreview } from "@/features/learning/wall-extension/consolidation/WallExtensionConsolidationPreview";
 import { WallExtensionImplementationPreview } from "@/features/learning/wall-extension/implementation/WallExtensionImplementationPreview";
+import { WallExtensionUnitPreview } from "@/features/learning/wall-extension/unit/WallExtensionUnitPreview";
 import { BubbleSortMotivationPreview } from "@/features/learning/bubble-sort/motivation/BubbleSortMotivationPreview";
 import { BubbleSortExecutionPreview } from "@/features/learning/bubble-sort/execution/BubbleSortExecutionPreview";
 import { BubbleSortCheckPreview } from "@/features/learning/bubble-sort/check/BubbleSortCheckPreview";
@@ -50,6 +51,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "wall-extension-code-check") return <WallExtensionCodeCheckPreview />;
   if (contentId === "wall-extension-consolidation") return <WallExtensionConsolidationPreview />;
   if (contentId === "wall-extension-implementation") return <WallExtensionImplementationPreview />;
+  if (contentId === "wall-extension-unit") return <WallExtensionUnitPreview />;
   if (contentId === "dfs-motivation") return <DfsMotivationPreview />;
   if (contentId === "dfs-execution") return <DfsExecutionPreview />;
   if (contentId === "dfs-check") return <DfsCheckPreview />;
