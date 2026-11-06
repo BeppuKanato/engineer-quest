@@ -21,6 +21,7 @@ import { WallExtensionCodeMappingPreview } from "@/features/learning/wall-extens
 import { WallExtensionCodeCheckPreview } from "@/features/learning/wall-extension/code-check/WallExtensionCodeCheckPreview";
 import { WallExtensionConsolidationPreview } from "@/features/learning/wall-extension/consolidation/WallExtensionConsolidationPreview";
 import { WallExtensionImplementationPreview } from "@/features/learning/wall-extension/implementation/WallExtensionImplementationPreview";
+import { BubbleSortMotivationPreview } from "@/features/learning/bubble-sort/motivation/BubbleSortMotivationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 
 export default async function LearningPreviewPage({ params }: { params: Promise<{ contentId: string }> }) {
   const { contentId } = await params;
+  if (contentId === "bubble-sort-motivation") return <BubbleSortMotivationPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
