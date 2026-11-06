@@ -26,6 +26,9 @@ const soundConfig = {
   cardAcquired: { src: "/audio/se/card-acquired.ogg", volume: 0.4 },
   achievementUnlocked: { src: "/audio/se/achievement-unlocked.ogg", volume: 0.45 },
   missionCompleted: { src: "/audio/se/mission-completed.ogg", volume: 0.5 },
+  // 紙吹雪の歓声（効果音ラボ「歓声と拍手」。フェーズ結果=中、単元最終=大）。#179
+  resultCheer: { src: "/audio/se/cheer-medium.ogg", volume: 0.5 },
+  resultCheerLarge: { src: "/audio/se/cheer-large.ogg", volume: 0.55 },
   likePop: { src: "/audio/se/like-pop.ogg", volume: 0.24 },
 } as const;
 
