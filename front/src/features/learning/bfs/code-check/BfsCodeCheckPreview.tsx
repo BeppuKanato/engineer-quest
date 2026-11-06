@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
@@ -30,6 +30,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
   useAssessmentFeedback(content, session, active && !reviewOpen);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
+  const attempt = record?.attempts.at(-1);
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
   // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
   useEffect(() => {
@@ -80,9 +81,15 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
               "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
         </Box>
       </>}
-      {retry && <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-        <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />
-      </Box>}
+      {attempt && !attempt.correct && <>
+        <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
+          <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />
+          {question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
+            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
+        </Box>
+      </>}
       {embedded && complete && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>
