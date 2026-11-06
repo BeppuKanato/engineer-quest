@@ -25,8 +25,7 @@ export default function CollectionPage() {
     ...data.knowledgeTips.items.filter((x) => x.collectedAt).map((x) => ({ id: x.id, title: x.title, type: "知識カード", at: x.collectedAt! })),
     ...data.achievements.items.filter((x) => x.achievedAt).map((x) => ({ id: x.id, title: x.title, type: `${x.rarity} 実績`, at: x.achievedAt! })),
   ].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 8) : [], [data]);
-  return <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}><AppHeader /><FeedbackDestination failed={!!error} ready={!!data && !error} /><Container maxWidth="lg" sx={{ py: 5 }}><Stack spacing={3}>
-    <AppBreadcrumbs items={[{ label: "コレクション" }]} />
+  return <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}><AppHeader /><FeedbackDestination failed={!!error} ready={!!data && !error} /><Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}><AppBreadcrumbs items={[{ label: "コレクション" }]} /></Container><Container maxWidth="lg" sx={{ pt: 3, pb: 5 }}><Stack spacing={3}>
     <Box><Typography variant="h2" fontWeight={900}>コレクション</Typography><Typography color="text.secondary">学びの発見と、挑戦の証をまとめて確認できます。</Typography></Box>
     {error && <Alert severity="error">{error}</Alert>}
     {!data ? <Skeleton variant="rounded" height={300} /> : <>

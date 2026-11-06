@@ -258,9 +258,11 @@ export default function QuestPostDetailPage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
       <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!post && !errorMessage} />
-      <Container maxWidth={false} sx={{ maxWidth: 960, py: 4 }}>
-        <Stack spacing={3}>
+      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
           <AppBreadcrumbs items={[{ label: "掲示板", href: "/quest-board" }, { label: post?.title ?? "投稿詳細" }]} />
+        </Container>
+      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 4 }}>
+        <Stack spacing={3}>
 
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 

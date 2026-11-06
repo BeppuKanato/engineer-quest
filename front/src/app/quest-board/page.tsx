@@ -228,9 +228,11 @@ export default function QuestBoardPage() {
         description="新しい投稿を作成する画面へ移動しています。"
         mascotState="thinking"
       />
-      <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
-        <Stack spacing={3}>
+      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
           <AppBreadcrumbs items={[{ label: "掲示板" }]} />
+        </Container>
+      <Container maxWidth={false} sx={{ maxWidth: 1120, pt: 3, pb: 4 }}>
+        <Stack spacing={3}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
             <Stack
               direction={{ xs: "column", md: "row" }}

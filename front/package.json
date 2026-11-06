@@ -25,7 +25,8 @@
     "verify:response-feedback": "node scripts/verifyResponseFeedback.cjs",
     "verify:answer-feedback": "node scripts/verifyAnswerFeedback.cjs",
     "verify:home-layout": "node scripts/verifyHomeLayout.cjs",
-    "verify:unit-overview": "node scripts/verifyUnitOverview.cjs"
+    "verify:unit-overview": "node scripts/verifyUnitOverview.cjs",
+    "verify:app-breadcrumbs": "node scripts/verifyAppBreadcrumbs.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
