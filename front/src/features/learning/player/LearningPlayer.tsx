@@ -6,6 +6,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import { Box, IconButton, Slider, Stack, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
@@ -28,6 +29,7 @@ export function LearningPlayer<TCanvas extends CanvasSnapshot>(props: LearningPl
 }
 
 function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas, endAction, onLearningEvent, active = true }: LearningPlayerProps<TCanvas>) {
+  const reduced = useReducedMotion();
   const [playback, setPlayback] = useState<PlaybackState>({ index: 0, playing: false });
   const count = content.steps.length;
   const step = content.steps[Math.min(playback.index, count - 1)];
@@ -76,30 +78,34 @@ function PlaybackSession<TCanvas extends CanvasSnapshot>({ content, renderCanvas
         }}>{step.caption}</Typography>
         <Box sx={{ flex: 1, minHeight: 0 }}>{renderCanvas(step.canvas)}</Box>
       </Box>
-      <Stack direction="row" alignItems="center" gap={{ xs: 0.5, sm: 1.5 }} role="group" aria-label="再生操作"
-        sx={{ mt: 1, flexShrink: 0, color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
+      <Stack direction="row" alignItems="center" justifyContent="center" gap={{ xs: 0.5, sm: 1.5 }} role="group" aria-label="再生操作"
+        sx={{ mt: 1, flexShrink: 0, position: "relative", color: playerTokens.control, "& .MuiIconButton-root": { color: "inherit" }, "& .MuiIconButton-root:focus-visible": { outline: `2px solid ${playerTokens.control}` } }}>
         <IconButton aria-label={playback.playing ? "一時停止" : playback.index === count - 1 ? "最初から再生" : "再生"}
           disabled={count < 2} onClick={() => dispatch({ type: "toggle" })}
-          sx={{ width: 48, height: 48, "& .MuiSvgIcon-root": { fontSize: 32 } }}>
+          sx={{ width: 56, height: 56, "& .MuiSvgIcon-root": { fontSize: 40 } }}>
           {playback.playing ? <PauseIcon /> : playback.index === count - 1 ? <ReplayIcon /> : <PlayArrowIcon />}
         </IconButton>
         <IconButton aria-label="前のステップ" disabled={playback.index === 0}
-          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })} sx={{ width: 40, height: 40 }}><SkipPreviousIcon /></IconButton>
+          onClick={() => dispatch({ type: "seek", index: playback.index - 1 })} sx={{ width: 48, height: 48, "& .MuiSvgIcon-root": { fontSize: 30 } }}><SkipPreviousIcon /></IconButton>
         <IconButton aria-label="次のステップ" disabled={playback.index === count - 1}
-          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })} sx={{ width: 40, height: 40 }}><SkipNextIcon /></IconButton>
+          onClick={() => dispatch({ type: "seek", index: playback.index + 1 })} sx={{ width: 48, height: 48, "& .MuiSvgIcon-root": { fontSize: 30 } }}><SkipNextIcon /></IconButton>
         <Slider aria-label="ステップ位置" data-seek-slider value={playback.index}
           min={0} max={Math.max(count - 1, 0)} step={1} disabled={count < 2}
           getAriaValueText={(value) => `${value + 1} / ${count}`}
           onChange={(_, value) => dispatch({ type: "seek", index: Array.isArray(value) ? value[0] : value })}
           sx={{ flex: "1 1 auto", maxWidth: 320, minWidth: 40, mx: 0.5, color: playerTokens.control,
-            "& .MuiSlider-rail": { bgcolor: "#d1d5db", opacity: 1 },
-            "& .MuiSlider-thumb": { width: 18, height: 18 },
+            "& .MuiSlider-rail": { bgcolor: "#d1d5db", opacity: 1, height: 6 },
+            "& .MuiSlider-track": { height: 6 },
+            "& .MuiSlider-thumb": { width: 22, height: 22 },
             "&:focus-visible": { outline: `2px solid ${playerTokens.control}`, outlineOffset: 2 } }} />
-        <Typography component="span" sx={{ fontSize: 14, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+        <Typography component="span" sx={{ fontSize: 15, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
           {playback.index + 1} / {count}
         </Typography>
         {endAction && playback.index === count - 1 && (
-          <Box sx={{ ml: 1, flexShrink: 0 }}>
+          <Box component={motion.div}
+            initial={reduced ? false : { opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: reduced ? 0 : 0.3, ease: "easeOut" }}
+            sx={{ position: "absolute", right: 0, top: 0, bottom: 0, display: "flex", alignItems: "center" }}>
             <PhaseNextButton label={endAction.label}
               onClick={() => { onLearningEvent?.({ eventType: "player_end_action", targetId: step.id, payload: { contentId: content.id } }); endAction.onClick(); }} />
           </Box>
