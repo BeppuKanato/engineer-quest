@@ -67,9 +67,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     const result = await completeLearningPhase(await getToken(), courseId, phaseKey, summary);
     if (auth.currentUser?.uid !== uid) return;
     setRewards(current => mergeLearningRewards(current, result));
-    // onPhaseCompleteの既存Promise内で、次フェーズへ移る前に提示する。エラー時はここへ到達しない。
+    // 提示はフェーズの切れ目に重ねて出し、遷移は待たせない（#147）。提示側の完了は待たない。エラー時はここへ到達しない。
     const achievements = phaseBoundaryAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
-    if (result.awardedCard || achievements.length) await present({ phaseKey, achievements });
+    if (result.awardedCard || achievements.length) present({ phaseKey, achievements });
   }, [getToken, courseId, uid, unit, present]);
   const onFinalResult = useCallback(() => setFinalShown(true), []);
   useEffect(() => {

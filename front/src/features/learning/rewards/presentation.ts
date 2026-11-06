@@ -3,6 +3,8 @@ import { knowledgeCardTones } from "../../collection/knowledgeCard.tokens";
 
 export type RewardStage = "anticipation" | "appearance" | "praise";
 export const rewardStages: readonly RewardStage[] = ["anticipation", "appearance", "praise"];
+// durations は [発見の前振り, 開示の保持, 賞賛の保持] の目安。#147 以降、発見と賞賛は
+// ユーザの操作（開く／次へ進む）で進むため、自動遷移に使うのは開示の保持だけ。
 export const cardPresentation = {
   COMMON: { durations: [350, 450, 800], scale: 0.96, turns: 0, rays: 0, glow: 0, tone: knowledgeCardTones.COMMON },
   RARE: { durations: [450, 600, 950], scale: 0.88, turns: 4, rays: 4, glow: 16, tone: knowledgeCardTones.RARE },
@@ -12,7 +14,8 @@ export const presentationFor = (rarity: string) => cardPresentation[rarity as ke
 export const phaseBoundaryAchievements = (phaseKey: string, finalPhaseKey: string | undefined, items: readonly UnlockedAchievement[]) => phaseKey === finalPhaseKey ? [] : items;
 export type RewardBoundary = { phaseKey: string; achievements: readonly UnlockedAchievement[] };
 export const rewardText = {
-  title: "学びの発見", anticipation: "学びの先に、新しいつながりが…", appearance: "知識カードを発見！",
+  title: "学びの発見", anticipation: "やった！ 学びの途中で、知識カードを見つけました！", appearance: "知識カードを発見！",
+  reveal: "カードを開く",
   praise: "学んだ考え方から、知識のつながりが広がりました。", saved: "カードの内容はコレクションでいつでも確認できます。",
   achievement: "実績を獲得しました", achievementPraise: "今回の学習で達成したことが、証として残りました。",
   skip: "演出をスキップ", close: "学習を続ける", finalTitle: "この単元で獲得した実績", finalEmpty: "獲得済みの実績は実績一覧で確認できます。",
