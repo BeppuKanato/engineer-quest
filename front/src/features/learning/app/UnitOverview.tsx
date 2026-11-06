@@ -48,9 +48,9 @@ export function UnitOverview({ courseId }: { courseId: string }) {
       <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt: 2 }}>{unit?.title ?? "単元"}</Typography>
       {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <Typography role="status" sx={{ my: 4 }}>進捗を読み込んでいます。</Typography> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : progress && <>
-          <Typography sx={{ mt: 2 }}>フェーズ {completed}/{unit.phases.length} 完了</Typography>
+          <Typography sx={{ mt: 2 }}>{completed} / {unit.phases.length} 完了</Typography>
           <LinearProgress aria-label="単元の進捗" variant="determinate" value={completed / unit.phases.length * 100} sx={{ my: 2, height: 8, borderRadius: 4 }} />
-          <Box component="ol" aria-label="フェーズ一覧" sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, columnGap: 2, rowGap: { xs: 2, sm: 3 }, p: 0, listStyle: "none", my: 3 }}>
+          <Box component="ol" aria-label="この単元の流れ" sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" }, columnGap: 2, rowGap: { xs: 2, sm: 3 }, p: 0, listStyle: "none", my: 3 }}>
             {unit.phases.map((phase, index) => {
               const done = progress.phases.some(item => item.phaseKey === phase.id && item.status === "COMPLETED");
               const current = index === next, reachable = index <= (next ?? unit.phases.length - 1), Icon = icons[index];
@@ -64,7 +64,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
                   ...(connector === "right" ? { top: 48, left: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
                     connector === "left" ? { top: 48, right: "calc(50% + 50px)", width: "calc(100% - 100px + 16px)", height: 4 } :
                     { top: 100, left: "calc(50% - 2px)", width: 4, height: "calc(100% - 100px + 24px)" }) }} />}
-                <Button aria-label={`フェーズ${phase.phase} ${phase.formalName}：${status}`} aria-current={current ? "step" : undefined} disabled={!reachable || starting}
+                <Button aria-label={`${phase.phase}. ${phase.formalName}：${status}`} aria-current={current ? "step" : undefined} disabled={!reachable || starting}
                   onClick={() => void start(current ? undefined : index)} sx={{ width: 100, maxWidth: "100%", height: 100, borderRadius: "50%", border: `3px solid ${current ? tokens.progress.next : tokens.progress.stroke}`,
                     bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle, color: current ? tokens.surface : tokens.text, position: "relative", zIndex: 1,
                     transition: "background-color 200ms, transform 200ms", "&:hover": { transform: "translateY(-3px)", bgcolor: done ? tokens.progress.completed : current ? tokens.progress.next : tokens.progress.idle } }}>

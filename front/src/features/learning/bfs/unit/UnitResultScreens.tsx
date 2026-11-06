@@ -32,7 +32,7 @@ export function UnitResultScreen({ phase, summary, onNext }: {
   const headingRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
   if (!phase.result) return null;
-  return <Box component="section" aria-label={`フェーズ${phase.phase}のリザルト`}
+  return <Box component="section" aria-label={`${phase.formalName}のリザルト`}
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, p: 2 }}>
     <CheckCircleIcon aria-hidden sx={{ fontSize: 56, color: playerTokens.focus }} />
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{phase.result.heading}</Typography>
@@ -80,7 +80,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
         return <Box component="li" key={phase.id} sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.75, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
           <CheckCircleIcon aria-hidden sx={{ fontSize: 20, color: playerTokens.focus, flexShrink: 0 }} />
           <Typography component="p" sx={{ fontSize: 16 }}>
-            フェーズ{phase.phase}：{phase.formalName}{line ? ` ― ${line}` : ""}
+            {phase.phase}. {phase.formalName}{line ? ` ― ${line}` : ""}
           </Typography>
           <Button size="small" onClick={() => onReviewPhase(index)}
             sx={{ ml: "auto", minHeight: 36, color: playerTokens.control, whiteSpace: "nowrap" }}>復習する</Button>

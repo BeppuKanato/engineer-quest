@@ -110,7 +110,7 @@ export default function KnowledgeCardsPage() {
                 <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 38, md: 52 } }}>知識カード</Typography>
                 <Typography color="text.secondary" sx={{ mt: 1, fontSize: 17 }}>コースで学んだ考え方から、次に調べてみたい世界へつながるカードです。</Typography>
               </Box>
-              <Chip icon={<InfoOutlinedIcon />} label="フェーズ完了時に獲得" sx={{ alignSelf: { xs: "flex-start", md: "center" }, px: 1, py: 2.3, fontWeight: 900, color: "#0052d9", bgcolor: "#fff", border: "1px solid #bfdbfe" }} />
+              <Chip icon={<InfoOutlinedIcon />} label="学習の区切りで獲得" sx={{ alignSelf: { xs: "flex-start", md: "center" }, px: 1, py: 2.3, fontWeight: 900, color: "#0052d9", bgcolor: "#fff", border: "1px solid #bfdbfe" }} />
             </Stack>
 
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
