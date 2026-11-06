@@ -1,4 +1,3 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 import CodeIcon from "@mui/icons-material/Code";
 import DatasetIcon from "@mui/icons-material/Dataset";
@@ -195,19 +194,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           </Stack>
           {featured && status === "not_started" && (
             <Chip label="Recommended" size="small" sx={{ bgcolor: "#10b981", color: "#fff", fontWeight: 900 }} />
-          )}
-          {isCompleted && (
-            <Chip
-              icon={<CheckCircleIcon />}
-              label="コースクリア"
-              size="small"
-              sx={{
-                bgcolor: "#dcfce7",
-                color: "#15803d",
-                fontWeight: 800,
-                "& .MuiChip-icon": { color: "inherit" },
-              }}
-            />
           )}
         </Stack>
 
