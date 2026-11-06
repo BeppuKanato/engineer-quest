@@ -17,7 +17,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { bfsUnitPhases, bfsUnitTitle } = load(`${root}/bfs/unit/unit.content.ts`);
+const { bfsUnitPhases, bfsUnitTitle, nextPhaseLabel } = load(`${root}/bfs/unit/unit.content.ts`);
 
 // 単元は幅優先探索（BFS）で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(bfsUnitTitle, "幅優先探索（BFS）");
@@ -35,10 +35,18 @@ for (const phase of bfsUnitPhases) {
   if (phase.transitionOut === "result") {
     assert.ok(phase.result && phase.result.heading.length > 0 && phase.result.nextPreview.length > 0, `phase ${phase.phase} result content`);
   }
-  if (phase.transitionOut === "seamless" || phase.transitionOut === "result-in-phase") {
-    assert.ok(phase.nextLabel && phase.nextLabel.length > 0, `phase ${phase.phase} nextLabel`);
-  }
 }
+// 遷移ボタンの文言は「次の段階の正式名称＋へ進む」で導出され、「フェーズ」を含まない（#142）。
+for (const phase of bfsUnitPhases.slice(0, -1)) {
+  const next = bfsUnitPhases[phase.phase];
+  assert.equal(nextPhaseLabel(phase), `${next.formalName}へ進む`, `phase ${phase.phase} transition label`);
+  assert.doesNotMatch(nextPhaseLabel(phase), /フェーズ/, `phase ${phase.phase} label has no developer term`);
+}
+// 遷移ボタンは共通部品 PhaseNextButton に統一されている（#142）。
+for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCanvas.tsx", "bfs/unit/UnitResultScreens.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
+  assert.match(read(`${root}/${file}`), /PhaseNextButton/, `${file} uses the shared transition button`);
+}
+assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "アルゴリズム説明へ進む"/, "motivation exit label names the destination");
 
 // 単品プレビューのルートに単元フローが接続されている。
 const page = read(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"));
