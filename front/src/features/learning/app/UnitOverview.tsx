@@ -1,14 +1,8 @@
 "use client";
 import { Alert, Box, Button, Chip, Container, LinearProgress, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import RouteIcon from "@mui/icons-material/Route";
-import QuizIcon from "@mui/icons-material/Quiz";
-import CodeIcon from "@mui/icons-material/Code";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import ExtensionIcon from "@mui/icons-material/Extension";
 import StarIcon from "@mui/icons-material/Star";
-import TerminalIcon from "@mui/icons-material/Terminal";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,11 +16,11 @@ import { startLearningUnit } from "@/api/learning.api";
 import { knowledgeCardTones } from "@/features/collection/knowledgeCard.tokens";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
 import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";
+import { learningPhaseIcons } from "./learningPhaseIcons";
 import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
 import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
 
-const icons = [LightbulbIcon, RouteIcon, QuizIcon, CodeIcon, QuizIcon, ExtensionIcon, TerminalIcon];
 
 // 波形の形状は unitPathGeometry に共通化（最終リザルトのミニマップと共有）。
 
@@ -150,7 +144,7 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, onStart 
         const done = completedIds.has(phase.id);
         const current = index === next;
         const reachable = index <= (next ?? count - 1);
-        const Icon = icons[index];
+        const Icon = learningPhaseIcons[index];
         const status = done ? "完了" : current && hasProgress ? "進行中" : "未着手";
         const position = point(index);
         const size = current ? 118 : 102;
