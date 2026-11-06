@@ -45,6 +45,7 @@ function canonicalSet(kind: "border" | "pillars", size: number): ReadonlySet<str
 export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensionTracePlayback {
   const steps: LearningStep<WallExtensionTraceCanvas>[] = [];
   const extendedPillars = new Set<string>();
+  let lastCategory: string | null = null;
   const checkpoint: { walls: ReadonlySet<string> | null; size: number | null } = { walls: null, size: null };
   let lastEvent: PythonTraceEvent | null = null;
   let invalidTail = false;
@@ -67,16 +68,19 @@ export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensi
     const border = canonicalSet("border", size);
     const pillars = canonicalSet("pillars", size);
     let caption: string = text.changed;
+    let category: "setup" | "border" | "pillars" | "extend" | "changed" = "changed";
     let processing: MazeCellKey | null = null;
     let highlights: readonly MazeCellKey[] = added;
     if (checkpoint.walls === null) {
       caption = walls.length === 0 ? text.setup : text.changed;
+      category = walls.length === 0 ? "setup" : "changed";
       highlights = [];
     } else if (removed.length === 0 && added.length > 0 && added.every(key => border.has(key))) {
-      caption = text.border; highlights = [];
+      caption = text.border; category = "border"; highlights = [];
     } else if (removed.length === 0 && added.length > 0 && added.every(key => pillars.has(key))) {
-      caption = text.pillars; highlights = [];
+      caption = text.pillars; category = "pillars"; highlights = [];
     } else if (removed.length === 0 && added.length === 1) {
+      category = "extend";
       const target = added[0];
       const { x, y } = parseMazeCellKey(target);
       const adjacentPillars = ([[0, -1], [0, 1], [-1, 0], [1, 0]] as const)
@@ -92,15 +96,25 @@ export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensi
         highlights = [target];
       }
     }
-    steps.push({ id: `trace-${steps.length}`, caption, canvas: makeCanvas(size, walls, processing, highlights, event) });
+    // 外周と柱は1マスずつ書かれるため、同じ種類の追加が続く間は1コマにまとめる
+    // （フェーズ2の「外周」「柱」のコマに対応させる。BFSが距離代入とキュー追加を1コマにまとめるのと同じ扱い）。
+    if ((category === "border" || category === "pillars") && category === lastCategory && steps.length > 0) {
+      steps[steps.length - 1] = { ...steps[steps.length - 1], canvas: makeCanvas(size, walls, null, [], event) };
+    } else {
+      steps.push({ id: `trace-${steps.length}`, caption, canvas: makeCanvas(size, walls, processing, highlights, event) });
+    }
+    lastCategory = category;
     checkpoint.walls = wallSet;
     checkpoint.size = size;
   }
 
   for (const event of trace.events) {
     lastEvent = event;
+    // grid キーが無いイベントは「まだ盤面が作られていない」だけなので読み飛ばす。
+    // キーがあり値が null の場合は「盤面はあるが描ける形ではない」ため、末尾の部分表示の判定に使う。
+    if (!("grid" in event.locals)) continue;
     const grid = event.locals.grid;
-    if (grid === undefined || grid === null) continue;
+    if (grid === null || grid === undefined) { invalidTail = true; continue; }
     const size = drawableGridSize(grid);
     if (size === null) { invalidTail = true; continue; }
     invalidTail = false;
