@@ -1,9 +1,10 @@
 "use client";
 
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckIcon from "@mui/icons-material/Check";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { LearningObserver } from "../../../../lib/learningEvents";
 import { useLearningVisit } from "../../instrumentation/useLearningVisit";
@@ -132,12 +133,14 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
       <Typography component="h1" sx={{ fontSize: 16, fontWeight: 700, whiteSpace: "nowrap" }}>{bfsUnitTitle}</Typography>
-      <Box role="navigation" aria-label={bfsUnitText.navLabel} sx={{ display: "flex", gap: 0.5, overflowX: "auto", flex: 1, py: 0.25 }}>
+      <Box role="navigation" aria-label={bfsUnitText.navLabel} sx={{ display: "flex", alignItems: "center", gap: 0.5, overflowX: "auto", flex: 1, py: 0.25 }}>
         {bfsUnitPhases.map((phase, index) => {
           const completed = isCompleted(index);
           const current = isCurrent(index);
           const reachable = index <= furthest;
-          return <Button key={phase.id} disabled={!reachable} onClick={() => goToPhase(index)}
+          return <Fragment key={phase.id}>
+          {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
+          <Button disabled={!reachable} onClick={() => goToPhase(index)}
             aria-current={current ? "step" : undefined}
             startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : undefined}
             sx={{
@@ -149,9 +152,12 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
               "&.Mui-disabled": { color: playerTokens.states.completed.stroke, borderColor: playerTokens.layers.layer1 },
             }}>
             {phase.phase}. {phase.shortName}
-          </Button>;
+          </Button>
+          </Fragment>;
         })}
-        {unitComplete && <Button onClick={() => setScreen({ kind: "final" })}
+        {unitComplete && <>
+          <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
+          <Button onClick={() => setScreen({ kind: "final" })}
           aria-current={screen.kind === "final" ? "step" : undefined}
           startIcon={<EmojiEventsIcon sx={{ fontSize: 16 }} />}
           sx={{
@@ -162,7 +168,8 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
             "&:hover": { bgcolor: screen.kind === "final" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
           }}>
           {bfsUnitText.finalChip}
-        </Button>}
+          </Button>
+        </>}
       </Box>
     </Box>
     {saving && (
