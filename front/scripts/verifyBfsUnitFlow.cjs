@@ -202,6 +202,12 @@ assert.match(confettiSource, /firedRef/, "Confetti fires once per mount, never o
 assert.match(confettiSource, /preset === "final"/, "The launcher carries a final-result preset");
 assert.match(confettiSource, /particleCount: 110/, "The final preset fires 110 pieces per popper");
 assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The final preset adds a centre popper");
+// 紙吹雪には歓声が付く（#179）。プリセットで音の大きさが変わり、全体のサウンド設定に従う。
+assert.match(confettiSource, /resultCheerLarge/, "The final preset plays the large cheer");
+assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
+const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
+assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
+assert.match(soundSource, /resultCheerLarge: \{ src: "\/audio\/se\/cheer-large\.ogg"/, "The large cheer is registered in the sound config");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
