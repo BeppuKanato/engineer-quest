@@ -35,8 +35,12 @@ function QueueItem({ nodeId, distance, position, source, first, highlighted, dur
 }
 
 /** フェーズ3の復習、フェーズ4の図にも同じ snapshot と renderer を渡せる。 */
-export function BfsExecutionCanvas({ canvas, renderNodeOverlay }: {
+export function BfsExecutionCanvas({ canvas, renderNodeOverlay, highlightNodes = true, graphAction }: {
   canvas: BfsExecutionCanvasState;
+  /** 回答画面は操作用リングを使う。処理状態の塗りは残し、強調リングだけを抑える。 */
+  highlightNodes?: boolean;
+  /** 回答操作を図のすぐ下に置く任意スロット。未指定なら既存の座標・表示を維持する。 */
+  graphAction?: { height: number; content: ReactNode };
   /** 同じノードの座標内に操作領域だけを重ねる。図の描画・状態は変更しない。 */
   renderNodeOverlay?: (nodeId: string, radius: number) => ReactNode;
 }) {
@@ -46,17 +50,18 @@ export function BfsExecutionCanvas({ canvas, renderNodeOverlay }: {
   const transition = { duration, ease: "easeInOut" } as const;
   const { data, state, highlights } = canvas;
   const graphHeight = 300;
+  const actionHeight = graphAction?.height ?? 0;
   const position = (id: string): Point => data.graph.nodes.find(node => node.id === id)!;
   const focused = (kind: "node" | "queue-item", id: string) => highlights.some(item => item.kind === kind && item.id === id);
   const itemWidth = 86;
   const gap = 14;
   const queueWidth = state.queue.length * (itemWidth + gap) - gap;
-  const queueY = graphHeight + 96;
+  const queueY = graphHeight + 96 + actionHeight;
   const queueX = (index: number) => (graphGeometry.width - queueWidth) / 2 + itemWidth / 2 + index * (itemWidth + gap);
 
   return (
     <Box sx={{ width: "100%", height: "100%", minHeight: 220 }}>
-      <GraphViewport interactive={!!renderNodeOverlay} label="BFSのグラフ・距離層・待ち行列">
+      <GraphViewport interactive={!!renderNodeOverlay} label="BFSのグラフ・距離層・待ち行列" height={graphGeometry.height + actionHeight}>
         {data.graph.layers.map((layer, index) => {
           const active = state.activeDistance === layer.distance;
           return <g key={layer.distance} role="group" aria-label={`${layer.distance}歩の層${active ? "、現在の層" : ""}`}>
@@ -74,15 +79,18 @@ export function BfsExecutionCanvas({ canvas, renderNodeOverlay }: {
         })} />
         <GraphNodes transition={transition} nodes={data.graph.nodes.map(node => {
           const value = state.nodes.find(value => value.id === node.id)!;
-          return { ...node, label: node.id, status: value.status, highlighted: focused("node", node.id),
+          return { ...node, label: node.id, status: value.status, highlighted: highlightNodes && focused("node", node.id),
             ariaLabel: `${node.id}：${playerTokens.states[value.status].label}${value.distance === null ? "" : `、${value.distance}歩`}` };
         })} renderNodeDecoration={nodeId => {
           const value = state.nodes.find(value => value.id === nodeId)!;
           return value.distance !== null && <text y={graphGeometry.nodeRadius + 24} textAnchor="middle"
             fill={playerTokens.text} fontSize={15}>{value.distance}歩</text>;
         }} renderNodeOverlay={renderNodeOverlay} />
+        {graphAction && <foreignObject x={0} y={graphHeight + 8} width={graphGeometry.width} height={actionHeight}>
+          {graphAction.content}
+        </foreignObject>}
         <g role="group" aria-label={state.queueLabel}>
-          <text x={graphGeometry.width / 2} y={graphHeight + 46} textAnchor="middle" fill={playerTokens.text} fontSize={17} fontWeight={700}>{state.queueLabel}</text>
+          <text x={graphGeometry.width / 2} y={graphHeight + 46 + actionHeight} textAnchor="middle" fill={playerTokens.text} fontSize={17} fontWeight={700}>{state.queueLabel}</text>
           <g role="list" aria-label="キューの中身（先頭から末尾）">
             {state.queue.length === 0 && <text role="listitem" aria-label="空" x={graphGeometry.width / 2} y={queueY + 7} textAnchor="middle" fill={playerTokens.text} fontSize={18}>空</text>}
             <AnimatePresence initial={false}>

@@ -6,13 +6,19 @@ const ts = require("typescript");
 
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
   const source = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    fileName: filename,
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
-  vm.runInNewContext(source, { exports, require: name => load(path.resolve(path.dirname(filename), `${name}.ts`)) }, { filename });
+  vm.runInNewContext(source, { exports, require: name => {
+    if (!name.startsWith(".")) return require(name);
+    const target = path.resolve(path.dirname(filename), name);
+    return load([`${target}.ts`, `${target}.tsx`].find(candidate => fs.existsSync(candidate)));
+  } }, { filename });
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
@@ -119,3 +125,29 @@ rejects(broken => broken.questions[1].reviewStepIds = ["missing"]);
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 assert.throws(() => selectReviewContent(execution, ["skip-e", "skip-e"]));
 console.log("BFS check verified: exact phase-2 references, shared graph identity, FIFO answer, no new neighbor, linked retry gate, first-attempt records and review identity.");
+
+// 描画の回帰: 回答中だけ状態強調リングを抑え、ノードの状態色と通常再生の描画は保つ。
+const React = require("react");
+const { renderToStaticMarkup } = require("react-dom/server");
+const { BfsCheckCanvas } = load(path.join(root, "bfs/check/BfsCheckCanvas.tsx"));
+const { BfsExecutionCanvas } = load(path.join(root, "bfs/execution/BfsExecutionCanvas.tsx"));
+for (const question of content.questions) {
+  const canvas = getLearningStep(execution, question.stepId).canvas;
+  const snapshot = JSON.stringify(canvas);
+  const html = renderToStaticMarkup(React.createElement(BfsCheckCanvas, {
+    canvas, questionId: question.id, nodeIds: question.nodeIds, allowNone: question.allowNone, onAnswer() {},
+  }));
+  assert.equal((html.match(/<circle\b/g) || []).length, question.nodeIds.length, "No extra algorithm highlight ring over an answer node");
+  assert.equal((html.match(/<button\b/g) || []).length, question.nodeIds.length + Number(question.allowNone));
+  for (const id of question.nodeIds) assert.equal(html.split(`aria-label="${id}を選ぶ"`).length - 1, 1);
+  assert.equal(html.includes("どれも入らない"), question.allowNone);
+  if (question.allowNone) {
+    assert(html.indexOf("どれも入らない") < html.indexOf('aria-label="キュー"'), "Keep the alternative answer next to the graph, above the queue");
+    assert.match(html, /data-node-id="C"[\s\S]*?<circle[^>]*fill="#2563eb"/, "Keep the processing node blue");
+  }
+  assert.equal(JSON.stringify(canvas), snapshot, "Rendering must not mutate the shared snapshot");
+  const playback = renderToStaticMarkup(React.createElement(BfsExecutionCanvas, { canvas }));
+  assert.equal((playback.match(/<circle\b/g) || []).length, question.nodeIds.length + 1, "Normal playback keeps its focus ring");
+  assert.match(playback, /viewBox="0 0 600 450"/, "Normal playback keeps the original viewport");
+}
+console.log("BFS check UI verified: one answer button per node, no double rings, processing colors, graph-adjacent alternative, immutable snapshots and unchanged playback defaults.");
