@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 
 import { playerTokens } from "../../player/player.tokens";
 import { ConsolidationGraph } from "../consolidation/ConsolidationGraph";
