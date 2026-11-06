@@ -12,6 +12,7 @@ import { BfsImplementationPreview } from "@/features/learning/bfs/implementation
 import { BfsUnitPreview } from "@/features/learning/bfs/unit/BfsUnitPreview";
 import { DfsMotivationPreview } from "@/features/learning/dfs/motivation/DfsMotivationPreview";
 import { DfsExecutionPreview } from "@/features/learning/dfs/execution/DfsExecutionPreview";
+import { DfsCheckPreview } from "@/features/learning/dfs/check/DfsCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -22,6 +23,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   const { contentId } = await params;
   if (contentId === "dfs-motivation") return <DfsMotivationPreview />;
   if (contentId === "dfs-execution") return <DfsExecutionPreview />;
+  if (contentId === "dfs-check") return <DfsCheckPreview />;
   if (contentId === "bfs-unit") return <BfsUnitPreview />;
   if (contentId === "bfs-motivation") return <BfsMotivationPreview />;
   if (contentId === "bfs-execution") return <BfsExecutionPreview />;

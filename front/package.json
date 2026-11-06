@@ -12,6 +12,7 @@
     "verify:bfs-motivation": "node scripts/verifyBfsMotivation.cjs",
     "verify:dfs-motivation": "node scripts/verifyDfsMotivation.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
+    "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:bfs-execution": "node scripts/verifyBfsExecution.cjs",
     "verify:bfs-check": "node scripts/verifyBfsCheck.cjs",
     "verify:bfs-code-mapping": "node scripts/verifyBfsCodeMapping.cjs",
