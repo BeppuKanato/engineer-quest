@@ -7,10 +7,8 @@ import StarIcon from "@mui/icons-material/Star";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getLearningProgress } from "@/api/learning.api";
-import { findLearningUnit } from "@/features/learning/app/unitRegistry";
-
 import { getCourses } from "@/api/courses.api";
+import { withLearningProgress } from "./courseProgress";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { useUserSession } from "@/app/component/userSession";
 import { peekClientQueryData } from "@/lib/clientQueryCache";
@@ -53,16 +51,9 @@ export default function CoursesPage() {
         setErrorMessage(null);
         const data = await getCourses(token);
 
-        const progress = await Promise.allSettled(data.map(async course => {
-          const unit = findLearningUnit(course.id);
-          if (!unit) return course;
-          const saved = await getLearningProgress(token, course.id);
-          const completed = saved.phases.filter(phase => phase.status === "COMPLETED" && unit.phases.some(item => item.id === phase.phaseKey)).length;
-          return { ...course, status: saved.unit?.status === "COMPLETED" ? "completed" as const : saved.unit ? "in_progress" as const : "not_started" as const,
-            progressRate: completed / unit.phases.length * 100 };
-        }));
+        const merged = await withLearningProgress(token, data);
         if (request !== requestRef.current) return;
-        setCourses(data.map((course, index) => progress[index].status === "fulfilled" ? progress[index].value : course));
+        setCourses(merged);
       } catch (error) {
         if (request !== requestRef.current) return;
         // 前回データがある場合は保持し、エラー表示で一覧を消さない。
