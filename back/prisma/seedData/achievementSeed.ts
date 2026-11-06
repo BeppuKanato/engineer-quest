@@ -7,7 +7,7 @@ import {
 
 import { createQuestSeed } from "./createQuestSeed";
 import { courseSeed } from "./courseSeed";
-import { BFS_COURSE_ID, knowledgeCardSeed } from "./knowledgeCardSeed";
+import { BFS_COURSE_ID, WALL_EXTENSION_COURSE_ID, knowledgeCardSeed } from "./knowledgeCardSeed";
 
 const levelRarity = [
   AchievementRarity.COMMON,
@@ -90,5 +90,11 @@ export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
   { id: "ach-phase-bfs-consolidation-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: BFS_COURSE_ID, phaseKey: "bfs-consolidation", title: "応用問題 初回満点", description: "応用問題を、初回の回答で満点だった証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 340 },
   { id: "ach-phase-bfs-implementation-nohint", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_NO_HINT_COMPLETE, courseId: BFS_COURSE_ID, phaseKey: "bfs-implementation", title: "ノーヒントクリア", description: "「自分で実装」をヒントなしでクリアした証です。", rarity: AchievementRarity.EPIC, iconKey: "challenge", isSecret: false, sortOrder: 350 },
   { id: "ach-bfs-card-complete", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, conditionValue: 3, courseId: BFS_COURSE_ID, title: "BFSカードコンプリート", description: "幅優先探索の知識カードをすべて集めた証です。", rarity: AchievementRarity.RARE, iconKey: "knowledge", isSecret: false, sortOrder: 410 },
+  { id: "ach-unit-wall-extension-complete", category: AchievementCategory.COURSE_COMPLETE, conditionType: AchievementConditionType.UNIT_COMPLETE, courseId: WALL_EXTENSION_COURSE_ID, title: "棒倒し法を修得した", description: "棒倒し法の単元を最後まで完了した証です。", rarity: AchievementRarity.RARE, iconKey: "course", isSecret: false, sortOrder: 111 },
+  { id: "ach-phase-wall-extension-implementation-clear", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_COMPLETED, courseId: WALL_EXTENSION_COURSE_ID, phaseKey: "wall-extension-implementation", title: "自分で実装クリア", description: "棒倒し法を自分のコードで実装し、すべてのテストを通過した証です。", rarity: AchievementRarity.RARE, iconKey: "build", isSecret: false, sortOrder: 321 },
+  { id: "ach-phase-wall-extension-check-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: WALL_EXTENSION_COURSE_ID, phaseKey: "wall-extension-check,wall-extension-code-check", title: "確認問題 初回全問正解", description: "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 331 },
+  { id: "ach-phase-wall-extension-consolidation-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: WALL_EXTENSION_COURSE_ID, phaseKey: "wall-extension-consolidation", title: "応用問題 初回満点", description: "応用問題を、初回の回答で満点だった証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 341 },
+  { id: "ach-phase-wall-extension-implementation-nohint", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_NO_HINT_COMPLETE, courseId: WALL_EXTENSION_COURSE_ID, phaseKey: "wall-extension-implementation", title: "ノーヒントクリア", description: "「自分で実装」をヒントなしでクリアした証です。", rarity: AchievementRarity.EPIC, iconKey: "challenge", isSecret: false, sortOrder: 351 },
+  { id: "ach-wall-extension-card-complete", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, conditionValue: 3, courseId: WALL_EXTENSION_COURSE_ID, title: "棒倒し法カードコンプリート", description: "棒倒し法の知識カードをすべて集めた証です。", rarity: AchievementRarity.RARE, iconKey: "knowledge", isSecret: false, sortOrder: 411 },
   ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, knowledgeCardSeed.length], sortOrder: 400, iconKey: "knowledge" }),
 ];
