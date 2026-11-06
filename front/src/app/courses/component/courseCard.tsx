@@ -21,6 +21,7 @@ import { CategoryChip } from "../../component/categoryChip";
 import { DifficultyLabel } from "../../component/difficultyLabel";
 import { StatusChip } from "../../component/statusChip";
 import type { Course, CourseCategory } from "../type";
+import { CourseThumbnail, hasCourseThumbnail } from "./courseThumbnail";
 
 type CourseCardProps = Course & {
   onCourseClick?: (courseId: string) => void;
@@ -160,24 +161,30 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           placeItems: "center",
         }}
       >
-        <Box
-          sx={{
-            width: featured ? 116 : 92,
-            height: featured ? 116 : 92,
-            borderRadius: 3,
-            bgcolor: "rgba(255,255,255,0.74)",
-            border: "1px solid rgba(148, 163, 184, 0.34)",
-            display: "grid",
-            placeItems: "center",
-            color: visualStyle.accent,
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-            "& svg": {
-              fontSize: featured ? 60 : 48,
-            },
-          }}
-        >
-          {visualStyle.icon}
-        </Box>
+        {hasCourseThumbnail(id) ? (
+          <Box sx={{ width: featured ? 176 : 168, maxWidth: "100%", aspectRatio: "200 / 120" }}>
+            <CourseThumbnail courseId={id} />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              width: featured ? 116 : 92,
+              height: featured ? 116 : 92,
+              borderRadius: 3,
+              bgcolor: "rgba(255,255,255,0.74)",
+              border: "1px solid rgba(148, 163, 184, 0.34)",
+              display: "grid",
+              placeItems: "center",
+              color: visualStyle.accent,
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+              "& svg": {
+                fontSize: featured ? 60 : 48,
+              },
+            }}
+          >
+            {visualStyle.icon}
+          </Box>
+        )}
       </Box>
 
       <Stack spacing={1.45} sx={{ p: { xs: 2, md: featured ? 2.25 : 2 }, minWidth: 0 }}>
