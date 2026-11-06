@@ -15,7 +15,6 @@ import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Checkbox, Chip, CircularProgress,
   Container, Divider, FormControlLabel, LinearProgress, Paper, Skeleton, Stack, Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,7 +27,8 @@ import {
 import { AppHeader } from "@/app/component/appHeader";
 import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateQuestPreview } from "@/app/create/_components/createQuestPreview";
-import { auth } from "@/lib/firebase";
+import { invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 import { disposePyodideRunner, preparePyodide, runCreateQuestTests } from "@/lib/pyodideRunner";
 
 const categoryLabel = { FUNCTIONAL: "機能", QUALITY: "品質", PERFORMANCE: "性能", IMPLEMENTATION: "実装" } as const;
@@ -77,11 +77,15 @@ export default function CreateQuestWorkPage() {
     setFeedback(latestSubmission ? (latestSubmission.feedback ?? await startCreateQuestFeedback(idToken, latestSubmission.id)) : null);
   }, [questId]);
 
-  useEffect(() => onAuthStateChanged(auth, async (user) => {
-    if (!user) { setError("ログインが必要です。"); return; }
-    try { const idToken = await user.getIdToken(); setToken(idToken); await load(idToken); }
-    catch (cause) { console.error(cause); setError("作る課題を準備できませんでした。"); }
-  }), [load]);
+  const { status: sessionStatus, token: sessionToken } = useUserSession();
+  useEffect(() => {
+    if (sessionStatus === "loading") return;
+    if (sessionStatus !== "authenticated" || !sessionToken) { setError("ログインが必要です。"); return; }
+    let active = true;
+    setToken(sessionToken);
+    load(sessionToken).catch(cause => { if (active) { console.error(cause); setError("作る課題を準備できませんでした。"); } });
+    return () => { active = false; };
+  }, [sessionStatus, sessionToken, load]);
 
   useEffect(() => {
     let active = true;
@@ -125,7 +129,7 @@ export default function CreateQuestWorkPage() {
   const save = async () => {
     if (!quest?.attempt || !token) return;
     setSaving(true); setError(null);
-    try { const response = await saveCreateQuestAttempt(token, quest.attempt.id, code, selectedIds); setSavedAt(new Date(response.savedAt).toLocaleString("ja-JP")); }
+    try { const response = await saveCreateQuestAttempt(token, quest.attempt.id, code, selectedIds); setSavedAt(new Date(response.savedAt).toLocaleString("ja-JP")); invalidateClientQueries([queryTags.works]); }
     catch (cause) { console.error(cause); setError("コードを保存できませんでした。"); }
     finally { setSaving(false); }
   };
@@ -134,7 +138,7 @@ export default function CreateQuestWorkPage() {
     if (!quest?.attempt || !token || !basicPassed) return;
     setSubmitting(true); setError(null);
     try {
-      const next = await submitCreateQuest(token, quest.attempt.id, code, results);
+      const next = await submitCreateQuest(token, quest.attempt.id, code, results); invalidateClientQueries([queryTags.works]);
       setSubmission({ id: next.submissionId, score: next.score, maxScore: next.maxScore });
       setUnlockedAchievements(next.unlockedAchievements);
       setFeedback(await startCreateQuestFeedback(token, next.submissionId));

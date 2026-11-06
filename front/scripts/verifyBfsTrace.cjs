@@ -5,6 +5,7 @@ const { spawnSync } = require("node:child_process");
 const ts = require("typescript");
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {}; cache.set(filename, exports);
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename, "utf8"), {
@@ -31,7 +32,7 @@ const dedupe = values => values.filter((value, index) => index === 0 || JSON.str
   const { buildPythonTraceHarness } = await import(pathToFileURL(path.resolve(__dirname, "../public/python-trace-harness.mjs")));
   function trace(source, maxEvents = bfsTraceEventLimit) {
     const harness = buildPythonTraceHarness({ code: source, functionName: "bfs_distances", args: d1.args, maxEvents });
-    const result = spawnSync("python3", ["-c", "import ast,sys\ntree=ast.parse(sys.stdin.read())\nexec(compile(ast.Module(body=tree.body[:-1],type_ignores=[]),'<harness>','exec'))\nprint(eval(compile(ast.Expression(tree.body[-1].value),'<harness>','eval')))"], { input: harness, encoding: "utf8", timeout: 10000 });
+    const result = spawnSync(process.env.PYTHON || "python3", ["-c", "import ast,sys\ntree=ast.parse(sys.stdin.read())\nexec(compile(ast.Module(body=tree.body[:-1],type_ignores=[]),'<harness>','exec'))\nprint(eval(compile(ast.Expression(tree.body[-1].value),'<harness>','eval')))"], { input: harness, encoding: "utf8", timeout: 10000 });
     assert.equal(result.status, 0, result.stderr);
     return JSON.parse(result.stdout);
   }

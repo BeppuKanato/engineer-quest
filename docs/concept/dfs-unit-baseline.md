@@ -60,7 +60,7 @@
 
 ### 1.1 採用グラフ: BFS と完全に同一
 
-ノード・座標・辺・隣接順序のすべてを BFS の正本（`front/src/features/learning/bfs/bfsGraph.ts`）と同一にする。新しい座標や辺は作らない。
+ノード・座標・辺・隣接順序のすべてを BFS・DFS 共通の正本（`front/src/features/learning/graphs/searchGraph.ts`、#122 で中立な共有モジュールへ移動）と同一にする。新しい座標や辺は作らない。
 
 **ノードと座標**（共通描画の論理座標 600×450、ノード半径30は `learning-player-ui.md` §2.3 の定義通り）
 
@@ -514,7 +514,7 @@ BFS の結果表示部品（距離の辞書を前提にした差分表示）は�
 
 - 教材指針: `origin/develop` の `docs/concept/learning-materials-guideline.md`
 - プレイヤー UI 定義: `origin/develop` の `docs/concept/learning-player-ui.md`
-- BFS 基準データ: `origin/develop` の `front/src/features/learning/bfs/` 配下（bfsGraph.ts、execution / check / code-check / consolidation / implementation / motivation の各 content、code-mapping/bfsCode.ts、unit/unit.content.ts）
+- BFS 基準データ: `origin/develop` の `front/src/features/learning/bfs/` 配下（共有 graphs/searchGraph.ts、execution / check / code-check / consolidation / implementation / motivation の各 content、code-mapping/bfsCode.ts、unit/unit.content.ts）
 - BFS 知識カード: `origin/develop` の `back/prisma/seedData/knowledgeCardSeed.ts`
 - 旧 DFS コース: `archive/legacy-flow-2026-11-05` の `back/prisma/seedData/depthFirstSearchCourseSeed.ts`（旧・再帰形の正解コード原文。本書の正解コードは §0.3 の決定によりスタック形に書き換えたもので、原文ではない。旧教材の訪問順 A→B→D→F→E→C は、本書のスタック形の実行結果と一致することを確認した）
 - 実行検証: スタック形の正解コード（§7）を python3 で実行し、フェーズ2トレースの全イベント列（入れる・取り出す・飛ばす・追加なし）と状態遷移、フェーズ6各問の正解（問2のスタック状態を含む）、フェーズ7全テストの期待値を確認した

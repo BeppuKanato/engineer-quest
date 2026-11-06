@@ -124,11 +124,11 @@ function loadRenderer(filename) {
 const sourceRoot = path.resolve(__dirname, "../src/features/learning");
 const { bfsMotivationContent } = loadRenderer(`${sourceRoot}/bfs/motivation/motivation.content.ts`);
 const { bfsExecutionContent } = loadRenderer(`${sourceRoot}/bfs/execution/execution.content.ts`);
-const { bfsGraph } = loadRenderer(`${sourceRoot}/bfs/bfsGraph.ts`);
+const { searchGraph } = loadRenderer(`${sourceRoot}/graphs/searchGraph.ts`);
 const { BfsMotivationCanvas } = loadRenderer(`${sourceRoot}/bfs/motivation/BfsMotivationCanvas.tsx`);
 const { BfsExecutionCanvas } = loadRenderer(`${sourceRoot}/bfs/execution/BfsExecutionCanvas.tsx`);
 const { GraphCanvas } = loadRenderer(`${sourceRoot}/player/GraphCanvas.tsx`);
-const generic = { data: bfsGraph, state: { nodes: bfsGraph.nodes.map(node => ({ id: node.id, status: "idle" })), structures: [], variables: [] },
+const generic = { data: searchGraph, state: { nodes: searchGraph.nodes.map(node => ({ id: node.id, status: "idle" })), structures: [], variables: [] },
   highlights: [{ kind: "node", id: "B", tone: "processing" }, { kind: "edge", id: "ab", tone: "processing" }] };
 const motivation = bfsMotivationContent.steps.find(step => step.id === "bridge-entrance").canvas;
 const execution = bfsExecutionContent.steps.find(step => step.id === "discover-b").canvas;

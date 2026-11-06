@@ -1,10 +1,10 @@
 import type { GraphCanvasState } from "../../player/graphCanvas.types";
-import { bfsGraph } from "../bfsGraph";
+import { searchGraph } from "../../graphs/searchGraph";
 
 export type ConsolidationGraph = GraphCanvasState["data"];
 export const transferGraph: ConsolidationGraph = {
   kind: "graph",
-  nodes: bfsGraph.nodes.map((node, index) => ({ ...node, id: "GHIJKL"[index], label: "GHIJKL"[index] })),
+  nodes: searchGraph.nodes.map((node, index) => ({ ...node, id: "GHIJKL"[index], label: "GHIJKL"[index] })),
   edges: [
     { id: "gh", from: "G", to: "H" }, { id: "gi", from: "G", to: "I" },
     { id: "hj", from: "H", to: "J" }, { id: "ij", from: "I", to: "J" },
@@ -13,6 +13,6 @@ export const transferGraph: ConsolidationGraph = {
   layers: [],
 };
 export const isolatedGraph: ConsolidationGraph = {
-  ...bfsGraph,
-  nodes: [...bfsGraph.nodes, { id: "Z", label: "Z", x: 530, y: 330 }],
+  ...searchGraph,
+  nodes: [...searchGraph.nodes, { id: "Z", label: "Z", x: 530, y: 330 }],
 };

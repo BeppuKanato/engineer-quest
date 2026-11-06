@@ -29,6 +29,7 @@
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
 | [BFS フェーズ1](../front/src/features/learning/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
 | [DFS 導入](../front/src/features/learning/dfs/motivation/README.md) | 現行 | Issue #121の宝探し18場面、BFSと共有する迷路・グラフ、A→B→D→F→E→Cの歩行と確認手順 |
+| [DFS 動きの説明](../front/src/features/learning/dfs/execution/README.md) | 現行 | Issue #122の17ステップ、共有グラフ、スタックと訪問順、Python実行トレース検証と確認手順 |
 | [BFS フェーズ2](../front/src/features/learning/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
 | [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
 | [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
@@ -45,6 +46,7 @@
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
 | [dfs-motivation-121.md](dfs-motivation-121.md) | 記録 | Issue #121のDFS導入、共通描画の抽出、18場面と訪問順の検証、基準案の留保 |
+| [dfs-execution-122.md](dfs-execution-122.md) | 記録 | Issue #122のDFS動きの説明、BFS/DFS共有グラフの切り出し、17状態のPython実行照合と確認手順 |
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
@@ -53,6 +55,7 @@
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
 | [progress-loading-175.md](progress-loading-175.md) | 記録 | Issue #175の読み込み中表示の改善（進捗読み込みを素のテキストからスケルトンへ） |
+| [response-rollout-174.md](response-rollout-174.md) | 記録 | Issue #174のレスポンス改善の横展開（全画面のセッション＋キャッシュ統一、掲示板の新規投稿の即時表示） |
 | [phase7-editor-hints-149.md](phase7-editor-hints-149.md) | 記録 | Issue #149のフェーズ7見直し（エディタのライトテーマ化と枠による分離、実行ボタンの文言、ヒント2のフロー表示、テスト結果のアニメーション） |
 | [breadcrumb-unify-161.md](breadcrumb-unify-161.md) | 記録 | Issue #161のパンくず配置のアプリ全体統一（ヘッダー直下の独立行・1440px基準、内容幅は不変） |
 | [learning-rewards-111.md](learning-rewards-111.md) | 記録 | Issue #111 のカード3段階演出・区切りと最終リザルトの実績・未所持カードの影、テーブル別再現手順と確認画像 |

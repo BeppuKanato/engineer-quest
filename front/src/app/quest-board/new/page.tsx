@@ -16,7 +16,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,6 +23,7 @@ import { getCourses } from "@/api/courses.api";
 import {
   createQuestPost,
   getQuestBoardPosts,
+  type QuestBoardListResponse,
   type QuestBoardOption,
   type QuestPostCategory,
 } from "@/api/questBoard.api";
@@ -34,7 +34,8 @@ import { AppSnackbar } from "@/app/component/appSnackbar";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import type { Course } from "@/app/courses/type";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 const defaultCategories: QuestBoardOption[] = [
   { value: "QUESTION", label: "質問" },
@@ -66,10 +67,12 @@ export default function NewQuestPostPage() {
   const router = useRouter();
   const { play } = useSoundEffect();
 
-  const [token, setToken] = useState<string | null>(null);
+  const { status, token } = useUserSession();
+  const [cachedBoard] = useState(() => peekClientQueryData<QuestBoardListResponse>("quest-board"));
+  const [cachedBoardCourses] = useState(() => peekClientQueryData<Course[]>("quest-board-courses"));
   const [categories, setCategories] =
-    useState<QuestBoardOption[]>(defaultCategories);
-  const [courses, setCourses] = useState<Course[]>([]);
+    useState<QuestBoardOption[]>(cachedBoard?.options.categories ?? defaultCategories);
+  const [courses, setCourses] = useState<Course[]>(cachedBoardCourses ?? []);
   const [category, setCategory] = useState<QuestPostCategory>("QUESTION");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -80,7 +83,7 @@ export default function NewQuestPostPage() {
   const [isNavigatingAfterSubmit, setIsNavigatingAfterSubmit] =
     useState(false);
   const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
-  const [isOptionsLoading, setIsOptionsLoading] = useState(true);
+  const [isOptionsLoading, setIsOptionsLoading] = useState(!cachedBoard);
   const [optionsError, setOptionsError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -122,45 +125,32 @@ export default function NewQuestPostPage() {
   }, []);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedBoard) { setErrorMessage("ログインが必要です。"); setIsOptionsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+    Promise.all([
+      fetchClientQuery("quest-board", () => getQuestBoardPosts(token), { staleTimeMs: 300_000, tags: [queryTags.questBoard] }),
+      fetchClientQuery("quest-board-courses", () => getCourses(token), { staleTimeMs: 300_000, tags: [queryTags.questBoard] }),
+    ])
+      .then(([boardData, courseData]) => {
         if (!isMounted) return;
-        setErrorMessage("ログインが必要です。");
-        setIsOptionsLoading(false);
-        return;
-      }
-
-      try {
-        setIsOptionsLoading(true);
-        setOptionsError(null);
-        const idToken = await user.getIdToken();
-        const [boardData, courseData] = await Promise.all([
-          getQuestBoardPosts(idToken),
-          getCourses(idToken),
-        ]);
-
-        if (!isMounted) return;
-        setToken(idToken);
         setCategories(boardData.options.categories);
         setCourses(courseData);
-      } catch (error) {
+        setOptionsError(null);
+      })
+      .catch(error => {
         console.error(error);
-        if (!isMounted) return;
-        setOptionsError("カテゴリや関連コースを取得できませんでした。");
-        setErrorMessage("投稿フォームの準備に失敗しました。");
-      } finally {
-        if (!isMounted) return;
-        setIsOptionsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+        if (isMounted && !cachedBoard) {
+          setOptionsError("カテゴリや関連コースを取得できませんでした。");
+          setErrorMessage("投稿フォームの準備に失敗しました。");
+        }
+      })
+      .finally(() => { if (isMounted) setIsOptionsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, cachedBoard]);
 
   const handleSubmit = async () => {
     if (!token || !canSubmit) {

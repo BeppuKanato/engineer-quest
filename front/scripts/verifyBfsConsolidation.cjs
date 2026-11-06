@@ -5,6 +5,7 @@ const vm = require("node:vm");
 const ts = require("typescript");
 const cache = new Map();
 function load(filename) {
+  filename = path.resolve(filename);
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
@@ -19,7 +20,7 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const { bfsConsolidationContent: content, validateConsolidation } = load(`${root}/bfs/consolidation/consolidation.content.ts`);
-const { bfsGraph } = load(`${root}/bfs/bfsGraph.ts`);
+const { searchGraph } = load(`${root}/graphs/searchGraph.ts`);
 const { bfsCode } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
 const { bfsCodeMappingContent: mapping } = load(`${root}/bfs/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(`${root}/assessment/assessment.ts`);
@@ -36,11 +37,11 @@ assert.equal(content.questions.length, 5);
 assert.equal(content.code, bfsCode);
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
 assert.deepEqual(plain(content.questions.map(question => question.tags[0])), ["処理順序の追跡", "キューの状態の追跡", "たどり着けない場所の扱い", "距離が決まった場所の扱い", "コード全体の流れ"]);
-assert.equal(q1.scene.graph, bfsGraph); assert.equal(q4.scene.graph, bfsGraph);
-assert.equal(q3.scene.graph.edges, bfsGraph.edges);
-assert.deepEqual(plain(q3.scene.graph.nodes.slice(0, 6)), plain(bfsGraph.nodes));
+assert.equal(q1.scene.graph, searchGraph); assert.equal(q4.scene.graph, searchGraph);
+assert.equal(q3.scene.graph.edges, searchGraph.edges);
+assert.deepEqual(plain(q3.scene.graph.nodes.slice(0, 6)), plain(searchGraph.nodes));
 assert.deepEqual(plain(q3.scene.graph.nodes.at(-1)), { id: "Z", label: "Z", x: 530, y: 330 });
-assert.deepEqual(plain(q2.scene.graph.nodes.map(({ x, y }) => ({ x, y }))), plain(bfsGraph.nodes.map(({ x, y }) => ({ x, y }))));
+assert.deepEqual(plain(q2.scene.graph.nodes.map(({ x, y }) => ({ x, y }))), plain(searchGraph.nodes.map(({ x, y }) => ({ x, y }))));
 assert.equal(q2.scene.graph.nodes.map(node => node.id).join(), "G,H,I,J,K,L");
 assert.deepEqual(plain(q2.scene.graph.edges.map(edge => `${edge.from}-${edge.to}`)), ["G-H", "G-I", "H-J", "I-J", "I-K", "J-L", "K-L"]);
 

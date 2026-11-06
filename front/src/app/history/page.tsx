@@ -24,14 +24,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { getHistory, type HistoryEvent, type HistoryEventType } from "@/api/history.api";
+import { getHistory, type HistoryEvent, type HistoryEventType, type HistoryResponse } from "@/api/history.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 const eventMeta: Record<
   HistoryEventType,
@@ -132,47 +132,27 @@ const getLearningCount = (events: HistoryEvent[]) =>
   events.filter((event) => learningTypes.includes(event.type)).length;
 
 export default function HistoryPage() {
-  const [events, setEvents] = useState<HistoryEvent[]>([]);
+  const { status, token } = useUserSession();
+  const [cachedHistory] = useState(() => peekClientQueryData<HistoryResponse>("history"));
+  const [events, setEvents] = useState<HistoryEvent[]>(cachedHistory?.events ?? []);
   const [selectedMonth, setSelectedMonth] = useState(() => new Date());
   const [visibleCount, setVisibleCount] = useState(6);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!cachedHistory);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      if (!cachedHistory) { setErrorMessage("ログインが必要です。"); setIsLoading(false); }
+      return;
+    }
     let isMounted = true;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        if (!isMounted) return;
-        setEvents([]);
-        setErrorMessage("ログインが必要です。");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const token = await user.getIdToken();
-        const data = await getHistory(token);
-
-        if (!isMounted) return;
-        setEvents(data.events);
-      } catch (error) {
-        console.error(error);
-        if (!isMounted) return;
-        setErrorMessage("履歴を取得できませんでした。");
-      } finally {
-        if (!isMounted) return;
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, []);
+    fetchClientQuery("history", () => getHistory(token), { staleTimeMs: 300_000, tags: [queryTags.history] })
+      .then(data => { if (isMounted) { setEvents(data.events); setErrorMessage(null); } })
+      .catch(error => { console.error(error); if (isMounted && !cachedHistory) setErrorMessage("履歴を取得できませんでした。"); })
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
+  }, [status, token, cachedHistory]);
 
   const dashboard = useMemo(() => {
     const currentMonthEvents = events.filter((event) => isSameMonth(new Date(event.occurredAt), selectedMonth));

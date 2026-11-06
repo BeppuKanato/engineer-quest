@@ -7,7 +7,6 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SchoolIcon from "@mui/icons-material/School";
 import StarIcon from "@mui/icons-material/Star";
 import { Alert, Box, Button, Chip, Container, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
-import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,21 +16,29 @@ import { AppHeader } from "@/app/component/appHeader";
 import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateThumbnail } from "@/app/create/_components/createThumbnail";
 import { createQuestMethodMessage, createQuestProblemLabel } from "@/app/create/_components/createQuestPresentation";
-import { auth } from "@/lib/firebase";
+import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
+import { useUserSession } from "@/app/component/userSession";
 
 const kindLabel = { BASIC: "基本要件", OPTIONAL: "追加要件" } as const;
 
 export default function CreateQuestDetailPage() {
   const { questId } = useParams<{ questId: string }>();
-  const [quest, setQuest] = useState<CreateQuest | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { status, token } = useUserSession();
+  const detailKey = `create-quest:${questId}`;
+  const [cachedQuest] = useState(() => peekClientQueryData<CreateQuest>(detailKey));
+  const [quest, setQuest] = useState<CreateQuest | null>(cachedQuest ?? null);
+  const [loading, setLoading] = useState(!cachedQuest);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => onAuthStateChanged(auth, async (user) => {
-    if (!user) { setError("ログインが必要です。"); setLoading(false); return; }
-    try { setQuest(await getCreateQuest(await user.getIdToken(), questId)); }
-    catch (cause) { console.error(cause); setError("作る課題を取得できませんでした。"); }
-    finally { setLoading(false); }
-  }), [questId]);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) { if (!cachedQuest) { setError("ログインが必要です。"); setLoading(false); } return; }
+    let active = true;
+    fetchClientQuery(detailKey, () => getCreateQuest(token, questId), { staleTimeMs: 300_000, tags: [queryTags.works] })
+      .then(next => { if (active) { setQuest(next); setError(null); } })
+      .catch(cause => { console.error(cause); if (active && !cachedQuest) setError("作る課題を取得できませんでした。"); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [status, token, questId, detailKey, cachedQuest]);
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
     <AppHeader /><FeedbackDestination failed={!!error} ready={!!quest && !error} />

@@ -11,6 +11,7 @@ import { DistanceOutput, formatDistance as distance } from "./DistanceOutput";
 const labels = content.display;
 
 export function ImplementationResults({ outcomes, diagnostics = outcomes }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[] }) {
+  const reducedMotion = useReducedMotion();
   const kinds = resultKinds(diagnostics);
   return <Box sx={{ color: playerTokens.text }}>
     {kinds.length > 0 && <Box role="status" aria-label={labels.errorLabel} sx={{ mb: 2 }}>
@@ -20,9 +21,17 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes }: { ou
       {content.tests.map(test => {
         const outcome = outcomes.find(outcome => outcome.id === test.id);
         const status = !outcome ? labels.statuses.unexecuted : outcome.passed ? labels.statuses.passed : labels.statuses.failed;
+        const statusKey = !outcome ? "unexecuted" : outcome.passed ? "passed" : "failed";
         const scene = content.displayScenes.find(scene => scene.testId === test.id);
         return <Box component="li" key={test.id} data-test-id={test.id} sx={{ mb: 2 }}>
-          <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：<span aria-hidden="true">{status.icon} </span>{status.label}</Typography>
+          <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：
+            <Box component={motion.span} key={statusKey} data-test-status={statusKey}
+              initial={reducedMotion ? false : { opacity: 0, scale: 0.86 }}
+              animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0 : 0.3 }}
+              sx={{ display: "inline-block", color: outcome?.passed ? playerTokens.focus : playerTokens.text }}>
+              <span aria-hidden="true">{status.icon} </span>{status.label}
+            </Box>
+          </Typography>
           {test.visibility === "display" && <>
             {scene && <>
               <Typography component="p">{labels.startLabel}：{scene.start}</Typography>

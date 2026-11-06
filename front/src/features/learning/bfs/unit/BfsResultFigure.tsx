@@ -5,7 +5,8 @@ import { Box, Typography } from "@mui/material";
 import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
 import { graphGeometry } from "../../player/graphGeometry";
 import { playerTokens } from "../../player/player.tokens";
-import { bfsDistancesFrom, bfsGraphEdges, bfsGraphNodes } from "../bfsGraph";
+import { searchGraphEdges, searchGraphNodes } from "../../graphs/searchGraph";
+import { bfsDistancesFrom } from "../bfsDistances";
 
 /**
  * 到達図：単元の完成図を結果画面に出す静的表示（BFS は全ノードに距離が入った最終状態）。
@@ -14,14 +15,14 @@ import { bfsDistancesFrom, bfsGraphEdges, bfsGraphNodes } from "../bfsGraph";
  */
 export function BfsResultFigure() {
   const distances = bfsDistancesFrom("A");
-  const position = (id: string) => bfsGraphNodes.find(node => node.id === id)!;
+  const position = (id: string) => searchGraphNodes.find(node => node.id === id)!;
   const transition = { duration: 0, ease: "easeInOut" } as const;
   return <Box data-result-figure sx={{ width: "100%", maxWidth: 520, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
     <GraphViewport label="完成した図：すべての場所に距離が入った状態" height={300}>
       <GraphEdges transition={transition} position={position}
-        edges={bfsGraphEdges.map(edge => ({ ...edge, highlighted: false }))} />
+        edges={searchGraphEdges.map(edge => ({ ...edge, highlighted: false }))} />
       <GraphNodes transition={transition}
-        nodes={bfsGraphNodes.map(node => ({
+        nodes={searchGraphNodes.map(node => ({
           ...node, label: node.id, status: "processing" as const, highlighted: false,
           ariaLabel: `${node.id}：${distances.get(node.id)}歩`,
         }))}
