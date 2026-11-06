@@ -14,6 +14,7 @@ import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
 import { phaseBoundaryAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { readCodeDraft, writeCodeDraft } from "./codeDraft";
+import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { LearningRewardsContext } from "./LearningRewardsContext";
 import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
 import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
@@ -27,7 +28,7 @@ export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string;
     <Box sx={{ flexShrink: 0 }}><AppHeader /></Box>
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
-        <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <Typography role="status">進捗を読み込んでいます。</Typography> :
+        <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <ProgressLoadingSkeleton variant="screen" /> :
           <LearningRun key={`${firebaseUser.uid}:${courseId}`} unit={unit} progress={progress} reviewPhaseKey={reviewPhaseKey} />}
     </Box>
   </Box>;

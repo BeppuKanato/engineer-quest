@@ -19,6 +19,7 @@ import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from 
 import { learningPhaseIcons } from "./learningPhaseIcons";
 import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
 import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
+import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { useLearningLog } from "./useLearningLog";
 
 
@@ -49,7 +50,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
     </Container>
     <Container component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ pt: 1, pb: 5, maxWidth: 1200 }}>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt: 2 }}>{unit?.title ?? "単元"}</Typography>
-      {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <Typography role="status" sx={{ my: 4 }}>進捗を読み込んでいます。</Typography> : error ?
+      {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <ProgressLoadingSkeleton variant="overview" /> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : progress && <>
           <Typography sx={{ mt: 1.5, color: "text.secondary", lineHeight: 1.8 }}>{unit.intro}</Typography>
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
