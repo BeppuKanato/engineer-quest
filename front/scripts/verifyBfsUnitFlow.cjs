@@ -118,39 +118,9 @@ const nodes = element => {
 };
 const renderCelebration = () => nodes(UnitResultCelebration({ heading: "確認が終わりました", headingRef: null }));
 const animated = renderCelebration();
-const confetti = animated.find(node => Object.hasOwn(node.props, "data-phase-result-confetti"));
-assert.equal(confetti.props["aria-hidden"], "true", "Confetti is decorative");
-assert.equal(confetti.props.sx.pointerEvents, "none", "Confetti never intercepts next / review actions");
-assert.equal(confetti.props.sx.position, "fixed");
-assert.equal(confetti.props.sx.left, 0);
-assert.equal(confetti.props.sx.right, 0, "Confetti spans the screen, including outside the last-answer symbol");
-assert.equal(confetti.props.sx.height, "85dvh");
-assert.ok(confetti.props.sx.zIndex < 1300, "Reward dialogs remain above the confetti");
-const particles = animated.filter(node => Object.hasOwn(node.props, "data-confetti-piece"));
-assert.ok(particles.length >= 100 && particles.length <= 140, "Confetti must remain clearly visible on large screens");
-assert.deepEqual([...new Set(particles.map(node => node.props.sx.left))].sort(), ["12%", "88%"], "Exactly two party-popper origins");
-for (const side of ["left", "right"]) {
-  const burst = particles.filter(node => node.props["data-confetti-origin"] === side);
-  assert.equal(burst.length, 60);
-  assert.ok(burst.every(node => node.props.sx.top === "70%"), "Launch from the lower sides, not a rain band");
-  const horizontalSpread = burst.map(node => parseFloat(node.props.animate.x[2]));
-  assert.ok(Math.max(...horizontalSpread) - Math.min(...horizontalSpread) > 25, "Each popper opens into a fan");
-  assert.ok(burst.every(node => node.props.transition.delay <= 0.11), "Each pop is a simultaneous burst");
-}
-for (const particle of particles) {
-  assert.equal(particle.props.initial.opacity, 0);
-  assert.equal(particle.props.animate.x[0], "0vw");
-  const vertical = particle.props.animate.y.map(parseFloat);
-  assert.equal(vertical[0], 0);
-  assert.ok(vertical[1] < 0 && vertical[2] < vertical[1], "Confetti shoots upwards first");
-  assert.ok(vertical[3] > vertical[2] && vertical.at(-1) > 0, "After the apex, confetti falls below its origin");
-  assert.ok(particle.props.transition.times[2] <= 0.2, "The upward pop is quick; the fall provides the afterglow");
-  assert.equal(particle.props.animate.opacity.at(-1), 0, "Confetti ends invisible");
-  assert.ok(particle.props.transition.duration >= 3 && particle.props.transition.duration + particle.props.transition.delay <= 5,
-    "Keep confetti visible beyond the 1.5-second answer symbol, then finish");
-  assert.ok(particle.props.sx.width >= 10 && particle.props.sx.height >= 14);
-  assert.equal(particle.props.transition.repeat, 0);
-}
+// 紙吹雪は canvas-confetti ライブラリに任せ、発射専用コンポーネントとして一度だけマウントする。
+assert.ok(animated.some(node => node.type?.name === "PhaseResultConfetti"), "Confetti launcher mounts with the celebration");
+
 for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"]) {
   const element = animated.find(node => Object.hasOwn(node.props, attribute));
   assert.equal(element.props.transition.repeat, 0);
@@ -162,7 +132,7 @@ assert.deepEqual(plain(renderCelebration().map(node => [node.key, node.props.ini
   plain(animated.map(node => [node.key, node.props.initial, node.props.animate])));
 reducedMotion = true;
 const still = renderCelebration();
-assert.ok(!still.some(node => Object.hasOwn(node.props, "data-confetti-piece")), "Reduced motion omits confetti");
+assert.ok(!still.some(node => node.type?.name === "PhaseResultConfetti"), "Reduced motion omits confetti");
 for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"]) {
   const element = still.find(node => Object.hasOwn(node.props, attribute));
   assert.equal(element.props.initial, false, "Reduced motion starts in the completed state");
@@ -177,8 +147,8 @@ for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "resul
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading) && html.includes(phase.result.nextPreview));
     assert.ok(html.includes(phaseResultPraise(summary)), "Both phase screens use the same praise function");
-    assert.ok(html.includes("次のフェーズへ進む"), "Next remains immediately available");
-    assert.ok(!html.includes("data-phase-result-confetti"), "Reduced-motion markup is complete without decoration");
+    assert.ok(html.includes(nextPhaseLabel(phase)), "Next remains immediately available");
+    assert.ok(!html.includes("<canvas"), "Confetti is an effect only; markup is complete without decoration");
     assert.doesNotMatch(html, /mascot|Mascot/);
   }
 }
@@ -186,6 +156,15 @@ reducedMotion = false;
 const celebrationSource = read(`${root}/bfs/unit/UnitResultCelebration.tsx`);
 assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearningRewards|setTimeout|setInterval|whileInView|onAnimationComplete|Math\.random/);
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
+// 紙吹雪はライブラリ（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
+assert.match(celebrationSource, /from "canvas-confetti"/, "Confetti comes from the library");
+assert.doesNotMatch(celebrationSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
+assert.match(celebrationSource, /particleCount: 60/, "Each popper fires 60 pieces");
+assert.match(celebrationSource, /angle: 60, origin: \{ x: 0\.12, y: 0\.7 \}/, "Left popper fires up-right from the lower left");
+assert.match(celebrationSource, /angle: 120, origin: \{ x: 0\.88, y: 0\.7 \}/, "Right popper fires up-left from the lower right");
+assert.match(celebrationSource, /zIndex: 1200/, "Confetti stays below reward dialogs (1300)");
+assert.match(celebrationSource, /disableForReducedMotion: true/, "The library also honours reduced motion");
+assert.match(celebrationSource, /firedRef/, "Confetti fires once per mount, never on re-render or dialog close");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
