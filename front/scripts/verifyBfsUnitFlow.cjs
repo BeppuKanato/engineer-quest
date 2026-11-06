@@ -92,6 +92,17 @@ assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final resul
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
 assert.ok(!fs.existsSync(`${root}/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
 
+// 到達図の距離は正本グラフから導出し、教材の距離と一致する。
+const { bfsDistancesFrom } = load(`${root}/bfs/bfsGraph.ts`);
+assert.deepEqual(plain(Object.fromEntries(bfsDistancesFrom("A"))), { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 }, "Result figure distances derive from the canonical graph");
+// スコアのドットは件数の集計表示。初回正解が塗り、再挑戦分が輪郭。不正な件数では描かない。
+const { ResultScoreDots } = load(`${root}/app/ResultScoreDots.tsx`);
+const dotStates = value => value === null ? null : value.props.children.map(child => child.props["data-dot-state"]);
+assert.deepEqual(plain(dotStates(ResultScoreDots({ total: 2, firstAttemptCorrect: 2 }))), ["first", "first"]);
+assert.deepEqual(plain(dotStates(ResultScoreDots({ total: 2, firstAttemptCorrect: 1 }))), ["first", "retry"]);
+assert.equal(ResultScoreDots({ total: 0, firstAttemptCorrect: 0 }), null);
+assert.equal(ResultScoreDots({ total: 2, firstAttemptCorrect: 3 }), null);
+
 // 実コンポーネントの宣言を検査する。限定された一度きりの演出で、操作や報酬と結び付けない。
 const { UnitResultCelebration } = load(`${root}/bfs/unit/UnitResultCelebration.tsx`);
 const nodes = element => {
@@ -133,6 +144,13 @@ for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "resul
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading) && html.includes(phase.result.nextPreview));
+    if (summary?.totalQuestions !== undefined) {
+      assert.ok(html.includes("data-score-dots"), "Phase results visualize the score as dots");
+      assert.equal((html.match(/data-dot-state="first"/g) ?? []).length, summary.firstAttemptCorrect);
+      assert.ok(html.includes("data-result-figure"), "Phase results show the unit's completed figure");
+    } else {
+      assert.ok(!html.includes("data-score-dots"), "No score dots without a recorded score");
+    }
     assert.ok(html.includes(nextPhaseLabel(phase)), "Next remains immediately available");
     assert.ok(!html.includes("<canvas"), "Confetti is an effect only; markup is complete without decoration");
     assert.doesNotMatch(html, /mascot|Mascot/);
@@ -156,6 +174,12 @@ const phaseResultSource = resultSource.slice(resultSource.indexOf("export functi
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
+assert.match(phaseResultSource, /<BfsResultFigure/, "Phase results render the reached figure");
+assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
+const figureSource = read(`${root}/bfs/unit/BfsResultFigure.tsx`);
+assert.match(figureSource, /bfsDistancesFrom/, "The figure derives distances from the canonical graph");
+assert.match(figureSource, /status: "processing"/, "The figure paints nodes in achievement blue");
+assert.doesNotMatch(figureSource, /status: "completed"/, "The figure never uses the completed grey for achievement");
 assert.doesNotMatch(phaseResultSource, /mascot|Mascot|<UnitResultCelebration[^>]*key=/);
 assert.doesNotMatch(finalResultSource, /UnitResultCelebration|phaseResultPraise/, "The final result is outside #144");
 assert.match(container, /<UnitResultScreen phase=\{bfsUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
