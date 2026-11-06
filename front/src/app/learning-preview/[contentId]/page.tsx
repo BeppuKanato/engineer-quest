@@ -16,6 +16,7 @@ import { DfsCheckPreview } from "@/features/learning/dfs/check/DfsCheckPreview";
 import { DfsCodeMappingPreview } from "@/features/learning/dfs/code-mapping/DfsCodeMappingPreview";
 import { WallExtensionMotivationPreview } from "@/features/learning/wall-extension/motivation/WallExtensionMotivationPreview";
 import { WallExtensionExecutionPreview } from "@/features/learning/wall-extension/execution/WallExtensionExecutionPreview";
+import { WallExtensionCheckPreview } from "@/features/learning/wall-extension/check/WallExtensionCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -26,6 +27,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   const { contentId } = await params;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
+  if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
   if (contentId === "dfs-motivation") return <DfsMotivationPreview />;
   if (contentId === "dfs-execution") return <DfsExecutionPreview />;
   if (contentId === "dfs-check") return <DfsCheckPreview />;
