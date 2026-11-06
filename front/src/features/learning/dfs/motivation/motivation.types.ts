@@ -2,7 +2,7 @@ import type { LearningContent } from "../../player/content.types";
 import type { GraphCanvasState } from "../../player/graphCanvas.types";
 import type { MazeLayout } from "../../player/MotivationDrawing";
 import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
-import { bfsGraph, bfsMaze } from "../../bfs/bfsGraph";
+import { searchGraph, searchMaze } from "../../graphs/searchGraph";
 
 export type DfsMotivationCanvasState = {
   readonly data: {
@@ -33,7 +33,7 @@ export type DfsMotivationContent = LearningContent<DfsMotivationCanvasState> & {
 
 export function validateDfsMotivationCanvas(canvas: DfsMotivationCanvasState): void {
   const { data, state, highlights } = canvas;
-  if (data.graph !== bfsGraph || data.maze !== bfsMaze) throw new Error("DFS must share the canonical BFS graph and maze");
+  if (data.graph !== searchGraph || data.maze !== searchMaze) throw new Error("DFS must share the canonical BFS graph and maze");
   const ids = new Set(data.graph.nodes.map(node => node.id));
   const node = (id: string) => { if (!ids.has(id)) throw new Error(`Unknown DFS place: ${id}`); };
   const path = (places: readonly string[]) => {

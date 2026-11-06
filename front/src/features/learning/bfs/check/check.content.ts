@@ -1,9 +1,9 @@
 import { validateAssessment, type NodeTapAssessment } from "../../assessment/assessment";
 import { getLearningStep } from "../../review/reviewContent";
-import { bfsGraphNodes } from "../bfsGraph";
+import { searchGraphNodes } from "../../graphs/searchGraph";
 import { bfsExecutionContent } from "../execution/execution.content";
 
-const nodeIds = bfsGraphNodes.map(node => node.id);
+const nodeIds = searchGraphNodes.map(node => node.id);
 
 export const bfsCheckContent: NodeTapAssessment & { readonly phase: 3; readonly completion: { readonly stepId: string; readonly caption: string } } = {
   version: 1, kind: "node-tap-check", id: "bfs-check", phase: 3,

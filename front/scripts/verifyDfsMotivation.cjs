@@ -22,7 +22,7 @@ const feature = `${root}/dfs/motivation`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { dfsMotivationContent: content, dfsMotivationWalk } = load(`${feature}/motivation.content.ts`);
 const { validateDfsMotivationCanvas: validate } = load(`${feature}/motivation.types.ts`);
-const { bfsGraph: graph, bfsMaze: maze } = load(`${root}/bfs/bfsGraph.ts`);
+const { searchGraph: graph, searchMaze: maze } = load(`${root}/graphs/searchGraph.ts`);
 const { bfsMotivationContent: bfs } = load(`${root}/bfs/motivation/motivation.content.ts`);
 const { DfsMotivationCanvas } = load(`${feature}/DfsMotivationCanvas.tsx`);
 const { DfsMotivationPreview } = load(`${feature}/DfsMotivationPreview.tsx`);

@@ -1,5 +1,5 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
-import { bfsGraph } from "../bfsGraph";
+import { searchGraph } from "../../graphs/searchGraph";
 import { transferGraph } from "../consolidation/consolidation.graphs";
 import { bfsCode } from "../code-mapping/bfsCode";
 import { bfsConsolidationContent } from "../consolidation/consolidation.content";
@@ -25,7 +25,7 @@ export const bfsImplementationContent = {
     { id: "J3", label: "隣の情報が未登録の場所を含む", visibility: "judgement", functionName: "bfs_distances", args: [{ A: ["B"] }, "A"], expected: { A: 0, B: 1 } },
   ] satisfies ImplementationTest[],
   displayScenes: [
-    { testId: "D1", graph: bfsGraph, start: "A" },
+    { testId: "D1", graph: searchGraph, start: "A" },
     { testId: "D2", graph: transferGraph, start: "G" },
   ],
   hints: {

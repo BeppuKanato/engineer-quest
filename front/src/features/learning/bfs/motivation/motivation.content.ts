@@ -1,12 +1,12 @@
 import { defineLearningContent } from "../../player/content.types";
-import { bfsGraph, bfsMaze } from "../bfsGraph";
+import { searchGraph, searchMaze } from "../../graphs/searchGraph";
 import { validateMotivationCanvas, type MotivationCanvasState, type MotivationContent, type VocabularyEntry } from "./motivation.types";
 
 /**
- * 格子の配置は、正本グラフ（../bfsGraph）の辺がすべて隣接マス間の移動になるように置く。
+ * 格子の配置は、正本グラフ（../../graphs/searchGraph）の辺がすべて隣接マス間の移動になるように置く。
  * A B D / C E F の2行3列で、全7辺が上下左右の1マス移動と1対1に対応する（#91）。
  */
-const maze: MotivationCanvasState["data"]["maze"] = bfsMaze;
+const maze: MotivationCanvasState["data"]["maze"] = searchMaze;
 
 const routes: MotivationCanvasState["data"]["routes"] = [
   {
@@ -44,10 +44,10 @@ function scene(
 ): MotivationCanvasState {
   return {
     data: {
-      kind: "bfs-motivation", view, graph: bfsGraph, maze, routes,
+      kind: "bfs-motivation", view, graph: searchGraph, maze, routes,
       labels: {
         start: "出発点", goal: "ゴール", moveUnit: "手", distanceUnit: "歩",
-        nodeNames: Object.fromEntries(bfsGraph.nodes.map(({ id }) => [id, view === "rail" ? `${id}駅` : view === "social" ? `${id}さん` : id])),
+        nodeNames: Object.fromEntries(searchGraph.nodes.map(({ id }) => [id, view === "rail" ? `${id}駅` : view === "social" ? `${id}さん` : id])),
       },
     },
     state: { ...initialState, ...state }, highlights,

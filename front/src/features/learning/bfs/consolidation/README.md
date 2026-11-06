@@ -37,7 +37,7 @@ Parsonsは全行を1つのリストで提示し、その場で並び替える（
 | `start-already-discovered` | 距離が決まった場所の扱い | 基準グラフ、Aは0のまま | `for-b-a` → `if-b-a` |
 | `whole-code-order` | コード全体の流れ | bfsCode全11行の順序一致（初期化2行は交換可） | フェーズ4の全62フレーム |
 
-問1・4は`bfsGraph`そのものを参照し、問3は基準ノードにZだけを追加し辺は同じ参照。問2は基準と同じ座標にG〜Lを割り当て、指定順の辺 G-H / G-I / H-J / I-J / I-K / J-L / K-L を使う。
+問1・4は`searchGraph`そのものを参照し、問3は基準ノードにZだけを追加し辺は同じ参照。問2は基準と同じ座標にG〜Lを割り当て、指定順の辺 G-H / G-I / H-J / I-J / I-K / J-L / K-L を使う。
 描画は既存の`GraphEdges`・`GraphNodes`・`GraphViewport`と`graphGeometry`を使い、出発点の注記とノードのタップ領域だけを重ねる。共通描画・基準グラフは変更しない。色は既存`playerTokens`のみ。
 
 Parsonsの行本文・インデントは`bfsCode`（id `bfs-distances-deque`、version 1）を直接参照する。本文・意味ID・versionは変更しない。提示順はIssue指定の意味ID列、正解は元の行順であり、表示行番号で照合しない。

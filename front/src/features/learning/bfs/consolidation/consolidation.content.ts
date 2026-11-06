@@ -1,6 +1,6 @@
 import { validateAssessment, type DiagnosticAssessment, type NodeTapQuestion, type ChoiceQuestion, type ParsonsQuestion } from "../../assessment/assessment";
 import { getLearningStep } from "../../review/reviewContent";
-import { bfsGraph } from "../bfsGraph";
+import { searchGraph } from "../../graphs/searchGraph";
 import { bfsCode } from "../code-mapping/bfsCode";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import { isolatedGraph, transferGraph, type ConsolidationGraph } from "./consolidation.graphs";
@@ -30,7 +30,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
   questions: [
     {
       kind: "node", id: "last-from-f", prompt: "出発点をFに変えると、最後に取り出されるのはどれ？",
-      scene: { graph: bfsGraph, start: "F" }, nodeIds: bfsGraph.nodes.map(node => node.id), allowNone: false,
+      scene: { graph: searchGraph, start: "F" }, nodeIds: searchGraph.nodes.map(node => node.id), allowNone: false,
       correctAnswer: { kind: "node", nodeId: "A" }, requires: null,
       stepId: "execution-dequeue-c", reviewStepIds: ["while-c", "execution-dequeue-c"], tags: ["処理順序の追跡"],
       instruction: "図のノードをタップして答える",
@@ -59,7 +59,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
     },
     {
       kind: "choice", id: "start-already-discovered", prompt: "隣の場所を調べている途中で、出発点Aが隣として見つかったとき、Aの距離はどうなりますか？",
-      scene: { graph: bfsGraph, start: "A" },
+      scene: { graph: searchGraph, start: "A" },
       choices: [{ id: "unchanged", text: "0のまま。すでに決まっているので、追加も更新もされない" }, { id: "update", text: "見つけた場所の距離に1を足した値に更新される" }, { id: "requeue", text: "キューにもう一度入る" }],
       correctAnswer: { kind: "choice", choiceId: "unchanged" }, requires: null,
       stepId: "if-b-a", reviewStepIds: ["for-b-a", "if-b-a"], tags: ["距離が決まった場所の扱い"],

@@ -13,4 +13,4 @@
 - `DfsMotivationCanvas.tsx`: 共通の格子／グラフ描画へ重ねる宝・軌跡とフォルダの実用例。
 - `DfsMotivationPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
 
-検証: `npm run verify:dfs-motivation`。BFSと共有する格子・道筋・現在地の描画は`player/MotivationDrawing.tsx`、グラフは`bfs/bfsGraph.ts`と`player/GraphDrawing.tsx`を参照する。
+検証: `npm run verify:dfs-motivation`。BFSと共有する格子・道筋・現在地の描画は`player/MotivationDrawing.tsx`、グラフは`graphs/searchGraph.ts`と`player/GraphDrawing.tsx`を参照する。
