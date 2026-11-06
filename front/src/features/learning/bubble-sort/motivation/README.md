@@ -11,6 +11,6 @@
 - `motivation.content.ts`: キャプション・完全スナップショット・用語表。
 - `motivation.types.ts`: 共通配列型への出口の追加と検証。
 - `BubbleSortMotivationCanvas.tsx`: 共通配列描画への出口ボタンの重ね方。
-- `BubbleSortMotivationPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
+- `BubbleSortMotivationPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#235）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete）を持ち、未指定なら単品ページとして動く。最終場面の出口ボタンが onComplete につながる。
 
 検証: `npm run verify:bubble-sort-motivation`。配列データの組み立て（参照コードと同じ手順の実行記録）は`../bubbleSort.ts`、配列の型・検証・描画は`player/arrayBars.types.ts`・`player/arrayBarsGeometry.ts`・`player/ArrayDrawing.tsx`を参照する。

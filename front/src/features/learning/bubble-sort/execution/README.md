@@ -11,6 +11,6 @@
 - `execution.content.ts`: キャプション・完全スナップショット。配列は `../bubbleSort.ts` の実行記録から組み立て、手書きしない。ステップIDは `compare-<何周目>-<比べる位置 j>` / `pass-end-<何周目>`。
 - `execution.types.ts`: 共通配列型をそのまま使い、highlight が比べたペアと一致することと比較外では highlight を使わないことを追加検証する。
 - `BubbleSortExecutionCanvas.tsx`: 共通配列描画への委譲。
-- `BubbleSortExecutionPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
+- `BubbleSortExecutionPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#235）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。共通プレイヤーの endAction が onComplete につながる。
 
 検証: `npm run verify:bubble-sort-execution`。配列データの組み立ては`../bubbleSort.ts`、配列の型・検証・描画は`player/arrayBars.types.ts`・`player/arrayBarsGeometry.ts`・`player/ArrayDrawing.tsx`を参照する。フェーズ3はステップIDと canvas をそのまま問いの図に参照できる（例: `compare-1-1` は1周目の2回目の比較まで終えた状態で、フェーズ3の場面になる）。フェーズ4は同じスナップショットへコード対応を付加する。
