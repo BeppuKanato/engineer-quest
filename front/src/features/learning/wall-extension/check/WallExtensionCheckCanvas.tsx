@@ -26,7 +26,7 @@ export function WallExtensionCheckCanvas({ canvas, questionId, cellIds, onAnswer
   disabled?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ width: mazeGridGeometry.width, height: mazeGridGeometry.height });
+  const [size, setSize] = useState<{ width: number; height: number }>({ width: mazeGridGeometry.width, height: mazeGridGeometry.height });
   useEffect(() => {
     if (!host.current) return;
     const observer = new ResizeObserver(([entry]) => {
