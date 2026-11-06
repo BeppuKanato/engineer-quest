@@ -39,6 +39,19 @@ def _eq_distances(value):
 def _eq_queue(value):
     return list(value) if type(value) in (list, tuple, _eq_collections.deque) and len(value) <= 64 and all(type(item) is str and len(item) <= 100 for item in value) else None
 
+def _eq_grid(value):
+    if type(value) not in (list, tuple) or len(value) < 3 or len(value) > 25 or len(value) % 2 == 0:
+        return None
+    size = len(value)
+    grid = []
+    for row in value:
+        if type(row) not in (list, tuple) or len(row) != size:
+            return None
+        if not all(type(item) is int and -256 < item < 256 for item in row):
+            return None
+        grid.append(list(row))
+    return grid
+
 def _eq_detect(values, preferred, convert):
     global _eq_ambiguous
     if preferred in values:
@@ -57,6 +70,14 @@ def _eq_locals(frame):
         result["queue"] = queue_value
     if distance_name is not None:
         result["distances"] = distance_value
+    grid_name, grid_value = _eq_detect(values, "grid", _eq_grid)
+    if grid_name is not None:
+        result["grid"] = grid_value
+    if type(values.get("size")) is int:
+        result["size"] = values["size"]
+    choices = values.get("choices")
+    if type(choices) in (list, tuple) and len(choices) <= 64 and all(type(item) is int for item in choices):
+        result["choices"] = list(choices)
     for key in ("node", "neighbor"):
         if key in values:
             value = values[key]
@@ -109,7 +130,10 @@ try:
     _eq_last_line = None
     _eq_ambiguous = False
     _eq_sys.settrace(_eq_trace)
-    _eq_result = _eq_distances(_eq_function(*_eq_args))
+    _eq_raw_result = _eq_function(*_eq_args)
+    _eq_result = _eq_distances(_eq_raw_result)
+    if _eq_result is None:
+        _eq_result = _eq_grid(_eq_raw_result)
 except _EqTraceLimit:
     _eq_status = "truncated"
 except BaseException as _eq_exception:
