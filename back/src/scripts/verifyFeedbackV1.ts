@@ -33,6 +33,11 @@ async function main() {
   assert.throws(() => validateSelection(personalized, tampered), /HEXAD_SCORE_MISMATCH/);
   const mismatch = structuredClone(adjusted); mismatch.personalizationAdjustment!.targetId = "card-1";
   assert.throws(() => validateSelection(personalized, mismatch), /HEXAD_SELECTION_MISMATCH/);
+  // Action 23 (proceed to the next phase) validates only when it is offered with a target.
+  const proceedInput: Input = { ...input, actions: [{ id: 23, label: "次のフェーズへ進む", purpose: "学習の継続", condition: "次のフェーズがある", targetIds: ["phase-next"] }], targets: { 23: [{ id: "phase-next", href: "/courses/roadmap/course-1/learn?phase=phase-next" }] } };
+  const proceedSelection: Selection = { ...selection, actionId: 23, targetId: "phase-next" };
+  assert.equal(validateSelection(proceedInput, proceedSelection).actionHref, "/courses/roadmap/course-1/learn?phase=phase-next");
+  assert.throws(() => validateSelection(input, proceedSelection), /ACTION_NOT_ALLOWED/);
   const failures: unknown[] = [];
   await assert.rejects(generate(input, async () => { throw new Error("MODEL_DOWN"); }, async entry => { failures.push(entry); }), /MODEL_DOWN/);
   assert.equal(failures.length, 1);

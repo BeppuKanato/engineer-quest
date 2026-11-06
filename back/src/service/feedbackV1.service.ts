@@ -5,7 +5,26 @@ import { buildFeedbackV1Context } from "./feedbackV1.context";
 import { generate, validateSelection } from "./feedbackV1.engine";
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v));
 
-export async function feedbackV1(firebaseUid: string, kind: "mission" | "create", eventId: string, start = false, generator: typeof generate = generate) {
+export type FeedbackV1Kind = "mission" | "create" | "phase" | "unit";
+
+// New-flow events are identified by the progress row plus its completion time,
+// so re-completing the same phase/unit later is a distinct feedback event.
+async function resolveEventKey(userId: string, kind: FeedbackV1Kind, eventId: string): Promise<string> {
+  if (kind === "phase") {
+    const [courseId, phaseKey] = eventId.split(":");
+    const row = courseId && phaseKey ? await prisma.phaseLearningProgress.findUnique({ where: { userId_courseId_phaseKey: { userId, courseId, phaseKey } } }) : null;
+    if (!row || row.status !== "COMPLETED" || !row.completedAt) throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+    return `phase:${row.id}:${row.completedAt.toISOString()}`;
+  }
+  if (kind === "unit") {
+    const row = await prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId, courseId: eventId } } });
+    if (!row || row.status !== "COMPLETED" || !row.completedAt) throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+    return `unit:${row.id}:${row.completedAt.toISOString()}`;
+  }
+  return `${kind}:${eventId}`;
+}
+
+export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string, start = false, generator: typeof generate = generate) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, select: { id: true } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   // Previously generated results remain immutable; v1 applies to new events.
@@ -13,7 +32,7 @@ export async function feedbackV1(firebaseUid: string, kind: "mission" | "create"
     const legacy = await prisma.createQuestFeedback.findFirst({ where: { submissionId: eventId, submission: { attempt: { userId: user.id } }, status: "COMPLETED" } });
     if (legacy) return { id: undefined, status: legacy.status, source: "GENERATED", requestedAt: legacy.createdAt.toISOString(), completedAt: legacy.generatedAt?.toISOString() ?? null, feedback: { currentState: legacy.currentState, nextGoal: legacy.nextGoal, nextStep: legacy.nextStep, actionType: legacy.actionType, actionLabel: legacy.actionLabel } };
   }
-  const key = `${kind}:${eventId}`;
+  const key = await resolveEventKey(user.id, kind, eventId);
   let row = await prisma.feedbackV1.findUnique({ where: { eventKey: key } });
   if (row && row.userId !== user.id) throw new AppError(404, "EVENT_NOT_FOUND", "Event not found");
   if (row?.status === "GENERATING" && Date.now() - row.createdAt.getTime() > 10 * 60_000) {
