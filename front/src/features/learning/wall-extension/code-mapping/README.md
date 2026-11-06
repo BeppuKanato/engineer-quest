@@ -13,6 +13,6 @@
 - `codeMapping.types.ts`: Canvas 型と検証。盤面とコードは正本への参照同一を要求し、変数は pillars が柱の正規順の接頭辞であること等を検証する。
 - `codeMapping.presentation.ts`: 変数行の整形と変更判定。
 - `WallExtensionCodeMappingCanvas.tsx`: 盤面（共通グリッド描画への委譲）＋コード表示（共通 `CodeDisplay`）＋変数表。
-- `WallExtensionCodeMappingPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
+- `WallExtensionCodeMappingPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#214）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。onComplete 指定時は共通プレイヤーの endAction で次へ進む。
 
 検証: `npm run verify:wall-extension-code-mapping`。参照コードを CPython で実際に実行したトレース（`front/scripts/fixtures/wallExtensionCodeMappingTrace.py`）と、全フレームの行・ローカル変数を突き合わせる。

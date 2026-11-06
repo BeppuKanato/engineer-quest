@@ -11,6 +11,6 @@
 - `motivation.content.ts`: キャプション・完全スナップショット・用語表。
 - `motivation.types.ts`: 共通グリッド型への出口の追加と検証。
 - `WallExtensionMotivationCanvas.tsx`: 共通グリッド描画への出口ボタンの重ね方。
-- `WallExtensionMotivationPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
+- `WallExtensionMotivationPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#214）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete）を持ち、未指定なら単品ページとして動く。最終場面の出口ボタンが onComplete につながる。
 
 検証: `npm run verify:wall-extension-motivation`。迷路データの組み立て（外周＋柱＋伸長）は`../wallExtensionMaze.ts`、グリッドの型・検証・描画は`player/mazeGrid.types.ts`・`player/mazeGridGeometry.ts`・`player/MazeGridDrawing.tsx`を参照する。壁の色は playerTokens に専用の濃色が無いため、最濃のニュートラル色である text を使っている（実施記録の留保参照）。

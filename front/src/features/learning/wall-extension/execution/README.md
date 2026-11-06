@@ -11,6 +11,6 @@
 - `execution.content.ts`: キャプション・完全スナップショット。盤面は `../wallExtensionMaze.ts` の組み立てで作り、手書きしない。
 - `execution.types.ts`: 共通グリッド型をそのまま使い、highlight が壁マスであることと target を使わないことを追加検証する。
 - `WallExtensionExecutionCanvas.tsx`: 共通グリッド描画への委譲。
-- `WallExtensionExecutionPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たな��。
+- `WallExtensionExecutionPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#214）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。onComplete 指定時は共通プレイヤーの endAction で次へ進む。
 
 検証: `npm run verify:wall-extension-execution`。グリッドの型・検証・描画は`player/mazeGrid.types.ts`・`player/mazeGridGeometry.ts`・`player/MazeGridDrawing.tsx`を参照する。フェーズ3はステップIDと canvas をそのまま問いの図に参照できる（例: `extend-2-4` は4本目まで伸ばした状態で、フェーズ3の場面になる）。フェーズ4は同じスナップショットへコード対応を付加する。

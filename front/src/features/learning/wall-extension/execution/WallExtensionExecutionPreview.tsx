@@ -2,19 +2,31 @@
 
 import { Box } from "@mui/material";
 
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { LearningPlayer } from "../../player/LearningPlayer";
 import { playerTokens } from "../../player/player.tokens";
 import { wallExtensionExecutionContent } from "./execution.content";
 import { WallExtensionExecutionCanvas } from "./WallExtensionExecutionCanvas";
 
-/** 単品の動きの説明。接続・保存・学習ログのポートは持たない。 */
-export function WallExtensionExecutionPreview() {
+/** embedded / onComplete / nextLabel は単元フロー（#214）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
+export function WallExtensionExecutionPreview({ embedded = false, onLearningEvent, active = true, onComplete, nextLabel }: LearningInstrumentation & { embedded?: boolean; onComplete?: () => void; nextLabel?: string }) {
+  const player = (
+    <LearningPlayer onLearningEvent={onLearningEvent} active={active} content={wallExtensionExecutionContent}
+      renderCanvas={(canvas) => <WallExtensionExecutionCanvas canvas={canvas} />}
+      endAction={onComplete ? { label: nextLabel ?? "次へ進む", onClick: onComplete } : undefined} />
+  );
+  if (embedded) {
+    return (
+      <Box component="div" sx={{ height: "100%", minHeight: 0, display: "flex", bgcolor: playerTokens.background }}>
+        {player}
+      </Box>
+    );
+  }
   return (
     <Box component="main" aria-label={wallExtensionExecutionContent.stageName}
       sx={{ height: "100dvh", minHeight: 440, display: "grid", placeItems: "center", bgcolor: playerTokens.background }}>
       <Box sx={{ width: "84vw", height: "84dvh", minHeight: 360, display: "flex" }}>
-        <LearningPlayer content={wallExtensionExecutionContent}
-          renderCanvas={(canvas) => <WallExtensionExecutionCanvas canvas={canvas} />} />
+        {player}
       </Box>
     </Box>
   );

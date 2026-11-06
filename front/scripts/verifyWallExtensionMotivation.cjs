@@ -125,7 +125,9 @@ const canvasSource = fs.readFileSync(`${feature}/WallExtensionMotivationCanvas.t
 assert(canvasSource.includes("MazeGridDrawing") && canvasSource.includes("PhaseNextButton"));
 const previewSource = fs.readFileSync(`${feature}/WallExtensionMotivationPreview.tsx`, "utf8");
 assert.match(previewSource, /width: "84vw", height: "84dvh"/);
-assert.doesNotMatch(previewSource, /onLearningEvent|onComplete|fetch\(|localStorage/);
+// 接続ポートは単元フロー（#214）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
+assert.match(previewSource, /onComplete\?: \(\) => void/);
+assert.doesNotMatch(previewSource, /fetch\(|localStorage/);
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8").includes('contentId === "wall-extension-motivation"'));
 
 // 基盤の検証は不正な盤面を弾く。
