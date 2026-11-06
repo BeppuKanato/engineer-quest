@@ -54,6 +54,7 @@
 | [phase-bridge-141.md](phase-bridge-141.md) | 記録 | Issue #141のフェーズ間ブリッジ追加（全遷移に目標提示のステップを統一、リザルト予告の廃止、教材指針の遷移モデル改訂） |
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
+| [phase7-result-presentation-180.md](phase7-result-presentation-180.md) | 記録 | Issue #180のフェーズ7テスト結果の作り直し（通過ごとの描き込みチェックと全通過時の祝福） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
 | [progress-loading-175.md](progress-loading-175.md) | 記録 | Issue #175の読み込み中表示の改善（進捗読み込みを素のテキストからスケルトンへ） |
