@@ -157,7 +157,45 @@ const KmpFigure = () => {
   );
 };
 
+const MazeFigure = () => {
+  // 教材（フェーズ1・2）と同じ主教材 9×9 の完成迷路。行文字列の # が壁。
+  const rows = [
+    "#########",
+    "#.......#",
+    "#.#####.#",
+    "#...#...#",
+    "#.#.###.#",
+    "#.#...#.#",
+    "#.#####.#",
+    "#.....#.#",
+    "#########",
+  ];
+  const cell = 11;
+  const ox = 50;
+  const oy = 10;
+  const center = (cx: number, cy: number): [number, number] => [ox + (cx + 0.5) * cell, oy + (cy + 0.5) * cell];
+  // フェーズ1で示すスタート (1,7) → ゴール (7,7) の経路の折れ点。
+  const route: Array<[number, number]> = [[1, 7], [1, 1], [7, 1], [7, 7]];
+  const routePoints = route.map(([cx, cy]) => center(cx, cy).join(",")).join(" ");
+  const [start, goal] = [center(1, 7), center(7, 7)];
+  return (
+    <g>
+      {rows.flatMap((row, y) =>
+        [...row].map((ch, x) =>
+          ch === "#" ? (
+            <rect key={`${x}-${y}`} x={ox + x * cell} y={oy + y * cell} width={cell} height={cell} fill={INK} />
+          ) : null,
+        ),
+      )}
+      <polyline points={routePoints} fill="none" stroke={ACCENT} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={start[0]} cy={start[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+      <circle cx={goal[0]} cy={goal[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+    </g>
+  );
+};
+
 const FIGURES: Record<string, React.ReactElement> = {
+  "course-algorithm-wall-extension-v1": <MazeFigure />,
   "course-algorithm-breadth-first-search-v1": <GraphFigure dfs={false} />,
   "course-algorithm-depth-first-search-v1": <GraphFigure dfs={true} />,
   "course-algorithm-bubble-sort-v2": <BubbleSortFigure />,
