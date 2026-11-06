@@ -1,6 +1,7 @@
 import type { AssessmentContent, AssessmentState } from "./assessment";
 
 export type AnswerFeedback = {
+  readonly assessmentId: string;
   readonly questionId: string;
   readonly attempt: number;
   readonly correct: boolean;
@@ -25,7 +26,7 @@ export function newAnswerFeedback(content: AssessmentContent, previous: Assessme
       ? "correctFeedback" in question && typeof question.correctFeedback === "string" ? question.correctFeedback : answerFeedbackText.correct
       : "incorrectFeedback" in question && typeof question.incorrectFeedback === "string" ? question.incorrectFeedback
         : "retryFeedback" in content && typeof content.retryFeedback === "string" ? content.retryFeedback : answerFeedbackText.incorrect;
-    feedback = { questionId: question.id, attempt: attempt.number, correct: attempt.correct, message };
+    feedback = { assessmentId: content.id, questionId: question.id, attempt: attempt.number, correct: attempt.correct, message };
   }
   return feedback;
 }

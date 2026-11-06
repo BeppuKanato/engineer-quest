@@ -4,12 +4,13 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
-import { AnswerFeedbackMessage, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
+import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
+import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { BfsCodeDisplay } from "../code-mapping/BfsCodeDisplay";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
@@ -29,9 +30,6 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
   useAssessmentFeedback(content, session, active && !reviewOpen);
   const record = session.records.find(record => record.questionId === question?.id);
   const retry = record?.attempts.at(-1)?.correct === false;
-  const latest = [...session.records].reverse().find(record => record.attemptCount > 0);
-  const answeredQuestion = content.questions.find(question => question.id === latest?.questionId);
-  const feedback = latest ? latest.attempts.at(-1)?.correct ? answeredQuestion?.correctFeedback : content.retryFeedback : null;
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
   // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
   useEffect(() => {
@@ -65,6 +63,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none",
       }}>{complete ? content.completion.caption : question?.prompt}</Typography>
+      {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         <Box ref={codeRef} sx={{ width: "100%", overflowX: "auto", py: 1 }}>
           <Box sx={{ width: "max-content", minWidth: "100%", display: "flex", justifyContent: "center" }}>
@@ -81,10 +80,8 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
               "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
         </Box>
       </>}
-      {feedback && <AnswerFeedbackMessage message={feedback} />}
       {retry && <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-        <Button variant="outlined" onClick={() => setReviewOpen(true)}
-          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>{content.reviewLabel}</Button>
+        <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />
       </Box>}
       {embedded && complete && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}

@@ -4,13 +4,13 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
-import { AnswerFeedbackMessage, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
-import { answerFeedbackText } from "../../assessment/answerFeedbackState";
+import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
 import { playerTokens } from "../../player/player.tokens";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
+import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { getLearningStep } from "../../review/reviewContent";
 import { BfsExecutionCanvas } from "../execution/BfsExecutionCanvas";
 import { bfsExecutionContent } from "../execution/execution.content";
@@ -54,15 +54,14 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
       }}>{caption}</Typography>
+      {!embedded && <AnswerFeedbackNotice assessmentId={bfsCheckContent.id} />}
       {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
         図の丸いボタン{question.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう
       </Typography>}
       <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
         allowNone={question?.allowNone} onAnswer={submit} />
-      {retry && <AnswerFeedbackMessage message={answerFeedbackText.incorrect} />}
       <Box sx={{ minHeight: 44, mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center" }}>
-        {retry && <Button variant="outlined" onClick={() => setReviewOpen(true)}
-          sx={{ color: playerTokens.text, borderColor: playerTokens.control }}>該当ステップの動きを確認する</Button>}
+        {retry && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label="該当ステップの動きを確認する" />}
         {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bfsCheckContent))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
       </Box>
