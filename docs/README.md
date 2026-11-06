@@ -76,6 +76,7 @@
 | [wall-extension-phase7-212.md](wall-extension-phase7-212.md) | 記録 | Issue #212の棒倒し法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保 |
 | [wall-extension-trace-213.md](wall-extension-trace-213.md) | 記録 | Issue #213の棒倒し法フェーズ7視覚デバッグ、フェーズ2盤面での生成過程再生と段階適用、トレース基盤へのgrid検出の最小拡張 |
 | [wall-extension-unit-214.md](wall-extension-unit-214.md) | 記録 | Issue #214の棒倒し法フェーズ接続・単元コンテナ接続、フェーズ1・2・4への接続ポート追加、unitRegistry登録とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [wall-extension-integration-215.md](wall-extension-integration-215.md) | 記録 | Issue #215の棒倒し法アプリ統合、コース・知識カード3枚・実績6件のシード追加、コレクション検証の単元汎用化、サムネイルの迷路図、シード再実行の要否 |
 | [bubble-sort-phase1-227.md](bubble-sort-phase1-227.md) | 記録 | Issue #227の配列描画基盤とバブルソートフェーズ1（導入）、検証済みトレースとの照合と場面圧縮・基準データ未取り込みの留保 |
 | [bubble-sort-phase2-228.md](bubble-sort-phase2-228.md) | 記録 | Issue #228のバブルソートフェーズ2（動きの説明）16ステップ、検証済みトレースとの照合と比較・交換・確定の表現、確定キャプションと基準データ未取り込みの留保 |
 | [bubble-sort-phase3-229.md](bubble-sort-phase3-229.md) | 記録 | Issue #229のバブルソートフェーズ3（動きの確認問題）連結2問、フェーズ2場面の参照と検証済みトレースとの正解照合 |
