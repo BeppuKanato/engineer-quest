@@ -151,3 +151,12 @@ const overlayHtml = renderToStaticMarkup(createElement(BfsExecutionCanvas, { can
 assert.equal((overlayHtml.match(/<foreignObject width="60" height="60"/g) || []).length, 6);
 assert.equal((overlayHtml.match(/role="group" aria-label="[A-F]：/g) || []).length, 6);
 console.log("Shared graph drawing: all three renderers, uniform geometry and phase-3 overlay coordinates passed.");
+
+// シーク表示の切替契約（UI 定義 §3・#145）: 目安25以下はセグメント、超過時は幅320px以下のスライダー。
+const playerSource = fs.readFileSync(`${sourceRoot}/player/LearningPlayer.tsx`, "utf8");
+assert.match(playerSource, /SEGMENT_SEEK_MAX_STEPS = 25/);
+assert.match(playerSource, /count <= SEGMENT_SEEK_MAX_STEPS/);
+assert.match(playerSource, /data-seek-bar/);
+assert.match(playerSource, /data-seek-slider/);
+assert.match(playerSource, /maxWidth: 320/);
+console.log("Learning player: seek presentation switch (segments up to 25 steps, slider beyond) passed.");
