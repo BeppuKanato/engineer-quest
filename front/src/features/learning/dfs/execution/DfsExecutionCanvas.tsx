@@ -2,12 +2,14 @@
 
 import { Box } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
 import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
 import { graphGeometry } from "../../player/graphGeometry";
 import { playerTokens } from "../../player/player.tokens";
 import type { DfsExecutionCanvasState } from "./execution.types";
 
 type Point = { x: number; y: number };
+export const dfsExecutionCanvasHeight = 510;
 
 function StackItem({ nodeId, position, source, top, highlighted, duration }: {
   nodeId: string; position: Point; source: Point; top: boolean; highlighted: boolean; duration: number;
@@ -27,7 +29,12 @@ function StackItem({ nodeId, position, source, top, highlighted, duration }: {
 }
 
 /** 図・スタック・訪問順は同じ完全スナップショットから表示する。 */
-export function DfsExecutionCanvas({ canvas }: { canvas: DfsExecutionCanvasState }) {
+export function DfsExecutionCanvas({ canvas, renderNodeOverlay, highlightNodes = true }: {
+  canvas: DfsExecutionCanvasState;
+  /** 回答中は共通の回答リングを使い、処理状態の塗りと辺は残す。 */
+  highlightNodes?: boolean;
+  renderNodeOverlay?: (nodeId: string, radius: number) => ReactNode;
+}) {
   const reducedMotion = useReducedMotion();
   const duration = reducedMotion ? 0 : 0.6;
   const transition = { duration, ease: "easeInOut" } as const;
@@ -37,7 +44,7 @@ export function DfsExecutionCanvas({ canvas }: { canvas: DfsExecutionCanvasState
   const stackX = (index: number) => graphGeometry.width / 2 + (index - (state.stack.length - 1) / 2) * 86;
   const orderX = (index: number) => graphGeometry.width / 2 + (index - (state.order.length - 1) / 2) * 72;
   return <Box sx={{ width: "100%", height: "100%", minHeight: 220 }}>
-    <GraphViewport label="DFSのグラフ・スタック・訪問順" height={510}>
+    <GraphViewport interactive={!!renderNodeOverlay} label="DFSのグラフ・スタック・訪問順" height={dfsExecutionCanvasHeight}>
       <GraphEdges position={position} transition={transition} edges={data.graph.edges.map(edge => {
         const focus = highlights.find(item => item.kind === "edge" && item.id === edge.id);
         return { ...edge, highlighted: !!focus, dashed: focus?.kind === "edge" && focus.style === "dashed" };
@@ -45,8 +52,8 @@ export function DfsExecutionCanvas({ canvas }: { canvas: DfsExecutionCanvasState
       <GraphNodes transition={transition} nodes={data.graph.nodes.map(node => {
         const { status } = state.nodes.find(value => value.id === node.id)!;
         const label = status === "queued" ? "スタック内" : status === "completed" ? "調べ終えた" : playerTokens.states[status].label;
-        return { ...node, status, highlighted: focused("node", node.id), ariaLabel: `${node.id}：${label}` };
-      })} />
+        return { ...node, status, highlighted: highlightNodes && focused("node", node.id), ariaLabel: `${node.id}：${label}` };
+      })} renderNodeOverlay={renderNodeOverlay} />
       <g role="group" aria-label="スタック">
         <text x={300} y={310} textAnchor="middle" fill={playerTokens.text} fontSize={20} fontWeight={700}>スタック</text>
         <g role="list" aria-label="スタックの中身（左が底、右が末尾）">
@@ -54,7 +61,7 @@ export function DfsExecutionCanvas({ canvas }: { canvas: DfsExecutionCanvasState
           <AnimatePresence initial={false}>
             {state.stack.map((nodeId, index) => <StackItem key={nodeId} nodeId={nodeId} source={position(nodeId)}
               position={{ x: stackX(index), y: 350 }} top={index === state.stack.length - 1}
-              highlighted={focused("stack-item", nodeId)} duration={duration} />)}
+              highlighted={highlightNodes && focused("stack-item", nodeId)} duration={duration} />)}
           </AnimatePresence>
         </g>
         {!!state.stack.length && <text x={stackX(state.stack.length - 1)} y={399} textAnchor="middle"
