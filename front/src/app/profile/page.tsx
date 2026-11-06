@@ -44,7 +44,8 @@ import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { ActionButton } from "@/app/component/actionButton";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
-import { getMascotImagePath, isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
+import { isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
+import { MascotFigure } from "@/app/component/mascotFigure";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import {
   useAchievementNotificationMode,
@@ -196,7 +197,7 @@ export default function ProfilePage() {
 
             <Paper elevation={0} sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff", boxShadow: "0 18px 44px rgba(15, 23, 42, 0.06)" }}>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr) 520px" }, gap: { xs: 3, lg: 4 }, alignItems: "center" }}>
-                <Box component="img" src={getMascotImagePath(selectedMascotId, "normal")} alt="マスコット画像" sx={{ width: { xs: 220, md: 300 }, height: { xs: 220, md: 300 }, objectFit: "contain", mx: { xs: "auto", lg: 0 } }} />
+                <MascotFigure mascotId={selectedMascotId} state="normal" alt="マスコット画像" size="XL" grounding="disc" sx={{ mx: { xs: "auto", lg: 0 } }} />
 
                 <Stack spacing={2.2}>
                   <Chip label="プロフィール" sx={{ alignSelf: "flex-start", fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
@@ -232,7 +233,7 @@ export default function ProfilePage() {
                       icon={<PetsIcon />}
                       label="相棒"
                       value={selectedMascot.label}
-                      image={getMascotImagePath(selectedMascotId, "face")}
+                      image={<MascotFigure mascotId={selectedMascotId} alt={selectedMascot.label} size="S" presentation="circle" />}
                       onClick={() => {
                         setDraftMascotId(selectedMascotId);
                         setIsMascotDialogOpen(true);
@@ -341,7 +342,7 @@ const SettingRow = ({
   value: string;
   href?: string;
   onClick?: () => void;
-  image?: string;
+  image?: ReactNode;
 }) => (
   <Paper
     component={onClick ? "button" : Link}
@@ -366,7 +367,7 @@ const SettingRow = ({
     <Stack direction="row" spacing={1.5} alignItems="center">
       <Box sx={{ width: 34, color: "#0052d9", display: "grid", placeItems: "center" }}>{icon}</Box>
       <Typography fontWeight={800} sx={{ flex: 1 }}>{label}</Typography>
-      {image && <Box component="img" src={image} alt={value} sx={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover" }} />}
+      {image}
       <Typography fontWeight={800}>{value}</Typography>
       <ChevronRightIcon sx={{ color: "#94a3b8" }} />
     </Stack>
@@ -500,7 +501,7 @@ const MascotSelectDialog = ({
                   },
                 }}
               >
-                <Box component="img" src={getMascotImagePath(mascot.id, "normal")} alt={mascot.label} sx={{ width: 150, height: 150, objectFit: "contain" }} />
+                <MascotFigure mascotId={mascot.id} state="normal" alt={mascot.label} size="L" grounding="disc" sx={{ mx: "auto" }} />
                 <Typography variant="h6" fontWeight={900}>{mascot.label}</Typography>
                 <Stack direction="row" spacing={0.75} justifyContent="center" sx={{ mt: 1 }} flexWrap="wrap">
                   {current && <Chip label="現在の相棒" size="small" color="success" sx={{ fontWeight: 900 }} />}
@@ -513,7 +514,7 @@ const MascotSelectDialog = ({
         </Box>
         <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#f8fbff" }}>
           <Stack spacing={1.5} alignItems="center" textAlign="center">
-            <Box component="img" src={getMascotImagePath(selectedMascotId, "normal")} alt={selectedMascot.label} sx={{ width: 180, height: 180, objectFit: "contain" }} />
+            <MascotFigure mascotId={selectedMascotId} state="normal" alt={selectedMascot.label} size="L" grounding="disc" />
             <Typography variant="h5" fontWeight={900}>{selectedMascot.label}</Typography>
             <Chip label={selectedMascot.personality} sx={{ fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
             <Typography color="#334155" fontWeight={800} sx={{ lineHeight: 1.75 }}>

@@ -26,7 +26,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { getMascotImagePath } from "@/app/component/mascot";
+import { MascotFigure } from "@/app/component/mascotFigure";
 import { auth } from "@/lib/firebase";
 
 const brandGradient = "linear-gradient(90deg, #0047c7 0%, #0053df 48%, #0041b8 100%)";
@@ -217,12 +217,7 @@ export default function TopPage() {
             <Card elevation={0} sx={{ border: cardBorder, borderRadius: 4, bgcolor: "#fff" }}>
               <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                 <Stack spacing={2} alignItems="center">
-                  <Box
-                    component="img"
-                    src={getMascotImagePath("red-panda", "cheer")}
-                    alt="Engineer Quest の相棒キャラクター"
-                    sx={{ width: { xs: 150, md: 190 }, height: "auto" }}
-                  />
+                  <MascotFigure mascotId="red-panda" state="cheer" alt="Engineer Quest の相棒キャラクター" size="L" grounding="disc" />
                   <Box sx={{ bgcolor: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 3, px: 2.5, py: 1.75, width: "100%" }}>
                     <Typography sx={{ color: headingColor, fontWeight: 700, lineHeight: 1.8, textAlign: "center" }}>
                       相棒と一緒に少しずつ進めよう。

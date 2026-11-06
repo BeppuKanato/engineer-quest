@@ -5,20 +5,16 @@ import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import { Box, CircularProgress, Paper, Typography, keyframes } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { getMascotImagePath, useUserMascot } from "./mascot";
+import { useUserMascot, type MascotState } from "./mascot";
+import { MascotFigure } from "./mascotFigure";
 
 type BlockingProcessOverlayProps = {
   open: boolean;
   title: string;
   description?: string;
   delayMs?: number;
-  mascotState?: "normal" | "happy" | "cheer" | "thinking" | "surprise" | "celebrate";
+  mascotState?: Exclude<MascotState, "face" | "surprise" | "celebrate">;
 };
-
-const mascotBounce = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-`;
 
 const sparkle = keyframes`
   0%, 100% { opacity: 0.4; transform: scale(0.9); }
@@ -80,18 +76,7 @@ export const BlockingProcessOverlay = ({
               placeItems: "center",
             }}
           >
-            <Box
-              component="img"
-              src={getMascotImagePath(mascotId, mascotState)}
-              alt="相棒マスコット"
-              sx={{
-                width: { xs: 68, sm: 84 },
-                height: { xs: 68, sm: 84 },
-                objectFit: "contain",
-                animation: `${mascotBounce} 1200ms ease-in-out infinite`,
-                "@media (prefers-reduced-motion: reduce)": { animation: "none" },
-              }}
-            />
+            <MascotFigure mascotId={mascotId} state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="bounce" />
             <AutoAwesomeRoundedIcon
               sx={{
                 position: "absolute",

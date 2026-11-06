@@ -25,7 +25,8 @@ import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
 
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
-import { getMascotImagePath, isMascotId, type MascotId } from "@/app/component/mascot";
+import { isMascotId, type MascotId } from "@/app/component/mascot";
+import { MascotFigure } from "@/app/component/mascotFigure";
 import { auth } from "@/lib/firebase";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -148,12 +149,7 @@ export default function HomePage() {
               <CardContent sx={{ p: 3 }}>
                 <Stack spacing={2.5}>
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Box
-                      component="img"
-                      src={getMascotImagePath(mascotId, "normal")}
-                      alt="ユーザーの相棒"
-                      sx={{ width: 132, height: 132, objectFit: "cover", borderRadius: 3 }}
-                    />
+                    <MascotFigure mascotId={mascotId} state="normal" alt="ユーザーの相棒" size="L" grounding="disc" />
                     <Box>
                       <Chip label="エンジニア見習い" size="small" sx={{ mb: 1, fontWeight: 900, bgcolor: "#dbeafe", color: "#0b4ac8" }} />
                       <Typography sx={{ fontSize: 28, fontWeight: 950, lineHeight: 1.1 }}>{displayName}</Typography>
@@ -252,7 +248,7 @@ export default function HomePage() {
                     </Stack>
                   </Box>
                   <Box sx={{ p: 2, borderRadius: 3, bgcolor: "#eff6ff", display: "flex", gap: 1.5 }}>
-                    <Box component="img" src={getMascotImagePath(mascotId, "happy")} alt="応援する相棒" sx={{ width: 54, height: 54, borderRadius: "50%", objectFit: "cover" }} />
+                    <MascotFigure mascotId={mascotId} alt="応援する相棒" size="S" presentation="circle" />
                     <Box>
                       <Typography fontWeight={900}>いいペースだよ！</Typography>
                       <Typography variant="body2" color="text.secondary">この調子でスキルをレベルアップしよう。</Typography>
