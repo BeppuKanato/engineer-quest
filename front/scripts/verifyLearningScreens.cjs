@@ -14,7 +14,7 @@ function load(file) {
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'), { fileName: file, compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText,
     { ...globals, exports, require: name => {
       if (name === '@/lib/fetcher') return { fetcher: async (url, options) => { requests.push({ url, options }); return { courseId: 'c', unit: {}, phase: {}, unlockedAchievements: [] }; } };
-      if (name === '@/lib/clientQueryCache') return { queryTags: { courses:'courses',home:'home',collection:'collection',achievements:'achievements' }, invalidateClientQueries: tags => invalidations.push(tags) };
+      if (name === '@/lib/clientQueryCache') return { queryTags: { courses:'courses',home:'home',collection:'collection',achievements:'achievements' }, invalidateClientQueries: tags => invalidations.push(tags), fetchClientQuery: (key, query) => query() };
       if (name === 'react') return {};
       if (!name.startsWith('.') && !name.startsWith('@/')) return require(name);
       const target = name.startsWith('@/') ? path.resolve(root, name.slice(2)) : path.resolve(path.dirname(file), name);

@@ -1,5 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
-import { invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
+import { fetchClientQuery, invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
 import type { BfsUnitPhaseSummary } from "@/features/learning/bfs/unit/unit.types";
 
 export type LearningStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
@@ -22,7 +22,8 @@ export type LearningEvent = {
 };
 const unitPath = (courseId: string) => `/learning/units/${encodeURIComponent(courseId)}`;
 const invalidate = () => invalidateClientQueries([queryTags.courses, queryTags.home, queryTags.collection, queryTags.achievements]);
-export const getLearningProgress = (token: string, courseId: string) => fetcher<LearningProgress>(`${unitPath(courseId)}/progress`, { token });
+export const getLearningProgress = (token: string, courseId: string) =>
+  fetchClientQuery(`learning-progress:${courseId}`, () => fetcher<LearningProgress>(`${unitPath(courseId)}/progress`, { token }), { staleTimeMs: 30_000, tags: [queryTags.courses] });
 export async function startLearningUnit(token: string, courseId: string, phaseKey?: string) {
   const result = await fetcher<{ courseId: string; unit: UnitProgress }>(`${unitPath(courseId)}/start`, { token, method: "POST", body: JSON.stringify({ phaseKey }) });
   invalidate(); return result;

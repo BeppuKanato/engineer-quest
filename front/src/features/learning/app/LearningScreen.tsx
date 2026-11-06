@@ -37,7 +37,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const uid = firebaseUser!.uid, courseId = unit.courseId;
   const log = useLearningLog(courseId);
   const [draft, setDraft] = useState<{ code?: string } | null>(null), [draftError, setDraftError] = useState(false);
-  const [ready, setReady] = useState(false), [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
+  const [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
   const [rewards, setRewards] = useState(emptyLearningRewards);
   const { boundary, present, finish } = useRewardBoundary();
   const [finalShown, setFinalShown] = useState(false), [unitSaved, setUnitSaved] = useState(progress.unit?.status === "COMPLETED");
@@ -54,10 +54,10 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   useEffect(() => {
     let current = true;
     setEntryError(null);
-    // 単元画面を経ない直接訪問でも開始を記録する。既に完了済みなら状態は維持する。
+    // 開始記録は描画を待たせない（#151）。単元画面を経ない直接訪問でも開始を記録する。既に完了済みなら状態は維持する。
+    // 失敗しても学習は続けられるため、警告として出し、再試行できるようにする。
     void (initialPhase === null ? Promise.resolve() : getToken().then(token => startLearningUnit(token, courseId, unit.phases[initialPhase].id))).then(() => {
       if (!current) return;
-      setReady(true);
       log({ eventType: "unit_view", payload: { resume: !!progress.unit, phaseKey: initialPhase === null ? null : unit.phases[initialPhase].id } });
       if (!progress.unit) log({ eventType: "unit_start", phaseKey: unit.phases[initialPhase ?? 0].id, payload: { resume: false, direct: true } });
     }, error => { if (current) setEntryError(learningErrorMessage(error)); });
@@ -85,9 +85,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   }, [finalShown, unitSaved, courseId, getToken, log, unitRevision]);
   const saveCode = useCallback((code: string) => setDraftError(!writeCodeDraft(courseId, uid, code)), [courseId, uid]);
   const dismissAwardedCard = useCallback((cardId: string) => setRewards(current => ({ ...current, awardedCards: current.awardedCards.filter(item => item.card.id !== cardId) })), []);
-  if (entryError) return <Alert severity="error" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>{entryError}</Alert>;
-  if (!ready || !draft) return <Typography role="status">学習を開いています。</Typography>;
+  if (!draft) return <Typography role="status">学習を開いています。</Typography>;
   return <LearningRewardsContext.Provider value={{ rewards, dismissAwardedCard }}>
+    {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
     <BfsUnitPreview embedded initialPhaseIndex={initialPhase} initialFurthestIndex={next ?? unit.phases.length - 1} initialUnitComplete={progress.unit?.status === "COMPLETED"}

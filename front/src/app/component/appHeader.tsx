@@ -23,7 +23,6 @@ import * as React from "react";
 
 import { useUserMascotState } from "./mascot";
 import { MascotFigure } from "./mascotFigure";
-import { PageTransitionOverlay } from "./pageTransitionOverlay";
 
 const pages = [
   { label: "ホーム", href: "/home", icon: HomeRoundedIcon, match: ["/home"] },
@@ -42,27 +41,9 @@ const pages = [
 
 export const AppHeader: React.FC = () => {
   const pathname = usePathname();
-  const [isNavigating, setIsNavigating] = React.useState(false);
   const { mascotId, isLoading: isMascotLoading } = useUserMascotState();
 
-  React.useEffect(() => {
-    setIsNavigating(false);
-  }, [pathname]);
-
-  const handleNavigate = (href: string) => {
-    if (href !== pathname) {
-      setIsNavigating(true);
-    }
-  };
-
   return (
-    <>
-    <PageTransitionOverlay
-      open={isNavigating}
-      title="ページを移動しています"
-      description="次の画面を準備しています。"
-      mascotState="thinking"
-    />
     <AppBar
       position="sticky"
       elevation={0}
@@ -79,7 +60,6 @@ export const AppHeader: React.FC = () => {
           <Box
             component={Link}
             href="/home"
-            onClick={() => handleNavigate("/home")}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -137,7 +117,6 @@ export const AppHeader: React.FC = () => {
                   key={page.label}
                   component={Link}
                   href={page.href}
-                  onClick={() => handleNavigate(page.href)}
                   aria-current={active ? "page" : undefined}
                   sx={{
                     position: "relative",
@@ -187,7 +166,6 @@ export const AppHeader: React.FC = () => {
               <IconButton
                 component={Link}
                 href="/profile"
-                onClick={() => handleNavigate("/profile")}
                 aria-label="プロフィール"
                 sx={{
                   p: 0.35,
@@ -215,6 +193,5 @@ export const AppHeader: React.FC = () => {
         </Toolbar>
       </Container>
     </AppBar>
-    </>
   );
 };
