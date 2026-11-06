@@ -135,6 +135,46 @@ export function buildMazeDiggingGrid(size: number, choices: readonly number[]): 
   return runMazeDigging(size, choices).grid;
 }
 
+/** 1回のバックトラックの記録。掘削列から決定的に導出する（盤面は変わらない）。 */
+export type MazeDiggingBacktrack = {
+  /** このバックトラックが起きる直前の掘削の位置（digs への 0 始まりの添字）。 */
+  readonly afterDigIndex: number;
+  /** 行き止まりで取り除かれた部屋（現在マス側から再開マス側へ向かう順）。 */
+  readonly poppedRooms: readonly MazeCellKey[];
+  /** 戻り終えた先の部屋。ここから掘り直す。 */
+  readonly resumeRoom: MazeCellKey;
+  /** 盤面の壁集合。直前の掘削直後と変わらない。 */
+  readonly wallsAfter: readonly MazeCellKey[];
+  /** 戻り終えた時点のスタック経路（部屋列を間のマスでつないだもの）。 */
+  readonly stackPath: readonly MazeCellKey[];
+};
+
+/**
+ * 掘削列からバックトラックを導出する。次の掘削の開始マスが直前の掘削先と
+ * 異なれば、その間にスタックの巻き戻しが起きている。再開マスと戻り終えた
+ * スタックは、次の掘削のスタック経路（末尾の間の壁＋部屋を除いたもの）から
+ * 読み取れる。最後の掘削の後にスタックが空になるまで戻る過程は、完成側の
+ * 状態であり、バックトラックには含めない。
+ */
+export function mazeDiggingBacktracks(digs: readonly MazeDiggingDig[]): readonly MazeDiggingBacktrack[] {
+  const backtracks: MazeDiggingBacktrack[] = [];
+  for (let index = 0; index + 1 < digs.length; index += 1) {
+    const next = digs[index + 1];
+    if (next.from === digs[index].room) continue;
+    const rooms = digs[index].stackPath.filter((_, position) => position % 2 === 0);
+    const resumeIndex = rooms.indexOf(next.from);
+    if (resumeIndex < 0) throw new Error(`Backtrack resume room is not on the stack: ${next.from}`);
+    backtracks.push({
+      afterDigIndex: index,
+      poppedRooms: rooms.slice(resumeIndex + 1).reverse(),
+      resumeRoom: next.from,
+      wallsAfter: digs[index].wallsAfter,
+      stackPath: next.stackPath.slice(0, -2),
+    });
+  }
+  return backtracks;
+}
+
 /**
  * 完成した迷路の start から goal への経路を幅優先探索で導出する。
  * 完全迷路では経路は1つに定まるため、結果は決定的になる。
