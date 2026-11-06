@@ -1,18 +1,12 @@
 import { defineLearningContent } from "../../player/content.types";
-import { bfsGraph } from "../bfsGraph";
+import { bfsGraph, bfsMaze } from "../bfsGraph";
 import { validateMotivationCanvas, type MotivationCanvasState, type MotivationContent, type VocabularyEntry } from "./motivation.types";
 
 /**
  * 格子の配置は、正本グラフ（../bfsGraph）の辺がすべて隣接マス間の移動になるように置く。
  * A B D / C E F の2行3列で、全7辺が上下左右の1マス移動と1対1に対応する（#91）。
  */
-const maze: MotivationCanvasState["data"]["maze"] = {
-  rows: 2, columns: 3,
-  places: [
-    { id: "A", row: 0, column: 0 }, { id: "B", row: 0, column: 1 }, { id: "D", row: 0, column: 2 },
-    { id: "C", row: 1, column: 0 }, { id: "E", row: 1, column: 1 }, { id: "F", row: 1, column: 2 },
-  ],
-};
+const maze: MotivationCanvasState["data"]["maze"] = bfsMaze;
 
 const routes: MotivationCanvasState["data"]["routes"] = [
   {
