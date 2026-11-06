@@ -62,9 +62,11 @@ export default function CreatePage() {
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
     <AppHeader /><FeedbackDestination failed={!!error} ready={!loading && !error} />
-    <Container maxWidth={false} sx={{ maxWidth: 1180, py: 4 }}>
-      <Stack spacing={3}>
+    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
         <CreateBreadcrumbs items={[{ label: "作る" }]} />
+      </Container>
+    <Container maxWidth={false} sx={{ maxWidth: 1180, pt: 3, pb: 4 }}>
+      <Stack spacing={3}>
         <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
           <Box><Typography variant="h3" fontWeight={950}>作る</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Pythonで機能を完成させ、達成した要件の分だけ得点を伸ばします。</Typography></Box>
           <Button component={Link} href="/my-works" variant="outlined" sx={{ alignSelf: { md: "center" }, fontWeight: 900 }}>挑戦中・提出済み</Button>
