@@ -6,13 +6,12 @@ import { bfsImplementationContent as content } from "./implementation.content";
 import { resultKinds, type TestOutcome } from "./implementation";
 
 import { DistanceOutput, formatDistance as distance } from "./DistanceOutput";
-import { editorTokens } from "./editor.tokens";
 
 const labels = content.display;
 
-export function ImplementationResults({ outcomes, diagnostics = outcomes, dark = false }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[]; dark?: boolean }) {
+export function ImplementationResults({ outcomes, diagnostics = outcomes }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[] }) {
   const kinds = resultKinds(diagnostics);
-  return <Box sx={{ color: dark ? editorTokens.text : playerTokens.text }}>
+  return <Box sx={{ color: playerTokens.text }}>
     {kinds.length > 0 && <Box role="status" aria-label={labels.errorLabel} sx={{ mb: 2 }}>
       {kinds.map(kind => <Typography component="p" key={kind} data-error-kind={kind}>{labels.messages[kind]}</Typography>)}
     </Box>}
@@ -26,7 +25,7 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes, dark =
           {test.visibility === "display" && <>
             {scene && <>
               <Typography component="p">{labels.startLabel}：{scene.start}</Typography>
-              <Box sx={{ height: 210, display: "flex", bgcolor: playerTokens.surface, borderRadius: dark ? 1 : 0, my: dark ? 1 : 0 }}><ConsolidationGraph graph={scene.graph} start={scene.start} minHeight={0} /></Box>
+              <Box sx={{ height: 210, display: "flex", bgcolor: playerTokens.surface, border: "1px solid #e5e7eb", borderRadius: 1, my: 1 }}><ConsolidationGraph graph={scene.graph} start={scene.start} minHeight={0} /></Box>
             </>}
             <Typography component="p" sx={{ fontSize: 16 }}>{labels.expectedLabel}：
               {Object.entries(test.expected).map(([node, value]) => <Box component="span" key={node} sx={{ display: "inline-block", mr: 1 }}>{node}：{distance(value)}</Box>)}

@@ -1,6 +1,8 @@
 import { playerTokens } from "../../player/player.tokens";
-/** エディタのUIだけに使う。教材キャンバスの状態色はplayerTokensを保つ。 */
+/** エディタ画面だけに使う（#149 でダーク基調を廃止し、アプリ・教材と同じ明色に統一した）。
+ * エディタ領域の分離は暗色ではなく、枠と見出しで表す。教材キャンバスの状態色は playerTokens を保つ。 */
 export const editorTokens = {
-  background: "#1e1e1e", panel: "#252526", border: "#666666", text: "#e7e7e7",
-  button: "#333333", focus: playerTokens.focus, onFocus: playerTokens.surface,
+  background: playerTokens.background, panel: playerTokens.surface, panelAlt: playerTokens.layers.layer0,
+  border: "#9ca3af", text: playerTokens.text, button: playerTokens.layers.layer0,
+  focus: playerTokens.focus, onFocus: playerTokens.surface,
 } as const;

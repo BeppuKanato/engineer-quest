@@ -3,20 +3,18 @@
 import { Box, Button, Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
 
 import { playerTokens } from "../../player/player.tokens";
-import { editorTokens } from "./editor.tokens";
 
 import { bfsCode } from "../code-mapping/bfsCode";
 import { ParsonsBoard } from "../consolidation/ParsonsBoard";
 import { bfsImplementationContent as content } from "./implementation.content";
 import type { HintLevel } from "./implementation";
 
-export function ImplementationHints({ level, onInsert, onClose, dark = false }: {
-  dark?: boolean;
+export function ImplementationHints({ level, onInsert, onClose }: {
   level: HintLevel; onInsert: (token: string) => void; onClose: () => void;
 }) {
-  const textColor = dark ? editorTokens.text : playerTokens.text;
+  const textColor = playerTokens.text;
   return <Dialog open onClose={onClose} maxWidth={false} aria-labelledby="implementation-hint-title"
-    slotProps={{ paper: { sx: { width: "90vw", maxHeight: "90dvh", m: 1, bgcolor: dark ? editorTokens.panel : playerTokens.surface, color: textColor } } }}>
+    slotProps={{ paper: { sx: { width: "min(92vw, 760px)", maxHeight: "90dvh", m: 1, bgcolor: playerTokens.surface, color: textColor } } }}>
     <DialogTitle id="implementation-hint-title">{content.hints.labels[level - 1]}</DialogTitle>
     <DialogContent>
       {level === 1 && <>
@@ -33,9 +31,9 @@ export function ImplementationHints({ level, onInsert, onClose, dark = false }: 
       </Box>}
       {level === 4 && <>
         <Typography component="p" sx={{ mb: 1 }}>{content.hints.parsonsQuestion.instruction}</Typography>
-        <Box sx={{ bgcolor: playerTokens.surface, color: playerTokens.text, p: dark ? 1 : 0 }}><ParsonsBoard question={content.hints.parsonsQuestion} code={bfsCode} /></Box>
+        <Box sx={{ bgcolor: playerTokens.surface, color: playerTokens.text }}><ParsonsBoard question={content.hints.parsonsQuestion} code={bfsCode} /></Box>
       </>}
-      <Button onClick={onClose} sx={{ mt: 2, minHeight: 44, color: dark ? editorTokens.text : playerTokens.control }}>{content.hints.closeLabel}</Button>
+      <Button onClick={onClose} sx={{ mt: 2, minHeight: 44, color: playerTokens.control }}>{content.hints.closeLabel}</Button>
     </DialogContent>
   </Dialog>;
 }
