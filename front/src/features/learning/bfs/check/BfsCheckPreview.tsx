@@ -60,11 +60,11 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
         図の丸いボタン{question.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう
       </Typography>}
       <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
-        allowNone={question?.allowNone} onAnswer={submit} />
+        allowNone={question?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
       {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
       <Box sx={{ minHeight: 44, mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center" }}>
         {retry && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label="該当ステップの動きを確認する" />}
-        {attempt && !attempt.correct && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(bfsCheckContent, current, question.id))}
+        {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(bfsCheckContent, current, question.id))}
           sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
             "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === bfsCheckContent.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
         {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bfsCheckContent))}

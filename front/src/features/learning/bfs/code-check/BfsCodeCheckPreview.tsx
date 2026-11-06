@@ -73,7 +73,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
         </Box>
         <Typography component="p" sx={{ textAlign: "center", fontSize: 16, mt: 2, mb: 1 }}>{content.instruction}</Typography>
         <Box role="group" aria-label="空欄に入るコードの選択肢" sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
-          {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple
+          {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple disabled={attempt?.correct === true}
             aria-label={`${choice.text}を選ぶ`} onClick={() => setSession(current => answerQuestion(content, current, question.id, { kind: "choice", choiceId: choice.id }))}
             sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999, color: playerTokens.text, bgcolor: playerTokens.surface,
               minWidth: 120, minHeight: 48, px: 2, fontSize: 18, fontFamily: "monospace", textTransform: "none",
@@ -81,10 +81,10 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
               "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
         </Box>
       </>}
-      {attempt && !attempt.correct && <>
-        <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>
+      {attempt && <>
+        {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
-          <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />
+          {!attempt.correct && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />}
           {question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
             sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
               "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}

@@ -165,9 +165,8 @@ export function answerQuestion(content: AssessmentContent, state: AssessmentStat
   if (!question || question.id !== questionId || !allowed(question, answer)) return state;
   const comparable = "kind" in question && question.kind === "parsons" && answer.kind === "order" ? normalizeParsonsOrder(question, answer) : answer;
   const correct = sameAnswer(comparable, question.correctAnswer);
-  // 確認問題（診断型以外）は正解したらそのまま次の問題へ進む。診断型は正解しても「次へ」を押すまで同じ問に留まる。
-  const advance = correct && content.kind !== "diagnostic-check";
-  return { ...state, position: advance ? (state.position ?? 0) + 1 : state.position, records: state.records.map(record => record.questionId !== questionId ? record : {
+  // 進行は全形式で統一する：回答（正解・不正解とも）では進まず、「次へ」（advanceAssessment）を押して初めて次の問題へ進む。
+  return { ...state, records: state.records.map(record => record.questionId !== questionId ? record : {
     questionId, attemptCount: record.attemptCount + 1, firstCorrect: record.firstCorrect ?? correct, solved: record.solved || correct,
     attempts: [...record.attempts, { number: record.attemptCount + 1, answer: answer.kind === "order" ? { ...answer, lineIds: [...answer.lineIds] } : { ...answer }, correct }],
   }) };

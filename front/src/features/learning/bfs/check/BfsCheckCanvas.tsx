@@ -26,12 +26,14 @@ const answerCueSx = {
 } as const;
 
 /** 図と回答操作を同じキャンバスへまとめる。画面下端へ操作を押し出さない。 */
-export function BfsCheckCanvas({ canvas, questionId, nodeIds, allowNone = false, onAnswer }: {
+export function BfsCheckCanvas({ canvas, questionId, nodeIds, allowNone = false, onAnswer, disabled = false }: {
   canvas: BfsExecutionCanvasState;
   questionId?: string;
   nodeIds?: readonly string[];
   allowNone?: boolean;
   onAnswer: (answer: NodeAnswer) => void;
+  /** 正解後は選び直せないよう入力を固定する。 */
+  disabled?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 600, height: 530 });
@@ -56,7 +58,7 @@ export function BfsCheckCanvas({ canvas, questionId, nodeIds, allowNone = false,
       <Box sx={{ width: graphGeometry.width * scale, height: graphGeometry.height * scale + controlsHeight, flexShrink: 0 }}>
         <BfsExecutionCanvas canvas={canvas} highlightNodes={!questionId}
           graphAction={{ height: actionHeight, content: <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {questionId && allowNone && <Button key={questionId} type="button" startIcon={<TouchAppIcon sx={{ fontSize: `${22 / scale}px !important` }} />}
+            {questionId && allowNone && <Button key={questionId} type="button" disabled={disabled} startIcon={<TouchAppIcon sx={{ fontSize: `${22 / scale}px !important` }} />}
               onClick={() => onAnswer({ kind: "none" })}
               sx={{ ...answerCueSx, minHeight: 48 / scale, px: `${24 / scale}px`, borderRadius: 999, bgcolor: playerTokens.layers.layer0,
                 color: playerTokens.text, fontSize: Math.min(20, Math.max(16, size.width * 0.015)) / scale, fontWeight: 700,
@@ -71,7 +73,7 @@ export function BfsCheckCanvas({ canvas, questionId, nodeIds, allowNone = false,
             const size = tapSize;
             const ringInset = (size - graphGeometry.ringRadius * 2) / 2;
             return <foreignObject key={questionId} x={-size / 2} y={-size / 2} width={size} height={size}>
-              <Box component="button" type="button" aria-label={`${nodeId}を選ぶ`}
+              <Box component="button" type="button" aria-label={`${nodeId}を選ぶ`} disabled={disabled}
                 onClick={() => onAnswer({ kind: "node", nodeId })}
                 sx={{ ...answerCueSx, width: "100%", height: "100%", display: "block", p: 0, border: 0,
                   borderRadius: "50%", background: "transparent", cursor: "pointer", touchAction: "manipulation",
