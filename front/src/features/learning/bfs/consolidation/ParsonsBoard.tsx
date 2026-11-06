@@ -6,7 +6,9 @@ import { useState } from "react";
 
 import type { OrderAnswer, ParsonsQuestion } from "../../assessment/assessment";
 import { playerTokens } from "../../player/player.tokens";
-import { bfsCode } from "../code-mapping/bfsCode";
+
+/** 並び替え対象のコード契約。行の意味IDと本文だけを使うため、単元を問わず使える。 */
+export type ParsonsCode = { readonly lines: readonly { readonly id: string; readonly text: string }[] };
 
 const rowStyle = {
   display: "flex", alignItems: "center", width: "max-content", minWidth: "100%", boxSizing: "border-box",
@@ -32,7 +34,7 @@ function SortableLine({ id, text, index, count, duration, disabled = false, onMo
 }
 
 /** 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。 */
-export function ParsonsBoard({ question, code, onAnswer, disabled = false }: { question: ParsonsQuestion; code: typeof bfsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean }) {
+export function ParsonsBoard({ question, code, onAnswer, disabled = false }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean }) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
