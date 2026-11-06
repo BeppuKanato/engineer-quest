@@ -30,6 +30,8 @@ export type PythonTraceResult = {
   readonly limit: number;
   /** 型・内容で候補を一意に選べなかった場合は、部分再生でも推測しない。 */
   readonly ambiguous: boolean;
+  /** 曖昧になった変数の種類（queue / distances / grid / array）。判定は単元ごとに自単元の種類だけを見る。 */
+  readonly ambiguousKinds: readonly string[];
 };
 export type PythonTraceRequest = {
   readonly code: string;
