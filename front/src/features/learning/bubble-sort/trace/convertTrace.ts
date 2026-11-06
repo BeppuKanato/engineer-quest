@@ -91,7 +91,8 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
     if (!lastFrame.current) {
       emit({ values, comparing: null, fixedFrom: values.length, highlights: [] }, event, text.initial);
     }
-    if (event.event === "return") {
+    // 例外や打ち切りで抜けたフレームにも return イベントが届くため、成功した場合だけ終端として扱う。
+    if (event.event === "return" && trace.status === "returned") {
       flushComparison(values, event);
       if (lastI !== null && comparisonsInPass > 0) emitPassEnd(values, values.length - (lastI + 1), event);
       // 終端の並びは作業リストのスナップショットではなく、実際に返されたリストを正とする（sorted(values) を返す実装など）。
