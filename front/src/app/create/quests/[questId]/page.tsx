@@ -35,9 +35,11 @@ export default function CreateQuestDetailPage() {
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
     <AppHeader /><FeedbackDestination failed={!!error} ready={!!quest && !error} />
-    <Container maxWidth={false} sx={{ maxWidth: 1120, py: 4 }}>
-      {loading ? <Skeleton variant="rounded" height={700} /> : <Stack spacing={3}>
+    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
         <CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest?.title ?? "課題" }]} />
+      </Container>
+    <Container maxWidth={false} sx={{ maxWidth: 1120, pt: 3, pb: 4 }}>
+      {loading ? <Skeleton variant="rounded" height={700} /> : <Stack spacing={3}>
         {error && <Alert severity="error">{error}</Alert>}
         {quest && <>
           <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, border: "1px solid #dbe3ef" }}>

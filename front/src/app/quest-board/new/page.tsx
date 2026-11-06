@@ -203,14 +203,16 @@ export default function NewQuestPostPage() {
         description="投稿の保存が完了しました。詳細画面を開いています。"
       />
 
-      <Container maxWidth={false} sx={{ maxWidth: 960, py: 4 }}>
-        <Stack spacing={3}>
+      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
           <AppBreadcrumbs
             items={[
               { label: "掲示板", href: "/quest-board" },
               { label: "新規投稿" },
             ]}
           />
+        </Container>
+      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 4 }}>
+        <Stack spacing={3}>
           <Box>
             <Typography variant="h4" fontWeight={900}>
               新しい投稿
