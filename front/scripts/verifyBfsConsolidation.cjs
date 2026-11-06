@@ -37,6 +37,9 @@ assert.equal(content.questions.length, 5);
 assert.equal(content.code, bfsCode);
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
 assert.deepEqual(plain(content.questions.map(question => question.tags[0])), ["処理順序の追跡", "キューの状態の追跡", "たどり着けない場所の扱い", "距離が決まった場所の扱い", "コード全体の流れ"]);
+// たどり着けない場所の復習先は、結果ではなく「発見の関門」のステップ列を指す（#182）。
+const unreachable = content.questions.find(question => question.id === "unreachable-z");
+assert.deepEqual(plain(unreachable.reviewStepIds), ["for-a-b", "if-a-b", "assign-a-b", "execution-discover-b"], "unreachable review must show how a found neighbor is recorded and enqueued");
 assert.equal(q1.scene.graph, searchGraph); assert.equal(q4.scene.graph, searchGraph);
 assert.equal(q3.scene.graph.edges, searchGraph.edges);
 assert.deepEqual(plain(q3.scene.graph.nodes.slice(0, 6)), plain(searchGraph.nodes));
