@@ -200,7 +200,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
               <Typography component="p" sx={{ fontSize: 16, mb: 0.5 }}>{text.hints}</Typography>
               <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
                 {content.hints.labels.map((label, index) => <Button key={label} aria-label={label} title={label} variant="outlined" disabled={busy || !editorReady || (index > 0 && usage[index - 1] === 0)} onClick={() => openHint((index + 1) as HintLevel)}
-                  sx={{ ...outlinedButton, minWidth: 0, display: "block", textTransform: "none", fontSize: 14, py: 0.5, px: 0.5 }}>
+                  sx={{ ...outlinedButton, minWidth: 0, display: "block", textTransform: "none", fontSize: 15, py: 0.5, px: 0.5 }}>
                   <Box component="span" sx={{ display: "block" }}>{content.hints.compactLabels[index]}</Box>
                   <Box component="span" sx={{ display: "block" }}>{text.hintNames[index]}</Box>
                 </Button>)}
