@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
+import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer } from "../../assessment/assessment";
@@ -20,6 +21,28 @@ import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { ConsolidationGraph } from "./ConsolidationGraph";
 import { ParsonsBoard } from "./ParsonsBoard";
 import { bfsConsolidationContent as content, type ConsolidationQuestion } from "./consolidation.content";
+
+/** 結果のスコア表示。正解数とゲージがアニメーションで増えて最終値に届く。動きを減らす設定では即座に最終値を出す。 */
+function DiagnosisScore({ correct, total }: { correct: number; total: number }) {
+  const reduced = useReducedMotion();
+  const progress = useMotionValue(reduced ? 1 : 0);
+  const count = useTransform(progress, value => Math.round(value * correct));
+  const width = useTransform(progress, value => `${total > 0 ? (value * correct / total) * 100 : 0}%`);
+  useEffect(() => {
+    if (reduced) { progress.set(1); return; }
+    const controls = animate(progress, 1, { duration: 0.9, delay: 0.25, ease: "easeOut" });
+    return () => controls.stop();
+  }, [progress, reduced]);
+  return <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, mt: 1 }}>
+    <Typography component="p" sx={{ fontSize: 15 }}>初回正解</Typography>
+    <Typography component="p" sx={{ fontSize: 44, fontWeight: 800, lineHeight: 1, color: playerTokens.focus }}>
+      <motion.span>{count}</motion.span> / {total}<Typography component="span" sx={{ fontSize: 20, fontWeight: 700 }}> 問</Typography>
+    </Typography>
+    <Box aria-hidden sx={{ width: "min(420px, 80%)", height: 10, borderRadius: 999, overflow: "hidden", bgcolor: playerTokens.states.completed.fill }}>
+      <Box component={motion.div} style={{ width }} sx={{ height: "100%", bgcolor: playerTokens.focus }} />
+    </Box>
+  </Box>;
+}
 
 /** embedded / onComplete / onNext は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。
  * このフェーズのリザルトは診断画面そのものなので、完了通知とは別に、診断画面から次へ進む導線（onNext）を足す。 */
@@ -86,17 +109,9 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
       </>}
       {diagnosis && <>
         <ResultConfetti />
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, mt: 1 }}>
-          <Typography component="p" sx={{ fontSize: 15 }}>初回正解</Typography>
-          <Typography component="p" sx={{ fontSize: 44, fontWeight: 800, lineHeight: 1, color: playerTokens.focus }}>
-            {diagnosis.correct} / {diagnosis.total}<Typography component="span" sx={{ fontSize: 20, fontWeight: 700 }}> 問</Typography>
-          </Typography>
-          <Box aria-hidden sx={{ width: "min(420px, 80%)", height: 10, borderRadius: 999, overflow: "hidden", bgcolor: playerTokens.states.completed.fill }}>
-            <Box sx={{ width: `${diagnosis.total ? (diagnosis.correct / diagnosis.total) * 100 : 0}%`, height: "100%", bgcolor: playerTokens.focus }} />
-          </Box>
-        </Box>
+        <DiagnosisScore correct={diagnosis.correct} total={diagnosis.total} />
         <Box component="ul" aria-label="論点ごとの結果" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
-          {diagnosis.tags.map(result => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag}
+          {diagnosis.tags.map((result, index) => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag} index={index}
             passed={result.passed} correct={result.correct} total={result.total}
             reviewAction={!result.passed ? <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
               onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} /> : undefined} />)}

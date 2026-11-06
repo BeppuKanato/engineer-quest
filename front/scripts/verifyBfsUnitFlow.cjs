@@ -162,6 +162,8 @@ assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearning
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
 // 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
 assert.match(celebrationSource, /<ResultConfetti/, "Phase results mount the shared confetti launcher");
+assert.match(celebrationSource, /data-phase-result-check/, "The celebration mark draws its check");
+assert.match(celebrationSource, /pathLength/, "The mark's circle and check draw in with path animation");
 const confettiSource = read(`${root}/app/ResultConfetti.tsx`);
 assert.match(confettiSource, /from "canvas-confetti"/, "Confetti comes from the library");
 assert.doesNotMatch(confettiSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
@@ -187,6 +189,8 @@ assert.match(consolidationSource, /"応用問題の結果"/, "Phase 6 result scr
 assert.doesNotMatch(consolidationSource, /応用問題の診断結果|診断結果を見る|診断には初回の回答|初回不正解/, "No diagnosis wording or failure labels in phase 6 user-facing strings");
 assert.match(consolidationSource, /<ResultTagRow/, "Phase 6 renders per-tag result rows");
 assert.match(consolidationSource, /<ResultConfetti/, "Phase 6 results also celebrate with confetti");
+assert.match(consolidationSource, /useTransform/, "Phase 6 score count and gauge animate up to the result");
+assert.match(consolidationSource, /function DiagnosisScore/, "Phase 6 score display is a dedicated animated component");
 const tagRowSource = read(`${root}/app/ResultTagRow.tsx`);
 assert.match(tagRowSource, /復習で確認できます/, "Tags not reached on the first attempt point at review instead of blame");
 assert.doesNotMatch(tagRowSource, /初回不正解/, "Tag rows never label a first attempt as a failure");

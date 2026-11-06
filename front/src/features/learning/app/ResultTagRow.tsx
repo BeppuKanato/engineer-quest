@@ -3,6 +3,7 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { Box, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 import { playerTokens } from "../player/player.tokens";
@@ -12,20 +13,28 @@ import { playerTokens } from "../player/player.tokens";
  * 中立の復習アイコン＋「復習で確認できます」で示して復習導線を主役にする。
  * 論点が複数問を持つ場合は分数と小バーを足す（1問だけの論点では出さない）。
  */
-export function ResultTagRow({ label, passed, correct, total, dataTag, reviewAction }: {
+export function ResultTagRow({ label, passed, correct, total, dataTag, reviewAction, index = 0 }: {
   label: string;
   passed: boolean;
   correct?: number;
   total?: number;
   dataTag?: string;
   reviewAction?: ReactNode;
+  /** 行の出現をずらすための表示順。 */
+  index?: number;
 }) {
+  const reduced = useReducedMotion();
   const multi = total !== undefined && total > 1 && correct !== undefined;
   return <Box component="li" data-result-tag={dataTag}
     sx={{ listStyle: "none", display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1.5, p: 1.5,
       border: `1px solid ${playerTokens.layers.layer1}`, borderRadius: 2, bgcolor: playerTokens.surface }}>
     {passed
-      ? <CheckCircleIcon aria-hidden sx={{ color: playerTokens.focus, fontSize: 34, flexShrink: 0 }} />
+      ? <Box component={motion.span} aria-hidden
+          initial={reduced ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: reduced ? 0 : 0.35, delay: reduced ? 0 : index * 0.07, repeat: 0, ease: "easeOut" }}
+          sx={{ display: "inline-flex", flexShrink: 0 }}>
+          <CheckCircleIcon sx={{ color: playerTokens.focus, fontSize: 34 }} />
+        </Box>
       : <Box aria-hidden sx={{ width: 34, height: 34, borderRadius: "50%", flexShrink: 0, display: "grid", placeItems: "center",
           border: `2px solid ${playerTokens.states.idle.stroke}` }}>
           <ReplayIcon sx={{ color: playerTokens.states.idle.stroke, fontSize: 20 }} />
