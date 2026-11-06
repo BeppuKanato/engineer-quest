@@ -178,7 +178,7 @@ export default function CreateQuestWorkPage() {
     <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}><Box><Typography variant="h3" fontWeight={950}>{quest.title}</Typography><Typography color="text.secondary" sx={{ mt: 0.5 }}>{quest.scenario}</Typography></Box><Paper elevation={0} sx={{ p: 2, minWidth: 230, border: "1px solid #c7d8f7", borderRadius: 2 }}><Stack direction="row" justifyContent="space-between"><Typography fontWeight={900}>現在の得点</Typography><Typography variant="h5" fontWeight={950} color="primary">{score} / {quest.maxScore}</Typography></Stack><LinearProgress variant="determinate" value={(score / quest.maxScore) * 100} sx={{ mt: 1, height: 9, borderRadius: 99 }} /><Typography fontSize={12} color="text.secondary" sx={{ mt: 0.7 }}>{basicPassed ? "基本要件クリア" : `基本要件 ${quest.basicScore}点分をすべて通すと提出できます`}</Typography></Paper></Stack>
     {error && <Alert severity="error">{error}</Alert>}
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(460px, 1fr) 280px" }, gap: 2, alignItems: "start" }}>
-      <Stack spacing={1.3}><Typography variant="h5" fontWeight={950}>要件</Typography>{quest.requirements.map((requirement) => {
+      <Stack spacing={1.3}>{quest.requirements.map((requirement) => {
         const result = results.find((item) => item.requirementId === requirement.id);
         const selected = selectedIds.includes(requirement.id);
         return <Accordion key={requirement.id} disableGutters elevation={0} sx={{ border: `1px solid ${result?.passed ? "#86efac" : "#dbe3ef"}`, borderRadius: "10px !important", overflow: "hidden", bgcolor: result?.passed ? "#f0fdf4" : "#fff" }}>

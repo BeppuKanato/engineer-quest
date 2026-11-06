@@ -26,6 +26,9 @@ for (const page of ['app/home/page.tsx', 'app/courses/page.tsx', 'app/collection
 // attempt state; saving / submitting invalidates the works caches instead (#174).
 const createWork = read('app/create/quests/[questId]/work/page.tsx');
 assert(createWork.includes('useUserSession'), 'create work page must use the session token');
+// 3カラムのカード上端を揃える（#184）: 要件カラムだけ見出し分ずれる形にしない。
+assert(!createWork.includes('>要件</Typography>'), 'requirements column must not lead with a standalone heading');
+assert(createWork.includes('alignItems: "start"'), 'the three-column grid keeps its tops aligned');
 assert(!createWork.includes('onAuthStateChanged'), 'create work page must not subscribe to auth state itself');
 assert(createWork.includes('invalidateClientQueries([queryTags.works])'), 'create work page must invalidate works caches after save/submit');
 // Board list and new-post share the same cached board/courses entries, so the form
