@@ -20,6 +20,7 @@
     "verify:wall-extension-implementation": "node scripts/verifyWallExtensionImplementation.cjs",
     "verify:bubble-sort-motivation": "node scripts/verifyBubbleSortMotivation.cjs",
     "verify:bubble-sort-execution": "node scripts/verifyBubbleSortExecution.cjs",
+    "verify:bubble-sort-check": "node scripts/verifyBubbleSortCheck.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
