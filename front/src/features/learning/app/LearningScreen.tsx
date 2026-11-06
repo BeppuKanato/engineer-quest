@@ -10,6 +10,7 @@ import { fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress } from "@/api/learning.api";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
+import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
 import type { BfsUnitPhaseSummary } from "../bfs/unit/unit.types";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
@@ -18,7 +19,7 @@ import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { LearningRewardsContext } from "./LearningRewardsContext";
-import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
+import { emptyLearningRewards, mergeLearningRewards, type LearningRewards } from "./rewards";
 import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
 import { learningErrorMessage, useLearningProgress } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
@@ -108,14 +109,31 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const saveCode = useCallback((code: string) => setDraftError(!writeCodeDraft(courseId, uid, code)), [courseId, uid]);
   const dismissAwardedCard = useCallback((cardId: string) => setRewards(current => ({ ...current, awardedCards: current.awardedCards.filter(item => item.card.id !== cardId) })), []);
   if (!draft) return <Typography role="status">学習を開いています。</Typography>;
+  // 単元コンテナは kind で出し分ける。進捗保存・下書き・学習ログ・フィードバック（#202）の経路は単元共通で、
+  // コンテナ側の受け口（props の形）も単元間で同一にそろえてある。
+  const unitPreviewProps = {
+    embedded: true,
+    initialPhaseIndex: initialPhase,
+    initialFurthestIndex: next ?? unit.phases.length - 1,
+    initialUnitComplete: progress.unit?.status === "COMPLETED",
+    initialCompletedPhases: progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey),
+    initialSummaries: savedPhaseSummaries(unit, progress),
+    initialCode: draft.code,
+    onCodeChange: saveCode,
+    onPhaseComplete: completePhase,
+    onFinalResult,
+    onLearningEvent: log,
+    rewards,
+    renderRewards: (value: LearningRewards) => <FinalLearningRewards rewards={value} onEvent={log} />,
+    onCheckPhaseCompleted,
+    renderPhaseFeedback,
+    renderUnitFeedback,
+  };
   return <LearningRewardsContext.Provider value={{ rewards, dismissAwardedCard }}>
     {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
-    <BfsUnitPreview embedded initialPhaseIndex={initialPhase} initialFurthestIndex={next ?? unit.phases.length - 1} initialUnitComplete={progress.unit?.status === "COMPLETED"}
-      initialCompletedPhases={progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey)} initialSummaries={savedPhaseSummaries(unit, progress)}
-      initialCode={draft.code} onCodeChange={saveCode} onPhaseComplete={completePhase} onFinalResult={onFinalResult} onLearningEvent={log} rewards={rewards} renderRewards={value => <FinalLearningRewards rewards={value} onEvent={log} />}
-      onCheckPhaseCompleted={onCheckPhaseCompleted} renderPhaseFeedback={renderPhaseFeedback} renderUnitFeedback={renderUnitFeedback} />
+    {unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
   </LearningRewardsContext.Provider>;
 }

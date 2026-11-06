@@ -1,8 +1,12 @@
 import { bfsUnitIntro, bfsUnitPhases, bfsUnitTitle } from "../bfs/unit/unit.content";
 import type { BfsUnitPhaseSummary } from "../bfs/unit/unit.types";
+import { bubbleSortUnitIntro, bubbleSortUnitPhases, bubbleSortUnitTitle } from "../bubble-sort/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";
 
-export const learningUnits = [{ courseId: "course-algorithm-breadth-first-search-v1", title: bfsUnitTitle, intro: bfsUnitIntro, kind: "bfs", phases: bfsUnitPhases }] as const;
+export const learningUnits = [
+  { courseId: "course-algorithm-breadth-first-search-v1", title: bfsUnitTitle, intro: bfsUnitIntro, kind: "bfs", phases: bfsUnitPhases },
+  { courseId: "course-algorithm-bubble-sort-v2", title: bubbleSortUnitTitle, intro: bubbleSortUnitIntro, kind: "bubble-sort", phases: bubbleSortUnitPhases },
+] as const;
 export const findLearningUnit = (courseId: string) => learningUnits.find(unit => unit.courseId === courseId);
 export type LearningUnit = (typeof learningUnits)[number];
 export function resumePhaseIndex(unit: LearningUnit, progress: LearningProgress): number | null {
