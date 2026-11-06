@@ -1,5 +1,14 @@
 import type { GraphCanvasState } from "../player/graphCanvas.types";
 
+/** 導入の格子配置もBFS・DFSで共有する（上段A B D／下段C E F）。 */
+export const bfsMaze = {
+  rows: 2, columns: 3,
+  places: [
+    { id: "A", row: 0, column: 0 }, { id: "B", row: 0, column: 1 }, { id: "D", row: 0, column: 2 },
+    { id: "C", row: 1, column: 0 }, { id: "E", row: 1, column: 1 }, { id: "F", row: 1, column: 2 },
+  ],
+} as const;
+
 /**
  * BFS 教材のグラフの正本（#88 で統一）。
  * 辺と配置はフェーズ2のレビュー済みサンプルに一致させる。

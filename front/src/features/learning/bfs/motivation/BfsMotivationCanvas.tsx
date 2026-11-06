@@ -2,10 +2,10 @@
 
 import { Box } from "@mui/material";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
-import { useId } from "react";
 
 import { GraphEdges, GraphNodes, GraphViewport } from "../../player/GraphDrawing";
 import { graphGeometry } from "../../player/graphGeometry";
+import { motivationMazeGeometry, MotivationMazeTiles, MotivationTrail, MotivationCurrentPlace } from "../../player/MotivationDrawing";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
 import type { MotivationCanvasState } from "./motivation.types";
@@ -29,32 +29,18 @@ function CandidateRoute({ route, view, point, focused, transition }: {
   </motion.g>;
 }
 
-function CurrentPlace({ position, transition }: { position: Point; transition: Transition }) {
-  const present = useIsPresent();
-  return <motion.circle role="img" aria-label="現在地" aria-hidden={!present || undefined}
-    initial={{ cx: position.x, cy: position.y, r: 22, opacity: 0 }}
-    animate={{ cx: position.x, cy: position.y, r: 22, opacity: 1 }} exit={{ opacity: 0 }} transition={transition}
-    fill={playerTokens.states.processing.fill} stroke={playerTokens.states.processing.stroke} strokeWidth={2} />;
-}
-
 /** 教材固有の図のみを描画する。再生、キャプション、操作バーは共通プレイヤーへ委譲。
  * onExit が渡された場合だけ、最終場面の終了ボタンを実際に押せるようにする（単元フローでの意思確認の区切り）。 */
 export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanvasState; onExit?: () => void }) {
   const { data, state, highlights } = canvas;
   const isMaze = data.view === "maze";
-  const wallId = useId();
   const reducedMotion = useReducedMotion();
   const transition = { duration: reducedMotion ? 0 : 0.6, ease: "easeInOut" } as const;
   // 迷路はグラフ領域（600×360）の中へ中央配置する。
-  const cell = Math.min(100, 440 / data.maze.columns, 240 / data.maze.rows);
-  const mazeOrigin = {
-    x: (600 - cell * data.maze.columns) / 2,
-    y: (360 - cell * data.maze.rows) / 2,
-  };
+  const { cell, point: mazePoint } = motivationMazeGeometry(data.maze);
   const point = (id: string) => {
     if (!isMaze) return data.graph.nodes.find((node) => node.id === id)!;
-    const place = data.maze.places.find((node) => node.id === id)!;
-    return { x: mazeOrigin.x + (place.column + 0.5) * cell, y: mazeOrigin.y + (place.row + 0.5) * cell };
+    return mazePoint(id);
   };
   const focus = (kind: "node" | "edge" | "route", id: string) => highlights.some((target) => target.kind === kind && target.id === id);
   const goal = point(state.goal);
@@ -63,19 +49,8 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
   return (
     <Box sx={{ height: "100%", minHeight: 220, position: "relative" }}>
       <GraphViewport label={isMaze ? "格子の迷路と現在の場所" : "AからFの場所とつながり"}>
-        <defs>
-          <pattern id={wallId} width={8} height={8} patternUnits="userSpaceOnUse">
-            <path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke={playerTokens.states.idle.stroke} />
-          </pattern>
-        </defs>
         <motion.g initial={false} animate={{ opacity: isMaze ? 1 : 0 }} transition={transition} aria-hidden={!isMaze}>
-          {Array.from({ length: data.maze.rows * data.maze.columns }, (_, index) => {
-            const row = Math.floor(index / data.maze.columns);
-            const column = index % data.maze.columns;
-            const wall = !data.maze.places.some((place) => place.row === row && place.column === column);
-            return <rect key={index} x={mazeOrigin.x + column * cell} y={mazeOrigin.y + row * cell} width={cell} height={cell}
-              fill={wall ? `url(#${wallId})` : playerTokens.surface} stroke={playerTokens.states.idle.stroke} />;
-          })}
+          <MotivationMazeTiles maze={data.maze} />
         </motion.g>
         <GraphEdges transition={transition} position={point} edges={data.graph.edges.map(edge => ({
           ...edge, highlighted: focus("edge", edge.id), hidden: isMaze && !focus("edge", edge.id),
@@ -84,12 +59,7 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
           {data.routes.filter((route) => state.shownRoutes.includes(route.id)).map((route) =>
             <CandidateRoute key={route.id} route={route} view={data.view} point={point} focused={focus("route", route.id)} transition={transition} />)}
         </AnimatePresence>
-        {state.trail.slice(1).map((id, index) => {
-          const from = point(state.trail[index]), to = point(id);
-          return <motion.line key={`${state.trail[index]}-${id}`} initial={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y, pathLength: 0 }}
-            animate={{ x1: from.x, y1: from.y, x2: to.x, y2: to.y, pathLength: 1 }}
-            stroke={playerTokens.focus} strokeWidth={6} transition={transition} />;
-        })}
+        <MotivationTrail trail={state.trail} point={point} transition={transition} />
         {!isMaze && <GraphNodes transition={transition} nodes={data.graph.nodes.map(node => ({
           ...node, label: state.showNames ? data.labels.nodeNames[node.id] : "",
           status: node.id === state.current ? "processing" : "idle",
@@ -115,7 +85,7 @@ export function BfsMotivationCanvas({ canvas, onExit }: { canvas: MotivationCanv
           </motion.g>;
         })}
         <AnimatePresence initial={false}>
-          {isMaze && current && <CurrentPlace key="current" position={current} transition={transition} />}
+          {isMaze && current && <MotivationCurrentPlace key="current" position={current} transition={transition} />}
         </AnimatePresence>
         {data.graph.nodes.map(node => {
           const p = point(node.id);
