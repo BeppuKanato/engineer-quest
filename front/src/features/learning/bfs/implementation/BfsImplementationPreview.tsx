@@ -7,6 +7,8 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
+import { DrawnCheck } from "../../app/DrawnCheck";
+import { ResultConfetti } from "../../app/ResultConfetti";
 import { playerTokens } from "../../player/player.tokens";
 import { BfsTraceDialog } from "../trace/BfsTraceDialog";
 import { traceBfsCode } from "../trace/acquireTrace";
@@ -159,6 +161,8 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
         sx={{ flexShrink: 0, bgcolor: colors.button, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
       {complete ? <Box sx={{ my: "auto", textAlign: "center", overflowY: "auto" }}>
+        <ResultConfetti />
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 1.5 }}><DrawnCheck size={76} /></Box>
         <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
         {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
         <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
