@@ -10,6 +10,11 @@ import type { DfsExecutionCanvasState } from "./execution.types";
 
 type Point = { x: number; y: number };
 export const dfsExecutionCanvasHeight = 510;
+/** コードの1行間の中間状態。通常再生・設問は元のsnapshotのまま使う。 */
+export type DfsExecutionView = {
+  readonly state: Pick<DfsExecutionCanvasState["state"], "current" | "stack" | "order" | "nodes">;
+  readonly highlights: DfsExecutionCanvasState["highlights"];
+};
 
 function StackItem({ nodeId, position, source, top, highlighted, duration }: {
   nodeId: string; position: Point; source: Point; top: boolean; highlighted: boolean; duration: number;
@@ -29,16 +34,18 @@ function StackItem({ nodeId, position, source, top, highlighted, duration }: {
 }
 
 /** 図・スタック・訪問順は同じ完全スナップショットから表示する。 */
-export function DfsExecutionCanvas({ canvas, renderNodeOverlay, highlightNodes = true }: {
+export function DfsExecutionCanvas({ canvas, renderNodeOverlay, highlightNodes = true, view }: {
   canvas: DfsExecutionCanvasState;
   /** 回答中は共通の回答リングを使い、処理状態の塗りと辺は残す。 */
   highlightNodes?: boolean;
   renderNodeOverlay?: (nodeId: string, radius: number) => ReactNode;
+  view?: DfsExecutionView;
 }) {
   const reducedMotion = useReducedMotion();
   const duration = reducedMotion ? 0 : 0.6;
   const transition = { duration, ease: "easeInOut" } as const;
-  const { data, state, highlights } = canvas;
+  const { data } = canvas;
+  const { state, highlights } = view ?? canvas;
   const position = (id: string): Point => data.graph.nodes.find(node => node.id === id)!;
   const focused = (kind: "node" | "stack-item", id: string) => highlights.some(item => item.kind === kind && item.id === id);
   const stackX = (index: number) => graphGeometry.width / 2 + (index - (state.stack.length - 1) / 2) * 86;
