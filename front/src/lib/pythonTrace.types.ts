@@ -8,6 +8,11 @@ export type PythonTraceLocals = {
   readonly grid?: readonly (readonly number[])[] | null;
   readonly size?: number | null;
   readonly choices?: readonly number[] | null;
+  /** 数値リスト（並び替えの作業配列など）。優先名は result、なければ型・内容で一意に検出する。 */
+  readonly array?: readonly number[] | null;
+  readonly i?: number | null;
+  readonly j?: number | null;
+  readonly n?: number | null;
 };
 export type PythonTraceEvent = {
   readonly line: number;
@@ -18,7 +23,7 @@ export type PythonTraceEvent = {
 export type PythonTraceResult = {
   readonly events: readonly PythonTraceEvent[];
   readonly status: "returned" | "error" | "truncated";
-  readonly result: Readonly<Record<string, number>> | readonly (readonly number[])[] | null;
+  readonly result: Readonly<Record<string, number>> | readonly (readonly number[])[] | readonly number[] | null;
   readonly error: { readonly line: number | null; readonly kind: string } | null;
   readonly stoppedLine: number | null;
   readonly eventCount: number;

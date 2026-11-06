@@ -52,6 +52,10 @@ def _eq_grid(value):
         grid.append(list(row))
     return grid
 
+def _eq_array(value):
+    return list(value) if type(value) in (list, tuple) and len(value) <= 64 and all((type(item) is int and item.bit_length() < 256) or (type(item) is float and _eq_math.isfinite(item)) for item in value) else None
+
+
 def _eq_detect(values, preferred, convert):
     global _eq_ambiguous
     if preferred in values:
@@ -66,6 +70,7 @@ def _eq_locals(frame):
     result = {}
     queue_name, queue_value = _eq_detect(values, "queue", _eq_queue)
     distance_name, distance_value = _eq_detect(values, "distances", _eq_distances)
+    array_name, array_value = _eq_detect(values, "result", _eq_array)
     if queue_name is not None:
         result["queue"] = queue_value
     if distance_name is not None:
@@ -78,6 +83,12 @@ def _eq_locals(frame):
     choices = values.get("choices")
     if type(choices) in (list, tuple) and len(choices) <= 64 and all(type(item) is int for item in choices):
         result["choices"] = list(choices)
+    if array_name is not None:
+        result["array"] = array_value
+    for key in ("i", "j", "n"):
+        if key in values:
+            value = values[key]
+            result[key] = value if type(value) is int and value.bit_length() < 256 else None
     for key in ("node", "neighbor"):
         if key in values:
             value = values[key]
@@ -130,10 +141,12 @@ try:
     _eq_last_line = None
     _eq_ambiguous = False
     _eq_sys.settrace(_eq_trace)
-    _eq_raw_result = _eq_function(*_eq_args)
-    _eq_result = _eq_distances(_eq_raw_result)
+    _eq_returned = _eq_function(*_eq_args)
+    _eq_result = _eq_distances(_eq_returned)
     if _eq_result is None:
-        _eq_result = _eq_grid(_eq_raw_result)
+        _eq_result = _eq_grid(_eq_returned)
+    if _eq_result is None:
+        _eq_result = _eq_array(_eq_returned)
 except _EqTraceLimit:
     _eq_status = "truncated"
 except BaseException as _eq_exception:
