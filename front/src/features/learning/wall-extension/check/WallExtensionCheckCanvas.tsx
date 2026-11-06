@@ -43,7 +43,7 @@ export function WallExtensionCheckCanvas({ canvas, questionId, cellIds, onAnswer
   return <Box ref={host} sx={{ flex: 1, minHeight: 320, minWidth: 0 }}>
     <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ width: mazeGridGeometry.width * scale, height: mazeGridGeometry.height * scale, position: "relative", flexShrink: 0 }}>
-        <MazeGridDrawing canvas={canvas} label="9×9の迷路の盤面" />
+        <MazeGridDrawing canvas={canvas} label={`${canvas.data.size}×${canvas.data.size}の迷路の盤面`} />
         {questionId && <Box role="group" aria-label="回答の選択肢" sx={{ position: "absolute", inset: 0 }}>
           {cellIds?.map((key) => {
             const center = layout.center(key);

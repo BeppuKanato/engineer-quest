@@ -71,6 +71,7 @@
 | [wall-extension-phase3-208.md](wall-extension-phase3-208.md) | 記録 | Issue #208の棒倒し法フェーズ3（動きの確認問題）連結2問、フェーズ2盤面の参照と検証済みトレースとの正解照合 |
 | [wall-extension-phase4-209.md](wall-extension-phase4-209.md) | 記録 | Issue #209の棒倒し法フェーズ4（動きとコードの対応）137フレーム、CPythonトレースとの全行・全変数照合とelse行の説明フレーム |
 | [wall-extension-phase5-210.md](wall-extension-phase5-210.md) | 記録 | Issue #210の棒倒し法フェーズ5（コードの確認問題）独立2問、文脈で一意化する空欄位置と設問固有の解説フィードバック、フェーズ4参照コードとの照合 |
+| [wall-extension-phase6-211.md](wall-extension-phase6-211.md) | 記録 | Issue #211の棒倒し法フェーズ6（応用問題）転移タップ・性質と理由の選択・21行Parsons、完全迷路の独立検証と初回診断、ParsonsBoardの汎用化 |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
