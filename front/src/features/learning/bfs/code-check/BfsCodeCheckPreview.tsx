@@ -63,7 +63,7 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
       sx={{ width: embedded ? "100%" : "84vw", minHeight: embedded ? "100%" : "84dvh", p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none",
-      }}>{complete ? content.completion.caption : question?.prompt}</Typography>
+      }}>{complete ? content.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         <Box ref={codeRef} sx={{ width: "100%", overflowX: "auto", py: 1 }}>
@@ -81,19 +81,15 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
               "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
         </Box>
       </>}
-      {attempt && <>
-        {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
-          {!attempt.correct && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />}
-          {question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
-            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
-        </Box>
-      </>}
-      {embedded && complete && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}
-          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>
-      </Box>}
+      {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
+      <Box sx={{ minHeight: 44, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center", mt: 1 }}>
+        {attempt && !attempt.correct && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={content.reviewLabel} />}
+        {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
+          sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+            "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
+        {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}
+          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
+      </Box>
     </Box>
     {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsCodeMappingContent} stepIds={question.reviewStepIds}
       renderCanvas={canvas => <BfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
