@@ -20,6 +20,7 @@ import { WallExtensionCheckPreview } from "@/features/learning/wall-extension/ch
 import { WallExtensionCodeMappingPreview } from "@/features/learning/wall-extension/code-mapping/WallExtensionCodeMappingPreview";
 import { WallExtensionCodeCheckPreview } from "@/features/learning/wall-extension/code-check/WallExtensionCodeCheckPreview";
 import { WallExtensionConsolidationPreview } from "@/features/learning/wall-extension/consolidation/WallExtensionConsolidationPreview";
+import { WallExtensionImplementationPreview } from "@/features/learning/wall-extension/implementation/WallExtensionImplementationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -34,6 +35,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "wall-extension-code-mapping") return <WallExtensionCodeMappingPreview />;
   if (contentId === "wall-extension-code-check") return <WallExtensionCodeCheckPreview />;
   if (contentId === "wall-extension-consolidation") return <WallExtensionConsolidationPreview />;
+  if (contentId === "wall-extension-implementation") return <WallExtensionImplementationPreview />;
   if (contentId === "dfs-motivation") return <DfsMotivationPreview />;
   if (contentId === "dfs-execution") return <DfsExecutionPreview />;
   if (contentId === "dfs-check") return <DfsCheckPreview />;
