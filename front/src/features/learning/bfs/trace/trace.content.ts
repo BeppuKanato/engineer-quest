@@ -1,7 +1,7 @@
 export const bfsTraceText = {
   button: "実行する", resultButton: "動きを確認する",
-  loading: "表示用のグラフで自分のコードを実行しています。",
-  close: "動きの表示を閉じる", dialog: "自分のコードの動き（表示用グラフ）",
+  loading: "基本グラフで自分のコードを実行しています。",
+  close: "動きの表示を閉じる", dialog: "自分のコードの動き（基本グラフ）",
   variables: "実行中の変数", line: "観測行", unset: "—",
   unsupported: "このコードの動きは再生できませんでした。結果だけを表示します",
   timeout: "実行がタイムアウトしました。取得できた状態はありません。",
