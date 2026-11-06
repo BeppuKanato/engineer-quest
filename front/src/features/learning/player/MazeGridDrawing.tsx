@@ -12,6 +12,8 @@ import { playerTokens } from "./player.tokens";
  * 迷路グリッドの唯一の描画実装（GraphDrawing に対するグリッド版）。
  * 色の意味は UI 定義 §2 に従い、すべて playerTokens から取る。緑は使わない。
  * 壁は、レイヤー系で最も濃いニュートラル色として text を使う（専用トークンは無い）。
+ * highlight はフォーカス青の内側の枠で示す。壁マスは「今回壁になったマス」の
+ * 表現として実線の枠、通路マスはグラフのリングと同じ破線にする。
  */
 export function MazeGridDrawing({ canvas, label }: { canvas: MazeGridCanvasState; label: string }) {
   const { size } = canvas.data;
@@ -55,9 +57,9 @@ export function MazeGridDrawing({ canvas, label }: { canvas: MazeGridCanvasState
               animate={{ fill: fillFor(key), stroke: strokeFor(key), strokeWidth: key === target ? 2.5 : 1 }}
               transition={transition} />
             {highlighted.has(key) && (
-              <rect x={rect.x + 3} y={rect.y + 3} width={rect.width - 6} height={rect.height - 6}
+              <rect data-maze-highlight={key} x={rect.x + 3} y={rect.y + 3} width={rect.width - 6} height={rect.height - 6}
                 fill="none" stroke={playerTokens.focus} strokeWidth={graphGeometry.ringStrokeWidth}
-                strokeDasharray={graphGeometry.ringDasharray} pointerEvents="none" />
+                strokeDasharray={wallSet.has(key) ? undefined : graphGeometry.ringDasharray} pointerEvents="none" />
             )}
           </g>
         );
