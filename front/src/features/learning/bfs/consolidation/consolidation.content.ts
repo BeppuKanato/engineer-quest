@@ -52,10 +52,10 @@ export const bfsConsolidationContent: ConsolidationContent = {
       scene: { graph: isolatedGraph, start: "A" },
       choices: [{ id: "absent", text: "距離は決まらず、結果にも入らない" }, { id: "zero", text: "距離0として入る" }, { id: "largest", text: "いちばん大きな距離として入る" }],
       correctAnswer: { kind: "choice", choiceId: "absent" }, requires: null,
-      stepId: "return-distances", reviewStepIds: ["while-empty", "return-distances"], tags: ["たどり着けない場所の扱い"],
+      stepId: "return-distances", reviewStepIds: ["for-a-b", "if-a-b", "assign-a-b", "execution-discover-b"], tags: ["たどり着けない場所の扱い"],
       instruction: "結果の扱いを1つ選ぶ",
       correctFeedback: "正解。たどり着けないZはキューに入らず、距離辞書にも記録されません。",
-      incorrectFeedback: "不正解。出発点からたどれない場所が、一度でもキューに入るかを考えてみましょう。",
+      incorrectFeedback: "不正解。距離が記録されてキューに入るのは、処理中の場所の隣として見つかった場所だけです。Zはどの場所の隣にもないので、最後まで見つかりません。",
     },
     {
       kind: "choice", id: "start-already-discovered", prompt: "隣の場所を調べている途中で、出発点Aが隣として見つかったとき、Aの距離はどうなりますか？",
