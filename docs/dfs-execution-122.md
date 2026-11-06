@@ -4,7 +4,7 @@
 - 適用範囲: DFSの第2段階、BFS/DFS共有グラフの配置と参照経路、関連verify。
 - 最終確認日: 2026-11-06
 - 起点: PR #173マージ後のdevelop `9245a03925bfb2004d9241ebf3ea59893b745990`。
-- 実装コミット: 共有グラフ `a3f886e`、Windows検証互換 `a50b2d2`、17場面の実装・検証 `1db3114`。作業中にマージされた#149もdevelop `084c943`から取り込み、最終検証を再実行した。
+- 実装コミット: 共有グラフ `a3f886e`、Windows検証互換 `a50b2d2`、17場面の実装・検証 `1db3114`。作業中にマージされた#149（develop `084c943`）と#174（`2c538ae`）も取り込み、最終検証を再実行した。
 - 正本: [DFS基準データ](concept/dfs-unit-baseline.md) §§0.1/2/7.1、[教材指針](concept/learning-materials-guideline.md)、[プレイヤーUI](concept/learning-player-ui.md)、[Issue #122](https://github.com/BeppuKanato/engineer-quest/issues/122)。
 
 ## 実装
