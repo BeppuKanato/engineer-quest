@@ -48,6 +48,11 @@ assert(homePage.includes('<HomeUnitGrid'), 'home page must render the unit grid'
 // 5. ContinueLearning: rich hero when a unit is in progress, nothing when none is.
 const cont = read('features/learning/app/ContinueLearning.tsx');
 assert(cont.includes('return null'), 'ContinueLearning must render nothing when no unit is in progress');
+// ホームの用語は「単元」に統一する（#177）。一覧ページ自体の表記は別途判断。
+assert(!homeGrid.includes('コース一覧へ'), 'home grid must not link with the old terminology');
+assert(homeGrid.includes('単元一覧へ'), 'home grid links to the unit list');
+assert(!cont.includes('コース一覧へ'), 'ContinueLearning must not link with the old terminology');
+assert(cont.includes('単元一覧へ'), 'ContinueLearning links to the unit list');
 assert(cont.includes('次は「'), 'ContinueLearning must name the next stage');
 assert(cont.includes('formalName'), 'ContinueLearning must derive the next stage name from the unit definition');
 assert(!cont.includes('コース一覧から学びたい単元を選びましょう'), 'ContinueLearning must not degrade into a catalog link card');
