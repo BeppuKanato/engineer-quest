@@ -88,10 +88,11 @@ assert(assessmentComplete(diagnostic, current), "The soft gate still allows all-
 
 // Exercise the effect guard, including StrictMode replay, inactive phases, settings rerenders and reset.
 const shown = [], effects = [];
+const clearedMessages = [];
 let previousRef;
 let presenter = feedback => shown.push(feedback);
 const hookModule = createLoader({ react: { ...React,
-  useContext: () => presenter,
+  useContext: () => ({ present: presenter, clear: id => clearedMessages.push(id), messages: {} }),
   useRef: value => previousRef ??= { current: value },
   useEffect: callback => effects.push(callback),
 }, "@/app/component/soundFeedback": { useSoundEffect: () => ({ play() {} }) } })(file("assessment/AnswerFeedback.tsx"));
@@ -101,7 +102,7 @@ function renderHook(state, active = true) {
   effects.forEach(effect => effect());
 }
 const initial = createAssessmentState(concept);
-renderHook(initial); assert.equal(shown.length, 0);
+renderHook(initial); assert.equal(shown.length, 0); assert.equal(clearedMessages.at(-1), concept.id);
 renderHook(firstError); assert.equal(shown.length, 1);
 effects[0](); assert.equal(shown.length, 1, "StrictMode must not duplicate a response");
 renderHook(firstError); assert.equal(shown.length, 1);
@@ -111,38 +112,61 @@ renderHook(after, false); renderHook(after); assert.equal(shown.length, 1, "Retu
 renderHook(initial); renderHook(firstError); assert.equal(shown.length, 2, "Reset starts a fresh response sequence");
 
 // Provider sound selection and timer lifetime are independent of the answering child's lifetime.
-const played = [], cleared = [], timers = new Map(), refs = [], cleanups = [];
-let state = null, refIndex = 0, timerId = 0, reduced = false;
+const played = [], cleared = [], timers = new Map(), refs = [], cleanups = [], states = [];
+let refIndex = 0, stateIndex = 0, timerId = 0, reduced = false, uiContext;
 const uiModule = createLoader({ react: { ...React,
   useCallback: callback => callback,
+  useMemo: factory => factory(),
+  useContext: () => uiContext,
   useRef: value => refs[refIndex++] ??= { current: value },
-  useState: () => [state, value => { state = typeof value === "function" ? value(state) : value; }],
+  useState: initial => {
+    const index = stateIndex++;
+    if (!Object.hasOwn(states, index)) states[index] = initial;
+    return [states[index], value => { states[index] = typeof value === "function" ? value(states[index]) : value; }];
+  },
   useEffect: callback => { const cleanup = callback(); if (cleanup) cleanups.push(cleanup); },
 }, "@/app/component/soundFeedback": { useSoundEffect: () => ({ play: name => played.push(name) }) },
 "framer-motion": { ...require("framer-motion"), useReducedMotion: () => reduced },
 }, { setTimeout: (callback, ms) => { const id = ++timerId; timers.set(id, { callback, ms }); return id; }, clearTimeout: id => cleared.push(id) })(file("assessment/AnswerFeedback.tsx"));
-const tree = uiModule.AnswerFeedbackProvider({ children: null });
-const present = tree.props.value;
-const response = { questionId: "q", attempt: 1, correct: true, message: "正解！" };
+function renderProvider() {
+  refIndex = 0; stateIndex = 0;
+  uiContext = uiModule.AnswerFeedbackProvider({ children: null }).props.value;
+}
+renderProvider();
+const { present, clear } = uiContext;
+const response = { assessmentId: concept.id, questionId: "q", attempt: 1, correct: true, message: "正解！" };
 present(response);
 assert.equal(played.join(), "answerCorrect");
 assert.equal(timers.get(1).ms, 1500);
-assert.equal(state.correct, true, "A final answer remains present without its phase component");
+assert.equal(states[0].correct, true, "A final answer remains present without its phase component");
 present({ ...response, correct: false, message: "不正解。もう一度考えてみよう。" });
 assert.equal(played.join(), "answerCorrect,answerIncorrect");
 assert(cleared.includes(1), "A new answer replaces the previous presentation");
-timers.get(2).callback(); assert.equal(state, null);
-present(response); cleanups.forEach(cleanup => cleanup()); assert(cleared.includes(3));
+timers.get(2).callback(); assert.equal(states[0], null);
+assert.equal(states[1][concept.id].correct, false, "The message must outlive the symbol timer and result transition");
+renderProvider();
+const notice = uiModule.AnswerFeedbackNotice({ assessmentId: concept.id });
+assert.equal(notice.props.role, "status");
+assert.equal(notice.props.children.props.children[1].props.children, states[1][concept.id].message);
+assert.equal(notice.props.children.props.children[1].props.sx.fontWeight, 700, "The persistent message is bold");
+assert.equal(uiModule.AnswerFeedbackNotice({ assessmentId: "another" }).props.children, undefined, "Do not show another phase's message");
+present({ ...response, assessmentId: code.id });
+clear(concept.id);
+assert.equal(states[1][concept.id], undefined, "Starting over clears old messages");
+assert(states[1][code.id], "Clearing a phase must not erase another phase's message");
+present(response); cleanups.forEach(cleanup => cleanup()); assert(cleared.includes(4));
 for (const correct of [true, false]) {
   reduced = false;
   const overlay = uiModule.AnswerFeedbackPresentation({ feedback: { ...response, correct } });
   assert.equal(overlay.props.sx.pointerEvents, "none", "Feedback must never block answering or navigation");
-  assert.equal(overlay.props.role, "status");
+  assert.equal(overlay.props["aria-hidden"], "true", "The persistent text announces the outcome, not the decorative symbol");
   const panel = overlay.props.children;
   assert.equal(panel.props.transition.opacity.duration, 1.5, "Keep the response visible long enough to recognize");
   assert.equal(panel.props.transition.scale.duration, 0.6, "Keep the zoom brief, then hold the result");
   assert.equal(panel.props.transition.repeat, undefined, "No loop");
-  assert.equal(panel.props.children[0].props.children.type, correct ? "circle" : "path");
+  assert.equal(panel.props.children.props.children.type, correct ? "circle" : "path");
+  const html = require("react-dom/server").renderToStaticMarkup(overlay);
+  assert(!html.includes(response.message), "Symbol presentation must contain no explanation or praise text");
   if (!correct) assert.equal(panel.props.animate.scale, 1, "Incorrect answers do not zoom or shake");
   reduced = true;
   const quiet = uiModule.AnswerFeedbackPresentation({ feedback: { ...response, correct } }).props.children;
@@ -154,9 +178,17 @@ for (const correct of [true, false]) {
 for (const preview of ["bfs/check/BfsCheckPreview.tsx", "bfs/code-check/BfsCodeCheckPreview.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
   const source = fs.readFileSync(file(preview), "utf8");
   assert.match(source, /useAssessmentFeedback\(/, `${preview}: shared response hook`);
-  assert.match(source, /<AnswerFeedbackMessage\b/, `${preview}: shared message renderer`);
+  assert.match(source, /!embedded && <AnswerFeedbackNotice\b/, `${preview}: shared persistent message outside the unit`);
+  assert.match(source, /<AssessmentReviewButton\b/, `${preview}: prominent shared review action`);
   assert(!source.includes("useSoundEffect"), "Phases must not add their own playback path");
 }
 const layout = fs.readFileSync(path.join(root, "app/layout.tsx"), "utf8");
 assert.match(layout, /<SoundProvider>\s*<AnswerFeedbackProvider>[\s\S]*\{children\}[\s\S]*<\/AnswerFeedbackProvider>\s*<\/SoundProvider>/);
+const unitSource = fs.readFileSync(file("bfs/unit/BfsUnitPreview.tsx"), "utf8");
+assert.match(unitSource, /<AnswerFeedbackNotice assessmentId=\{phaseKey\}/, "The unit keeps the message through phase result screens");
+const { AssessmentReviewButton } = load(file("review/AssessmentReviewButton.tsx"));
+const reviewButton = AssessmentReviewButton({ label: "💡 この処理の動作をもう一度見る", onClick() {} });
+assert.equal(reviewButton.props.variant, "contained");
+assert.equal(reviewButton.props.sx.fontWeight, 700);
+assert(reviewButton.props.sx.minHeight >= 48);
 console.log("Answer feedback: recorded outcomes for every answer type, existing copy, final response lifetime, soft gate, silent rerenders/review/restore, StrictMode dedupe, sound routing, timer replacement, non-blocking presentation and reduced motion passed.");
