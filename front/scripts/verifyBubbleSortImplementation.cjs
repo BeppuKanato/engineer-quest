@@ -276,6 +276,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
   assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
   assert.match(previewSource, /DrawnCheck size=\{76\}/, "the completion view leads with a large drawn check");
-  assert(!previewSource.includes("Trace"), "visual debugging stays in issue #234");
+  assert.match(previewSource, /BubbleSortTraceDialog/, "visual debugging is wired in issue #234");
+  assert.match(previewSource, /traceBubbleSortCode/, "preview acquires the trace through the trace module");
   console.log("Bubble-sort implementation: five cases verified against an independent sort and CPython reference, typical-mistake mutations (reversed swap condition, too-wide and too-narrow inner ranges), documented non-failing variants (non-narrowing range, in-place sorting), canonical skeleton and Parsons reuse, hint gating, array difference display, free-execution array rendering, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

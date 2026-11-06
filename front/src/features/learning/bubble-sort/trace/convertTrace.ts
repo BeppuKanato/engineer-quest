@@ -36,7 +36,7 @@ function validateTraceCanvas(canvas: BubbleSortTraceCanvas) {
 
 export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTracePlayback {
   const steps: LearningStep<BubbleSortTraceCanvas>[] = [];
-  let lastFrame: Frame | null = null;
+  const lastFrame: { current: Frame | null } = { current: null };
   let lastI: number | null = null;
   let pending: Pending | null = null;
   let comparisonsInPass = 0;
@@ -52,15 +52,15 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
       trace: { line: event.line || null, variables: event.locals, terminal },
     };
     validateTraceCanvas(canvas);
-    if (lastFrame && sameFrame(lastFrame, frame)) {
+    if (lastFrame.current && sameFrame(lastFrame.current, frame)) {
       if (terminal || caption) {
         steps[steps.length - 1] = { ...steps[steps.length - 1], caption, canvas };
-        lastFrame = frame;
+        lastFrame.current = frame;
       }
       return;
     }
     steps.push({ id: `trace-${steps.length}`, caption, canvas });
-    lastFrame = frame;
+    lastFrame.current = frame;
   }
 
   /** 保留中の比較を、その時点の並び（比較後の状態）で1コマとして確定する。フェーズ2と同じく、入れ替えた2マスだけを強調する。 */
@@ -88,7 +88,7 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
     lastSnapshot = { values, event };
     const i = intOrNull(event.locals.i);
     const j = intOrNull(event.locals.j);
-    if (!lastFrame) {
+    if (!lastFrame.current) {
       emit({ values, comparing: null, fixedFrom: values.length, highlights: [] }, event, text.initial);
     }
     if (event.event === "return") {
@@ -117,8 +117,8 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
     }
     if (i === null || j === null) {
       // i / j を使わない実装（while など）では、並びの変化だけを追う。
-      if (lastFrame && !sameValues(lastFrame.values, values)) {
-        emit({ values, comparing: null, fixedFrom: lastFrame.fixedFrom, highlights: [] }, event, text.changed);
+      if (lastFrame.current && !sameValues(lastFrame.current.values, values)) {
+        emit({ values, comparing: null, fixedFrom: lastFrame.current.fixedFrom, highlights: [] }, event, text.changed);
       }
     }
   }
@@ -129,7 +129,7 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
   const finalEvent: PythonTraceEvent = lastEvent ?? { line: trace.stoppedLine ?? 0, event: "return", boundary: "line", locals: {} };
   if (mode === "final") {
     steps.length = 0;
-    lastFrame = null;
+    lastFrame.current = null;
     const values = safeValues(Array.isArray(trace.result) ? trace.result : null) ?? lastSnapshot?.values ?? bubbleSortMainValues;
     emit({ values, comparing: null, fixedFrom: values.length, highlights: [] }, finalEvent, text.final, true);
   }
