@@ -2,7 +2,6 @@
 import { Alert, Box, Button, Chip, Container, LinearProgress, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import StarIcon from "@mui/icons-material/Star";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +12,6 @@ import { AppHeader } from "@/app/component/appHeader";
 import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
 import { useUserSession } from "@/app/component/userSession";
 import { startLearningUnit } from "@/api/learning.api";
-import { knowledgeCardTones } from "@/features/collection/knowledgeCard.tokens";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
 import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";
 import { learningPhaseIcons } from "./learningPhaseIcons";
@@ -149,7 +147,6 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, onStart 
         const status = done ? "完了" : current && hasProgress ? "進行中" : "未着手";
         const position = point(index);
         const size = current ? 118 : 102;
-        const tone = phase.cardRarity ? knowledgeCardTones[phase.cardRarity] : null;
         return (
           <Box
             key={phase.id}
@@ -163,7 +160,7 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, onStart 
               sx={{ width: "100%", height: "100%" }}
             >
             <Button
-              aria-label={`${phase.phase}. ${phase.formalName}：${status}${phase.cardRarity ? "・知識カードが手に入ることがあります" : ""}`}
+              aria-label={`${phase.phase}. ${phase.formalName}：${status}`}
               aria-current={current ? "step" : undefined}
               disabled={!reachable || starting}
               onClick={() => onStart(index, current)}
@@ -182,11 +179,6 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, onStart 
             >
               <Icon sx={{ fontSize: 44 }} />
               {done && <CheckCircleIcon aria-hidden sx={{ position: "absolute", right: 0, bottom: 0, fontSize: 28 }} />}
-              {tone && (
-                <Box aria-hidden sx={{ position: "absolute", top: -8, right: -8, width: 23, height: 31, borderRadius: "4px", bgcolor: tone.color, border: "2px solid #fff", display: "grid", placeItems: "center", boxShadow: "0 4px 10px rgba(15,23,42,0.25)" }}>
-                  <StarIcon sx={{ fontSize: 13, color: "#fff" }} />
-                </Box>
-              )}
             </Button>
             {current && (
               <Box
