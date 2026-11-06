@@ -94,7 +94,9 @@ export function convertBubbleSortTrace(trace: PythonTraceResult): BubbleSortTrac
     if (event.event === "return") {
       flushComparison(values, event);
       if (lastI !== null && comparisonsInPass > 0) emitPassEnd(values, values.length - (lastI + 1), event);
-      emit({ values, comparing: null, fixedFrom: 0, highlights: [] }, event, text.ended, true);
+      // 終端の並びは作業リストのスナップショットではなく、実際に返されたリストを正とする（sorted(values) を返す実装など）。
+      const returned = safeValues(Array.isArray(trace.result) ? trace.result : null);
+      emit({ values: returned ?? values, comparing: null, fixedFrom: 0, highlights: [] }, event, text.ended, true);
       continue;
     }
     if (i !== null && lastI !== null && i !== lastI) {
