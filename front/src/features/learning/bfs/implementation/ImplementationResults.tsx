@@ -11,6 +11,7 @@ import { DistanceOutput, formatDistance as distance } from "./DistanceOutput";
 const labels = content.display;
 
 export function ImplementationResults({ outcomes, diagnostics = outcomes }: { outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[] }) {
+  const reduced = useReducedMotion();
   const kinds = resultKinds(diagnostics);
   return <Box sx={{ color: playerTokens.text }}>
     {kinds.length > 0 && <Box role="status" aria-label={labels.errorLabel} sx={{ mb: 2 }}>
@@ -22,7 +23,13 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes }: { ou
         const status = !outcome ? labels.statuses.unexecuted : outcome.passed ? labels.statuses.passed : labels.statuses.failed;
         const scene = content.displayScenes.find(scene => scene.testId === test.id);
         return <Box component="li" key={test.id} data-test-id={test.id} sx={{ mb: 2 }}>
-          <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：<span aria-hidden="true">{status.icon} </span>{status.label}</Typography>
+          <Typography component="p" sx={{ fontWeight: 700 }}>{test.label}：
+            <Box component={motion.span} key={!outcome ? "unexecuted" : outcome.passed ? "passed" : "failed"} data-test-status={test.id}
+              initial={reduced ? false : { opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 22 }}
+              sx={{ display: "inline-block", color: outcome?.passed ? playerTokens.focus : "inherit" }}>
+              <span aria-hidden="true">{status.icon} </span>{status.label}
+            </Box></Typography>
           {test.visibility === "display" && <>
             {scene && <>
               <Typography component="p">{labels.startLabel}：{scene.start}</Typography>
