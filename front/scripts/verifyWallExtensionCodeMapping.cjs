@@ -181,5 +181,7 @@ assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u
 assert.match(renderer, /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/WallExtensionCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
-assert(!/onLearningEvent|onComplete|endAction|fetch\(|localStorage/u.test(entry));
+// 接続ポートは単元フロー（#214）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
+assert.match(entry, /onComplete\?: \(\) => void/u); assert.match(entry, /endAction/u);
+assert(!/fetch\(|localStorage/u.test(entry));
 console.log(`Wall-extension code mapping verified: ${content.steps.length} frames, byte-exact 21-line contract wall-extension-v1, all CPython lines/locals, 13 phase-2 checkpoints (extensions on the write line), else explanations, shared rendering and standalone preview.`);
