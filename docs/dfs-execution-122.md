@@ -4,6 +4,7 @@
 - 適用範囲: DFSの第2段階、BFS/DFS共有グラフの配置と参照経路、関連verify。
 - 最終確認日: 2026-11-06
 - 起点: PR #173マージ後のdevelop `9245a03925bfb2004d9241ebf3ea59893b745990`。
+- 実装コミット: 共有グラフ `a3f886e`、Windows検証互換 `a50b2d2`、17場面の実装・検証 `1db3114`。作業中にマージされた#149もdevelop `084c943`から取り込み、最終検証を再実行した。
 - 正本: [DFS基準データ](concept/dfs-unit-baseline.md) §§0.1/2/7.1、[教材指針](concept/learning-materials-guideline.md)、[プレイヤーUI](concept/learning-player-ui.md)、[Issue #122](https://github.com/BeppuKanato/engineer-quest/issues/122)。
 
 ## 実装
@@ -20,9 +21,11 @@
 
 Windowsで参照同一性を正しく検証するため、既存BFS verifyのVMキャッシュキーを絶対パスへ正規化した。Pythonを呼ぶ4本は`PYTHON`環境変数を許容し、未指定時の`python3`は維持する。既存の検証内容やアサーションは緩めていない。
 
+最新developの#149取り込み後、`verify:bfs-implementation`が`data-test-status`不在で失敗した。develop側の`ImplementationResults`にも同じ欠落があり、motion/useReducedMotionはimportのみだった。BFS全verifyが通る条件を満たすため、#149の既定どおり状態ごとのバッジへ短い出現とreduced-motion分岐を配線する最小補修を、独立コミット`067443a`にした。テスト判定や結果データ・文言は変えず、既存verifyを緩和せずに動きの配線も検証する。
+
 ## 検証
 
-- `npm run lint`: 成功。既存の警告2件（BfsCodeCheckPreviewの未使用retry、BfsUnitPreviewのuseCallback依存）のみ。
+- `npm run lint`: 成功。既存の警告2件（BfsCodeCheckPreviewの未使用retry、BfsUnitPreviewのuseCallback依存）のみ。#149のimportだけだった2件は配線の補修により解消。本変更の新規警告なし。
 - `npm run typecheck` / `npm run build`: 成功。
 - package.jsonの`verify:*`全21本: 成功（BFS全10本、DFS導入・動きの説明、プレイヤー・学習画面等）。Windowsでは`PYTHON=D:/Python310/python.exe`、`PYTHONUTF8=1`を指定。
 - `verify:dfs-execution`: 基準書§7.1の12行を実CPythonで実行し、観測した17状態を教材および基準書§2.2と照合。processing/stack/order/completed/operation全件、最終訪問順、逆順復元、不正データ拒否、共有グラフの参照同一性、表示・reduced-motionの契約を固定。
