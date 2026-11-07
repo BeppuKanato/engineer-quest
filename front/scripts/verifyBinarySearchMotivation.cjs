@@ -126,9 +126,10 @@ assert.match(previewSource, /width: "84vw", height: "84dvh"/);
 // 接続ポートは単元フロー（接続Issue）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
 assert.match(previewSource, /onComplete\?: \(\) => void/);
 assert.doesNotMatch(previewSource, /fetch\(|localStorage/);
-// 単体プレビューは単元専用ページに置き、後続フェーズは同じページへ追加していく。
-const pageSource = fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/binary-search-unit/page.tsx"), "utf8");
+// プレビュー登録は他単元と同じ [contentId] 方式に寄せる（単元接続 #294 でフェーズ1専用ページを廃止）。
+const pageSource = fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8");
 assert(pageSource.includes("BinarySearchMotivationPreview"));
+assert(!fs.existsSync(path.resolve(__dirname, "../src/app/learning-preview/binary-search-unit/page.tsx")), "dedicated preview page was removed in #294");
 
 // 単元側の検証は、不正な場面を弾く。
 assert.throws(() => validate({ ...get("main-example-preview"), state: { ...get("main-example-preview").state, exit: { label: "x", nextPhase: 3 } } }), /phase 2/);

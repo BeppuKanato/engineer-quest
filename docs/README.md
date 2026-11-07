@@ -79,6 +79,7 @@
 | [binary-search-phase6-291.md](binary-search-phase6-291.md) | 記録 | Issue #291の二分探索フェーズ6（応用問題）、転移タップ・不在ケース・Parsons主要8行・前提の選択の4問、場面を共通配列基盤で持つ判断などの留保 |
 | [binary-search-phase7-292.md](binary-search-phase7-292.md) | 記録 | Issue #292の二分探索フェーズ7（自分で実装）、表示用D1＋判定用J1〜J3、ヒント4段階ラダー、位置表示の新設、視覚デバッグ未接続などの留保 |
 | [binary-search-trace-293.md](binary-search-trace-293.md) | 記録 | Issue #293の二分探索の視覚デバッグ、共有ハーネスへの lo・hi・mid・target 記録の加算、フェーズ2正準11コマとの完全一致、発見判定は戻り値ではなく最後の比較から行う留保 |
+| [binary-search-unit-294.md](binary-search-unit-294.md) | 記録 | Issue #294の二分探索単元コンテナと学習フロー接続、アプリ登録（unitRegistry / LearningScreen）、結果図、プレビュー登録の [contentId] 方式への統一などの留保 |
 | [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
 | [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
 | [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
