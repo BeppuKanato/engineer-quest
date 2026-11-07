@@ -84,7 +84,8 @@ def _eq_locals(frame):
         result["choices"] = list(choices)
     if array_name is not None:
         result["array"] = array_value
-    for key in ("i", "j", "n"):
+    # lo / hi / mid / target は二分探索単元（Issue #293）向けの加算。対象名の変数が無い単元では何も記録されず、既存単元の結果は変わらない。
+    for key in ("i", "j", "n", "lo", "hi", "mid", "target"):
         if key in values:
             value = values[key]
             result[key] = value if type(value) is int and value.bit_length() < 256 else None
