@@ -13,6 +13,11 @@ export type PythonTraceLocals = {
   readonly i?: number | null;
   readonly j?: number | null;
   readonly n?: number | null;
+  /** 二分探索単元用（Issue #293）。探索範囲の両端・中央・探す値の整数だけをコピーする。 */
+  readonly lo?: number | null;
+  readonly hi?: number | null;
+  readonly mid?: number | null;
+  readonly target?: number | null;
 };
 export type PythonTraceEvent = {
   readonly line: number;
