@@ -4,6 +4,8 @@ import { createQuestSeed } from "../../prisma/seedData/createQuestSeed";
 import {
   BFS_CARD_PHASE_SLOTS,
   BFS_COURSE_ID,
+  BINARY_SEARCH_CARD_PHASE_SLOTS,
+  BINARY_SEARCH_COURSE_ID,
   BUBBLE_SORT_CARD_PHASE_SLOTS,
   BUBBLE_SORT_COURSE_ID,
   KNOWLEDGE_CARD_TABLE_COUNT,
@@ -62,15 +64,26 @@ const MAZE_DIGGING_PHASE_KEYS: readonly string[] = [
   "maze-digging-implementation",
 ];
 
+const BINARY_SEARCH_PHASE_KEYS: readonly string[] = [
+  "binary-search-motivation",
+  "binary-search-execution",
+  "binary-search-check",
+  "binary-search-code-mapping",
+  "binary-search-code-check",
+  "binary-search-consolidation",
+  "binary-search-implementation",
+];
+
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
   { courseId: WALL_EXTENSION_COURSE_ID, slots: WALL_EXTENSION_CARD_PHASE_SLOTS, phaseKeys: WALL_EXTENSION_PHASE_KEYS },
   { courseId: BUBBLE_SORT_COURSE_ID, slots: BUBBLE_SORT_CARD_PHASE_SLOTS, phaseKeys: BUBBLE_SORT_PHASE_KEYS },
   { courseId: MAZE_DIGGING_COURSE_ID, slots: MAZE_DIGGING_CARD_PHASE_SLOTS, phaseKeys: MAZE_DIGGING_PHASE_KEYS },
+  { courseId: BINARY_SEARCH_COURSE_ID, slots: BINARY_SEARCH_CARD_PHASE_SLOTS, phaseKeys: BINARY_SEARCH_PHASE_KEYS },
 ] as const;
 
-// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法を追加）
+// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法、Issue #295 で二分探索を追加）
 const expectedCardCount = CARD_COURSES.reduce((sum, course) => sum + course.slots.length, 0);
 if (knowledgeCardSeed.length !== expectedCardCount) fail(`Card pool must contain ${expectedCardCount} cards, got ${knowledgeCardSeed.length}`);
 for (const card of knowledgeCardSeed) {
