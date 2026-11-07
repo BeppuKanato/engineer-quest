@@ -10,6 +10,7 @@ export const BFS_COURSE_ID = "course-algorithm-breadth-first-search-v1";
 export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
 export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
 export const MAZE_DIGGING_COURSE_ID = "course-algorithm-maze-digging-v1";
+export const BINARY_SEARCH_COURSE_ID = "course-algorithm-binary-search-v1";
 
 export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   {
@@ -212,6 +213,57 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
     sortOrder: 12,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-binary-search-halving-range",
+    courseId: BINARY_SEARCH_COURSE_ID,
+    label: "絞り込み",
+    title: "探索範囲を半分にする",
+    description:
+      "並んだデータから目的の値を探すとき、真ん中の値と比べることで、まだ調べていない範囲を一度に半分にできる考え方。",
+    connection:
+      "二分探索は、中央の値より小さいか大きいかを見て、目的の値がないと分かる側を丸ごと捨てる。これを繰り返すたびに、残りの範囲は半分ずつ狭まっていく。",
+    useCase:
+      "辞書で単語を引くときや、並んだ名簿から名前を探すときに、端から1つずつ見るよりずっと少ない回数で見つけられる。",
+    searchKeywords: ["二分探索", "Binary Search", "探索範囲", "半分"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 13,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-binary-search-compare-middle",
+    courseId: BINARY_SEARCH_COURSE_ID,
+    label: "比較",
+    title: "中央の値と比べる",
+    description:
+      "探す範囲のちょうど真ん中にある値を取り出し、目的の値と比べる操作。比べた結果によって、次に探すのが左側か右側かが決まる。",
+    connection:
+      "二分探索では、範囲の両端 lo と hi から真ん中の位置 (lo + hi) // 2 を計算し、その値と目的の値を比べる。一致すれば、その位置が答えになる。",
+    useCase:
+      "数当てゲームで真ん中の数を聞くのが最も効率がよいことと同じ発想で、絞り込み探索の中心になる操作。",
+    searchKeywords: ["中央", "真ん中", "比較", "mid"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 14,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-binary-search-logarithmic-time",
+    courseId: BINARY_SEARCH_COURSE_ID,
+    label: "計算量",
+    title: "対数時間",
+    description:
+      "データの量が2倍になっても、必要な手間が一定量しか増えない処理の速さの目安。手間はデータ量の対数に比例して増える。",
+    connection:
+      "二分探索は1回の比較で範囲を半分にするため、n 個のデータでも約 log₂n 回の比較で済む。100個でも7回程度、100万個でも20回程度になる。",
+    useCase:
+      "大量のデータから検索するときに、端から順に見る方法（線形探索）との差が大きくなる場面で効いてくる。",
+    searchKeywords: ["対数時間", "計算量", "log", "二分探索"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 15,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -240,6 +292,13 @@ export const MAZE_DIGGING_CARD_PHASE_SLOTS = [
   { phaseKey: "maze-digging-execution", knowledgeCardId: "knowledge-card-maze-digging-backtracking" },
   { phaseKey: "maze-digging-code-check", knowledgeCardId: "knowledge-card-maze-digging-stack" },
   { phaseKey: "maze-digging-implementation", knowledgeCardId: "knowledge-card-maze-digging-spanning-tree" },
+] as const;
+
+/** フェーズ完了のタイミングとカードの対応（二分探索。配布位置とレアリティは BFS と同じ）。 */
+export const BINARY_SEARCH_CARD_PHASE_SLOTS = [
+  { phaseKey: "binary-search-execution", knowledgeCardId: "knowledge-card-binary-search-halving-range" },
+  { phaseKey: "binary-search-code-check", knowledgeCardId: "knowledge-card-binary-search-compare-middle" },
+  { phaseKey: "binary-search-implementation", knowledgeCardId: "knowledge-card-binary-search-logarithmic-time" },
 ] as const;
 
 /**
@@ -284,4 +343,5 @@ export const knowledgeCardPhaseScheduleSeed: Array<
   ...buildCardPhaseSchedule(WALL_EXTENSION_COURSE_ID, "wall-extension", WALL_EXTENSION_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(BUBBLE_SORT_COURSE_ID, "bubble-sort", BUBBLE_SORT_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(MAZE_DIGGING_COURSE_ID, "maze-digging", MAZE_DIGGING_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(BINARY_SEARCH_COURSE_ID, "binary-search", BINARY_SEARCH_CARD_PHASE_SLOTS),
 ];
