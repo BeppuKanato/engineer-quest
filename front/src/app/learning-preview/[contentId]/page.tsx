@@ -38,12 +38,14 @@ import { MazeDiggingCodeCheckPreview } from "@/features/learning/maze-digging/co
 import { MazeDiggingConsolidationPreview } from "@/features/learning/maze-digging/consolidation/MazeDiggingConsolidationPreview";
 import { MazeDiggingImplementationPreview } from "@/features/learning/maze-digging/implementation/MazeDiggingImplementationPreview";
 import { MazeDiggingUnitPreview } from "@/features/learning/maze-digging/unit/MazeDiggingUnitPreview";
+import { BinarySearchMotivationPreview } from "@/features/learning/binary-search/motivation/BinarySearchMotivationPreview";
 import { BinarySearchExecutionPreview } from "@/features/learning/binary-search/execution/BinarySearchExecutionPreview";
 import { BinarySearchCheckPreview } from "@/features/learning/binary-search/check/BinarySearchCheckPreview";
 import { BinarySearchCodeMappingPreview } from "@/features/learning/binary-search/code-mapping/BinarySearchCodeMappingPreview";
 import { BinarySearchCodeCheckPreview } from "@/features/learning/binary-search/code-check/BinarySearchCodeCheckPreview";
 import { BinarySearchConsolidationPreview } from "@/features/learning/binary-search/consolidation/BinarySearchConsolidationPreview";
 import { BinarySearchImplementationPreview } from "@/features/learning/binary-search/implementation/BinarySearchImplementationPreview";
+import { BinarySearchUnitPreview } from "@/features/learning/binary-search/unit/BinarySearchUnitPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -68,12 +70,14 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "maze-digging-consolidation") return <MazeDiggingConsolidationPreview />;
   if (contentId === "maze-digging-implementation") return <MazeDiggingImplementationPreview />;
   if (contentId === "maze-digging-unit") return <MazeDiggingUnitPreview />;
+  if (contentId === "binary-search-motivation") return <BinarySearchMotivationPreview />;
   if (contentId === "binary-search-execution") return <BinarySearchExecutionPreview />;
   if (contentId === "binary-search-check") return <BinarySearchCheckPreview />;
   if (contentId === "binary-search-code-mapping") return <BinarySearchCodeMappingPreview />;
   if (contentId === "binary-search-code-check") return <BinarySearchCodeCheckPreview />;
   if (contentId === "binary-search-consolidation") return <BinarySearchConsolidationPreview />;
   if (contentId === "binary-search-implementation") return <BinarySearchImplementationPreview />;
+  if (contentId === "binary-search-unit") return <BinarySearchUnitPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
