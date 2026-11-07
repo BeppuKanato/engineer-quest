@@ -4,7 +4,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import type { AutoParseableTextFormat } from "openai/lib/parser";
 import type { ZodTypeAny } from "zod";
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
-const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-5.4-mini";
+const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-6.1-terra";
 
 const text = z.string().trim().min(1);
 export const analysisSchema = z.object({
