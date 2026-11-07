@@ -69,6 +69,7 @@
 | [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
+| [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
 | [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
 | [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
 | [wall-extension-phase3-208.md](wall-extension-phase3-208.md) | 記録 | Issue #208の棒倒し法フェーズ3（動きの確認問題）連結2問、フェーズ2盤面の参照と検証済みトレースとの正解照合 |
