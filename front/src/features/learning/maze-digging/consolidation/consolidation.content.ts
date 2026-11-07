@@ -52,7 +52,7 @@ export const mazeDiggingConsolidationContent: MazeDiggingConsolidationContent = 
 version: 1, kind: "diagnostic-check", id: "maze-digging-consolidation", phase: 6, stageName: "応用問題",
 code: mazeDiggingCode,
 reviewLabel: "💡 基本例の動き・コードをもう一度見る",
-completion: "理解の状況が確認できました。それではに進み、自分の手でコードを完成させましょう！",
+completion: "理解の状況が確認できました。それでは【自分で実装】に進み、自分の手でコードを完成させましょう！",
 questions: [
 {
 kind: "node", id: "transfer-dig-target",
