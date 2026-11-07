@@ -76,7 +76,7 @@ assert(!/完璧|マスター/u.test(question.correctFeedback + question.incorrec
 // Q1の空欄は dx 側の「2」だけ（暫定判断）。dy 側の「2」は表示されたままで、
 // 空欄に誤った値を入れても dy 側は元の行のまま残ることを固定する。
 const q1Line = mazeDiggingCode.lines.find(line => line.id === q1.lineId);
-assert.equal(q1Line.text, " nx, ny = x + 2 * dx, y + 2 * dy");
+assert.equal(q1Line.text, "            nx, ny = x + 2 * dx, y + 2 * dy");
 assert.equal(q1.blank.start, q1Line.text.indexOf("2 * dx"), "The blank covers the dx-side multiplier only");
 assert(fillCodeBlank(q1, "1").endsWith("y + 2 * dy"), "The dy-side multiplier stays visible and unchanged");
 const programs = [];
@@ -158,10 +158,10 @@ assert(skipped.records.every(record => record.firstCorrect === false &&!record.s
 
 const codeCheckPreviewSource = fs.readFileSync(`${root}/maze-digging/code-check/MazeDiggingCodeCheckPreview.tsx`, "utf8");
 assert.match(codeCheckPreviewSource, /advanceAssessment\(mazeDiggingCodeCheckContent, current, question\.id\)/);
-assert.match(codeCheckPreviewSource, /"結果を見る": "次の問題へ"/);
+assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);
 // 単品画面の仕組みはフェーズ3単品に揃える（#181）: 再回答時は見出しに「もう一度、」が付き、
 // 「もう一度解く」は回答後ボタンと同じ行に出る（別の行に独立させない）。
-assert.match(codeCheckPreviewSource, /retry \? "もう一度、": ""/, "re-answering carries the same caption cue as phase 3");
+assert.match(codeCheckPreviewSource, /retry \? "もう一度、" : ""/, "re-answering carries the same caption cue as phase 3");
 assert.equal((codeCheckPreviewSource.match(/もう一度解く/g) || []).length, 1, "the restart button appears exactly once, inside the shared action row");
 assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state);
 let firstTry = createAssessmentState(content);
