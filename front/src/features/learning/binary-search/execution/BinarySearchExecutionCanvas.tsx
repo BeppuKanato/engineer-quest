@@ -23,8 +23,9 @@ const cellStatusToPlayerStatus: Record<BinarySearchCellStatus, PlayerStatus> = {
  * 盤面を共通配列基盤の形へ変換する。状態の意味は単元側の盤面型が持ち、
  * 描画は ArrayDrawing へ委譲する（cellStatuses 拡張でセルごとの色を決める）。
  * フェーズ4は同じ snapshot と renderer を、トレース変換は同じ盤面型を使う。
+ * フェーズ3の回答キャンバスも同じ変換を使うため export する。
  */
-function toArrayBars(canvas: BinarySearchExecutionCanvasState): ArrayBarsCanvasState {
+export function toArrayBars(canvas: BinarySearchExecutionCanvasState): ArrayBarsCanvasState {
   const { values, cells } = canvas.state;
   return {
     data: { kind: "array-bars" },
