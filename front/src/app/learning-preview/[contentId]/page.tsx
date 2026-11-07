@@ -35,6 +35,7 @@ import { MazeDiggingExecutionPreview } from "@/features/learning/maze-digging/ex
 import { MazeDiggingCheckPreview } from "@/features/learning/maze-digging/check/MazeDiggingCheckPreview";
 import { MazeDiggingCodeMappingPreview } from "@/features/learning/maze-digging/code-mapping/MazeDiggingCodeMappingPreview";
 import { MazeDiggingCodeCheckPreview } from "@/features/learning/maze-digging/code-check/MazeDiggingCodeCheckPreview";
+import { MazeDiggingConsolidationPreview } from "@/features/learning/maze-digging/consolidation/MazeDiggingConsolidationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -56,6 +57,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "maze-digging-check") return <MazeDiggingCheckPreview />;
   if (contentId === "maze-digging-code-mapping") return <MazeDiggingCodeMappingPreview />;
   if (contentId === "maze-digging-code-check") return <MazeDiggingCodeCheckPreview />;
+  if (contentId === "maze-digging-consolidation") return <MazeDiggingConsolidationPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
