@@ -7,6 +7,8 @@ import {
   BUBBLE_SORT_CARD_PHASE_SLOTS,
   BUBBLE_SORT_COURSE_ID,
   KNOWLEDGE_CARD_TABLE_COUNT,
+  MAZE_DIGGING_CARD_PHASE_SLOTS,
+  MAZE_DIGGING_COURSE_ID,
   WALL_EXTENSION_CARD_PHASE_SLOTS,
   WALL_EXTENSION_COURSE_ID,
   knowledgeCardPhaseScheduleSeed,
@@ -17,7 +19,7 @@ const fail = (message: string): never => { throw new Error(message); };
 const courseIds = new Set(courseSeed.map((course) => course.id));
 const questIds = new Set<string>(createQuestSeed.map((quest) => quest.id));
 
-if (courseSeed.length !== 8) fail(`Expected 8 courses, found ${courseSeed.length}`);
+if (courseSeed.length !== 9) fail(`Expected 9 courses, found ${courseSeed.length}`);
 if (new Set(achievementSeed.map((a) => a.id)).size !== achievementSeed.length) fail("Duplicate achievement ids");
 
 // フェーズキー（front の単元コンテンツが正本。seed 側の参照整合性のためにここで固定する）
@@ -50,14 +52,25 @@ const BUBBLE_SORT_PHASE_KEYS: readonly string[] = [
   "bubble-sort-implementation",
 ];
 
+const MAZE_DIGGING_PHASE_KEYS: readonly string[] = [
+  "maze-digging-motivation",
+  "maze-digging-execution",
+  "maze-digging-check",
+  "maze-digging-code-mapping",
+  "maze-digging-code-check",
+  "maze-digging-consolidation",
+  "maze-digging-implementation",
+];
+
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
   { courseId: WALL_EXTENSION_COURSE_ID, slots: WALL_EXTENSION_CARD_PHASE_SLOTS, phaseKeys: WALL_EXTENSION_PHASE_KEYS },
   { courseId: BUBBLE_SORT_COURSE_ID, slots: BUBBLE_SORT_CARD_PHASE_SLOTS, phaseKeys: BUBBLE_SORT_PHASE_KEYS },
+  { courseId: MAZE_DIGGING_COURSE_ID, slots: MAZE_DIGGING_CARD_PHASE_SLOTS, phaseKeys: MAZE_DIGGING_PHASE_KEYS },
 ] as const;
 
-// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソートを追加）
+// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法を追加）
 const expectedCardCount = CARD_COURSES.reduce((sum, course) => sum + course.slots.length, 0);
 if (knowledgeCardSeed.length !== expectedCardCount) fail(`Card pool must contain ${expectedCardCount} cards, got ${knowledgeCardSeed.length}`);
 for (const card of knowledgeCardSeed) {

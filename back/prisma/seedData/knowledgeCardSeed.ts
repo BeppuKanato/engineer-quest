@@ -9,6 +9,7 @@ import { KnowledgeCardRarity, type Prisma } from "@prisma/client";
 export const BFS_COURSE_ID = "course-algorithm-breadth-first-search-v1";
 export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
 export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
+export const MAZE_DIGGING_COURSE_ID = "course-algorithm-maze-digging-v1";
 
 export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   {
@@ -160,6 +161,57 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
     sortOrder: 9,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-maze-digging-backtracking",
+    courseId: MAZE_DIGGING_COURSE_ID,
+    label: "探索",
+    title: "バックトラッキング",
+    description:
+      "行き止まりまで進んでから、まだ試していない選択肢が残る場所まで戻って、別の道を試す考え方。",
+    connection:
+      "穴掘り法は、掘れる部屋がなくなったマスで行き止まりになる。そこで、候補が残っているマスまで戻って掘り直すことで、すべての部屋を掘り切る。",
+    useCase:
+      "迷路の経路探索や、数独のように候補を1つずつ試して合わなければ戻る問題で使える。",
+    searchKeywords: ["バックトラッキング", "Backtracking", "深さ優先探索"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 10,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-maze-digging-stack",
+    courseId: MAZE_DIGGING_COURSE_ID,
+    label: "データ構造",
+    title: "スタック",
+    description:
+      "最後に積んだものを最初に取り出す（後入れ先出しの）データの入れ方。取り出すのは、いつも一番上のもの。",
+    connection:
+      "穴掘り法では、掘った部屋をスタックに積んでいき、行き止まりでは一番上の部屋を取り除いて1つ前の部屋に戻る。Python ではリストの append と pop で実現できる。",
+    useCase:
+      "ブラウザの「戻る」履歴や、操作の取り消し（アンドゥ）、深さ優先探索で使える。",
+    searchKeywords: ["スタック", "Stack", "LIFO", "リスト"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 11,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-maze-digging-spanning-tree",
+    courseId: MAZE_DIGGING_COURSE_ID,
+    label: "グラフ",
+    title: "全域木",
+    description:
+      "すべての頂点をつなぎ、輪のないグラフ。頂点が n 個なら、辺は必ず n-1 本になる。",
+    connection:
+      "穴掘り法で掘った通路は、すべての部屋をつなぎ、輪が1つもない。そのため部屋を頂点とみると全域木になっていて、どの部屋と部屋の間にも経路がちょうど1つだけある。",
+    useCase:
+      "すべての地点をつなぐ配線や道路網を、無駄なく設計するとき（最小全域木）に使える。",
+    searchKeywords: ["全域木", "Spanning Tree", "完全迷路", "木構造"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 12,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -181,6 +233,13 @@ export const BUBBLE_SORT_CARD_PHASE_SLOTS = [
   { phaseKey: "bubble-sort-execution", knowledgeCardId: "knowledge-card-bubble-sort-stable-sort" },
   { phaseKey: "bubble-sort-code-check", knowledgeCardId: "knowledge-card-bubble-sort-swap" },
   { phaseKey: "bubble-sort-implementation", knowledgeCardId: "knowledge-card-bubble-sort-complexity" },
+] as const;
+
+/** フェーズ完了のタイミングとカードの対応（穴掘り法。配布位置とレアリティは BFS と同じ）。 */
+export const MAZE_DIGGING_CARD_PHASE_SLOTS = [
+  { phaseKey: "maze-digging-execution", knowledgeCardId: "knowledge-card-maze-digging-backtracking" },
+  { phaseKey: "maze-digging-code-check", knowledgeCardId: "knowledge-card-maze-digging-stack" },
+  { phaseKey: "maze-digging-implementation", knowledgeCardId: "knowledge-card-maze-digging-spanning-tree" },
 ] as const;
 
 /**
@@ -224,4 +283,5 @@ export const knowledgeCardPhaseScheduleSeed: Array<
   ...buildCardPhaseSchedule(BFS_COURSE_ID, "bfs", BFS_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(WALL_EXTENSION_COURSE_ID, "wall-extension", WALL_EXTENSION_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(BUBBLE_SORT_COURSE_ID, "bubble-sort", BUBBLE_SORT_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(MAZE_DIGGING_COURSE_ID, "maze-digging", MAZE_DIGGING_CARD_PHASE_SLOTS),
 ];

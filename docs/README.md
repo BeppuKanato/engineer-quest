@@ -97,6 +97,7 @@
 | [maze-digging-phase7-263.md](maze-digging-phase7-263.md) | 記録 | Issue #263の穴掘り法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保（視覚デバッグは #264） |
 | [maze-digging-trace-264.md](maze-digging-trace-264.md) | 記録 | Issue #264の穴掘り法フェーズ7視覚デバッグ、フェーズ2正準21コマと一致する掘削・バックトラック再生（スタック経路は通路の木構造から導出）、イベント上限1000の実測根拠 |
 | [maze-digging-unit-265.md](maze-digging-unit-265.md) | 記録 | Issue #265の穴掘り法フェーズ接続・単元コンテナ接続、unitRegistry登録とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [maze-digging-integration-266.md](maze-digging-integration-266.md) | 記録 | Issue #266の穴掘り法アプリ統合、コース・知識カード3枚（バックトラッキング／スタック／全域木）・実績6件のシード追加、配布スケジュールの単元ごと生成への汎用化とコレクション検証の汎用化、単元サムネイル（完成迷路＋フェーズ1経路） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [prisma-tmp-cleanup-278.md](prisma-tmp-cleanup-278.md) | 記録 | Issue #278のPrisma生成一時ファイル（.tmp 9件・約173MB）の追跡削除と.gitignore追加（Cloud Buildソースアーカイブ肥大の主因対策） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
