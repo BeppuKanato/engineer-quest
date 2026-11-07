@@ -27,6 +27,7 @@
 | [concept/wall-extension-unit-baseline.md](concept/wall-extension-unit-baseline.md) | 正本 | 棒倒し法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 wall-extension-v1、各フェーズの問題、グリッド描画基盤、知識カード案）。実装（#206 以降）は本書を正本として参照する |
 | [concept/bubble-sort-unit-baseline.md](concept/bubble-sort-unit-baseline.md) | 正本 | バブルソート単元の基準データ設計書（主教材 [4, 2, 5, 1, 3] の検証済みトレース、参照コード契約 bubble-sort-v1、各フェーズの問題、配列描画基盤、知識カード案）。実装（#227 以降）は本書を正本として参照する |
 | [concept/maze-digging-unit-baseline.md](concept/maze-digging-unit-baseline.md) | 正本 | 穴掘り法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 maze-digging-v1、各フェーズの問題、グリッド描画基盤の再利用、知識カード案）。実装（#257 以降）は本書を正本として参照する |
+| [concept/binary-search-unit-baseline.md](concept/binary-search-unit-baseline.md) | 正本 | 二分探索単元の基準データ設計書（主教材 [3,7,12,19,25,31,42] で 25 を探す検証済みトレース、参照コード契約 binary-search-v1、各フェーズの問題、配列描画基盤の再利用、知識カード案）。実装（#286 以降）は本書を正本として参照する |
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
@@ -69,6 +70,7 @@
 | [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
+| [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
 | [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
 | [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
