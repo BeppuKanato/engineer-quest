@@ -74,6 +74,7 @@
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
 | [binary-search-phase3-288.md](binary-search-phase3-288.md) | 記録 | Issue #288の二分探索フェーズ3（動きの確認問題）、連結2問（セルタップ＋文章4択）、出題エンジンへの concept-check 形式追加などの留保 |
+| [binary-search-phase4-289.md](binary-search-phase4-289.md) | 記録 | Issue #289の二分探索フェーズ4（動きとコードの対応）、18フレームとCPythonトレース照合、基準データの行数表記（11行/12行）などの留保 |
 | [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
 | [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
 | [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
