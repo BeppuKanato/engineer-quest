@@ -18,22 +18,31 @@ import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { mazeDiggingImplementationContent as content } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome, type MazeDiggingImplementationSummary } from "./implementation";
+import { MazeDiggingTraceDialog } from "../trace/MazeDiggingTraceDialog";
+import { traceMazeDiggingCode } from "../trace/acquireTrace";
+import { convertMazeDiggingTrace } from "../trace/convertTrace";
+import { mazeDiggingTraceText } from "../trace/trace.content";
+import type { MazeDiggingTracePlayback } from "../trace/trace.types";
 
 /** embedded / onComplete は単元フロー接続（後続Issue）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function MazeDiggingImplementationPreview({ embedded = false, onComplete, onLearningEvent, initialCode, onCodeChange }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: MazeDiggingImplementationSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void }) {
+export function MazeDiggingImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: MazeDiggingImplementationSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void }) {
   const [code, setCode] = useState<string>(initialCode ?? content.template);
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
+  const [tracing, setTracing] = useState(false);
   const [freeStatus, setFreeStatus] = useState<"idle" | "preparing" | "running">("idle");
   const [freeResult, setFreeResult] = useState<FreeExecutionResult | null>(null);
   const [panel, setPanel] = useState<"tests" | "console">("tests");
   const freeRunning = freeStatus !== "idle";
-  const busy = running || freeRunning;
+  const busy = running || tracing || freeRunning;
   const panelId = useId();
   const sidePanel = useRef<HTMLElement>(null);
+  const [tracePlayback, setTracePlayback] = useState<MazeDiggingTracePlayback | null>(null);
+  const [traceError, setTraceError] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
   const [runs, setRuns] = useState(0);
+  const traceRuns = useRef(0);
   const [usage, setUsage] = useState<HintUsage>([0, 0, 0, 0]);
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
@@ -88,7 +97,7 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
     const current = generation.current;
     setPanel("tests");
     onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code } });
-    setRunning(true); setRuns(count => count + 1); setOutcomes([]);
+    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
       if (current === generation.current) {
@@ -101,9 +110,33 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
       if (current === generation.current) setRunning(false);
     }
   };
+  const runTrace = async () => {
+    if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
+    lock.current = true;
+    const current = generation.current;
+    traceRuns.current++;
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code } });
+    setTracing(true); setTraceError(null);
+    try {
+      const trace = await traceMazeDiggingCode(code, () => current === generation.current);
+      if (current === generation.current) {
+        const playback = convertMazeDiggingTrace(trace);
+        setTracePlayback(playback);
+        onLearningEvent?.({ eventType: "trace_result", payload: { mode: playback.mode, states: playback.content.steps.length, status: trace.status, partial: !!playback.notice, errorKind: trace.error?.kind ?? null } });
+      }
+    } catch (error) {
+      onLearningEvent?.({ eventType: "trace_result", payload: { status: "failed", states: 0, timeout: error instanceof Error && error.message.includes("タイムアウト") } });
+      if (current === generation.current) setTraceError(error instanceof Error && error.message.includes("タイムアウト") ? mazeDiggingTraceText.timeout : mazeDiggingTraceText.unavailable);
+    } finally {
+      lock.current = false;
+      if (current === generation.current) setTracing(false);
+    }
+  };
   const outlinedButton = { minHeight: 44, color: colors.text, borderColor: colors.border,
     "&:hover": { borderColor: colors.text, bgcolor: colors.button },
     "&.Mui-disabled": { color: colors.text, borderColor: colors.border, opacity: 0.45 } };
+  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
+    sx={outlinedButton}>{complete ? mazeDiggingTraceText.resultButton : mazeDiggingTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
     if (!instance || !selection || busy) return;
@@ -132,19 +165,22 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
         <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
         {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
         <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
+        <Box sx={{ mt: 2 }}>{traceButton}</Box>
+        {tracing && <Typography component="p" role="status">{mazeDiggingTraceText.loading}</Typography>}
       </Box> : <>
         <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 2.4fr) minmax(300px, 1fr)", gap: 2 }}>
           <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `2px solid ${colors.focus}`, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel }}>
             <Box role="group" aria-label={text.panel} sx={{ flexShrink: 0, p: 1, bgcolor: colors.panelAlt, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
               <Typography component="p" sx={{ fontWeight: 800, fontSize: 16, mr: 0.5 }}>{text.code}</Typography>
               <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runFree()} sx={outlinedButton}>{text.freeRun}</Button>
+              {traceButton}
               <Button variant="contained" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void run()}
                 sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke }, "&.Mui-disabled": { bgcolor: colors.button, color: colors.text, opacity: 0.45 } }}>{content.controls.run}</Button>
             </Box>
             <Box sx={{ flex: 1, minHeight: 0 }}>
               <Editor height="100%" language="python" theme="vs" value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setFreeResult(null); }}
+                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
@@ -176,12 +212,14 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
           </Box>
         </Box>
         <Box sx={{ flexShrink: 0 }}>
-          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{freeStatus === "preparing" ? text.preparing : freeStatus === "running" ? text.running : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{freeStatus === "preparing" ? text.preparing : freeStatus === "running" ? text.running : tracing ? mazeDiggingTraceText.loading : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           {runtime === "error" && <Button onClick={() => void prepare()} sx={outlinedButton}>{content.controls.reload}</Button>}
         </Box>
       </>}
+      {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
+    {tracePlayback && <MazeDiggingTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
     {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }
