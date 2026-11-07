@@ -94,6 +94,7 @@
 | [maze-digging-phase4-260.md](maze-digging-phase4-260.md) | 記録 | Issue #260の穴掘り法フェーズ4（動きとコードの対応）669フレーム、参照コード契約 maze-digging-v1（22行）と CPython トレース照合、チェックポイントは掘削=push行・バックトラック=戻り切ったpop行・完成=while終了判定 |
 | [maze-digging-phase5-261.md](maze-digging-phase5-261.md) | 記録 | Issue #261の穴掘り法フェーズ5（コードの確認問題）独立2問、2マス先の座標計算（11行目）と未掘削の条件（12行目）の空欄補充、Q1は形式の制約で dx 側の「2」のみ空欄（留保あり） |
 | [maze-digging-phase6-262.md](maze-digging-phase6-262.md) | 記録 | Issue #262の穴掘り法フェーズ6（応用問題）4問、転移7×7のタップ（掘削5回目まで・左へ掘る部屋）・完成迷路の性質・バックトラックの理由（復習はフェーズ4の pop 行）・参照コード22行の Parsons（順序自由な行なし） |
+| [maze-digging-phase7-263.md](maze-digging-phase7-263.md) | 記録 | Issue #263の穴掘り法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保（視覚デバッグは #264） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [prisma-tmp-cleanup-278.md](prisma-tmp-cleanup-278.md) | 記録 | Issue #278のPrisma生成一時ファイル（.tmp 9件・約173MB）の追跡削除と.gitignore追加（Cloud Buildソースアーカイブ肥大の主因対策） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
