@@ -8,6 +8,7 @@ import { KnowledgeCardRarity, type Prisma } from "@prisma/client";
 
 export const BFS_COURSE_ID = "course-algorithm-breadth-first-search-v1";
 export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
+export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
 
 export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   {
@@ -110,6 +111,55 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
     sortOrder: 6,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-bubble-sort-stable-sort",
+    courseId: BUBBLE_SORT_COURSE_ID,
+    label: "安定性",
+    title: "安定なソート",
+    description:
+      "同じ値の要素どうしの順番が、並び替えた後も保たれる性質を安定といい、その性質を持つ並び替えを安定なソートという。",
+    connection:
+      "バブルソートは、左の値が大きいときだけ隣同士を交換する。同じ値どうしは決して追い越し合わないため、安定なソートになる。",
+    useCase:
+      "名前順に並べた後で点数順に並べ直すような二段がけの並び替えで、先の並び順を活かしたいときに使える。",
+    searchKeywords: ["安定なソート", "安定性", "Stable Sort"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 7,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-bubble-sort-swap",
+    courseId: BUBBLE_SORT_COURSE_ID,
+    label: "交換",
+    title: "値の交換",
+    description:
+      "2つの変数の中身を入れ替える操作。Python では a, b = b, a というタプル代入で、一時的な変数を使わずに書ける。",
+    connection:
+      "バブルソートは、隣り合う値の順番が逆になっている場所でこの交換を繰り返し、大きい値を右へ運んでいく。",
+    useCase: "並び替えに限らず、2つの値を入れ替える場面全般で使う、プログラムの基本操作の1つ。",
+    searchKeywords: ["値の交換", "スワップ", "swap", "タプル代入"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 8,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-bubble-sort-complexity",
+    courseId: BUBBLE_SORT_COURSE_ID,
+    label: "計算量",
+    title: "計算量",
+    description:
+      "データの量が増えたときに、処理の回数がどれくらいの割合で増えるかを表す考え方。",
+    connection:
+      "バブルソートの比較は約 n² 回（n は要素の数）。データが2倍になると、かかる手間は約4倍になる。",
+    useCase: "大量のデータを並び替えるときに、どの方法を選ぶかの判断材料になる。",
+    searchKeywords: ["計算量", "時間計算量", "オーダー"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 9,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -124,6 +174,13 @@ export const WALL_EXTENSION_CARD_PHASE_SLOTS = [
   { phaseKey: "wall-extension-execution", knowledgeCardId: "knowledge-card-wall-extension-procedural-generation" },
   { phaseKey: "wall-extension-code-check", knowledgeCardId: "knowledge-card-wall-extension-random-seed" },
   { phaseKey: "wall-extension-implementation", knowledgeCardId: "knowledge-card-wall-extension-perfect-maze" },
+] as const;
+
+/** フェーズ完了のタイミングとカードの対応（バブルソート。配布位置とレアリティは BFS と同じ）。 */
+export const BUBBLE_SORT_CARD_PHASE_SLOTS = [
+  { phaseKey: "bubble-sort-execution", knowledgeCardId: "knowledge-card-bubble-sort-stable-sort" },
+  { phaseKey: "bubble-sort-code-check", knowledgeCardId: "knowledge-card-bubble-sort-swap" },
+  { phaseKey: "bubble-sort-implementation", knowledgeCardId: "knowledge-card-bubble-sort-complexity" },
 ] as const;
 
 /**
@@ -166,4 +223,5 @@ export const knowledgeCardPhaseScheduleSeed: Array<
 > = [
   ...buildCardPhaseSchedule(BFS_COURSE_ID, "bfs", BFS_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(WALL_EXTENSION_COURSE_ID, "wall-extension", WALL_EXTENSION_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(BUBBLE_SORT_COURSE_ID, "bubble-sort", BUBBLE_SORT_CARD_PHASE_SLOTS),
 ];

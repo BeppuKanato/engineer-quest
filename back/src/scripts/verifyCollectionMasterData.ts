@@ -4,6 +4,8 @@ import { createQuestSeed } from "../../prisma/seedData/createQuestSeed";
 import {
   BFS_CARD_PHASE_SLOTS,
   BFS_COURSE_ID,
+  BUBBLE_SORT_CARD_PHASE_SLOTS,
+  BUBBLE_SORT_COURSE_ID,
   KNOWLEDGE_CARD_TABLE_COUNT,
   WALL_EXTENSION_CARD_PHASE_SLOTS,
   WALL_EXTENSION_COURSE_ID,
@@ -38,13 +40,24 @@ const WALL_EXTENSION_PHASE_KEYS: readonly string[] = [
   "wall-extension-implementation",
 ];
 
+const BUBBLE_SORT_PHASE_KEYS: readonly string[] = [
+  "bubble-sort-motivation",
+  "bubble-sort-execution",
+  "bubble-sort-check",
+  "bubble-sort-code-mapping",
+  "bubble-sort-code-check",
+  "bubble-sort-consolidation",
+  "bubble-sort-implementation",
+];
+
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
   { courseId: WALL_EXTENSION_COURSE_ID, slots: WALL_EXTENSION_CARD_PHASE_SLOTS, phaseKeys: WALL_EXTENSION_PHASE_KEYS },
+  { courseId: BUBBLE_SORT_COURSE_ID, slots: BUBBLE_SORT_CARD_PHASE_SLOTS, phaseKeys: BUBBLE_SORT_PHASE_KEYS },
 ] as const;
 
-// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法を追加）
+// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソートを追加）
 const expectedCardCount = CARD_COURSES.reduce((sum, course) => sum + course.slots.length, 0);
 if (knowledgeCardSeed.length !== expectedCardCount) fail(`Card pool must contain ${expectedCardCount} cards, got ${knowledgeCardSeed.length}`);
 for (const card of knowledgeCardSeed) {
