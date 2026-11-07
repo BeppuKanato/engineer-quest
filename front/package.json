@@ -32,6 +32,7 @@
     "verify:maze-digging-motivation": "node scripts/verifyMazeDiggingMotivation.cjs",
     "verify:maze-digging-execution": "node scripts/verifyMazeDiggingExecution.cjs",
     "verify:maze-digging-check": "node scripts/verifyMazeDiggingCheck.cjs",
+    "verify:maze-digging-code-mapping": "node scripts/verifyMazeDiggingCodeMapping.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
