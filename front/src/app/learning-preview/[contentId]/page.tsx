@@ -41,6 +41,7 @@ import { MazeDiggingUnitPreview } from "@/features/learning/maze-digging/unit/Ma
 import { BinarySearchExecutionPreview } from "@/features/learning/binary-search/execution/BinarySearchExecutionPreview";
 import { BinarySearchCheckPreview } from "@/features/learning/binary-search/check/BinarySearchCheckPreview";
 import { BinarySearchCodeMappingPreview } from "@/features/learning/binary-search/code-mapping/BinarySearchCodeMappingPreview";
+import { BinarySearchCodeCheckPreview } from "@/features/learning/binary-search/code-check/BinarySearchCodeCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -68,6 +69,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "binary-search-execution") return <BinarySearchExecutionPreview />;
   if (contentId === "binary-search-check") return <BinarySearchCheckPreview />;
   if (contentId === "binary-search-code-mapping") return <BinarySearchCodeMappingPreview />;
+  if (contentId === "binary-search-code-check") return <BinarySearchCodeCheckPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
