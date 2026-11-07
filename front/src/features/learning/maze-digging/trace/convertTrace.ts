@@ -55,7 +55,7 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
   /** 直近に処理した描画可能な盤面（差分の基準）。 */
   let prev: { walls: ReadonlySet<string>; size: number } | null = null;
   /** 最後にコマとして確定した状態。バックトラックのコマはこの盤面で作る。 */
-  let settled: { walls: ReadonlySet<string>; processing: MazeCellKey | null; path: readonly MazeCellKey[] } | null = null;
+  const settled: { current: { walls: ReadonlySet<string>; processing: MazeCellKey | null; path: readonly MazeCellKey[] } | null } = { current: null };
   /** 確定したコマ以降に掘れたマス（間の壁だけ先に掘れるため、部屋が掘れるまで保留する）。 */
   let pending: MazeCellKey[] = [];
   /** 最初に掘った部屋。経路の起点にする。 */
@@ -79,7 +79,7 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
     const wallSet = new Set<string>(walls);
     const safeHighlights = highlights.filter(key => !wallSet.has(key));
     steps.push({ id: `trace-${steps.length}`, caption, canvas: makeCanvas(size, walls, processing, safeHighlights, path, null, null, event) });
-    settled = { walls: wallSet, processing, path };
+    settled.current = { walls: wallSet, processing, path };
   }
 
   for (const event of trace.events) {
@@ -94,21 +94,25 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
     invalidTail = false;
     const walls = wallsOf(grid);
     const wallSet = new Set<string>(walls);
-    if (prev !== null && prev.size === size && wallSet.size === prev.walls.size && walls.every(key => prev.walls.has(key))) {
-      prev = { walls: wallSet, size };
-      continue;
+    if (prev !== null && prev.size === size && wallSet.size === prev.walls.size) {
+      const prevWalls = prev.walls;
+      if (walls.every(key => prevWalls.has(key))) {
+        prev = { walls: wallSet, size };
+        continue;
+      }
     }
     if (prev === null || prev.size !== size) {
       // 最初の盤面。全部が壁なら用意のコマ、それ以外は変化として見せる。
       pending = [];
-      settled = null;
+      settled.current = null;
       startRoom = null;
       emit(size, walls, null, [], [], walls.length === size * size ? text.setup : text.changed, event);
       prev = { walls: wallSet, size };
       continue;
     }
-    const opened = [...prev.walls].filter(key => !wallSet.has(key));
-    const closed = walls.filter(key => !prev.walls.has(key));
+    const prevWalls = prev.walls;
+    const opened = [...prevWalls].filter(key => !wallSet.has(key));
+    const closed = walls.filter(key => !prevWalls.has(key));
     pending.push(...opened);
     const newRooms = opened.filter(key => isRoom(key, size));
     if (closed.length === 0 && newRooms.length > 0) {
@@ -120,16 +124,18 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
         const candidate = mazeCellKey(2 * b.x - r.x, 2 * b.y - r.y);
         if (isRoom(candidate, size)) { fromRoom = candidate; break; }
       }
-      if (startRoom === null) startRoom = fromRoom ?? room;
-      if (fromRoom !== null && settled !== null && settled.processing !== null && fromRoom !== settled.processing) {
+      const start: MazeCellKey = startRoom ?? fromRoom ?? room;
+      if (startRoom === null) startRoom = start;
+      const settledState = settled.current;
+      if (fromRoom !== null && settledState !== null && settledState.processing !== null && fromRoom !== settledState.processing) {
         // 次の掘削の開始マスが前回の掘削先と違う場合、その間にバックトラックが起きている。
         // 盤面は変わらないため、確定済みの盤面のまま現在位置とスタック経路だけを移す。
-        const route = routePath(size, settled.walls, startRoom, fromRoom);
+        const route = routePath(size, settledState.walls, start, fromRoom);
         const path = route !== null && route.length > 1 ? route : [];
-        emit(size, [...settled.walls], fromRoom, [], path,
+        emit(size, [...settledState.walls], fromRoom, [], path,
           text.backtrack.replace("{room}", coordinate(fromRoom)), event);
       }
-      const route = routePath(size, wallSet, startRoom, room);
+      const route = routePath(size, wallSet, start, room);
       const path = route !== null && route.length > 1 ? route : [];
       let caption = text.firstRoom.replace("{room}", coordinate(room));
       if (fromRoom !== null) {
@@ -141,7 +147,8 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
       pending = [];
     } else if (closed.length > 0) {
       // 壁が増えるなど掘削以外の変化は、そのまま1コマにする（誤りも差し替えない）。
-      const processing = settled !== null && settled.processing !== null && !wallSet.has(settled.processing) ? settled.processing : null;
+      const settledState = settled.current;
+      const processing = settledState !== null && settledState.processing !== null && !wallSet.has(settledState.processing) ? settledState.processing : null;
       emit(size, walls, processing, pending, [], text.changed, event);
       pending = [];
     }
@@ -150,9 +157,10 @@ export function convertMazeDiggingTrace(trace: PythonTraceResult): MazeDiggingTr
   }
 
   // 部屋まで掘り切らずに止まった場合は、掘れたところまでを最後のコマとして出す。
-  if (pending.length > 0 && prev !== null && settled !== null && lastEvent !== null) {
-    const processing = settled.processing !== null && !prev.walls.has(settled.processing) ? settled.processing : null;
-    const path = settled.path.every(key => !prev.walls.has(key)) ? settled.path : [];
+  const settledState = settled.current;
+  if (pending.length > 0 && prev !== null && settledState !== null && lastEvent !== null) {
+    const processing = settledState.processing !== null && !prev.walls.has(settledState.processing) ? settledState.processing : null;
+    const path = settledState.path.every(key => !prev.walls.has(key)) ? settledState.path : [];
     emit(prev.size, [...prev.walls], processing, pending, path, text.changed, lastEvent);
     pending = [];
   }
