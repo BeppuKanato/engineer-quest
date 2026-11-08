@@ -16,7 +16,14 @@ const sceneStep = getLearningStep(bubbleSortExecutionContent, SCENE_STEP_ID);
 const scene = sceneStep.canvas.state;
 const comparisons = bubbleSortComparisons(bubbleSortMainValues);
 const sceneIndex = comparisons.findIndex((comparison) => `compare-${comparison.pass}-${comparison.j}` === SCENE_STEP_ID);
+const sceneComparison = comparisons[sceneIndex];
 const next = comparisons[sceneIndex + 1];
+// 状況キャプション（Issue #297）。Q1の場面の青ペアは「比べ終えたペア」、
+// Q2の場面の青ペアは「これから比べるペア」で、色だけでは時制が読めない。
+// Q1は場面ステップで起きた比較を完了形で、Q2は前提として確定した次の
+// 比較を未来形で示し、青の意味を文章で固定する（文言はトレースから導く）。
+const pastSituation = `${sceneComparison.pair[0]} と ${sceneComparison.pair[1]} を比べて、${sceneComparison.swapped ? "入れ替えました" : "そのままにしました"}。`;
+const nextSituation = `次に、${next.pair[0]} と ${next.pair[1]} を比べます。`;
 // Q1の回答対象は、場面の未確定範囲のマスだけ。確定済みの右端はもう比べない。
 const unfixedIds = scene.values.map((_, index) => String(index)).filter((id) => Number(id) < scene.fixedFrom);
 // Q2の回答対象は、比べるペアの2マスだけ。大きい値は比べた後に
@@ -29,13 +36,13 @@ export const bubbleSortCheckContent: BubbleSortCheckContent = {
   version: 1, kind: "node-tap-check", id: "bubble-sort-check", phase: 3, stageName: "動きの確認問題",
   questions: [
     {
-      id: "next-pair", prompt: "次に比べるペアの左側のマスはどれか", stepId: SCENE_STEP_ID,
+      id: "next-pair", prompt: "次に比べるペアの左側のマスはどれか", situation: pastSituation, stepId: SCENE_STEP_ID,
       nodeIds: unfixedIds, allowNone: false,
       correctAnswer: { kind: "node", nodeId: String(next.j) }, requires: null,
       reviewStepIds: [SCENE_STEP_ID, "compare-1-2"], tags: ["compare-order"],
     },
     {
-      id: "larger-destination", prompt: `比べた後、大きい方の ${largerValue} はどのマスへ行くか`, stepId: SCENE_STEP_ID,
+      id: "larger-destination", prompt: `比べた後、大きい方の ${largerValue} はどのマスへ行くか`, situation: nextSituation, stepId: SCENE_STEP_ID,
       nodeIds: destinationIds, allowNone: false,
       correctAnswer: { kind: "node", nodeId: String(largerIndex) },
       requires: { questionId: "next-pair", answer: { kind: "node", nodeId: String(next.j) } },
@@ -75,6 +82,8 @@ getLearningStep(bubbleSortExecutionContent, bubbleSortCheckContent.completion.st
 // 基準データ §3 の確定事項（場面 [2, 4, 5, 1, 3]、次は j=2 のペア (5, 1) で交換し、5 は位置3へ）と教材の正解がずれたら落とす。
 if (sceneIndex < 0 || next.pass !== 1 || next.j !== 2 || next.pair[0] !== 5 || next.pair[1] !== 1 ||
   !next.swapped || largerValue !== 5 || largerIndex !== 3 || next.after[largerIndex] !== 5 ||
+  sceneComparison.pass !== 1 || sceneComparison.j !== 1 || sceneComparison.pair[0] !== 4 || sceneComparison.pair[1] !== 5 ||
+  sceneComparison.swapped || pastSituation !== "4 と 5 を比べて、そのままにしました。" || nextSituation !== "次に、5 と 1 を比べます。" ||
   scene.values.join(",") !== "2,4,5,1,3" || comparisons[sceneIndex].after.join(",") !== scene.values.join(",")) {
   throw new Error("Bubble-sort check answers must follow the verified trace");
 }

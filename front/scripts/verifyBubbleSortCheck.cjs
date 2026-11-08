@@ -41,6 +41,10 @@ assert.deepEqual(plain(content.questions.map(q => [q.id, q.prompt, q.stepId, q.c
   ["next-pair", "次に比べるペアの左側のマスはどれか", "compare-1-1", "2", "compare-order"],
   ["larger-destination", "比べた後、大きい方の 5 はどのマスへ行くか", "compare-1-1", "3", "swap-destination"],
 ]);
+// 状況キャプション（Issue #297）: Q1は場面で比べ終えたペアを完了形で、
+// Q2は前提の次の比較を未来形で示し、青ペアの時制を文章で固定する。
+assert.equal(q1.situation, "4 と 5 を比べて、そのままにしました。");
+assert.equal(q2.situation, "次に、5 と 1 を比べます。");
 assert.equal(q1.requires, null);
 assert.deepEqual(plain(q2.requires), { questionId: q1.id, answer: plain(q1.correctAnswer) });
 assert.equal(content.completion.stepId, "compare-1-2");
@@ -162,6 +166,7 @@ const render = () => { cursor = 0; tree = elements(BubbleSortCheckPreview({})); 
 const canvasProps = () => tree.find(element => element.type === Canvas).props;
 const button = label => { const element = tree.find(element => element.props?.children === label); assert(element, `Missing button: ${label}`); return element.props; };
 render();
+assert(tree.some(element => element.props?.children === q1.situation), "Q1 shows the situation caption");
 const first = canvasProps();
 assert.equal(first.questionId, q1.id); assert.equal(first.disabled, false);
 assert.deepEqual(plain(first.canvas), plain(scene1), "Preview shows the phase-2 step canvas for Q1");
@@ -177,6 +182,7 @@ assert.equal(canvasProps().disabled, true, "Correct answer locks the board");
 const solved = slots[0]; first.onAnswer(cell("2")); render();
 assert.equal(slots[0], solved, "Even a queued duplicate cannot add another attempt after success");
 button("次の問題へ").onClick(); render();
+assert(tree.some(element => element.props?.children === q2.situation), "Q2 shows the situation caption");
 assert.equal(canvasProps().questionId, q2.id);
 assert.deepEqual(plain(canvasProps().canvas.state.comparing), [2, 3], "Q2 preview scene compares the premise pair");
 first.onAnswer(cell("2")); render();
