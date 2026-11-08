@@ -83,7 +83,19 @@ const request = <T>(payload: Record<string, unknown>, timeoutMs = 15_000, output
     currentWorker.postMessage({ id, ...payload });
   });
 
-export const preparePyodide = () => request<{ ready: true }>({ kind: "ping" }, 120_000);
+export const preparePyodide = async () => {
+  try {
+    return await request<{ ready: true }>({ kind: "ping" }, 120_000);
+  } catch (error) {
+    // CDN からの Pyodide 読み込みが一時的に失敗すると、Worker は失敗した
+    // readyPromise を保持し続けて二度と読み込めない。Worker を作り直して
+    // 一度だけ再試行する（#305：トレース取得時の冷再読込失敗への対策）。
+    // タイムアウトは読み込み失敗ではないので再試行しない。
+    if (error instanceof Error && error.message.includes("タイムアウト")) throw error;
+    disposePyodideRunner();
+    return request<{ ready: true }>({ kind: "ping" }, 120_000);
+  }
+};
 export const runCourseMissionTests = (code: string, tests: PythonTestCase[], output?: PythonRunOutputOptions) =>
   request<{ done: true; results: PythonTestResult[]; stdout: string; stderr: string }>({ kind: "run", code, tests }, 15_000, output);
 
