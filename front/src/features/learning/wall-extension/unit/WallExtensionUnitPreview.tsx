@@ -71,6 +71,8 @@ export function WallExtensionUnitPreview({ embedded = false, initialPhaseIndex =
   const [failed, setFailed] = useState<{ index: number; summary?: WallExtensionUnitPhaseSummary } | null>(null);
   const observer = useRef(onLearningEvent);
   useEffect(() => { screenRef.current = screen; observer.current = onLearningEvent; }, [screen, onLearningEvent]);
+  const failedRef = useRef<{ index: number; summary?: WallExtensionUnitPhaseSummary } | null>(null);
+  useEffect(() => { failedRef.current = failed; }, [failed]);
   const phaseKey = screen.kind === "final" ? undefined : wallExtensionUnitPhases[screen.index].id;
   const onUnitEvent = useCallback<LearningObserver>(event => onLearningEvent?.({ ...event,
     phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : undefined,
@@ -107,6 +109,35 @@ export function WallExtensionUnitPreview({ embedded = false, initialPhaseIndex =
 
   const handleComplete = useCallback(async (index: number, summary?: WallExtensionUnitPhaseSummary) => {
     if (busy.current) return;
+    const phase = wallExtensionUnitPhases[index];
+    // リザルト遷移のフェーズ（3・5）は、保存を待たずに結果画面へ移る（#317 案1）。
+    // 完了ビューが保存往復の間だけ閃く問題への対処で、保存は並行して行う。
+    // 失敗時は結果画面上でも警告と再試行が出る（failed の Alert は画面種別に依らない）。
+    // 保存のリトライでは、遷移と phase_complete の記録を繰り返さない。
+    // 結果画面のフィードバックは保存の確定後にマウントする（未保存のまま先行リクエストすると
+    // 未完了として404になり、その画面では二度と表示されないため。#202）。
+    if (phase.transitionOut === "result") {
+      const retrying = failedRef.current?.index === index;
+      busy.current = true; setSaving(true);
+      if (!retrying) {
+        observer.current?.({ eventType: "phase_complete", phaseKey: phase.id, payload: { summary } });
+        if (summary) setSummaries(current => ({ ...current, [index]: summary }));
+        setCompleted(current => new Set(current).add(phase.id));
+        setFurthest(current => Math.max(current, Math.min(index + 1, wallExtensionUnitPhases.length - 1)));
+        const current = screenRef.current;
+        if (current.kind === "phase" && current.index === index) setScreen({ kind: "result", index });
+      }
+      try {
+        if (onPhaseComplete) await onPhaseComplete(phase.id, summary);
+        // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+        if (onCheckPhaseCompleted && isCheckPhase(phase)) {
+          onCheckPhaseCompleted(phase.id, wallExtensionUnitPhases[index + 1]?.id ?? null);
+        }
+        setFailed(null);
+      } catch { setFailed({ index, summary }); }
+      finally { busy.current = false; setSaving(false); }
+      return;
+    }
     busy.current = true; setSaving(true); setFailed(null);
     try {
       if (onPhaseComplete) await onPhaseComplete(wallExtensionUnitPhases[index].id, summary);
@@ -213,7 +244,7 @@ export function WallExtensionUnitPreview({ embedded = false, initialPhaseIndex =
         ))}
         {screen.kind === "result" && (
           <UnitResultScreen phase={wallExtensionUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
-            feedback={isCheckPhase(wallExtensionUnitPhases[screen.index]) && renderPhaseFeedback ? renderPhaseFeedback(wallExtensionUnitPhases[screen.index].id, wallExtensionUnitPhases[screen.index + 1]?.id ?? null, {
+            feedback={isCheckPhase(wallExtensionUnitPhases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(wallExtensionUnitPhases[screen.index].id, wallExtensionUnitPhases[screen.index + 1]?.id ?? null, {
               goToPhase: key => { const target = wallExtensionUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
               goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
             }) : undefined} />
