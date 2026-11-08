@@ -19,6 +19,12 @@ export const wallExtensionMainChoices: readonly number[] = [3, 1, 2, 0, 2, 0, 2,
 export const wallExtensionSmallSize = 7;
 export const wallExtensionSmallChoices: readonly number[] = [1, 2, 2, 0];
 
+/**
+ * フェーズ2の説明専用ステップ「別の迷路」用の choices（9×9）。
+ * 主教材と違う形の完全迷路になることを検証済み（壁の差分10マス）。
+ */
+export const wallExtensionAnotherChoices: readonly number[] = [0, 0, 2, 0, 0, 0, 2, 0, 2];
+
 /** 主教材 9×9 でスタート (1,7) からゴール (7,7) へたどる検証済みの経路。 */
 export const wallExtensionMainPath: readonly MazeCellKey[] = [
   "1,7", "1,6", "1,5", "1,4", "1,3", "1,2", "1,1", "2,1", "3,1", "4,1",

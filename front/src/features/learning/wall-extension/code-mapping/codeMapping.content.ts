@@ -50,6 +50,8 @@ function frames(): [LearningStep<WallExtensionCodeMappingCanvasState>, ...Learni
   checkpoint("empty-board", "initialize-grid", "assignment");
 
   // 外周: for の行と4つの書き込み行が、i = 0..8 でそのまま繰り返される。
+  // 各周の最後の書き込み（border-right）が、フェーズ2の border-i ステップの
+  // チェックポイントになり、盤面はループ1周ごとに切り替わる（指針 §2-5）。
   for (let i = 0; i < size; i++) {
     vars = { ...vars, i };
     add(`for-border-${i}`, "for-border",
@@ -57,8 +59,7 @@ function frames(): [LearningStep<WallExtensionCodeMappingCanvasState>, ...Learni
     add(`border-top-${i}`, "border-top", `上の辺の左から${i + 1}マス目を壁にします。`, "assignment");
     add(`border-bottom-${i}`, "border-bottom", `下の辺の左から${i + 1}マス目を壁にします。`, "assignment");
     add(`border-left-${i}`, "border-left", `左の辺の上から${i + 1}マス目を壁にします。`, "assignment");
-    if (i === size - 1) checkpoint("border-walls", "border-right", "assignment");
-    else add(`border-right-${i}`, "border-right", `右の辺の上から${i + 1}マス目を壁にします。`, "assignment");
+    checkpoint(`border-${i}`, "border-right", "assignment");
   }
   add("for-border-exit", "for-border", "外側のすべての辺を囲んだので、この繰り返しを終えます。", "evaluation");
 
@@ -76,10 +77,10 @@ function frames(): [LearningStep<WallExtensionCodeMappingCanvasState>, ...Learni
     }
     vars = { ...vars, x };
     add(`for-pillar-column-${y}-${x}`, "for-pillar-column", `xに${x}を入れて、柱を立てる列を選びます。`, "structure");
-    add(`place-pillar-${x}-${y}`, "place-pillar", `（${x}, ${y}）のマスを、柱として壁にします。`, "assignment");
+    // 柱を書き込む行が、フェーズ2の pillar-x-y ステップのチェックポイントになる。
+    checkpoint(`pillar-${x}-${y}`, "place-pillar", "assignment");
     vars = { ...vars, pillars: [...(vars.pillars ?? []), [x, y] as const] };
-    if (pillarKey === pillarKeys.at(-1)) checkpoint("pillars", "append-pillar", "assignment");
-    else add(`append-pillar-${x}-${y}`, "append-pillar", `柱（${x}, ${y}）を、pillarsの末尾へ記録します。`, "assignment");
+    add(`append-pillar-${x}-${y}`, "append-pillar", `柱（${x}, ${y}）を、pillarsの末尾へ記録します。`, "assignment");
   }
   add(`for-pillar-column-exit-${vars.y}`, "for-pillar-column", "xの候補をすべて見たので、内側の繰り返しを終えます。", "evaluation");
   add("for-pillar-row-exit", "for-pillar-row", "yの候補をすべて見たので、柱を立てる繰り返しを終えます。", "evaluation");
@@ -87,12 +88,15 @@ function frames(): [LearningStep<WallExtensionCodeMappingCanvasState>, ...Learni
   add("define-directions", "define-directions", "方向の名前と進む量の対応を、directionsに用意します。", "assignment");
 
   // 伸長: 書き込み行がフェーズ2の伸長ステップと1対1に対応する（チェックポイント）。
+  // choices の意味（柱ごとに倒す方向を表す番号の並び）は、コード本文が契約
+  // wall-extension-v1 で凍結されているためコメントでは足さず、for-extension の
+  // キャプションで言語化する（Issue #316）。
   const extensions = wallExtensionExtensions(size, wallExtensionMainChoices);
   extensions.forEach((extension, index) => {
     const [x, y] = extension.pillar.split(",").map(Number);
     const choice = wallExtensionMainChoices[index];
     vars = { ...vars, x, y, choice };
-    add(`for-extension-${x}-${y}`, "for-extension", `柱（${x}, ${y}）と番号${choice}を取り出して、壁を伸ばす処理を始めます。`, "structure");
+    add(`for-extension-${x}-${y}`, "for-extension", `柱（${x}, ${y}）と、倒す方向を表す番号${choice}を choices から取り出して、壁を伸ばす処理を始めます。`, "structure");
     add(`if-first-row-${x}-${y}`, "if-first-row",
       y === 2 ? "yが2なので、この柱は一番上の段にあります。" : "yが2ではないので、この柱は一番上の段にはありません。", "evaluation");
     if (y === 2) {

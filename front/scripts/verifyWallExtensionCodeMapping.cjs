@@ -75,8 +75,9 @@ const actual = JSON.parse(run.stdout);
 const resultWalls = new Set();
 actual.result.forEach((row, y) => row.forEach((cell, x) => { if (cell === 1) resultWalls.add(`${x},${y}`); }));
 assert.equal(resultWalls.size, 50, "Executed reference code builds the verified 9x9 maze");
-assert.deepEqual(new Set(execution.steps.at(-1).canvas.state.walls), resultWalls,
-  "Phase-2 final board equals the executed result");
+// 完成盤面は説明専用ステップより前にある complete ステップが担う（末尾は別の迷路）。
+assert.deepEqual(new Set(execution.steps.find(step => step.id === "complete").canvas.state.walls), resultWalls,
+  "Phase-2 complete board equals the executed result");
 
 // else: 行は CPython が行イベントを発しないため、説明フレームを分けて数える。
 const elseFrames = content.steps.filter(step => step.canvas.highlights[0].id === "else-branch");
@@ -100,17 +101,28 @@ for (const step of elseFrames) {
     `${step.id}: else itself changes no variable`);
 }
 
-// フェーズ2の13ステップがすべて、順番どおりチェックポイントとして現れる。
+// フェーズ2のコード対応ステップ29件がすべて、順番どおりチェックポイントとして現れる。
+// 説明専用ステップ（方向の決まり・輪の実演・別の迷路）はチェックポイントに出ない（#314）。
+const { codeMappedSteps } = load(`${root}/player/content.types.ts`);
+const codeMappedExecutionSteps = codeMappedSteps(execution);
+assert.equal(codeMappedExecutionSteps.length, 29);
 const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
-assert.equal(checkpoints.length, 13);
-assert.deepEqual(plain(checkpoints.map(step => step.canvas.state.executionStepId)), plain(execution.steps.map(step => step.id)));
-const checkpointLines = { "empty-board": "initialize-grid", "border-walls": "border-right", pillars: "append-pillar", complete: "for-extension" };
+assert.equal(checkpoints.length, 29);
+assert.deepEqual(plain(checkpoints.map(step => step.canvas.state.executionStepId)), plain(codeMappedExecutionSteps.map(step => step.id)));
+for (const explanationId of ["directions-rule", "loop-what-if", "another-maze"]) {
+  assert(!content.steps.some(step => step.canvas.state.executionStepId === explanationId),
+    `Explanation step ${explanationId} never appears in phase 4`);
+}
+const checkpointLines = { "empty-board": "initialize-grid", complete: "for-extension" };
+for (let i = 0; i < 9; i++) checkpointLines[`border-${i}`] = "border-right";
 for (const step of checkpoints) {
   const reference = execution.steps.find(candidate => candidate.id === step.canvas.state.executionStepId);
   assert.equal(step.canvas.state.execution, reference.canvas, `${step.id}: board is the phase-2 snapshot itself`);
   assert.equal(step.caption, reference.caption, `${step.id}: checkpoint caption is the phase-2 caption`);
-  assert.equal(step.canvas.highlights[0].id, checkpointLines[step.canvas.state.executionStepId] ?? "write-wall",
-    `${step.id}: the line that completes the phase-2 step (extensions show the write line)`);
+  const expectedLine = checkpointLines[step.canvas.state.executionStepId]
+    ?? (step.canvas.state.executionStepId.startsWith("pillar-") ? "place-pillar" : "write-wall");
+  assert.equal(step.canvas.highlights[0].id, expectedLine,
+    `${step.id}: the line that completes the phase-2 step (borders end on border-right, pillars on place-pillar, extensions on write-wall)`);
 }
 
 const savedExecution = JSON.stringify(execution);
@@ -142,7 +154,10 @@ assert.equal(middleExtension.state.variables.choice, 2);
 assert.deepEqual(plain(middleExtension.state.variables.allowed), ["down", "left", "right"]);
 assert.equal(middleExtension.state.variables.dx, 1); assert.equal(middleExtension.state.variables.dy, 0);
 assert.equal(middleExtension.state.execution.state.walls.length, 46);
-assert.equal(frame("execution-pillars").state.variables.pillars.length, 9);
+// 最後の柱の記録フレームでは pillars が9本そろっている（チェックポイントは書き込み行側）。
+assert.equal(frame("append-pillar-6-6").state.variables.pillars.length, 9);
+assert.equal(frame("execution-pillar-6-6").state.variables.pillars.length, 8,
+  "At the place-pillar checkpoint the pillar is drawn but not yet recorded");
 assert.match(content.steps.find(step => step.id === "lookup-delta-4-4").caption, /右/u);
 assert.equal(content.steps.at(-1).canvas.highlights[0].id, "return-grid");
 assert.equal(frame("execution-complete").state.execution.state.walls.length, 50);
@@ -173,7 +188,7 @@ assert.throws(() => validate({ ...middleExtension, highlights: [{ kind: "code-li
 assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.state, variables: { ...middleExtension.state.variables, pillars: [[4, 2]] } } }), /prefix/u);
 assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.state, variables: { ...middleExtension.state.variables, allowed: ["up"] } } }), /allowed/u);
 assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.state, variables: { ...middleExtension.state.variables, dx: 2 } } }), /delta/u);
-assert.throws(() => defineWallExtensionCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-extend-4-4") }), /13/u);
+assert.throws(() => defineWallExtensionCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-extend-4-4") }), /29/u);
 
 const renderer = fs.readFileSync(file(`${feature}/WallExtensionCodeMappingCanvas.tsx`), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
@@ -184,4 +199,4 @@ assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
 // 接続ポートは単元フロー（#214）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
 assert.match(entry, /onComplete\?: \(\) => void/u); assert.match(entry, /endAction/u);
 assert(!/fetch\(|localStorage/u.test(entry));
-console.log(`Wall-extension code mapping verified: ${content.steps.length} frames, byte-exact 21-line contract wall-extension-v1, all CPython lines/locals, 13 phase-2 checkpoints (extensions on the write line), else explanations, shared rendering and standalone preview.`);
+console.log(`Wall-extension code mapping verified: ${content.steps.length} frames, byte-exact 21-line contract wall-extension-v1, all CPython lines/locals, 29 phase-2 checkpoints (borders on border-right, pillars on place-pillar, extensions on the write line; explanation steps excluded), else explanations, shared rendering and standalone preview.`);

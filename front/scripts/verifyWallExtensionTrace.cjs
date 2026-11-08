@@ -28,7 +28,10 @@ const code = wallExtensionCode.lines.map(line => line.text).join("\n");
 const d1 = wallExtensionImplementationContent.tests.find(test => test.id === "D1");
 const wallsOf = canvas => [...canvas.state.walls].sort();
 const dedupe = values => values.filter((value, index) => index === 0 || JSON.stringify(value) !== JSON.stringify(values[index - 1]));
-const expectedSequence = dedupe(plain(wallExtensionExecutionContent.steps.map(step => wallsOf(step.canvas))));
+// 再生が一致すべき正準列は、フェーズ2のコード対応ステップ（説明専用を除く）。
+// 説明専用ステップの盤面（仮定・別解）は実行からは生まれない（#314）。
+const { codeMappedSteps } = load(`${root}/player/content.types.ts`);
+const expectedSequence = dedupe(plain(codeMappedSteps(wallExtensionExecutionContent).map(step => wallsOf(step.canvas))));
 (async () => {
   const { buildPythonTraceHarness } = await import(pathToFileURL(path.resolve(__dirname, "../public/python-trace-harness.mjs")));
   function trace(source, maxEvents = wallExtensionTraceEventLimit) {
