@@ -1,4 +1,4 @@
-import { defineLearningContent, type LearningContent } from "../../player/content.types";
+import { codeMappedSteps, defineLearningContent, type LearningContent } from "../../player/content.types";
 import {
   wallExtensionAllowedDirections, wallExtensionDirections, wallExtensionMainSize, wallExtensionPillars,
   type WallExtensionDirection,
@@ -90,10 +90,13 @@ export function defineWallExtensionCodeMappingContent(
   content: WallExtensionCodeMappingContent,
 ): WallExtensionCodeMappingContent {
   defineLearningContent(content, validateWallExtensionCodeMappingCanvas);
+  // チェックポイントは、フェーズ2のコード対応ステップ（説明専用を除く）を
+  // 順序どおりすべて含むことが契約。説明専用ステップはフェーズ4に出さない。
+  const expectedCheckpoints = codeMappedSteps(wallExtensionExecutionContent);
   const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
   if (checkpoints.map(step => step.canvas.state.executionStepId).join() !==
-    wallExtensionExecutionContent.steps.map(step => step.id).join()) {
-    throw new Error("Keep all 13 execution checkpoints in order");
+    expectedCheckpoints.map(step => step.id).join()) {
+    throw new Error(`Keep all ${expectedCheckpoints.length} execution checkpoints in order`);
   }
   if (wallExtensionCode.lines.some(line => !content.steps.some(step => step.canvas.highlights[0].id === line.id))) {
     throw new Error("Unvisited code line");

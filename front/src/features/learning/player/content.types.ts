@@ -15,7 +15,24 @@ export type LearningStep<TCanvas extends CanvasSnapshot> = {
   readonly id: string;
   readonly caption: string;
   readonly canvas: TCanvas;
+  /**
+   * 説明専用ステップ（教材指針 §2-6）。コードの実行単位には対応しない説明
+   * （ルールの予告、反例の実演、別解の提示など）をフェーズ2に置くための印。
+   * フェーズ2では通常ステップとして再生されるが、フェーズ4のチェック
+   * ポイント対象からは外れる（チェックポイントは codeMappedSteps で数える）。
+   */
+  readonly explanationOnly?: boolean;
 };
+
+/**
+ * フェーズ4がチェックポイントとして順序どおり再現すべきステップ。
+ * 説明専用ステップ（explanationOnly）を除いたものが、コード対応の正である。
+ */
+export function codeMappedSteps<TCanvas extends CanvasSnapshot>(
+  content: LearningContent<TCanvas>,
+): readonly LearningStep<TCanvas>[] {
+  return content.steps.filter(step => !step.explanationOnly);
+}
 
 export type LearningContent<TCanvas extends CanvasSnapshot> = {
   readonly version: 1;
