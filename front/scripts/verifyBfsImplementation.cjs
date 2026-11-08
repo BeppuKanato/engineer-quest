@@ -175,7 +175,10 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(resultsSource, /DrawnCheck/, "passed tests show the shared drawn check");
   assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
   assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
-  assert.match(previewSource, /DrawnCheck size=\{76\}/, "the completion view leads with a large drawn check");
+  assert.match(previewSource, /data-completion-banner/, "all-pass keeps the workspace and overlays the achievement banner (#305)");
+  assert.match(previewSource, /DrawnCheck size=\{44\}/, "the completion banner leads with a drawn check");
+  assert.match(previewSource, /onShowFinalResult/, "the final result is reached by the learner's button, not automatically (#305)");
+  assert.match(previewSource, /answerCorrect/, "each newly passed test plays the small check sound (#305)");
   const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
   assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
   console.log("BFS implementation: independent BFS on five cases, canonical skeleton, hint-1 tokens, four staged hints, mini graphs and distance differences, timeout classification, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");

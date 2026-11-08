@@ -122,8 +122,9 @@ export function WallExtensionUnitPreview({ embedded = false, initialPhaseIndex =
       if (transition === "final") setUnitComplete(true);
       const current = screenRef.current;
       if (onPhaseComplete && (current.kind !== "phase" || current.index !== index)) return;
-      if (transition === "final") setScreen({ kind: "final" });
-      else if (transition === "result") setScreen({ kind: "result", index });
+      // フェーズ7（final）は自動遷移しない。学習者がフェーズ7画面の
+      // 「単元の結果を見る」を押したときだけ最終結果へ進む（#305 案A'）。
+      if (transition === "result") setScreen({ kind: "result", index });
       else if (transition === "bridge") {
         busy.current = false;
         setScreen({ kind: "bridge", index: index + 1 });
@@ -145,7 +146,7 @@ export function WallExtensionUnitPreview({ embedded = false, initialPhaseIndex =
       case 3: return <WallExtensionCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(wallExtensionUnitPhases[3])} />;
       case 4: return <WallExtensionCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
       case 5: return <WallExtensionConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(wallExtensionUnitPhases[5])} />;
-      case 6: return <WallExtensionImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} />;
+      case 6: return <WallExtensionImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
       default: return null;
     }
   };

@@ -289,7 +289,10 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(resultsSource, /DrawnCheck/, "passed tests show the shared drawn check");
   assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
   assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
-  assert.match(previewSource, /DrawnCheck size=\{76\}/, "the completion view leads with a large drawn check");
+  assert.match(previewSource, /data-completion-banner/, "all-pass keeps the workspace and overlays the achievement banner (#305)");
+  assert.match(previewSource, /DrawnCheck size=\{44\}/, "the completion banner leads with a drawn check");
+  assert.match(previewSource, /onShowFinalResult/, "the final result is reached by the learner's button, not automatically (#305)");
+  assert.match(previewSource, /answerCorrect/, "each newly passed test plays the small check sound (#305)");
   // プレビュー登録（視覚デバッグの接続は Issue #293 で行うため、ここでは登録だけを確認する）。
   const pageSource = fs.readFileSync(path.resolve(root, "../../app/learning-preview/[contentId]/page.tsx"), "utf8");
   assert.match(pageSource, /binary-search-implementation/, "preview route is registered");
