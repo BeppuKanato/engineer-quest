@@ -67,6 +67,7 @@
 | [home-target-achievement-183.md](home-target-achievement-183.md) | 記録 | Issue #183の目標実績のホーム表示（API既存の targetAchievement を左カラムに描画） |
 | [phase5-preview-unify-181.md](phase5-preview-unify-181.md) | 記録 | Issue #181のフェーズ5単品画面のフェーズ3単品への統一（再回答の合図とボタンの出方） |
 | [phase7-result-presentation-180.md](phase7-result-presentation-180.md) | 記録 | Issue #180のフェーズ7テスト結果の作り直し（通過ごとの描き込みチェックと全通過時の祝福） |
+| [phase5-layout-completion-317.md](phase5-layout-completion-317.md) | 記録 | Issue #317/#315のフェーズ5レイアウト組み替え（コードのみスクロール・選択肢とボタンの下部固定）とフェーズ3・5完了ビューのバイパス（保存を待たず結果画面へ即時遷移） |
 | [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
