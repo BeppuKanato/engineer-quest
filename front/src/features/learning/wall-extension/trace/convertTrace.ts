@@ -45,7 +45,7 @@ function canonicalSet(kind: "border" | "pillars", size: number): ReadonlySet<str
 export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensionTracePlayback {
   const steps: LearningStep<WallExtensionTraceCanvas>[] = [];
   const extendedPillars = new Set<string>();
-  let lastCategory: string | null = null;
+  let lastGroupKey: string | null = null;
   const checkpoint: { walls: ReadonlySet<string> | null; size: number | null } = { walls: null, size: null };
   let lastEvent: PythonTraceEvent | null = null;
   let invalidTail = false;
@@ -96,14 +96,17 @@ export function convertWallExtensionTrace(trace: PythonTraceResult): WallExtensi
         highlights = [target];
       }
     }
-    // 外周と柱は1マスずつ書かれるため、同じ種類の追加が続く間は1コマにまとめる
-    // （フェーズ2の「外周」「柱」のコマに対応させる。BFSが距離代入とキュー追加を1コマにまとめるのと同じ扱い）。
-    if ((category === "border" || category === "pillars") && category === lastCategory && steps.length > 0) {
+    // 図の変化はコードの実行単位に対応させる（教材指針 §2-5）。外周は1周で4マス
+    // 書かれるため、同じ i の間の追加だけを1コマにまとめ、フェーズ2の外周ステップ
+    // （ループ1周ごと）と再生のコマを一致させる。i が読み取れないコードでは
+    // 外周全体を1コマにまとめる。柱は書き込みが1本につき1回なので、まとめは起きない。
+    const groupKey = category === "border" ? `border:${event.locals.i ?? "all"}` : category;
+    if (category === "border" && groupKey === lastGroupKey && steps.length > 0) {
       steps[steps.length - 1] = { ...steps[steps.length - 1], canvas: makeCanvas(size, walls, null, [], event) };
     } else {
       steps.push({ id: `trace-${steps.length}`, caption, canvas: makeCanvas(size, walls, processing, highlights, event) });
     }
-    lastCategory = category;
+    lastGroupKey = groupKey;
     checkpoint.walls = wallSet;
     checkpoint.size = size;
   }
