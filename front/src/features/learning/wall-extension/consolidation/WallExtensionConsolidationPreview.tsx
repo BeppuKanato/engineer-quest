@@ -111,7 +111,7 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
               color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
               "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
         </Box>}
-        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} disabled={attempt?.correct === true} scrollable />}
+        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true} />}
         {attempt && <>
           {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
