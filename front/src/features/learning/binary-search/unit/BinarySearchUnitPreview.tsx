@@ -234,7 +234,9 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
-    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: screen.kind === "final" ? "auto" : undefined }}>
+    {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
+        はみ出して描かれないようにする（#303）。背景色もこの箱が担う。 */}
+    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "final" ? "auto" : "100%", minHeight: "100%", display: "flex", flexDirection: "column" }}>
         {screen.kind === "phase" && <AnswerFeedbackNotice assessmentId={phaseKey} />}
         {binarySearchUnitPhases.map((phase, index) => visited.has(index) && (
