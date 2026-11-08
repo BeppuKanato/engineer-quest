@@ -47,9 +47,15 @@ export function BubbleSortCodeCheckPreview({ embedded = false, onLearningEvent, 
     if (!host) return;
     const showBlank = () => {
       const blank = host.querySelector<HTMLElement>('[aria-label="空欄"]');
-      if (!blank || host.scrollWidth <= host.clientWidth) return;
+      if (!blank) return;
       const box = host.getBoundingClientRect(), hole = blank.getBoundingClientRect();
-      host.scrollLeft += hole.left - box.left - (host.clientWidth - hole.width) / 2;
+      // 空欄が視界の外にあるときだけ、縦横それぞれ空欄が中央に来るよう寄せる（#317）。
+      if (host.scrollWidth > host.clientWidth) {
+        host.scrollLeft += hole.left - box.left - (host.clientWidth - hole.width) / 2;
+      }
+      if (host.scrollHeight > host.clientHeight) {
+        host.scrollTop += hole.top - box.top - (host.clientHeight - hole.height) / 2;
+      }
     };
     showBlank();
     const observer = new ResizeObserver(showBlank);
@@ -59,35 +65,39 @@ export function BubbleSortCodeCheckPreview({ embedded = false, onLearningEvent, 
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "コードの確認問題の結果" : "バブルソートのコードの確認問題"}
-      sx={{ width: embedded ? "100%" : "84vw", minHeight: embedded ? "100%" : "84dvh", p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minHeight: 0, p: 1, display: "flex", flexDirection: "column" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
-        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none",
+        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none", flexShrink: 0,
       }}>{complete ? bubbleSortCodeCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={bubbleSortCodeCheckContent.id} />}
-      {question && <>
-        <Box ref={codeRef} sx={{ width: "100%", overflowX: "auto", py: 1 }}>
-          <Box sx={{ width: "max-content", minWidth: "100%", display: "flex", justifyContent: "center" }}>
-            <CodeDisplay code={bubbleSortCodeCheckContent.code} label="bubble_sortのコード" blank={{ lineId: question.lineId, ...question.blank }} />
+      {question ? <Box ref={codeRef} sx={{ width: "100%", flex: 1, minHeight: 0, overflow: "auto", py: 1 }}>
+          <Box sx={{ width: "max-content", minWidth: "100%", minHeight: "100%", display: "flex" }}>
+            <Box sx={{ margin: "auto" }}>
+              <CodeDisplay code={bubbleSortCodeCheckContent.code} label="bubble_sortのコード" blank={{ lineId: question.lineId, ...question.blank }} />
+            </Box>
           </Box>
+        </Box> : <Box sx={{ flex: 1, minHeight: 0 }} />}
+      <Box sx={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
+        {question && <>
+          <Typography component="p" sx={{ textAlign: "center", fontSize: 16, mt: 1, mb: 1 }}>{bubbleSortCodeCheckContent.instruction}</Typography>
+          <Box role="group" aria-label="空欄に入るコードの選択肢" sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
+            {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple disabled={attempt?.correct === true}
+              aria-label={`${choice.text}を選ぶ`} onClick={() => setSession(current => answerQuestion(bubbleSortCodeCheckContent, current, question.id, { kind: "choice", choiceId: choice.id }))}
+              sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999, color: playerTokens.text, bgcolor: playerTokens.surface,
+                minWidth: 120, minHeight: 48, px: 2, fontSize: 18, fontFamily: "monospace", textTransform: "none",
+                "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` },
+                "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
+          </Box>
+        </>}
+        {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
+        <Box sx={{ minHeight: 44, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center", mt: 1 }}>
+          {attempt && !attempt.correct && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={bubbleSortCodeCheckContent.reviewLabel} />}
+          {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(bubbleSortCodeCheckContent, current, question.id))}
+            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === bubbleSortCodeCheckContent.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
+          {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bubbleSortCodeCheckContent))}
+            sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
         </Box>
-        <Typography component="p" sx={{ textAlign: "center", fontSize: 16, mt: 2, mb: 1 }}>{bubbleSortCodeCheckContent.instruction}</Typography>
-        <Box role="group" aria-label="空欄に入るコードの選択肢" sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
-          {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple disabled={attempt?.correct === true}
-            aria-label={`${choice.text}を選ぶ`} onClick={() => setSession(current => answerQuestion(bubbleSortCodeCheckContent, current, question.id, { kind: "choice", choiceId: choice.id }))}
-            sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999, color: playerTokens.text, bgcolor: playerTokens.surface,
-              minWidth: 120, minHeight: 48, px: 2, fontSize: 18, fontFamily: "monospace", textTransform: "none",
-              "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` },
-              "&:focus-visible": { outline: `3px solid ${playerTokens.control}`, outlineOffset: 2 } }}>{choice.text}</Button>)}
-        </Box>
-      </>}
-      {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
-      <Box sx={{ minHeight: 44, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", alignItems: "center", mt: 1 }}>
-        {attempt && !attempt.correct && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label={bubbleSortCodeCheckContent.reviewLabel} />}
-        {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(bubbleSortCodeCheckContent, current, question.id))}
-          sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-            "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === bubbleSortCodeCheckContent.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
-        {embedded && complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(bubbleSortCodeCheckContent))}
-          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
       </Box>
     </Box>
     {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bubbleSortCodeMappingContent} stepIds={question.reviewStepIds}
