@@ -40,7 +40,13 @@ export function BfsCodeMappingCanvas({ canvas }: { canvas: CodeMappingCanvasStat
         <BfsExecutionCanvas canvas={execution} />
       </Box>
       <Box sx={{ width: codeWidth, px: 1, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "safe center", minHeight: 0, overflowY: "auto" }}>
-        <BfsCodeDisplay code={canvas.data.code} activeLineId={activeLineId} />
+        {/* コードだけを横スクロールさせる（フェーズ5と同じ割り付け）。max-content でコード本来の幅を
+            スクロール量へ反映し、列幅に切り取られて末尾へ辿れない状態を防ぐ（#301）。 */}
+        <Box sx={{ width: "100%", overflowX: "auto", flexShrink: 0 }}>
+          <Box sx={{ width: "max-content", minWidth: "100%" }}>
+            <BfsCodeDisplay code={canvas.data.code} activeLineId={activeLineId} />
+          </Box>
+        </Box>
         <Box component="dl" aria-label="コードの変数" sx={{ mt: 2, mb: 0, display: "grid", gridTemplateColumns: "max-content minmax(0, 1fr)",
           columnGap: 1, rowGap: 0.5, fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", color: playerTokens.text, flexShrink: 0 }}>
           {rows.map(({ name, value, changed }) => <Box key={name} sx={{ display: "contents" }}>
