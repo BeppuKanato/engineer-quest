@@ -78,8 +78,8 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "応用問題の結果" : "BFSの応用問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: question && question.kind !== "parsons" ? (embedded ? "100%" : "84dvh") : "auto",
-        minHeight: question && question.kind !== "parsons" ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      sx={{ width: embedded ? "100%" : "84vw", height: question ? (embedded ? "100%" : "84dvh") : "auto",
+        minHeight: question ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -97,7 +97,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
               color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
               "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
         </Box>}
-        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} disabled={attempt?.correct === true} />}
+        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true} />}
         {attempt && <>
           {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
           <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>

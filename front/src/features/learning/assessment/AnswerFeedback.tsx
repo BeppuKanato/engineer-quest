@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import { playerTokens } from "../player/player.tokens";
-import type { AssessmentContent, AssessmentState } from "./assessment";
+import { activeQuestion, type AssessmentContent, type AssessmentState } from "./assessment";
 import { newAnswerFeedback, type AnswerFeedback } from "./answerFeedbackState";
 
 type FeedbackContextValue = {
@@ -53,7 +53,7 @@ export function AnswerFeedbackProvider({ children }: { children: ReactNode }) {
 
 /** 新しい試行だけを提示。再描画・StrictMode・復習・非表示からの復帰で音を再生し直さない。 */
 export function useAssessmentFeedback(content: AssessmentContent, session: AssessmentState, active = true) {
-  const { present, clear } = useContext(FeedbackContext);
+  const { present, clear, messages } = useContext(FeedbackContext);
   const previous = useRef(session);
   useEffect(() => {
     const before = previous.current;
@@ -61,11 +61,15 @@ export function useAssessmentFeedback(content: AssessmentContent, session: Asses
     if (session.records.every(record => record.attemptCount === 0)) { clear(content.id); return; }
     if (!active) return;
     const feedback = newAnswerFeedback(content, before, session);
-    if (feedback) present(feedback);
-  }, [content, session, active, present, clear]);
+    if (feedback) { present(feedback); return; }
+    // 表示ポリシー（Issue #302/#303/#318）：「直前の回答」は、その問題を開いている間だけ残す。
+    // 次の問題へ進んだ場合と、全問を終えて結果画面になった場合は、残っている通知を消す。
+    const stored = messages[content.id];
+    if (stored && activeQuestion(content, session)?.id !== stored.questionId) clear(content.id);
+  }, [content, session, active, present, clear, messages]);
 }
 
-/** 文章は演出から独立した通常の画面要素として残す。単元内ではリザルトにも同じ枠を置く。 */
+/** 文章は演出から独立した通常の画面要素として残す。残すのは対象の問題を開いている間だけ（Issue #302/#303/#318）。 */
 export function AnswerFeedbackNotice({ assessmentId }: { assessmentId?: string }) {
   const { messages } = useContext(FeedbackContext);
   const feedback = assessmentId ? messages[assessmentId] : undefined;

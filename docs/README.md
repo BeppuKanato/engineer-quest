@@ -113,6 +113,7 @@
 | [maze-digging-unit-265.md](maze-digging-unit-265.md) | 記録 | Issue #265の穴掘り法フェーズ接続・単元コンテナ接続、unitRegistry登録とLearningScreenのkind出し分け、フィードバック接続（#202） |
 | [maze-digging-integration-266.md](maze-digging-integration-266.md) | 記録 | Issue #266の穴掘り法アプリ統合、コース・知識カード3枚（バックトラッキング／スタック／全域木）・実績6件のシード追加、配布スケジュールの単元ごと生成への汎用化とコレクション検証の汎用化、単元サムネイル（完成迷路＋フェーズ1経路） |
 | [binary-search-integration-295.md](binary-search-integration-295.md) | 記録 | Issue #295の二分探索アプリ統合、知識カード3枚（探索範囲を半分にする／中央の値と比べる／対数時間）・実績6件のシード追加、コレクション検証への単元登録、単元サムネイルを主教材の図へ差し替え、シード再実行の要否 |
+| [parsons-overflow-feedback-318.md](parsons-overflow-feedback-318.md) | 記録 | Issue #318の Parsons 盤面はみ出し修正（盤面のみ内部スクロール・行ピッチ52→46px・全5単元）と、Issue #302/#303/#318共通の「直前の回答」表示ポリシー（対象の問題を開いている間だけ表示） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [prisma-tmp-cleanup-278.md](prisma-tmp-cleanup-278.md) | 記録 | Issue #278のPrisma生成一時ファイル（.tmp 9件・約173MB）の追跡削除と.gitignore追加（Cloud Buildソースアーカイブ肥大の主因対策） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
