@@ -39,7 +39,13 @@ export function WallExtensionCodeMappingCanvas({ canvas }: { canvas: WallExtensi
         <WallExtensionExecutionCanvas canvas={execution} />
       </Box>
       <Box sx={{ width: codeWidth, px: 1, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "safe center", minHeight: 0, overflowY: "auto" }}>
-        <CodeDisplay code={canvas.data.code} label="generate_mazeのコード" activeLineId={activeLineId} lineHeight={1.6} />
+        {/* コードだけを横スクロールさせる（フェーズ5と同じ割り付け）。max-content でコード本来の幅を
+            スクロール量へ反映し、列幅に切り取られて末尾へ辿れない状態を防ぐ（#301）。 */}
+        <Box sx={{ width: "100%", overflowX: "auto", flexShrink: 0 }}>
+          <Box sx={{ width: "max-content", minWidth: "100%" }}>
+            <CodeDisplay code={canvas.data.code} label="generate_mazeのコード" activeLineId={activeLineId} lineHeight={1.6} />
+          </Box>
+        </Box>
         <Box component="dl" aria-label="コードの変数" sx={{ mt: 1.5, mb: 0, display: "grid", gridTemplateColumns: "max-content minmax(0, 1fr)",
           columnGap: 1, rowGap: 0.25, fontFamily: "monospace", fontSize: 16, lineHeight: 1.3, color: playerTokens.text, flexShrink: 0 }}>
           {rows.map(({ name, value, changed }) => <Box key={name} sx={{ display: "contents" }}>
