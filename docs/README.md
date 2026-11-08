@@ -144,6 +144,7 @@
 | [bfs-code-mapping-72.md](bfs-code-mapping-72.md) | 記録 | Issue #72 のコード契約・62フレーム、Pythonトレース検証、PR #93 の可読性・変数差分表示と確認画像 |
 | [graph-unify-91.md](graph-unify-91.md) | 記録 | Issue #91 の共通描画・迷路配置、検証結果と同じ画面幅でのフェーズ1・2・3比較 |
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
+| [phase3-situation-captions-297.md](phase3-situation-captions-297.md) | 記録 | Issue #297のフェーズ3状況キャプション追加（バブルソート・棒倒し法）、青い処理中色の時制をトレース由来の文言で固定、他単元への適用判定 |
 
 ## 図
 
