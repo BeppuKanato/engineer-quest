@@ -10,9 +10,11 @@ import { playerTokens } from "../../player/player.tokens";
 /** 並び替え対象のコード契約。行の意味IDと本文だけを使うため、単元を問わず使える。 */
 export type ParsonsCode = { readonly lines: readonly { readonly id: string; readonly text: string }[] };
 
+// 枠線はレイアウト上の高さを増やさないよう inset の boxShadow で描く（2px 相当）。
+// これにより行の高さは操作ボタン（44px）ちょうどになり、行ピッチを詰められる。
 const rowStyle = {
   display: "flex", alignItems: "center", width: "max-content", minWidth: "100%", boxSizing: "border-box",
-  background: playerTokens.surface, border: `2px solid ${playerTokens.focus}`, borderRadius: 4,
+  background: playerTokens.surface, boxShadow: `inset 0 0 0 2px ${playerTokens.focus}`, borderRadius: 4,
 } as const;
 const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5 } as const;
 
@@ -33,8 +35,12 @@ function SortableLine({ id, text, index, count, duration, disabled = false, onMo
   </Reorder.Item>;
 }
 
-/** 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。 */
-export function ParsonsBoard({ question, code, onAnswer, disabled = false }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean }) {
+/**
+ * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
+ * scrollable のときは残り高さの中で盤面だけが縦スクロールし、ボタン行は下に固定される（Issue #318）。
+ * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
+ */
+export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean }) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
@@ -47,17 +53,17 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false }: { q
     return next;
   });
   const isInitialOrder = ordered.every((id, index) => id === question.lineIds[index]);
-  return <Box sx={{ minWidth: 0 }}>
-    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.8 }}>
-      <Box sx={{ overflowX: "auto" }}>
+  return <Box sx={{ minWidth: 0, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
+    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
+      <Box sx={{ overflowX: "auto", ...(scrollable ? { flex: 1, minHeight: 0, overflowY: "auto" } : {}) }}>
         <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
-          style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
             onMove={offset => move(id, offset)} />)}
         </Reorder.Group>
       </Box>
     </Box>
-    <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+    <Box sx={{ mt: 2, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
       <Button onClick={() => setOrdered([...question.lineIds])} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
       {onAnswer && <Button variant="contained" disabled={disabled} onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
         sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
