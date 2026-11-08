@@ -5,7 +5,15 @@ import type { NodeTapAssessment, NodeTapQuestion } from "../../assessment/assess
  * 回答対象はグラフのノードIDではなく配列の位置（インデックス）の文字列で、
  * エンジン側の NodeAnswer はそのまま流用する（assessment.ts の契約どおり）。
  */
-export type BubbleSortCheckQuestion = NodeTapQuestion;
+export type BubbleSortCheckQuestion = NodeTapQuestion & {
+  /**
+   * 場面の状況を1文で示すキャプション（Issue #297）。場面はフェーズ2の
+   * ステップ盤面を再利用するため、青ペアの時間的な意味（比べ終えたペアか、
+   * これから比べるペアか）が盤面だけでは決まらない。設問ごとに、場面の
+   * 直前に起きた比較（Q1）／これから行う比較（Q2）を文章で固定する。
+   */
+  readonly situation: string;
+};
 
 export type BubbleSortCheckContent = Omit<NodeTapAssessment, "questions"> & {
   readonly phase: 3;

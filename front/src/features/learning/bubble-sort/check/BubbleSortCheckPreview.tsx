@@ -58,6 +58,9 @@ export function BubbleSortCheckPreview({ embedded = false, onLearningEvent, acti
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
         minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
       }}>{caption}</Typography>
+      {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, fontWeight: 700, flexShrink: 0, mb: 1 }}>
+        {question.situation}
+      </Typography>}
       {!embedded && <AnswerFeedbackNotice assessmentId={bubbleSortCheckContent.id} />}
       {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
         配列のマスをタップして答えよう

@@ -9,6 +9,12 @@ import type { WallExtensionDirection } from "../wallExtensionMaze";
 export type WallExtensionCheckQuestion = NodeTapQuestion & {
   /** 方向の指示がある設問（Q2）だけ方向を持つ。場面では処理中の柱と併せて示す。 */
   readonly direction: WallExtensionDirection | null;
+  /**
+   * 場面の状況を1文で示すキャプション（Issue #297、バブルソートと同型）。
+   * 場面の青い柱は Q1 では伸ばし終えた柱、Q2 ではこれから処理する柱を
+   * 指し、色だけでは時制が読めないため、文章で固定する。
+   */
+  readonly situation: string;
 };
 
 export type WallExtensionCheckContent = Omit<NodeTapAssessment, "questions"> & {
