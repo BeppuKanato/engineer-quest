@@ -41,6 +41,10 @@ assert.deepEqual(plain(content.questions.map(q => [q.id, q.prompt, q.stepId, q.c
   ["next-pillar", "次に処理する柱はどれですか", "extend-2-4", "4,4", "pillar-order", null],
   ["wall-target", "壁になるマスはどれですか", "extend-2-4", "5,4", "extension-target", "right"],
 ]);
+// 状況キャプション（Issue #297）: Q1は伸ばし終えた柱を完了形で、
+// Q2は前提の次の処理を未来形で示し、青い柱の時制を文章で固定する。
+assert.equal(q1.situation, "真ん中の段の左の柱から、下へ壁を伸ばしました。");
+assert.equal(q2.situation, "次は、真ん中の段の真ん中の柱から壁を伸ばします。");
 assert.equal(q1.requires, null);
 assert.deepEqual(plain(q2.requires), { questionId: q1.id, answer: plain(q1.correctAnswer) });
 assert.equal(content.completion.stepId, "extend-4-4");
@@ -164,6 +168,7 @@ const render = () => { cursor = 0; tree = elements(WallExtensionCheckPreview({})
 const canvasProps = () => tree.find(element => element.type === Canvas).props;
 const button = label => { const element = tree.find(element => element.props?.children === label); assert(element, `Missing button: ${label}`); return element.props; };
 render();
+assert(tree.some(element => element.props?.children === q1.situation), "Q1 shows the situation caption");
 const first = canvasProps();
 assert.equal(first.questionId, q1.id); assert.equal(first.disabled, false);
 assert.deepEqual(plain(first.canvas), plain(scene1), "Preview shows the phase-2 step canvas for Q1");
@@ -179,6 +184,7 @@ assert.equal(canvasProps().disabled, true, "Correct answer locks the board");
 const solved = slots[0]; first.onAnswer(cell("4,4")); render();
 assert.equal(slots[0], solved, "Even a queued duplicate cannot add another attempt after success");
 button("次の問題へ").onClick(); render();
+assert(tree.some(element => element.props?.children === q2.situation), "Q2 shows the situation caption");
 assert.equal(canvasProps().questionId, q2.id);
 assert.equal(canvasProps().canvas.state.processing, "4,4");
 assert(tree.some(element => Array.isArray(element.props?.children) && element.props.children.join("") === "方向の指示：右"), "Q2 shows the direction indication");
