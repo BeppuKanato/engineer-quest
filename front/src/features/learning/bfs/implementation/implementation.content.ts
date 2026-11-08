@@ -76,6 +76,7 @@ export const bfsImplementationContent = {
   result: {
     runsLabel: "テスト実行回数：{count}回", hintLabel: "ヒントレベル{level}：{count}回",
     title: "幅優先探索（BFS）マスター！",
+    finalButton: "単元の結果を見る",
     closing: "幅優先探索のコードを完成させ、基本ケースと境界ケースのすべてのテストを通過しました。この単元の学習は完了です。",
   },
 } as const;

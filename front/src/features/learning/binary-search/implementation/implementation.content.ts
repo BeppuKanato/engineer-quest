@@ -82,6 +82,7 @@ export const binarySearchImplementationContent = {
   result: {
     runsLabel: "テスト実行回数：{count}回", hintLabel: "ヒントレベル{level}：{count}回",
     title: "二分探索マスター！",
+    finalButton: "単元の結果を見る",
     closing: "二分探索のコードを完成させ、基本・転移・不在のすべてのテストを通過しました。この単元の学習は完了です。",
   },
 } as const;

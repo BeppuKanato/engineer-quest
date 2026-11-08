@@ -77,6 +77,7 @@ export const bubbleSortImplementationContent = {
   result: {
     runsLabel: "テスト実行回数：{count}回", hintLabel: "ヒントレベル{level}：{count}回",
     title: "バブルソートマスター！",
+    finalButton: "単元の結果を見る",
     closing: "バブルソートのコードを完成させ、基本ケースと境界ケースのすべてのテストを通過しました。この単元の学習は完了です。",
   },
 } as const;

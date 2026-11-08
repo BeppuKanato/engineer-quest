@@ -9,6 +9,7 @@ import type { LearningInstrumentation } from "../../instrumentation/useLearningV
 
 import { DrawnCheck } from "../../app/DrawnCheck";
 import { ResultConfetti } from "../../app/ResultConfetti";
+import { useSoundEffect } from "../../../../app/component/soundFeedback";
 import { playerTokens } from "../../player/player.tokens";
 import { BubbleSortTraceDialog } from "../trace/BubbleSortTraceDialog";
 import { traceBubbleSortCode } from "../trace/acquireTrace";
@@ -25,7 +26,7 @@ import { bubbleSortImplementationContent as content } from "./implementation.con
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type BubbleSortImplementationSummary, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
 /** embedded / onComplete は単元フロー接続（後続Issue）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BubbleSortImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BubbleSortImplementationSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void }) {
+export function BubbleSortImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BubbleSortImplementationSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void; onShowFinalResult?: () => void }) {
   const [code, setCode] = useState<string>(initialCode ?? content.template);
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
@@ -50,7 +51,8 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
   const lock = useRef(false);
   const generation = useRef(0);
   const completedRef = useRef(false);
-  const resultRef = useRef<HTMLParagraphElement>(null);
+  const { play } = useSoundEffect();
+  const prevPassedRef = useRef(0);
   const passed = outcomes.filter(outcome => outcome.passed).length;
   const complete = !running && allTestsPassed(content.tests, outcomes);
   const prepare = useCallback(async () => {
@@ -64,7 +66,6 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
     void prepare();
     return () => { lifetime.current++; disposePyodideRunner(); };
   }, [prepare]);
-  useEffect(() => { if (complete) resultRef.current?.focus(); }, [complete]);
   // 全テスト通過した瞬間だけ単元フローへ通知する。
   useEffect(() => {
     if (complete && !completedRef.current) {
@@ -73,9 +74,17 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
     }
     if (!complete) completedRef.current = false;
   }, [complete, onComplete, runs, usage]);
+  // テストが新たに通過するたび、小さな確認音で採点の進みを伝える（#305 案A'）。
+  // 全通過時の紙吹雪と歓声は ResultConfetti が担当し、演出の強弱を分ける。
   useEffect(() => {
-    if (panel === "console" && freeRunning && window.matchMedia("(max-width: 899px)").matches) sidePanel.current?.scrollIntoView({ block: "start" });
-  }, [panel, freeRunning]);
+    const passedCount = outcomes.filter(outcome => outcome.passed).length;
+    if (passedCount > prevPassedRef.current) play("answerCorrect");
+    prevPassedRef.current = passedCount;
+  }, [outcomes, play]);
+  useEffect(() => {
+    const shouldScroll = (panel === "console" && freeRunning) || (panel === "tests" && running);
+    if (shouldScroll && window.matchMedia("(max-width: 899px)").matches) sidePanel.current?.scrollIntoView({ block: "start" });
+  }, [panel, freeRunning, running]);
   const runFree = async () => {
     if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
     lock.current = true;
@@ -151,23 +160,16 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
-    <Box component="section" aria-label={complete ? "バブルソート 自分で実装の完了" : "バブルソートの自分で実装"}
+    <Box component="section" aria-label="バブルソートの自分で実装"
       sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
-      <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", outline: "none", flexShrink: 0 }}>
-        {complete ? content.result.title : content.caption}
+      <Typography component="p" sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", flexShrink: 0 }}>
+        {content.caption}
       </Typography>
+      {complete && <ResultConfetti />}
       <Typography component="p" role="status" aria-live="polite" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0 }}>{passed}/{content.tests.length} 本通過</Typography>
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
         sx={{ flexShrink: 0, bgcolor: colors.button, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
-      {complete ? <Box sx={{ my: "auto", textAlign: "center", overflowY: "auto" }}>
-        <ResultConfetti />
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 1.5 }}><DrawnCheck size={76} /></Box>
-        <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
-        {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
-        <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
-        <Box sx={{ mt: 2 }}>{traceButton}</Box>
-        {tracing && <Typography component="p" role="status">{bubbleSortTraceText.loading}</Typography>}
-      </Box> : <>
+      <>
         <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 2.4fr) minmax(300px, 1fr)", gap: 2 }}>
           <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `2px solid ${colors.focus}`, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel }}>
             <Box role="group" aria-label={text.panel} sx={{ flexShrink: 0, p: 1, bgcolor: colors.panelAlt, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
@@ -177,7 +179,17 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
               <Button variant="contained" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void run()}
                 sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke }, "&.Mui-disabled": { bgcolor: colors.button, color: colors.text, opacity: 0.45 } }}>{content.controls.run}</Button>
             </Box>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
+            <Box sx={{ flex: 1, minHeight: 0, position: "relative" }}>
+              {complete && <Box data-completion-banner sx={{ position: "absolute", top: 8, right: 8, zIndex: 6, maxWidth: "min(440px, calc(100% - 16px))", display: "flex", gap: 1.25, alignItems: "flex-start", p: 1.5, bgcolor: colors.panel, border: `2px solid ${colors.focus}`, borderRadius: 1.5, boxShadow: 3 }}>
+                <Box sx={{ flexShrink: 0 }}><DrawnCheck size={44} /></Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography component="p" sx={{ fontWeight: 800, fontSize: 17 }}>{content.result.title}</Typography>
+                  <Typography component="p" sx={{ fontSize: 13.5, mt: 0.25 }}>{content.result.closing}</Typography>
+                  <Typography component="p" sx={{ fontSize: 13.5, mt: 0.5 }}>{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
+                  {onShowFinalResult && <Button variant="contained" onClick={onShowFinalResult}
+                    sx={{ mt: 1, minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.result.finalButton}</Button>}
+                </Box>
+              </Box>}
               <Editor height="100%" language="python" theme="vs" value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
                 onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
@@ -216,7 +228,7 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           {runtime === "error" && <Button onClick={() => void prepare()} sx={outlinedButton}>{content.controls.reload}</Button>}
         </Box>
-      </>}
+      </>
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
     {tracePlayback && <BubbleSortTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
