@@ -192,7 +192,7 @@ console.log("BFS consolidation: independent BFS on all four graphs, corrected J 
 // ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
 const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
 const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/ParsonsBoard.tsx"), "utf8");
-assert.match(previewSource, /height: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /flex: "1 1 auto", minHeight: 0, maxHeight: "min\(54dvh, 600px\)"/);
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\{\(\) => onAnswer/);
 // 正解後の固定契約: 正解した問題は選択肢・ノード・Parsons のいずれも選び直せない。
