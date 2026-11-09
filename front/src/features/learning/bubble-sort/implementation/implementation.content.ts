@@ -1,6 +1,7 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import { bubbleSortMainValues, bubbleSortTransferValues, runBubbleSort } from "../bubbleSort";
-import { bubbleSortCode } from "../code-mapping/bubbleSortCode";
+import { bubbleSortCode, type BubbleSortCodeLineId } from "../code-mapping/bubbleSortCode";
 import { bubbleSortConsolidationContent } from "../consolidation/consolidation.content";
 
 export type ImplementationTest = PythonTestCase & { readonly visibility: "display" | "judgement" };
@@ -16,10 +17,63 @@ if (!parsonsQuestion || parsonsQuestion.kind !== "parsons") throw new Error("Pha
 
 const skeletonLineIds = ["for-pass", "for-compare", "if-larger"] as const;
 
+/**
+ * 入力量レベル別の初期テンプレート（Issue #328）。
+ * 「骨格から書く」「穴埋めで書く」は、正解コード（bubbleSortCode）の行から組み立てる。
+ * 残す行は正解コードの行そのものを使い、置き換える行は、その行のインデントを保った
+ * プレースホルダ行（raise NotImplementedError ＋「ここを書く」の目印）にする。
+ * プレースホルダが残っていると必ずテストに失敗する。
+ */
+const codeLineText = (id: BubbleSortCodeLineId): string => {
+  const line = bubbleSortCode.lines.find(line => line.id === id);
+  if (!line) throw new Error("Missing canonical line");
+  return line.text;
+};
+const placeholderLine = (id: BubbleSortCodeLineId, description: string): string => {
+  const indent = /^ */u.exec(codeLineText(id))?.[0] ?? "";
+  return `${indent}raise NotImplementedError  # ここを書く：${description}`;
+};
+const placeholderGuide = "    # 「ここを書く」の行が、まだ書けていない場所です。その行を消して、自分のコードを書いてください。";
+
+const fullTemplate = "def bubble_sort(values):\n    # ここに、並び替えた新しいリストを返すコードを書く\n    pass";
+
+/** 骨格：制御構造（2つのループと条件分岐）と最後の return だけを残し、本体の行をすべてプレースホルダにする。 */
+const skeletonTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  placeholderLine("copy-values", "並び替えるためのコピーを用意する"),
+  placeholderLine("count-values", "要素の個数 n を用意する"),
+  codeLineText("for-pass"),
+  codeLineText("for-compare"),
+  codeLineText("if-larger"),
+  placeholderLine("swap-values", "2つの値を入れ替える"),
+  codeLineText("return-result"),
+].join("\n");
+
+/** 穴埋め：要点の行（コピーの用意と、値の入れ替え）だけをプレースホルダにする。 */
+const fillInTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  placeholderLine("copy-values", "元のリストを変えないよう、コピーを用意する"),
+  codeLineText("count-values"),
+  codeLineText("for-pass"),
+  codeLineText("for-compare"),
+  codeLineText("if-larger"),
+  placeholderLine("swap-values", "左が大きければ、2つの値を入れ替える"),
+  codeLineText("return-result"),
+].join("\n");
+
+const levelTemplates: Readonly<Record<ImplementationInputLevel, string>> = {
+  full: fullTemplate,
+  skeleton: skeletonTemplate,
+  "fill-in": fillInTemplate,
+};
+
 export const bubbleSortImplementationContent = {
   version: 1, id: "bubble-sort-implementation", phase: 7,
   caption: "数を小さい順に並び替えるコードを完成させ、実行して確かめましょう。",
-  template: "def bubble_sort(values):\n    # ここに、並び替えた新しいリストを返すコードを書く\n    pass",
+  template: fullTemplate,
+  templates: levelTemplates,
   tests: [
     testCase("D1", "基本（動きの説明の並び）", "display", bubbleSortMainValues),
     testCase("D2", "転移（応用問題の並び）", "display", bubbleSortTransferValues),
