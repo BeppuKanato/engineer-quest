@@ -151,6 +151,7 @@ export const mazeDiggingImplementationContent = {
       timeout: "実行が終わらないテストがあります（無限ループの可能性があります）",
       mismatch: "実行はできていますが、結果が期待と違うテストがあります。",
     },
+    lineNote: "（{line}行目付近）",
   },
   status: {
     loading: "Python実行環境を読み込み中です。", ready: "実行できます。", running: "テストを実行中です（{current}/{total}件目）",

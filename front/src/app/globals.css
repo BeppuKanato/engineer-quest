@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* フェーズ7エディタのエラー行ハイライト（useErrorLineDecoration が付ける Monaco 行デコレーション） */
+.monaco-editor .eq-error-line-highlight {
+  background-color: rgb(220 38 38 / 0.1);
+}
+.monaco-editor .eq-error-line-marker {
+  background-color: rgb(220 38 38 / 0.55);
+  width: 5px !important;
+  margin-left: 3px;
+}

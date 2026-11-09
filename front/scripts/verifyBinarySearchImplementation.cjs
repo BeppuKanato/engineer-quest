@@ -161,6 +161,35 @@ assert.equal(classifyExecutionError(new Error(timeoutMessage)), "timeout");
 assert.equal(classifyExecutionError(new Error("SyntaxError: bad syntax")), "syntax");
 assert.equal(classifyExecutionError(new Error("IndentationError: bad indentation")), "syntax");
 assert.equal(classifyExecutionError(new Error("ValueError: " + timeoutMessage)), "runtime", "Do not mistake a Python exception mentioning a timeout for the runner deadline");
+// ---- エラー行の抽出と表示（#325）: 行番号は学習者コード基準で持ち回り、表示と検証に使う ----
+const { analyzeExecutionError, extractExecutionErrorLine } = load(path.resolve(root, "../../lib/executionError.ts"));
+const syntaxTrace = ["Traceback (most recent call last):", '  File "<exec>", line 3, in <module>', '  File "<string>", line 2', "    def solve(a, b)", "                 ^", "SyntaxError: expected ':'"].join("\n");
+assert.deepEqual(plain(analyzeExecutionError(new Error(syntaxTrace))), { kind: "syntax", line: 2 }, "syntax errors carry the learner line from the traceback");
+const runtimeTrace = ["Traceback (most recent call last):", '  File "<exec>", line 12, in <module>', '  File "<string>", line 5, in solve', '  File "<string>", line 3, in helper', "NameError: name 'x' is not defined"].join("\n");
+assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: "runtime", line: 3 }, "runtime errors use the deepest learner frame");
+assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
+assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
+assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
+const { binarySearchEditorText: editorText } = load(`${root}/binary-search/implementation/editor.content.ts`);
+const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
+  result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
+}));
+assert(syntaxFreeHtml.includes(editorText.errors.syntax + "（2行目付近）"), "console error text names the learner line");
+assert(syntaxFreeHtml.includes(editorText.syntaxNote), "syntax errors explain that not even print runs");
+assert(syntaxFreeHtml.includes('data-free-error-line="2"'), "console exposes the error line");
+const runtimeFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
+  result: { stdout: "", outputTruncated: false, returned: false, error: "runtime" }, busy: false,
+}));
+assert(!runtimeFreeHtml.includes("行目付近"), "no line note when the line is unknown");
+assert(!runtimeFreeHtml.includes(editorText.syntaxNote), "the nothing-runs note is syntax-only");
+const lineSummaryHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [{ id: "D1", passed: false, error: "runtime", errorLine: 7 }] }));
+assert(lineSummaryHtml.includes(content.display.messages.runtime + "（7行目付近）"), "test summary names the learner line");
+assert(lineSummaryHtml.includes('data-error-line="7"'), "test summary exposes the error line");
+const errorLinePreviewSource = fs.readFileSync(`${root}/binary-search/implementation/BinarySearchImplementationPreview.tsx`, "utf8");
+assert.match(errorLinePreviewSource, /useErrorLineDecoration/, "preview highlights the error line in the editor (#325)");
+assert.match(errorLinePreviewSource, /setErrorLine\(undefined\)/, "changing code or rerunning clears the error line");
+assert(fs.readFileSync(path.resolve(root, "../../app/globals.css"), "utf8").includes(".eq-error-line-highlight"), "the error line highlight has a global style");
+
 assert.deepEqual(plain(resultKinds([{ id: "D1", passed: false }, { id: "J1", passed: false, error: "timeout" }])), ["timeout", "mismatch"]);
 for (let done = 0; done < 4; done++) assert.equal(runningMessage(done, 4), `テストを実行中です（${done + 1}/4件目）`);
 const passedOutcomes = content.tests.map(test => ({ id: test.id, passed: true }));
@@ -252,6 +281,10 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.deepEqual(calls, ["D1", "J1", "J2", "J3"], "Continue after case errors");
   assert.deepEqual(progress.map(next => next.length), [1, 2, 3, 4]);
   assert.equal(outcomes[1].error, "syntax"); assert.equal(outcomes[2].error, "runtime"); assert.equal(outcomes[3].error, "timeout");
+  assert.equal(outcomes[1].errorLine, undefined, "label-only errors carry no line into outcomes");
+  runner.runCourseMissionTests = async () => { throw new Error(runtimeTrace); };
+  const tracedOutcomes = await runImplementationTests("learner code", content.tests.slice(0, 1), () => {});
+  assert.equal(tracedOutcomes[0].error, "runtime"); assert.equal(tracedOutcomes[0].errorLine, 3, "test outcomes carry the learner line (#325)");
   assert(!JSON.stringify(outcomes.slice(1)).includes("HIDDEN"), "Judgement values never enter UI state");
   assert(!JSON.stringify(outcomes).includes("HIDDEN_EXCEPTION"));
   assert.equal(progress[0].length, 1, "Earlier progress snapshots stay unchanged");
@@ -270,6 +303,9 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   const free = await runBinarySearchFreeCode("learner code");
   assert.equal(disposed, 1, "free execution rebuilds the worker");
   assert.equal(free.returned, true); assert.equal(free.error, null);
+  runner.runCourseMissionTests = async () => { throw new Error(syntaxTrace); };
+  const freeError = await runBinarySearchFreeCode("learner code");
+  assert.equal(freeError.returned, false); assert.equal(freeError.error, "syntax"); assert.equal(freeError.errorLine, 2, "free execution carries the learner line (#325)");
   assert.equal(free.actual, 4);
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。

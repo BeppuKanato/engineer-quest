@@ -31,6 +31,9 @@ export function ImplementationResults({ outcomes, diagnostics = outcomes }: { ou
   });
   return <ImplementationTestResults listLabel={labels.listLabel} rows={rows}
     diagnostics={kinds.length > 0 ? <Box role="status" aria-label={labels.errorLabel} sx={{ mb: 2 }}>
-      {kinds.map(kind => <Typography component="p" key={kind} data-error-kind={kind}>{labels.messages[kind]}</Typography>)}
+      {kinds.map(kind => {
+        const line = diagnostics.find(outcome => outcome.error === kind)?.errorLine;
+        return <Typography component="p" key={kind} data-error-kind={kind} data-error-line={line}>{labels.messages[kind]}{line ? labels.lineNote.replace("{line}", String(line)) : ""}</Typography>;
+      })}
     </Box> : undefined} />;
 }

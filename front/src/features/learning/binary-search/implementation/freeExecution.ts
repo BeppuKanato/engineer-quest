@@ -1,11 +1,11 @@
 import { disposePyodideRunner, preparePyodide, runCourseMissionTests } from "../../../../lib/pyodideRunner";
 import { binarySearchImplementationContent as content } from "./implementation.content";
-import { classifyExecutionError } from "./implementation";
+import { analyzeExecutionError } from "../../../../lib/executionError";
 
 export const freeOutputLimit = 16_000;
 export type FreeExecutionResult = {
   stdout: string; outputTruncated: boolean;
-} & ({ returned: true; actual: unknown; error: "mismatch" | null } | { returned: false; error: "syntax" | "runtime" | "timeout" | "unavailable" });
+} & ({ returned: true; actual: unknown; error: "mismatch" | null } | { returned: false; error: "syntax" | "runtime" | "timeout" | "unavailable"; errorLine?: number });
 export const freeDisplayCase = content.tests.find(test => test.id === "D1" && test.visibility === "display");
 
 /** 判定用の引数・stdoutが残ったWorkerを再利用せず、D1だけで実行する。 */
@@ -31,6 +31,7 @@ export async function runBinarySearchFreeCode(code: string, onPrepared: () => vo
     return { stdout, outputTruncated, returned: true, actual: result.actual, error: result.passed ? null : "mismatch" };
   } catch (error) {
     if (isCurrent()) disposePyodideRunner();
-    return { stdout, outputTruncated, returned: false, error: classifyExecutionError(error) };
+    const analysis = analyzeExecutionError(error);
+    return { stdout, outputTruncated, returned: false, error: analysis.kind, ...(analysis.line !== undefined ? { errorLine: analysis.line } : {}) };
   }
 }
