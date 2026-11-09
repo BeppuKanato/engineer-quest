@@ -237,12 +237,18 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
+    {screen.kind === "phase" && (
+      <Box sx={{ flexShrink: 0, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: screen.index === 6 ? "100%" : "84vw" }}>
+          <AnswerFeedbackNotice assessmentId={phaseKey} />
+        </Box>
+      </Box>
+    )}
     {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
         はみ出して描かれないようにする（#303）。背景色もこの箱が担う。
         結果・ブリッジ・最終結果では、この箱が唯一のスクロール領域になる（#298）。 */}
     <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "phase" ? "100%" : "auto", minHeight: "100%", display: "flex", flexDirection: "column" }}>
-        {screen.kind === "phase" && <AnswerFeedbackNotice assessmentId={phaseKey} />}
         {mazeDiggingUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
             {renderPhase(index)}
