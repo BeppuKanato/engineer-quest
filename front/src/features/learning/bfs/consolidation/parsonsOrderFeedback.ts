@@ -17,6 +17,36 @@
  */
 export type ParsonsInterchangeableGroups = readonly (readonly string[])[];
 
+/** フェード型で並び替え対象になる行だけを、並びの順序のまま取り出す。 */
+export function parsonsMovableLineIds(
+  order: readonly string[],
+  fixedLineIds: readonly string[] = [],
+): string[] {
+  if (!fixedLineIds.length) return [...order];
+  const fixed = new Set(fixedLineIds);
+  return order.filter(id => !fixed.has(id));
+}
+
+/**
+ * 正解順を固定行で区切った、並び替え可能な範囲（セグメント）の一覧を返す。
+ * 可動行は自分のセグメントの中だけで並び替えでき、固定行を越えて移動しない。
+ */
+export function parsonsMovableSegments(
+  solutionOrder: readonly string[],
+  fixedLineIds: readonly string[] = [],
+): string[][] {
+  const fixed = new Set(fixedLineIds);
+  const segments: string[][] = [];
+  let current: string[] = [];
+  for (const id of solutionOrder) {
+    if (fixed.has(id)) {
+      if (current.length) { segments.push(current); current = []; }
+    } else current.push(id);
+  }
+  if (current.length) segments.push(current);
+  return segments;
+}
+
 /** 入れ替え可能グループを assessment の判定と同じ方法で正規化した並びを返す。 */
 export function canonicalizeParsonsOrder(
   learnerOrder: readonly string[],
