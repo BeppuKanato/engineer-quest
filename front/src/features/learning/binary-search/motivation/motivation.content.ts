@@ -10,14 +10,26 @@ import {
  * 基準データ §3 フェーズ1。主教材の配列は §1 の検証済みデータ、
  * 数当ての件数列は §1 の半分の計算（100→50→25→13→7→4→2→1）から組み立てる。
  * 用語（二分探索・インデックス等）はフェーズ1では出さず、名称付けは後続フェーズに置く。
+ * 場面1だけは主教材と同じ7つの数字を並び替えて示す（Issue #329 の決定）。
+ * 並んでいないと端から順に見るしかなく、最悪の場合は文脈の外の一般論ではなく目の前の場面で起きる。
+ * 並び替えは固定で、探す値 25 を最後尾に置く（端から見ると7つ全部を見ることになる）。
  */
 const halvingCounts = binarySearchHalvingCounts(100);
 
-function arrayScene(target: number | null, exit: BinarySearchMotivationCanvasState["state"]["exit"] = null): BinarySearchMotivationCanvasState {
+/** 場面1専用：主教材 [3, 7, 12, 19, 25, 31, 42] の並び替え。25 は最後尾（位置6）。 */
+const shuffledMainValues: readonly number[] = [19, 3, 31, 7, 42, 12, 25];
+
+type ArraySceneOptions = {
+  readonly values?: readonly number[];
+  readonly order?: "sorted" | "unsorted";
+};
+
+function arrayScene(target: number | null, exit: BinarySearchMotivationCanvasState["state"]["exit"] = null, options: ArraySceneOptions = {}): BinarySearchMotivationCanvasState {
+  const values = options.values ?? binarySearchMainValues;
   return {
     data: { kind: "binary-search-motivation" },
-    state: { visual: { kind: "array", values: binarySearchMainValues, target }, exit },
-    highlights: target === null ? [] : [{ kind: "cell", id: binarySearchMainValues.indexOf(target) }],
+    state: { visual: { kind: "array", values, order: options.order ?? "sorted", target }, exit },
+    highlights: target === null ? [] : [{ kind: "cell", id: values.indexOf(target) }],
   };
 }
 
@@ -33,8 +45,8 @@ const sequence = defineLearningContent<BinarySearchMotivationCanvasState>({
   version: 1, kind: "step-sequence", id: "binary-search-motivation", phase: 1, intervalMs: 3500,
   steps: [
     {
-      id: "find-twenty-five", caption: "小さい順に並んだ7つの数字から25を探すとき、端から順に見ると最大で7回も見ることになります。",
-      canvas: arrayScene(binarySearchMainTarget),
+      id: "find-twenty-five", caption: "バラバラに並んだ7つの数字から25を探すとき、端から順に見ていくしかなく、最後にある25は7つ全部を見てやっと見つかります。",
+      canvas: arrayScene(binarySearchMainTarget, null, { values: shuffledMainValues, order: "unsorted" }),
     },
     {
       id: "guessing-game", caption: "たとえば、1から100のうちの1つの数を、『大きい』『小さい』のヒントだけで当てるゲームがあります。",
