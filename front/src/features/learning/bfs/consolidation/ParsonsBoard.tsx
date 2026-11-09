@@ -67,11 +67,15 @@ function SortableLine({ id, text, index, count, duration, disabled = false, keep
  * 回答後に「動かさなくてよい行」を示すための入力（Issue #327）。
  * active は「その問題に1回以上回答した」ことを呼び出し側が渡す。未指定なら従来表示のまま。
  * 判定は絶対位置ではなく相対順序（parsonsOrderFeedback）。間違っている行には印を付けない。
+ * submittedLineIds は直近に提出した並び。印はこの並びへの判定として固定し、
+ * ドラッグ中の並びでは更新しない（Issue #354）。ライブに更新すると、緑になる
+ * 位置を探す操作になってしまい、回答の判定にならないため。
  */
 export type ParsonsOrderFeedback = {
   readonly solutionLineIds: readonly string[];
   readonly interchangeableLineGroups?: ParsonsInterchangeableGroups;
   readonly active: boolean;
+  readonly submittedLineIds?: readonly string[];
 };
 
 type ParsonsAttemptActions = {
@@ -109,10 +113,12 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
   const isInitialOrder = ordered.every((id, index) => id === question.lineIds[index]);
   const resetOrder = () => setOrdered([...question.lineIds]);
   const answerLabel = orderFeedback?.active ? "この順序で再回答する" : "この順序で回答する";
-  // 順序フィードバックは「回答済み」かつ「現在の並びがまだ正解でない」ときだけ出す。
-  // 並び替えるたびに再計算するので、正解の並びに到達した時点で印と凡例は消える。
-  const keepIds = orderFeedback?.active && !isParsonsOrderCorrect(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
-    ? parsonsKeepLineIds(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
+  // 順序フィードバックは「提出した回答」への判定として固定する（Issue #354）。
+  // 印は提出時の並びからだけ計算し、ドラッグで並び替えても変わらない。
+  // 次の回答を提出した時点でだけ判定し直す。提出した並びが正解なら印は出さない。
+  const submittedLineIds = orderFeedback?.submittedLineIds;
+  const keepIds = orderFeedback && submittedLineIds && !isParsonsOrderCorrect(submittedLineIds, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
+    ? parsonsKeepLineIds(submittedLineIds, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
     : null;
   const showOrderFeedback = keepIds !== null && keepIds.size > 0;
   return <Box sx={{ minWidth: 0, ...(scrollable ? { minHeight: 0, display: "flex", flexDirection: "column", [compactViewport]: { flexShrink: 0 } } : {}) }}>
