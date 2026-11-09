@@ -7,7 +7,7 @@ import { AppHeader } from "@/app/component/appHeader";
 import { FeedbackV1 } from "@/app/component/feedbackV1";
 import { useUserSession } from "@/app/component/userSession";
 import { fetcher } from "@/lib/fetcher";
-import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress } from "@/api/learning.api";
+import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
@@ -17,7 +17,8 @@ import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPrev
 import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
-import { phaseBoundaryAchievements } from "../rewards/presentation";
+import { AchievementBand, NewAchievementZone } from "../rewards/AchievementPresentation";
+import { phaseResultAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
@@ -46,6 +47,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const [draft, setDraft] = useState<{ code?: string } | null>(null), [draftError, setDraftError] = useState(false);
   const [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
   const [rewards, setRewards] = useState(emptyLearningRewards);
+  // 実績の提示先（#333）。フェーズ結果画面用はフェーズキー別、最終リザルトの新着用は一括で持つ。
+  const [phaseUnlocks, setPhaseUnlocks] = useState<Readonly<Record<string, readonly UnlockedAchievement[]>>>({});
+  const [finalUnlocks, setFinalUnlocks] = useState<readonly UnlockedAchievement[]>([]);
   const { boundary, present, finish } = useRewardBoundary();
   const [finalShown, setFinalShown] = useState(false), [unitSaved, setUnitSaved] = useState(progress.unit?.status === "COMPLETED");
   const [unitError, setUnitError] = useState(false), [unitRevision, setUnitRevision] = useState(0);
@@ -74,9 +78,13 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     const result = await completeLearningPhase(await getToken(), courseId, phaseKey, summary);
     if (auth.currentUser?.uid !== uid) return;
     setRewards(current => mergeLearningRewards(current, result));
-    // 提示はフェーズの切れ目に重ねて出し、遷移は待たせない（#147）。提示側の完了は待たない。エラー時はここへ到達しない。
-    const achievements = phaseBoundaryAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
-    if (result.awardedCard || achievements.length) present({ phaseKey, achievements });
+    // 実績は解除されたフェーズの結果画面で提示する（#333）。最終フェーズ分は最終リザルトの新着へ。
+    const forResult = phaseResultAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
+    if (forResult.length) setPhaseUnlocks(current => ({ ...current, [phaseKey]: [...(current[phaseKey] ?? []), ...forResult.filter(item => !(current[phaseKey] ?? []).some(x => x.id === item.id))] }));
+    const forFinal = result.unlockedAchievements.filter(item => !forResult.some(x => x.id === item.id));
+    if (forFinal.length) setFinalUnlocks(current => [...current, ...forFinal.filter(item => !current.some(x => x.id === item.id))]);
+    // 切れ目ダイアログは知識カード専用（#333）。提示は遷移を待たせない（#147）。エラー時はここへ到達しない。
+    if (result.awardedCard) present({ phaseKey });
   }, [getToken, courseId, uid, unit, present]);
   // フィードバックの先行生成と表示（#202）。生成の成否は学習の進行に影響させない。
   const startFeedback = useCallback((kind: "phase" | "unit", eventId: string) => {
@@ -104,6 +112,8 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     void getToken().then(token => completeLearningUnit(token, courseId)).then(result => {
       if (!current) return;
       setUnitSaved(true); setRewards(rewards => mergeLearningRewards(rewards, result));
+      // 単元完了で解除された実績は最終リザルトの「新しい実績」に出す（#333）。
+      if (result.unlockedAchievements.length) setFinalUnlocks(current => [...current, ...result.unlockedAchievements.filter(item => !current.some(x => x.id === item.id))]);
       log({ eventType: "unit_complete" });
       startFeedback("unit", courseId);
     }, () => { if (current) { completedUnitRequest.current = false; setUnitError(true); } });
@@ -131,6 +141,11 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     onLearningEvent: log,
     rewards,
     renderRewards: (value: LearningRewards) => <FinalLearningRewards rewards={value} onEvent={log} />,
+    renderPhaseAchievements: (phaseKey: string) => {
+      const items = phaseUnlocks[phaseKey];
+      return items?.length ? <AchievementBand items={items} phaseKey={phaseKey} onEvent={log} /> : null;
+    },
+    renderNewAchievements: () => finalUnlocks.length ? <NewAchievementZone items={finalUnlocks} onEvent={log} /> : null,
     onCheckPhaseCompleted,
     renderPhaseFeedback,
     renderUnitFeedback,
