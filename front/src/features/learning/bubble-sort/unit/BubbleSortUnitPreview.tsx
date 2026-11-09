@@ -50,13 +50,16 @@ export type BubbleSortUnitPreviewProps = {
   onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
+  // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
+  renderPhaseAchievements?: (phaseKey: string) => ReactNode;
+  renderNewAchievements?: () => ReactNode;
   // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
   // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
   onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
   renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
   renderUnitFeedback?: () => ReactNode;
 };
-export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BubbleSortUnitPreviewProps = {}) {
+export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BubbleSortUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, bubbleSortUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -246,6 +249,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
         ))}
         {screen.kind === "result" && (
           <UnitResultScreen phase={bubbleSortUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            achievements={renderPhaseAchievements?.(bubbleSortUnitPhases[screen.index].id)}
             feedback={isCheckPhase(bubbleSortUnitPhases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(bubbleSortUnitPhases[screen.index].id, bubbleSortUnitPhases[screen.index + 1]?.id ?? null, {
               goToPhase: key => { const target = bubbleSortUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
               goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
@@ -255,7 +259,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
           <PhaseBridgeScreen phase={bubbleSortUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
+          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
         )}
       </Box>
     </Box>
