@@ -243,10 +243,15 @@ rejects(broken => broken.questions[3].tags = []);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("binary-search/consolidation/BinarySearchConsolidationPreview.tsx"), "utf8");
-assert.match(previewSource, /height: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /flex: "1 1 auto", minHeight: 0, maxHeight: "min\(54dvh, 600px\)"/);
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
 assert.match(previewSource, /content=\{binarySearchCodeMappingContent\}/, "review opens the phase-4 content");
+// Parsons の行に現れる lo / hi / mid は、この単元では記号の定義が画面に無いと読めない（Issue #331）。
+const parsonsQuestion = content.questions.find(question => question.kind === "parsons");
+assert(parsonsQuestion.definitions?.includes("lo = 探索範囲の左端の位置") && parsonsQuestion.definitions?.includes("hi = 探索範囲の右端の位置"),
+  "Parsons question defines lo and hi on screen");
+assert.match(previewSource, /question\.definitions/, "preview renders the definitions line");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "binary-search-consolidation"'), "Standalone preview is registered");
 console.log("Binary-search consolidation verified: transfer tap from the independent [2,5,8,12,16,23,38,56,72,91] trace, absent-case refutations on the shared 19-31-25 probe path, 8-line Parsons with no interchangeable lines, unsorted-list premise refutations, soft-gate completion and first-attempt diagnosis.");

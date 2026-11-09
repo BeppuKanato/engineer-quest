@@ -44,6 +44,10 @@ const stoppedCaption = (trace: PythonTraceResult) => trace.error?.line ? text.st
 function rangeCells(values: readonly number[], lo: number, hi: number): BinarySearchCellStatus[] {
   return values.map((_, index) => (index < lo || index > hi ? "discarded" : "in-range"));
 }
+/** フェーズ2の確定した残り範囲と同じ規則（execution.content の settledRangeCells と同じ導出）。 */
+function settledRangeCells(values: readonly number[], lo: number, hi: number): BinarySearchCellStatus[] {
+  return values.map((_, index) => (index < lo || index > hi ? "discarded" : "remaining"));
+}
 function probeCells(values: readonly number[], probe: Pending, droppedSide: "left" | "right" | null, found = false): BinarySearchCellStatus[] {
   return values.map((_, index) => {
     if (index < probe.lo || index > probe.hi) return "discarded";
@@ -93,7 +97,7 @@ export function convertBinarySearchTrace(trace: PythonTraceResult): BinarySearch
         .replace("{value}", String(values[probe.mid])).replaceAll("{target}", String(target)));
     if (lo <= hi) {
       const size = hi - lo + 1;
-      emit({ values, lo, hi, mid: null, cells: rangeCells(values, lo, hi), highlights: [] }, event,
+      emit({ values, lo, hi, mid: null, cells: settledRangeCells(values, lo, hi), highlights: [] }, event,
         size === 1 ? text.rangeSingle : lo === 0 && hi === values.length - 1 ? text.rangeAll : text.rangeRest);
     }
   }
@@ -138,7 +142,8 @@ export function convertBinarySearchTrace(trace: PythonTraceResult): BinarySearch
         }
       } else if (!pending && mid === null && inBoard) {
         // 範囲だけが決まった局面（比較の前）。重複は emit 側で抑える。
-        emit({ values, lo, hi, mid: null, cells: rangeCells(values, lo, hi), highlights: [] }, event,
+        // すでに狭まっている範囲は、確定した残り範囲として示す。
+        emit({ values, lo, hi, mid: null, cells: lo === 0 && hi === values.length - 1 ? rangeCells(values, lo, hi) : settledRangeCells(values, lo, hi), highlights: [] }, event,
           lo === 0 && hi === values.length - 1 ? text.rangeAll : text.rangeRest);
       }
     }
