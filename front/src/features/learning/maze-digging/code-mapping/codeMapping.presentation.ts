@@ -1,8 +1,9 @@
 import type { MazeDiggingCodeVariables } from "./codeMapping.types";
 
 const scalar = (value: number | null) => value === null ? "—" : String(value);
+/** 部屋の組の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。値の保持順はコードの (x, y) のまま、表示だけを入れ替える。 */
 const rooms = (value: MazeDiggingCodeVariables["candidates"]) =>
-  value === null ? "—" : `[${value.map(([x, y]) => `(${x}, ${y})`).join(", ")}]`;
+  value === null ? "—" : `[${value.map(([x, y]) => `(${y}, ${x})`).join(", ")}]`;
 
 /** 表示文字列どうしを比較するので、未代入→値、リストの伸長・短縮も同じ規則で扱う。 */
 export function codeVariableRows(variables: MazeDiggingCodeVariables, previous?: MazeDiggingCodeVariables) {

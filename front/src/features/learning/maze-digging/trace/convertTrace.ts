@@ -13,7 +13,8 @@ const directionByDelta: Readonly<Record<string, keyof typeof directionNames>> = 
 const kindName = (kind: string) => /^[A-Za-z_][A-Za-z_0-9]{0,79}$/u.test(kind) ? kind : "PythonError";
 const stoppedCaption = (trace: PythonTraceResult) => trace.error?.line ? text.stopped.replace("{line}", String(trace.error.line)).replace("{kind}", kindName(trace.error.kind)) :
   text.stoppedUnknown.replace("{kind}", kindName(trace.error?.kind ?? "PythonError"));
-const coordinate = (key: MazeCellKey) => { const { x, y } = parseMazeCellKey(key); return `(${x}, ${y})`; };
+/** 座標の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。 */
+const coordinate = (key: MazeCellKey) => { const { x, y } = parseMazeCellKey(key); return `(${y}, ${x})`; };
 
 /** 描画できる盤面かどうかだけを確認する。正しい迷路かどうかはここでは判定しない（学習者の誤りもそのまま見せる）。 */
 function drawableGridSize(grid: Grid | null | undefined): number | null {

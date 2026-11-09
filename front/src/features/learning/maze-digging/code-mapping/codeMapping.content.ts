@@ -11,7 +11,8 @@ import {
 
 const directionLabels: Readonly<Record<string, string>> = { up: "上", right: "右", down: "下", left: "左" };
 const pair = (x: number, y: number): readonly [number, number] => [x, y];
-const coord = (x: number, y: number) => `(${x}, ${y})`;
+/** 座標の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。進む量（dx, dy）も同じ順で示す。 */
+const coord = (x: number, y: number) => `(${y}, ${x})`;
 
 /**
  * コード側フレームだけを構成する。盤面はフェーズ2のスナップショットを参照し、再実装しない。

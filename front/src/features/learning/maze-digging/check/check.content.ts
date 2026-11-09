@@ -34,9 +34,10 @@ const directionLabels: Record<string, string> = { up: "上", right: "右", down:
 const nextDirection = mazeDiggingDirections.find(
   (direction) => mazeCellKey(currentX + 2 * direction.x, currentY + 2 * direction.y) === next.room,
 );
+/** 座標の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。 */
 const coordinate = (key: MazeCellKey) => {
   const { x, y } = parseMazeCellKey(key);
-  return `(${x}, ${y})`;
+  return `(${y}, ${x})`;
 };
 
 export const mazeDiggingCheckContent: MazeDiggingCheckContent = {
