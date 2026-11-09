@@ -72,16 +72,16 @@ const question = { id: "q", kind: "parsons", lineIds: ["b", "a", "c", "d"], corr
 const board = (orderFeedback) => renderToStaticMarkup(createElement(ParsonsBoard, { question, code, orderFeedback }));
 const active = board({ solutionLineIds: solution4, active: true });
 // 初期並び [b,a,c,d] の最長部分列は [b,c,d]（前の行優先）なので、a だけ印なし。
-assert(active.includes("✓ が付いた行は、動かさなくて大丈夫です"), "legend is shown while feedback is active");
+assert(active.includes("✓ は移動不要"), "legend is shown while feedback is active");
 assert.equal((active.match(/data-parsons-keep="true"/g) || []).length, 3, "three kept rows are marked");
 const keepRowOf = (html, id) => new RegExp(`data-parsons-line-id="${id}"[^>]*data-parsons-keep="true"`).test(html);
 assert(keepRowOf(active, "b") && keepRowOf(active, "c") && keepRowOf(active, "d") && !keepRowOf(active, "a"), "marks follow the relative-order judgement");
 // 未回答（active でない）ときは印も凡例も出ない。
 const inactive = board({ solutionLineIds: solution4, active: false });
 assert(!inactive.includes("data-parsons-keep"), "no marks before the first answer");
-assert(!inactive.includes("動かさなくて大丈夫です"), "no legend before the first answer");
+assert(!inactive.includes("data-parsons-order-legend"), "no legend before the first answer");
 // orderFeedback 未指定（フェーズ7ヒントL4等）も従来表示のまま。
 const plain = board(undefined);
-assert(!plain.includes("data-parsons-keep") && !plain.includes("動かさなくて大丈夫です"), "default board is unchanged");
+assert(!plain.includes("data-parsons-keep") && !plain.includes("data-parsons-order-legend"), "default board is unchanged");
 
 console.log("Parsons order feedback: relative-order keep set (identity, moved-line, adjacent swap, reverse, distractor, interchangeable group) and board rendering (marks, legend, inactive/default unchanged) passed.");

@@ -6,6 +6,7 @@ export type AnswerFeedback = {
   readonly attempt: number;
   readonly correct: boolean;
   readonly message: string;
+  readonly inlineNotice?: true;
 };
 
 export const answerFeedbackText = {
@@ -26,7 +27,8 @@ export function newAnswerFeedback(content: AssessmentContent, previous: Assessme
       ? "correctFeedback" in question && typeof question.correctFeedback === "string" ? question.correctFeedback : answerFeedbackText.correct
       : "incorrectFeedback" in question && typeof question.incorrectFeedback === "string" ? question.incorrectFeedback
         : "retryFeedback" in content && typeof content.retryFeedback === "string" ? content.retryFeedback : answerFeedbackText.incorrect;
-    feedback = { assessmentId: content.id, questionId: question.id, attempt: attempt.number, correct: attempt.correct, message };
+    feedback = { assessmentId: content.id, questionId: question.id, attempt: attempt.number, correct: attempt.correct, message,
+      ...(attempt.answer.kind === "order" ? { inlineNotice: true } : {}) };
   }
   return feedback;
 }

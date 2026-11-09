@@ -276,7 +276,7 @@ assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "fig
 assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
-assert.match(previewSource, /variant=\{retryingParsons \? "outlined" : "contained"\} onClick=\{\(\) => setSession\(current => advanceAssessment/, "advance is secondary only during a Parsons retry (#352)");
+assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
 assert.match(previewSource, /content=\{mazeDiggingCodeMappingContent\}/, "review opens the phase-4 content");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
@@ -287,7 +287,7 @@ assert.match(previewSource, /minHeight: "3em"/, "prompt keeps its reserved heigh
 const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /question\?\.kind === "parsons" \? parsonsQuestionBodySx/, "parsons uses the shared scroll layout");
 assert.match(parsonsBoardSource, /maxHeight: 368, overflowY: "auto"/, "parsons scroll viewport is capped and can shrink");
-assert.match(parsonsBoardSource, /\[compactViewport\]: \{ maxHeight: "none", flexShrink: 0 \}/, "the board flows in the shared scroll region on compact screens");
+assert.match(parsonsBoardSource, /\[compactViewport\]: \{ maxHeight: "none", flexShrink: 0, overflowY: "hidden" \}/, "the board flows in the shared scroll region on compact screens");
 assert.match(parsonsBoardSource, /parsonsDragCursor/, "parsons drag cursor is the shared dark SVG cursor");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
 console.log("Maze-digging consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, backtrack reason with the phase-4 pop route, 22-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");
