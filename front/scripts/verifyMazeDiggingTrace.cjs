@@ -20,6 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const { mazeDiggingCodeLineNumber, mazeDiggingCodeSource } = load(`${root}/maze-digging/code-mapping/mazeDiggingCode.ts`);
 const { mazeDiggingImplementationContent } = load(`${root}/maze-digging/implementation/implementation.content.ts`);
 const { mazeDiggingExecutionContent } = load(`${root}/maze-digging/execution/execution.content.ts`);
+const { codeMappedSteps } = load(`${root}/player/content.types.ts`);
 const { convertMazeDiggingTrace } = load(`${root}/maze-digging/trace/convertTrace.ts`);
 const { traceMazeDiggingCode, mazeDiggingTraceEventLimit } = load(`${root}/maze-digging/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
@@ -34,10 +35,11 @@ const frameOf = step => ({
   start: step.canvas.state.start,
   goal: step.canvas.state.goal,
 });
-const expectedFrames = plain(mazeDiggingExecutionContent.steps.map(frameOf));
+// トレース再生が対応するのはコード対応ステップだけ（説明専用ステップは実行に対応しない）。
+const expectedFrames = plain(codeMappedSteps(mazeDiggingExecutionContent).map(frameOf));
 const wallsOf = canvas => [...canvas.state.walls].sort();
 const dedupe = values => values.filter((value, index) => index === 0 || JSON.stringify(value) !== JSON.stringify(values[index - 1]));
-const expectedWallSequence = dedupe(plain(mazeDiggingExecutionContent.steps.map(step => wallsOf(step.canvas))));
+const expectedWallSequence = dedupe(plain(codeMappedSteps(mazeDiggingExecutionContent).map(step => wallsOf(step.canvas))));
 (async () => {
   const { buildPythonTraceHarness } = await import(pathToFileURL(path.resolve(__dirname, "../public/python-trace-harness.mjs")));
   function trace(source, maxEvents = mazeDiggingTraceEventLimit) {
