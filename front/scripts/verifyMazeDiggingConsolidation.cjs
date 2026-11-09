@@ -91,7 +91,7 @@ const small = referenceRun(7, [0, 0, 0, 1, 0, 1, 0, 0]);
 assert.equal(small.digs.length, 8);
 assert.deepEqual([small.digs[4].from, small.digs[4].room], ["3,3", "3,5"], "5th dig reaches the scene room");
 assert.deepEqual([small.digs[5].from, small.digs[5].room, small.digs[5].between], ["3,5", "1,5", "2,5"], "6th dig goes left");
-assert.equal(q1.prompt, "(3, 5) から左へ掘ります。掘られる部屋はどれですか");
+assert.equal(q1.prompt, "(5, 3) から左へ掘ります。掘られる部屋はどれですか");
 assert.equal(q1.scene.data.size, 7);
 assert.equal(q1.scene.state.processing, "3,5");
 assert.equal(q1.correctAnswer.nodeId, "1,5");
