@@ -83,13 +83,20 @@ assert(content.vocabulary.every(entry => steps.some(step => step.id === entry.fi
 for (const step of steps) validate(step.canvas);
 
 // 場面の状態は基準データ §3 フェーズ1の場面案と一致する。
-assert.deepEqual(plain(get("find-twenty-five").state.visual), { kind: "array", values: main, target: 25 });
-assert.deepEqual(plain(get("find-twenty-five").highlights.map(highlight => highlight.id)), [4]);
+// 場面1だけは Issue #329 の決定で、主教材と同じ7つの数字を並び替えて示す。
+// 25 は最後尾にあり、端から順に見ると7つ全部を見る（最悪のケースが場面の中で実際に起きる）。
+const shuffled = [19, 3, 31, 7, 42, 12, 25];
+assert.deepEqual([...shuffled].sort((a, b) => a - b), main, "Scene 1 values are a permutation of the main values");
+assert.equal(shuffled.at(-1), 25, "Scene 1 puts the target last");
+assert.equal(shuffled.indexOf(25) + 1, 7, "Sequential search in scene 1 views all 7 values");
+assert(shuffled.some((value, index) => index > 0 && value < shuffled[index - 1]), "Scene 1 bars are not monotonic");
+assert.deepEqual(plain(get("find-twenty-five").state.visual), { kind: "array", values: shuffled, target: 25, order: "unsorted" });
+assert.deepEqual(plain(get("find-twenty-five").highlights.map(highlight => highlight.id)), [6]);
 assert.deepEqual(plain(get("guessing-game").state.visual), { kind: "guess", low: 1, high: 100, asked: null, remaining: null });
 assert.deepEqual(plain(get("ask-middle").state.visual), { kind: "guess", low: 1, high: 100, asked: 50, remaining: [51, 100] });
 assert.deepEqual(plain(get("seven-guesses").state.visual), { kind: "halving", counts: expectedCounts });
-assert.deepEqual(plain(get("unit-overview").state.visual), { kind: "array", values: main, target: null });
-assert.deepEqual(plain(get("main-example-preview").state.visual), { kind: "array", values: main, target: 25 });
+assert.deepEqual(plain(get("unit-overview").state.visual), { kind: "array", values: main, target: null, order: "sorted" });
+assert.deepEqual(plain(get("main-example-preview").state.visual), { kind: "array", values: main, target: 25, order: "sorted" });
 
 // 実描画: 配列の棒・数当ての帯（セル100個、聞いた数、捨てた半分）・件数列・出口ボタンが SVG に現れる。
 for (const step of steps) {
@@ -135,13 +142,16 @@ assert(!fs.existsSync(path.resolve(__dirname, "../src/app/learning-preview/binar
 assert.throws(() => validate({ ...get("main-example-preview"), state: { ...get("main-example-preview").state, exit: { label: "x", nextPhase: 3 } } }), /phase 2/);
 assert.throws(() => validate({ ...get("ask-middle"), state: { ...get("ask-middle").state, exit: { label: "x", nextPhase: 2 } } }), /settled/);
 const arrayWith = visual => ({ data: { kind: "binary-search-motivation" }, state: { visual, exit: null }, highlights: [] });
-assert.throws(() => validate(arrayWith({ kind: "array", values: [3, 7, 7, 19], target: 7 })), /ascending/);
-assert.throws(() => validate(arrayWith({ kind: "array", values: main, target: 20 })), /one of the values/);
-assert.throws(() => validate({ ...arrayWith({ kind: "array", values: main, target: 25 }), highlights: [{ kind: "cell", id: 0 }] }), /target cell only/);
+assert.throws(() => validate(arrayWith({ kind: "array", values: [3, 7, 7, 19], target: 7, order: "sorted" })), /ascending/);
+assert.throws(() => validate(arrayWith({ kind: "array", values: main, target: 20, order: "sorted" })), /one of the values/);
+assert.throws(() => validate({ ...arrayWith({ kind: "array", values: main, target: 25, order: "sorted" }), highlights: [{ kind: "cell", id: 0 }] }), /target cell only/);
+// 並んでいない場面は、小さい順のままでは成立せず、重複も許さない。
+assert.throws(() => validate(arrayWith({ kind: "array", values: main, target: 25, order: "unsorted" })), /must not be in ascending/);
+assert.throws(() => validate(arrayWith({ kind: "array", values: [19, 3, 3, 25], target: 25, order: "unsorted" })), /distinct/);
 assert.throws(() => validate({ ...arrayWith({ kind: "guess", low: 1, high: 100, asked: 50, remaining: [51, 100] }), highlights: [{ kind: "cell", id: 0 }] }), /array scenes only/);
 assert.throws(() => validate(arrayWith({ kind: "guess", low: 1, high: 100, asked: null, remaining: [51, 100] })), /asked number first/);
 assert.throws(() => validate(arrayWith({ kind: "guess", low: 1, high: 100, asked: 50, remaining: [40, 60] })), /exclude the asked/);
 assert.throws(() => validate(arrayWith({ kind: "guess", low: 1, high: 100, asked: 120, remaining: null })), /inside the guess range/);
 assert.throws(() => validate(arrayWith({ kind: "halving", counts: [100, 49, 25, 13, 7, 4, 2, 1] })), /halve/);
 assert.throws(() => validate(arrayWith({ kind: "halving", counts: [100, 50, 25, 13, 7, 4, 2] })), /end at 1/);
-console.log("Binary-search motivation: 6 scenes, verified trace of [3,7,12,19,25,31,42] finding 25 in 3 probes, guessing-game halving 100→1 in 7, unit-side scene validation, rendering and standalone preview page passed.");
+console.log("Binary-search motivation: 6 scenes, scene 1 presents the main values shuffled ([19,3,31,7,42,12,25], target last, sequential search views all 7), verified trace of [3,7,12,19,25,31,42] finding 25 in 3 probes, guessing-game halving 100→1 in 7, unit-side scene validation, rendering and standalone preview page passed.");
