@@ -43,8 +43,8 @@ export type MazeDiggingUnitPreviewProps = {
   initialUnitComplete?: boolean;
   initialCompletedPhases?: readonly string[];
   initialSummaries?: Readonly<Record<number, MazeDiggingUnitPhaseSummary>>;
-  initialCode?: string;
-  onCodeChange?: (code: string) => void;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
   onPhaseComplete?: (phaseKey: string, summary?: MazeDiggingUnitPhaseSummary) => Promise<void>;
   onFinalResult?: () => void;
   onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
@@ -56,7 +56,7 @@ export type MazeDiggingUnitPreviewProps = {
   renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
   renderUnitFeedback?: () => ReactNode;
 };
-export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: MazeDiggingUnitPreviewProps = {}) {
+export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: MazeDiggingUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, mazeDiggingUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -177,7 +177,7 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
       case 3: return <MazeDiggingCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(mazeDiggingUnitPhases[3])} />;
       case 4: return <MazeDiggingCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
       case 5: return <MazeDiggingConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(mazeDiggingUnitPhases[5])} />;
-      case 6: return <MazeDiggingImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
+      case 6: return <MazeDiggingImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
       default: return null;
     }
   };
