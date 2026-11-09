@@ -77,56 +77,57 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   }, [diagnosis, onComplete]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    {/* 中央寄せは justifyContent: "center" でなく、問題文と末尾スペーサの marginTop: "auto" で行う。
-        内容が画面より高いとき（選択肢の折り返し・誤答後のボタン追加など）に上方向へはみ出して
-        通知やチップに重なるのを防ぎ、余白のリズムを保ったまま下方向のスクロールへ逃がすため（Issue #327）。 */}
+    {/* 画面は3段組（Issue #298）: 中央のスクロール領域に問題文・図・指示・選択肢を上から流し、
+        再回答の注記と進行ボタンは下部の固定ゾーンに置く。図の高さは設問と viewport だけで決まり、
+        テキスト量では変わらない。旧来の marginTop: "auto" による中央寄せ（#327）は廃止した。 */}
     <Box component="section" aria-label={complete ? "応用問題の結果" : "BFSの応用問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: question ? (embedded ? "100%" : "84dvh") : "auto",
-        minHeight: question ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column" }}>
-      <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
-        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
-        marginTop: "auto", minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
-      }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
-      {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
-      {question && <>
-        {question.kind !== "parsons" && <Box sx={{ width: "100%", flex: "1 1 auto", minHeight: 0, maxHeight: "min(54dvh, 600px)", display: "flex" }}>
-          <ConsolidationGraph {...question.scene} minHeight={0} onSelect={question.kind === "node" && !attempt?.correct ? id => submit({ kind: "node", nodeId: id }) : undefined} />
-        </Box>}
-        <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
-        {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-          {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
-            disabled={attempt?.correct === true}
-            onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
-              color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
-              "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
-        </Box>}
-        {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true}
-          orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0 }} />}
-        {attempt && <>
-          {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
-          <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-            {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
-            <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
-              sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-                "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>
-          </Box>
+      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh",
+        minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
+          color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
+          minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
+        }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
+        {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
+        {question && <>
+          {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", flexShrink: 0, display: "flex" }}>
+            <ConsolidationGraph {...question.scene} minHeight={0} onSelect={question.kind === "node" && !attempt?.correct ? id => submit({ kind: "node", nodeId: id }) : undefined} />
+          </Box>}
+          <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
+          {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+            {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+              disabled={attempt?.correct === true}
+              onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
+                color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
+                "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
+          </Box>}
+          {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true}
+            orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0 }} />}
         </>}
-      </>}
-      {diagnosis && <>
-        <ResultConfetti />
-        <DiagnosisScore correct={diagnosis.correct} total={diagnosis.total} />
-        <Box component="ul" aria-label="論点ごとの結果" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
-          {diagnosis.tags.map((result, index) => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag} index={index}
-            passed={result.passed} correct={result.correct} total={result.total}
-            reviewAction={!result.passed ? <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
-              onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} /> : undefined} />)}
+        {diagnosis && <>
+          <ResultConfetti />
+          <DiagnosisScore correct={diagnosis.correct} total={diagnosis.total} />
+          <Box component="ul" aria-label="論点ごとの結果" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
+            {diagnosis.tags.map((result, index) => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag} index={index}
+              passed={result.passed} correct={result.correct} total={result.total}
+              reviewAction={!result.passed ? <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
+                onClick={() => setReview(content.questions.find(question => question.tags.includes(result.tag))!)} label={content.reviewLabel} /> : undefined} />)}
+          </Box>
+          <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
+        </>}
+      </Box>
+      {question && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
+        {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
+        <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+          {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
+          <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
+            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>
         </Box>
-        <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
-        {onNext && <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />
-        </Box>}
-      </>}
-      <Box aria-hidden sx={{ marginTop: "auto" }} />
+      </Box>}
+      {diagnosis && onNext && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1, display: "flex", justifyContent: "center" }}>
+        <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />
+      </Box>}
     </Box>
     {review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsCodeMappingContent} stepIds={review.reviewStepIds}
       renderCanvas={canvas => <BfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}

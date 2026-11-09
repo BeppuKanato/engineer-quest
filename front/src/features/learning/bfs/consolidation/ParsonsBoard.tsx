@@ -61,7 +61,7 @@ export type ParsonsOrderFeedback = {
 
 /**
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
- * scrollable のときは残り高さの中で盤面だけが縦スクロールし、ボタン行は下に固定される（Issue #318）。
+ * scrollable のときは固定高の窓の中で盤面だけが縦スクロールし、ボタン行は盤面の下に置かれる（Issue #318、#298）。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  */
 export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback }) {
@@ -83,12 +83,12 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
     ? parsonsKeepLineIds(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
     : null;
   const showOrderFeedback = keepIds !== null && keepIds.size > 0;
-  return <Box sx={{ minWidth: 0, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
-    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
-      {/* scrollable の表示窓には下限を設ける: 行ピッチ46px × 6行 = 276px。
-          誤答後に通知や再回答ボタンが増えても盤面が数行まで潰れて操作不能にならないため（Issue #327）。
-          収まらない分は画面側のスクロール（単元画面の外側ボックス）に逃がす前提。 */}
-      <Box sx={{ overflowX: "auto", ...(scrollable ? { flex: 1, minHeight: 276, overflowY: "auto" } : {}) }}>
+  return <Box sx={{ minWidth: 0, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
+    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
+      {/* scrollable の表示窓は固定高: 行ピッチ46px × 8行 = 368px（Issue #298）。
+          下限 276px（6行、Issue #327）は盤面が潰れて操作不能にならないための床として残す。
+          盤面の内側スクロールは、学習画面で唯一認める入れ子のスクロールである。 */}
+      <Box sx={{ overflowX: "auto", ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto" } : {}) }}>
         <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
           style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
