@@ -73,6 +73,7 @@
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
+| [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
 | [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
 | [binary-search-phase3-288.md](binary-search-phase3-288.md) | 記録 | Issue #288の二分探索フェーズ3（動きの確認問題）、連結2問（セルタップ＋文章4択）、出題エンジンへの concept-check 形式追加などの留保 |
 | [binary-search-phase4-289.md](binary-search-phase4-289.md) | 記録 | Issue #289の二分探索フェーズ4（動きとコードの対応）、18フレームとCPythonトレース照合、基準データの行数表記（11行/12行）などの留保 |
