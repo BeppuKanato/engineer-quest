@@ -21,7 +21,7 @@ export function LearningRewardBoundary({ boundary, onDone, onEvent }: { boundary
   const last = rewards.awardedCards.length <= 1;
   useEffect(() => { if (!card) onDone(); }, [card, onDone]);
   if (!card) return null;
-  return <Presentation key={card.id} card={card} boundary={{ phaseKey: entry.phaseKey }} onEvent={onEvent}
+  return <Presentation key={card.id} card={card} boundary={{ phaseKey: entry?.phaseKey ?? boundary.phaseKey }} onEvent={onEvent}
     onDone={() => { dismissAwardedCard(card.id); if (last) onDone(); }} />;
 }
 function Presentation({ card, boundary, onDone, onEvent }: { card: AwardedCard; boundary: RewardBoundary; onDone: () => void; onEvent?: LearningObserver }) {
