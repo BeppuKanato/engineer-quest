@@ -281,8 +281,13 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
   const impl = (file) => fs.readFileSync(`${root}/wall-extension/implementation/${file}`, "utf8");
   const previewSource = impl("WallExtensionImplementationPreview.tsx");
-  assert.match(previewSource, /theme="vs"/);
+  assert.match(previewSource, /theme={LEARNING_EDITOR_THEME}/, "editor uses the shared learning theme");
+  assert.match(previewSource, /beforeMount={setupLearningEditor}/, "editor setup is shared");
+  assert.match(previewSource, /learningEditorTextCursor/, "editor text cursor is the shared dark I-beam");
   assert(!previewSource.includes("vs-dark"), "editor is light themed");
+  const editorSetupSource = fs.readFileSync(`${root}/code/learningEditor.ts`, "utf8");
+  assert.match(editorSetupSource, /base: "vs"/, "shared editor theme is based on the light vs theme");
+  assert.match(editorSetupSource, /"editorCursor\.foreground": "#111827"/, "shared editor theme pins a dark caret colour");
   assert.match(previewSource, /border: `2px solid \$\{colors\.focus\}`/, "editor area is framed in the focus colour");
   assert(!impl("editor.tokens.ts").includes("#1e1e1e"), "editor tokens are light");
   const hintsSource = impl("ImplementationHints.tsx");
