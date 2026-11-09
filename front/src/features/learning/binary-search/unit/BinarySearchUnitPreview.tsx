@@ -43,8 +43,8 @@ export type BinarySearchUnitPreviewProps = {
   initialUnitComplete?: boolean;
   initialCompletedPhases?: readonly string[];
   initialSummaries?: Readonly<Record<number, BinarySearchUnitPhaseSummary>>;
-  initialCode?: string;
-  onCodeChange?: (code: string) => void;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
   onPhaseComplete?: (phaseKey: string, summary?: BinarySearchUnitPhaseSummary) => Promise<void>;
   onFinalResult?: () => void;
   onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
@@ -59,7 +59,7 @@ export type BinarySearchUnitPreviewProps = {
   renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
   renderUnitFeedback?: () => ReactNode;
 };
-export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BinarySearchUnitPreviewProps = {}) {
+export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BinarySearchUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, binarySearchUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -180,7 +180,7 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
       case 3: return <BinarySearchCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(binarySearchUnitPhases[3])} />;
       case 4: return <BinarySearchCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
       case 5: return <BinarySearchConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(binarySearchUnitPhases[5])} />;
-      case 6: return <BinarySearchImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
+      case 6: return <BinarySearchImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
       default: return null;
     }
   };

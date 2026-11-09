@@ -142,6 +142,86 @@ assert.deepEqual(results.returnsNone, { D1: true, J1: true, J2: true, J3: false 
 // 位置ではなく値そのものを返すと、基本ケースが落ちる。
 assert.equal(results.returnsValue.D1, false, "returning the value instead of its position fails");
 
+// ---- 入力量レベル（Issue #328）: テンプレート構成・プレースホルダ・下書きキー・セレクタ ----
+const {
+  implementationInputLevels, implementationInputLevelText, implementationDraftKey,
+  countImplementationPlaceholders, isImplementationPlaceholderLine,
+} = load(`${root}/implementation/inputLevel.ts`);
+const { ImplementationLevelSelector } = load(`${root}/implementation/ImplementationLevelSelector.tsx`);
+assert.deepEqual(plain(implementationInputLevels), ["full", "skeleton", "fill-in"]);
+assert.deepEqual(Object.keys(content.templates).sort(), ["fill-in", "full", "skeleton"]);
+assert.equal(content.template, content.templates.full, "the legacy template is the full level");
+assert.equal(countImplementationPlaceholders(content.templates.full), 0);
+assert.equal(countImplementationPlaceholders(content.templates.skeleton), 6, "skeleton leaves every substantive line as a placeholder");
+assert.equal(countImplementationPlaceholders(content.templates["fill-in"]), 3, "fill-in leaves only the key lines as placeholders");
+for (const level of implementationInputLevels) assert(content.templates[level].startsWith("def binary_search(values, target):"), `${level} template keeps the contract signature`);
+assert.equal(implementationInputLevelText.levels.full.label, "全部書く");
+assert.equal(implementationInputLevelText.levels.skeleton.label, "骨格から書く");
+assert.equal(implementationInputLevelText.levels["fill-in"].label, "穴埋めで書く");
+assert.equal(implementationDraftKey("base-key", "full"), "base-key", "the full level keeps the legacy draft key");
+assert.equal(implementationDraftKey("base-key", "skeleton"), "base-key:level:skeleton");
+assert.equal(implementationDraftKey("base-key", "fill-in"), "base-key:level:fill-in");
+const canonicalById = new Map(binarySearchCode.lines.map(line => [line.id, line.text]));
+const solveTemplate = (template, groups) => {
+  let group = 0;
+  const solved = [];
+  for (const line of template.split("\n")) {
+    if (isImplementationPlaceholderLine(line)) {
+      for (const id of groups[group++]) solved.push(canonicalById.get(id));
+    } else if (!/^\s*#/u.test(line)) solved.push(line);
+  }
+  assert.equal(group, groups.length, "every placeholder is accounted for");
+  return solved.join("\n");
+};
+const skeletonSolved = solveTemplate(content.templates.skeleton, [
+  ["init-lo"], ["init-hi"], ["compute-mid"], ["return-mid"], ["drop-left"], ["drop-right"],
+]);
+const fillInSolved = solveTemplate(content.templates["fill-in"], [
+  ["compute-mid"], ["drop-left"], ["drop-right"],
+]);
+assert.equal(skeletonSolved, binarySearchCodeSource, "skeleton frame + canonical lines = canonical code");
+assert.equal(fillInSolved, binarySearchCodeSource, "fill-in frame + canonical lines = canonical code");
+const levelPython = spawnSync(process.env.PYTHON || "python3", ["-c", `
+import json, sys
+data = json.load(sys.stdin)
+def run(code):
+    ns = {}
+    try:
+        exec(code, ns)
+    except Exception:
+        return {test["id"]: False for test in data["tests"]}
+    out = {}
+    for test in data["tests"]:
+        try:
+            out[test["id"]] = ns[test["functionName"]](*test["args"]) == test["expected"]
+        except Exception:
+            out[test["id"]] = False
+    return out
+print(json.dumps({name: run(code) for name, code in data["variants"].items()}))
+`], {
+  input: JSON.stringify({
+    tests: plain(content.tests),
+    variants: {
+      skeletonUntouched: content.templates.skeleton, fillInUntouched: content.templates["fill-in"],
+      skeletonSolved, fillInSolved,
+    },
+  }),
+  encoding: "utf8",
+});
+assert.equal(levelPython.status, 0, levelPython.stderr);
+const levelResults = JSON.parse(levelPython.stdout);
+const allFalse = { D1: false, J1: false, J2: false, J3: false };
+const allTrue = { D1: true, J1: true, J2: true, J3: true };
+assert.deepEqual(levelResults.skeletonUntouched, allFalse, "an untouched skeleton template must fail every test (placeholders remain)");
+assert.deepEqual(levelResults.fillInUntouched, allFalse, "an untouched fill-in template must fail every test (placeholders remain)");
+assert.deepEqual(levelResults.skeletonSolved, allTrue, "the canonical solution passes from the skeleton frame");
+assert.deepEqual(levelResults.fillInSolved, allTrue, "the canonical solution passes from the fill-in frame");
+const selectorHtml = renderToStaticMarkup(createElement(ImplementationLevelSelector, { level: "skeleton", onChange: () => {} }));
+assert(selectorHtml.includes("data-input-level-selector"));
+assert.equal((selectorHtml.match(/data-input-level-option=/g) || []).length, 3, "the selector offers all three levels");
+for (const label of ["全部書く", "骨格から書く", "穴埋めで書く"]) assert(selectorHtml.includes(label), `selector shows ${label}`);
+assert.equal((selectorHtml.match(/aria-pressed="true"/g) || []).length, 1, "exactly the selected level is pressed");
+
 // ---- ヒント利用・エラー分類・進捗文言（先行フェーズ7と同じ契約） ----
 let usage = [0, 0, 0, 0];
 for (const level of [2, 3, 4]) assert.equal(recordHintUsage(usage, level), usage);
@@ -337,6 +417,12 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /DrawnCheck size=\{44\}/, "the completion banner leads with a drawn check");
   assert.match(previewSource, /onShowFinalResult/, "the final result is reached by the learner's button, not automatically (#305)");
   assert.match(previewSource, /answerCorrect/, "each newly passed test plays the small check sound (#305)");
+  assert.match(previewSource, /useImplementationInputLevel/, "phase 7 manages code per input level (#328)");
+  assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
+  assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
+  assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
+  const unitSource = fs.readFileSync(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`, "utf8");
+  assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
   // プレビュー登録（視覚デバッグの接続は Issue #293 で行うため、ここでは登録だけを確認する）。
   const pageSource = fs.readFileSync(path.resolve(root, "../../app/learning-preview/[contentId]/page.tsx"), "utf8");
   assert.match(pageSource, /binary-search-implementation/, "preview route is registered");
