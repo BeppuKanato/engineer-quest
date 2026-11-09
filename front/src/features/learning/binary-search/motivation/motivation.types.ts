@@ -3,7 +3,8 @@ import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
 
 /**
  * フェーズ1の Canvas は場面ごとに3種の図を持つ（基準データ §3 フェーズ1）。
- * - array: 主教材の並んだ数字。描画は共通配列基盤（player の ArrayDrawing）へ委譲する。
+ * - array: 主教材の数字。場面1だけは同じ数字を並び替えて「並んでいない」状態を示し（Issue #329）、
+ *   それ以外の場面は小さい順に並んだ主教材そのもの。描画は共通配列基盤（player の ArrayDrawing）へ委譲する。
  * - guess: 1〜100 の数当てゲームの候補の帯。真ん中を聞いて片側を捨てた状態を表す。
  * - halving: 候補の数が半分ずつ減っていく件数の列。
  * 配列上の状態語彙（探索範囲・中央・範囲外）はフェーズ2の盤面型で扱い、
@@ -13,8 +14,13 @@ import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
 export type BinarySearchMotivationVisual =
   | {
       readonly kind: "array";
-      /** 小さい順に並んだ数字。 */
+      /** 並べる数字。order が "sorted" の場面では主教材の小さい順の配列、そのままの順で並べる。 */
       readonly values: readonly number[];
+      /**
+       * 並び方。"sorted" は小さい順（この単元の探索の前提）。
+       * "unsorted" は場面1専用で、並んでいないから端から順に見るしかないことを示す（Issue #329 の決定）。
+       */
+      readonly order: "sorted" | "unsorted";
       /** 探す値。この場面で探す対象を示さない場合は null。 */
       readonly target: number | null;
     }
@@ -65,7 +71,7 @@ export function validateBinarySearchMotivationCanvas(canvas: BinarySearchMotivat
   }
 
   if (visual.kind === "array") {
-    const { values, target } = visual;
+    const { values, order, target } = visual;
     if (!Array.isArray(values) || values.length === 0) {
       throw new Error("Array scene needs at least one value");
     }
@@ -73,11 +79,24 @@ export function validateBinarySearchMotivationCanvas(canvas: BinarySearchMotivat
       if (!Number.isFinite(value) || value < 0) {
         throw new Error(`Array value must be a finite, non-negative number: index ${index}`);
       }
-      // この単元の前提は「小さい順に並んでいる」こと。並んでいない配列は教材データの誤りとして弾く。
-      if (index > 0 && value <= values[index - 1]) {
-        throw new Error("Array scene values must be in ascending order");
-      }
     });
+    if (order === "sorted") {
+      // 探索の前提は「小さい順に並んでいる」こと。前提を担う場面で並んでいない配列は教材データの誤りとして弾く。
+      values.forEach((value, index) => {
+        if (index > 0 && value <= values[index - 1]) {
+          throw new Error("Array scene values must be in ascending order");
+        }
+      });
+    } else {
+      // 並んでいない場面（場面1）は、同じ値の重複があると「探す値」のマスが一意に決まらないため弾く。
+      if (new Set(values).size !== values.length) {
+        throw new Error("Unsorted array scene values must be distinct");
+      }
+      // 小さい順に並んでしまっている配列は「並んでいない」場面として成立しない。
+      if (values.every((value, index) => index === 0 || value > values[index - 1])) {
+        throw new Error("Unsorted array scene must not be in ascending order");
+      }
+    }
     if (target !== null && !values.includes(target)) {
       throw new Error("Target must be one of the values");
     }
