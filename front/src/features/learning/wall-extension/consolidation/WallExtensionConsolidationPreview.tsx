@@ -126,7 +126,7 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
               onReview: () => setReview(question),
               onAdvance: () => setSession(current => advanceAssessment(content, current, question.id)),
             }}
-            orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0 }} />}
+            orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0, submittedLineIds: attempt?.answer.kind === "order" ? attempt.answer.lineIds : undefined }} />}
         </>}
         {diagnosis && <>
           <ResultConfetti />
