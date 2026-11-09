@@ -1,5 +1,6 @@
 import { runCourseMissionTests } from "../../../../lib/pyodideRunner";
 import { analyzeExecutionError } from "../../../../lib/executionError";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import { mazeCellKey, type MazeGridCanvasState } from "../../player/mazeGrid.types";
 import { wallExtensionImplementationContent as content, type ImplementationTest } from "./implementation.content";
 
@@ -11,6 +12,8 @@ export type TestOutcome = { readonly id: string; readonly passed: boolean; reado
 export type WallExtensionImplementationSummary = {
   readonly testRuns: number;
   readonly hintUsage: HintUsage;
+  /** 完了時点の入力量レベル（Issue #328）。テストと完了条件はレベルによらず同一。 */
+  readonly inputLevel: ImplementationInputLevel;
 };
 
 export const recordHintUsage = (usage: HintUsage, level: HintLevel): HintUsage => {

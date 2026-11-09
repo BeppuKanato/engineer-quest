@@ -1,10 +1,11 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import { mazeCellKey } from "../../player/mazeGrid.types";
 import {
   buildWallExtensionWalls, wallExtensionMainChoices, wallExtensionMainSize,
   wallExtensionSmallChoices, wallExtensionSmallSize,
 } from "../wallExtensionMaze";
-import { wallExtensionCode } from "../code-mapping/wallExtensionCode";
+import { wallExtensionCode, type WallExtensionCodeLineId } from "../code-mapping/wallExtensionCode";
 import { wallExtensionConsolidationContent } from "../consolidation/consolidation.content";
 
 export type ImplementationTest = PythonTestCase & { readonly visibility: "display" | "judgement" };
@@ -21,10 +22,89 @@ if (!parsonsQuestion || parsonsQuestion.kind !== "parsons") throw new Error("Pha
 
 const skeletonLineIds = ["for-pillar-row", "for-pillar-column", "if-first-row"] as const;
 
+/**
+ * 入力量レベル別の初期テンプレート（Issue #328）。
+ * 「骨格から書く」「穴埋めで書く」は、正解コード（wallExtensionCode）の行から組み立てる。
+ * 残す行は正解コードの行そのものを使い、置き換える行は、その行のインデントを保った
+ * プレースホルダ行（raise NotImplementedError ＋「ここを書く」の目印）にする。
+ * プレースホルダが残っていると必ずテストに失敗する。
+ */
+const codeLineText = (id: WallExtensionCodeLineId): string => {
+  const line = wallExtensionCode.lines.find(line => line.id === id);
+  if (!line) throw new Error("Missing canonical line");
+  return line.text;
+};
+const placeholderLine = (id: WallExtensionCodeLineId, description: string): string => {
+  const indent = /^ */u.exec(codeLineText(id))?.[0] ?? "";
+  return `${indent}raise NotImplementedError  # ここを書く：${description}`;
+};
+const placeholderGuide = "    # 「ここを書く」の行が、まだ書けていない場所です。その行を消して、自分のコードを書いてください。";
+
+const fullTemplate = "def generate_maze(size, choices):\n    directions = {\"up\": (0, -1), \"down\": (0, 1), \"left\": (-1, 0), \"right\": (1, 0)}\n    # ここに、迷路を作って返すコードを書く\n    pass";
+
+/** 骨格：制御構造（外周・柱・伸長のループと最上段の分岐）と最後の return だけを残し、本体の行をすべてプレースホルダにする。 */
+const skeletonTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  placeholderLine("initialize-grid", "盤をすべて通路（0）で用意する"),
+  codeLineText("for-border"),
+  placeholderLine("border-top", "一番上の行を壁にする"),
+  placeholderLine("border-bottom", "一番下の行を壁にする"),
+  placeholderLine("border-left", "一番左の列を壁にする"),
+  placeholderLine("border-right", "一番右の列を壁にする"),
+  placeholderLine("initialize-pillars", "柱のリストを用意する"),
+  codeLineText("for-pillar-row"),
+  codeLineText("for-pillar-column"),
+  placeholderLine("place-pillar", "柱のマスを壁にする"),
+  placeholderLine("append-pillar", "柱の位置をリストに加える"),
+  placeholderLine("define-directions", "4方向の移動量を用意する"),
+  codeLineText("for-extension"),
+  codeLineText("if-first-row"),
+  placeholderLine("allowed-four", "最上段の柱で使える4方向を用意する"),
+  codeLineText("else-branch"),
+  placeholderLine("allowed-three", "最上段以外で使える3方向を用意する。上は除く"),
+  placeholderLine("lookup-delta", "選んだ方向の移動量 dx, dy を取り出す"),
+  placeholderLine("write-wall", "柱の隣のマスを壁にする"),
+  codeLineText("return-grid"),
+].join("\n");
+
+/** 穴埋め：要点の行（方向の移動量、最上段以外の方向、上を除く決まり、壁を書き込む行）だけをプレースホルダにする。 */
+const fillInTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  codeLineText("initialize-grid"),
+  codeLineText("for-border"),
+  codeLineText("border-top"),
+  codeLineText("border-bottom"),
+  codeLineText("border-left"),
+  codeLineText("border-right"),
+  codeLineText("initialize-pillars"),
+  codeLineText("for-pillar-row"),
+  codeLineText("for-pillar-column"),
+  codeLineText("place-pillar"),
+  codeLineText("append-pillar"),
+  placeholderLine("define-directions", "4方向の移動量を用意する。特に上の移動量が要点"),
+  codeLineText("for-extension"),
+  codeLineText("if-first-row"),
+  codeLineText("allowed-four"),
+  codeLineText("else-branch"),
+  placeholderLine("allowed-three", "最上段以外で使える方向を用意する。上に伸ばすと輪ができるので、上は除く"),
+  placeholderLine("lookup-delta", "選んだ方向の移動量 dx, dy を取り出す"),
+  placeholderLine("write-wall", "柱の隣のマスを壁にする"),
+  codeLineText("return-grid"),
+].join("\n");
+
+const levelTemplates: Readonly<Record<ImplementationInputLevel, string>> = {
+  full: fullTemplate,
+  skeleton: skeletonTemplate,
+  "fill-in": fillInTemplate,
+};
+
 export const wallExtensionImplementationContent = {
   version: 1, id: "wall-extension-implementation", phase: 7,
   caption: "柱から壁を伸ばして迷路を作るコードを完成させ、実行して確かめましょう。",
-  template: "def generate_maze(size, choices):\n    directions = {\"up\": (0, -1), \"down\": (0, 1), \"left\": (-1, 0), \"right\": (1, 0)}\n    # ここに、迷路を作って返すコードを書く\n    pass",
+  template: fullTemplate,
+  templates: levelTemplates,
   tests: [
     { id: "D1", label: "基本（動きの説明の迷路）", visibility: "display", functionName: "generate_maze", args: [wallExtensionMainSize, wallExtensionMainChoices], expected: expectedGrid(wallExtensionMainSize, wallExtensionMainChoices) },
     { id: "D2", label: "転移（応用問題の迷路）", visibility: "display", functionName: "generate_maze", args: [wallExtensionSmallSize, wallExtensionSmallChoices], expected: expectedGrid(wallExtensionSmallSize, wallExtensionSmallChoices) },
