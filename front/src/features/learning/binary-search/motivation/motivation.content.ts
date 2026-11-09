@@ -53,7 +53,11 @@ const sequence = defineLearningContent<BinarySearchMotivationCanvasState>({
       canvas: guessScene(null, null),
     },
     {
-      id: "ask-middle", caption: "真ん中の数を聞くと、答えに合わせて候補の半分が一度に消えます。",
+      id: "ask-middle", caption: "まず、答えが真ん中の数である50かどうかを聞いてみます。",
+      canvas: guessScene(50, null),
+    },
+    {
+      id: "ask-middle-result", caption: "答えは『50より大きい』だったので、50より小さい候補は一度に消えます。",
       canvas: guessScene(50, [51, 100]),
     },
     {
