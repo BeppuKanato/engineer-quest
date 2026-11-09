@@ -198,5 +198,6 @@ assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\
 // 正解後の固定契約: 正解した問題は選択肢・ノード・Parsons のいずれも選び直せない。
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "choices lock after a correct answer");
 assert.match(previewSource, /question.kind === "node" && !attempt\?\.correct/, "graph locks after a correct answer");
-assert.match(previewSource, /disabled=\{attempt\?\.correct === true\} \/>/, "parsons locks after a correct answer");
+assert.match(previewSource, /<ParsonsBoard[^>]*disabled=\{attempt\?\.correct === true\}/, "parsons locks after a correct answer");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
 console.log("BFS consolidation: primary-action buttons and graph-height cap contract passed.");

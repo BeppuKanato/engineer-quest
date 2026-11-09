@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import type { OrderAnswer, ParsonsQuestion } from "../../assessment/assessment";
 import { playerTokens } from "../../player/player.tokens";
+import { isParsonsOrderCorrect, parsonsKeepLineIds, type ParsonsInterchangeableGroups } from "./parsonsOrderFeedback";
 
 /** 並び替え対象のコード契約。行の意味IDと本文だけを使うため、単元を問わず使える。 */
 export type ParsonsCode = { readonly lines: readonly { readonly id: string; readonly text: string }[] };
@@ -27,27 +28,43 @@ export const parsonsDragCursor = `url("data:image/svg+xml,${dragCursorSvg}") 16 
 
 type SortableLineProps = {
   id: string; text: string; index: number; count: number; duration: number; disabled?: boolean;
+  /** undefined = 順序フィードバックを表示しない。true = 動かさなくてよい行。false = 印なし（幅だけ確保）。 */
+  keep?: boolean;
   onMove: (offset: -1 | 1) => void;
 };
-function SortableLine({ id, text, index, count, duration, disabled = false, onMove }: SortableLineProps) {
+function SortableLine({ id, text, index, count, duration, disabled = false, keep, onMove }: SortableLineProps) {
   const controls = useDragControls();
   return <Reorder.Item as="div" value={id} dragListener={false} dragControls={controls}
-    data-parsons-line-id={id} style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor }} transition={{ duration }}
+    data-parsons-line-id={id} data-parsons-keep={keep || undefined}
+    style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor, ...(keep ? { boxShadow: `inset 0 0 0 2px ${playerTokens.focus}, inset 8px 0 0 0 ${playerTokens.focus}` } : {}) }} transition={{ duration }}
     whileDrag={{ zIndex: 1 }}>
     <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え" disabled={disabled}
       onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: parsonsDragCursor, touchAction: "none" }}>↕</Button>
     <Box component="code" sx={{ flex: 1, whiteSpace: "pre", textAlign: "left", px: 1 }}>{text}</Box>
     <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={disabled || index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
     <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={disabled || index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
+    {keep !== undefined && <Box aria-hidden sx={{ width: 28, flexShrink: 0, textAlign: "center", fontSize: 16, fontWeight: 700, color: playerTokens.focus }}>{keep ? "✓" : ""}</Box>}
+    {keep && <Box component="span" sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>この行は動かさなくて大丈夫です</Box>}
   </Reorder.Item>;
 }
+
+/**
+ * 回答後に「動かさなくてよい行」を示すための入力（Issue #327）。
+ * active は「その問題に1回以上回答した」ことを呼び出し側が渡す。未指定なら従来表示のまま。
+ * 判定は絶対位置ではなく相対順序（parsonsOrderFeedback）。間違っている行には印を付けない。
+ */
+export type ParsonsOrderFeedback = {
+  readonly solutionLineIds: readonly string[];
+  readonly interchangeableLineGroups?: ParsonsInterchangeableGroups;
+  readonly active: boolean;
+};
 
 /**
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
  * scrollable のときは残り高さの中で盤面だけが縦スクロールし、ボタン行は下に固定される（Issue #318）。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  */
-export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean }) {
+export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback }) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
@@ -60,6 +77,12 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
     return next;
   });
   const isInitialOrder = ordered.every((id, index) => id === question.lineIds[index]);
+  // 順序フィードバックは「回答済み」かつ「現在の並びがまだ正解でない」ときだけ出す。
+  // 並び替えるたびに再計算するので、正解の並びに到達した時点で印と凡例は消える。
+  const keepIds = orderFeedback?.active && !isParsonsOrderCorrect(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
+    ? parsonsKeepLineIds(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
+    : null;
+  const showOrderFeedback = keepIds !== null && keepIds.size > 0;
   return <Box sx={{ minWidth: 0, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
     <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
       {/* scrollable の表示窓には下限を設ける: 行ピッチ46px × 6行 = 276px。
@@ -69,10 +92,12 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
         <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
           style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
+            keep={showOrderFeedback ? keepIds.has(id) : undefined}
             onMove={offset => move(id, offset)} />)}
         </Reorder.Group>
       </Box>
     </Box>
+    {showOrderFeedback && <Box component="p" data-parsons-order-legend sx={{ m: 0, mt: 1, flexShrink: 0, textAlign: "center", fontSize: 14, color: playerTokens.text }}>✓ が付いた行は、動かさなくて大丈夫です</Box>}
     <Box sx={{ mt: 2, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
       <Button onClick={() => setOrdered([...question.lineIds])} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
       {onAnswer && <Button variant="contained" disabled={disabled} onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
