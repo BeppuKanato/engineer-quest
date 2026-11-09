@@ -60,6 +60,7 @@
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
 | [unit-final-result-150.md](unit-final-result-150.md) | 記録 | Issue #150の単元最終リザルト視覚強化（一段強い紙吹雪、全灯ミニマップ、要約タイル、実績のコンパクト要約、獲得カードのタイル表示） |
 | [achievement-presentation-333.md](achievement-presentation-333.md) | 記録 | Issue #333の実績提示の再設計（解除されたフェーズの結果画面に実績バンド、最終リザルトに「新しい実績」ゾーン、切れ目ダイアログはカード専用化） |
+| [mainstream-layout-results-298.md](mainstream-layout-results-298.md) | 記録 | Issue #298の主流レイアウト移行 第1弾（結果・ブリッジ・最終結果のスクロールを単元コンテナのラッパーに一元化） |
 | [phase-bridge-141.md](phase-bridge-141.md) | 記録 | Issue #141のフェーズ間ブリッジ追加（全遷移に目標提示のステップを統一、リザルト予告の廃止、教材指針の遷移モデル改訂） |
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
