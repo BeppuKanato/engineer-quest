@@ -91,6 +91,12 @@ assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻�
 const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
+// フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
+const phaseResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("export function UnitFinalResult"));
+assert.doesNotMatch(phaseResultOnly, /overflowY: "auto"/, "phase result does not own an inner scroll area (#298)");
+assert.doesNotMatch(read(`${root}/bfs/unit/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
+// 結果・ブリッジ・最終結果では内側カラムが内容の高さで伸び、スクロールはラッパー側で起きる（#298）。
+assert.match(container, /height: screen\.kind === "phase" \? "100%" : "auto"/, "result/bridge/final columns grow with content (#298)");
 assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
 assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
