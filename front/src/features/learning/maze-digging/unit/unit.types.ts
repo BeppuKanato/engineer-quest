@@ -1,3 +1,5 @@
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
+
 /**
  * 単元フロー（Issue #265）が各フェーズの単品プレビューから受け取る到達状況。
  * フェーズごとに該当する項目だけが入る（未実施の項目は undefined）。
@@ -13,4 +15,6 @@ export type MazeDiggingUnitPhaseSummary = {
   testRuns?: number;
   /** ヒントレベル別の使用回数（フェーズ7） */
   hintUsage?: readonly number[];
+  /** 完了時点の入力量レベル（フェーズ7、Issue #328） */
+  inputLevel?: ImplementationInputLevel;
 };
