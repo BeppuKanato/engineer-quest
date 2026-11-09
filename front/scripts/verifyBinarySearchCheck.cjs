@@ -74,7 +74,7 @@ assert.deepEqual(plain(scene1.state.values), [3, 7, 12, 19, 25, 31, 42]);
 assert.deepEqual(plain([scene1.state.lo, scene1.state.hi, scene1.state.mid]), [probes[1].lo, probes[1].hi, null],
   "Q1 scene is the settled range after dropping the left side");
 assert.deepEqual(plain(scene1.state.cells),
-  ["discarded", "discarded", "discarded", "discarded", "in-range", "in-range", "in-range"],
+  ["discarded", "discarded", "discarded", "discarded", "remaining", "remaining", "remaining"],
   "The checked 19 (index 3) is already discarded in the Q1 scene");
 assert.deepEqual(plain([scene2.state.lo, scene2.state.hi, scene2.state.mid]), [probes[1].lo, probes[1].hi, probes[1].mid]);
 assert.equal(scene2.state.cells[probes[1].mid], "center", "Q2 scene looks at the new center 31");

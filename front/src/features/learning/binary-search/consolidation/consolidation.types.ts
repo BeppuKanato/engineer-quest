@@ -17,6 +17,8 @@ export type ConsolidationQuestionDetails = {
   readonly instruction: string;
   readonly correctFeedback: string;
   readonly incorrectFeedback: string;
+  /** 設問で使う変数記号の定義（例: Parsons の lo / hi）。記号が初出の設問にだけ置き、操作指示の下に小さく表示する。 */
+  readonly definitions?: string;
 };
 
 export type BinarySearchArrayTapQuestion = NodeTapQuestion & ConsolidationQuestionDetails & {

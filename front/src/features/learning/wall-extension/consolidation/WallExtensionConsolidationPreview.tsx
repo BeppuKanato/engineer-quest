@@ -100,7 +100,7 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
         {question.kind === "node" && <Typography component="p" sx={{ textAlign: "center", fontSize: 17, fontWeight: 700, flexShrink: 0, mb: 1 }}>
           方向の指示：{directionLabels[question.direction]}
         </Typography>}
-        {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
+        {question.kind !== "parsons" && <Box sx={{ width: "100%", flex: "1 1 auto", minHeight: 0, maxHeight: "min(54dvh, 600px)", display: "flex" }}>
           {question.kind === "node"
             ? <WallExtensionCheckCanvas canvas={question.scene} questionId={question.id} cellIds={question.nodeIds}
                 onAnswer={submit} disabled={attempt?.correct === true} />

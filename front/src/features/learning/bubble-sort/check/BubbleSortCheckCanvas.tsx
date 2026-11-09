@@ -46,7 +46,7 @@ export function BubbleSortCheckCanvas({ canvas, questionId, cellIds, onAnswer, d
   const layout = arrayBarsLayout(values);
   const slotWidth = (arrayBarsGeometry.width - arrayBarsGeometry.marginX * 2) / values.length;
   const tapWidth = Math.max(slotWidth * scale, 44);
-  return <Box ref={host} sx={{ flex: 1, minHeight: 320, minWidth: 0 }}>
+  return <Box ref={host} sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
     <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ width: arrayBarsGeometry.width * scale, height: arrayBarsGeometry.height * scale, position: "relative", flexShrink: 0 }}>
         <ArrayDrawing canvas={canvas} label="バブルソートの並び替えの途中経過" />

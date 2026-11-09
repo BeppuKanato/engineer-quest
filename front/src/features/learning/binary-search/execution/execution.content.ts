@@ -46,6 +46,11 @@ function rangeCells(lo: number, hi: number): BinarySearchCellStatus[] {
   return values.map((_, index) => (index < lo || index > hi ? "discarded" : "in-range"));
 }
 
+/** 捨てた後に確定した範囲の盤面。残った範囲を remaining として示し、キャプションの「ここ」が図のどこか分かるようにする。 */
+function settledRangeCells(lo: number, hi: number): BinarySearchCellStatus[] {
+  return values.map((_, index) => (index < lo || index > hi ? "discarded" : "remaining"));
+}
+
 /**
  * 比較の盤面。droppedSide が無ければ「真ん中を見た」ところ、
  * あれば捨てた側（中央を除く）が範囲外へ切り替わったところ、
@@ -63,7 +68,7 @@ function probeCells(probe: BinarySearchProbe, droppedSide: "left" | "right" | nu
 
 const steps: LearningStep<BinarySearchExecutionCanvasState>[] = [
   {
-    id: "introduce", caption: `小さい順に並んだ数字から、${target} を探します。`,
+    id: "introduce", caption: `数字が小さい順に並んでいることが前提の探し方で、${target} を探します。`,
     canvas: snapshot(
       { lo: null, hi: null, mid: null, cells: values.map(() => "in-range" as const) },
       [{ kind: "cell", id: foundIndex }],
@@ -110,7 +115,7 @@ probes.forEach((probe, index) => {
   steps.push({
     id: settledSize === 1 ? "range-single" : `range-after-drop-${side}`,
     caption: settledSize === 1 ? "残った範囲は 1 個だけです。" : "残った範囲はここだけです。",
-    canvas: snapshot({ lo: next.lo, hi: next.hi, mid: null, cells: rangeCells(next.lo, next.hi) }),
+    canvas: snapshot({ lo: next.lo, hi: next.hi, mid: null, cells: settledRangeCells(next.lo, next.hi) }),
   });
 });
 const lastProbe = probes[probes.length - 1];

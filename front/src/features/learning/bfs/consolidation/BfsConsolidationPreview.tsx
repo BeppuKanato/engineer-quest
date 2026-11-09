@@ -89,8 +89,8 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
       }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
-        {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
-          <ConsolidationGraph {...question.scene} onSelect={question.kind === "node" && !attempt?.correct ? id => submit({ kind: "node", nodeId: id }) : undefined} />
+        {question.kind !== "parsons" && <Box sx={{ width: "100%", flex: "1 1 auto", minHeight: 0, maxHeight: "min(54dvh, 600px)", display: "flex" }}>
+          <ConsolidationGraph {...question.scene} minHeight={0} onSelect={question.kind === "node" && !attempt?.correct ? id => submit({ kind: "node", nodeId: id }) : undefined} />
         </Box>}
         <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
         {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>

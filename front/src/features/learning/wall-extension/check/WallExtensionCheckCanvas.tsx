@@ -40,7 +40,7 @@ export function WallExtensionCheckCanvas({ canvas, questionId, cellIds, onAnswer
   const scale = Math.max(0.1, Math.min(size.width / mazeGridGeometry.width, size.height / mazeGridGeometry.height));
   const layout = mazeGridLayout(canvas.data.size);
   const tapSize = Math.max(layout.cell * scale, 44);
-  return <Box ref={host} sx={{ flex: 1, minHeight: 320, minWidth: 0 }}>
+  return <Box ref={host} sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
     <Box sx={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ width: mazeGridGeometry.width * scale, height: mazeGridGeometry.height * scale, position: "relative", flexShrink: 0 }}>
         <MazeGridDrawing canvas={canvas} label={`${canvas.data.size}×${canvas.data.size}の迷路の盤面`} />

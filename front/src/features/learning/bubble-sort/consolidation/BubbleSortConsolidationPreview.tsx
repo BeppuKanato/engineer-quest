@@ -94,7 +94,7 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
       }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
-        {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
+        {question.kind !== "parsons" && <Box sx={{ width: "100%", flex: "1 1 auto", minHeight: 0, maxHeight: "min(54dvh, 600px)", display: "flex" }}>
           {question.kind === "node"
             ? <BubbleSortCheckCanvas canvas={question.scene} questionId={question.id} cellIds={question.nodeIds}
                 onAnswer={submit} disabled={attempt?.correct === true} />

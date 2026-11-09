@@ -9,12 +9,14 @@ import type { BinarySearchCellStatus, BinarySearchExecutionCanvasState } from ".
 
 /**
  * 単元側のセル状態からプレイヤートークンへの写像（基準データ §4）。
- * 範囲外は完了グレー相当、範囲内は未処理の白、中央と発見は処理中の青
- * （達成を示す青。BFS の到達図と同じ使い方）。発見は強調リングで中央と区別する。
+ * 範囲外は完了グレー相当、範囲内は未処理の白、確定した残り範囲は候補の
+ * ベージュ、中央と発見は処理中の青（達成を示す青。BFS の到達図と同じ使い方）。
+ * 発見は強調リングで中央と区別する。
  */
 const cellStatusToPlayerStatus: Record<BinarySearchCellStatus, PlayerStatus> = {
   discarded: "completed",
   "in-range": "idle",
+  remaining: "queued",
   center: "processing",
   found: "processing",
 };

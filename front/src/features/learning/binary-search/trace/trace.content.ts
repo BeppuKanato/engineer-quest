@@ -10,7 +10,7 @@ export const binarySearchTraceText = {
   partial: "変換できない状態があるため、途中まで表示します。",
   ended: "実行が終わり、この範囲になりました。",
   final: "実行の最終状態を表示しています。",
-  initial: "小さい順に並んだ数字から、{target} を探します。",
+  initial: "数字が小さい順に並んでいることが前提の探し方で、{target} を探します。",
   rangeAll: "まず、探す範囲は全体です。",
   rangeRest: "残った範囲はここだけです。",
   rangeSingle: "残った範囲は 1 個だけです。",

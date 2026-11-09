@@ -94,13 +94,14 @@ export function BinarySearchConsolidationPreview({ embedded = false, onLearningE
       }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
-        {question.kind !== "parsons" && <Box sx={{ width: "100%", height: "min(54dvh, 600px)", minHeight: 320, display: "flex", flexShrink: 1 }}>
+        {question.kind !== "parsons" && <Box sx={{ width: "100%", flex: "1 1 auto", minHeight: 0, maxHeight: "min(54dvh, 600px)", display: "flex" }}>
           {question.kind === "node"
             ? <BinarySearchConsolidationCanvas canvas={question.scene} label={question.prompt} questionId={question.id} cellIds={question.nodeIds}
                 onAnswer={submit} disabled={attempt?.correct === true} />
             : <BinarySearchConsolidationCanvas canvas={question.scene} label={question.prompt} onAnswer={() => {}} />}
         </Box>}
         <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
+        {question.definitions && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, fontWeight: 700, flexShrink: 0, mb: 1 }}>{question.definitions}</Typography>}
         {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
           {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
             disabled={attempt?.correct === true}

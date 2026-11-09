@@ -8,18 +8,20 @@ import type { LearningContent } from "../../player/content.types";
  * セル状態は単元側の語彙で持つ。
  * - discarded: 範囲外（捨てた部分）。もう答えの候補ではない。
  * - in-range: 探索範囲の中にあり、まだ候補として残っている。
+ * - remaining: 捨てる操作の後に確定した「残った範囲」。範囲が狭まった確定盤面
+ *   でのみ使い、キャプションの「ここ」が指す範囲を図でも示す。
  * - center: いま見ている真ん中（中央）。
  * - found: 探す値が見つかった位置（確定）。
  * 描画は共通配列基盤へ委譲し、色はプレイヤートークンへ写す
- * （discarded＝完了グレー相当、in-range＝未処理の白、center と found＝処理中の青。
- * found は中央と区別するため強調リングを重ねる）。
+ * （discarded＝完了グレー相当、in-range＝未処理の白、remaining＝候補のベージュ、
+ * center と found＝処理中の青。found は中央と区別するため強調リングを重ねる）。
  *
  * lo / hi / mid はそのステップ時点の探索変数（範囲は両端含む）。
  * 範囲を示す前（導入ステップ）だけ lo / hi / mid をすべて null にする。
  * 捨てるステップでは、捨てた側のセル（中央を除く）が先に discarded になり、
  * lo / hi の更新は次の「残った範囲」のステップで表す（1ステップ1変化）。
  */
-export type BinarySearchCellStatus = "discarded" | "in-range" | "center" | "found";
+export type BinarySearchCellStatus = "discarded" | "in-range" | "remaining" | "center" | "found";
 
 export type BinarySearchExecutionCanvasState = {
   readonly data: { readonly kind: "binary-search-execution" };
@@ -44,7 +46,7 @@ export type BinarySearchExecutionContent = LearningContent<BinarySearchExecution
   readonly stageName: "動きの説明";
 };
 
-const cellStatuses: readonly string[] = ["discarded", "in-range", "center", "found"];
+const cellStatuses: readonly string[] = ["discarded", "in-range", "remaining", "center", "found"];
 
 /** 型付き教材の参照整合性をロード時に検証し、不正な盤面を黙って再生しない。 */
 export function validateBinarySearchExecutionCanvas(canvas: BinarySearchExecutionCanvasState): void {
@@ -129,6 +131,17 @@ export function validateBinarySearchExecutionCanvas(canvas: BinarySearchExecutio
       if (onRight && droppedInside.some((index, order) => index !== hi - (droppedInside.length - 1 - order))) {
         throw new Error("Dropped cells must continue from the range edge");
       }
+    }
+    // 「残った範囲」は、捨てる操作が済んだ確定盤面だけで使う。中央は無く、
+    // 範囲の中はすべて remaining で、実際に捨てた部分が存在しなければならない
+    // （狭まっていない全体や、比較の途中の盤面には使わない）。
+    const remaining = cells.flatMap((status, index) => (status === "remaining" ? [index] : []));
+    if (remaining.length > 0) {
+      if (mid !== null) throw new Error("Remaining cells require a settled board without a mid position");
+      if (cells.some((status, index) => index >= lo && index <= hi && status !== "remaining")) {
+        throw new Error("A settled board marks its whole range as remaining");
+      }
+      if (!cells.includes("discarded")) throw new Error("Remaining cells require a dropped part");
     }
   }
 

@@ -25,6 +25,7 @@ import type { BinarySearchConsolidationContent} from "./consolidation.types";
 const cellStatusToPlayerStatus: Record<BinarySearchCellStatus, PlayerStatus> = {
 discarded: "completed",
 "in-range": "idle",
+remaining: "queued",
 center: "processing",
 found: "processing",
 };
@@ -133,6 +134,7 @@ correctAnswer: { kind: "order", lineIds: parsonsLineIds}, requires: null,
 stepId: firstFrame.id, reviewStepIds: [firstFrame.id,...remainingFrames.map((frame) => frame.id)],
 tags: ["コード全体の流れ"],
 instruction: "行をドラッグ、または↑↓ボタンで並び替える",
+definitions: "lo = 探索範囲の左端の位置、hi = 探索範囲の右端の位置、mid = 真ん中の位置",
 correctFeedback: "正解。範囲が残っている間、真ん中を計算して比べ、一致すればその位置を返し、真ん中が小さければ左側を捨て、範囲が空になれば -1 を返す流れを組み立てられました。",
 incorrectFeedback: "不正解。繰り返しの条件、真ん中の計算、比べる、一致したら返す、小さい側を捨てる、最後に -1 を返す、という流れを確かめてみましょう。",
 },

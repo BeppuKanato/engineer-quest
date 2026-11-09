@@ -60,7 +60,7 @@ assert.deepEqual(plain(steps.map(step => step.id)), [
   "probe-3-mid", "found", "summary",
 ]);
 assert.deepEqual(plain(steps.map(step => step.caption)), [
-  "小さい順に並んだ数字から、25 を探します。",
+  "数字が小さい順に並んでいることが前提の探し方で、25 を探します。",
   "まず、探す範囲は全体です。",
   "真ん中の 19 を見ます。",
   "19 は 25 より小さいので、左側には 25 はありません。",
@@ -83,16 +83,16 @@ for (const step of steps) {
 }
 
 // 盤面状態列の期待値（基準データ §3 フェーズ2の「図の状態」列）。
-const D = "discarded", I = "in-range", C = "center", F = "found";
+const D = "discarded", I = "in-range", R = "remaining", C = "center", F = "found";
 const expectedCells = {
   "introduce": [I, I, I, I, I, I, I],
   "range-full": [I, I, I, I, I, I, I],
   "probe-1-mid": [I, I, I, C, I, I, I],
   "probe-1-drop-left": [D, D, D, C, I, I, I],
-  "range-after-drop-left": [D, D, D, D, I, I, I],
+  "range-after-drop-left": [D, D, D, D, R, R, R],
   "probe-2-mid": [D, D, D, D, I, C, I],
   "probe-2-drop-right": [D, D, D, D, I, C, D],
-  "range-single": [D, D, D, D, I, D, D],
+  "range-single": [D, D, D, D, R, D, D],
   "probe-3-mid": [D, D, D, D, C, D, D],
   "found": [D, D, D, D, F, D, D],
   "summary": [D, D, D, D, F, D, D],
@@ -143,7 +143,7 @@ steps.forEach((step, index) => {
 });
 
 // 実描画: 棒の本数・セル状態の写像（範囲外＝完了、範囲内＝未処理、中央と発見＝処理中）・発見の枠が SVG に現れる。
-const playerStatusOf = { discarded: "completed", "in-range": "idle", center: "processing", found: "processing" };
+const playerStatusOf = { discarded: "completed", "in-range": "idle", remaining: "queued", center: "processing", found: "processing" };
 for (const step of steps) {
   const html = renderToStaticMarkup(createElement(BinarySearchExecutionCanvas, { canvas: step.canvas }));
   assert(html.includes('viewBox="0 0 600 450"'), `Step ${step.id}: viewport`);
@@ -169,6 +169,9 @@ assert.throws(() => validate(droppedWrongSide), /one side of mid/);
 const settledWithDrop = plain(get("range-after-drop-left").canvas);
 settledWithDrop.state.cells = [D, D, D, D, D, I, I];
 assert.throws(() => validate(settledWithDrop), /require a mid/);
+const remainingWithoutDrop = plain(get("range-full").canvas);
+remainingWithoutDrop.state.cells = [R, R, R, R, R, R, R];
+assert.throws(() => validate(remainingWithoutDrop), /dropped part/);
 const wrongFound = plain(get("range-full").canvas);
 wrongFound.state.cells = [F, I, I, I, I, I, I];
 assert.throws(() => validate(wrongFound), /Found cell must hold the target/);
