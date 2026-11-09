@@ -72,7 +72,7 @@ assert.deepEqual(plain(searchModule.binarySearchHalvingCounts(100)), expectedCou
 assert.equal(content.id, "binary-search-motivation"); assert.equal(content.phase, 1); assert.equal(content.stageName, "導入");
 assert(content.intervalMs >= 2500);
 assert.deepEqual(plain(steps.map(step => step.id)), [
-  "find-twenty-five", "guessing-game", "ask-middle", "seven-guesses", "unit-overview", "main-example-preview",
+  "find-twenty-five", "guessing-game", "ask-middle", "ask-middle-result", "seven-guesses", "unit-overview", "main-example-preview",
 ]);
 assert(steps.every(step => (step.caption.match(/[。？]/gu) ?? []).length === 1), "One sentence per scene");
 assert(!steps.some(step => /二分探索|インデックス|フェーズ|対数|バイナリサーチ/u.test(step.caption)), "No algorithm name, index term or developer terms in phase 1");
@@ -93,7 +93,8 @@ assert(shuffled.some((value, index) => index > 0 && value < shuffled[index - 1])
 assert.deepEqual(plain(get("find-twenty-five").state.visual), { kind: "array", values: shuffled, target: 25, order: "unsorted" });
 assert.deepEqual(plain(get("find-twenty-five").highlights.map(highlight => highlight.id)), [6]);
 assert.deepEqual(plain(get("guessing-game").state.visual), { kind: "guess", low: 1, high: 100, asked: null, remaining: null });
-assert.deepEqual(plain(get("ask-middle").state.visual), { kind: "guess", low: 1, high: 100, asked: 50, remaining: [51, 100] });
+assert.deepEqual(plain(get("ask-middle").state.visual), { kind: "guess", low: 1, high: 100, asked: 50, remaining: null });
+assert.deepEqual(plain(get("ask-middle-result").state.visual), { kind: "guess", low: 1, high: 100, asked: 50, remaining: [51, 100] });
 assert.deepEqual(plain(get("seven-guesses").state.visual), { kind: "halving", counts: expectedCounts });
 assert.deepEqual(plain(get("unit-overview").state.visual), { kind: "array", values: main, target: null, order: "sorted" });
 assert.deepEqual(plain(get("main-example-preview").state.visual), { kind: "array", values: main, target: 25, order: "sorted" });
@@ -117,8 +118,16 @@ assert(!(gameHtml.match(/data-guess-asked="true"/g) ?? []).length);
 const middleHtml = renderToStaticMarkup(createElement(BinarySearchMotivationCanvas, { canvas: get("ask-middle") }));
 assert.equal((middleHtml.match(/data-guess-cell=/g) ?? []).length, 100);
 assert.equal((middleHtml.match(/data-guess-asked="true"/g) ?? []).length, 1);
-assert.equal((middleHtml.match(/data-guess-dropped="true"/g) ?? []).length, 49);
+assert.equal((middleHtml.match(/data-guess-dropped="true"/g) ?? []).length, 0);
+assert(!middleHtml.includes("data-guess-reply"), "No reply before the answer comes back");
 assert(middleHtml.includes("data-guess-asked-label"));
+// 答えの場面: 捨てた半分（49個）と、答え「50より大きい」の吹き出しが現れる。帯の形状は聞く場面と同一。
+const resultHtml = renderToStaticMarkup(createElement(BinarySearchMotivationCanvas, { canvas: get("ask-middle-result") }));
+assert.equal((resultHtml.match(/data-guess-cell=/g) ?? []).length, 100);
+assert.equal((resultHtml.match(/data-guess-asked="true"/g) ?? []).length, 1);
+assert.equal((resultHtml.match(/data-guess-dropped="true"/g) ?? []).length, 49);
+assert(resultHtml.includes('data-guess-reply="50より大きい"'));
+assert(resultHtml.includes("data-guess-asked-label"));
 const halvingHtml = renderToStaticMarkup(createElement(BinarySearchMotivationCanvas, { canvas: get("seven-guesses") }));
 assert.equal((halvingHtml.match(/data-halving-bar=/g) ?? []).length, 8);
 const previewHtml = renderToStaticMarkup(createElement(BinarySearchMotivationPreview));
@@ -154,4 +163,4 @@ assert.throws(() => validate(arrayWith({ kind: "guess", low: 1, high: 100, asked
 assert.throws(() => validate(arrayWith({ kind: "guess", low: 1, high: 100, asked: 120, remaining: null })), /inside the guess range/);
 assert.throws(() => validate(arrayWith({ kind: "halving", counts: [100, 49, 25, 13, 7, 4, 2, 1] })), /halve/);
 assert.throws(() => validate(arrayWith({ kind: "halving", counts: [100, 50, 25, 13, 7, 4, 2] })), /end at 1/);
-console.log("Binary-search motivation: 6 scenes, scene 1 presents the main values shuffled ([19,3,31,7,42,12,25], target last, sequential search views all 7), verified trace of [3,7,12,19,25,31,42] finding 25 in 3 probes, guessing-game halving 100→1 in 7, unit-side scene validation, rendering and standalone preview page passed.");
+console.log("Binary-search motivation: 7 scenes, scene 1 presents the main values shuffled ([19,3,31,7,42,12,25], target last, sequential search views all 7), verified trace of [3,7,12,19,25,31,42] finding 25 in 3 probes, guessing-game halving 100→1 in 7, unit-side scene validation, rendering and standalone preview page passed.");
