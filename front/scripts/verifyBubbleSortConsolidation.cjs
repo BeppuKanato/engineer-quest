@@ -236,7 +236,10 @@ rejects(broken => broken.questions[2].tags = []);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("bubble-sort/consolidation/BubbleSortConsolidationPreview.tsx"), "utf8");
-assert.match(previewSource, /flex: "1 1 auto", minHeight: 0, maxHeight: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
+assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
+assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
+assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
 assert.match(previewSource, /content=\{bubbleSortCodeMappingContent\}/, "review opens the phase-4 content");

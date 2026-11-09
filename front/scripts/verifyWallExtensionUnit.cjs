@@ -117,6 +117,8 @@ assert.doesNotMatch(phaseResultOnly, /overflowY: "auto"/, "phase result does not
 assert.doesNotMatch(read(`${root}/bfs/unit/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
 // 結果・ブリッジ・最終結果では内側カラムが内容の高さで伸び、スクロールはラッパー側で起きる（#298）。
 assert.match(container, /height: screen\.kind === "phase" \? "100%" : "auto"/, "result/bridge/final columns grow with content (#298)");
+// 「直前の回答」は内側カラムの中ではなく、ヘッダー直下の固定ゾーン（ラッパーより前）に置く（#298）。
+assert.ok(container.indexOf("AnswerFeedbackNotice") > -1 && container.indexOf("AnswerFeedbackNotice") < container.indexOf("画面より高い内容はこの中でスクロールさせ"), "answer notice sits in the fixed zone under the header (#298)");
 assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
 assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");

@@ -272,16 +272,20 @@ rejects(broken => broken.questions[3].interchangeableLineGroups = [["dig-between
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx"), "utf8");
-assert.match(previewSource, /flex: "1 1 auto", minHeight: 0, maxHeight: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
+assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
+assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
+assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
 assert.match(previewSource, /content=\{mazeDiggingCodeMappingContent\}/, "review opens the phase-4 content");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "maze-digging-consolidation"'), "Standalone preview is registered");
-// レイアウト契約（#327）: 中央寄せは marginTop auto の安全な方式で、盤面には高さ下限と濃色ドラッグカーソルがある。
+// レイアウト契約（#298）: 3段組（中央スクロール＋下部固定ゾーン）。中央寄せは使わず、盤面の窓は固定高＋下限、ドラッグカーソルは濃色。
 assert(!previewSource.includes('flexDirection: "column", justifyContent: "center"'), "consolidation does not center with justifyContent (overflow would spill upward)");
-assert.match(previewSource, /marginTop: "auto", minHeight: "3em"/, "prompt carries the first half of the safe centering");
+assert.match(previewSource, /minHeight: "3em"/, "prompt keeps its reserved height so the figure position is stable");
 const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+assert.match(parsonsBoardSource, /height: 368/, "parsons scroll viewport has a fixed height (#298)");
 assert.match(parsonsBoardSource, /minHeight: 276/, "parsons scroll viewport keeps a usable minimum height");
 assert.match(parsonsBoardSource, /parsonsDragCursor/, "parsons drag cursor is the shared dark SVG cursor");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
