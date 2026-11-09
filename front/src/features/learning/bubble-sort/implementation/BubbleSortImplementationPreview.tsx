@@ -11,6 +11,7 @@ import type { LearningInstrumentation } from "../../instrumentation/useLearningV
 import { DrawnCheck } from "../../app/DrawnCheck";
 import { ResultConfetti } from "../../app/ResultConfetti";
 import { useSoundEffect } from "../../../../app/component/soundFeedback";
+import { useErrorLineDecoration } from "../../../../hooks/useErrorLineDecoration";
 import { playerTokens } from "../../player/player.tokens";
 import { BubbleSortTraceDialog } from "../trace/BubbleSortTraceDialog";
 import { traceBubbleSortCode } from "../trace/acquireTrace";
@@ -49,6 +50,8 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
   const editor = useRef<Parameters<OnMount>[0] | null>(null);
+  const [errorLine, setErrorLine] = useState<number | undefined>(undefined);
+  useErrorLineDecoration(editor, editorReady, errorLine);
   const lock = useRef(false);
   const generation = useRef(0);
   const completedRef = useRef(false);
@@ -90,10 +93,10 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
     if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
-    setFreeStatus("preparing"); setFreeResult(null); setPanel("console");
+    setFreeStatus("preparing"); setFreeResult(null); setErrorLine(undefined); setPanel("console");
     try {
       const result = await runBubbleSortFreeCode(code, () => { if (current === generation.current) setFreeStatus("running"); }, () => current === generation.current);
-      if (current === generation.current) setFreeResult(result);
+      if (current === generation.current) { setFreeResult(result); setErrorLine(result.returned ? undefined : result.errorLine); }
     } catch {
       if (current === generation.current) setFreeResult({ stdout: "", outputTruncated: false, returned: false, error: "unavailable" });
     } finally {
@@ -107,9 +110,9 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
     const current = generation.current;
     setPanel("tests");
     onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code } });
-    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
+    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null); setErrorLine(undefined);
     try {
-      const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
+      const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) { setOutcomes(next); setErrorLine(next.find(outcome => outcome.errorLine !== undefined)?.errorLine); } }, () => current === generation.current);
       if (current === generation.current) {
         setLastOutcomes(result);
         onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
@@ -194,7 +197,7 @@ export function BubbleSortImplementationPreview({ embedded = false, onComplete, 
               </Box>}
               <Editor height="100%" language="python" theme={LEARNING_EDITOR_THEME} beforeMount={setupLearningEditor} value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
+                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); setErrorLine(undefined); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>

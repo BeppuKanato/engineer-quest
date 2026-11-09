@@ -14,4 +14,6 @@ export const bubbleSortEditorText = {
     timeout: "実行が終わりませんでした（無限ループの可能性があります）。",
     unavailable: "Python実行環境を読み込めませんでした。再読込して試してください。",
   },
+  errorLineSuffix: "（{line}行目付近）",
+  syntaxNote: "プログラム全体に文法エラーがあると、print を含め1行も実行されません。",
 } as const;
