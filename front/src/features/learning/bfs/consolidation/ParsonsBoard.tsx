@@ -16,7 +16,14 @@ const rowStyle = {
   display: "flex", alignItems: "center", width: "max-content", minWidth: "100%", boxSizing: "border-box",
   background: playerTokens.surface, boxShadow: `inset 0 0 0 2px ${playerTokens.focus}`, borderRadius: 4,
 } as const;
-const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5 } as const;
+const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5, cursor: "default" } as const;
+
+// ドラッグ用カーソルは OS 標準の手袋（grab）だと白系で明るい行の上でほぼ見えなくなる（Issue #327）。
+// 濃色で描いた SVG カーソルをデータ URI で直接指定し、OS のカーソル配色に依存せず常に見えるようにする。
+// 図形は上下の移動を示す両向き矢印。フォールバックとして標準の grab を後置する。
+const dragCursorSvg = "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>"
+  + "<path d='M16 2 L22 9 L18.5 9 L18.5 23 L22 23 L16 30 L10 23 L13.5 23 L13.5 9 L10 9 Z' fill='%23111827' stroke='%23ffffff' stroke-width='1.6'/></svg>";
+export const parsonsDragCursor = `url("data:image/svg+xml,${dragCursorSvg}") 16 16, grab`;
 
 type SortableLineProps = {
   id: string; text: string; index: number; count: number; duration: number; disabled?: boolean;
@@ -25,10 +32,10 @@ type SortableLineProps = {
 function SortableLine({ id, text, index, count, duration, disabled = false, onMove }: SortableLineProps) {
   const controls = useDragControls();
   return <Reorder.Item as="div" value={id} dragListener={false} dragControls={controls}
-    data-parsons-line-id={id} style={{ ...rowStyle, position: "relative" }} transition={{ duration }}
+    data-parsons-line-id={id} style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor }} transition={{ duration }}
     whileDrag={{ zIndex: 1 }}>
     <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え" disabled={disabled}
-      onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: "grab", touchAction: "none" }}>↕</Button>
+      onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: parsonsDragCursor, touchAction: "none" }}>↕</Button>
     <Box component="code" sx={{ flex: 1, whiteSpace: "pre", textAlign: "left", px: 1 }}>{text}</Box>
     <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={disabled || index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
     <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={disabled || index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
@@ -55,7 +62,10 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
   const isInitialOrder = ordered.every((id, index) => id === question.lineIds[index]);
   return <Box sx={{ minWidth: 0, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
     <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
-      <Box sx={{ overflowX: "auto", ...(scrollable ? { flex: 1, minHeight: 0, overflowY: "auto" } : {}) }}>
+      {/* scrollable の表示窓には下限を設ける: 行ピッチ46px × 6行 = 276px。
+          誤答後に通知や再回答ボタンが増えても盤面が数行まで潰れて操作不能にならないため（Issue #327）。
+          収まらない分は画面側のスクロール（単元画面の外側ボックス）に逃がす前提。 */}
+      <Box sx={{ overflowX: "auto", ...(scrollable ? { flex: 1, minHeight: 276, overflowY: "auto" } : {}) }}>
         <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
           style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
