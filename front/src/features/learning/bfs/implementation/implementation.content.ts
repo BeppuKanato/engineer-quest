@@ -1,7 +1,8 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
 import { searchGraph } from "../../graphs/searchGraph";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import { transferGraph } from "../consolidation/consolidation.graphs";
-import { bfsCode } from "../code-mapping/bfsCode";
+import { bfsCode, type BfsCodeLineId } from "../code-mapping/bfsCode";
 import { bfsConsolidationContent } from "../consolidation/consolidation.content";
 
 export type ImplementationTest = PythonTestCase & { readonly visibility: "display" | "judgement" };
@@ -13,10 +14,69 @@ if (!parsonsQuestion || parsonsQuestion.kind !== "parsons") throw new Error("Pha
 
 const skeletonLineIds = ["while-queue", "for-neighbor", "if-undiscovered"] as const;
 
+/**
+ * 入力量レベル別の初期テンプレート（Issue #328）。
+ * 「骨格から書く」「穴埋めで書く」は、正解コード（bfsCode）の行から組み立てる。
+ * 残す行は正解コードの行そのものを使い、置き換える行は、その行のインデントを保った
+ * プレースホルダ行（raise NotImplementedError ＋「ここを書く」の目印）にする。
+ * プレースホルダが残っていると、その行にたどり着くテストは必ず失敗する。
+ */
+const codeLineText = (id: BfsCodeLineId): string => {
+  const line = bfsCode.lines.find(line => line.id === id);
+  if (!line) throw new Error("Missing canonical line");
+  return line.text;
+};
+const placeholderLine = (id: BfsCodeLineId, description: string): string => {
+  const indent = /^ */u.exec(codeLineText(id))?.[0] ?? "";
+  return `${indent}raise NotImplementedError  # ここを書く：${description}`;
+};
+const placeholderGuide = "    # 「ここを書く」の行が、まだ書けていない場所です。その行を消して、自分のコードを書いてください。";
+
+const fullTemplate = "from collections import deque\ndef bfs_distances(graph, start):\n    # ここに、出発点からの距離を返すコードを書く\n    pass";
+
+/** 骨格：制御構造（キューが空でない間・隣を調べる・未訪問のとき）と最後の return だけを残し、本体の行をすべてプレースホルダにする。 */
+const skeletonTemplate = [
+  codeLineText("import-deque"),
+  codeLineText("define-function"),
+  placeholderGuide,
+  placeholderLine("initialize-distances", "出発点の距離が0の辞書を用意する"),
+  placeholderLine("initialize-queue", "出発点を入れたキューを用意する"),
+  codeLineText("while-queue"),
+  placeholderLine("dequeue-node", "キューの先頭を取り出す"),
+  codeLineText("for-neighbor"),
+  codeLineText("if-undiscovered"),
+  placeholderLine("assign-distance", "隣の距離を、今の距離＋1で記録する"),
+  placeholderLine("enqueue-neighbor", "隣をキューの末尾に加える"),
+  codeLineText("return-distances"),
+].join("\n");
+
+/** 穴埋め：要点の行（距離の記録と、キューへの追加）だけをプレースホルダにする。 */
+const fillInTemplate = [
+  codeLineText("import-deque"),
+  codeLineText("define-function"),
+  placeholderGuide,
+  codeLineText("initialize-distances"),
+  codeLineText("initialize-queue"),
+  codeLineText("while-queue"),
+  codeLineText("dequeue-node"),
+  codeLineText("for-neighbor"),
+  codeLineText("if-undiscovered"),
+  placeholderLine("assign-distance", "隣の距離を、今の距離＋1で記録する"),
+  placeholderLine("enqueue-neighbor", "隣をキューの末尾に加える"),
+  codeLineText("return-distances"),
+].join("\n");
+
+const levelTemplates: Readonly<Record<ImplementationInputLevel, string>> = {
+  full: fullTemplate,
+  skeleton: skeletonTemplate,
+  "fill-in": fillInTemplate,
+};
+
 export const bfsImplementationContent = {
   version: 1, id: "bfs-implementation", phase: 7,
   caption: "出発点から各場所までの距離を返すコードを完成させ、実行して確かめましょう。",
-  template: "from collections import deque\ndef bfs_distances(graph, start):\n    # ここに、出発点からの距離を返すコードを書く\n    pass",
+  template: fullTemplate,
+  templates: levelTemplates,
   tests: [
     { id: "D1", label: "基本（動きの説明のグラフ）", visibility: "display", functionName: "bfs_distances", args: [basic, "A"], expected: distances },
     { id: "D2", label: "転移（応用問題のグラフ）", visibility: "display", functionName: "bfs_distances", args: [transfer, "G"], expected: { G: 0, H: 1, I: 1, J: 2, K: 2, L: 3 } },
