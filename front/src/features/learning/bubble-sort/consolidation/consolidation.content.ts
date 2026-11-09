@@ -101,9 +101,11 @@ lineIds: [
 "return-result", "copy-values", "if-larger", "for-compare",
 ],
 correctAnswer: { kind: "order", lineIds: bubbleSortCode.lines.map((line) => line.id)}, requires: null,
+// フェード型: 関数定義と return は固定し、コピーから交換までの流れだけを並べ替える。
+fixedLineIds: ["define-function", "return-result"],
 stepId: firstFrame.id, reviewStepIds: [firstFrame.id, ...remainingFrames.map((frame) => frame.id)],
 tags: ["コード全体の流れ"],
-instruction: "行をドラッグ、または↑↓ボタンで並び替える",
+instruction: "色の薄い行は固定されています。残りの行をドラッグ、または↑↓ボタンで並び替える",
 correctFeedback: "正解。コピーして、周ごとに隣同士を比べて入れ替え、返すまでの流れを組み立てられました。",
 incorrectFeedback: "不正解。リストをコピーする、周のループ、比べるループ、交換の条件、返す、という流れを確かめてみましょう。",
 },
