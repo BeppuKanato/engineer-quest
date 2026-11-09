@@ -1,4 +1,4 @@
-import { defineLearningContent, type LearningContent } from "../../player/content.types";
+import { codeMappedSteps, defineLearningContent, type LearningContent } from "../../player/content.types";
 import { mazeDiggingMainChoices, mazeDiggingMainSize } from "../mazeDiggingMaze";
 import { mazeDiggingExecutionContent } from "../execution/execution.content";
 import type { MazeDiggingExecutionCanvasState } from "../execution/execution.types";
@@ -94,10 +94,13 @@ export function defineMazeDiggingCodeMappingContent(
   content: MazeDiggingCodeMappingContent,
 ): MazeDiggingCodeMappingContent {
   defineLearningContent(content, validateMazeDiggingCodeMappingCanvas);
+  // チェックポイントは、フェーズ2のコード対応ステップ（説明専用を除く）を
+  // 順序どおりすべて含むことが契約。説明専用ステップはフェーズ4に出さない。
+  const expectedCheckpoints = codeMappedSteps(mazeDiggingExecutionContent);
   const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
   if (checkpoints.map(step => step.canvas.state.executionStepId).join() !==
-    mazeDiggingExecutionContent.steps.map(step => step.id).join()) {
-    throw new Error("Keep all 21 execution checkpoints in order");
+    expectedCheckpoints.map(step => step.id).join()) {
+    throw new Error(`Keep all ${expectedCheckpoints.length} execution checkpoints in order`);
   }
   if (mazeDiggingCode.lines.some(line => !content.steps.some(step => step.canvas.highlights[0].id === line.id))) {
     throw new Error("Unvisited code line");

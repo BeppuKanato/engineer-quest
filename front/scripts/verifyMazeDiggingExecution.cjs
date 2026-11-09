@@ -21,6 +21,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const feature = `${root}/maze-digging/execution`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { mazeDiggingExecutionContent: content } = load(`${feature}/execution.content.ts`);
+const { codeMappedSteps } = load(`${root}/player/content.types.ts`);
 const { validateMazeDiggingExecutionCanvas: validate } = load(`${feature}/execution.types.ts`);
 const maze = load(`${root}/maze-digging/mazeDiggingMaze.ts`);
 const { MazeDiggingExecutionCanvas } = load(`${feature}/MazeDiggingExecutionCanvas.tsx`);
@@ -148,12 +149,12 @@ resumable.forEach((expected, index) => {
 
 assert.equal(content.id, "maze-digging-execution"); assert.equal(content.phase, 2); assert.equal(content.stageName, "動きの説明");
 assert(content.intervalMs >= 2500);
-assert.equal(steps.length, 21, "Phase 2 keeps all 21 steps (setup 2 + digs 15 + backtracks 3 + complete)");
+assert.equal(steps.length, 23, "Phase 2 keeps all 23 steps (setup 2 + digs 15 + backtracks 3 + complete + 2 explanation-only)");
 assert.deepEqual(plain(steps.map(step => step.id)), [
   "all-walls", "dig-start",
   "dig-1", "dig-2", "dig-3", "dig-4", "dig-5", "dig-6", "backtrack-1",
   "dig-7", "dig-8", "dig-9", "dig-10", "dig-11", "dig-12", "dig-13", "backtrack-2",
-  "dig-14", "backtrack-3", "dig-15", "complete",
+  "dig-14", "backtrack-3", "dig-15", "complete", "no-loops", "loop-what-if",
 ]);
 assert.deepEqual(plain(steps.map(step => step.caption)), [
   "全部が壁の9×9の盤面を用意します。",
@@ -166,6 +167,8 @@ assert.deepEqual(plain(steps.map(step => step.caption)), [
   "行き止まりになったので、掘れる部屋がある (5, 7) まで戻ります。",
   `(${expectedDigs[14].from.split(",").join(", ")}) から${expectedDigs[14].direction}へ掘ります。`,
   "迷路が完成し、輪がなく、どの部屋からどの部屋へも必ずたどり着けます。",
+  "掘り進める先はまだ掘っていない部屋だけなので、通路に輪はできず、どの部屋へも道は1本だけです。",
+  "ためしに、すでに掘った部屋へ間の壁を掘ってみると、もとの道と合わせて輪ができてしまいます。",
 ]);
 assert(steps.every(step => (step.caption.match(/。/gu) ?? []).length === 1), "One sentence per step");
 for (const step of steps) {
@@ -176,7 +179,7 @@ for (const step of steps) {
 
 // 盤面の積み上がり: 全部壁（81）→開始マス（80）→掘削ごとにちょうど2マス減り、バックトラックでは変わらない。
 const wallCounts = steps.map(step => step.canvas.state.walls.length);
-assert.deepEqual(plain(wallCounts), [81, 80, 78, 76, 74, 72, 70, 68, 68, 66, 64, 62, 60, 58, 56, 54, 54, 52, 52, 50, 50]);
+assert.deepEqual(plain(wallCounts), [81, 80, 78, 76, 74, 72, 70, 68, 68, 66, 64, 62, 60, 58, 56, 54, 54, 52, 52, 50, 50, 50, 49]);
 steps.forEach((step, index) => {
   if (index === 0) return;
   const before = keySet(steps[index - 1].canvas.state.walls), after = keySet(step.canvas.state.walls);
@@ -223,7 +226,7 @@ backtrackSteps.forEach((step, index) => {
 });
 
 // 完成ステップ: 検証済みの完成迷路に、スタートからゴールへの一本道を示す。
-const complete = steps.at(-1).canvas;
+const complete = steps.find(step => step.id === "complete").canvas;
 assert.deepEqual(keySet(complete.state.walls), reference.walls, "Final step is the verified completed maze");
 assert.equal(complete.state.processing, null); assert.deepEqual(plain(complete.highlights), []);
 assert.equal(complete.state.start, "1,1"); assert.equal(complete.state.goal, "7,7");
@@ -241,6 +244,30 @@ while (queue.length) {
 }
 assert.equal(seen.size, 81 - 50, "Completed maze is fully connected (perfect maze)");
 
+// 説明専用ステップ（Issue #334、ガイドライン §2-6）: 完成の後に2つだけ置き、
+// コード対応ステップは21のまま（フェーズ4のチェックポイントに含めない）。
+assert.deepEqual(plain(steps.filter(step => step.explanationOnly).map(step => step.id)), ["no-loops", "loop-what-if"]);
+assert.deepEqual(plain(codeMappedSteps(content).map(step => step.id)), plain(steps.slice(0, 21).map(step => step.id)),
+  "Code-mapped steps are exactly the first 21");
+const noLoops = steps.find(step => step.id === "no-loops").canvas;
+assert.deepEqual(keySet(noLoops.state.walls), reference.walls, "No-loops step shows the completed maze");
+assert.equal(noLoops.state.processing, null); assert.deepEqual(plain(noLoops.state.path), []);
+assert.deepEqual(plain(noLoops.highlights), []);
+// 仮定盤面: 完成迷路から間の壁 (4,1) だけを余分に掘ると、両側の部屋 (3,1)・(5,1) の
+// もとの一本道（7マス）と新しい道で輪が閉じる。掘った2マスが highlight、掘り先が処理中。
+const whatIf = steps.find(step => step.id === "loop-what-if").canvas;
+assert.equal(whatIf.state.walls.length, 49, "What-if board digs exactly one extra wall");
+assert(!keySet(whatIf.state.walls).has("4,1"), "What-if digs the between wall (4,1)");
+assert([...reference.walls].every(key => key === "4,1" || keySet(whatIf.state.walls).has(key)),
+  "What-if walls are the completed walls minus (4,1)");
+assert.equal(whatIf.state.processing, "5,1");
+assert.deepEqual(keySet(whatIf.highlights.map(highlight => highlight.id)), new Set(["4,1", "5,1"]));
+const loopPath = plain(whatIf.state.path);
+assert.deepEqual(loopPath, [...plain(maze.solveMazeDiggingPath(maze.buildMazeDiggingGrid(9, maze.mazeDiggingMainChoices), "3,1", "5,1")), "4,1"],
+  "What-if path traces the original unique route plus the extra dug wall");
+const [lx, ly] = loopPath[0].split(",").map(Number), [ex, ey] = loopPath.at(-1).split(",").map(Number);
+assert.equal(Math.abs(lx - ex) + Math.abs(ly - ey), 1, "What-if path closes the loop (last cell adjacent to first)");
+
 // 実描画: 壁の数、highlight（通路マスは破線の枠）、経路、旗が SVG に現れる。
 for (const step of steps) {
   const html = renderToStaticMarkup(createElement(MazeDiggingExecutionCanvas, { canvas: step.canvas }));
@@ -251,7 +278,7 @@ for (const step of steps) {
   if (highlights.length) assert(/data-maze-highlight[^>]*stroke-dasharray/.test(html), `Step ${step.id}: dug-cell highlight is a dashed frame`);
   if (step.canvas.state.path.length > 1) assert(html.includes("data-maze-path="), `Step ${step.id}: stack path rendered`);
 }
-const completeHtml = renderToStaticMarkup(createElement(MazeDiggingExecutionCanvas, { canvas: steps.at(-1).canvas }));
+const completeHtml = renderToStaticMarkup(createElement(MazeDiggingExecutionCanvas, { canvas: complete }));
 assert.equal((completeHtml.match(/data-maze-flag=/g) ?? []).length, 2, "Complete step shows start and goal flags");
 const previewHtml = renderToStaticMarkup(createElement(MazeDiggingExecutionPreview));
 assert(previewHtml.includes('aria-label="動きの説明"') && previewHtml.includes(steps[0].caption));
@@ -263,4 +290,4 @@ const digOne = plain(steps[2].canvas);
 assert.throws(() => validate({ ...digOne, highlights: [{ kind: "cell", id: "0,0" }] }), /just dug/);
 const allWallsPlain = plain(steps[0].canvas);
 assert.throws(() => validate({ ...allWallsPlain, state: { ...allWallsPlain.state, target: "5,5" } }), /target must be null/);
-console.log("Maze-digging execution: 21 steps, verified 9x9 trace (15 digs, 3 compressed backtracks with popped counts 2/1/4), stack paths, perfect maze, dashed dug-cell highlight frames and standalone preview passed.");
+console.log("Maze-digging execution: 23 steps (21 code-mapped + 2 explanation-only: no-loops / loop-what-if), verified 9x9 trace (15 digs, 3 compressed backtracks with popped counts 2/1/4), stack paths, perfect maze, what-if loop board, dashed dug-cell highlight frames and standalone preview passed.");

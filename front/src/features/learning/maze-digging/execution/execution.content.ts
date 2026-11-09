@@ -90,6 +90,35 @@ steps.push({
   }),
 });
 
+/**
+ * 説明専用ステップ（ガイドライン §2-6、Issue #334）。「輪ができない理由」は
+ * コードの実行瞬間には対応しないため、完成の後に置き、フェーズ4の
+ * チェックポイントには含めない（棒倒し法の loop-what-if と同じ扱い）。
+ * 仮定盤面は完成グリッドから決定的に作る: 間の壁を1つだけ余分に掘ると、
+ * もとの一本道（両側の部屋の間の最短路）と新しい道で輪ができる。
+ * その間の壁と両側の部屋は検証スクリプトで固定する。
+ */
+const whatIfGrid = run.grid.map(row => [...row]);
+whatIfGrid[1][4] = 0;
+steps.push(
+  {
+    id: "no-loops", explanationOnly: true,
+    caption: "掘り進める先はまだ掘っていない部屋だけなので、通路に輪はできず、どの部屋へも道は1本だけです。",
+    canvas: snapshot({ walls: mazeDiggingWalls(run.grid) }),
+  },
+  {
+    id: "loop-what-if", explanationOnly: true,
+    caption: "ためしに、すでに掘った部屋へ間の壁を掘ってみると、もとの道と合わせて輪ができてしまいます。",
+    canvas: snapshot(
+      {
+        walls: mazeDiggingWalls(whatIfGrid), processing: mazeCellKey(5, 1),
+        path: [...solveMazeDiggingPath(run.grid, mazeCellKey(3, 1), mazeCellKey(5, 1)), mazeCellKey(4, 1)],
+      },
+      [{ kind: "cell", id: mazeCellKey(4, 1) }, { kind: "cell", id: mazeCellKey(5, 1) }],
+    ),
+  },
+);
+
 const sequence = defineLearningContent<MazeDiggingExecutionCanvasState>({
   version: 1, kind: "step-sequence", id: "maze-digging-execution", phase: 2, intervalMs: 3500,
   steps: steps as [LearningStep<MazeDiggingExecutionCanvasState>, ...LearningStep<MazeDiggingExecutionCanvasState>[]],

@@ -78,8 +78,8 @@ assert.deepEqual(plain(actual.result), plain(maze.runMazeDigging(maze.mazeDiggin
 const resultWalls = new Set();
 actual.result.forEach((row, y) => row.forEach((cell, x) => { if (cell === 1) resultWalls.add(`${x},${y}`); }));
 assert.equal(resultWalls.size, 50, "Executed reference code builds the verified 9x9 maze");
-assert.deepEqual(new Set(execution.steps.at(-1).canvas.state.walls), resultWalls,
-  "Phase-2 final board equals the executed result");
+assert.deepEqual(new Set(execution.steps.find(step => step.id === "complete").canvas.state.walls), resultWalls,
+  "Phase-2 completed board equals the executed result");
 
 // else: 行は CPython が行イベントを発しないため、説明フレームを分けて数える。
 const elseFrames = content.steps.filter(step => step.canvas.highlights[0].id === "else-branch");
@@ -103,10 +103,14 @@ for (const step of elseFrames) {
     `${step.id}: else itself changes no variable`);
 }
 
-// フェーズ2の21ステップがすべて、順番どおりチェックポイントとして現れる。
+// フェーズ2のコード対応21ステップがすべて、順番どおりチェックポイントとして現れる。
+// 説明専用ステップ（Issue #334）はフェーズ4に現れない。
+const { codeMappedSteps } = load(file("player/content.types.ts"));
 const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
 assert.equal(checkpoints.length, 21);
-assert.deepEqual(plain(checkpoints.map(step => step.canvas.state.executionStepId)), plain(execution.steps.map(step => step.id)));
+assert.deepEqual(plain(checkpoints.map(step => step.canvas.state.executionStepId)), plain(codeMappedSteps(execution).map(step => step.id)));
+assert(!checkpoints.some(step => ["no-loops", "loop-what-if"].includes(step.canvas.state.executionStepId)),
+  "Explanation-only steps never become checkpoints");
 const checkpointLine = stepId => stepId === "all-walls" ? "initialize-grid"
   : stepId === "dig-start" ? "dig-start"
   : stepId === "complete" ? "while-stack"
