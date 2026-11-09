@@ -19,7 +19,8 @@
 
 - `verify:maze-digging-execution`: 23ステップの列・キャプション・壁数の推移（…50 → 50 → 49）、仮定盤面の輪（経路の末尾マスが先頭マスに隣接して閉じること）を機械確認。
 - `verify:maze-digging-code-mapping`: チェックポイントがコード対応21ステップと一致し、説明専用ステップを含まないことを確認。CPython トレース突き合わせは従来どおり全フレーム通過。
-- 他の穴掘り法 verify（check / code-check / consolidation / implementation / trace / unit / motivation）と front の lint / typecheck / build は PR 本文に結果を記録する。
+- `verify:maze-digging-trace`: トレース再生（フェーズ7の視覚デバッグ）が対応するフレーム列はコード対応ステップだけのため、期待値を `codeMappedSteps` に合わせた（再生列21フレームは不変）。
+- 他の穴掘り法 verify（check / code-check / consolidation / implementation / unit / motivation）と front の lint / typecheck / build は PR 本文に結果を記録する。
 
 ## 未実施・申し送り
 
