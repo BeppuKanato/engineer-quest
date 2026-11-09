@@ -1,10 +1,11 @@
 import { runCourseMissionTests } from "../../../../lib/pyodideRunner";
+import { analyzeExecutionError } from "../../../../lib/executionError";
 import type { ArrayBarsCanvasState } from "../../player/arrayBars.types";
 import { binarySearchImplementationContent as content, type ImplementationTest } from "./implementation.content";
 
 export type HintLevel = 1 | 2 | 3 | 4;
 export type HintUsage = readonly [number, number, number, number];
-export type TestOutcome = { readonly id: string; readonly passed: boolean; readonly actual?: unknown; readonly error?: "syntax" | "runtime" | "timeout" };
+export type TestOutcome = { readonly id: string; readonly passed: boolean; readonly actual?: unknown; readonly error?: "syntax" | "runtime" | "timeout"; readonly errorLine?: number };
 
 /** 単元フロー接続時（後続Issue）に渡す要約。集計はテスト実行とヒント利用から導く。 */
 export type BinarySearchImplementationSummary = {
@@ -16,11 +17,8 @@ export const recordHintUsage = (usage: HintUsage, level: HintLevel): HintUsage =
   if (level > 1 && usage[level - 2] === 0) return usage;
   return [usage[0] + (level === 1 ? 1 : 0), usage[1] + (level === 2 ? 1 : 0), usage[2] + (level === 3 ? 1 : 0), usage[3] + (level === 4 ? 1 : 0)];
 };
-export function classifyExecutionError(error: unknown): NonNullable<TestOutcome["error"]> {
-  const message = error !== null && typeof error === "object" && "message" in error && typeof error.message === "string" ? error.message : String(error);
-  if (message === "Pythonの実行がタイムアウトしました。処理を見直してください。") return "timeout";
-  return /(?:SyntaxError|IndentationError|TabError):/u.test(message) ? "syntax" : "runtime";
-}
+/** エラーの分類・行番号の解析は共通モジュール（lib/executionError）が正。 */
+export { classifyExecutionError } from "../../../../lib/executionError";
 export function resultKinds(outcomes: readonly TestOutcome[]) {
   return (["syntax", "runtime", "timeout", "mismatch"] as const).filter(kind =>
     outcomes.some(outcome => kind === "mismatch" ? !outcome.passed && !outcome.error : outcome.error === kind));
@@ -64,7 +62,8 @@ export async function runImplementationTests(code: string, tests: readonly Imple
       if (!result) throw new Error("Missing test result");
       outcomes.push({ id: test.id, passed: result.passed, ...(test.visibility === "display" ? { actual: result.actual } : {}) });
     } catch (error) {
-      outcomes.push({ id: test.id, passed: false, error: classifyExecutionError(error) });
+      const analysis = analyzeExecutionError(error);
+      outcomes.push({ id: test.id, passed: false, error: analysis.kind, ...(analysis.line !== undefined ? { errorLine: analysis.line } : {}) });
     }
     progress([...outcomes]);
   }
