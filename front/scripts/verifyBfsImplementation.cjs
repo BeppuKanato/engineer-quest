@@ -129,7 +129,8 @@ assert(mismatchedHtml.includes(content.display.statuses.failed.icon));
 assert(mismatchedHtml.includes("期待と異なる")); assert(mismatchedHtml.includes("項目なし")); assert(mismatchedHtml.includes("余分な項目"));
 // 通過したテストには描き込まれるチェックが1件ずつ付く（#180）。未実施・未通過には付かない。
 const passedHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: content.tests.map(test => ({ id: test.id, passed: true, actual: test.expected })) }));
-assert.equal((passedHtml.match(/data-phase-result-check/g) || []).length, content.tests.length, "each passed test draws in its own check");
+assert(!passedHtml.includes("data-phase-result-check"), "result rows carry the text mark only; the drawn check belongs to the completion view");
+assert.equal(passedHtml.split(content.display.statuses.passed.icon).length - 1, content.tests.length, "each passed test shows its text mark in the list");
 assert(!(unchangedHtml.includes("data-phase-result-check")), "unexecuted tests have no drawn check");
 assert(!(mismatchedHtml.includes("data-phase-result-check")), "failed tests have no drawn check");
 const review = renderToStaticMarkup(createElement(ParsonsBoard, { question: content.hints.parsonsQuestion, code: bfsCode }));
@@ -167,13 +168,15 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(hintsSource, /キューが空になるまでくり返し/, "hint 2 shows the loop as a flow");
   assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");
   const resultsSource = impl("ImplementationResults.tsx");
-  assert.match(resultsSource, /data-test-status/, "test status changes animate in");
-  assert.match(resultsSource, /component=\{motion\.span\} key=\{statusKey\}/, "a status change mounts its own short animation");
-  assert.match(resultsSource, /initial=\{reducedMotion \? false/, "reduced motion skips the initial animation state");
-  assert.match(resultsSource, /duration: reducedMotion \? 0 : 0\.3/, "reduced motion removes the transition");
-  // 画面契約（#180）: 通過は描き込まれるチェックで積み上がり、全通過時は完了表示で紙吹雪と大きなチェックで祝う。
-  assert.match(resultsSource, /DrawnCheck/, "passed tests show the shared drawn check");
-  assert.match(resultsSource, /outcome\?\.passed && /, "the drawn check is gated on passing");
+  assert.match(resultsSource, /ImplementationTestResults/, "results render through the shared list-first component (#325)");
+  assert(!resultsSource.includes("DrawnCheck"), "rows carry the text mark only; the drawn check belongs to the completion view");
+  const sharedResultsSource = fs.readFileSync(`${root}/implementation/ImplementationTestResults.tsx`, "utf8");
+  assert.match(sharedResultsSource, /data-test-status/, "test status changes animate in");
+  assert.match(sharedResultsSource, /component=\{motion\.span\} key=\{row\.statusKey\}/, "a status change mounts its own short animation");
+  assert.match(sharedResultsSource, /initial=\{reducedMotion \? false/, "reduced motion skips the initial animation state");
+  assert.match(sharedResultsSource, /duration: reducedMotion \? 0 : 0\.3/, "reduced motion removes the transition");
+  assert.match(sharedResultsSource, /statusKey !== "passed"/, "passed display figures start collapsed");
+  // 画面契約（#180→#325で改訂）: 行の通過印はテキスト（✓）に一本化し、全通過時は完了表示で紙吹雪と大きなチェックで祝う。
   assert.match(previewSource, /ResultConfetti/, "all-pass fires the phase confetti");
   assert.match(previewSource, /data-completion-banner/, "all-pass keeps the workspace and overlays the achievement banner (#305)");
   assert.match(previewSource, /DrawnCheck size=\{44\}/, "the completion banner leads with a drawn check");
