@@ -8,9 +8,9 @@
 
 | 設問 | 形式 | 場面・正解 | 論点タグ | 復習フレーム（フェーズ4） |
 | --- | --- | --- | --- | --- |
-| `transfer-dig-target` | グリッドタップ | 7×7の途中状態（掘削5回目まで）、現在マス (3, 5) から左、正解 (1, 5) | 掘り進める先の追跡 | `choose-candidate-6` → `dig-between-6` → `dig-room-6` → `execution-dig-6` |
+| `transfer-dig-target` | グリッドタップ | 7×7の途中状態（掘削5回目まで）、現在マス (5, 3) から左、正解 (5, 1) | 掘り進める先の追跡 | `choose-candidate-6` → `dig-between-6` → `dig-room-6` → `execution-dig-6` |
 | `completed-maze-properties` | 選択 | 完成した9×9、正解「すべての部屋が通路でつながっていて、輪がない」 | 完成した迷路の性質 | `execution-complete` → `return-grid` |
-| `backtrack-reason` | 選択 | 行き止まり (5, 1) を掘った直後の9×9、正解「掘れる部屋がもうなく、戻らなければ残りの部屋にたどり着けないため」 | バックトラックが必要な理由 | `if-candidates-7` → `else-branch-7` → `pop-stack-7` → `execution-backtrack-1` |
+| `backtrack-reason` | 選択 | 行き止まり (1, 5) を掘った直後の9×9、正解「掘れる部屋がもうなく、戻らなければ残りの部屋にたどり着けないため」 | バックトラックが必要な理由 | `if-candidates-7` → `else-branch-7` → `pop-stack-7` → `execution-backtrack-1` |
 | `whole-code-order` | Parsons | 参照コード22行すべて、正解は元の行順（順序自由な行なし） | コード全体の流れ | フェーズ4の全669フレーム |
 
 - Q1の場面・正解は検証済みトレースの6回目の掘削から導き、回答対象はフェーズ3と同じく、アルゴリズムが実際に集める候補（2マス先が盤内でまだ壁のままの部屋）に限る。方向はフェーズ3と同じく問題文の中で提示する（基準データ §6-6）。Q2・Q3の場面はフェーズ2の盤面を参照のまま使い、壁を複製しない。

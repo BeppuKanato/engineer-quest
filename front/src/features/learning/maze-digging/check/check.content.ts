@@ -69,7 +69,7 @@ export const mazeDiggingCheckContent: MazeDiggingCheckContent = {
 
 /**
  * 設問の場面。2問とも同じ掘削の前後を問うため、場面ステップの canvas をそのまま返す
- * （処理中の現在マス (5, 3) は両問で変わらない。棒倒し法フェーズ3と違い、
+ * （処理中の現在マス (3, 5) は両問で変わらない。棒倒し法フェーズ3と違い、
  * 前提設問の正解で処理中マスが移ることはない）。
  */
 export function getMazeDiggingCheckScene(): MazeDiggingCanvasState {
