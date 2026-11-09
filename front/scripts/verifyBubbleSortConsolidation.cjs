@@ -242,4 +242,5 @@ assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs 
 assert.match(previewSource, /content=\{bubbleSortCodeMappingContent\}/, "review opens the phase-4 content");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "bubble-sort-consolidation"'), "Standalone preview is registered");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
 console.log("Bubble-sort consolidation verified: transfer tap from the independent [3,1,4,2] trace, sorted-array edge case refutations, right-end mechanism, 8-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");

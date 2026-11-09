@@ -254,4 +254,5 @@ assert(parsonsQuestion.definitions?.includes("lo = 探索範囲の左端の位�
 assert.match(previewSource, /question\.definitions/, "preview renders the definitions line");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "binary-search-consolidation"'), "Standalone preview is registered");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
 console.log("Binary-search consolidation verified: transfer tap from the independent [2,5,8,12,16,23,38,56,72,91] trace, absent-case refutations on the shared 19-31-25 probe path, 8-line Parsons with no interchangeable lines, unsorted-list premise refutations, soft-gate completion and first-attempt diagnosis.");
