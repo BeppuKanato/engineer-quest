@@ -7,6 +7,9 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+import { ImplementationLevelSelector } from "../../implementation/ImplementationLevelSelector";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
+import { useImplementationInputLevel } from "../../implementation/useImplementationInputLevel";
 
 import { DrawnCheck } from "../../app/DrawnCheck";
 import { ResultConfetti } from "../../app/ResultConfetti";
@@ -27,8 +30,10 @@ import { mazeDiggingTraceText } from "../trace/trace.content";
 import type { MazeDiggingTracePlayback } from "../trace/trace.types";
 
 /** embedded / onComplete は単元フロー接続（後続Issue）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function MazeDiggingImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: MazeDiggingImplementationSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void; onShowFinalResult?: () => void }) {
-  const [code, setCode] = useState<string>(initialCode ?? content.template);
+export function MazeDiggingImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: MazeDiggingImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
+  // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。
+  const draftBaseKey = codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`;
+  const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
   const [tracing, setTracing] = useState(false);
@@ -67,14 +72,14 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
     void prepare();
     return () => { lifetime.current++; disposePyodideRunner(); };
   }, [prepare]);
-  // 全テスト通過した瞬間だけ単元フローへ通知する。
+  // 全テスト通過した瞬間だけ単元フローへ通知する。完了時点の入力量レベルも要約に残す（Issue #328）。
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ testRuns: runs, hintUsage: usage });
+      onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level });
     }
     if (!complete) completedRef.current = false;
-  }, [complete, onComplete, runs, usage]);
+  }, [complete, onComplete, runs, usage, level]);
   // テストが新たに通過するたび、小さな確認音で採点の進みを伝える（#305 案A'）。
   // 全通過時の紙吹雪と歓声は ResultConfetti が担当し、演出の強弱を分ける。
   useEffect(() => {
@@ -106,14 +111,14 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
     lock.current = true;
     const current = generation.current;
     setPanel("tests");
-    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code } });
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code, level } });
     setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
       if (current === generation.current) {
         setLastOutcomes(result);
-        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
-        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage } });
+        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, level, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
+        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, level } });
       }
     } finally {
       lock.current = false;
@@ -125,7 +130,7 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
     lock.current = true;
     const current = generation.current;
     traceRuns.current++;
-    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code } });
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code, level } });
     setTracing(true); setTraceError(null);
     try {
       const trace = await traceMazeDiggingCode(code, () => current === generation.current);
@@ -160,6 +165,13 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
     onLearningEvent?.({ eventType: "hint_open", payload: { level, count: usage[level - 1] + 1 } });
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
+  // レベルの切り替えはログに残し、表示中の結果は切り替えたレベルのコードに合わせて消す（Issue #328）。
+  const changeLevel = (next: ImplementationInputLevel) => {
+    if (busy || next === level) return;
+    onLearningEvent?.({ eventType: "implementation_level_select", payload: { level: next, previousLevel: level } });
+    selectLevel(next);
+    setOutcomes([]); setTraceError(null); setFreeResult(null);
+  };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
     <Box component="section" aria-label="穴掘り法の自分で実装"
       sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
@@ -170,6 +182,9 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
       <Typography component="p" role="status" aria-live="polite" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0 }}>{passed}/{content.tests.length} 本通過</Typography>
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
         sx={{ flexShrink: 0, bgcolor: colors.button, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
+      {!complete && <Box sx={{ flexShrink: 0 }}>
+        <ImplementationLevelSelector level={level} onChange={changeLevel} disabled={busy || !editorReady} />
+      </Box>}
       <>
         <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 2.4fr) minmax(300px, 1fr)", gap: 2 }}>
           <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `2px solid ${colors.focus}`, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel,
@@ -194,7 +209,7 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
               </Box>}
               <Editor height="100%" language="python" theme={LEARNING_EDITOR_THEME} beforeMount={setupLearningEditor} value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
+                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>

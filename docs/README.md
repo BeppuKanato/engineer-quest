@@ -85,6 +85,7 @@
 | [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
 | [phase7-grading-sequence-305.md](phase7-grading-sequence-305.md) | 記録 | Issue #305のフェーズ7採点シーケンス表示（案A'、全5単元）、自動遷移の廃止と達成バナーのオーバーレイ化、Pyodide読み込みリトライ、図の高さ210/260配分を規約として留保した判断 |
 | [phase7-test-list-325.md](phase7-test-list-325.md) | 記録 | Issue #325のフェーズ7テストタブ一覧主構造化（全5単元）、表示テストの図の一覧下への分離と通過時の既定閉じ、行の印のテキスト一本化、結果表示の共通コンポーネント化 |
+| [phase7-input-levels-328.md](phase7-input-levels-328.md) | 記録 | Issue #328のフェーズ7入力量レベル（全部書く／骨格から書く／穴埋めで書く）の仕組みと穴掘り法への適用（PR 1）、レベル別下書き・学習ログへのレベル記録・ガイドライン7-4の追加。残り単元への展開は後続PR |
 | [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
 | [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
 | [wall-extension-phase3-208.md](wall-extension-phase3-208.md) | 記録 | Issue #208の棒倒し法フェーズ3（動きの確認問題）連結2問、フェーズ2盤面の参照と検証済みトレースとの正解照合 |

@@ -19,7 +19,7 @@ import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
 import { phaseBoundaryAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
-import { readCodeDraft, writeCodeDraft } from "./codeDraft";
+import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { LearningRewardsContext } from "./LearningRewardsContext";
 import { emptyLearningRewards, mergeLearningRewards, type LearningRewards } from "./rewards";
@@ -123,6 +123,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     initialSummaries: savedPhaseSummaries(unit, progress),
     initialCode: draft.code,
     onCodeChange: saveCode,
+    // 入力量レベル別下書きの基底キー（Issue #328）。レベル対応済みの単元はこのキーからレベル別に読み書きする。
+    codeDraftBaseKey: codeDraftKey(courseId, uid),
+    onCodeDraftError: (failed: boolean) => setDraftError(failed),
     onPhaseComplete: completePhase,
     onFinalResult,
     onLearningEvent: log,
