@@ -74,7 +74,7 @@ export function AnswerFeedbackNotice({ assessmentId }: { assessmentId?: string }
   const { messages } = useContext(FeedbackContext);
   const feedback = assessmentId ? messages[assessmentId] : undefined;
   return <Box role="status" aria-live="polite" aria-atomic="true" sx={{ flexShrink: 0, minWidth: 0 }}>
-    {feedback && <Box sx={{ my: 1, px: 2, py: 1.25, bgcolor: playerTokens.layers.layer0,
+    {feedback && !feedback.inlineNotice && <Box sx={{ my: 1, px: 2, py: 1.25, bgcolor: playerTokens.layers.layer0,
       borderLeft: `4px solid ${playerTokens.focus}`, color: playerTokens.text }}>
       <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mb: 0.5 }}>直前の回答</Typography>
       <Typography component="p" sx={{ fontSize: "clamp(18px, 1.4vw, 22px)", fontWeight: 700, lineHeight: 1.6 }}>

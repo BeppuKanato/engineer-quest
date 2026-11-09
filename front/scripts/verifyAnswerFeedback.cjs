@@ -81,6 +81,7 @@ for (const question of diagnostic.questions) {
       : { kind: "order", lineIds: question.lineIds };
   const incorrect = answerQuestion(diagnostic, current, question.id, wrong);
   assert.equal(newAnswerFeedback(diagnostic, current, incorrect).message, question.incorrectFeedback);
+  assert.equal(newAnswerFeedback(diagnostic, current, incorrect).inlineNotice, question.kind === "parsons" ? true : undefined);
   assert.equal(JSON.stringify(current), snapshot, "The reader must leave records untouched");
   const next = advanceAssessment(diagnostic, incorrect, question.id);
   assert.equal(newAnswerFeedback(diagnostic, incorrect, next), null, "Next and diagnosis do not replay the last answer");
@@ -154,10 +155,13 @@ assert.equal(notice.props.children.props.children[1].props.children, states[1][c
 assert.equal(notice.props.children.props.children[1].props.sx.fontWeight, 700, "The persistent message is bold");
 assert.equal(uiModule.AnswerFeedbackNotice({ assessmentId: "another" }).props.children, undefined, "Do not show another phase's message");
 present({ ...response, assessmentId: code.id });
+present({ ...response, assessmentId: diagnostic.id, inlineNotice: true });
+renderProvider();
+assert(!uiModule.AnswerFeedbackNotice({ assessmentId: diagnostic.id }).props.children, "The Parsons board owns its feedback notice");
 clear(concept.id);
 assert.equal(states[1][concept.id], undefined, "Starting over clears old messages");
 assert(states[1][code.id], "Clearing a phase must not erase another phase's message");
-present(response); cleanups.forEach(cleanup => cleanup()); assert(cleared.includes(4));
+present(response); cleanups.forEach(cleanup => cleanup()); assert(cleared.includes(5));
 for (const correct of [true, false]) {
   reduced = false;
   const overlay = uiModule.AnswerFeedbackPresentation({ feedback: { ...response, correct } });

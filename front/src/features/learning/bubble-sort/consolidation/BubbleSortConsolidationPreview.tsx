@@ -9,7 +9,7 @@ import {
   diagnoseAssessment, type AssessmentAnswer,
 } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
-import { ParsonsBoard } from "../../bfs/consolidation/ParsonsBoard";
+import { ParsonsBoard, parsonsQuestionBodySx } from "../../bfs/consolidation/ParsonsBoard";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { playerTokens } from "../../player/player.tokens";
@@ -71,7 +71,9 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
     setSession(current => current.records.find(entry => entry.questionId === question.id)?.solved
       ? current : answerQuestion(content, current, question.id, answer));
   };
-  useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
+  useEffect(() => {
+    captionRef.current?.focus({ preventScroll: question?.kind === "parsons" && (record?.attemptCount ?? 0) > 0 });
+  }, [question?.id, question?.kind, complete, record?.attemptCount]);
   // 診断が出た瞬間だけ単元フローへ通知する。
   useEffect(() => {
     if (diagnosis && !completedRef.current) {
@@ -88,10 +90,12 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
     <Box component="section" aria-label={complete ? "応用問題の結果" : "バブルソートの応用問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh",
         minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column",
+        ...(question?.kind === "parsons" ? parsonsQuestionBodySx : {}) }}>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
           color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
+          ...(question?.kind === "parsons" ? { minHeight: 0 } : {}),
         }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
         {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
         {question && <>
@@ -101,7 +105,7 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
                   onAnswer={submit} disabled={attempt?.correct === true} />
               : <BubbleSortCheckCanvas canvas={question.scene} onAnswer={() => {}} />}
           </Box>}
-          <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>
+          {question.kind !== "parsons" && <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, mt: 1, mb: 1 }}>{question.instruction}</Typography>}
           {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {question.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
               disabled={attempt?.correct === true}
@@ -110,6 +114,12 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
                 "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
           </Box>}
           {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true}
+            instruction={question.instruction} attemptActions={attempt && {
+              correct: attempt.correct, message: attempt.correct ? question.correctFeedback : question.incorrectFeedback,
+              advanceLabel: session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ",
+              onReview: () => setReview(question),
+              onAdvance: () => setSession(current => advanceAssessment(content, current, question.id)),
+            }}
             orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0 }} />}
         </>}
         {diagnosis && <>
@@ -124,7 +134,7 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
           <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
         </>}
       </Box>
-      {question && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
+      {question && question.kind !== "parsons" && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
         {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
         <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
           {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}

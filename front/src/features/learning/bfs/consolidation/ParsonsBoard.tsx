@@ -1,11 +1,14 @@
 "use client";
 
-import { Box, Button } from "@mui/material";
-import { Reorder, useDragControls, useReducedMotion } from "framer-motion";
-import { useState } from "react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import { motion, Reorder, useDragControls, useReducedMotion } from "framer-motion";
+import { useId, useState } from "react";
 
 import type { OrderAnswer, ParsonsQuestion } from "../../assessment/assessment";
 import { playerTokens } from "../../player/player.tokens";
+import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { isParsonsOrderCorrect, parsonsKeepLineIds, type ParsonsInterchangeableGroups } from "./parsonsOrderFeedback";
 
 /** 並び替え対象のコード契約。行の意味IDと本文だけを使うため、単元を問わず使える。 */
@@ -18,6 +21,15 @@ const rowStyle = {
   background: playerTokens.surface, boxShadow: `inset 0 0 0 2px ${playerTokens.focus}`, borderRadius: 4,
 } as const;
 const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5, cursor: "default" } as const;
+const keepColors = { fill: "#dcfce7", mark: "#15803d" } as const;
+
+// 高さが低い画面や文章が折り返す狭い画面では、設問と盤面を同じ領域で流す。
+const compactViewport = "@media (max-height: 640px), (max-width: 799.95px)";
+const narrowViewport = "@media (max-width: 799.95px)";
+export const parsonsQuestionBodySx = {
+  overflowY: "visible",
+  [compactViewport]: { overflowY: "auto" },
+} as const;
 
 // ドラッグ用カーソルは OS 標準の手袋（grab）だと白系で明るい行の上でほぼ見えなくなる（Issue #327）。
 // 濃色で描いた SVG カーソルをデータ URI で直接指定し、OS のカーソル配色に依存せず常に見えるようにする。
@@ -36,14 +48,17 @@ function SortableLine({ id, text, index, count, duration, disabled = false, keep
   const controls = useDragControls();
   return <Reorder.Item as="div" value={id} dragListener={false} dragControls={controls}
     data-parsons-line-id={id} data-parsons-keep={keep || undefined}
-    style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor, ...(keep ? { boxShadow: `inset 0 0 0 2px ${playerTokens.focus}, inset 8px 0 0 0 ${playerTokens.focus}` } : {}) }} transition={{ duration }}
+    style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor,
+      ...(keep ? { background: keepColors.fill, boxShadow: `inset 0 0 0 2px ${keepColors.mark}` } : {}) }} transition={{ duration }}
     whileDrag={{ zIndex: 1 }}>
     <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え" disabled={disabled}
       onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: parsonsDragCursor, touchAction: "none" }}>↕</Button>
+    {keep !== undefined && <Box aria-hidden sx={{ width: 36, flexShrink: 0, display: "grid", placeItems: "center" }}>
+      {keep && <CheckCircleIcon sx={{ fontSize: 24, color: keepColors.mark }} />}
+    </Box>}
     <Box component="code" sx={{ flex: 1, whiteSpace: "pre", textAlign: "left", px: 1 }}>{text}</Box>
     <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={disabled || index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
     <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={disabled || index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
-    {keep !== undefined && <Box aria-hidden sx={{ width: 28, flexShrink: 0, textAlign: "center", fontSize: 16, fontWeight: 700, color: playerTokens.focus }}>{keep ? "✓" : ""}</Box>}
     {keep && <Box component="span" sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>この行は動かさなくて大丈夫です</Box>}
   </Reorder.Item>;
 }
@@ -59,13 +74,28 @@ export type ParsonsOrderFeedback = {
   readonly active: boolean;
 };
 
+type ParsonsAttemptActions = {
+  correct: boolean;
+  message: string;
+  advanceLabel: string;
+  onReview: () => void;
+  onAdvance: () => void;
+};
+
 /**
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
- * scrollable のときは固定高の窓の中で盤面だけが縦スクロールし、ボタン行は盤面の下に置かれる（Issue #318、#298）。
+ * scrollable のときは表示窓を固定高368px（下限276px）とし、ボタン行は盤面の下に置く。
+ * 画面高640px以下または幅800px未満では窓の高さ制限を外し、盤面を設問と同じ中央領域に流す（Issue #352）。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  */
-export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback }) {
+export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback, instruction, attemptActions }: {
+  question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean;
+  scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback; instruction?: string; attemptActions?: ParsonsAttemptActions;
+}) {
   const [ordered, setOrdered] = useState<readonly string[]>(() => [...question.lineIds]);
+  const [hintOpen, setHintOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const menuId = useId();
   const reduced = useReducedMotion();
   const duration = reduced ? 0 : 0.6;
   const text = (id: string) => code.lines.find(line => line.id === id)!.text;
@@ -77,32 +107,81 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
     return next;
   });
   const isInitialOrder = ordered.every((id, index) => id === question.lineIds[index]);
+  const resetOrder = () => setOrdered([...question.lineIds]);
+  const answerLabel = orderFeedback?.active ? "この順序で再回答する" : "この順序で回答する";
   // 順序フィードバックは「回答済み」かつ「現在の並びがまだ正解でない」ときだけ出す。
   // 並び替えるたびに再計算するので、正解の並びに到達した時点で印と凡例は消える。
   const keepIds = orderFeedback?.active && !isParsonsOrderCorrect(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
     ? parsonsKeepLineIds(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
     : null;
   const showOrderFeedback = keepIds !== null && keepIds.size > 0;
-  return <Box sx={{ minWidth: 0, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
-    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
-      {/* scrollable の表示窓は固定高: 行ピッチ46px × 8行 = 368px（Issue #298）。
-          下限 276px（6行、Issue #327）は盤面が潰れて操作不能にならないための床として残す。
-          盤面の内側スクロールは、学習画面で唯一認める入れ子のスクロールである。 */}
-      <Box sx={{ overflowX: "auto", ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto" } : {}) }}>
-        <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
-          style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
-            keep={showOrderFeedback ? keepIds.has(id) : undefined}
-            onMove={offset => move(id, offset)} />)}
-        </Reorder.Group>
+  return <Box sx={{ minWidth: 0, ...(scrollable ? { minHeight: 0, display: "flex", flexDirection: "column", [compactViewport]: { flexShrink: 0 } } : {}) }}>
+    {(instruction || showOrderFeedback || attemptActions) && <Box sx={{ minHeight: 40, mb: 1, px: 0.5, flexShrink: 0,
+      display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", columnGap: 1 }}>
+      <Box role="status" sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 1 }}>
+        {attemptActions
+          ? <Typography component="span" sx={{ fontWeight: 700 }}>{attemptActions.correct ? "正解" : "不正解"}</Typography>
+          : instruction && <Typography component="span" sx={{ fontWeight: 700 }}>{instruction}</Typography>}
+        {showOrderFeedback && <Typography component="span" data-parsons-order-legend sx={{ fontSize: 14 }}>✓ は移動不要</Typography>}
       </Box>
+      {attemptActions && <Button onClick={() => setHintOpen(true)} aria-label={attemptActions.correct ? "解説を見る" : "ヒントを見る"}
+        sx={{ minHeight: 40, color: playerTokens.focus }}>
+        {attemptActions.correct ? "解説" : "ヒント"}
+      </Button>}
+    </Box>}
+    <Box component={motion.div} layoutScroll sx={{ overflowX: "auto", fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5,
+      ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto", overscrollBehaviorY: "contain",
+        [compactViewport]: { height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" } } : {}) }}>
+      <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
+        style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
+          keep={orderFeedback ? keepIds?.has(id) ?? false : undefined}
+          onMove={offset => move(id, offset)} />)}
+      </Reorder.Group>
     </Box>
-    {showOrderFeedback && <Box component="p" data-parsons-order-legend sx={{ m: 0, mt: 1, flexShrink: 0, textAlign: "center", fontSize: 14, color: playerTokens.text }}>✓ が付いた行は、動かさなくて大丈夫です</Box>}
-    <Box sx={{ mt: 2, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-      <Button onClick={() => setOrdered([...question.lineIds])} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
+    <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1,
+      ...(scrollable ? { minHeight: 56, alignItems: "center", [narrowViewport]: { minHeight: 48 },
+        [compactViewport]: { position: "sticky", bottom: 0, zIndex: 2, bgcolor: playerTokens.background } } : {}) }}>
+      <Button onClick={resetOrder} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44,
+        ...(scrollable ? { [narrowViewport]: { display: "none" } } : {}) }}>提示順に戻す</Button>
       {onAnswer && <Button variant="contained" disabled={disabled} onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
-        sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-          "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>この順序で回答する</Button>}
+        aria-label={answerLabel} sx={{ minHeight: 48, px: 3, [narrowViewport]: { px: 1.5 }, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
+          "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
+        {scrollable ? <>
+          <Box component="span" sx={{ [narrowViewport]: { display: "none" } }}>{answerLabel}</Box>
+          <Box component="span" sx={{ display: "none", [narrowViewport]: { display: "inline" } }}>{orderFeedback?.active ? "再回答する" : "回答する"}</Box>
+        </> : answerLabel}
+      </Button>}
+      {attemptActions && <>
+        {!attemptActions.correct && <Box sx={{ display: "flex", [narrowViewport]: { display: "none" } }}>
+          <AssessmentReviewButton label="基本例を見る" variant="outlined" onClick={attemptActions.onReview} />
+        </Box>}
+        <Button variant={attemptActions.correct ? "contained" : "outlined"} onClick={attemptActions.onAdvance}
+          sx={{ minHeight: 48, px: 3, [narrowViewport]: { px: 1.5 }, fontSize: 16, fontWeight: 700, ...(attemptActions.correct
+            ? { bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }
+            : { borderColor: playerTokens.focus, color: playerTokens.focus }) }}>{attemptActions.advanceLabel}</Button>
+      </>}
+      {scrollable && <>
+        <IconButton aria-label="並べ替えのその他の操作" aria-haspopup="menu" aria-expanded={Boolean(menuAnchor)}
+          aria-controls={menuAnchor ? menuId : undefined} onClick={event => setMenuAnchor(event.currentTarget)}
+          sx={{ display: "none", [narrowViewport]: { display: "inline-flex" }, width: 48, minHeight: 48, color: playerTokens.control }}>
+          <MoreHorizIcon />
+        </IconButton>
+        <Menu id={menuId} anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
+          <MenuItem disabled={disabled || isInitialOrder} onClick={() => { resetOrder(); setMenuAnchor(null); }}>提示順に戻す</MenuItem>
+          {attemptActions && !attemptActions.correct && <MenuItem onClick={() => { setMenuAnchor(null); attemptActions.onReview(); }}>
+            基本例を見る
+          </MenuItem>}
+        </Menu>
+      </>}
     </Box>
+    {attemptActions && <Dialog open={hintOpen} onClose={() => setHintOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>直前の回答</DialogTitle>
+      <DialogContent>
+        <Typography>{attemptActions.message}</Typography>
+        {!attemptActions.correct && <Typography sx={{ mt: 1 }}>結果には初回の回答を使います。</Typography>}
+      </DialogContent>
+      <DialogActions><Button onClick={() => setHintOpen(false)}>閉じる</Button></DialogActions>
+    </Dialog>}
   </Box>;
 }
