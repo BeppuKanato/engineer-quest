@@ -154,6 +154,7 @@
 | [wall-extension-phase2-314-316.md](wall-extension-phase2-314-316.md) | 記録 | Issue #314/#316の「図の変化とコード実行単位の対応」原則と説明専用ステップの導入、棒倒し法フェーズ2の32ステップ再構成とフェーズ4チェックポイント契約の改訂、フェーズ7トレース再生への波及 |
 | [maze-digging-loop-explanation-334.md](maze-digging-loop-explanation-334.md) | 記録 | Issue #334の穴掘り法フェーズ2への輪の説明ステップ追加（説明専用2ステップ: 理由＋仮定盤面の実演）とフェーズ4チェックポイント契約のコード対応ステップへの改訂 |
 | [binary-search-phase1-unsorted-329.md](binary-search-phase1-unsorted-329.md) | 記録 | Issue #329の二分探索フェーズ1場面1の未ソート化（主教材の並び替え [19,3,31,7,42,12,25]、25を最後尾に置き最悪のケースを場面内で起こす）、配列場面への並び方（sorted/unsorted）の導入 |
+| [binary-search-review-fixes-330-331.md](binary-search-review-fixes-330-331.md) | 記録 | Issue #331の応用問題の表示被り修正（図領域のフレックス化、全5単元）と lo/hi 定義行の追加、Issue #330のフェーズ2「残った範囲」の強調（remaining 状態）とソート前提のキャプション追加 |
 
 ## 図
 
