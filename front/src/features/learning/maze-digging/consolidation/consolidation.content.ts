@@ -110,9 +110,11 @@ lineIds: [
 "if-diggable", "dig-between",
 ],
 correctAnswer: { kind: "order", lineIds: mazeDiggingCode.lines.map((line) => line.id)}, requires: null,
+// フェード型: 関数定義・初期化・開始マスの準備・ループの枠・return は固定し、掘るか戻るかの本体だけを並べ替える。
+fixedLineIds: ["define-function", "initialize-grid", "define-directions", "dig-start", "initialize-stack", "initialize-step", "while-stack", "return-grid"],
 stepId: firstFrame.id, reviewStepIds: [firstFrame.id,...remainingFrames.map((frame) => frame.id)],
 tags: ["コード全体の流れ"],
-instruction: "行をドラッグ、または↑↓ボタンで並び替える",
+instruction: "色の薄い行は固定されています。残りの行をドラッグ、または↑↓ボタンで並び替える",
 correctFeedback: "正解。全部を壁にする、開始マスを掘る、候補を選んで掘るか戻る、盤面を返す、という流れを組み立てられました。",
 incorrectFeedback: "不正解。開始マスを掘る、候補を集める、選んで掘ってスタックに積む、候補がなければ戻る、という流れを確かめてみましょう。",
 },

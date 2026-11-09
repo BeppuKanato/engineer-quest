@@ -45,6 +45,12 @@ export type ParsonsQuestion = Omit<ChoiceQuestion, "kind" | "choices" | "correct
   readonly correctAnswer: OrderAnswer;
   /** 正解順で隣接する、グループ内だけ順不同の行。未指定なら完全一致。 */
   readonly interchangeableLineGroups?: readonly (readonly string[])[];
+  /**
+   * フェード型（2026-11-09 決定）: 正解位置に固定表示し、並び替え対象から外す行。
+   * 未指定なら全行が並び替え対象。固定できるのは学習目標の中核でない行に限り、
+   * 入れ替え可能グループの行は固定しない（グループの扱いを保つため）。
+   */
+  readonly fixedLineIds?: readonly string[];
 };
 export type DiagnosticAssessment = {
   readonly version: 1;
@@ -147,6 +153,10 @@ export function validateAssessment(content: AssessmentContent): void {
           new Set(group).size !== group.length || positions.some((position, index) => position !== positions[0] + index)) throw new Error("Invalid interchangeable line group");
         group.forEach(id => grouped.add(id));
       }
+      // 固定行は提示行の一部で、重複なく、全行固定にはせず、入れ替え可能グループの行は含めない。
+      const fixedLineIds = question.fixedLineIds ?? [];
+      if (new Set(fixedLineIds).size !== fixedLineIds.length || fixedLineIds.some(id => !question.lineIds.includes(id)) ||
+        fixedLineIds.some(id => grouped.has(id)) || fixedLineIds.length >= question.lineIds.length) throw new Error("Invalid fixed line set");
     } else if (content.kind === "code-blank-check" || !question.nodeIds.length || new Set(question.nodeIds).size !== question.nodeIds.length) {
       throw new Error("Invalid node-tap question");
     }

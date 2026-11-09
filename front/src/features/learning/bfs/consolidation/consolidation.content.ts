@@ -72,8 +72,10 @@ export const bfsConsolidationContent: ConsolidationContent = {
       lineIds: ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"],
       correctAnswer: { kind: "order", lineIds: bfsCode.lines.map(line => line.id) }, requires: null,
       interchangeableLineGroups: [["initialize-distances", "initialize-queue"]],
+      // フェード型: import・関数定義・ループの枠・return は固定し、初期化の対とループ本体の流れだけを並べ替える。
+      fixedLineIds: ["import-deque", "define-function", "while-queue", "return-distances"],
       stepId: firstFrame.id, reviewStepIds: [firstFrame.id, ...remainingFrames.map(frame => frame.id)], tags: ["コード全体の流れ"],
-      instruction: "行をドラッグ、または↑↓ボタンで並び替える",
+      instruction: "色の薄い行は固定されています。残りの行をドラッグ、または↑↓ボタンで並び替える",
       correctFeedback: "正解。初期化から探索、結果を返すまでのコードの流れを組み立てられました。",
       incorrectFeedback: "不正解。初期化、取り出し、未発見判定、距離代入と追加、結果を返す流れを確かめてみましょう。",
     },

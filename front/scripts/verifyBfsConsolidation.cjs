@@ -110,7 +110,21 @@ for (const question of content.questions) {
   }
 }
 const parsonsHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: q5, code: bfsCode, onAnswer: () => {} }));
-assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), plain(q5.lineIds));
+// フェード型: 固定行は正解位置に固定表示され、可動行は初期並びの相対順序のまま残りの位置を埋める。
+assert.deepEqual(plain(q5.fixedLineIds), ["import-deque", "define-function", "while-queue", "return-distances"], "Faded split as designed");
+{
+  const fixedSet = new Set(q5.fixedLineIds);
+  const movableInitial = q5.lineIds.filter(id => !fixedSet.has(id));
+  let cursor = 0;
+  const expectedOrder = q5.correctAnswer.lineIds.map(id => fixedSet.has(id) ? id : movableInitial[cursor++]);
+  assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder], "Fixed lines render pinned at their solution positions");
+  const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
+  assert.deepEqual(fixedRendered, plain(q5.fixedLineIds), "Exactly the fixed lines render as non-operable");
+  const { parsonsMovableSegments } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
+  for (const segment of parsonsMovableSegments(q5.correctAnswer.lineIds, q5.fixedLineIds)) {
+    assert.deepEqual([...q5.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable by reordering within each segment");
+  }
+}
 for (const line of bfsCode.lines) assert(parsonsHtml.includes(line.text), "Preserve original indentation and every line");
 
 const wrong = question => question.kind === "node" ? { kind: "node", nodeId: "B" } : question.kind === "choice" ?

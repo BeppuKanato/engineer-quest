@@ -98,9 +98,12 @@ export const wallExtensionConsolidationContent: WallExtensionConsolidationConten
       correctAnswer: { kind: "order", lineIds: wallExtensionCode.lines.map((line) => line.id) }, requires: null,
       // 外周の4つの書き込みは互いに独立で、順序を入れ替えても迷路は変わらない（BFSの初期化2行と同じ扱い）。
       interchangeableLineGroups: [["border-top", "border-bottom", "border-left", "border-right"]],
+      // フェード型: 関数定義・盤面の初期化・外周ループと柱ループの枠・方向表・return は固定し、
+      // 外周の書き込み、柱を立てる中身、壁を伸ばす判断の流れだけを並べ替える。入れ替え可能グループの行は固定しない。
+      fixedLineIds: ["define-function", "initialize-grid", "for-border", "initialize-pillars", "for-pillar-row", "for-pillar-column", "define-directions", "return-grid"],
       stepId: firstFrame.id, reviewStepIds: [firstFrame.id, ...remainingFrames.map((frame) => frame.id)],
       tags: ["コード全体の流れ"],
-      instruction: "行をドラッグ、または↑↓ボタンで並び替える",
+      instruction: "色の薄い行は固定されています。残りの行をドラッグ、または↑↓ボタンで並び替える",
       correctFeedback: "正解。外側を囲み、柱を立て、柱から壁を伸ばして返すまでの流れを組み立てられました。",
       incorrectFeedback: "不正解。外側を囲む、柱を立てる、方向を決めて壁を書き込む、盤面を返す、という流れを確かめてみましょう。",
     },
