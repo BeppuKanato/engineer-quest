@@ -197,6 +197,11 @@ assert(tree.some(element => element.props?.children === content.completion.capti
 assert.equal(canvasProps().questionId, undefined);
 
 const previewSource = fs.readFileSync(file("wall-extension/check/WallExtensionCheckPreview.tsx"), "utf8");
+// レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
+assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
+assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
+assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
+
 assert.match(previewSource, /advanceAssessment\(wallExtensionCheckContent, current, question\.id\)/);
 assert.match(previewSource, /"結果を見る" : "次の問題へ"/);
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
