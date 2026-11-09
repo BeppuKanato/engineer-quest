@@ -34,9 +34,10 @@ const directionLabels: Record<string, string> = { up: "上", right: "右", down:
 const nextDirection = mazeDiggingDirections.find(
   (direction) => mazeCellKey(currentX + 2 * direction.x, currentY + 2 * direction.y) === next.room,
 );
+/** 座標の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。 */
 const coordinate = (key: MazeCellKey) => {
   const { x, y } = parseMazeCellKey(key);
-  return `(${x}, ${y})`;
+  return `(${y}, ${x})`;
 };
 
 export const mazeDiggingCheckContent: MazeDiggingCheckContent = {
@@ -68,7 +69,7 @@ export const mazeDiggingCheckContent: MazeDiggingCheckContent = {
 
 /**
  * 設問の場面。2問とも同じ掘削の前後を問うため、場面ステップの canvas をそのまま返す
- * （処理中の現在マス (5, 3) は両問で変わらない。棒倒し法フェーズ3と違い、
+ * （処理中の現在マス (3, 5) は両問で変わらない。棒倒し法フェーズ3と違い、
  * 前提設問の正解で処理中マスが移ることはない）。
  */
 export function getMazeDiggingCheckScene(): MazeDiggingCanvasState {

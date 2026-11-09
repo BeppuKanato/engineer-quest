@@ -30,9 +30,10 @@ function directionName(from: MazeCellKey, room: MazeCellKey): string {
   return "上";
 }
 
+/** 座標の表示は、コードの grid[y][x] の添字順に合わせ (y, x) とする（Issue #326）。 */
 function coordinate(key: MazeCellKey): string {
   const { x, y } = parseMazeCellKey(key);
-  return `(${x}, ${y})`;
+  return `(${y}, ${x})`;
 }
 
 function snapshot(state: Partial<MazeDiggingExecutionCanvasState["state"]>,

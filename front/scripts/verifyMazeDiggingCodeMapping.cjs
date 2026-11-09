@@ -123,6 +123,13 @@ for (const step of checkpoints) {
     `${step.id}: the line that completes the phase-2 step`);
 }
 
+// 座標表示は (y, x) 順（Issue #326）: キャプションと変数表示が grid[y][x] の添字順と一致する。
+const currentRoom2 = content.steps.find(step => step.id === "current-room-2");
+assert(currentRoom2.caption.includes("(1, 3) を現在マスとします"), "Caption coordinates use (y, x) order");
+const pairRows = codeVariableRows({ size: 9, step: 0, x: 3, y: 1, dx: null, dy: null, nx: null, ny: null, candidates: [[5, 1], [3, 3]], stack: [[1, 1]] });
+assert.equal(pairRows.find(row => row.name === "candidates").value, "[(1, 5), (3, 3)]", "Variable pairs display in (y, x) order");
+assert.equal(pairRows.find(row => row.name === "stack").value, "[(1, 1)]", "Stack pairs display in (y, x) order");
+
 const savedExecution = JSON.stringify(execution);
 for (const step of [...content.steps].reverse()) {
   validate(step.canvas);

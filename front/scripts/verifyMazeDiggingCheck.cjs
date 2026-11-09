@@ -34,11 +34,11 @@ const { validateAssessment, createAssessmentState, answerQuestion, advanceAssess
 const { newAnswerFeedback } = load(file("assessment/answerFeedbackState.ts"));
 const [q1, q2] = content.questions;
 
-// 基準データ §3 フェーズ3の確定事項（場面 dig-3、連結2問、(5,3) から右へ (7,3)・間の壁 (6,3)）。
+// 基準データ §3 フェーズ3の確定事項（場面 dig-3、連結2問、キー "5,3" から右へ "7,3"・間の壁 "6,3"、表示座標は (y, x) 順）。
 assert.equal(content.id, "maze-digging-check"); assert.equal(content.phase, 3); assert.equal(content.stageName, "動きの確認問題");
 assert.equal(content.questions.length, 2);
 assert.deepEqual(plain(content.questions.map(q => [q.id, q.prompt, q.stepId, q.correctAnswer.nodeId, q.tags[0]])), [
-  ["next-room", "(5, 3) から右へ掘ります。掘られる部屋はどれですか", "dig-3", "7,3", "dig-target"],
+  ["next-room", "(3, 5) から右へ掘ります。掘られる部屋はどれですか", "dig-3", "7,3", "dig-target"],
   ["between-wall", "そのとき通路になる、間の壁マスはどれですか", "dig-3", "6,3", "dig-between"],
 ]);
 assert.equal(q1.requires, null);
