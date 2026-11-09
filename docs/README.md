@@ -126,6 +126,7 @@
 | [binary-search-integration-295.md](binary-search-integration-295.md) | 記録 | Issue #295の二分探索アプリ統合、知識カード3枚（探索範囲を半分にする／中央の値と比べる／対数時間）・実績6件のシード追加、コレクション検証への単元登録、単元サムネイルを主教材の図へ差し替え、シード再実行の要否 |
 | [parsons-overflow-feedback-318.md](parsons-overflow-feedback-318.md) | 記録 | Issue #318の Parsons 盤面はみ出し修正（盤面のみ内部スクロール・行ピッチ52→46px・全5単元）と、Issue #302/#303/#318共通の「直前の回答」表示ポリシー（対象の問題を開いている間だけ表示） |
 | [parsons-order-feedback-327.md](parsons-order-feedback-327.md) | 記録 | Issue #327の Parsons 相対順序フィードバック（最長部分列で「動かさなくてよい行」に✓、全5単元の応用問題へ接続、フェーズ7ヒントL4は対象外） |
+| [parsons-marks-answer-time-354.md](parsons-marks-answer-time-354.md) | 記録 | Issue #354の Parsons キープ印の判定固定（印は提出した並びへの判定として固定し、ドラッグ中は更新しない） |
 | [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
 | [prisma-tmp-cleanup-278.md](prisma-tmp-cleanup-278.md) | 記録 | Issue #278のPrisma生成一時ファイル（.tmp 9件・約173MB）の追跡削除と.gitignore追加（Cloud Buildソースアーカイブ肥大の主因対策） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
