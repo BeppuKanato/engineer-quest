@@ -66,18 +66,23 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "コードの確認問題の結果" : "穴掘り法のコードの確認問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minHeight: 0, p: 1, display: "flex", flexDirection: "column" }}>
-      <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
-        color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none", flexShrink: 0,
-      }}>{complete ? mazeDiggingCodeCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`}</Typography>
-      {!embedded && <AnswerFeedbackNotice assessmentId={mazeDiggingCodeCheckContent.id} />}
-      {question ? <Box ref={codeRef} sx={{ width: "100%", flex: 1, minHeight: 0, overflow: "auto", py: 1 }}>
-          <Box sx={{ width: "max-content", minWidth: "100%", minHeight: "100%", display: "flex" }}>
-            <Box sx={{ margin: "auto" }}>
-              <CodeDisplay code={mazeDiggingCodeCheckContent.code} label="dig_mazeのコード" blank={{ lineId: question.lineId, ...question.blank }} />
+      {/* 3段組（#298）: 中央はスクロール領域。問題文とコード窓はここに置き、
+          コード窓の高さは 320px の固定（#321 の残り高さ方式から変更）。窓の内側スクロールと空欄への寄せは維持する。 */}
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
+          color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none", flexShrink: 0,
+        }}>{complete ? mazeDiggingCodeCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`}</Typography>
+        {!embedded && <AnswerFeedbackNotice assessmentId={mazeDiggingCodeCheckContent.id} />}
+        {question ? <Box ref={codeRef} sx={{ width: "100%", height: 320, flexShrink: 0, overflow: "auto", py: 1 }}>
+            <Box sx={{ width: "max-content", minWidth: "100%", minHeight: "100%", display: "flex" }}>
+              <Box sx={{ margin: "auto" }}>
+                <CodeDisplay code={mazeDiggingCodeCheckContent.code} label="dig_mazeのコード" blank={{ lineId: question.lineId, ...question.blank }} />
+              </Box>
             </Box>
-          </Box>
-        </Box> : <Box sx={{ flex: 1, minHeight: 0 }} />}
-      <Box sx={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
+          </Box> : <Box sx={{ height: 320, flexShrink: 0 }} />}
+      </Box>
+      {/* 下部の固定ゾーン（#298）: 指示・選択肢・注記・進行操作は常時表示する。 */}
+      <Box sx={{ flexShrink: 0, display: "flex", flexDirection: "column", borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>
         {question && <>
           <Typography component="p" sx={{ textAlign: "center", fontSize: 16, mt: 1, mb: 1 }}>{mazeDiggingCodeCheckContent.instruction}</Typography>
           <Box role="group" aria-label="空欄に入るコードの選択肢" sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
