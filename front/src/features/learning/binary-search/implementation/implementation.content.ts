@@ -1,9 +1,10 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import {
   binarySearchMainTarget, binarySearchMainValues, binarySearchTransferTarget,
   binarySearchTransferValues, runBinarySearch,
 } from "../binarySearch";
-import { binarySearchCode } from "../code-mapping/binarySearchCode";
+import { binarySearchCode, type BinarySearchCodeLineId } from "../code-mapping/binarySearchCode";
 import { binarySearchConsolidationContent } from "../consolidation/consolidation.content";
 
 export type ImplementationTest = PythonTestCase & { readonly visibility: "display" | "judgement" };
@@ -19,10 +20,71 @@ if (!parsonsQuestion || parsonsQuestion.kind !== "parsons") throw new Error("Pha
 
 const skeletonLineIds = ["while-range", "if-hit", "elif-smaller", "else-larger"] as const;
 
+/**
+ * 入力量レベル別の初期テンプレート（Issue #328）。
+ * 「骨格から書く」「穴埋めで書く」は、正解コード（binarySearchCode）の行から組み立てる。
+ * 残す行は正解コードの行そのものを使い、置き換える行は、その行のインデントを保った
+ * プレースホルダ行（raise NotImplementedError ＋「ここを書く」の目印）にする。
+ * プレースホルダが残っていると必ずテストに失敗する。
+ */
+const codeLineText = (id: BinarySearchCodeLineId): string => {
+  const line = binarySearchCode.lines.find(line => line.id === id);
+  if (!line) throw new Error("Missing canonical line");
+  return line.text;
+};
+const placeholderLine = (id: BinarySearchCodeLineId, description: string): string => {
+  const indent = /^ */u.exec(codeLineText(id))?.[0] ?? "";
+  return `${indent}raise NotImplementedError  # ここを書く：${description}`;
+};
+const placeholderGuide = "    # 「ここを書く」の行が、まだ書けていない場所です。その行を消して、自分のコードを書いてください。";
+
+const fullTemplate = "def binary_search(values, target):\n    \"\"\"values（小さい順に並んだ数字のリスト）の中から target を探し、その位置を返す。無い場合は -1 を返す。\"\"\"\n    pass";
+
+/** 骨格：制御構造（ループと条件分岐）と最後の return だけを残し、本体の行をすべてプレースホルダにする。 */
+const skeletonTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  placeholderLine("init-lo", "探す範囲の左端 lo を用意する"),
+  placeholderLine("init-hi", "探す範囲の右端 hi を用意する"),
+  codeLineText("while-range"),
+  placeholderLine("compute-mid", "真ん中の位置 mid を計算する"),
+  codeLineText("if-hit"),
+  placeholderLine("return-mid", "見つけた位置を返す"),
+  codeLineText("elif-smaller"),
+  placeholderLine("drop-left", "左側を捨てて、範囲を右半分にする"),
+  codeLineText("else-larger"),
+  placeholderLine("drop-right", "右側を捨てて、範囲を左半分にする"),
+  codeLineText("return-missing"),
+].join("\n");
+
+/** 穴埋め：要点の行（真ん中の計算と、範囲の狭め方。フェーズ5の空欄に対応する行）だけをプレースホルダにする。 */
+const fillInTemplate = [
+  codeLineText("define-function"),
+  placeholderGuide,
+  codeLineText("init-lo"),
+  codeLineText("init-hi"),
+  codeLineText("while-range"),
+  placeholderLine("compute-mid", "探す範囲の真ん中の位置 mid を計算する"),
+  codeLineText("if-hit"),
+  codeLineText("return-mid"),
+  codeLineText("elif-smaller"),
+  placeholderLine("drop-left", "真ん中より右側に範囲を狭める。mid 自身はもう調べない"),
+  codeLineText("else-larger"),
+  placeholderLine("drop-right", "真ん中より左側に範囲を狭める。mid 自身はもう調べない"),
+  codeLineText("return-missing"),
+].join("\n");
+
+const levelTemplates: Readonly<Record<ImplementationInputLevel, string>> = {
+  full: fullTemplate,
+  skeleton: skeletonTemplate,
+  "fill-in": fillInTemplate,
+};
+
 export const binarySearchImplementationContent = {
   version: 1, id: "binary-search-implementation", phase: 7,
   caption: "小さい順に並んだ数字から目的の値を探すコードを完成させ、実行して確かめましょう。",
-  template: "def binary_search(values, target):\n    \"\"\"values（小さい順に並んだ数字のリスト）の中から target を探し、その位置を返す。無い場合は -1 を返す。\"\"\"\n    pass",
+  template: fullTemplate,
+  templates: levelTemplates,
   tests: [
     testCase("D1", "基本（動きの説明のリスト）", "display", binarySearchMainValues, binarySearchMainTarget),
     testCase("J1", "基本と同じリスト", "judgement", binarySearchMainValues, binarySearchMainTarget),
