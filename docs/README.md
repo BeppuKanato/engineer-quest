@@ -150,6 +150,7 @@
 | [phase3-situation-captions-297.md](phase3-situation-captions-297.md) | 記録 | Issue #297のフェーズ3状況キャプション追加（バブルソート・棒倒し法）、青い処理中色の時制をトレース由来の文言で固定、他単元への適用判定 |
 | [code-mapping-scroll-grey-band-301-303.md](code-mapping-scroll-grey-band-301-303.md) | 記録 | Issue #301のフェーズ4コード見切れ修正（コード専用の横スクロールを全6単元へ）と、Issue #303の画面下グレー帯の特定（body背景のはみ出し）と単元プレビューの内側スクロール化（全5単元） |
 | [wall-extension-phase2-314-316.md](wall-extension-phase2-314-316.md) | 記録 | Issue #314/#316の「図の変化とコード実行単位の対応」原則と説明専用ステップの導入、棒倒し法フェーズ2の32ステップ再構成とフェーズ4チェックポイント契約の改訂、フェーズ7トレース再生への波及 |
+| [maze-digging-loop-explanation-334.md](maze-digging-loop-explanation-334.md) | 記録 | Issue #334の穴掘り法フェーズ2への輪の説明ステップ追加（説明専用2ステップ: 理由＋仮定盤面の実演）とフェーズ4チェックポイント契約のコード対応ステップへの改訂 |
 
 ## 図
 
