@@ -286,8 +286,9 @@ assert(!previewSource.includes('flexDirection: "column", justifyContent: "center
 assert.match(previewSource, /minHeight: "3em"/, "prompt keeps its reserved height so the figure position is stable");
 const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /question\?\.kind === "parsons" \? parsonsQuestionBodySx/, "parsons uses the shared scroll layout");
-assert.match(parsonsBoardSource, /maxHeight: 368, overflowY: "auto"/, "parsons scroll viewport is capped and can shrink");
-assert.match(parsonsBoardSource, /\[compactViewport\]: \{ maxHeight: "none", flexShrink: 0, overflowY: "hidden" \}/, "the board flows in the shared scroll region on compact screens");
+assert.match(parsonsBoardSource, /height: 368/, "parsons scroll viewport has a fixed height (#298)");
+assert.match(parsonsBoardSource, /minHeight: 276/, "parsons scroll viewport keeps a usable minimum height");
+assert.match(parsonsBoardSource, /\[compactViewport\]: \{ height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" \}/, "the board flows in the shared scroll region on compact screens");
 assert.match(parsonsBoardSource, /parsonsDragCursor/, "parsons drag cursor is the shared dark SVG cursor");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
 console.log("Maze-digging consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, backtrack reason with the phase-4 pop route, 22-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");

@@ -84,7 +84,8 @@ type ParsonsAttemptActions = {
 
 /**
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
- * scrollable のときは盤面を残りの高さに収め、ボタン行は盤面の下に置く（Issue #352）。
+ * scrollable のときは表示窓を固定高368px（下限276px）とし、ボタン行は盤面の下に置く。
+ * 画面高640px以下または幅800px未満では窓の高さ制限を外し、盤面を設問と同じ中央領域に流す（Issue #352）。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  */
 export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback, instruction, attemptActions }: {
@@ -129,8 +130,8 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
       </Button>}
     </Box>}
     <Box component={motion.div} layoutScroll sx={{ overflowX: "auto", fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5,
-      ...(scrollable ? { maxHeight: 368, overflowY: "auto", overscrollBehaviorY: "contain",
-        [compactViewport]: { maxHeight: "none", flexShrink: 0, overflowY: "hidden" } } : {}) }}>
+      ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto", overscrollBehaviorY: "contain",
+        [compactViewport]: { height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" } } : {}) }}>
       <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
         style={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
