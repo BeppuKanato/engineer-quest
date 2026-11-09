@@ -85,12 +85,15 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
   }, [diagnosis, onComplete]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+    {/* 中央寄せは justifyContent: "center" でなく、問題文と末尾スペーサの marginTop: "auto" で行う。
+        内容が画面より高いとき（選択肢の折り返し・誤答後のボタン追加など）に上方向へはみ出して
+        通知やチップに重なるのを防ぎ、余白のリズムを保ったまま下方向のスクロールへ逃がすため（Issue #327）。 */}
     <Box component="section" aria-label={complete ? "応用問題の結果" : "棒倒し法の応用問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: question ? (embedded ? "100%" : "84dvh") : "auto",
-        minHeight: question ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        minHeight: question ? (embedded ? 0 : 500) : (embedded ? "100%" : "84dvh"), p: 1, display: "flex", flexDirection: "column" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
         color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
-        minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
+        marginTop: "auto", minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
       }}>{diagnosis ? "応用問題の結果" : question?.prompt}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
@@ -113,8 +116,8 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
         </Box>}
         {question.kind === "parsons" && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true} />}
         {attempt && <>
-          {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
-          <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+          {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
+          <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
             {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
             <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
               sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
@@ -136,6 +139,7 @@ export function WallExtensionConsolidationPreview({ embedded = false, onLearning
           <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />
         </Box>}
       </>}
+      <Box aria-hidden sx={{ marginTop: "auto" }} />
     </Box>
     {review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={wallExtensionCodeMappingContent} stepIds={review.reviewStepIds}
       renderCanvas={canvas => <WallExtensionCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}

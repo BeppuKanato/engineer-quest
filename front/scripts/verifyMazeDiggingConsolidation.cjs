@@ -278,4 +278,10 @@ assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs 
 assert.match(previewSource, /content=\{mazeDiggingCodeMappingContent\}/, "review opens the phase-4 content");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "maze-digging-consolidation"'), "Standalone preview is registered");
+// レイアウト契約（#327）: 中央寄せは marginTop auto の安全な方式で、盤面には高さ下限と濃色ドラッグカーソルがある。
+assert(!previewSource.includes('flexDirection: "column", justifyContent: "center"'), "consolidation does not center with justifyContent (overflow would spill upward)");
+assert.match(previewSource, /marginTop: "auto", minHeight: "3em"/, "prompt carries the first half of the safe centering");
+const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+assert.match(parsonsBoardSource, /minHeight: 276/, "parsons scroll viewport keeps a usable minimum height");
+assert.match(parsonsBoardSource, /parsonsDragCursor/, "parsons drag cursor is the shared dark SVG cursor");
 console.log("Maze-digging consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, backtrack reason with the phase-4 pop route, 22-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");
