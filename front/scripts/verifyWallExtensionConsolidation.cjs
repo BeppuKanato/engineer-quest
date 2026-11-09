@@ -275,5 +275,5 @@ assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs 
 assert.match(previewSource, /content=\{wallExtensionCodeMappingContent\}/, "review opens the phase-4 content");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "wall-extension-consolidation"'), "Standalone preview is registered");
-assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
 console.log("Wall-extension consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, y == 2 review route, 21-line Parsons with border-block-only reordering, soft-gate completion and first-attempt diagnosis.");

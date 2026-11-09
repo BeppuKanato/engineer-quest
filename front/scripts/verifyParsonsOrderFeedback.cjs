@@ -66,17 +66,28 @@ assert.deepEqual(sorted(parsonsKeepLineIds(learnerG, solutionG, groups)), sorted
 const scattered = ["init-q", "body", "init-d", "tail"];
 assert.equal(isParsonsOrderCorrect(scattered, solutionG, groups), false);
 
-// 盤面の描画: 回答済み（active）で未正解の初期並びでは、残せる行にだけ印と凡例が出る。
+// 盤面の描画: 印は「提出した並び」への判定として固定される（Issue #354）。
+// 盤面の現在の並び（初期並び [b,a,c,d]）ではなく、submittedLineIds から判定する。
 const code = { lines: solution4.map(id => ({ id, text: `code-${id}` })) };
 const question = { id: "q", kind: "parsons", lineIds: ["b", "a", "c", "d"], correctAnswer: { kind: "order", lineIds: solution4 } };
 const board = (orderFeedback) => renderToStaticMarkup(createElement(ParsonsBoard, { question, code, orderFeedback }));
-const active = board({ solutionLineIds: solution4, active: true });
-// 初期並び [b,a,c,d] の最長部分列は [b,c,d]（前の行優先）なので、a だけ印なし。
-assert(active.includes("✓ は移動不要"), "legend is shown while feedback is active");
-assert.equal((active.match(/data-parsons-keep="true"/g) || []).length, 3, "three kept rows are marked");
 const keepRowOf = (html, id) => new RegExp(`data-parsons-line-id="${id}"[^>]*data-parsons-keep="true"`).test(html);
-assert(keepRowOf(active, "b") && keepRowOf(active, "c") && keepRowOf(active, "d") && !keepRowOf(active, "a"), "marks follow the relative-order judgement");
-// 未回答（active でない）ときは印も凡例も出ない。
+// 提出した並び [b,a,c,d] が誤答: 最長部分列 [b,c,d] にだけ印。a だけ印なし。
+const submittedSame = board({ solutionLineIds: solution4, active: true, submittedLineIds: ["b", "a", "c", "d"] });
+assert(submittedSame.includes("✓ は移動不要"), "legend is shown after a wrong submission");
+assert.equal((submittedSame.match(/data-parsons-keep="true"/g) || []).length, 3, "three kept rows are marked");
+assert(keepRowOf(submittedSame, "b") && keepRowOf(submittedSame, "c") && keepRowOf(submittedSame, "d") && !keepRowOf(submittedSame, "a"), "marks follow the submitted order's relative-order judgement");
+// 提出した並びが現在の盤面と違っても、印は提出時の判定のまま（ドラッグで更新しない）。
+// 逆順 [d,c,b,a] の提出では残せるのは d だけ。ライブ判定なら [b,c,d] に付くはずで、付かないことを確認する。
+const submittedReversed = board({ solutionLineIds: solution4, active: true, submittedLineIds: ["d", "c", "b", "a"] });
+assert.equal((submittedReversed.match(/data-parsons-keep="true"/g) || []).length, 1, "only the submitted order's keep row is marked");
+assert(keepRowOf(submittedReversed, "d") && !keepRowOf(submittedReversed, "b") && !keepRowOf(submittedReversed, "c") && !keepRowOf(submittedReversed, "a"), "marks stay frozen to the submitted order, not the live order");
+assert(submittedReversed.includes("data-parsons-order-legend"), "legend follows the frozen judgement");
+// 提出した並びが正解なら、盤面の並びが誤っていても印も凡例も出ない。
+const submittedCorrect = board({ solutionLineIds: solution4, active: true, submittedLineIds: solution4 });
+assert(!submittedCorrect.includes("data-parsons-keep"), "no marks when the submitted order is correct");
+assert(!submittedCorrect.includes("data-parsons-order-legend"), "no legend when the submitted order is correct");
+// 未提出（submittedLineIds なし）のときは印も凡例も出ない。
 const inactive = board({ solutionLineIds: solution4, active: false });
 assert(!inactive.includes("data-parsons-keep"), "no marks before the first answer");
 assert(!inactive.includes("data-parsons-order-legend"), "no legend before the first answer");
@@ -84,4 +95,4 @@ assert(!inactive.includes("data-parsons-order-legend"), "no legend before the fi
 const plain = board(undefined);
 assert(!plain.includes("data-parsons-keep") && !plain.includes("data-parsons-order-legend"), "default board is unchanged");
 
-console.log("Parsons order feedback: relative-order keep set (identity, moved-line, adjacent swap, reverse, distractor, interchangeable group) and board rendering (marks, legend, inactive/default unchanged) passed.");
+console.log("Parsons order feedback: relative-order keep set (identity, moved-line, adjacent swap, reverse, distractor, interchangeable group) and board rendering (marks frozen to the submitted order, none for a correct submission, inactive/default unchanged) passed.");

@@ -202,5 +202,5 @@ assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "choices lock after a correct answer");
 assert.match(previewSource, /question.kind === "node" && !attempt\?\.correct/, "graph locks after a correct answer");
 assert.match(previewSource, /<ParsonsBoard[^>]*disabled=\{attempt\?\.correct === true\}/, "parsons locks after a correct answer");
-assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0 \}\}/, "parsons order feedback is wired (#327)");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
 console.log("BFS consolidation: primary-action buttons and graph-height cap contract passed.");
