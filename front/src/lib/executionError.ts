@@ -21,7 +21,9 @@ export function executionErrorText(error: unknown): string {
 /** トレースバック中の `File "<string>", line N` のうち最後のものの行番号。見つからなければ undefined。 */
 export function extractExecutionErrorLine(message: string): number | undefined {
   let line: number | undefined;
-  for (const match of message.matchAll(/File "<string>", line (\d+)/gu)) {
+  const pattern = /File "<string>", line (\d+)/gu;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(message)) !== null) {
     const parsed = Number(match[1]);
     if (Number.isSafeInteger(parsed) && parsed > 0) line = parsed;
   }
