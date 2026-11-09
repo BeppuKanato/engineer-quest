@@ -149,6 +149,7 @@
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
 | [phase3-situation-captions-297.md](phase3-situation-captions-297.md) | 記録 | Issue #297のフェーズ3状況キャプション追加（バブルソート・棒倒し法）、青い処理中色の時制をトレース由来の文言で固定、他単元への適用判定 |
 | [code-mapping-scroll-grey-band-301-303.md](code-mapping-scroll-grey-band-301-303.md) | 記録 | Issue #301のフェーズ4コード見切れ修正（コード専用の横スクロールを全6単元へ）と、Issue #303の画面下グレー帯の特定（body背景のはみ出し）と単元プレビューの内側スクロール化（全5単元） |
+| [parsons-editor-usability-327-325.md](parsons-editor-usability-327-325.md) | 記録 | Issue #327の応用問題レイアウト修正（安全な中央寄せで問題文と通知の重なりを解消、全5単元）とParsons盤面の高さ下限・濃色ドラッグカーソル、Issue #325のフェーズ7エディタ共有テーマ（キャレット色明示）と濃色Iビームカーソル |
 | [wall-extension-phase2-314-316.md](wall-extension-phase2-314-316.md) | 記録 | Issue #314/#316の「図の変化とコード実行単位の対応」原則と説明専用ステップの導入、棒倒し法フェーズ2の32ステップ再構成とフェーズ4チェックポイント契約の改訂、フェーズ7トレース再生への波及 |
 
 ## 図
