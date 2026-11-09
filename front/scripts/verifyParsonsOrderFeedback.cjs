@@ -95,4 +95,35 @@ assert(!inactive.includes("data-parsons-order-legend"), "no legend before the fi
 const plain = board(undefined);
 assert(!plain.includes("data-parsons-keep") && !plain.includes("data-parsons-order-legend"), "default board is unchanged");
 
-console.log("Parsons order feedback: relative-order keep set (identity, moved-line, adjacent swap, reverse, distractor, interchangeable group) and board rendering (marks frozen to the submitted order, none for a correct submission, inactive/default unchanged) passed.");
+// フェード型: 固定行は正解位置に固定表示され、印は可動行だけを判定する。
+const { parsonsMovableLineIds, parsonsMovableSegments } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
+const solution5 = ["s1", "s2", "s3", "s4", "s5"];
+const fixed5 = ["s1", "s5"];
+assert.deepEqual([...parsonsMovableLineIds(solution5, fixed5)], ["s2", "s3", "s4"]);
+assert.deepEqual([...parsonsMovableLineIds(solution5)], solution5);
+assert.deepEqual([...parsonsMovableSegments(solution5, fixed5)].map(segment => [...segment]), [["s2", "s3", "s4"]]);
+assert.deepEqual([...parsonsMovableSegments(solution5, ["s3"])].map(segment => [...segment]), [["s1", "s2"], ["s4", "s5"]], "fixed lines split the movable range into segments");
+assert.deepEqual([...parsonsMovableSegments(solution5)].map(segment => [...segment]), [solution5], "no fixed lines means one full segment");
+const fadedCode = { lines: solution5.map(id => ({ id, text: `code-${id}` })) };
+const fadedQuestion = { id: "q-faded", kind: "parsons", lineIds: ["s4", "s1", "s3", "s5", "s2"], correctAnswer: { kind: "order", lineIds: solution5 }, fixedLineIds: fixed5 };
+const fadedHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: fadedQuestion, code: fadedCode }));
+assert.deepEqual([...fadedHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), ["s1", "s4", "s3", "s2", "s5"],
+  "fixed lines pin at their solution positions and movable lines fill the remaining slots in their presented order");
+const fixedRendered = [...fadedHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
+assert.deepEqual(fixedRendered, fixed5, "exactly the fixed lines render as non-operable");
+const unfadedHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: { ...fadedQuestion, fixedLineIds: undefined }, code: fadedCode }));
+assert.equal((unfadedHtml.match(/<button/g) || []).length - (fadedHtml.match(/<button/g) || []).length, fixed5.length * 3,
+  "each fixed row loses its drag/up/down controls");
+// 提出した可動列 [s3,s2,s4]（s2 と s3 の隣接交換）では、相対順序の判定は可動列の中だけで行われ s2 だけが印なしになる。
+const fadedBoard = submittedLineIds => renderToStaticMarkup(createElement(ParsonsBoard, {
+  question: fadedQuestion, code: fadedCode,
+  orderFeedback: { solutionLineIds: solution5, active: true, submittedLineIds },
+}));
+const fadedSubmitted = fadedBoard(["s1", "s3", "s2", "s4", "s5"]);
+assert.equal((fadedSubmitted.match(/data-parsons-keep="true"/g) || []).length, 2, "marks land on movable rows only");
+assert(keepRowOf(fadedSubmitted, "s3") && keepRowOf(fadedSubmitted, "s4") && !keepRowOf(fadedSubmitted, "s2"), "keep set is judged within the movable subsequence");
+assert(!/data-parsons-line-id="s1"[^>]*data-parsons-keep/.test(fadedSubmitted) && !/data-parsons-line-id="s5"[^>]*data-parsons-keep/.test(fadedSubmitted), "fixed rows never receive keep marks");
+const fadedCorrect = fadedBoard(solution5);
+assert(!fadedCorrect.includes("data-parsons-keep"), "no marks for a correct faded submission");
+
+console.log("Parsons order feedback: relative-order keep set (identity, moved-line, adjacent swap, reverse, distractor, interchangeable group), board rendering (marks frozen to the submitted order, none for a correct submission, inactive/default unchanged) and faded boards (fixed lines pinned and non-operable, marks judged on movable lines only) passed.");
