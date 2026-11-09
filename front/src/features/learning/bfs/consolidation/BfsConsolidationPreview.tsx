@@ -19,7 +19,7 @@ import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { ConsolidationGraph } from "./ConsolidationGraph";
-import { ParsonsBoard } from "./ParsonsBoard";
+import { ParsonsBoard, parsonsQuestionBodySx } from "./ParsonsBoard";
 import { bfsConsolidationContent as content, type ConsolidationQuestion } from "./consolidation.content";
 
 /** 結果のスコア表示。正解数とゲージがアニメーションで増えて最終値に届く。動きを減らす設定では即座に最終値を出す。 */
@@ -62,6 +62,7 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
   useAssessmentFeedback(content, session, active && !review);
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
+  const retryingParsons = question?.kind === "parsons" && attempt?.correct === false;
   const diagnosis = complete ? diagnoseAssessment(content, session) : null;
   const submit = (answer: AssessmentAnswer) => {
     if (question) setSession(current => answerQuestion(content, current, question.id, answer));
@@ -83,7 +84,8 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
     <Box component="section" aria-label={complete ? "応用問題の結果" : "BFSの応用問題"}
       sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh",
         minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column",
+        ...(question?.kind === "parsons" ? parsonsQuestionBodySx : {}) }}>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
           color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -119,10 +121,13 @@ export function BfsConsolidationPreview({ embedded = false, onLearningEvent, act
       {question && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
         {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
         <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-          {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel} />}
-          <Button variant="contained" onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
-            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-              "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>
+          {!attempt.correct && <AssessmentReviewButton onClick={() => setReview(question)} label={content.reviewLabel}
+            variant={retryingParsons ? "outlined" : "contained"} />}
+          <Button variant={retryingParsons ? "outlined" : "contained"} onClick={() => setSession(current => advanceAssessment(content, current, question.id))}
+            sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, ...(retryingParsons
+              ? { borderColor: playerTokens.focus, color: playerTokens.focus }
+              : { bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } })
+            }}>{session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>
         </Box>
       </Box>}
       {diagnosis && onNext && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1, display: "flex", justifyContent: "center" }}>

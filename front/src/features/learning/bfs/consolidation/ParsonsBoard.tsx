@@ -1,7 +1,8 @@
 "use client";
 
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button } from "@mui/material";
-import { Reorder, useDragControls, useReducedMotion } from "framer-motion";
+import { motion, Reorder, useDragControls, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 
 import type { OrderAnswer, ParsonsQuestion } from "../../assessment/assessment";
@@ -18,6 +19,14 @@ const rowStyle = {
   background: playerTokens.surface, boxShadow: `inset 0 0 0 2px ${playerTokens.focus}`, borderRadius: 4,
 } as const;
 const controlStyle = { color: playerTokens.control, minWidth: 44, minHeight: 44, px: 0.5, cursor: "default" } as const;
+const keepColors = { fill: "#dcfce7", mark: "#15803d" } as const;
+
+// 高さが低い画面や文章が折り返す狭い画面では、設問と盤面を同じ領域で流す。
+const compactViewport = "@media (max-height: 640px), (max-width: 599.95px)";
+export const parsonsQuestionBodySx = {
+  overflowY: "visible",
+  [compactViewport]: { overflowY: "auto" },
+} as const;
 
 // ドラッグ用カーソルは OS 標準の手袋（grab）だと白系で明るい行の上でほぼ見えなくなる（Issue #327）。
 // 濃色で描いた SVG カーソルをデータ URI で直接指定し、OS のカーソル配色に依存せず常に見えるようにする。
@@ -36,14 +45,17 @@ function SortableLine({ id, text, index, count, duration, disabled = false, keep
   const controls = useDragControls();
   return <Reorder.Item as="div" value={id} dragListener={false} dragControls={controls}
     data-parsons-line-id={id} data-parsons-keep={keep || undefined}
-    style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor, ...(keep ? { boxShadow: `inset 0 0 0 2px ${playerTokens.focus}, inset 8px 0 0 0 ${playerTokens.focus}` } : {}) }} transition={{ duration }}
+    style={{ ...rowStyle, position: "relative", cursor: parsonsDragCursor,
+      ...(keep ? { background: keepColors.fill, boxShadow: `inset 0 0 0 2px ${keepColors.mark}` } : {}) }} transition={{ duration }}
     whileDrag={{ zIndex: 1 }}>
     <Button type="button" aria-label={`${text.trim()}をドラッグして並べ替え`} title="ドラッグして並べ替え" disabled={disabled}
       onPointerDown={event => { if (!disabled) controls.start(event); }} sx={{ ...controlStyle, cursor: parsonsDragCursor, touchAction: "none" }}>↕</Button>
+    {keep !== undefined && <Box aria-hidden sx={{ width: 36, flexShrink: 0, display: "grid", placeItems: "center" }}>
+      {keep && <CheckCircleIcon sx={{ fontSize: 24, color: keepColors.mark }} />}
+    </Box>}
     <Box component="code" sx={{ flex: 1, whiteSpace: "pre", textAlign: "left", px: 1 }}>{text}</Box>
     <Button type="button" aria-label={`${text.trim()}を上へ`} disabled={disabled || index === 0} onClick={() => onMove(-1)} sx={controlStyle}>↑</Button>
     <Button type="button" aria-label={`${text.trim()}を下へ`} disabled={disabled || index === count - 1} onClick={() => onMove(1)} sx={controlStyle}>↓</Button>
-    {keep !== undefined && <Box aria-hidden sx={{ width: 28, flexShrink: 0, textAlign: "center", fontSize: 16, fontWeight: 700, color: playerTokens.focus }}>{keep ? "✓" : ""}</Box>}
     {keep && <Box component="span" sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>この行は動かさなくて大丈夫です</Box>}
   </Reorder.Item>;
 }
@@ -61,7 +73,7 @@ export type ParsonsOrderFeedback = {
 
 /**
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
- * scrollable のときは固定高の窓の中で盤面だけが縦スクロールし、ボタン行は盤面の下に置かれる（Issue #318、#298）。
+ * scrollable のときは盤面を残りの高さに収め、ボタン行は盤面の下に置く（Issue #352）。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  */
 export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback }: { question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean; scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback }) {
@@ -83,26 +95,24 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
     ? parsonsKeepLineIds(ordered, orderFeedback.solutionLineIds, orderFeedback.interchangeableLineGroups)
     : null;
   const showOrderFeedback = keepIds !== null && keepIds.size > 0;
-  return <Box sx={{ minWidth: 0, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
-    <Box sx={{ fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5, ...(scrollable ? { display: "flex", flexDirection: "column" } : {}) }}>
-      {/* scrollable の表示窓は固定高: 行ピッチ46px × 8行 = 368px（Issue #298）。
-          下限 276px（6行、Issue #327）は盤面が潰れて操作不能にならないための床として残す。
-          盤面の内側スクロールは、学習画面で唯一認める入れ子のスクロールである。 */}
-      <Box sx={{ overflowX: "auto", ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto" } : {}) }}>
-        <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
-          style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
-            keep={showOrderFeedback ? keepIds.has(id) : undefined}
-            onMove={offset => move(id, offset)} />)}
-        </Reorder.Group>
-      </Box>
+  return <Box sx={{ minWidth: 0, ...(scrollable ? { minHeight: 0, display: "flex", flexDirection: "column", [compactViewport]: { flexShrink: 0 } } : {}) }}>
+    {showOrderFeedback && <Box component="p" data-parsons-order-legend sx={{ m: 0, mb: 1, flexShrink: 0, textAlign: "center", fontSize: 14, color: playerTokens.text }}>✓ が付いた行は、動かさなくて大丈夫です</Box>}
+    <Box component={motion.div} layoutScroll sx={{ overflowX: "auto", fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5,
+      ...(scrollable ? { maxHeight: 368, overflowY: "auto", overscrollBehaviorY: "contain",
+        [compactViewport]: { maxHeight: "none", flexShrink: 0 } } : {}) }}>
+      <Reorder.Group as="div" role="group" aria-label="コード行の並び替え" axis="y" values={[...ordered]} onReorder={disabled ? () => {} : setOrdered}
+        style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {ordered.map((id, index) => <SortableLine key={id} id={id} text={text(id)} index={index} count={ordered.length} duration={duration} disabled={disabled}
+          keep={showOrderFeedback ? keepIds.has(id) : undefined}
+          onMove={offset => move(id, offset)} />)}
+      </Reorder.Group>
     </Box>
-    {showOrderFeedback && <Box component="p" data-parsons-order-legend sx={{ m: 0, mt: 1, flexShrink: 0, textAlign: "center", fontSize: 14, color: playerTokens.text }}>✓ が付いた行は、動かさなくて大丈夫です</Box>}
-    <Box sx={{ mt: 2, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+    <Box sx={{ mt: 2, flexShrink: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1,
+      ...(scrollable ? { [compactViewport]: { position: "sticky", bottom: 0, zIndex: 2, bgcolor: playerTokens.background } } : {}) }}>
       <Button onClick={() => setOrdered([...question.lineIds])} disabled={disabled || isInitialOrder} sx={{ color: playerTokens.control, minHeight: 44 }}>提示順に戻す</Button>
       {onAnswer && <Button variant="contained" disabled={disabled} onClick={() => onAnswer({ kind: "order", lineIds: ordered })}
         sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-          "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>この順序で回答する</Button>}
+          "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{orderFeedback?.active ? "この順序で再回答する" : "この順序で回答する"}</Button>}
     </Box>
   </Box>;
 }

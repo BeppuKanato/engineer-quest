@@ -196,7 +196,7 @@ assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "fig
 assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
-assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
+assert.match(previewSource, /variant=\{retryingParsons \? "outlined" : "contained"\} onClick=\{\(\) => setSession\(current => advanceAssessment/, "advance is secondary only during a Parsons retry (#352)");
 assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\{\(\) => onAnswer/);
 // 正解後の固定契約: 正解した問題は選択肢・ノード・Parsons のいずれも選び直せない。
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "choices lock after a correct answer");
