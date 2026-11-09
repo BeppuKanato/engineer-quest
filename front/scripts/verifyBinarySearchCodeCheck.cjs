@@ -184,6 +184,12 @@ assert(assessmentComplete(content, skipped), "An all-wrong run still completes")
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
 const codeCheckPreviewSource = fs.readFileSync(`${root}/binary-search/code-check/BinarySearchCodeCheckPreview.tsx`, "utf8");
+
+// レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
+assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");
+assert.doesNotMatch(codeCheckPreviewSource, /flex: 1, minHeight: 0, overflow: "auto"/, "code window no longer takes the leftover height (#298)");
+assert.match(codeCheckPreviewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "prompt and code window flow in the middle scroll region (#298)");
+assert.match(codeCheckPreviewSource, /borderTop: `1px solid/, "choices live in the fixed bottom zone (#298)");
 assert.match(codeCheckPreviewSource, /advanceAssessment\(binarySearchCodeCheckContent, current, question\.id\)/);
 assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);
 // 単品画面の仕組みはフェーズ3単品に揃える（#181）: 再回答時は見出しに「もう一度、」が付き、
