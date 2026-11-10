@@ -14,8 +14,10 @@ export type UnlockedAchievement = {
   id: string; title: string; description: string; category: string; categoryLabel: string;
   rarity: string; iconKey: string; achievedAt: string;
 };
-export type PhaseCompletion = { courseId: string; phase: PhaseProgress; awardedCard?: AwardedCard | null; unlockedAchievements: UnlockedAchievement[] };
-export type UnitCompletion = { courseId: string; unit: UnitProgress; unlockedAchievements: UnlockedAchievement[] };
+/** この保存で達成へ遷移した大目標（#369）。提示側が達成と次の目標の提案につなげる。 */
+export type AchievedBigGoal = { id: string; type: string; displayText: string };
+export type PhaseCompletion = { courseId: string; phase: PhaseProgress; awardedCard?: AwardedCard | null; unlockedAchievements: UnlockedAchievement[]; achievedBigGoals?: AchievedBigGoal[] };
+export type UnitCompletion = { courseId: string; unit: UnitProgress; unlockedAchievements: UnlockedAchievement[]; achievedBigGoals?: AchievedBigGoal[] };
 export type LearningEvent = {
   eventType: string; courseId?: string; phaseKey?: string; targetId?: string;
   payload?: Record<string, unknown>; clientTimestamp: string;

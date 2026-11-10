@@ -29,6 +29,8 @@ type BigGoalRow = {
   type: string;
   params: Prisma.JsonValue;
   status: string;
+  /** 提示用の表示文。行を組み立てる呼び出し側が持っている場合だけ入る。 */
+  displayText?: string | null;
 };
 
 const asParams = (value: Prisma.JsonValue): BigGoalParams =>
@@ -95,6 +97,9 @@ export async function loadBigGoalFacts(
 
 export type BigGoalTransition = {
   goalId: string;
+  type: string;
+  /** 達成の提示（専用画面・称賛）に使う表示文。行に無い場合は空文字。 */
+  displayText: string;
   evaluation: BigGoalEvaluation;
   /** この評価で達成／未達成で終了へ遷移したか */
   transitioned: boolean;
@@ -126,7 +131,13 @@ export async function evaluateBigGoalRow(goal: BigGoalRow): Promise<BigGoalTrans
         : {}),
     },
   });
-  return { goalId: goal.id, evaluation, transitioned: nextStatus !== null };
+  return {
+    goalId: goal.id,
+    type: goal.type,
+    displayText: goal.displayText ?? "",
+    evaluation,
+    transitioned: nextStatus !== null,
+  };
 }
 
 /**
@@ -136,7 +147,7 @@ export async function evaluateBigGoalRow(goal: BigGoalRow): Promise<BigGoalTrans
 export async function evaluateBigGoalsForUser(userId: string): Promise<BigGoalTransition[]> {
   const goals = await prisma.bigGoal.findMany({
     where: { userId, status: BigGoalStatus.ACTIVE },
-    select: { id: true, userId: true, type: true, params: true, status: true },
+    select: { id: true, userId: true, type: true, params: true, status: true, displayText: true },
   });
   const transitions: BigGoalTransition[] = [];
   for (const goal of goals) {

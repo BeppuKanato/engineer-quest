@@ -23,8 +23,9 @@ import { MazeDiggingMotivationPreview } from "../motivation/MazeDiggingMotivatio
 import { mazeDiggingUnitPhases, nextPhaseLabel, mazeDiggingUnitText, mazeDiggingUnitTitle, type MazeDiggingUnitPhase } from "./unit.content";
 import type { MazeDiggingUnitPhaseSummary } from "./unit.types";
 import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
+import { FeedbackPositionFigure } from "../../app/feedback/FeedbackPositionFigure";
 
-type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
+type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" } | { kind: "feedback"; index: number } | { kind: "unitFeedback" };
 
 /** フィードバックの対象になる確認フェーズ（3・5・6）。#202 */
 const isCheckPhase = (phase: MazeDiggingUnitPhase) => phase.phase === 3 || phase.phase === 5 || phase.phase === 6;
@@ -53,13 +54,18 @@ export type MazeDiggingUnitPreviewProps = {
   // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
   renderPhaseAchievements?: (phaseKey: string) => ReactNode;
   renderNewAchievements?: () => ReactNode;
-  // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
-  // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
+  // フィードバック接続（#202／#369）。確認フェーズ（3・5・6）の完了保存後に先行生成を
+  // 依頼する。表示は結果画面の付属ではなく専用画面が担う：結果画面の前進で
+  // フィードバック画面へ入り（renderPhaseFeedbackScreen）、最終結果からは
+  // 専用の入口ボタンで単元のフィードバック画面へ進む（renderUnitFeedbackScreen）。
+  // 位置の図は学習状態を持つこのコンテナが組み立てて nav.figure で渡す。
   onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
-  renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
-  renderUnitFeedback?: () => ReactNode;
+  /** フィードバックがこの学習者に適用される見込みがあるか。false の間は結果画面の前進が従来のブリッジへ向かう。 */
+  feedbackEnabled?: boolean;
+  renderPhaseFeedbackScreen?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => ReactNode;
+  renderUnitFeedbackScreen?: (nav: { goBack: () => void; figure: ReactNode }) => ReactNode;
 };
-export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: MazeDiggingUnitPreviewProps = {}) {
+export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: MazeDiggingUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, mazeDiggingUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -76,7 +82,7 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
   useEffect(() => { screenRef.current = screen; observer.current = onLearningEvent; }, [screen, onLearningEvent]);
   const failedRef = useRef<{ index: number; summary?: MazeDiggingUnitPhaseSummary } | null>(null);
   useEffect(() => { failedRef.current = failed; }, [failed]);
-  const phaseKey = screen.kind === "final" ? undefined : mazeDiggingUnitPhases[screen.index].id;
+  const phaseKey = screen.kind === "final" || screen.kind === "unitFeedback" ? undefined : mazeDiggingUnitPhases[screen.index].id;
   const onUnitEvent = useCallback<LearningObserver>(event => onLearningEvent?.({ ...event,
     phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : undefined,
   }), [onLearningEvent]);
@@ -84,6 +90,8 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "result", "phase_result_view", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "bridge", "phase_bridge_view", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent, screen.kind === "final", "unit_result_view");
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "feedback", "feedback_view", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent, screen.kind === "unitFeedback", "unit_feedback_view");
   useEffect(() => { if (screen.kind === "final") onFinalResult?.(); }, [screen.kind, onFinalResult]);
   // 非表示への切替で閉じる滞在区間や、開始済みの非同期実行結果も元のフェーズへ記録する。
   const phaseObservers = useMemo(() => mazeDiggingUnitPhases.map((phase): LearningObserver => event => {
@@ -93,10 +101,10 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
   const goToPhase = useCallback((index: number) => {
     if (busy.current) return;
     const previous = screenRef.current;
-    const reviewing = previous.kind === "final" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
+    const reviewing = previous.kind === "final" || previous.kind === "unitFeedback" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
     const target = mazeDiggingUnitPhases[index].id;
     if (reviewing) reviewCounts.current[target] = (reviewCounts.current[target] ?? 0) + 1;
-    observer.current?.({ eventType: "phase_move", phaseKey: mazeDiggingUnitPhases[index].id, payload: { from: previous.kind === "final" ? "final" : mazeDiggingUnitPhases[previous.index].id, to: mazeDiggingUnitPhases[index].id,
+    observer.current?.({ eventType: "phase_move", phaseKey: mazeDiggingUnitPhases[index].id, payload: { from: previous.kind === "final" || previous.kind === "unitFeedback" ? "final" : mazeDiggingUnitPhases[previous.index].id, to: mazeDiggingUnitPhases[index].id,
       direction: reviewing ? "review" : "forward", reviewCount: reviewCounts.current[target] ?? 0 } });
     setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
     setScreen({ kind: "phase", index });
@@ -179,14 +187,20 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
       case 2: return <MazeDiggingCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 2} onLearningEvent={onLearningEvent ? phaseObservers[2] : undefined} onComplete={completeHandlers[2]} />;
       case 3: return <MazeDiggingCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(mazeDiggingUnitPhases[3])} />;
       case 4: return <MazeDiggingCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
-      case 5: return <MazeDiggingConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(mazeDiggingUnitPhases[5])} />;
+      case 5: return <MazeDiggingConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => { if (feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed) setScreen({ kind: "feedback", index: 5 }); else setScreen({ kind: "bridge", index: 6 }); }} nextLabel={nextPhaseLabel(mazeDiggingUnitPhases[5])} />;
       case 6: return <MazeDiggingImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
       default: return null;
     }
   };
 
   const isCompleted = (index: number) => completed.has(mazeDiggingUnitPhases[index].id);
-  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge") && screen.index === index;
+  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge" || screen.kind === "feedback") && screen.index === index;
+  // フィードバック専用画面の現在位置の図（#369）。完了集合と現在位置から組み立てる。
+  const buildFeedbackFigure = (currentIndex: number, allDone: boolean): ReactNode => (
+    <FeedbackPositionFigure
+      states={mazeDiggingUnitPhases.map((phase, index) => index === currentIndex ? "current" : allDone || completed.has(phase.id) ? "done" : "upcoming")}
+      phaseNames={mazeDiggingUnitPhases.map(phase => phase.formalName)} />
+  );
 
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
@@ -216,14 +230,14 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
         {unitComplete && <>
           <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
           <Button onClick={() => setScreen({ kind: "final" })}
-          aria-current={screen.kind === "final" ? "step" : undefined}
+          aria-current={screen.kind === "final" || screen.kind === "unitFeedback" ? "step" : undefined}
           startIcon={<EmojiEventsIcon sx={{ fontSize: 16 }} />}
           sx={{
             minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
-            color: screen.kind === "final" ? playerTokens.surface : playerTokens.text,
-            bgcolor: screen.kind === "final" ? playerTokens.focus : "transparent",
+            color: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.surface : playerTokens.text,
+            bgcolor: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.focus : "transparent",
             border: `2px solid ${playerTokens.focus}`,
-            "&:hover": { bgcolor: screen.kind === "final" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
+            "&:hover": { bgcolor: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
           }}>
           {mazeDiggingUnitText.finalChip}
           </Button>
@@ -255,19 +269,29 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
           </Box>
         ))}
         {screen.kind === "result" && (
-          <UnitResultScreen phase={mazeDiggingUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
-            achievements={renderPhaseAchievements?.(mazeDiggingUnitPhases[screen.index].id)}
-            feedback={isCheckPhase(mazeDiggingUnitPhases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(mazeDiggingUnitPhases[screen.index].id, mazeDiggingUnitPhases[screen.index + 1]?.id ?? null, {
-              goToPhase: key => { const target = mazeDiggingUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
-              goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
-            }) : undefined} />
+          <UnitResultScreen phase={mazeDiggingUnitPhases[screen.index]} summary={summaries[screen.index]}
+            onNext={isCheckPhase(mazeDiggingUnitPhases[screen.index]) && feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed
+              ? () => setScreen({ kind: "feedback", index: screen.index })
+              : () => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            achievements={renderPhaseAchievements?.(mazeDiggingUnitPhases[screen.index].id)} />
         )}
+        {screen.kind === "feedback" && renderPhaseFeedbackScreen?.(mazeDiggingUnitPhases[screen.index].id, mazeDiggingUnitPhases[screen.index + 1]?.id ?? null, {
+          goToPhase: key => { const target = mazeDiggingUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
+          goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
+          goBack: () => setScreen({ kind: "result", index: screen.index }),
+          figure: buildFeedbackFigure(screen.index, false),
+        })}
         {screen.kind === "bridge" && (
           <PhaseBridgeScreen phase={mazeDiggingUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
+          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase}
+            onShowFeedback={feedbackEnabled && renderUnitFeedbackScreen ? () => setScreen({ kind: "unitFeedback" }) : undefined} />
         )}
+        {screen.kind === "unitFeedback" && renderUnitFeedbackScreen?.({
+          goBack: () => setScreen({ kind: "final" }),
+          figure: buildFeedbackFigure(mazeDiggingUnitPhases.length - 1, true),
+        })}
       </Box>
     </Box>
   </Box>;

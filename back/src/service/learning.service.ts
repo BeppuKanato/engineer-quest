@@ -9,7 +9,10 @@ import { LearningProgressStatus, Prisma } from "@prisma/client";
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 import { evaluateAchievementsForUser } from "./achievement.service";
-import { evaluateBigGoalsForUser } from "./bigGoal.service";
+import {
+  evaluateBigGoalsForUser,
+  type BigGoalTransition,
+} from "./bigGoal.service";
 import { toKnowledgeCardSummary } from "./knowledgeCard.service";
 
 type AuthUser = { id: string; knowledgeCardTableNumber: number };
@@ -22,6 +25,16 @@ const getPublishedCourse = async (courseId: string) => {
   if (!course) throw new AppError(404, "COURSE_NOT_FOUND", "Course not found");
   return course;
 };
+
+/**
+ * この保存で達成へ遷移した大目標を、フロントの提示（フィードバック専用画面での
+ * 次の目標の提案 #369、結果画面での称賛 #370）が使える形で返す。
+ * 未達成で終了した遷移はここには含めない（提示はホームの履歴が担う）。
+ */
+const achievedBigGoalViews = (transitions: BigGoalTransition[]) =>
+  transitions
+    .filter((t) => t.transitioned && t.evaluation.outcome === "ACHIEVED")
+    .map((t) => ({ id: t.goalId, type: t.type, displayText: t.displayText }));
 
 const unitView = (unit: {
   status: LearningProgressStatus;
@@ -173,12 +186,14 @@ export const completePhaseByUser = async (
 
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
   // 大目標の達成判定も、実績評価と同じ保存タイミングで再評価する（#365）。
-  await evaluateBigGoalsForUser(user.id);
+  // 達成した場合はレスポンスにも含め、フロントが提示につなげられるようにする（#369）。
+  const bigGoalTransitions = await evaluateBigGoalsForUser(user.id);
   return {
     courseId,
     phase: phaseView(phase),
     awardedCard,
     unlockedAchievements,
+    achievedBigGoals: achievedBigGoalViews(bigGoalTransitions),
   };
 };
 
@@ -197,8 +212,14 @@ export const completeUnitByUser = async (user: AuthUser, courseId: string) => {
   });
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
   // 大目標の達成判定も、実績評価と同じ保存タイミングで再評価する（#365）。
-  await evaluateBigGoalsForUser(user.id);
-  return { courseId, unit: unitView(unit), unlockedAchievements };
+  // 達成した場合はレスポンスにも含め、フロントが提示につなげられるようにする（#369）。
+  const bigGoalTransitions = await evaluateBigGoalsForUser(user.id);
+  return {
+    courseId,
+    unit: unitView(unit),
+    unlockedAchievements,
+    achievedBigGoals: achievedBigGoalViews(bigGoalTransitions),
+  };
 };
 
 export type LearningEventInput = {
