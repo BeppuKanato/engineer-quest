@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
 import { HomeUnitGrid } from "@/features/learning/app/HomeUnitGrid";
+import { BigGoalBanner } from "@/features/learning/app/bigGoal/BigGoalBanner";
 
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
@@ -131,6 +132,7 @@ export default function HomePage() {
 
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <ContinueLearning />
+        <BigGoalBanner />
         {errorMessage && (
           <Alert severity="warning" sx={{ mb: 3 }}>
             {errorMessage}

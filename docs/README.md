@@ -86,6 +86,7 @@
 | [feedback-composition-332.md](feedback-composition-332.md) | 記録 | Issue #332のフィードバック構成の見直し（Sadler／Hattie & Timperley に照らした表示文章の要件・合計200〜300字の目安・reason の表示、purpose は内部用） |
 | [big-goal-model-365.md](big-goal-model-365.md) | 記録 | Issue #365の大目標データモデルと達成判定基盤（Prismaモデルとmigration、到達型・実績型・応用型の条件評価、進捗の部分充足計算、学習保存時へのフック） |
 | [big-goal-proposal-366.md](big-goal-proposal-366.md) | 記録 | Issue #366の大目標の候補生成・適合度採点・提案API（タイミングA/Bのルール、gpt-6.1-terra固定の採点とコードブック、検証ログ、合意による確定と再検証） |
+| [big-goal-ui-367.md](big-goal-ui-367.md) | 記録 | Issue #367の大目標の設定UIとホーム表示（単元開始時の目標設定ゲート、本命＋2件の候補表示と合意操作、ホームのバナーと履歴表示、進捗はAPIの計算結果をそのまま表示） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
