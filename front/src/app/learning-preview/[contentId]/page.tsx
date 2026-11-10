@@ -15,6 +15,7 @@ import { DfsExecutionPreview } from "@/features/learning/dfs/execution/DfsExecut
 import { DfsCheckPreview } from "@/features/learning/dfs/check/DfsCheckPreview";
 import { DfsCodeMappingPreview } from "@/features/learning/dfs/code-mapping/DfsCodeMappingPreview";
 import { DfsCodeCheckPreview } from "@/features/learning/dfs/code-check/DfsCodeCheckPreview";
+import { DfsConsolidationPreview } from "@/features/learning/dfs/consolidation/DfsConsolidationPreview";
 import { WallExtensionMotivationPreview } from "@/features/learning/wall-extension/motivation/WallExtensionMotivationPreview";
 import { WallExtensionExecutionPreview } from "@/features/learning/wall-extension/execution/WallExtensionExecutionPreview";
 import { WallExtensionCheckPreview } from "@/features/learning/wall-extension/check/WallExtensionCheckPreview";
@@ -92,6 +93,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "dfs-check") return <DfsCheckPreview />;
   if (contentId === "dfs-code-mapping") return <DfsCodeMappingPreview />;
   if (contentId === "dfs-code-check") return <DfsCodeCheckPreview />;
+  if (contentId === "dfs-consolidation") return <DfsConsolidationPreview />;
   if (contentId === "bfs-unit") return <BfsUnitPreview />;
   if (contentId === "bfs-motivation") return <BfsMotivationPreview />;
   if (contentId === "bfs-execution") return <BfsExecutionPreview />;
