@@ -18,7 +18,7 @@ export type DfsConsolidationQuestion = QuestionDetails & (
   | ParsonsQuestion
 );
 
-const transferGraph: Graph = {
+export const transferGraph: Graph = {
   kind: "graph",
   nodes: searchGraph.nodes.map((node, index) => {
     const id = "GHIJKL"[index];
