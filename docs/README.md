@@ -55,6 +55,7 @@
 | [dfs-execution-122.md](dfs-execution-122.md) | 記録 | Issue #122のDFS動きの説明、BFS/DFS共有グラフの切り出し、17状態のPython実行照合と確認手順 |
 | [dfs-check-123.md](dfs-check-123.md) | 記録 | Issue #123のDFS理解度確認、回答操作のBFS/DFS共通化、現行ソフトゲートと旧基準書の差・検証・確認手順 |
 | [dfs-code-mapping-124.md](dfs-code-mapping-124.md) | 記録 | Issue #124の全行と図の同期、字下げの明確化、逆順投入・mark-at-pushの説明案、検証と確認手順 |
+| [dfs-code-check-125.md](dfs-code-check-125.md) | 記録 | Issue #125のDFSコード穴埋め2問、既存フレームでの復習、初回スコアと確認手順 |
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
