@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { analysisPrompt, selectionPrompt, generate, validateSelection, type Input, type Analysis, type Selection, type Call } from "../service/feedbackV1.engine";
 
 async function main() {
-  const input: Input = { learning: { answers: [{ id: "answer-1", code: "RAW_CODE_SENTINEL", isCorrect: true }] }, state: { posts: Array.from({ length: 101 }, (_, i) => ({ id: `post-${i}`, body: `body-${i}`, comments: [{ body: `reply-${i}` }] })), history: [{ status: "PRESENTED" }] }, actions: [{ id: 9, label: "復習", purpose: "理解の確認", condition: "獲得済み", targetIds: ["card-1", "card-2"] }], targets: { 9: [{ id: "card-1", href: "/knowledge-cards?cardId=card-1" }, { id: "card-2", href: "/knowledge-cards?cardId=card-2" }] }, hexad: null };
+  const input: Input = { learning: { answers: [{ id: "answer-1", code: "RAW_CODE_SENTINEL", isCorrect: true }] }, state: { posts: Array.from({ length: 101 }, (_, i) => ({ id: `post-${i}`, body: `body-${i}`, comments: [{ body: `reply-${i}` }] })), history: [{ status: "PRESENTED" }] }, actions: [{ id: 9, label: "復習", purpose: "理解の確認", condition: "獲得済み", targetIds: ["card-1", "card-2"] }], targets: { 9: [{ id: "card-1", href: "/knowledge-cards?cardId=card-1" }, { id: "card-2", href: "/knowledge-cards?cardId=card-2" }] }, hexad: null, bigGoal: null };
   const analysis: Analysis = { currentState: "テストに合格した", understood: ["基本操作"], needsImprovement: [], uncertain: ["応用の理解は未観測"], evidence: [{ sourceId: "answer-1", fact: "正答した", inference: false }] };
   const selection: Selection = { nextGoal: "操作の理由を説明する", nextStep: "カードで確認する", actionLabel: "カードを開く", actionId: 9, targetId: "card-2", purpose: "理解の確認", reason: "基本操作を根拠とする", personalizationAdjustment: null };
   const personalized: Input = { ...input, hexad: { questionnaireVersion: "hexad-24-ja-v1", scoreRange: [4, 28], scores: { Philanthropist: 20, Socialiser: 8, FreeSpirit: 24, Achiever: 28, Disruptor: 8, Player: 16 } } };
@@ -12,6 +12,16 @@ async function main() {
   assert.equal(analysisPrompt(input), analysisPrompt(personalized));
   assert(!analysisPrompt(personalized).includes("Achiever"));
   assert(!analysisPrompt(input).includes("post-100"));
+  // 大目標ブロック（#368）：分析段だけに渡し、両条件で同一に保つ。目標が無い場合は従来どおりブロックなし。
+  const goalBlock = { displayText: "幅優先探索の単元を完了する", type: "UNIT_COMPLETION", condition: { courseId: "course-bfs" }, progress: { outcome: "ONGOING", fraction: 3 / 7, detail: { completedPhaseCount: 3, totalPhaseCount: 7 } }, status: "ACTIVE", confirmedAt: "2026-11-09T00:00:00.000Z", daysSinceConfirmed: 1 };
+  const goalInput: Input = { ...input, bigGoal: goalBlock };
+  const goalPersonalized: Input = { ...goalInput, hexad: personalized.hexad };
+  assert.equal(analysisPrompt(goalInput), analysisPrompt(goalPersonalized));
+  assert(analysisPrompt(goalInput).includes("幅優先探索の単元を完了する"));
+  assert(analysisPrompt(goalInput).includes("completedPhaseCount"));
+  assert(!analysisPrompt(goalPersonalized).includes("Achiever"));
+  assert(!analysisPrompt(input).includes("bigGoal"));
+  assert(!selectionPrompt(goalInput, analysis).includes("幅優先探索の単元を完了する"));
   assert(selectionPrompt(input, analysis).includes("reply-100"));
   assert(!selectionPrompt(input, analysis).includes("RAW_CODE_SENTINEL"));
   assert(!selectionPrompt(input, analysis).includes("hexad-24-ja-v1"));
