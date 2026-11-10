@@ -58,6 +58,7 @@
 | [dfs-code-check-125.md](dfs-code-check-125.md) | 記録 | Issue #125のDFSコード穴埋め2問、既存フレームでの復習、初回スコアと確認手順 |
 | [dfs-consolidation-126.md](dfs-consolidation-126.md) | 記録 | Issue #126のDFS応用5問、固定行つき並び替え、論点別診断と確認手順 |
 | [dfs-implementation-127.md](dfs-implementation-127.md) | 記録 | Issue #127のDFS実装課題、共通エディタ、5ケースと段階式ヒント、確認手順 |
+| [dfs-trace-128.md](dfs-trace-128.md) | 記録 | Issue #128のDFSコード再生、17場面との実行照合、途中停止と最終結果 |
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |

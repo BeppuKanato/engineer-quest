@@ -1,5 +1,5 @@
 /** 同じPythonソースをWorkerとCPython検証から使う。結果・例外本文・任意のlocalsは返さない。 */
-export function buildPythonTraceHarness({ code, functionName, args, maxEvents = 500 }) {
+export function buildPythonTraceHarness({ code, functionName, args, maxEvents = 500, traceKind }) {
   const limit = Math.max(1, Math.min(2000, Math.floor(maxEvents) || 500));
   return `
 import ast as _eq_ast
@@ -13,11 +13,13 @@ _eq_name = ${JSON.stringify(functionName)}
 _eq_args = _eq_json.loads(${JSON.stringify(JSON.stringify(args))})
 _eq_filename = "<learner>"
 _eq_limit = ${limit}
+_eq_dfs = ${traceKind === "dfs" ? "True" : "False"}
 _eq_events = []
 _eq_count = 0
 _eq_root = None
 _eq_last_line = None
 _eq_result = None
+_eq_visit_order = None
 _eq_error = None
 _eq_status = "returned"
 _eq_truncated = False
@@ -25,6 +27,7 @@ _eq_limit_line = None
 _eq_boundaries = {}
 _eq_while_names = {}
 _eq_ambiguous_kinds = set()
+_eq_dfs_names = {kind: set() for kind in ("stack", "order", "node", "neighbor")}
 
 class _EqTraceLimit(BaseException):
     pass
@@ -55,6 +58,15 @@ def _eq_grid(value):
 def _eq_array(value):
     return list(value) if type(value) in (list, tuple) and len(value) <= 64 and all((type(item) is int and item.bit_length() < 256) or (type(item) is float and _eq_math.isfinite(item)) for item in value) else None
 
+def _eq_node(value):
+    return value if type(value) is str and len(value) <= 100 else None
+
+def _eq_order(value):
+    return list(value) if type(value) is list and len(value) <= 64 and all(_eq_node(item) is not None for item in value) else None
+
+def _eq_visited(value):
+    return sorted(value) if type(value) is set and len(value) <= 64 and all(_eq_node(item) is not None for item in value) else None
+
 
 def _eq_detect(values, preferred, convert, kind):
     if preferred in values:
@@ -64,8 +76,28 @@ def _eq_detect(values, preferred, convert, kind):
         _eq_ambiguous_kinds.add(kind)
     return candidates[0] if len(candidates) == 1 else (None, None)
 
+def _eq_dfs_locals(values):
+    result = {}
+    stack_name = None
+    for kind, convert in (("stack", _eq_order), ("order", _eq_order), ("node", _eq_node), ("neighbor", _eq_node)):
+        # 同じ型の stack と order は、名前か AST 上の役割で区別する。
+        candidates = {key: values[key] for key in _eq_dfs_names[kind] if key in values}
+        if kind in values:
+            candidates = {kind: values[kind]}
+        name, value = _eq_detect(candidates, kind, convert, kind)
+        if name is not None:
+            result[kind] = value
+        if kind == "stack":
+            stack_name = name
+    name, value = _eq_detect(values, "visited", _eq_visited, "visited")
+    if name is not None:
+        result["visited"] = value
+    return result, stack_name
+
 def _eq_locals(frame):
     values = frame.f_locals
+    if _eq_dfs:
+        return _eq_dfs_locals(values)
     result = {}
     queue_name, queue_value = _eq_detect(values, "queue", _eq_queue, "queue")
     distance_name, distance_value = _eq_detect(values, "distances", _eq_distances, "distances")
@@ -123,6 +155,22 @@ try:
             _eq_boundaries[_eq_item.lineno] = "for"
         elif isinstance(_eq_item, _eq_ast.While):
             _eq_while_names[_eq_item.lineno] = {node.id for node in _eq_ast.walk(_eq_item.test) if isinstance(node, _eq_ast.Name)}
+        elif _eq_dfs and isinstance(_eq_item, _eq_ast.If):
+            _eq_boundaries[_eq_item.lineno] = "if"
+    if _eq_dfs:
+        _eq_root_def = next((node for node in _eq_tree.body if isinstance(node, _eq_ast.FunctionDef) and node.name == _eq_name), None)
+        if _eq_root_def is not None:
+            _eq_loop_vars = set().union(*(_eq_while_names.values()))
+            for node in _eq_ast.walk(_eq_root_def):
+                if isinstance(node, _eq_ast.Return) and isinstance(node.value, _eq_ast.Name):
+                    _eq_dfs_names["order"].add(node.value.id)
+                if isinstance(node, _eq_ast.For) and isinstance(node.target, _eq_ast.Name):
+                    _eq_dfs_names["neighbor"].add(node.target.id)
+                if isinstance(node, _eq_ast.Assign) and isinstance(node.value, _eq_ast.Call):
+                    call = node.value.func
+                    if isinstance(call, _eq_ast.Attribute) and call.attr == "pop" and isinstance(call.value, _eq_ast.Name) and call.value.id in _eq_loop_vars:
+                        _eq_dfs_names["stack"].add(call.value.id)
+                        _eq_dfs_names["node"].update(target.id for target in node.targets if isinstance(target, _eq_ast.Name))
     _eq_namespace = {}
     _eq_exec_error = None
     try:
@@ -142,6 +190,8 @@ try:
     _eq_ambiguous_kinds = set()
     _eq_sys.settrace(_eq_trace)
     _eq_returned = _eq_function(*_eq_args)
+    if _eq_dfs:
+        _eq_visit_order = _eq_order(_eq_returned)
     _eq_result = _eq_distances(_eq_returned)
     if _eq_result is None:
         _eq_result = _eq_grid(_eq_returned)
@@ -168,6 +218,9 @@ if _eq_truncated:
     _eq_last_line = _eq_limit_line
 _eq_root = None
 _eq_namespace = {}
-_eq_json.dumps({"events": _eq_events, "status": _eq_status, "result": _eq_result, "error": _eq_error, "stoppedLine": _eq_last_line, "eventCount": _eq_count, "limit": _eq_limit, "ambiguous": len(_eq_ambiguous_kinds) > 0, "ambiguousKinds": sorted(_eq_ambiguous_kinds)}, allow_nan=False)
+_eq_payload = {"events": _eq_events, "status": _eq_status, "result": _eq_result, "error": _eq_error, "stoppedLine": _eq_last_line, "eventCount": _eq_count, "limit": _eq_limit, "ambiguous": len(_eq_ambiguous_kinds) > 0, "ambiguousKinds": sorted(_eq_ambiguous_kinds)}
+if _eq_dfs:
+    _eq_payload["visitOrder"] = _eq_visit_order
+_eq_json.dumps(_eq_payload, allow_nan=False)
 `;
 }
