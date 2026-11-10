@@ -792,6 +792,12 @@ enum BigGoalProposalTiming {
   ON_ACHIEVEMENT
 }
 
+enum BigGoalProposalStatus {
+  GENERATING
+  GENERATED
+  FAILED
+}
+
 model BigGoalProposal {
   id                 String                @id @default(cuid())
   userId             String
@@ -799,7 +805,7 @@ model BigGoalProposal {
   timing             BigGoalProposalTiming
   startCourseId      String?
   condition          FeedbackCondition?
-  status             CourseExamFeedbackStatus @default(GENERATING)
+  status             BigGoalProposalStatus @default(GENERATING)
   input              Json
   result             Json?
   failureCode        String?

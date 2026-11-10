@@ -49,3 +49,8 @@ G1（#365）の migration `20261110210000_big_goal_model` が対象 DB に適用
 
 - DB を使う検証と、提案生成の実 LLM 呼び出しは VM で実行できないため未実施。CI と、migration 適用済みの環境での確認が必要。
 - 画面からの操作確認は G3（#367）。
+
+## 追記（2026-11-10、復旧 PR #373）
+
+- #372 はスタック先のベースブランチへマージされ、内容が develop に入っていなかったため、本ブランチを develop へ rebase し直して復旧 PR とした。
+- CI の型チェックで判明したスキーマの誤りを修正した：`BigGoalProposal.status` が `CourseExamFeedbackStatus`（GENERATING / COMPLETED / FAILED）で宣言されており、提案ライフサイクルが使う GENERATED が存在しなかった。専用の `BigGoalProposalStatus`（GENERATING / GENERATED / FAILED）を追加し、是正 migration `20261110214000_big_goal_proposal_status` を同梱した。DB 適用時は #371 の migration と合わせて `npx prisma migrate deploy` で両方が適用される。
