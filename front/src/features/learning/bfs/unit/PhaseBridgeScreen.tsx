@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { learningPhaseIcons } from "../../app/learningPhaseIcons";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
-import { bfsUnitPhases, type BfsUnitPhase } from "./unit.content";
+import type { UnitPhase } from "../../unit/unit.types";
 
 /**
  * フェーズ間のブリッジ（Issue #141）。前進の完了フローでのみ挟み、
@@ -14,7 +14,7 @@ import { bfsUnitPhases, type BfsUnitPhase } from "./unit.content";
  * 復習・ナビゲーションからの移動や途中再開では出さない。
  * スクロールはこの画面専用に持たず、単元コンテナのラッパーに一元化する（#298）。
  */
-export function PhaseBridgeScreen({ phase, onProceed }: { phase: BfsUnitPhase; onProceed: () => void }) {
+export function PhaseBridgeScreen({ phase, onProceed, total = 7 }: { phase: UnitPhase; onProceed: () => void; total?: number }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
   const Icon = learningPhaseIcons[phase.phase - 1];
@@ -25,7 +25,7 @@ export function PhaseBridgeScreen({ phase, onProceed }: { phase: BfsUnitPhase; o
       {Icon && <Icon sx={{ fontSize: 48, color: playerTokens.focus }} />}
     </Box>
     <Typography component="p" sx={{ fontSize: 14, color: playerTokens.states.idle.stroke }}>
-      ステージ {phase.phase} / {bfsUnitPhases.length}
+      ステージ {phase.phase} / {total}
     </Typography>
     <Typography ref={headingRef} component="h2" tabIndex={-1}
       sx={{ color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(20px, 1.8vw, 32px)", outline: "none" }}>

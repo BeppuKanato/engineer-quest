@@ -54,6 +54,7 @@
     "verify:dfs-consolidation": "node scripts/verifyDfsConsolidation.cjs",
     "verify:dfs-implementation": "node scripts/verifyDfsImplementation.cjs",
     "verify:dfs-trace": "node scripts/verifyDfsTrace.cjs",
+    "verify:dfs-unit": "node scripts/verifyDfsUnitFlow.cjs",
     "verify:bfs-execution": "node scripts/verifyBfsExecution.cjs",
     "verify:bfs-check": "node scripts/verifyBfsCheck.cjs",
     "verify:bfs-code-mapping": "node scripts/verifyBfsCodeMapping.cjs",

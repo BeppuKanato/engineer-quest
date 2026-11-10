@@ -191,7 +191,7 @@ for (const preview of ["bfs/check/BfsCheckPreview.tsx", "bfs/code-check/BfsCodeC
 }
 const layout = fs.readFileSync(path.join(root, "app/layout.tsx"), "utf8");
 assert.match(layout, /<SoundProvider>\s*<AnswerFeedbackProvider>[\s\S]*\{children\}[\s\S]*<\/AnswerFeedbackProvider>\s*<\/SoundProvider>/);
-const unitSource = fs.readFileSync(file("bfs/unit/BfsUnitPreview.tsx"), "utf8");
+const unitSource = fs.readFileSync(file("unit/LearningUnitPreview.tsx"), "utf8");
 assert.match(unitSource, /<AnswerFeedbackNotice assessmentId=\{phaseKey\}/, "The unit keeps the message through phase result screens");
 const { AssessmentReviewButton } = load(file("review/AssessmentReviewButton.tsx"));
 const reviewButton = AssessmentReviewButton({ label: "💡 この処理の動作をもう一度見る", onClick() {} });

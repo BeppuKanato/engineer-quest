@@ -14,9 +14,8 @@ import { UnitPathMiniMap } from "../../app/UnitPathMiniMap";
 import type { LearningRewards } from "../../app/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
-import { bfsImplementationContent } from "../implementation/implementation.content";
-import { bfsUnitPhases, bfsUnitText, type BfsUnitPhase } from "./unit.content";
-import type { BfsUnitPhaseSummary } from "./unit.types";
+import { unitText } from "../../unit/unit.content";
+import type { UnitPhase, UnitPhaseSummary } from "../../unit/unit.types";
 import { BfsResultFigure } from "./BfsResultFigure";
 import { UnitResultCelebration } from "./UnitResultCelebration";
 
@@ -32,9 +31,11 @@ const nextButtonSx = {
 
 /** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。
  * スクロールはこの画面専用に持たず、単元コンテナのラッパーに一元化する（#298）。 */
-export function UnitResultScreen({ phase, summary, onNext, feedback, achievements }: {
-  phase: BfsUnitPhase;
-  summary?: BfsUnitPhaseSummary;
+export function UnitResultScreen({ phase, summary, figure = <BfsResultFigure />, firstAttemptOnly = false, onNext, feedback, achievements }: {
+  phase: UnitPhase;
+  summary?: UnitPhaseSummary;
+  figure?: ReactNode;
+  firstAttemptOnly?: boolean;
   onNext: () => void;
   feedback?: ReactNode;
   achievements?: ReactNode;
@@ -45,12 +46,14 @@ export function UnitResultScreen({ phase, summary, onNext, feedback, achievement
   return <Box component="section" aria-label={`${phase.formalName}のリザルト`}
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "safe center", gap: 2, p: 2 }}>
     <UnitResultCelebration heading={phase.result.heading} headingRef={headingRef} />
-    <BfsResultFigure />
+    {figure}
     {summary?.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined && (
       <>
         <ResultScoreDots total={summary.totalQuestions} firstAttemptCorrect={summary.firstAttemptCorrect} />
         <Typography component="p" sx={{ textAlign: "center", fontSize: 17, fontWeight: 700 }}>
-          全{summary.totalQuestions}問に正解しました（初回で{summary.firstAttemptCorrect}問正解）。
+          {firstAttemptOnly
+            ? `全${summary.totalQuestions}問中、初回の正解は${summary.firstAttemptCorrect}問でした。`
+            : `全${summary.totalQuestions}問に正解しました（初回で${summary.firstAttemptCorrect}問正解）。`}
         </Typography>
       </>
     )}
@@ -61,7 +64,7 @@ export function UnitResultScreen({ phase, summary, onNext, feedback, achievement
 }
 
 /** フェーズの到達状況を1行の事実文にする。記録がないフェーズは「完了」だけを出す。 */
-function summaryLine(index: number, summary?: BfsUnitPhaseSummary): string | null {
+function summaryLine(summary?: UnitPhaseSummary): string | null {
   if (!summary) return null;
   if (summary.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined) {
     return `初回 ${summary.firstAttemptCorrect}/${summary.totalQuestions} 問正解`;
@@ -82,11 +85,13 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards, feedback, newAchievements }: {
+export function UnitFinalResult({ phases, result, summaries, onReviewPhase, rewards, renderRewards, feedback, newAchievements }: {
+  phases: readonly UnitPhase[];
+  result: { readonly title: string; readonly closing: string };
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
   newAchievements?: ReactNode;
-  summaries: Readonly<Record<number, BfsUnitPhaseSummary>>;
+  summaries: Readonly<Record<number, UnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
   feedback?: ReactNode;
 }) {
@@ -94,11 +99,11 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
   const reduced = useReducedMotion();
   useEffect(() => { headingRef.current?.focus(); }, []);
   // 要約タイルはサマリにある記録だけから組み立てる（記録のない項目は出さない）。
-  const assessed = bfsUnitPhases.map((_, index) => summaries[index])
+  const assessed = phases.map((_, index) => summaries[index])
     .filter(summary => summary?.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined);
   const firstCorrectTotal = assessed.reduce((sum, summary) => sum + (summary?.firstAttemptCorrect ?? 0), 0);
   const questionTotal = assessed.reduce((sum, summary) => sum + (summary?.totalQuestions ?? 0), 0);
-  const implementation = summaries[bfsUnitPhases.length - 1];
+  const implementation = summaries[phases.length - 1];
   const hintTotal = (implementation?.hintUsage ?? []).reduce((sum, count) => sum + count, 0);
   const tiles: { label: string; value: string }[] = [];
   if (questionTotal > 0) tiles.push({ label: "初回正解（確認問題・応用問題）", value: `${firstCorrectTotal} / ${questionTotal} 問` });
@@ -114,15 +119,15 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
       sx={{ width: 96, height: 96, borderRadius: "50%", bgcolor: playerTokens.layers.layer0, display: "grid", placeItems: "center", mt: 2 }}>
       <DrawnCheck />
     </Box>
-    <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{bfsImplementationContent.result.title}</Typography>
-    <UnitPathMiniMap count={bfsUnitPhases.length} />
+    <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{result.title}</Typography>
+    <UnitPathMiniMap count={phases.length} />
     {tiles.length > 0 && <Box data-final-stats sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center", width: "100%", maxWidth: 640 }}>
       {tiles.map(tile => <StatTile key={tile.label} label={tile.label} value={tile.value} />)}
     </Box>}
-    <Typography component="p" sx={{ fontWeight: 700, fontSize: 17 }}>{bfsUnitText.summaryHeading}</Typography>
+    <Typography component="p" sx={{ fontWeight: 700, fontSize: 17 }}>{unitText.summaryHeading}</Typography>
     <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, width: "100%", maxWidth: 560 }}>
-      {bfsUnitPhases.map((phase, index) => {
-        const line = summaryLine(index, summaries[index]);
+      {phases.map((phase, index) => {
+        const line = summaryLine(summaries[index]);
         return <Box component="li" key={phase.id} sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.75, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
           <CheckCircleIcon aria-hidden sx={{ fontSize: 20, color: playerTokens.focus, flexShrink: 0 }} />
           <Typography component="p" sx={{ fontSize: 16 }}>
@@ -133,11 +138,11 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
         </Box>;
       })}
     </Box>
-    <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{bfsImplementationContent.result.closing}</Typography>
+    <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{result.closing}</Typography>
     {newAchievements}
     {rewards && renderRewards?.(rewards)}
     {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
-    <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{bfsUnitText.reviewNote}</Typography>
-    <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToCourses}</Button>
+    <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{unitText.reviewNote}</Typography>
+    <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{unitText.backToCourses}</Button>
   </Box>;
 }

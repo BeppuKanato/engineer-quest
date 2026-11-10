@@ -130,5 +130,5 @@ assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u
 assert.match(renderer, /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/DfsCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
-assert(!/onLearningEvent|onComplete|endAction|fetch\(|localStorage/u.test(entry));
+assert(!/fetch\(|localStorage/u.test(entry));
 console.log("DFS code mapping verified: 68 frames, byte-exact 12-line contract, all CPython lines/locals, 17 original checkpoints, intermediate pop/mark states, shared rendering and standalone controls.");

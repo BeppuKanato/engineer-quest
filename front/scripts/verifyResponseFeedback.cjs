@@ -47,7 +47,7 @@ assert(learningApi.includes('fetchClientQuery'), 'getLearningProgress must go th
 assert(learningApi.includes('learning-progress:'), 'learning progress cache key must be per course');
 
 // 4. Phase completion must not freeze the unit screen while saving (#140/#142 P1).
-const unit = read('features/learning/bfs/unit/BfsUnitPreview.tsx');
+const unit = read('features/learning/unit/LearningUnitPreview.tsx');
 assert(!unit.includes('inert={saving'), 'unit screen must not go inert while saving');
 assert(unit.includes('CircularProgress'), 'saving state must be shown with a visible progress indicator');
 assert(unit.includes('role="status"'), 'saving indicator must be announced via role=status');

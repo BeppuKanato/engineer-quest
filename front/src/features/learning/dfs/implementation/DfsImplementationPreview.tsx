@@ -1,6 +1,6 @@
 "use client";
 
-import { ImplementationWorkspace } from "../../bfs/implementation/BfsImplementationPreview";
+import { ImplementationWorkspace, type ImplementationWorkspaceProps } from "../../bfs/implementation/BfsImplementationPreview";
 import { runFreeDisplayCase } from "../../bfs/implementation/freeExecution";
 import { dfsCode } from "../code-mapping/dfsCode";
 import { traceDfsCode } from "../trace/acquireTrace";
@@ -9,8 +9,8 @@ import { DfsTraceDialog } from "../trace/DfsTraceDialog";
 import { dfsImplementationContent as content, freeDisplayCase } from "./implementation.content";
 import { DfsImplementationResults, VisitOrderOutput } from "./ImplementationResults";
 
-export function DfsImplementationPreview() {
-  return <ImplementationWorkspace exercise={{
+export function DfsImplementationPreview(props: ImplementationWorkspaceProps = {}) {
+  return <ImplementationWorkspace {...props} exercise={{
     label: `DFSの${content.stageName}`,
     content,
     Results: DfsImplementationResults,

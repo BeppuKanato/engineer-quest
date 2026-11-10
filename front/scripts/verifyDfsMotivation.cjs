@@ -110,8 +110,10 @@ for (const source of [canvasSource, bfsCanvasSource]) assert(source.includes('fr
 assert(canvasSource.includes("GraphNodes") && canvasSource.includes("GraphEdges") && canvasSource.includes("GraphViewport"));
 assert(canvasSource.includes("useReducedMotion") && sharedSource.includes("graphGeometry"));
 const previewSource = fs.readFileSync(`${feature}/DfsMotivationPreview.tsx`, "utf8");
-assert.match(previewSource, /width: "84vw", height: "84dvh"/);
-assert.doesNotMatch(previewSource, /onLearningEvent|onComplete|fetch\(|localStorage/);
+assert.match(previewSource, /width: embedded \? "100%" : "84vw", height: embedded \? "100%" : "84dvh"/);
+assert.doesNotMatch(previewSource, /fetch\(|localStorage/);
+const embeddedExit = renderToStaticMarkup(createElement(DfsMotivationCanvas, { canvas: steps.at(-1).canvas, onExit() {} }));
+assert.match(embeddedExit, /<button(?![^>]+disabled=)[^>]*>動きの説明へ進む<\/button>/);
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8").includes('contentId === "dfs-motivation"'));
 const first = steps[0].canvas;
 assert.throws(() => validate({ ...first, data: { ...first.data, graph: { ...graph, nodes: [] } } }), /canonical/);

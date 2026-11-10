@@ -7,39 +7,16 @@
  * - final: 単元完了時の最終リザルト（フェーズ7の後）
  * ブリッジは前進の完了フローでのみ出す。復習・ナビゲーションからの移動や途中再開では出さない。
  */
-export type BfsUnitTransition = "bridge" | "result" | "result-in-phase" | "final";
-
-export type BfsUnitPhase = {
-  /** フェーズ番号（1〜7） */
-  phase: number;
-  /** 単品プレビューの contentId と対応する識別子 */
-  id: string;
-  /** 単元ナビゲーションの短い名前 */
-  shortName: string;
-  /** 正式名称（リザルトやブリッジで使う） */
-  formalName: string;
-  /** このフェーズの完了後にどう進むか */
-  transitionOut: BfsUnitTransition;
-  /** このフェーズに入るときのブリッジ文（目標の提示）。フェーズ1は単元の入口なので持たない */
-  bridge?: string;
-  /**
-   * この段階の区切りで知識カードが提示されうるとき、そのレアリティ。
-   * 付与そのものの正本は seed のカードスケジュール（back/prisma/seedData/knowledgeCardSeed.ts）で、
-   * ここは単元画面のノードに付けるバッジ表示のために持つ。
-   */
-  cardRarity?: "COMMON" | "RARE" | "EPIC";
-  /** transitionOut が "result" のときのリザルト画面の文言（事実のみ。次の目標はブリッジが担う） */
-  result?: {
-    heading: string;
-  };
-};
+import type { UnitPhase } from "../../unit/unit.types";
+export type { UnitPhase as BfsUnitPhase, UnitTransition as BfsUnitTransition } from "../../unit/unit.types";
+export { unitText as bfsUnitText } from "../../unit/unit.content";
 
 export const bfsUnitTitle = "幅優先探索（BFS）";
 
 /** 単元画面のタイトル下に出す、その単元で何を学ぶかの1文（コース説明の要約）。 */
 export const bfsUnitIntro = "開始地点に近い順に調べる幅優先探索を、図と待ち行列を一手ずつ追って学びます。";
 
-export const bfsUnitPhases: readonly BfsUnitPhase[] = [
+export const bfsUnitPhases: readonly UnitPhase[] = [
   { phase: 1, id: "bfs-motivation", shortName: "導入", formalName: "導入", transitionOut: "bridge" },
   {
     phase: 2, id: "bfs-execution", shortName: "動きの説明", formalName: "動きの説明", transitionOut: "bridge", cardRarity: "RARE",
@@ -70,15 +47,7 @@ export const bfsUnitPhases: readonly BfsUnitPhase[] = [
 ] as const;
 
 /** 遷移ボタンの文言は「次の段階の正式名称＋へ進む」で統一する（#142）。「フェーズ」は画面に出さない。 */
-export const nextPhaseLabel = (phase: BfsUnitPhase): string => {
+export const nextPhaseLabel = (phase: UnitPhase): string => {
   const next = bfsUnitPhases[phase.phase];
   return next ? `${next.formalName}へ進む` : "次へ進む";
 };
-
-export const bfsUnitText = {
-  navLabel: "この単元の流れ",
-  finalChip: "単元リザルト",
-  summaryHeading: "この単元の到達状況",
-  reviewNote: "気になる段階は、上のナビゲーションからいつでも戻って復習できます。",
-  backToCourses: "コース一覧に戻る",
-} as const;

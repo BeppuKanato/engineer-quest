@@ -66,10 +66,14 @@ assert.match(page, /contentId === "bfs-unit"/);
 assert.match(page, /BfsUnitPreview/);
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const container = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
-for (const component of ["BfsMotivationPreview", "BfsExecutionPreview", "BfsCheckPreview", "BfsCodeMappingPreview", "BfsCodeCheckPreview", "BfsConsolidationPreview", "BfsImplementationPreview"]) {
-  assert.ok(container.includes(`<${component} embedded`), `container renders ${component} embedded`);
-}
+const container = read(`${root}/unit/LearningUnitPreview.tsx`);
+const bfsPreview = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+assert.match(bfsPreview, /<LearningUnitPreview .*unit=\{bfsUnit\}/u);
+assert.match(container, /<View embedded/u);
+const components = ["BfsMotivationPreview", "BfsExecutionPreview", "BfsCheckPreview", "BfsCodeMappingPreview", "BfsCodeCheckPreview", "BfsConsolidationPreview", "BfsImplementationPreview"];
+bfsUnitPhases.forEach((phase, index) => {
+  assert.ok(bfsPreview.includes(`"${phase.id}": ${components[index]}`), `container registers ${components[index]}`);
+});
 
 // 接続の前提となる各部品の受け口が残っている。
 assert.match(read(`${root}/player/LearningPlayer.tsx`), /endAction/, "player endAction");
@@ -186,7 +190,7 @@ for (const phase of bfsUnitPhases.filter(phase => phase.phase > 1)) {
   assert.ok(html.includes(phase.bridge), `bridge text for phase ${phase.phase}`);
   assert.ok(html.includes(`${phase.formalName}へ進む`), `bridge button for phase ${phase.phase}`);
 }
-const previewSource = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+const previewSource = container;
 assert.match(previewSource, /kind: "bridge"/, "preview routes forward completion through the bridge screen");
 assert.match(previewSource, /"phase_bridge_view"/, "bridge views are logged with the target phase");
 const celebrationSource = read(`${root}/bfs/unit/UnitResultCelebration.tsx`);
@@ -213,7 +217,7 @@ assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The f
 // 紙吹雪には歓声が付く（#179）。プリセットで音の大きさが変わり、全体のサウンド設定に従う。
 assert.match(confettiSource, /resultCheerLarge/, "The final preset plays the large cheer");
 // フィードバック接続（#202）：確認フェーズの結果と最終結果にだけ差し込み、先行生成する。
-const fbPreviewSource = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+const fbPreviewSource = container;
 assert.match(fbPreviewSource, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
 assert.match(fbPreviewSource, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
 assert.match(fbPreviewSource, /renderUnitFeedback/, "The final result carries the unit feedback slot");
@@ -251,6 +255,6 @@ assert.match(tagRowSource, /復習で確認できます/, "Tags not reached on t
 assert.doesNotMatch(tagRowSource, /初回不正解/, "Tag rows never label a first attempt as a failure");
 assert.doesNotMatch(phaseResultSource, /mascot|Mascot|<UnitResultCelebration[^>]*key=/);
 assert.doesNotMatch(finalResultSource, /UnitResultCelebration|phaseResultPraise/, "The final result is outside #144");
-assert.match(container, /<UnitResultScreen phase=\{bfsUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
+assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
 
 console.log("verifyBfsUnitFlow: OK");
