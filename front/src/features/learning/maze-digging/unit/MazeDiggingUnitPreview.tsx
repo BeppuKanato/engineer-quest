@@ -54,6 +54,9 @@ export type MazeDiggingUnitPreviewProps = {
   // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
   renderPhaseAchievements?: (phaseKey: string) => ReactNode;
   renderNewAchievements?: () => ReactNode;
+  // 大目標の達成の提示（#370）。結果画面のバンドと最終リザルトのゾーンの差し込み口。
+  renderPhaseGoalAchievement?: (phaseKey: string) => ReactNode;
+  renderFinalGoalAchievement?: () => ReactNode;
   // フィードバック接続（#202／#369）。確認フェーズ（3・5・6）の完了保存後に先行生成を
   // 依頼する。表示は結果画面の付属ではなく専用画面が担う：結果画面の前進で
   // フィードバック画面へ入り（renderPhaseFeedbackScreen）、最終結果からは
@@ -65,7 +68,7 @@ export type MazeDiggingUnitPreviewProps = {
   renderPhaseFeedbackScreen?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => ReactNode;
   renderUnitFeedbackScreen?: (nav: { goBack: () => void; figure: ReactNode }) => ReactNode;
 };
-export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: MazeDiggingUnitPreviewProps = {}) {
+export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, renderPhaseGoalAchievement, renderFinalGoalAchievement, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: MazeDiggingUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, mazeDiggingUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -273,7 +276,8 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
             onNext={isCheckPhase(mazeDiggingUnitPhases[screen.index]) && feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed
               ? () => setScreen({ kind: "feedback", index: screen.index })
               : () => setScreen({ kind: "bridge", index: screen.index + 1 })}
-            achievements={renderPhaseAchievements?.(mazeDiggingUnitPhases[screen.index].id)} />
+            achievements={renderPhaseAchievements?.(mazeDiggingUnitPhases[screen.index].id)}
+            goalAchievement={renderPhaseGoalAchievement?.(mazeDiggingUnitPhases[screen.index].id)} />
         )}
         {screen.kind === "feedback" && renderPhaseFeedbackScreen?.(mazeDiggingUnitPhases[screen.index].id, mazeDiggingUnitPhases[screen.index + 1]?.id ?? null, {
           goToPhase: key => { const target = mazeDiggingUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
@@ -286,7 +290,7 @@ export function MazeDiggingUnitPreview({ embedded = false, initialPhaseIndex = 0
         )}
         {screen.kind === "final" && (
           <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase}
-            onShowFeedback={feedbackEnabled && renderUnitFeedbackScreen ? () => setScreen({ kind: "unitFeedback" }) : undefined} />
+            onShowFeedback={feedbackEnabled && renderUnitFeedbackScreen ? () => setScreen({ kind: "unitFeedback" }) : undefined} goalAchievement={renderFinalGoalAchievement?.()} />
         )}
         {screen.kind === "unitFeedback" && renderUnitFeedbackScreen?.({
           goBack: () => setScreen({ kind: "final" }),
