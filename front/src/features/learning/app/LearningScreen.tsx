@@ -106,6 +106,11 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     // この保存で達成した大目標は、そのフェーズのフィードバック画面で提示する（#369）。
     const achieved = result.achievedBigGoals ?? [];
     if (achieved.length) setPhaseAchievedGoals(current => ({ ...current, [phaseKey]: [...(current[phaseKey] ?? []), ...achieved.filter(goal => !(current[phaseKey] ?? []).some(x => x.id === goal.id))] }));
+    // 最終フェーズの保存で達成した目標（到達型は全フェーズの進捗が揃うこの保存で
+    // 遷移するのが主経路）は、単元完了と重なる達成として単元側の提示にも入れる。
+    if (achieved.length && phaseKey === unit.phases.at(-1)?.id) {
+      setUnitAchievedGoals(current => [...current, ...achieved.filter(goal => !current.some(x => x.id === goal.id))]);
+    }
     refreshCurrentGoal();
     // 切れ目ダイアログは知識カード専用（#333）。提示は遷移を待たせない（#147）。エラー時はここへ到達しない。
     if (result.awardedCard) present({ phaseKey });
