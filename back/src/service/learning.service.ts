@@ -9,6 +9,7 @@ import { LearningProgressStatus, Prisma } from "@prisma/client";
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 import { evaluateAchievementsForUser } from "./achievement.service";
+import { evaluateBigGoalsForUser } from "./bigGoal.service";
 import { toKnowledgeCardSummary } from "./knowledgeCard.service";
 
 type AuthUser = { id: string; knowledgeCardTableNumber: number };
@@ -171,6 +172,8 @@ export const completePhaseByUser = async (
   });
 
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
+  // 大目標の達成判定も、実績評価と同じ保存タイミングで再評価する（#365）。
+  await evaluateBigGoalsForUser(user.id);
   return {
     courseId,
     phase: phaseView(phase),
@@ -193,6 +196,8 @@ export const completeUnitByUser = async (user: AuthUser, courseId: string) => {
     },
   });
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
+  // 大目標の達成判定も、実績評価と同じ保存タイミングで再評価する（#365）。
+  await evaluateBigGoalsForUser(user.id);
   return { courseId, unit: unitView(unit), unlockedAchievements };
 };
 

@@ -38,6 +38,8 @@ model User {
   unitProgresses    UnitLearningProgress[]
   phaseProgresses   PhaseLearningProgress[]
   learningEvents    LearningEvent[]
+  bigGoals          BigGoal[]
+  bigGoalProposals  BigGoalProposal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -762,4 +764,87 @@ model KnowledgeCardPhaseScheduleEntry {
 
   @@unique([courseId, courseVersion, tableNumber, phaseKey])
   @@index([courseId, tableNumber])
+}
+
+// =========================
+// Big goal (大目標) model — Issue #365
+// =========================
+
+enum BigGoalType {
+  UNIT_COMPLETION
+  ACHIEVEMENT
+  CREATE_QUEST
+  INTEGRATION
+  SHARING
+  RETENTION
+}
+
+enum BigGoalStatus {
+  PROPOSED
+  ACTIVE
+  ACHIEVED
+  CLOSED_UNMET
+  REVISED
+}
+
+enum BigGoalProposalTiming {
+  UNIT_START
+  ON_ACHIEVEMENT
+}
+
+model BigGoalProposal {
+  id                 String                @id @default(cuid())
+  userId             String
+  eventKey           String                @unique
+  timing             BigGoalProposalTiming
+  startCourseId      String?
+  condition          FeedbackCondition?
+  status             CourseExamFeedbackStatus @default(GENERATING)
+  input              Json
+  result             Json?
+  failureCode        String?
+  selectedCandidateKey String?
+  createdAt          DateTime              @default(now())
+  generatedAt        DateTime?
+
+  user  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goals BigGoal[]
+  calls BigGoalProposalCall[]
+
+  @@index([userId, createdAt])
+}
+
+model BigGoalProposalCall {
+  id         String   @id @default(cuid())
+  proposalId String
+  data       Json
+  createdAt  DateTime @default(now())
+
+  proposal BigGoalProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  @@index([proposalId, createdAt])
+}
+
+model BigGoal {
+  id           String        @id @default(cuid())
+  userId       String
+  proposalId   String?
+  candidateKey String
+  type         BigGoalType
+  params       Json
+  displayText  String
+  status       BigGoalStatus @default(PROPOSED)
+  confirmedAt  DateTime?
+  evaluation   Json?
+  evaluatedAt  DateTime?
+  closedAt     DateTime?
+  supersedesId String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposal BigGoalProposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
 }

@@ -94,6 +94,7 @@ Object.assign(prisma.userKnowledgeCard, {
 Object.assign(prisma.user, { findUnique: async ({ where }: { where: { id: string } }) => ({ id: where.id }) });
 Object.assign(prisma.createQuestAttempt, { findMany: async () => [] });
 Object.assign(prisma.createQuestSubmission, { findMany: async () => [] });
+Object.assign(prisma.bigGoal, { findMany: async () => [] });
 Object.assign(prisma.achievement, { findMany: async () => awards });
 Object.assign(prisma.userAchievement, {
   findMany: async ({ where }: { where: { userId: string } }) => [...(owned.get(where.userId) ?? [])].map(achievementId => ({ achievementId })),
