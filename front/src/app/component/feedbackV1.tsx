@@ -17,22 +17,27 @@ function canonicalRoute(route: string) {
   return url.pathname + (params.size ? `?${params.toString()}` : "") + url.hash;
 }
 
-type Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null } };
-export function FeedbackV1({ kind, eventId, onAction }: {
-  kind: "mission" | "create" | "phase" | "unit";
-  eventId: string;
-  // Called when the recommended action is clicked. Return true to handle the
-  // navigation in-app (e.g. moving between phases) instead of following the link.
-  onAction?: (href: string | null) => boolean;
-}) {
+export type FeedbackV1Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null } };
+type Result = FeedbackV1Result;
+export type FeedbackV1Kind = "mission" | "create" | "phase" | "unit";
+
+/**
+ * フィードバック v1 の取得と生成待ちポーリング（#202）。
+ * 依頼（POST）は冪等で、先行生成済みなら即返る。生成中は1.5秒間隔で読み直す。
+ * 実験割り当てなし（409）は適用外として即座に unavailable。
+ * 完了イベントがまだ見えない 404 は、保存直後の競合でありうるため（#321）、
+ * 少し待って依頼し直してから unavailable と判断する。
+ */
+export function useFeedbackV1(kind: FeedbackV1Kind, eventId: string) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState(false);
   // No experiment assignment (409) or no such completion event (404): feedback
-  // simply does not apply to this user/event, so render nothing.
+  // simply does not apply to this user/event.
   const [unavailable, setUnavailable] = useState(false);
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
+    let notFoundRetries = 0;
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (!user) return;
       const token = await user.getIdToken();
@@ -41,11 +46,16 @@ export function FeedbackV1({ kind, eventId, onAction }: {
         try {
           const data = await fetcher<Result>(url, { method, token });
           if (stopped) return;
+          notFoundRetries = 0;
           setResult(data);
           if (data.status === "GENERATING") timer = setTimeout(() => void load("GET"), 1500);
         } catch (e) {
           if (stopped) return;
-          if (e instanceof ApiError && (e.status === 404 || e.status === 409)) { setUnavailable(true); return; }
+          if (e instanceof ApiError && e.status === 409) { setUnavailable(true); return; }
+          if (e instanceof ApiError && e.status === 404) {
+            if (method === "POST" && notFoundRetries < 2) { notFoundRetries += 1; timer = setTimeout(() => void load("POST"), 1500); return; }
+            setUnavailable(true); return;
+          }
           setError(true);
         }
       };
@@ -53,6 +63,17 @@ export function FeedbackV1({ kind, eventId, onAction }: {
     });
     return () => { stopped = true; clearTimeout(timer); unsubscribe(); };
   }, [eventId, kind]);
+  return { result, error, unavailable };
+}
+
+export function FeedbackV1({ kind, eventId, onAction }: {
+  kind: FeedbackV1Kind;
+  eventId: string;
+  // Called when the recommended action is clicked. Return true to handle the
+  // navigation in-app (e.g. moving between phases) instead of following the link.
+  onAction?: (href: string | null) => boolean;
+}) {
+  const { result, error, unavailable } = useFeedbackV1(kind, eventId);
   const f = result?.feedback;
   if (unavailable) return null;
   return <Paper variant="outlined" sx={{ p: 3, my: 2 }}>
