@@ -31,13 +31,12 @@ const nextButtonSx = {
 
 /** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。
  * スクロールはこの画面専用に持たず、単元コンテナのラッパーに一元化する（#298）。 */
-export function UnitResultScreen({ phase, summary, figure = <BfsResultFigure />, firstAttemptOnly = false, onNext, feedback, achievements }: {
+export function UnitResultScreen({ phase, summary, figure = <BfsResultFigure />, firstAttemptOnly = false, onNext, achievements }: {
   phase: UnitPhase;
   summary?: UnitPhaseSummary;
   figure?: ReactNode;
   firstAttemptOnly?: boolean;
   onNext: () => void;
-  feedback?: ReactNode;
   achievements?: ReactNode;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -59,7 +58,6 @@ export function UnitResultScreen({ phase, summary, figure = <BfsResultFigure />,
     )}
     {achievements}
     <PhaseNextButton label="次へ進む" onClick={onNext} />
-    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
   </Box>;
 }
 
@@ -85,7 +83,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ phases, result, summaries, onReviewPhase, rewards, renderRewards, feedback, newAchievements }: {
+export function UnitFinalResult({ phases, result, summaries, onReviewPhase, rewards, renderRewards, onShowFeedback, newAchievements }: {
   phases: readonly UnitPhase[];
   result: { readonly title: string; readonly closing: string };
   rewards?: LearningRewards;
@@ -93,7 +91,8 @@ export function UnitFinalResult({ phases, result, summaries, onReviewPhase, rewa
   newAchievements?: ReactNode;
   summaries: Readonly<Record<number, UnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
-  feedback?: ReactNode;
+  /** フィードバック専用画面への入口（#369）。単元のフィードバックがある場合だけ渡される。 */
+  onShowFeedback?: () => void;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
   const reduced = useReducedMotion();
@@ -141,8 +140,10 @@ export function UnitFinalResult({ phases, result, summaries, onReviewPhase, rewa
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{result.closing}</Typography>
     {newAchievements}
     {rewards && renderRewards?.(rewards)}
-    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{unitText.reviewNote}</Typography>
-    <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{unitText.backToCourses}</Button>
+    {onShowFeedback ? <>
+      <Button variant="contained" onClick={onShowFeedback} sx={{ ...nextButtonSx, minHeight: 48, px: 3, fontSize: 16, fontWeight: 700 }}>フィードバックへ進む</Button>
+      <Button variant="text" component={Link} href="/courses" sx={{ mb: 2, minHeight: 44, fontWeight: 700, color: playerTokens.control }}>{unitText.backToCourses}</Button>
+    </> : <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{unitText.backToCourses}</Button>}
   </Box>;
 }

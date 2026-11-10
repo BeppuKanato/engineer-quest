@@ -16,8 +16,9 @@ import { unitText } from "./unit.content";
 import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
+import { FeedbackPositionFigure } from "../app/feedback/FeedbackPositionFigure";
 
-type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
+type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" } | { kind: "feedback"; index: number } | { kind: "unitFeedback" };
 
 /** フィードバックの対象になる確認フェーズ（3・5・6）。#202 */
 const isCheckPhase = (phase: UnitPhase) => phase.phase === 3 || phase.phase === 5 || phase.phase === 6;
@@ -45,11 +46,16 @@ export type LearningUnitPreviewProps = {
   // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
   renderPhaseAchievements?: (phaseKey: string) => ReactNode;
   renderNewAchievements?: () => ReactNode;
-  // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
-  // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
+  // フィードバック接続（#202／#369）。確認フェーズ（3・5・6）の完了保存後に先行生成を
+  // 依頼する。表示は結果画面の付属ではなく専用画面が担う：結果画面の前進で
+  // フィードバック画面へ入り（renderPhaseFeedbackScreen）、最終結果からは
+  // 専用の入口ボタンで単元のフィードバック画面へ進む（renderUnitFeedbackScreen）。
+  // 位置の図は学習状態を持つこのコンテナが組み立てて nav.figure で渡す。
   onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
-  renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
-  renderUnitFeedback?: () => ReactNode;
+  /** フィードバックがこの学習者に適用される見込みがあるか。false の間は結果画面の前進が従来のブリッジへ向かう。 */
+  feedbackEnabled?: boolean;
+  renderPhaseFeedbackScreen?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => ReactNode;
+  renderUnitFeedbackScreen?: (nav: { goBack: () => void; figure: ReactNode }) => ReactNode;
 };
 type UnitPhaseViewProps = LearningInstrumentation & {
   embedded: true;
@@ -74,7 +80,7 @@ export type LearningUnitDefinition = {
   readonly keepHiddenPlayersRunning?: boolean;
 };
 
-export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: LearningUnitPreviewProps & { unit: LearningUnitDefinition }) {
+export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: LearningUnitPreviewProps & { unit: LearningUnitDefinition }) {
   const { phases } = unit;
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, phases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
@@ -92,7 +98,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   useEffect(() => { screenRef.current = screen; observer.current = onLearningEvent; }, [screen, onLearningEvent]);
   const failedRef = useRef<{ index: number; summary?: UnitPhaseSummary } | null>(null);
   useEffect(() => { failedRef.current = failed; }, [failed]);
-  const phaseKey = screen.kind === "final" ? undefined : phases[screen.index].id;
+  const phaseKey = screen.kind === "final" || screen.kind === "unitFeedback" ? undefined : phases[screen.index].id;
   const onUnitEvent = useCallback<LearningObserver>(event => onLearningEvent?.({ ...event,
     phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : undefined,
   }), [onLearningEvent]);
@@ -100,6 +106,8 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "result", "phase_result_view", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "bridge", "phase_bridge_view", phaseKey, { phaseKey });
   useLearningVisit(onLearningEvent, screen.kind === "final", "unit_result_view");
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "feedback", "feedback_view", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent, screen.kind === "unitFeedback", "unit_feedback_view");
   useEffect(() => { if (screen.kind === "final") onFinalResult?.(); }, [screen.kind, onFinalResult]);
   // 非表示への切替で閉じる滞在区間や、開始済みの非同期実行結果も元のフェーズへ記録する。
   const phaseObservers = useMemo(() => phases.map((phase): LearningObserver => event => {
@@ -109,10 +117,10 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   const goToPhase = useCallback((index: number) => {
     if (busy.current) return;
     const previous = screenRef.current;
-    const reviewing = previous.kind === "final" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
+    const reviewing = previous.kind === "final" || previous.kind === "unitFeedback" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
     const target = phases[index].id;
     if (reviewing) reviewCounts.current[target] = (reviewCounts.current[target] ?? 0) + 1;
-    observer.current?.({ eventType: "phase_move", phaseKey: phases[index].id, payload: { from: previous.kind === "final" ? "final" : phases[previous.index].id, to: phases[index].id,
+    observer.current?.({ eventType: "phase_move", phaseKey: phases[index].id, payload: { from: previous.kind === "final" || previous.kind === "unitFeedback" ? "final" : phases[previous.index].id, to: phases[index].id,
       direction: reviewing ? "review" : "forward", reviewCount: reviewCounts.current[target] ?? 0 } });
     setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
     setScreen({ kind: "phase", index });
@@ -205,7 +213,13 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   };
 
   const isCompleted = (index: number) => completed.has(phases[index].id);
-  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge") && screen.index === index;
+  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge" || screen.kind === "feedback") && screen.index === index;
+  // フィードバック専用画面の現在位置の図（#369）。完了集合と現在位置から組み立てる。
+  const buildFeedbackFigure = (currentIndex: number, allDone: boolean): ReactNode => (
+    <FeedbackPositionFigure
+      states={phases.map((phase, index) => index === currentIndex ? "current" : allDone || completed.has(phase.id) ? "done" : "upcoming")}
+      phaseNames={phases.map(phase => phase.formalName)} />
+  );
 
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
@@ -235,14 +249,14 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
         {unitComplete && <>
           <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
           <Button onClick={() => setScreen({ kind: "final" })}
-          aria-current={screen.kind === "final" ? "step" : undefined}
+          aria-current={screen.kind === "final" || screen.kind === "unitFeedback" ? "step" : undefined}
           startIcon={<EmojiEventsIcon sx={{ fontSize: 16 }} />}
           sx={{
             minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
-            color: screen.kind === "final" ? playerTokens.surface : playerTokens.text,
-            bgcolor: screen.kind === "final" ? playerTokens.focus : "transparent",
+            color: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.surface : playerTokens.text,
+            bgcolor: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.focus : "transparent",
             border: `2px solid ${playerTokens.focus}`,
-            "&:hover": { bgcolor: screen.kind === "final" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
+            "&:hover": { bgcolor: screen.kind === "final" || screen.kind === "unitFeedback" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
           }}>
           {unitText.finalChip}
           </Button>
@@ -274,19 +288,29 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
           </Box>
         ))}
         {screen.kind === "result" && (
-          <UnitResultScreen phase={phases[screen.index]} summary={summaries[screen.index]} figure={unit.resultFigure} firstAttemptOnly={unit.firstAttemptResult} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
-            achievements={renderPhaseAchievements?.(phases[screen.index].id)}
-            feedback={isCheckPhase(phases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(phases[screen.index].id, phases[screen.index + 1]?.id ?? null, {
-              goToPhase: key => { const target = phases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
-              goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
-            }) : undefined} />
+          <UnitResultScreen phase={phases[screen.index]} summary={summaries[screen.index]} figure={unit.resultFigure} firstAttemptOnly={unit.firstAttemptResult}
+            onNext={isCheckPhase(phases[screen.index]) && feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed
+              ? () => setScreen({ kind: "feedback", index: screen.index })
+              : () => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            achievements={renderPhaseAchievements?.(phases[screen.index].id)} />
         )}
+        {screen.kind === "feedback" && renderPhaseFeedbackScreen?.(phases[screen.index].id, phases[screen.index + 1]?.id ?? null, {
+          goToPhase: key => { const target = phases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
+          goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
+          goBack: () => setScreen({ kind: "result", index: screen.index }),
+          figure: buildFeedbackFigure(screen.index, false),
+        })}
         {screen.kind === "bridge" && (
           <PhaseBridgeScreen phase={phases[screen.index]} total={phases.length} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult phases={phases} result={unit.finalResult} rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
+          <UnitFinalResult phases={phases} result={unit.finalResult} rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase}
+            onShowFeedback={feedbackEnabled && renderUnitFeedbackScreen ? () => setScreen({ kind: "unitFeedback" }) : undefined} />
         )}
+        {screen.kind === "unitFeedback" && renderUnitFeedbackScreen?.({
+          goBack: () => setScreen({ kind: "final" }),
+          figure: buildFeedbackFigure(phases.length - 1, true),
+        })}
       </Box>
     </Box>
   </Box>;
