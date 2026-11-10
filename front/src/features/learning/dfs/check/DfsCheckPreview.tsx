@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import type { UnitPhaseSummary } from "../../unit/unit.types";
 import { playerTokens } from "../../player/player.tokens";
@@ -27,6 +28,7 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
   const retry = attempt?.correct === false;
+  useAssessmentObservation(dfsCheckContent, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   useAssessmentFeedback(dfsCheckContent, session, active && !reviewOpen);
   const firstCorrect = session.records.filter(record => record.firstCorrect === true).length;
   useAssessmentCompletion(complete, firstCorrect, dfsCheckContent.questions.length, onComplete);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { LearningUnitPreview, type LearningUnitDefinition, type UnitPhaseView } from "../../unit/LearningUnitPreview";
+import { LearningUnitPreview, type LearningUnitDefinition, type LearningUnitPreviewProps, type UnitPhaseView } from "../../unit/LearningUnitPreview";
 import { DfsCheckPreview } from "../check/DfsCheckPreview";
 import { DfsCodeCheckPreview } from "../code-check/DfsCodeCheckPreview";
 import { DfsCodeMappingPreview } from "../code-mapping/DfsCodeMappingPreview";
@@ -40,6 +40,6 @@ const dfsUnit = {
   finalResult: dfsImplementationContent.result,
 } satisfies LearningUnitDefinition;
 
-export function DfsUnitPreview() {
-  return <LearningUnitPreview unit={dfsUnit} />;
+export function DfsUnitPreview(props: LearningUnitPreviewProps = {}) {
+  return <LearningUnitPreview {...props} unit={dfsUnit} />;
 }

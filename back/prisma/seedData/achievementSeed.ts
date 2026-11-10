@@ -7,7 +7,7 @@ import {
 
 import { createQuestSeed } from "./createQuestSeed";
 import { courseSeed } from "./courseSeed";
-import { BFS_COURSE_ID, BINARY_SEARCH_COURSE_ID, BUBBLE_SORT_COURSE_ID, MAZE_DIGGING_COURSE_ID, WALL_EXTENSION_COURSE_ID, knowledgeCardSeed } from "./knowledgeCardSeed";
+import { BFS_COURSE_ID, BINARY_SEARCH_COURSE_ID, BUBBLE_SORT_COURSE_ID, DFS_COURSE_ID, MAZE_DIGGING_COURSE_ID, WALL_EXTENSION_COURSE_ID } from "./knowledgeCardSeed";
 
 const levelRarity = [
   AchievementRarity.COMMON,
@@ -114,5 +114,12 @@ export const achievementSeed: Prisma.AchievementUncheckedCreateInput[] = [
   { id: "ach-phase-binary-search-consolidation-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: BINARY_SEARCH_COURSE_ID, phaseKey: "binary-search-consolidation", title: "応用問題 初回満点", description: "応用問題を、初回の回答で満点だった証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 344 },
   { id: "ach-phase-binary-search-implementation-nohint", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_NO_HINT_COMPLETE, courseId: BINARY_SEARCH_COURSE_ID, phaseKey: "binary-search-implementation", title: "ノーヒントクリア", description: "「自分で実装」をヒントなしでクリアした証です。", rarity: AchievementRarity.EPIC, iconKey: "challenge", isSecret: false, sortOrder: 354 },
   { id: "ach-binary-search-card-complete", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, conditionValue: 3, courseId: BINARY_SEARCH_COURSE_ID, title: "二分探索カードコンプリート", description: "二分探索の知識カードをすべて集めた証です。", rarity: AchievementRarity.RARE, iconKey: "knowledge", isSecret: false, sortOrder: 414 },
-  ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, knowledgeCardSeed.length], sortOrder: 400, iconKey: "knowledge" }),
+  { id: "ach-unit-dfs-complete", category: AchievementCategory.COURSE_COMPLETE, conditionType: AchievementConditionType.UNIT_COMPLETE, courseId: DFS_COURSE_ID, title: "深さ優先探索を修得した", description: "深さ優先探索（DFS）の単元を最後まで完了した証です。", rarity: AchievementRarity.RARE, iconKey: "course", isSecret: false, sortOrder: 115 },
+  { id: "ach-phase-dfs-implementation-clear", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_COMPLETED, courseId: DFS_COURSE_ID, phaseKey: "dfs-implementation", title: "自分で実装クリア", description: "深さ優先探索を自分のコードで実装し、すべてのテストを通過した証です。", rarity: AchievementRarity.RARE, iconKey: "build", isSecret: false, sortOrder: 325 },
+  { id: "ach-phase-dfs-check-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: DFS_COURSE_ID, phaseKey: "dfs-check,dfs-code-check", title: "確認問題 初回全問正解", description: "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 335 },
+  { id: "ach-phase-dfs-consolidation-perfect", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT, courseId: DFS_COURSE_ID, phaseKey: "dfs-consolidation", title: "応用問題 初回満点", description: "応用問題で、初回の回答が満点だった証です。", rarity: AchievementRarity.EPIC, iconKey: "perfect", isSecret: false, sortOrder: 345 },
+  { id: "ach-phase-dfs-implementation-nohint", category: AchievementCategory.LEARNING_ACTION, conditionType: AchievementConditionType.PHASE_NO_HINT_COMPLETE, courseId: DFS_COURSE_ID, phaseKey: "dfs-implementation", title: "ノーヒントクリア", description: "「自分で実装」をヒントなしでクリアした証です。", rarity: AchievementRarity.EPIC, iconKey: "challenge", isSecret: false, sortOrder: 355 },
+  { id: "ach-dfs-card-complete", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, conditionValue: 3, courseId: DFS_COURSE_ID, title: "深さ優先探索カードコンプリート", description: "深さ優先探索の知識カードをすべて集めた証です。", rarity: AchievementRarity.RARE, iconKey: "knowledge", isSecret: false, sortOrder: 415 },
+  // カードプールの追加後も、既存の全体収集実績の達成条件を維持する。
+  ...countSeries({ id: "ach-knowledge", title: "知識の発見者", description: "知識カードを{count}枚発見した証です。", category: AchievementCategory.COLLECTION, conditionType: AchievementConditionType.KNOWLEDGE_CARD_COUNT, values: [1, 15], sortOrder: 400, iconKey: "knowledge" }),
 ];

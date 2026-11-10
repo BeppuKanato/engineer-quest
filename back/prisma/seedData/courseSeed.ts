@@ -69,7 +69,7 @@ export const courseSeed: CourseSeedEntry[] = [
   {
     id: "course-algorithm-depth-first-search-v1",
     title: "深さ優先探索（DFS）",
-    description: "一つの道を進めるところまで進み、行き止まりで戻りながらつながりを調べる深さ優先探索を学びます。図と呼び出しの積み重なりを追い、循環を防ぎながら訪問順を記録し、最後は再帰するPython関数を完成させます。",
+    description: "一つの道を奥まで進み、行き止まりから戻って別の道を調べる深さ優先探索を学びます。図とスタックを一手ずつ追い、同じ場所を二度訪れずに訪問順を記録するPython関数を完成させます。",
     difficulty: CourseDifficulty.EASY,
     isInitiallyUnlocked: true,
     isPublished: true,
