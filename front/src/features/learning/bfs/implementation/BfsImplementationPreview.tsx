@@ -3,13 +3,13 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { LEARNING_EDITOR_THEME, learningEditorTextCursor, setupLearningEditor } from "../../code/learningEditor";
 import { Box, Button, LinearProgress, Tab, Tabs, Typography } from "@mui/material";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { ImplementationLevelSelector } from "../../implementation/ImplementationLevelSelector";
 import type { ImplementationInputLevel } from "../../implementation/inputLevel";
-import { useImplementationInputLevel } from "../../implementation/useImplementationInputLevel";
+import { useImplementationInputLevel, type ImplementationLevelTemplates } from "../../implementation/useImplementationInputLevel";
 
 import { DrawnCheck } from "../../app/DrawnCheck";
 import { ResultConfetti } from "../../app/ResultConfetti";
@@ -26,13 +26,53 @@ import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runBfsFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { bfsEditorText as text } from "./editor.content";
 import { editorTokens as colors } from "./editor.tokens";
-import { ImplementationHints } from "./ImplementationHints";
+import type { ParsonsCode } from "../consolidation/ParsonsBoard";
+import { ImplementationHints, type ImplementationHintContent } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
-import { bfsImplementationContent as content } from "./implementation.content";
+import { bfsImplementationContent, type ImplementationTest } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
-/** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
+type WorkspaceProps = LearningInstrumentation & {
+  embedded?: boolean;
+  onComplete?: (summary: BfsUnitPhaseSummary) => void;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
+  onShowFinalResult?: () => void;
+};
+
+type ImplementationExercise = {
+  label: string;
+  content: Pick<typeof bfsImplementationContent, "status" | "controls"> & {
+    id: string;
+    caption: string;
+    templates: ImplementationLevelTemplates;
+    tests: readonly ImplementationTest[];
+    hints: ImplementationHintContent;
+    result: { title: string; closing: string; runsLabel: string; finalButton: string };
+  };
+  Results: ComponentType<{ outcomes: readonly TestOutcome[]; diagnostics?: readonly TestOutcome[] }>;
+  runFreeCode: (code: string, onPrepared: () => void, isCurrent: () => boolean) => Promise<FreeExecutionResult>;
+  hintCode?: ParsonsCode;
+  hintRepeatLabel?: string;
+  freeReturnedLabel?: string;
+  renderFreeReturn?: (actual: unknown) => ReactNode;
+  visualDebug?: boolean;
+};
+
+const bfsExercise = {
+  label: "BFSの自分で実装", content: bfsImplementationContent, Results: ImplementationResults,
+  runFreeCode: runBfsFreeCode, visualDebug: true,
+} satisfies ImplementationExercise;
+
+/** embedded / onComplete は単元フロー（#77）からの埋め込み用。 */
+export function BfsImplementationPreview(props: WorkspaceProps) {
+  return <ImplementationWorkspace {...props} exercise={bfsExercise} />;
+}
+
+/** BFS と DFS がエディタ、実行操作、ヒント表示を共有する。 */
+export function ImplementationWorkspace({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }:
+  WorkspaceProps & { exercise: ImplementationExercise }) {
+  const { content, Results } = exercise;
   // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。
   const draftBaseKey = codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`;
   const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
@@ -101,7 +141,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     const current = generation.current;
     setFreeStatus("preparing"); setFreeResult(null); setErrorLine(undefined); setPanel("console");
     try {
-      const result = await runBfsFreeCode(code, () => { if (current === generation.current) setFreeStatus("running"); }, () => current === generation.current);
+      const result = await exercise.runFreeCode(code, () => { if (current === generation.current) setFreeStatus("running"); }, () => current === generation.current);
       if (current === generation.current) { setFreeResult(result); setErrorLine(result.returned ? undefined : result.errorLine); }
     } catch {
       if (current === generation.current) setFreeResult({ stdout: "", outputTruncated: false, returned: false, error: "unavailable" });
@@ -154,14 +194,14 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
   const outlinedButton = { minHeight: 44, color: colors.text, borderColor: colors.border,
     "&:hover": { borderColor: colors.text, bgcolor: colors.button },
     "&.Mui-disabled": { color: colors.text, borderColor: colors.border, opacity: 0.45 } };
-  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
+  const traceButton = exercise.visualDebug && <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
     sx={outlinedButton}>{complete ? bfsTraceText.resultButton : bfsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
     if (!instance || !selection || busy) return;
     onLearningEvent?.({ eventType: "hint_token_insert", payload: { level: 1, token } });
     instance.pushUndoStop();
-    instance.executeEdits("bfs-token", [{ range: selection, text: token, forceMoveMarkers: true }]);
+    instance.executeEdits(content.id, [{ range: selection, text: token, forceMoveMarkers: true }]);
     instance.pushUndoStop(); instance.focus();
   };
   const openHint = (level: HintLevel) => {
@@ -177,7 +217,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     setOutcomes([]); setTraceError(null); setFreeResult(null);
   };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
-    <Box component="section" aria-label="BFSの自分で実装"
+    <Box component="section" aria-label={exercise.label}
       sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
       <Typography component="p" sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", flexShrink: 0 }}>
         {content.caption}
@@ -226,11 +266,11 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
             </Tabs>
             <Box role="tabpanel" hidden={panel !== "tests"} id={`${panelId}-tests-panel`} aria-labelledby={`${panelId}-tests`}
               sx={{ display: panel === "tests" ? "block" : "none", flex: 1, minHeight: 0, overflowY: "auto", p: 1.5 }}>
-              <ImplementationResults outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} />
+              <Results outcomes={outcomes} diagnostics={running ? outcomes : lastOutcomes} />
             </Box>
             <Box role="tabpanel" hidden={panel !== "console"} id={`${panelId}-console-panel`} aria-labelledby={`${panelId}-console`}
               sx={{ display: panel === "console" ? "block" : "none", flex: 1, minHeight: 0, overflowY: "auto" }}>
-              <FreeExecutionConsole result={freeResult} busy={freeRunning} />
+              <FreeExecutionConsole result={freeResult} busy={freeRunning} returnedLabel={exercise.freeReturnedLabel} renderReturn={exercise.renderFreeReturn} />
             </Box>
             <Box role="group" aria-label={content.hints.groupLabel} sx={{ p: 1, flexShrink: 0, borderTop: `1px solid ${colors.border}` }}>
               <Typography component="p" sx={{ fontSize: 16, mb: 0.5 }}>{text.hints}</Typography>
@@ -253,6 +293,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
     {tracePlayback && <BfsTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
-    {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
+    {hint && <ImplementationHints level={hint} hints={content.hints} code={exercise.hintCode} repeatLabel={exercise.hintRepeatLabel}
+      onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }

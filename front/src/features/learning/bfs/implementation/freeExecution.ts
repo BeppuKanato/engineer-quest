@@ -1,5 +1,6 @@
 import { disposePyodideRunner, preparePyodide, runCourseMissionTests } from "../../../../lib/pyodideRunner";
 import { bfsImplementationContent as content } from "./implementation.content";
+import type { ImplementationTest } from "./implementation.content";
 import { analyzeExecutionError } from "../../../../lib/executionError";
 
 export const freeOutputLimit = 16_000;
@@ -8,9 +9,14 @@ export type FreeExecutionResult = {
 } & ({ returned: true; actual: unknown; error: "mismatch" | null } | { returned: false; error: "syntax" | "runtime" | "timeout" | "unavailable"; errorLine?: number });
 export const freeDisplayCase = content.tests.find(test => test.id === "D1" && test.visibility === "display");
 
+export function runBfsFreeCode(code: string, onPrepared?: () => void, isCurrent?: () => boolean): Promise<FreeExecutionResult> {
+  return runFreeDisplayCase(freeDisplayCase, code, onPrepared, isCurrent);
+}
+
 /** 判定用の引数・stdoutが残ったWorkerを再利用せず、D1だけで実行する。 */
-export async function runBfsFreeCode(code: string, onPrepared: () => void = () => {}, isCurrent = () => true): Promise<FreeExecutionResult> {
-  if (!freeDisplayCase || freeDisplayCase.visibility !== "display") throw new Error("D1 must be a display case");
+export async function runFreeDisplayCase(displayCase: ImplementationTest | undefined, code: string,
+  onPrepared: () => void = () => {}, isCurrent = () => true): Promise<FreeExecutionResult> {
+  if (!displayCase || displayCase.id !== "D1" || displayCase.visibility !== "display") throw new Error("D1 must be a display case");
   disposePyodideRunner();
   try { await preparePyodide(); }
   catch { if (isCurrent()) disposePyodideRunner(); return { stdout: "", outputTruncated: false, returned: false, error: "unavailable" }; }
@@ -18,7 +24,7 @@ export async function runBfsFreeCode(code: string, onPrepared: () => void = () =
   onPrepared();
   let stdout = "", outputTruncated = false, lines = 0;
   try {
-    const response = await runCourseMissionTests(code, [freeDisplayCase], {
+    const response = await runCourseMissionTests(code, [displayCase], {
       maxOutputChars: freeOutputLimit,
       onStdout: line => {
         const chunk = (lines++ ? "\n" : "") + line;
@@ -26,7 +32,7 @@ export async function runBfsFreeCode(code: string, onPrepared: () => void = () =
         stdout += chunk.slice(0, Math.max(0, freeOutputLimit - stdout.length));
       },
     });
-    const result = response.results.find(result => result.id === freeDisplayCase.id);
+    const result = response.results.find(result => result.id === displayCase.id);
     if (!result) throw new Error("Missing display result");
     return { stdout, outputTruncated, returned: true, actual: result.actual, error: result.passed ? null : "mismatch" };
   } catch (error) {

@@ -1,10 +1,13 @@
 import { Box, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import { DistanceOutput } from "./DistanceOutput";
 import { bfsEditorText as text } from "./editor.content";
 import { editorTokens as colors } from "./editor.tokens";
 import { freeDisplayCase, freeOutputLimit, type FreeExecutionResult } from "./freeExecution";
 
-export function FreeExecutionConsole({ result, busy }: { result: FreeExecutionResult | null; busy: boolean }) {
+export function FreeExecutionConsole({ result, busy, returnedLabel = text.returned, renderReturn }: {
+  result: FreeExecutionResult | null; busy: boolean; returnedLabel?: string; renderReturn?: (actual: unknown) => ReactNode;
+}) {
   const errorLine = result && !result.returned ? result.errorLine : undefined;
   return <Box aria-label={text.freeTitle} sx={{ p: 1.5, bgcolor: colors.panel, color: colors.text, fontSize: 16 }}>
     <Typography component="p" sx={{ mb: 1 }}>{text.input}</Typography>
@@ -16,8 +19,8 @@ export function FreeExecutionConsole({ result, busy }: { result: FreeExecutionRe
       <Box component="pre" data-free-stdout sx={{ fontFamily: "monospace", fontSize: 16, whiteSpace: "pre-wrap", overflowWrap: "anywhere", my: 1 }}>{result.stdout || text.noOutput}</Box>
       {result.outputTruncated && <Typography component="p">{text.truncated.replace("{limit}", String(freeOutputLimit))}</Typography>}
       {result.returned && <>
-        <Typography component="h3" sx={{ mt: 2, fontSize: 16, fontWeight: 700 }}>{text.returned}</Typography>
-        <Box data-free-return sx={{ mt: 1 }}><DistanceOutput expected={freeDisplayCase?.expected} actual={result.actual} /></Box>
+        <Typography component="h3" sx={{ mt: 2, fontSize: 16, fontWeight: 700 }}>{returnedLabel}</Typography>
+        <Box data-free-return sx={{ mt: 1 }}>{renderReturn ? renderReturn(result.actual) : <DistanceOutput expected={freeDisplayCase?.expected} actual={result.actual} />}</Box>
       </>}
     </>}
   </Box>;
