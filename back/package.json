@@ -21,7 +21,8 @@
     "verify:feedback-v1-storage": "ts-node src/scripts/verifyFeedbackV1Storage.ts",
     "verify:feedback-v1-context": "ts-node src/scripts/verifyFeedbackV1Context.ts",
     "seed:preserve": "ts-node prisma/seed.ts --preserve-existing",
-    "verify:seed-preservation": "ts-node src/scripts/verifyPreservingSeed.ts"
+    "verify:seed-preservation": "ts-node src/scripts/verifyPreservingSeed.ts",
+    "verify:big-goal": "ts-node src/scripts/verifyBigGoal.ts"
   },
   "keywords": [],
   "author": "",
