@@ -4,7 +4,39 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { getAchievementsByUser } from "./achievement.service";
 import { HEXAD_FEEDBACK_EXPERIMENT_KEY } from "./experimentAssignment.service";
-import type { Action, Input, Target } from "./feedbackV1.engine";
+import { evaluateBigGoal } from "./bigGoal.evaluate";
+import { getActiveBigGoal, loadBigGoalFacts } from "./bigGoal.service";
+import type { BigGoalParams } from "./bigGoal.types";
+import type { Action, BigGoalInput, Input, Target } from "./feedbackV1.engine";
+
+/**
+ * 分析段へ渡す大目標ブロックを組み立てる（Issue #368、実装仕様6.1）。
+ * 渡すのはアクティブな大目標1つだけ。終了した目標の履歴は渡さない。
+ * 進捗は生成時点の実態データからコード側で計算し直す（部分充足の内訳）。
+ * 大目標が無い学習者では null とし、従来どおり目標ブロックなしで生成する。
+ */
+async function buildBigGoalInput(userId: string): Promise<BigGoalInput | null> {
+  const goal = await getActiveBigGoal(userId);
+  if (!goal) return null;
+  const params = (goal.params ?? {}) as BigGoalParams;
+  const facts = await loadBigGoalFacts(userId, goal.type, params);
+  const evaluation = evaluateBigGoal(goal.type, params, facts);
+  return {
+    displayText: goal.displayText,
+    type: goal.type,
+    condition: params as Record<string, unknown>,
+    progress: {
+      outcome: evaluation.outcome,
+      fraction: evaluation.fraction,
+      detail: evaluation.detail,
+    },
+    status: goal.status,
+    confirmedAt: goal.confirmedAt?.toISOString() ?? null,
+    daysSinceConfirmed: goal.confirmedAt
+      ? Math.max(0, Math.floor((Date.now() - goal.confirmedAt.getTime()) / 86_400_000))
+      : null,
+  };
+}
 
 // Preserve cross-kind chronology without supplying elapsed time as an ability signal.
 const sequence = (rows: { id: string; type: string; at: Date | undefined }[]) => rows
@@ -81,7 +113,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       ...a.executions.map(t => ({ id: t.id, type: "test", at: t.executedAt })), ...a.hintViews.map(t => ({ id: t.id, type: "hint", at: t.viewedAt })), ...a.submissions.map(t => ({ id: t.id, type: "submission", at: t.submittedAt })),
     ]), currentQuest: a.quest, selectedRequirementIds: a.selectedRequirementIds, tests: a.executions.map(v => withoutFields(v, ["executedAt"])), hints: a.hintViews.map(v => withoutFields(v, ["viewedAt"])), submissions: a.submissions.map(v => withoutFields(v, ["submittedAt"])) };
   }
-  const [courseRows, quests, cards, achievements, posts, history, allUnitRows, allPhaseRows] = await Promise.all([
+  const [courseRows, quests, cards, achievements, posts, history, allUnitRows, allPhaseRows, bigGoal] = await Promise.all([
     prisma.course.findMany({ where: { isPublished: true }, select: { id: true, title: true } }),
     prisma.createQuest.findMany({ where: { isPublished: true }, include: { attempts: { where: { userId: user.id }, select: { status: true, bestScore: true, code: true } }, relatedCourses: true, requirements: { select: { id: true, title: true, description: true, kind: true } } } }),
     prisma.knowledgeCard.findMany({ where: { isPublished: true, userKnowledgeCards: { some: { userId: user.id } } } }),
@@ -90,6 +122,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     prisma.feedbackV1.findMany({ where: { userId: user.id, createdAt: { gte: assignment.assignedAt, lte: cutoff } }, orderBy: { createdAt: "asc" }, select: { id: true, result: true, interactions: true, status: true } }),
     prisma.unitLearningProgress.findMany({ where: { userId: user.id } }),
     prisma.phaseLearningProgress.findMany({ where: { userId: user.id } }),
+    buildBigGoalInput(user.id),
   ]);
   const legacyWhere = { createdAt: { gte: assignment.assignedAt, lte: cutoff } };
   const legacyCreateHistory = await prisma.createQuestFeedback.findMany({ where: { ...legacyWhere, submission: { attempt: { userId: user.id } } }, select: { id: true, actionType: true, status: true, generatedAt: true } });
@@ -156,6 +189,6 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
     posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
-  const input: Input = { learning, targets, actions, hexad, state };
+  const input: Input = { learning, targets, actions, hexad, state, bigGoal };
   return { input, userId: user.id, condition: assignment.condition };
 }
