@@ -205,7 +205,13 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
       onLearningEvent={onLearningEvent ? phaseObservers[index] : undefined}
       onComplete={completeHandlers[index]}
       nextLabel={next ? `${next.formalName}へ進む` : "次へ進む"}
-      onNext={() => { if (!busy.current && completed.has(phase.id)) setScreen({ kind: "bridge", index: index + 1 }); }}
+      onNext={() => {
+        if (busy.current || !completed.has(phase.id)) return;
+        // 応用問題（result-in-phase）の結果からの前進も、確認フェーズの結果画面と
+        // 同じくフィードバック専用画面を経由する（#369）。
+        if (phase.transitionOut === "result-in-phase" && isCheckPhase(phase) && feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed) setScreen({ kind: "feedback", index });
+        else setScreen({ kind: "bridge", index: index + 1 });
+      }}
       advancePending={saving}
       achievements={visible && phase.transitionOut === "result-in-phase" ? renderPhaseAchievements?.(phase.id) : undefined}
       codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
