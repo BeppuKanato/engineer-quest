@@ -23,7 +23,7 @@ self.onmessage = async ({ data }) => {
     if (kind === "trace") {
       pyodide.setStdout({ batched: () => {} });
       pyodide.setStderr({ batched: () => {} });
-      const traced = await pyodide.runPythonAsync(buildPythonTraceHarness({ code, functionName: data.functionName, args: data.args, maxEvents: data.maxEvents }));
+      const traced = await pyodide.runPythonAsync(buildPythonTraceHarness({ code, functionName: data.functionName, args: data.args, maxEvents: data.maxEvents, traceKind: data.traceKind }));
       self.postMessage({ id, done: true, trace: JSON.parse(traced) });
       return;
     }
