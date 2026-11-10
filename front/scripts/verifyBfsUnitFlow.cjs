@@ -216,18 +216,26 @@ assert.match(confettiSource, /particleCount: 110/, "The final preset fires 110 p
 assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The final preset adds a centre popper");
 // 紙吹雪には歓声が付く（#179）。プリセットで音の大きさが変わり、全体のサウンド設定に従う。
 assert.match(confettiSource, /resultCheerLarge/, "The final preset plays the large cheer");
-// フィードバック接続（#202）：確認フェーズの結果と最終結果にだけ差し込み、先行生成する。
+// フィードバック接続（#202／#369）：先行生成し、表示は結果画面の付属ではなく専用画面が担う。
 const fbPreviewSource = container;
-assert.match(fbPreviewSource, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
+assert.match(fbPreviewSource, /isCheckPhase/, "Feedback screens follow check-phase results");
 assert.match(fbPreviewSource, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
-assert.match(fbPreviewSource, /renderUnitFeedback/, "The final result carries the unit feedback slot");
+assert.match(fbPreviewSource, /renderPhaseFeedbackScreen/, "Check-phase results route to the dedicated feedback screen");
+assert.match(fbPreviewSource, /renderUnitFeedbackScreen/, "The final result leads to the dedicated unit feedback screen");
+assert.match(fbPreviewSource, /kind: "unitFeedback"/, "The container carries a unit feedback screen state");
 const fbScreenSource = read(path.resolve(__dirname, "../src/features/learning/app/LearningScreen.tsx"));
 assert.match(fbScreenSource, /kind="phase"/, "Phase results mount phase feedback");
 assert.match(fbScreenSource, /kind="unit"/, "The final result mounts unit feedback");
 assert.match(fbScreenSource, /startFeedback/, "Generation starts at completion time, before the result is read");
+assert.match(fbScreenSource, /feedbackAvailability/, "Learners without feedback keep the conventional route");
 const fbComponentSource = read(path.resolve(__dirname, "../src/app/component/feedbackV1.tsx"));
-assert.match(fbComponentSource, /e.status === 404 \|\| e.status === 409/, "Users without an experiment assignment see no feedback card");
+assert.match(fbComponentSource, /useFeedbackV1/, "Feedback fetching and polling live in one hook");
+assert.match(fbComponentSource, /status === 409/, "Users without an experiment assignment see no feedback");
+assert.match(fbComponentSource, /status === 404/, "Missing completion events resolve to no feedback after a retry");
 assert.match(fbComponentSource, /onAction/, "Phase feedback actions can be handled inside the learning flow");
+const fbDedicatedSource = read(path.resolve(__dirname, "../src/features/learning/app/feedback/FeedbackScreen.tsx"));
+assert.match(fbDedicatedSource, /FeedbackObservation/, "The dedicated screen keeps the uptake observation");
+assert.match(fbDedicatedSource, /onUnavailable/, "The dedicated screen never strands a learner without feedback");
 assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
 const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
 assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
