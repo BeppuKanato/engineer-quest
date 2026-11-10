@@ -4,6 +4,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+import type { UnitPhaseSummary } from "../../unit/unit.types";
 import { playerTokens } from "../../player/player.tokens";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
@@ -13,8 +16,9 @@ import { dfsExecutionContent } from "../execution/execution.content";
 import { DfsCheckCanvas } from "./DfsCheckCanvas";
 import { dfsCheckContent } from "./check.content";
 
-/** 単品の理解度確認。判定・再試行・進行は共通assessmentに任せ、保存・接続は持たない。 */
-export function DfsCheckPreview() {
+export function DfsCheckPreview({ embedded = false, active = true, onLearningEvent, onComplete }: LearningInstrumentation & {
+  embedded?: boolean; onComplete?: (summary: UnitPhaseSummary) => void;
+} = {}) {
   const [session, setSession] = useState(() => createAssessmentState(dfsCheckContent));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
@@ -23,8 +27,9 @@ export function DfsCheckPreview() {
   const record = session.records.find(record => record.questionId === question?.id);
   const attempt = record?.attempts.at(-1);
   const retry = attempt?.correct === false;
-  useAssessmentFeedback(dfsCheckContent, session, !reviewOpen);
+  useAssessmentFeedback(dfsCheckContent, session, active && !reviewOpen);
   const firstCorrect = session.records.filter(record => record.firstCorrect === true).length;
+  useAssessmentCompletion(complete, firstCorrect, dfsCheckContent.questions.length, onComplete);
   const caption = complete ? `初回の正解は2問中${firstCorrect}問でした。` : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const step = getLearningStep(dfsExecutionContent, question?.stepId ?? dfsCheckContent.completion.stepId);
   const submit = (answer: NodeAnswer) => {
@@ -33,15 +38,15 @@ export function DfsCheckPreview() {
       ? current : answerQuestion(dfsCheckContent, current, question.id, answer));
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
-  return <Box component="main" aria-label={dfsCheckContent.stageName}
-    sx={{ minHeight: "100dvh", minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+  return <Box component={embedded ? "div" : "main"} aria-label={dfsCheckContent.stageName}
+    sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label="DFSの動きの確認問題"
-      sx={{ width: { xs: "100%", sm: "84vw" }, maxWidth: "100%", minWidth: 0, height: "84dvh", minHeight: 500,
+      sx={{ width: embedded ? "100%" : { xs: "100%", sm: "84vw" }, maxWidth: "100%", minWidth: 0, height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500,
         p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
         sx={{ color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none" }}>{caption}</Typography>
-      <AnswerFeedbackNotice assessmentId={dfsCheckContent.id} />
+      {!embedded && <AnswerFeedbackNotice assessmentId={dfsCheckContent.id} />}
       {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
         図の丸いボタンをタップして答えよう
       </Typography>}
@@ -59,7 +64,7 @@ export function DfsCheckPreview() {
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>}
       </Box>
     </Box>
-    {reviewOpen && question && <LearningReviewDialog content={dfsExecutionContent} stepIds={question.reviewStepIds}
+    {active && reviewOpen && question && <LearningReviewDialog content={dfsExecutionContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
       renderCanvas={canvas => <DfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
   </Box>;
 }

@@ -127,7 +127,7 @@ const hooks = { ...React,
   useState(initial) { const index = cursor++; if (!(index in slots)) slots[index] = typeof initial === "function" ? initial() : initial;
     return [slots[index], update => { slots[index] = typeof update === "function" ? update(slots[index]) : update; }]; },
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
-  useEffect() {},
+  useEffect(effect) { effect(); },
 };
 const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
 const { DfsCheckPreview } = ui(file("dfs/check/DfsCheckPreview.tsx"));
@@ -135,8 +135,8 @@ const Canvas = ui(file("dfs/check/DfsCheckCanvas.tsx")).DfsCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const elements = value => !value || typeof value !== "object" ? [] : Array.isArray(value) ? value.flatMap(elements) : [value, ...elements(value.props?.children)];
-let tree;
-const render = () => { cursor = 0; tree = elements(DfsCheckPreview()); };
+let tree, props;
+const render = () => { cursor = 0; tree = elements(DfsCheckPreview(props)); };
 const canvas = () => tree.find(element => element.type === Canvas).props;
 const button = label => { const element = tree.find(element => element.props?.children === label); assert(element, `Missing button: ${label}`); return element.props; };
 render();
@@ -167,11 +167,21 @@ for (const [answer, label] of [["F", "次の問題へ"], ["E", "結果を見る"
 }
 assert(tree.some(element => element.props?.children === "初回の正解は2問中2問でした。"));
 
+slots.length = 0;
+const summaries = [];
+props = { embedded: true, onComplete: summary => summaries.push(summary) };
+render();
+for (const [answer, label] of [["A", "次の問題へ"], ["E", "結果を見る"]]) {
+  canvas().onAnswer(node(answer)); render(); button(label).onClick(); render();
+}
+render();
+assert.deepEqual(JSON.parse(JSON.stringify(summaries)), [{ firstAttemptCorrect: 1, totalQuestions: 2 }]);
+
 const overlay = fs.readFileSync(file("assessment/NodeAnswerOverlay.tsx"), "utf8");
 assert.match(overlay, /prefers-reduced-motion: reduce/u); assert.match(overlay, /answer-cue 700ms ease-in-out 2/u);
 const preview = fs.readFileSync(file("dfs/check/DfsCheckPreview.tsx"), "utf8");
-assert.match(preview, /useAssessmentFeedback\(dfsCheckContent, session, !reviewOpen\)/u);
+assert.match(preview, /useAssessmentFeedback\(dfsCheckContent, session, active && !reviewOpen\)/u);
 assert.match(preview, /AnswerFeedbackNotice assessmentId=\{dfsCheckContent.id\}/u);
-assert(!/onLearningEvent|onComplete|fetch\(|localStorage|sessionStorage/u.test(preview), "Standalone only: no connection or persistence");
+assert(!/fetch\(|localStorage|sessionStorage/u.test(preview), "The preview does not persist progress");
 for (const relative of ["bfs/check/BfsCheckCanvas.tsx", "dfs/check/DfsCheckCanvas.tsx"]) assert.match(fs.readFileSync(file(relative), "utf8"), /<NodeAnswerOverlay/u);
 console.log("DFS check verified: F/E linked questions, original DFS snapshots/review, soft gate and retries, immutable first results, callback locking, shared answer controls, feedback wiring and standalone scope.");

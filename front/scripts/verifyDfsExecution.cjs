@@ -101,7 +101,7 @@ assert.match(renderer, /useReducedMotion\(\)/u); assert.match(renderer, /reduced
 assert(!/repeat\s*:|#(?:[0-9a-f]{3}){1,2}\b|\bgreen\b/iu.test(renderer));
 const preview = fs.readFileSync(`${feature}/DfsExecutionPreview.tsx`, "utf8");
 assert.match(preview, /LearningPlayer/u); assert.match(preview, /84vw/u); assert.match(preview, /84dvh/u);
-assert(!/endAction|ports=|onComplete|fetch\(|learningLog/u.test(preview));
+assert(!/ports=|fetch\(|learningLog/u.test(preview));
 assert.match(renderToStaticMarkup(createElement(DfsExecutionPreview)), /aria-label="動きの説明"/u);
 assert(!fs.existsSync(`${root}/bfs/bfsGraph.ts`), "No competing graph canonical module");
 console.log("DFS execution verified: all 17 snapshots match actual baseline Python; shared graph, backtracking, seeking and presentation contracts.");

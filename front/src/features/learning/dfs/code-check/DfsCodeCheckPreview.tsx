@@ -4,6 +4,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+import type { UnitPhaseSummary } from "../../unit/unit.types";
 import { CodeDisplay } from "../../code/CodeDisplay";
 import { playerTokens } from "../../player/player.tokens";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
@@ -12,7 +15,9 @@ import { DfsCodeMappingCanvas } from "../code-mapping/DfsCodeMappingCanvas";
 import { dfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import { dfsCodeCheckContent as content } from "./codeCheck.content";
 
-export function DfsCodeCheckPreview() {
+export function DfsCodeCheckPreview({ embedded = false, active = true, onLearningEvent, onComplete }: LearningInstrumentation & {
+  embedded?: boolean; onComplete?: (summary: UnitPhaseSummary) => void;
+} = {}) {
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
@@ -23,7 +28,8 @@ export function DfsCodeCheckPreview() {
   const attempt = record?.attempts.at(-1);
   const retry = attempt?.correct === false;
   const firstCorrect = session.records.filter(entry => entry.firstCorrect).length;
-  useAssessmentFeedback(content, session, !reviewOpen);
+  useAssessmentFeedback(content, session, active && !reviewOpen);
+  useAssessmentCompletion(complete, firstCorrect, content.questions.length, onComplete);
 
   useEffect(() => {
     captionRef.current?.focus();
@@ -53,15 +59,15 @@ export function DfsCodeCheckPreview() {
     });
   }
 
-  return <Box component="main" aria-label={content.stageName}
-    sx={{ minHeight: "100dvh", minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
+  return <Box component={embedded ? "div" : "main"} aria-label={content.stageName}
+    sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "コードの確認問題の結果" : "DFSのコードの確認問題"}
-      sx={{ width: "84vw", minWidth: 0, minHeight: "84dvh", p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      sx={{ width: embedded ? "100%" : "84vw", minWidth: 0, minHeight: embedded ? 0 : "84dvh", p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "center" }}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
         sx={{ fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none" }}>
         {complete ? `初回の正解は${content.questions.length}問中${firstCorrect}問でした。` : question?.prompt}
       </Typography>
-      <AnswerFeedbackNotice assessmentId={content.id} />
+      {!embedded && <AnswerFeedbackNotice assessmentId={content.id} />}
       {question && <>
         <Box ref={codeRef} tabIndex={0} role="region" aria-label="穴埋めコード"
           sx={{ width: "100%", overflowX: "auto", py: 1 }}>
@@ -94,7 +100,7 @@ export function DfsCodeCheckPreview() {
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>}
       </Box>}
     </Box>
-    {reviewOpen && question && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={question.reviewStepIds}
+    {active && reviewOpen && question && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
       renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
   </Box>;
 }

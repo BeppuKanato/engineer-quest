@@ -33,7 +33,7 @@ import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent, type ImplementationTest } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
-type WorkspaceProps = LearningInstrumentation & {
+export type ImplementationWorkspaceProps = LearningInstrumentation & {
   embedded?: boolean;
   onComplete?: (summary: BfsUnitPhaseSummary) => void;
   codeDraftBaseKey?: string;
@@ -71,13 +71,13 @@ const bfsExercise = {
 } satisfies ImplementationExercise<BfsTracePlayback>;
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。 */
-export function BfsImplementationPreview(props: WorkspaceProps) {
+export function BfsImplementationPreview(props: ImplementationWorkspaceProps) {
   return <ImplementationWorkspace {...props} exercise={bfsExercise} />;
 }
 
 /** BFS と DFS がエディタ、実行操作、ヒント表示を共有する。 */
 export function ImplementationWorkspace<Playback extends WorkspacePlayback>({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }:
-  WorkspaceProps & { exercise: ImplementationExercise<Playback> }) {
+  ImplementationWorkspaceProps & { exercise: ImplementationExercise<Playback> }) {
   const { content, Results, visualDebug } = exercise;
   const TraceDialog = visualDebug?.Dialog;
   // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。

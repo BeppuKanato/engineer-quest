@@ -35,7 +35,7 @@ function FolderExample() {
 }
 
 /** 図の差分だけを描画する。格子・現在地・軌跡はBFSと共用、グラフはGraphDrawingに委譲。 */
-export function DfsMotivationCanvas({ canvas }: { canvas: DfsMotivationCanvasState }) {
+export function DfsMotivationCanvas({ canvas, onExit }: { canvas: DfsMotivationCanvasState; onExit?: () => void }) {
   const { data, state, highlights } = canvas;
   const reduced = useReducedMotion(), returnArrow = useId();
   const transition = { duration: reduced ? 0 : playerTokens.transitionMs / 1000, ease: "easeInOut" } as const;
@@ -85,7 +85,7 @@ export function DfsMotivationCanvas({ canvas }: { canvas: DfsMotivationCanvasSta
     </GraphViewport>
     {state.exit && <Box component={motion.div} initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={transition}
       sx={{ position: "absolute", left: "50%", bottom: 12, transform: "translateX(-50%)" }}>
-      <PhaseNextButton label="動きの説明へ進む" disabled onClick={() => {}} />
+      <PhaseNextButton label="動きの説明へ進む" disabled={!onExit} onClick={onExit ?? (() => {})} />
     </Box>}
   </Box>;
 }
