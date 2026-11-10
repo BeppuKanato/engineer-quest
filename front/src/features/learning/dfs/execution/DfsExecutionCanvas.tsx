@@ -35,7 +35,7 @@ function StackItem({ nodeId, position, source, top, highlighted, duration }: {
 
 /** 図・スタック・訪問順は同じ完全スナップショットから表示する。 */
 export function DfsExecutionCanvas({ canvas, renderNodeOverlay, highlightNodes = true, view }: {
-  canvas: DfsExecutionCanvasState;
+  canvas: Pick<DfsExecutionCanvasState, "data"> & DfsExecutionView;
   /** 回答中は共通の回答リングを使い、処理状態の塗りと辺は残す。 */
   highlightNodes?: boolean;
   renderNodeOverlay?: (nodeId: string, radius: number) => ReactNode;

@@ -6,6 +6,7 @@ import { Box, Button, LinearProgress, Tab, Tabs, Typography } from "@mui/materia
 import { useCallback, useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
+import type { PythonTraceResult } from "../../../../lib/pythonTrace.types";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { ImplementationLevelSelector } from "../../implementation/ImplementationLevelSelector";
 import type { ImplementationInputLevel } from "../../implementation/inputLevel";
@@ -40,7 +41,8 @@ type WorkspaceProps = LearningInstrumentation & {
   onShowFinalResult?: () => void;
 };
 
-type ImplementationExercise = {
+type WorkspacePlayback = { mode: "replay" | "final"; notice: string | null; content: { steps: readonly unknown[] } };
+type ImplementationExercise<Playback extends WorkspacePlayback> = {
   label: string;
   content: Pick<typeof bfsImplementationContent, "status" | "controls"> & {
     id: string;
@@ -56,13 +58,17 @@ type ImplementationExercise = {
   hintRepeatLabel?: string;
   freeReturnedLabel?: string;
   renderFreeReturn?: (actual: unknown) => ReactNode;
-  visualDebug?: boolean;
+  visualDebug?: {
+    acquire: (code: string, isCurrent: () => boolean) => Promise<PythonTraceResult>;
+    convert: (trace: PythonTraceResult) => Playback;
+    Dialog: ComponentType<LearningInstrumentation & { playback: Playback; onClose: () => void }>;
+  };
 };
 
 const bfsExercise = {
   label: "BFSの自分で実装", content: bfsImplementationContent, Results: ImplementationResults,
-  runFreeCode: runBfsFreeCode, visualDebug: true,
-} satisfies ImplementationExercise;
+  runFreeCode: runBfsFreeCode, visualDebug: { acquire: traceBfsCode, convert: convertBfsTrace, Dialog: BfsTraceDialog },
+} satisfies ImplementationExercise<BfsTracePlayback>;
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。 */
 export function BfsImplementationPreview(props: WorkspaceProps) {
@@ -70,9 +76,10 @@ export function BfsImplementationPreview(props: WorkspaceProps) {
 }
 
 /** BFS と DFS がエディタ、実行操作、ヒント表示を共有する。 */
-export function ImplementationWorkspace({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }:
-  WorkspaceProps & { exercise: ImplementationExercise }) {
-  const { content, Results } = exercise;
+export function ImplementationWorkspace<Playback extends WorkspacePlayback>({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }:
+  WorkspaceProps & { exercise: ImplementationExercise<Playback> }) {
+  const { content, Results, visualDebug } = exercise;
+  const TraceDialog = visualDebug?.Dialog;
   // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。
   const draftBaseKey = codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`;
   const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
@@ -86,7 +93,7 @@ export function ImplementationWorkspace({ exercise, embedded = false, onComplete
   const busy = running || tracing || freeRunning;
   const panelId = useId();
   const sidePanel = useRef<HTMLElement>(null);
-  const [tracePlayback, setTracePlayback] = useState<BfsTracePlayback | null>(null);
+  const [tracePlayback, setTracePlayback] = useState<Playback | null>(null);
   const [traceError, setTraceError] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
@@ -170,16 +177,16 @@ export function ImplementationWorkspace({ exercise, embedded = false, onComplete
     }
   };
   const runTrace = async () => {
-    if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
+    if (!visualDebug || lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
     traceRuns.current++;
     onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code, level } });
     setTracing(true); setTraceError(null);
     try {
-      const trace = await traceBfsCode(code, () => current === generation.current);
+      const trace = await visualDebug.acquire(code, () => current === generation.current);
       if (current === generation.current) {
-        const playback = convertBfsTrace(trace);
+        const playback = visualDebug.convert(trace);
         setTracePlayback(playback);
         onLearningEvent?.({ eventType: "trace_result", payload: { mode: playback.mode, states: playback.content.steps.length, status: trace.status, partial: !!playback.notice, errorKind: trace.error?.kind ?? null } });
       }
@@ -194,7 +201,7 @@ export function ImplementationWorkspace({ exercise, embedded = false, onComplete
   const outlinedButton = { minHeight: 44, color: colors.text, borderColor: colors.border,
     "&:hover": { borderColor: colors.text, bgcolor: colors.button },
     "&.Mui-disabled": { color: colors.text, borderColor: colors.border, opacity: 0.45 } };
-  const traceButton = exercise.visualDebug && <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
+  const traceButton = visualDebug && <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
     sx={outlinedButton}>{complete ? bfsTraceText.resultButton : bfsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
@@ -292,7 +299,7 @@ export function ImplementationWorkspace({ exercise, embedded = false, onComplete
       </>
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
-    {tracePlayback && <BfsTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
+    {TraceDialog && tracePlayback && <TraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
     {hint && <ImplementationHints level={hint} hints={content.hints} code={exercise.hintCode} repeatLabel={exercise.hintRepeatLabel}
       onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;

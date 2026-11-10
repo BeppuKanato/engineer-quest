@@ -3,13 +3,14 @@ import { defineLearningContent } from "../../player/content.types";
 import { validateDfsExecutionCanvas, type DfsExecutionCanvasState, type DfsExecutionContent, type DfsOperation } from "./execution.types";
 
 /** 前コマへ依存せず、明示した状態だけから図・構造・強調を組み立てる。 */
-function snapshot(operation: DfsOperation, current: string | null, stack: readonly string[], order: readonly string[]): DfsExecutionCanvasState {
-  const completed = current === null ? order : order.slice(0, -1);
+export function dfsExecutionView(operation: DfsOperation | null, current: string | null, stack: readonly string[], order: readonly string[]):
+  Omit<DfsExecutionCanvasState, "state"> & { state: Omit<DfsExecutionCanvasState["state"], "operation"> } {
+  const completed = order.filter(id => id !== current);
   const highlights: DfsExecutionCanvasState["highlights"][number][] = [];
-  if (operation.kind !== "finish") highlights.push({ kind: "node", id: operation.nodeId });
-  if (operation.kind === "push-start" || operation.kind === "push") highlights.push({ kind: "stack-item", id: operation.nodeId });
-  if (operation.kind === "push" || operation.kind === "skip-visited") highlights.push({ kind: "edge", id: operation.edgeId, style: operation.kind === "push" ? "solid" : "dashed" });
-  if (operation.kind === "no-add") {
+  if (operation && operation.kind !== "finish") highlights.push({ kind: "node", id: operation.nodeId });
+  if (operation?.kind === "push-start" || operation?.kind === "push") highlights.push({ kind: "stack-item", id: operation.nodeId });
+  if (operation?.kind === "push" || operation?.kind === "skip-visited") highlights.push({ kind: "edge", id: operation.edgeId, style: operation.kind === "push" ? "solid" : "dashed" });
+  if (operation?.kind === "no-add") {
     for (const edge of searchGraph.edges.filter(edge => edge.from === current || edge.to === current)) {
       highlights.push({ kind: "edge", id: edge.id, style: "dashed" });
       const neighbor = edge.from === current ? edge.to : edge.from;
@@ -18,10 +19,15 @@ function snapshot(operation: DfsOperation, current: string | null, stack: readon
   }
   return {
     data: { kind: "dfs-execution", graph: searchGraph, start: "A" },
-    state: { operation, current, stack, order, completed, nodes: searchGraph.nodes.map(({ id }) => ({ id,
+    state: { current, stack, order, completed, nodes: searchGraph.nodes.map(({ id }) => ({ id,
       status: current === id ? "processing" : stack.includes(id) ? "queued" : completed.includes(id) ? "completed" : "idle",
     })) }, highlights,
   };
+}
+
+function snapshot(operation: DfsOperation, current: string | null, stack: readonly string[], order: readonly string[]): DfsExecutionCanvasState {
+  const view = dfsExecutionView(operation, current, stack, order);
+  return { ...view, state: { ...view.state, operation } };
 }
 
 export const dfsExecutionContent: DfsExecutionContent = {
