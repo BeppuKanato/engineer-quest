@@ -7,6 +7,7 @@
 import { KnowledgeCardRarity, type Prisma } from "@prisma/client";
 
 export const BFS_COURSE_ID = "course-algorithm-breadth-first-search-v1";
+export const DFS_COURSE_ID = "course-algorithm-depth-first-search-v1";
 export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
 export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
 export const MAZE_DIGGING_COURSE_ID = "course-algorithm-maze-digging-v1";
@@ -264,6 +265,48 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
     sortOrder: 15,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-dfs-topological-sort",
+    courseId: DFS_COURSE_ID,
+    label: "並び替え",
+    title: "トポロジカルソート",
+    description: "矢印をたどって出発点へ戻る循環がないグラフでは、深さ優先探索で各場所を調べ終えた順を逆にすると、矢印の出発側が到着側より前に来る順序を作れる。",
+    connection: "深さ優先探索では、訪れた順に加えて、先に進める場所をすべて調べ終えた順にも意味がある。その順を記録すると、依存関係の並び替えに使える。",
+    useCase: "プログラムのビルド順や履修科目の順序など、先に済ませる必要がある作業を並べるときに使える。",
+    searchKeywords: ["深さ優先探索", "DFS", "トポロジカルソート", "依存関係"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 16,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-dfs-list-stack",
+    courseId: DFS_COURSE_ID,
+    label: "スタック",
+    title: "リストで作るスタック",
+    description: "Python のリストは、末尾に append で積み、末尾から pop で取り出すと、後入れ先出しのスタックとして使える。",
+    connection: "深さ優先探索では、これから調べる場所をリストの末尾に積む。行き止まりに着いたら、残っている場所を末尾から取り出して探索を続ける。",
+    useCase: "ブラウザの「戻る」履歴や、アプリの操作の取り消し（アンドゥ）の記録に使える。",
+    searchKeywords: ["スタック", "リスト", "append", "pop", "LIFO"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 17,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-dfs-backtracking",
+    courseId: DFS_COURSE_ID,
+    label: "探索",
+    title: "バックトラッキング",
+    description: "一つの手を試し、行き止まりなら前の分岐に戻って別の手を試す。答えが見つかるまでこの手順を繰り返す探索方法。",
+    connection: "深さ優先探索の「奥へ進む・戻る」を、選択肢を順に試す問題へ応用する。戻ることで、試していない組み合わせを調べられる。",
+    useCase: "数独や迷路の解法、パズルの答えをすべて探すプログラムに使える。",
+    searchKeywords: ["深さ優先探索", "DFS", "バックトラッキング", "数独"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 18,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -271,6 +314,12 @@ export const BFS_CARD_PHASE_SLOTS = [
   { phaseKey: "bfs-execution", knowledgeCardId: "knowledge-card-bfs-shortest-path" },
   { phaseKey: "bfs-code-check", knowledgeCardId: "knowledge-card-bfs-deque" },
   { phaseKey: "bfs-implementation", knowledgeCardId: "knowledge-card-bfs-bidirectional" },
+] as const;
+
+export const DFS_CARD_PHASE_SLOTS = [
+  { phaseKey: "dfs-execution", knowledgeCardId: "knowledge-card-dfs-topological-sort" },
+  { phaseKey: "dfs-code-check", knowledgeCardId: "knowledge-card-dfs-list-stack" },
+  { phaseKey: "dfs-implementation", knowledgeCardId: "knowledge-card-dfs-backtracking" },
 ] as const;
 
 /** フェーズ完了のタイミングとカードの対応（棒倒し法。配布位置とレアリティは BFS と同じ）。 */
@@ -344,4 +393,5 @@ export const knowledgeCardPhaseScheduleSeed: Array<
   ...buildCardPhaseSchedule(BUBBLE_SORT_COURSE_ID, "bubble-sort", BUBBLE_SORT_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(MAZE_DIGGING_COURSE_ID, "maze-digging", MAZE_DIGGING_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(BINARY_SEARCH_COURSE_ID, "binary-search", BINARY_SEARCH_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(DFS_COURSE_ID, "dfs", DFS_CARD_PHASE_SLOTS),
 ];

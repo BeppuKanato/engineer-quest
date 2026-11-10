@@ -8,6 +8,8 @@ import {
   BINARY_SEARCH_COURSE_ID,
   BUBBLE_SORT_CARD_PHASE_SLOTS,
   BUBBLE_SORT_COURSE_ID,
+  DFS_CARD_PHASE_SLOTS,
+  DFS_COURSE_ID,
   KNOWLEDGE_CARD_TABLE_COUNT,
   MAZE_DIGGING_CARD_PHASE_SLOTS,
   MAZE_DIGGING_COURSE_ID,
@@ -33,6 +35,15 @@ const BFS_PHASE_KEYS: readonly string[] = [
   "bfs-code-check",
   "bfs-consolidation",
   "bfs-implementation",
+];
+const DFS_PHASE_KEYS: readonly string[] = [
+  "dfs-motivation",
+  "dfs-execution",
+  "dfs-check",
+  "dfs-code-mapping",
+  "dfs-code-check",
+  "dfs-consolidation",
+  "dfs-implementation",
 ];
 const WALL_EXTENSION_PHASE_KEYS: readonly string[] = [
   "wall-extension-motivation",
@@ -77,6 +88,7 @@ const BINARY_SEARCH_PHASE_KEYS: readonly string[] = [
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
+  { courseId: DFS_COURSE_ID, slots: DFS_CARD_PHASE_SLOTS, phaseKeys: DFS_PHASE_KEYS },
   { courseId: WALL_EXTENSION_COURSE_ID, slots: WALL_EXTENSION_CARD_PHASE_SLOTS, phaseKeys: WALL_EXTENSION_PHASE_KEYS },
   { courseId: BUBBLE_SORT_COURSE_ID, slots: BUBBLE_SORT_CARD_PHASE_SLOTS, phaseKeys: BUBBLE_SORT_PHASE_KEYS },
   { courseId: MAZE_DIGGING_COURSE_ID, slots: MAZE_DIGGING_CARD_PHASE_SLOTS, phaseKeys: MAZE_DIGGING_PHASE_KEYS },

@@ -62,6 +62,7 @@ type Stats = {
   completedCourses: Set<string>;
   completedQuests: number; perfectQuests: number; optionalRequirements: number;
   cardCount: number; questScores: Map<string, number>;
+  cardsByCourse: Map<string, number>;
   completedUnits: Set<string>;
   phases: Map<string, PhaseStat>;
 };
@@ -69,14 +70,18 @@ const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> 
   Array.isArray(value) ? value.filter((v) => Boolean(v) && typeof v === "object" && !Array.isArray(v)) as Array<Record<string, unknown>> : [];
 
 const loadStats = async (userId: string): Promise<Stats> => {
-  const [attempts, submissions, cardCount, unitProgress, phaseProgress] = await Promise.all([
+  const [attempts, submissions, cards, unitProgress, phaseProgress] = await Promise.all([
     prisma.createQuestAttempt.findMany({ where: { userId }, select: { questId: true, status: true, bestScore: true } }),
     prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true } }),
-    prisma.userKnowledgeCard.count({ where: { userId } }),
+    prisma.userKnowledgeCard.findMany({ where: { userId }, select: { knowledgeCard: { select: { courseId: true } } } }),
     prisma.unitLearningProgress.findMany({ where: { userId }, select: { courseId: true, status: true } }),
     prisma.phaseLearningProgress.findMany({ where: { userId }, select: { courseId: true, phaseKey: true, status: true, summary: true } }),
   ]);
   const optionalIds = new Set<string>();
+  const cardsByCourse = new Map<string, number>();
+  for (const { knowledgeCard: { courseId } } of cards) {
+    cardsByCourse.set(courseId, (cardsByCourse.get(courseId) ?? 0) + 1);
+  }
   submissions.flatMap((s) => asResultArray(s.results)).forEach((r) => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
@@ -87,7 +92,7 @@ const loadStats = async (userId: string): Promise<Stats> => {
     phases: new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }])),
     completedQuests: attempts.filter((a) => a.status === "COMPLETED").length,
     perfectQuests: attempts.filter((a) => a.bestScore >= 100).length,
-    optionalRequirements: optionalIds.size, cardCount,
+    optionalRequirements: optionalIds.size, cardCount: cards.length, cardsByCourse,
     questScores: new Map(attempts.map((a) => [a.questId, a.bestScore])),
   };
 };
@@ -130,7 +135,7 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
     case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT: return { goal, progress: s.completedQuests };
     case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT: return { goal, progress: s.optionalRequirements };
     case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT: return { goal, progress: s.perfectQuests };
-    case AchievementConditionType.KNOWLEDGE_CARD_COUNT: return { goal, progress: s.cardCount };
+    case AchievementConditionType.KNOWLEDGE_CARD_COUNT: return { goal, progress: a.courseId ? s.cardsByCourse.get(a.courseId) ?? 0 : s.cardCount };
     case AchievementConditionType.STREAK_DAYS: return { goal, progress: 0 };
   }
 };
