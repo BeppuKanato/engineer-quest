@@ -89,6 +89,7 @@
 | [big-goal-ui-367.md](big-goal-ui-367.md) | 記録 | Issue #367の大目標の設定UIとホーム表示（単元開始時の目標設定ゲート、本命＋2件の候補表示と合意操作、ホームのバナーと履歴表示、進捗はAPIの計算結果をそのまま表示） |
 | [feedback-big-goal-input-368.md](feedback-big-goal-input-368.md) | 記録 | Issue #368のフィードバック生成入力への大目標統合（分析段へ表示文・達成条件・進捗の内訳を渡し、currentStateを大目標に対する位置として書かせる。PROMPT_VERSION更新とverify追随） |
 | [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け） |
+| [big-goal-celebration-370.md](big-goal-celebration-370.md) | 記録 | Issue #370の大目標の称賛演出の統合（結果画面の紙吹雪・歓声を最大級へ引き上げる一元化、単元完了と重なる達成は最終リザルトへ統合、結果画面の無いフェーズからの持ち越し、達成バンド／ゾーンの提示） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
