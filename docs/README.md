@@ -77,6 +77,7 @@
 | [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
+| [feedback-composition-332.md](feedback-composition-332.md) | 記録 | Issue #332のフィードバック構成の見直し（Sadler／Hattie & Timperley に照らした表示文章の要件・合計200〜300字の目安・reason の表示、purpose は内部用） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |

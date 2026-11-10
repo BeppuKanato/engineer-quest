@@ -17,7 +17,7 @@ function canonicalRoute(route: string) {
   return url.pathname + (params.size ? `?${params.toString()}` : "") + url.hash;
 }
 
-type Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; actionLabel: string; actionHref: string | null } };
+type Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null } };
 export function FeedbackV1({ kind, eventId, onAction }: {
   kind: "mission" | "create" | "phase" | "unit";
   eventId: string;
@@ -58,7 +58,7 @@ export function FeedbackV1({ kind, eventId, onAction }: {
   return <Paper variant="outlined" sx={{ p: 3, my: 2 }}>
     {error || result?.status === "FAILED" ? <Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert> : !f ? <Alert severity="info">フィードバックを準備しています。</Alert> : <Stack spacing={2}>
       <FeedbackObservation id={result.id} href={f.actionHref} />
-      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal], ["次の一歩", f.nextStep]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
+      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal], ["次の一歩", f.nextStep], ["この一歩の理由", f.reason]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
       {f.actionHref && <Button component={Link} href={f.actionHref} variant="contained" onClick={event => { if (onAction?.(f.actionHref)) event.preventDefault(); }}>{f.actionLabel}</Button>}
     </Stack>}
   </Paper>;
