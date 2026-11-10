@@ -56,6 +56,8 @@ type UnitPhaseViewProps = LearningInstrumentation & {
   onComplete: (summary?: UnitPhaseSummary) => void;
   onNext: () => void;
   nextLabel: string;
+  advancePending: boolean;
+  achievements?: ReactNode;
   codeDraftBaseKey?: string;
   onCodeDraftError?: (failed: boolean) => void;
   onShowFinalResult: () => void;
@@ -195,9 +197,11 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
       onLearningEvent={onLearningEvent ? phaseObservers[index] : undefined}
       onComplete={completeHandlers[index]}
       nextLabel={next ? `${next.formalName}へ進む` : "次へ進む"}
-      onNext={() => setScreen({ kind: "bridge", index: index + 1 })}
+      onNext={() => { if (!busy.current && completed.has(phase.id)) setScreen({ kind: "bridge", index: index + 1 }); }}
+      advancePending={saving}
+      achievements={visible && phase.transitionOut === "result-in-phase" ? renderPhaseAchievements?.(phase.id) : undefined}
       codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
-      onShowFinalResult={() => setScreen({ kind: "final" })} />;
+      onShowFinalResult={() => { if (!busy.current && unitComplete) setScreen({ kind: "final" }); }} />;
   };
 
   const isCompleted = (index: number) => completed.has(phases[index].id);

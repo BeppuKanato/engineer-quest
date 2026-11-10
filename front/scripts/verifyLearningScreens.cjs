@@ -32,13 +32,28 @@ const plain = value => JSON.parse(JSON.stringify(value));
   assert.deepEqual(requests.map(item=>item.url), ['/learning/units/c%2Fa/progress','/learning/units/c%2Fa/start','/learning/units/c%2Fa/phases/p%2Fa/complete','/learning/units/c%2Fa/complete','/learning/events/batch']);
   assert(requests.every(item=>item.options.token==='jwt')); assert(requests.at(-1).options.keepalive);
   assert.deepEqual(JSON.parse(requests[2].options.body),{summary}); assert.equal(invalidations.length,3);
-  const { learningUnits,findLearningUnit,resumePhaseIndex,savedPhaseSummaries } = load(root+'/features/learning/app/unitRegistry.ts');
+  const { learningUnits,findLearningUnit,resumePhaseIndex,savedPhaseSummaries,unitUrl,learnUrl } = load(root+'/features/learning/app/unitRegistry.ts');
   const unit = learningUnits[0]; assert.equal(unit.courseId,'course-algorithm-breadth-first-search-v1'); assert.equal(findLearningUnit('unknown'),undefined);
   const empty={courseId:unit.courseId,unit:null,phases:[]}; assert.equal(resumePhaseIndex(unit,empty),0);
   const gap={...empty,unit:{lastPhaseKey:unit.phases[6].id},phases:[{phaseKey:unit.phases[0].id,status:'COMPLETED',summary},{phaseKey:unit.phases[2].id,status:'COMPLETED',summary:{testRuns:'bad',hintUsage:[-1]}},{phaseKey:unit.phases[1].id,status:'IN_PROGRESS',summary:null}]};
   assert.equal(resumePhaseIndex(unit,gap),1,'Resume the first unfinished phase, not lastPhaseKey or a later completed phase');
   assert.deepEqual(plain(savedPhaseSummaries(unit,gap)[0]),summary); assert.deepEqual(plain(savedPhaseSummaries(unit,gap)[2]),{});
   assert.equal(resumePhaseIndex(unit,{...empty,phases:unit.phases.map(phase=>({phaseKey:phase.id,status:'COMPLETED'}))}),null);
+  const dfsId = 'course-algorithm-depth-first-search-v1';
+  const dfs = findLearningUnit(dfsId);
+  assert.equal(dfs.kind, 'dfs');
+  assert.equal(unitUrl(dfsId), '/courses/roadmap/' + dfsId);
+  assert.equal(learnUrl(dfsId), unitUrl(dfsId) + '/learn');
+  assert.deepEqual(plain(dfs.phases.filter(phase=>phase.cardRarity).map(phase=>[phase.id,phase.cardRarity])),
+    [['dfs-execution','RARE'],['dfs-code-check','COMMON'],['dfs-implementation','EPIC']]);
+  const dfsProgress = {courseId:dfsId,unit:{lastPhaseKey:'dfs-implementation'},phases:[
+    {phaseKey:'dfs-motivation',status:'COMPLETED'}, {phaseKey:'dfs-execution',status:'COMPLETED'},
+    {phaseKey:'dfs-check',status:'COMPLETED',summary:{firstAttemptCorrect:1,totalQuestions:2}},
+  ]};
+  assert.equal(dfs.phases[resumePhaseIndex(dfs,dfsProgress)].id,'dfs-code-mapping');
+  assert.deepEqual(plain(savedPhaseSummaries(dfs,dfsProgress)[2]),{firstAttemptCorrect:1,totalQuestions:2});
+  await api.completeLearningPhase('jwt',dfsId,'dfs-check',dfsProgress.phases[2].summary);
+  assert.equal(requests.at(-1).url,'/learning/units/' + dfsId + '/phases/dfs-check/complete');
   const draft = load(root+'/features/learning/app/codeDraft.ts');
   assert(draft.writeCodeDraft(unit.courseId,'u1','learner source')); assert.equal(draft.readCodeDraft(unit.courseId,'u1'),'learner source');
   assert.equal(draft.readCodeDraft(unit.courseId,'u2'),undefined); assert.equal(draft.readCodeDraft('another-course','u1'),undefined);

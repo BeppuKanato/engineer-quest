@@ -169,8 +169,10 @@ assert.equal(find(bfs.props.unit.views["bfs-code-mapping"]).props.active, true, 
 
 const page = fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8");
 assert.match(page, /if \(contentId === "dfs-unit"\) return <DfsUnitPreview \/>/u);
-const registry = fs.readFileSync(root + "/app/unitRegistry.ts", "utf8");
-assert(!registry.includes("course-algorithm-depth-first-search-v1"));
+const learningScreen = fs.readFileSync(root + "/app/LearningScreen.tsx", "utf8");
+assert.match(learningScreen, /unit.kind === "dfs" \? <DfsUnitPreview \{\.\.\.unitPreviewProps\}/u);
+const overview = fs.readFileSync(root + "/app/UnitOverview.tsx", "utf8");
+assert.match(overview, /next === null && <Button[^>]+href=\{learnUrl\(courseId\)\}[^>]*>単元の結果を見る/u);
 async function verifyBfsSaving() {
   slots = [];
   let settle, saved = 0;
@@ -211,6 +213,48 @@ async function verifyBfsSaving() {
   assert(!tree.some(item => item.props.severity === "error"));
 }
 
-verifyBfsSaving().then(() => {
-  console.log("DFS unit verified: seven embedded stages, bridge and result callbacks, final summary, free review, and BFS resume/save compatibility.");
+async function verifyDfsAppSaving() {
+  slots = [];
+  let resolveSave;
+  const saved = [];
+  const entry = DfsUnitPreview({
+    embedded: true, initialPhaseIndex: 5,
+    onPhaseComplete(key, summary) {
+      saved.push([key, summary]);
+      return new Promise(resolve => { resolveSave = resolve; });
+    },
+    renderPhaseAchievements: key => "achievement:" + key,
+  });
+  draw(entry);
+  const application = phaseView(5);
+  assert.equal(application.props.achievements, "achievement:dfs-consolidation");
+  application.props.onComplete({ firstAttemptCorrect: 5, totalQuestions: 5 });
+  draw(entry);
+  assert.equal(phaseView(5).props.advancePending, true);
+  phaseView(5).props.onNext();
+  draw(entry);
+  assert(!find(PhaseBridgeScreen), "DFS waits for the application stage to save");
+  resolveSave();
+  await new Promise(setImmediate);
+  draw(entry);
+  phaseView(5).props.onNext();
+  draw(entry);
+  find(PhaseBridgeScreen).props.onProceed();
+  draw(entry);
+  phaseView(6).props.onComplete({ testRuns: 1, hintUsage: [0, 0, 0, 0] });
+  draw(entry);
+  phaseView(6).props.onShowFinalResult();
+  draw(entry);
+  assert(!find(UnitFinalResult), "DFS waits for the final phase to save");
+  resolveSave();
+  await new Promise(setImmediate);
+  draw(entry);
+  phaseView(6).props.onShowFinalResult();
+  draw(entry);
+  assert(find(UnitFinalResult));
+  assert.deepEqual(saved.map(([key]) => key), ["dfs-consolidation", "dfs-implementation"]);
+}
+
+verifyBfsSaving().then(verifyDfsAppSaving).then(() => {
+  console.log("DFS unit verified: seven stages, bridges, results, review, app save gates, and BFS resume/save compatibility.");
 }).catch(error => { console.error(error); process.exitCode = 1; });

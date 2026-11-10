@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ResultTagRow } from "../../app/ResultTagRow";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
@@ -11,6 +11,7 @@ import {
 } from "../../assessment/assessment";
 import { ConsolidationGraph } from "../../bfs/consolidation/ConsolidationGraph";
 import { ParsonsBoard, parsonsQuestionBodySx } from "../../bfs/consolidation/ParsonsBoard";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import type { UnitPhaseSummary } from "../../unit/unit.types";
 import { playerTokens } from "../../player/player.tokens";
@@ -20,8 +21,9 @@ import { DfsCodeMappingCanvas } from "../code-mapping/DfsCodeMappingCanvas";
 import { dfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import { dfsConsolidationContent as content, type DfsConsolidationQuestion } from "./consolidation.content";
 
-export function DfsConsolidationPreview({ embedded = false, active = true, onLearningEvent, onComplete, onNext, nextLabel }: LearningInstrumentation & {
+export function DfsConsolidationPreview({ embedded = false, active = true, onLearningEvent, onComplete, onNext, nextLabel, advancePending = false, achievements }: LearningInstrumentation & {
   embedded?: boolean; onComplete?: (summary: UnitPhaseSummary) => void; onNext?: () => void; nextLabel?: string;
+  advancePending?: boolean; achievements?: ReactNode;
 } = {}) {
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [review, setReview] = useState<DfsConsolidationQuestion | null>(null);
@@ -33,6 +35,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
   const diagnosis = complete ? diagnoseAssessment(content, session) : null;
   const advanceLabel = session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ";
 
+  useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
   useAssessmentFeedback(content, session, active && !review);
   useAssessmentCompletion(complete, diagnosis?.correct ?? 0, content.questions.length, onComplete);
 
@@ -100,6 +103,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
               reviewAction={!result.passed && <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`} label={content.reviewLabel}
                 onClick={() => setReview(content.questions.find(item => item.tags.includes(result.tag)) ?? null)} />} />)}
           </Box>
+          {achievements}
         </>}
       </Box>
       {(diagnosis || (question && question.kind !== "parsons" && attempt)) &&
@@ -112,7 +116,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
             {diagnosis
               ? <>
                 <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))} sx={{ minHeight: 48 }}>もう一度解く</Button>
-                {onNext && <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />}
+                {onNext && <PhaseNextButton label={nextLabel ?? "次へ進む"} disabled={advancePending} onClick={onNext} />}
               </>
               : <Button variant="contained" onClick={advance} sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700,
                 bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>

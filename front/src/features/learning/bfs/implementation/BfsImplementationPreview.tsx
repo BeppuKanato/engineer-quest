@@ -39,6 +39,7 @@ export type ImplementationWorkspaceProps = LearningInstrumentation & {
   codeDraftBaseKey?: string;
   onCodeDraftError?: (failed: boolean) => void;
   onShowFinalResult?: () => void;
+  advancePending?: boolean;
 };
 
 type WorkspacePlayback = { mode: "replay" | "final"; notice: string | null; content: { steps: readonly unknown[] } };
@@ -76,7 +77,7 @@ export function BfsImplementationPreview(props: ImplementationWorkspaceProps) {
 }
 
 /** BFS と DFS がエディタ、実行操作、ヒント表示を共有する。 */
-export function ImplementationWorkspace<Playback extends WorkspacePlayback>({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }:
+export function ImplementationWorkspace<Playback extends WorkspacePlayback>({ exercise, embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult, advancePending = false }:
   ImplementationWorkspaceProps & { exercise: ImplementationExercise<Playback> }) {
   const { content, Results, visualDebug } = exercise;
   const TraceDialog = visualDebug?.Dialog;
@@ -254,7 +255,7 @@ export function ImplementationWorkspace<Playback extends WorkspacePlayback>({ ex
                   <Typography component="p" sx={{ fontWeight: 800, fontSize: 17 }}>{content.result.title}</Typography>
                   <Typography component="p" sx={{ fontSize: 13.5, mt: 0.25 }}>{content.result.closing}</Typography>
                   <Typography component="p" sx={{ fontSize: 13.5, mt: 0.5 }}>{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
-                  {onShowFinalResult && <Button variant="contained" onClick={onShowFinalResult}
+                  {onShowFinalResult && <Button variant="contained" disabled={advancePending} onClick={onShowFinalResult}
                     sx={{ mt: 1, minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.result.finalButton}</Button>}
                 </Box>
               </Box>}

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import type { UnitPhaseSummary } from "../../unit/unit.types";
 import { CodeDisplay } from "../../code/CodeDisplay";
@@ -28,6 +29,7 @@ export function DfsCodeCheckPreview({ embedded = false, active = true, onLearnin
   const attempt = record?.attempts.at(-1);
   const retry = attempt?.correct === false;
   const firstCorrect = session.records.filter(entry => entry.firstCorrect).length;
+  useAssessmentObservation(content, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   useAssessmentFeedback(content, session, active && !reviewOpen);
   useAssessmentCompletion(complete, firstCorrect, content.questions.length, onComplete);
 

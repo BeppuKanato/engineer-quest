@@ -53,7 +53,8 @@ export function UnitOverview({ courseId }: { courseId: string }) {
           <Typography sx={{ mt: 1.5, color: "text.secondary", lineHeight: 1.8 }}>{unit.intro}</Typography>
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
             <Typography sx={{ mt: 2 }}>{completed} / {unit.phases.length} 完了</Typography>
-            {next === null && <Chip icon={<CheckCircleIcon />} label="単元完了" size="small" sx={{ mt: 2, fontWeight: 800, bgcolor: "#dcfce7", color: "#15803d", "& .MuiChip-icon": { color: "inherit" } }} />}
+            {progress.unit?.status === "COMPLETED" && <Chip icon={<CheckCircleIcon />} label="単元完了" size="small" sx={{ mt: 2, fontWeight: 800, bgcolor: "#dcfce7", color: "#15803d", "& .MuiChip-icon": { color: "inherit" } }} />}
+            {next === null && <Button variant="contained" component={Link} href={learnUrl(courseId)} sx={{ mt: 2 }}>単元の結果を見る</Button>}
           </Stack>
           <LinearProgress aria-label="単元の進捗" variant="determinate" value={completed / unit.phases.length * 100} sx={{ my: 2, height: 8, borderRadius: 4 }} />
           {startError && <Alert severity="error" sx={{ my: 2 }}>{startError}</Alert>}
