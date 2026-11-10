@@ -6,7 +6,11 @@ import {
   type BigGoalFacts,
   type PhaseFact,
 } from "../service/bigGoal.evaluate";
-import { buildBigGoalDisplayText } from "../service/bigGoal.types";
+import {
+  buildBigGoalDisplayText,
+  type BigGoalParams,
+  type BigGoalParamsByType,
+} from "../service/bigGoal.types";
 
 const phase = (
   phaseKey: string,
@@ -115,7 +119,7 @@ function main() {
     ["INTEGRATION", { courseIds: ["a", "b"], budgetLevel: "standard", count: 1 }],
     ["SHARING", { artifactQuestId: "q1" }],
     ["RETENTION", { courseId: "bfs" }],
-  ] as const) {
+  ] as Array<[keyof BigGoalParamsByType, BigGoalParams]>) {
     const result = evaluateBigGoal(type, params, {});
     assert.equal(result.outcome, "NOT_INSTRUMENTED");
     assert.equal(result.fraction, null);
