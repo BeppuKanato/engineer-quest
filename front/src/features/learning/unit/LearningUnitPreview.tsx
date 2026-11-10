@@ -1,0 +1,289 @@
+"use client";
+
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckIcon from "@mui/icons-material/Check";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
+
+import type { LearningObserver } from "../../../lib/learningEvents";
+import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
+import type { LearningRewards } from "../app/rewards";
+import { AnswerFeedbackNotice } from "../assessment/AnswerFeedback";
+
+import { playerTokens } from "../player/player.tokens";
+import { unitText } from "./unit.content";
+import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
+import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
+import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
+
+type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
+
+/** フィードバックの対象になる確認フェーズ（3・5・6）。#202 */
+const isCheckPhase = (phase: UnitPhase) => phase.phase === 3 || phase.phase === 5 || phase.phase === 6;
+
+/**
+ * 単品で確認済みの教材を、単元のフェーズ定義に沿って接続する。
+ * - 遷移は指針の3類型に従い、unit.content.ts の transitionOut で駆動する。
+ * - 未指定時は画面内だけのプレビュー。アプリは任意の初期進捗・保存・計装ポートを接続する。
+ * - 一度開いたフェーズはマウントしたまま隠し、戻ったときに状態（再生位置、回答、書いたコード）が残るようにする。
+ */
+export type LearningUnitPreviewProps = {
+  embedded?: boolean;
+  initialPhaseIndex?: number | null;
+  initialFurthestIndex?: number;
+  initialUnitComplete?: boolean;
+  initialCompletedPhases?: readonly string[];
+  initialSummaries?: Readonly<Record<number, UnitPhaseSummary>>;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
+  onPhaseComplete?: (phaseKey: string, summary?: UnitPhaseSummary) => Promise<void>;
+  onFinalResult?: () => void;
+  onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
+  rewards?: LearningRewards;
+  renderRewards?: (rewards: LearningRewards) => ReactNode;
+  // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
+  renderPhaseAchievements?: (phaseKey: string) => ReactNode;
+  renderNewAchievements?: () => ReactNode;
+  // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
+  // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
+  onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
+  renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
+  renderUnitFeedback?: () => ReactNode;
+};
+type UnitPhaseViewProps = LearningInstrumentation & {
+  embedded: true;
+  onComplete: (summary?: UnitPhaseSummary) => void;
+  onNext: () => void;
+  nextLabel: string;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
+  onShowFinalResult: () => void;
+};
+export type UnitPhaseView = ComponentType<UnitPhaseViewProps>;
+export type LearningUnitDefinition = {
+  readonly title: string;
+  readonly phases: readonly UnitPhase[];
+  readonly views: Readonly<Record<string, UnitPhaseView>>;
+  readonly resultFigure: ReactNode;
+  readonly firstAttemptResult?: boolean;
+  readonly finalResult: { readonly title: string; readonly closing: string };
+  /** BFS の単品プレビューは従来のバックグラウンド再生を維持する。 */
+  readonly keepHiddenPlayersRunning?: boolean;
+};
+
+export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: LearningUnitPreviewProps & { unit: LearningUnitDefinition }) {
+  const { phases } = unit;
+  const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, phases.length - 1));
+  const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
+  const screenRef = useRef(screen);
+  const [furthest, setFurthest] = useState(initialFurthestIndex ?? first ?? phases.length - 1);
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set(first === null ? [] : [first]));
+  const [summaries, setSummaries] = useState<Readonly<Record<number, UnitPhaseSummary>>>(initialSummaries);
+  const [completed, setCompleted] = useState(() => new Set(initialCompletedPhases));
+  const [unitComplete, setUnitComplete] = useState(initialUnitComplete || first === null);
+  const [saving, setSaving] = useState(false);
+  const busy = useRef(false);
+  const reviewCounts = useRef<Record<string, number>>({});
+  const [failed, setFailed] = useState<{ index: number; summary?: UnitPhaseSummary } | null>(null);
+  const observer = useRef(onLearningEvent);
+  useEffect(() => { screenRef.current = screen; observer.current = onLearningEvent; }, [screen, onLearningEvent]);
+  const failedRef = useRef<{ index: number; summary?: UnitPhaseSummary } | null>(null);
+  useEffect(() => { failedRef.current = failed; }, [failed]);
+  const phaseKey = screen.kind === "final" ? undefined : phases[screen.index].id;
+  const onUnitEvent = useCallback<LearningObserver>(event => onLearningEvent?.({ ...event,
+    phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : undefined,
+  }), [onLearningEvent]);
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "phase", "phase_start", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "result", "phase_result_view", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent ? onUnitEvent : undefined, screen.kind === "bridge", "phase_bridge_view", phaseKey, { phaseKey });
+  useLearningVisit(onLearningEvent, screen.kind === "final", "unit_result_view");
+  useEffect(() => { if (screen.kind === "final") onFinalResult?.(); }, [screen.kind, onFinalResult]);
+  // 非表示への切替で閉じる滞在区間や、開始済みの非同期実行結果も元のフェーズへ記録する。
+  const phaseObservers = useMemo(() => phases.map((phase): LearningObserver => event => {
+    observer.current?.({ ...event, phaseKey: phase.id });
+  }), [phases]);
+
+  const goToPhase = useCallback((index: number) => {
+    if (busy.current) return;
+    const previous = screenRef.current;
+    const reviewing = previous.kind === "final" || (previous.kind === "bridge" ? index < previous.index : index <= previous.index);
+    const target = phases[index].id;
+    if (reviewing) reviewCounts.current[target] = (reviewCounts.current[target] ?? 0) + 1;
+    observer.current?.({ eventType: "phase_move", phaseKey: phases[index].id, payload: { from: previous.kind === "final" ? "final" : phases[previous.index].id, to: phases[index].id,
+      direction: reviewing ? "review" : "forward", reviewCount: reviewCounts.current[target] ?? 0 } });
+    setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
+    setScreen({ kind: "phase", index });
+  }, [phases]);
+
+  // ブリッジからの前進は phase_move（forward）として記録し、対象フェーズを開く。
+  const proceedFromBridge = useCallback((index: number) => {
+    observer.current?.({ eventType: "phase_move", phaseKey: phases[index].id, payload: { from: phases[index - 1].id, to: phases[index].id,
+      direction: "forward", reviewCount: 0 } });
+    setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
+    setScreen({ kind: "phase", index });
+  }, [phases]);
+
+  const handleComplete = useCallback(async (index: number, summary?: UnitPhaseSummary) => {
+    if (busy.current) return;
+    const phase = phases[index];
+    // リザルト遷移のフェーズ（3・5）は、保存を待たずに結果画面へ移る（#317 案1）。
+    // 完了ビューが保存往復の間だけ閃く問題への対処で、保存は並行して行う。
+    // 失敗時は結果画面上でも警告と再試行が出る（failed の Alert は画面種別に依らない）。
+    // 保存のリトライでは、遷移と phase_complete の記録を繰り返さない。
+    // 結果画面のフィードバックは保存の確定後にマウントする（未保存のまま先行リクエストすると
+    // 未完了として404になり、その画面では二度と表示されないため。#202）。
+    if (phase.transitionOut === "result") {
+      const retrying = failedRef.current?.index === index;
+      busy.current = true; setSaving(true);
+      if (!retrying) {
+        observer.current?.({ eventType: "phase_complete", phaseKey: phase.id, payload: { summary } });
+        if (summary) setSummaries(current => ({ ...current, [index]: summary }));
+        setCompleted(current => new Set(current).add(phase.id));
+        setFurthest(current => Math.max(current, Math.min(index + 1, phases.length - 1)));
+        const current = screenRef.current;
+        if (current.kind === "phase" && current.index === index) setScreen({ kind: "result", index });
+      }
+      try {
+        if (onPhaseComplete) await onPhaseComplete(phase.id, summary);
+        // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+        if (onCheckPhaseCompleted && isCheckPhase(phase)) {
+          onCheckPhaseCompleted(phase.id, phases[index + 1]?.id ?? null);
+        }
+        setFailed(null);
+      } catch { setFailed({ index, summary }); }
+      finally { busy.current = false; setSaving(false); }
+      return;
+    }
+    busy.current = true; setSaving(true); setFailed(null);
+    try {
+      if (onPhaseComplete) await onPhaseComplete(phases[index].id, summary);
+      // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+      if (onCheckPhaseCompleted && isCheckPhase(phases[index])) {
+        onCheckPhaseCompleted(phases[index].id, phases[index + 1]?.id ?? null);
+      }
+      observer.current?.({ eventType: "phase_complete", phaseKey: phases[index].id, payload: { summary } });
+      if (summary) setSummaries(current => ({ ...current, [index]: summary }));
+      setCompleted(current => new Set(current).add(phases[index].id));
+      setFurthest(current => Math.max(current, Math.min(index + 1, phases.length - 1)));
+      const transition = phases[index].transitionOut;
+      if (transition === "final") setUnitComplete(true);
+      const current = screenRef.current;
+      if (onPhaseComplete && (current.kind !== "phase" || current.index !== index)) return;
+      // フェーズ7（final）は自動遷移しない。学習者がフェーズ7画面の
+      // 「単元の結果を見る」を押したときだけ最終結果へ進む（#305 案A'）。
+      if (transition === "result") setScreen({ kind: "result", index });
+      else if (transition === "bridge") {
+        busy.current = false;
+        setScreen({ kind: "bridge", index: index + 1 });
+      }
+    } catch { setFailed({ index, summary }); }
+    finally { busy.current = false; setSaving(false); }
+  }, [phases, onPhaseComplete, onCheckPhaseCompleted]);
+
+  const completeHandlers = useMemo(
+    () => phases.map((_, index) => (summary?: UnitPhaseSummary) => { void handleComplete(index, summary); }),
+    [phases, handleComplete],
+  );
+
+  const renderPhase = (index: number): ReactNode => {
+    const phase = phases[index];
+    const View = unit.views[phase.id];
+    const visible = screen.kind === "phase" && screen.index === index;
+    const next = phases[index + 1];
+    return <View embedded active={visible || (!onLearningEvent && !!unit.keepHiddenPlayersRunning)}
+      onLearningEvent={onLearningEvent ? phaseObservers[index] : undefined}
+      onComplete={completeHandlers[index]}
+      nextLabel={next ? `${next.formalName}へ進む` : "次へ進む"}
+      onNext={() => setScreen({ kind: "bridge", index: index + 1 })}
+      codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
+      onShowFinalResult={() => setScreen({ kind: "final" })} />;
+  };
+
+  const isCompleted = (index: number) => completed.has(phases[index].id);
+  const isCurrent = (index: number) => (screen.kind === "phase" || screen.kind === "result" || screen.kind === "bridge") && screen.index === index;
+
+  return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, display: "flex", flexDirection: "column", bgcolor: playerTokens.background, color: playerTokens.text }}>
+    <Box component="header" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, px: { xs: 1, sm: 2 }, py: 1, borderBottom: `1px solid ${playerTokens.layers.layer1}` }}>
+      <Typography component="h1" sx={{ fontSize: 16, fontWeight: 700, whiteSpace: "nowrap" }}>{unit.title}</Typography>
+      <Box role="navigation" aria-label={unitText.navLabel} sx={{ display: "flex", alignItems: "center", gap: 0.5, overflowX: "auto", flex: 1, py: 0.25 }}>
+        {phases.map((phase, index) => {
+          const completed = isCompleted(index);
+          const current = isCurrent(index);
+          const reachable = index <= furthest;
+          return <Fragment key={phase.id}>
+          {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
+          <Button disabled={!reachable} onClick={() => goToPhase(index)}
+            aria-current={current ? "step" : undefined}
+            startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : undefined}
+            sx={{
+              minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
+              color: current ? playerTokens.surface : playerTokens.text,
+              bgcolor: current ? playerTokens.focus : "transparent",
+              border: `2px solid ${current ? playerTokens.focus : completed ? playerTokens.focus : playerTokens.states.idle.stroke}`,
+              "&:hover": { bgcolor: current ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
+              "&.Mui-disabled": { color: playerTokens.states.completed.stroke, borderColor: playerTokens.layers.layer1 },
+            }}>
+            {phase.phase}. {phase.shortName}
+          </Button>
+          </Fragment>;
+        })}
+        {unitComplete && <>
+          <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
+          <Button onClick={() => setScreen({ kind: "final" })}
+          aria-current={screen.kind === "final" ? "step" : undefined}
+          startIcon={<EmojiEventsIcon sx={{ fontSize: 16 }} />}
+          sx={{
+            minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
+            color: screen.kind === "final" ? playerTokens.surface : playerTokens.text,
+            bgcolor: screen.kind === "final" ? playerTokens.focus : "transparent",
+            border: `2px solid ${playerTokens.focus}`,
+            "&:hover": { bgcolor: screen.kind === "final" ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
+          }}>
+          {unitText.finalChip}
+          </Button>
+        </>}
+      </Box>
+    </Box>
+    {saving && (
+      <Paper role="status" elevation={6} sx={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 1250, display: "flex", alignItems: "center", gap: 1.25, px: 2.25, py: 1.25, borderRadius: 999, pointerEvents: "none" }}>
+        <CircularProgress size={18} thickness={5} />
+        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…</Typography>
+      </Paper>
+    )}
+    {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
+    {screen.kind === "phase" && (
+      <Box sx={{ flexShrink: 0, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: screen.index === 6 ? "100%" : "84vw" }}>
+          <AnswerFeedbackNotice assessmentId={phaseKey} />
+        </Box>
+      </Box>
+    )}
+    {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
+        はみ出して描かれないようにする（#303）。背景色もこの箱が担う。
+        結果・ブリッジ・最終結果では、この箱が唯一のスクロール領域になる（#298）。 */}
+    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
+      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "phase" ? "100%" : "auto", minHeight: "100%", display: "flex", flexDirection: "column" }}>
+        {phases.map((phase, index) => visited.has(index) && (
+          <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
+            {renderPhase(index)}
+          </Box>
+        ))}
+        {screen.kind === "result" && (
+          <UnitResultScreen phase={phases[screen.index]} summary={summaries[screen.index]} figure={unit.resultFigure} firstAttemptOnly={unit.firstAttemptResult} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            achievements={renderPhaseAchievements?.(phases[screen.index].id)}
+            feedback={isCheckPhase(phases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(phases[screen.index].id, phases[screen.index + 1]?.id ?? null, {
+              goToPhase: key => { const target = phases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
+              goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
+            }) : undefined} />
+        )}
+        {screen.kind === "bridge" && (
+          <PhaseBridgeScreen phase={phases[screen.index]} total={phases.length} onProceed={() => proceedFromBridge(screen.index)} />
+        )}
+        {screen.kind === "final" && (
+          <UnitFinalResult phases={phases} result={unit.finalResult} rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
+        )}
+      </Box>
+    </Box>
+  </Box>;
+}

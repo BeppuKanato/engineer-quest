@@ -307,7 +307,7 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitSource = fs.readFileSync(`${root}/bfs/unit/BfsUnitPreview.tsx`, "utf8");
+  const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
   const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
   assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
