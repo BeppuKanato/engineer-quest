@@ -30,17 +30,20 @@ const nextButtonSx = {
   "&:hover": { bgcolor: playerTokens.states.processing.stroke },
 } as const;
 
-/** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。 */
-export function UnitResultScreen({ phase, summary, onNext }: {
+/** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。
+ * スクロールはこの画面専用に持たず、単元コンテナのラッパーに一元化する（#298）。 */
+export function UnitResultScreen({ phase, summary, onNext, feedback, achievements }: {
   phase: BfsUnitPhase;
   summary?: BfsUnitPhaseSummary;
   onNext: () => void;
+  feedback?: ReactNode;
+  achievements?: ReactNode;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
   if (!phase.result) return null;
   return <Box component="section" aria-label={`${phase.formalName}のリザルト`}
-    sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "safe center", gap: 2, p: 2 }}>
+    sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "safe center", gap: 2, p: 2 }}>
     <UnitResultCelebration heading={phase.result.heading} headingRef={headingRef} />
     <BfsResultFigure />
     {summary?.totalQuestions !== undefined && summary.firstAttemptCorrect !== undefined && (
@@ -51,7 +54,9 @@ export function UnitResultScreen({ phase, summary, onNext }: {
         </Typography>
       </>
     )}
+    {achievements}
     <PhaseNextButton label="次へ進む" onClick={onNext} />
+    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
   </Box>;
 }
 
@@ -77,11 +82,13 @@ function StatTile({ label, value }: { label: string; value: string }) {
 }
 
 /** 単元完了時の最終リザルト。称号と締めの文はフェーズ7の完了表示と文言を揃える。 */
-export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards }: {
+export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewards, feedback, newAchievements }: {
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
+  newAchievements?: ReactNode;
   summaries: Readonly<Record<number, BfsUnitPhaseSummary>>;
   onReviewPhase: (index: number) => void;
+  feedback?: ReactNode;
 }) {
   const headingRef = useRef<HTMLParagraphElement>(null);
   const reduced = useReducedMotion();
@@ -127,7 +134,9 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
       })}
     </Box>
     <Typography component="p" sx={{ textAlign: "center", fontSize: 16, maxWidth: 640 }}>{bfsImplementationContent.result.closing}</Typography>
+    {newAchievements}
     {rewards && renderRewards?.(rewards)}
+    {feedback && <Box sx={{ width: "100%", maxWidth: 640 }}>{feedback}</Box>}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{bfsUnitText.reviewNote}</Typography>
     <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{bfsUnitText.backToCourses}</Button>
   </Box>;

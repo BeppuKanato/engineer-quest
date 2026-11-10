@@ -19,12 +19,15 @@ import { BfsConsolidationPreview } from "../consolidation/BfsConsolidationPrevie
 import { BfsExecutionPreview } from "../execution/BfsExecutionPreview";
 import { BfsImplementationPreview } from "../implementation/BfsImplementationPreview";
 import { BfsMotivationPreview } from "../motivation/BfsMotivationPreview";
-import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle } from "./unit.content";
+import { bfsUnitPhases, nextPhaseLabel, bfsUnitText, bfsUnitTitle, type BfsUnitPhase } from "./unit.content";
 import type { BfsUnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "./PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
 
 type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" };
+
+/** フィードバックの対象になる確認フェーズ（3・5・6）。#202 */
+const isCheckPhase = (phase: BfsUnitPhase) => phase.phase === 3 || phase.phase === 5 || phase.phase === 6;
 
 /**
  * BFS 単元フロー（Issue #77）。単品ページで確認済みのフェーズ1〜7を、1つの単元として通して学べるよう接続する。
@@ -39,15 +42,23 @@ export type BfsUnitPreviewProps = {
   initialUnitComplete?: boolean;
   initialCompletedPhases?: readonly string[];
   initialSummaries?: Readonly<Record<number, BfsUnitPhaseSummary>>;
-  initialCode?: string;
-  onCodeChange?: (code: string) => void;
+  codeDraftBaseKey?: string;
+  onCodeDraftError?: (failed: boolean) => void;
   onPhaseComplete?: (phaseKey: string, summary?: BfsUnitPhaseSummary) => Promise<void>;
   onFinalResult?: () => void;
   onLearningEvent?: (event: Parameters<LearningObserver>[0] & { phaseKey?: string }) => void;
   rewards?: LearningRewards;
   renderRewards?: (rewards: LearningRewards) => ReactNode;
+  // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
+  renderPhaseAchievements?: (phaseKey: string) => ReactNode;
+  renderNewAchievements?: () => ReactNode;
+  // フィードバック接続（#202）。確認フェーズ（3・5・6）の完了保存後に先行生成を
+  // 依頼し、結果画面と最終結果にフィードバックの差し込み口を提供する。
+  onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
+  renderPhaseFeedback?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => ReactNode;
+  renderUnitFeedback?: () => ReactNode;
 };
-export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, initialCode, onCodeChange, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards }: BfsUnitPreviewProps = {}) {
+export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, onCheckPhaseCompleted, renderPhaseFeedback, renderUnitFeedback }: BfsUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, bfsUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -62,6 +73,8 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
   const [failed, setFailed] = useState<{ index: number; summary?: BfsUnitPhaseSummary } | null>(null);
   const observer = useRef(onLearningEvent);
   useEffect(() => { screenRef.current = screen; observer.current = onLearningEvent; }, [screen, onLearningEvent]);
+  const failedRef = useRef<{ index: number; summary?: BfsUnitPhaseSummary } | null>(null);
+  useEffect(() => { failedRef.current = failed; }, [failed]);
   const phaseKey = screen.kind === "final" ? undefined : bfsUnitPhases[screen.index].id;
   const onUnitEvent = useCallback<LearningObserver>(event => onLearningEvent?.({ ...event,
     phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : undefined,
@@ -98,9 +111,42 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
 
   const handleComplete = useCallback(async (index: number, summary?: BfsUnitPhaseSummary) => {
     if (busy.current) return;
+    const phase = bfsUnitPhases[index];
+    // リザルト遷移のフェーズ（3・5）は、保存を待たずに結果画面へ移る（#317 案1）。
+    // 完了ビューが保存往復の間だけ閃く問題への対処で、保存は並行して行う。
+    // 失敗時は結果画面上でも警告と再試行が出る（failed の Alert は画面種別に依らない）。
+    // 保存のリトライでは、遷移と phase_complete の記録を繰り返さない。
+    // 結果画面のフィードバックは保存の確定後にマウントする（未保存のまま先行リクエストすると
+    // 未完了として404になり、その画面では二度と表示されないため。#202）。
+    if (phase.transitionOut === "result") {
+      const retrying = failedRef.current?.index === index;
+      busy.current = true; setSaving(true);
+      if (!retrying) {
+        observer.current?.({ eventType: "phase_complete", phaseKey: phase.id, payload: { summary } });
+        if (summary) setSummaries(current => ({ ...current, [index]: summary }));
+        setCompleted(current => new Set(current).add(phase.id));
+        setFurthest(current => Math.max(current, Math.min(index + 1, bfsUnitPhases.length - 1)));
+        const current = screenRef.current;
+        if (current.kind === "phase" && current.index === index) setScreen({ kind: "result", index });
+      }
+      try {
+        if (onPhaseComplete) await onPhaseComplete(phase.id, summary);
+        // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+        if (onCheckPhaseCompleted && isCheckPhase(phase)) {
+          onCheckPhaseCompleted(phase.id, bfsUnitPhases[index + 1]?.id ?? null);
+        }
+        setFailed(null);
+      } catch { setFailed({ index, summary }); }
+      finally { busy.current = false; setSaving(false); }
+      return;
+    }
     busy.current = true; setSaving(true); setFailed(null);
     try {
       if (onPhaseComplete) await onPhaseComplete(bfsUnitPhases[index].id, summary);
+      // 確認フェーズの完了が保存できたら、結果画面の表示前に生成を始める（#202）。
+      if (onCheckPhaseCompleted && isCheckPhase(bfsUnitPhases[index])) {
+        onCheckPhaseCompleted(bfsUnitPhases[index].id, bfsUnitPhases[index + 1]?.id ?? null);
+      }
       observer.current?.({ eventType: "phase_complete", phaseKey: bfsUnitPhases[index].id, payload: { summary } });
       if (summary) setSummaries(current => ({ ...current, [index]: summary }));
       setCompleted(current => new Set(current).add(bfsUnitPhases[index].id));
@@ -109,15 +155,16 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       if (transition === "final") setUnitComplete(true);
       const current = screenRef.current;
       if (onPhaseComplete && (current.kind !== "phase" || current.index !== index)) return;
-      if (transition === "final") setScreen({ kind: "final" });
-      else if (transition === "result") setScreen({ kind: "result", index });
+      // フェーズ7（final）は自動遷移しない。学習者がフェーズ7画面の
+      // 「単元の結果を見る」を押したときだけ最終結果へ進む（#305 案A'）。
+      if (transition === "result") setScreen({ kind: "result", index });
       else if (transition === "bridge") {
         busy.current = false;
         setScreen({ kind: "bridge", index: index + 1 });
       }
     } catch { setFailed({ index, summary }); }
     finally { busy.current = false; setSaving(false); }
-  }, [goToPhase, onPhaseComplete]);
+  }, [goToPhase, onPhaseComplete, onCheckPhaseCompleted]);
 
   const completeHandlers = useMemo(
     () => bfsUnitPhases.map((_, index) => (summary?: BfsUnitPhaseSummary) => { void handleComplete(index, summary); }),
@@ -132,7 +179,7 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       case 3: return <BfsCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(bfsUnitPhases[3])} />;
       case 4: return <BfsCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
       case 5: return <BfsConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => setScreen({ kind: "bridge", index: 6 })} nextLabel={nextPhaseLabel(bfsUnitPhases[5])} />;
-      case 6: return <BfsImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} initialCode={initialCode} onCodeChange={onCodeChange} onComplete={completeHandlers[6]} />;
+      case 6: return <BfsImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
       default: return null;
     }
   };
@@ -189,22 +236,36 @@ export function BfsUnitPreview({ embedded = false, initialPhaseIndex = 0, initia
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
-    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: screen.kind === "final" ? "auto" : undefined }}>
-      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "final" ? "auto" : "100%", minHeight: "100%", display: "flex", flexDirection: "column" }}>
-        <AnswerFeedbackNotice assessmentId={phaseKey} />
+    {screen.kind === "phase" && (
+      <Box sx={{ flexShrink: 0, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: screen.index === 6 ? "100%" : "84vw" }}>
+          <AnswerFeedbackNotice assessmentId={phaseKey} />
+        </Box>
+      </Box>
+    )}
+    {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
+        はみ出して描かれないようにする（#303）。背景色もこの箱が担う。
+        結果・ブリッジ・最終結果では、この箱が唯一のスクロール領域になる（#298）。 */}
+    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
+      <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "phase" ? "100%" : "auto", minHeight: "100%", display: "flex", flexDirection: "column" }}>
         {bfsUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>
             {renderPhase(index)}
           </Box>
         ))}
         {screen.kind === "result" && (
-          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })} />
+          <UnitResultScreen phase={bfsUnitPhases[screen.index]} summary={summaries[screen.index]} onNext={() => setScreen({ kind: "bridge", index: screen.index + 1 })}
+            achievements={renderPhaseAchievements?.(bfsUnitPhases[screen.index].id)}
+            feedback={isCheckPhase(bfsUnitPhases[screen.index]) && renderPhaseFeedback && !saving && !failed ? renderPhaseFeedback(bfsUnitPhases[screen.index].id, bfsUnitPhases[screen.index + 1]?.id ?? null, {
+              goToPhase: key => { const target = bfsUnitPhases.findIndex(p => p.id === key); if (target >= 0) goToPhase(target); },
+              goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
+            }) : undefined} />
         )}
         {screen.kind === "bridge" && (
           <PhaseBridgeScreen phase={bfsUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
-          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} summaries={summaries} onReviewPhase={goToPhase} />
+          <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase} feedback={renderUnitFeedback?.()} />
         )}
       </Box>
     </Box>

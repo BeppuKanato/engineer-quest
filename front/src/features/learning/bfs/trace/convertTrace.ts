@@ -99,13 +99,14 @@ export function convertBfsTrace(trace: PythonTraceResult): BfsTracePlayback {
     emit(state, event);
   }
   if (pending) emit(pending.state, pending.event);
-  const mode = steps.length && !trace.ambiguous ? "replay" : "final";
+  const ambiguous = trace.ambiguousKinds ? trace.ambiguousKinds.some(kind => kind === "queue" || kind === "distances") : trace.ambiguous;
+  const mode = steps.length && !ambiguous ? "replay" : "final";
   const partial = mode === "replay" && invalidFinal;
   const finalEvent: PythonTraceEvent = lastEvent ?? { line: trace.stoppedLine ?? 0, event: "return", boundary: "line", locals: {} };
   if (mode === "final") {
     steps.length = 0; checkpoint.value = null;
     const value = trace.result ?? finalEvent.locals.distances;
-    const distances = Object.fromEntries(Object.entries(value ?? {}).filter(([id, distance]) => ids.has(id) && typeof distance === "number" && Number.isFinite(distance)));
+    const distances = Object.fromEntries(Object.entries(Array.isArray(value) ? {} : value ?? {}).filter(([id, distance]) => ids.has(id) && typeof distance === "number" && Number.isFinite(distance)));
     emit({ queue: [], distances, current: null }, finalEvent, text.final);
   }
   const last = steps[steps.length - 1];

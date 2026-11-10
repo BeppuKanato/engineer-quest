@@ -24,7 +24,7 @@ _eq_truncated = False
 _eq_limit_line = None
 _eq_boundaries = {}
 _eq_while_names = {}
-_eq_ambiguous = False
+_eq_ambiguous_kinds = set()
 
 class _EqTraceLimit(BaseException):
     pass
@@ -39,24 +39,56 @@ def _eq_distances(value):
 def _eq_queue(value):
     return list(value) if type(value) in (list, tuple, _eq_collections.deque) and len(value) <= 64 and all(type(item) is str and len(item) <= 100 for item in value) else None
 
-def _eq_detect(values, preferred, convert):
-    global _eq_ambiguous
+def _eq_grid(value):
+    if type(value) not in (list, tuple) or len(value) < 3 or len(value) > 25 or len(value) % 2 == 0:
+        return None
+    size = len(value)
+    grid = []
+    for row in value:
+        if type(row) not in (list, tuple) or len(row) != size:
+            return None
+        if not all(type(item) is int and -256 < item < 256 for item in row):
+            return None
+        grid.append(list(row))
+    return grid
+
+def _eq_array(value):
+    return list(value) if type(value) in (list, tuple) and len(value) <= 64 and all((type(item) is int and item.bit_length() < 256) or (type(item) is float and _eq_math.isfinite(item)) for item in value) else None
+
+
+def _eq_detect(values, preferred, convert, kind):
     if preferred in values:
         return preferred, convert(values[preferred])
     candidates = [(key, converted) for key, value in values.items() if (converted := convert(value)) is not None]
     if len(candidates) > 1:
-        _eq_ambiguous = True
+        _eq_ambiguous_kinds.add(kind)
     return candidates[0] if len(candidates) == 1 else (None, None)
 
 def _eq_locals(frame):
     values = frame.f_locals
     result = {}
-    queue_name, queue_value = _eq_detect(values, "queue", _eq_queue)
-    distance_name, distance_value = _eq_detect(values, "distances", _eq_distances)
+    queue_name, queue_value = _eq_detect(values, "queue", _eq_queue, "queue")
+    distance_name, distance_value = _eq_detect(values, "distances", _eq_distances, "distances")
+    array_name, array_value = _eq_detect(values, "result", _eq_array, "array")
     if queue_name is not None:
         result["queue"] = queue_value
     if distance_name is not None:
         result["distances"] = distance_value
+    grid_name, grid_value = _eq_detect(values, "grid", _eq_grid, "grid")
+    if grid_name is not None:
+        result["grid"] = grid_value
+    if type(values.get("size")) is int:
+        result["size"] = values["size"]
+    choices = values.get("choices")
+    if type(choices) in (list, tuple) and len(choices) <= 64 and all(type(item) is int for item in choices):
+        result["choices"] = list(choices)
+    if array_name is not None:
+        result["array"] = array_value
+    # lo / hi / mid / target は二分探索単元（Issue #293）向けの加算。対象名の変数が無い単元では何も記録されず、既存単元の結果は変わらない。
+    for key in ("i", "j", "n", "lo", "hi", "mid", "target"):
+        if key in values:
+            value = values[key]
+            result[key] = value if type(value) is int and value.bit_length() < 256 else None
     for key in ("node", "neighbor"):
         if key in values:
             value = values[key]
@@ -107,9 +139,14 @@ try:
     _eq_events = []
     _eq_count = 0
     _eq_last_line = None
-    _eq_ambiguous = False
+    _eq_ambiguous_kinds = set()
     _eq_sys.settrace(_eq_trace)
-    _eq_result = _eq_distances(_eq_function(*_eq_args))
+    _eq_returned = _eq_function(*_eq_args)
+    _eq_result = _eq_distances(_eq_returned)
+    if _eq_result is None:
+        _eq_result = _eq_grid(_eq_returned)
+    if _eq_result is None:
+        _eq_result = _eq_array(_eq_returned)
 except _EqTraceLimit:
     _eq_status = "truncated"
 except BaseException as _eq_exception:
@@ -131,6 +168,6 @@ if _eq_truncated:
     _eq_last_line = _eq_limit_line
 _eq_root = None
 _eq_namespace = {}
-_eq_json.dumps({"events": _eq_events, "status": _eq_status, "result": _eq_result, "error": _eq_error, "stoppedLine": _eq_last_line, "eventCount": _eq_count, "limit": _eq_limit, "ambiguous": _eq_ambiguous}, allow_nan=False)
+_eq_json.dumps({"events": _eq_events, "status": _eq_status, "result": _eq_result, "error": _eq_error, "stoppedLine": _eq_last_line, "eventCount": _eq_count, "limit": _eq_limit, "ambiguous": len(_eq_ambiguous_kinds) > 0, "ambiguousKinds": sorted(_eq_ambiguous_kinds)}, allow_nan=False)
 `;
 }

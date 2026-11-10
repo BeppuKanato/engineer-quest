@@ -5,29 +5,37 @@ const hookReact={useRef:value=>({current:value}),useState:value=>[value,next=>st
 function load(file){if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{fileName:file,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:name=>{if(name==='react'&&file.endsWith('/useRewardBoundary.ts'))return hookReact;if(!name.startsWith('.'))return require(name);const base=path.resolve(path.dirname(file),name);return load([base+'.ts',base+'.tsx'].find(fs.existsSync));}},{filename:file});return exports;}
 const plain=value=>JSON.parse(JSON.stringify(value));
 (async()=>{
- const {presentationFor,rewardStages,phaseBoundaryAchievements}=load(root+'/features/learning/rewards/presentation.ts');
+ const {presentationFor,rewardStages,phaseResultAchievements}=load(root+'/features/learning/rewards/presentation.ts');
  assert.deepEqual(plain(rewardStages),['anticipation','appearance','praise']);
  const strengths=['COMMON','RARE','EPIC'].map(presentationFor);
  for(const spec of strengths){assert.equal(spec.durations.length,3);assert(spec.durations.every(n=>n>0));assert(spec.durations.reduce((a,b)=>a+b,0)<=2500);}
  assert(strengths[0].rays<strengths[1].rays&&strengths[1].rays<strengths[2].rays);assert.equal(presentationFor('future-rarity'),strengths[0]);
  const achievement={id:'phase',title:'確認できた役割',description:'初回の回答で確認',rarity:'EPIC'};
- assert.equal(phaseBoundaryAchievements('check','implementation',[achievement]).length,1);assert.equal(phaseBoundaryAchievements('implementation','implementation',[achievement]).length,0);
+ // #333: 実績は解除フェーズの結果画面へ。最終フェーズ分は結果画面に出さず最終リザルトの新着へ回す。
+ assert.equal(phaseResultAchievements('check','implementation',[achievement]).length,1);assert.equal(phaseResultAchievements('implementation','implementation',[achievement]).length,0);
  const {useRewardBoundary}=load(root+'/features/learning/rewards/useRewardBoundary.ts');const boundary=useRewardBoundary();cleanup=effect();
- boundary.present({phaseKey:'check',achievements:[achievement]});
+ boundary.present({phaseKey:'check'});
  assert.equal(state.phaseKey,'check','Presentation shows without blocking the phase transition');
- boundary.present({phaseKey:'code-check',achievements:[]});
+ boundary.present({phaseKey:'code-check'});
  assert.equal(state.phaseKey,'check','A second boundary queues behind the visible one');
  boundary.finish();assert.equal(state.phaseKey,'code-check','Finish advances to the queued boundary');
  boundary.finish();assert.equal(state,null,'Finish on the last boundary clears it');
- boundary.present({phaseKey:'implementation',achievements:[]});assert.equal(state.phaseKey,'implementation');cleanup();
- boundary.present({phaseKey:'gone',achievements:[]});assert.equal(state.phaseKey,'implementation','Unmount does not enqueue another presentation');
+ boundary.present({phaseKey:'implementation'});assert.equal(state.phaseKey,'implementation');cleanup();
+ boundary.present({phaseKey:'gone'});assert.equal(state.phaseKey,'implementation','Unmount does not enqueue another presentation');
  const {rewardText}=load(root+'/features/learning/rewards/presentation.ts');
  assert(rewardText.reveal.length>0&&rewardText.anticipation.includes('見つけ'),'Discovery copy must praise the find and name the reveal action');
  const boundarySource=fs.readFileSync(root+'/features/learning/rewards/LearningRewardBoundary.tsx','utf8');
  assert(boundarySource.includes('card_presentation_reveal'),'Reveal must be a logged user action');
  assert(boundarySource.includes('text.reveal'),'Discovery stage must offer the reveal action');
+ // #333: 切れ目ダイアログはカード専用。実績は境界に載せない（結果画面で提示する）。
+ assert(!boundarySource.includes('AchievementList'),'Boundary must not render achievements anymore (#333)');
+ assert(!boundarySource.includes('boundary.achievements'),'Boundary payload must not carry achievements (#333)');
+ assert(boundarySource.includes('if (!card) return null'),'A boundary with no card must not open (#333)');
  const screenSource=fs.readFileSync(root+'/features/learning/app/LearningScreen.tsx','utf8');
  assert(!screenSource.includes('await present('),'Presentation must not block the phase transition');
+ assert(screenSource.includes('phaseResultAchievements'),'Unlock routing must split result-screen vs final-zone achievements (#333)');
+ assert(screenSource.includes('renderPhaseAchievements')&&screenSource.includes('renderNewAchievements'),'LearningScreen must offer the achievement slots to unit previews (#333)');
+ assert(!screenSource.includes('present({ phaseKey, achievements'),'Boundary must be presented for cards only (#333)');
  const {mergeLearningRewards,emptyLearningRewards}=load(root+'/features/learning/app/rewards.ts');
  const first=mergeLearningRewards(emptyLearningRewards,{phase:{phaseKey:'execution'},awardedCard:{id:'first'},unlockedAchievements:[achievement]});
  const second=mergeLearningRewards(first,{phase:{phaseKey:'code-check'},awardedCard:{id:'second'},unlockedAchievements:[achievement,{...achievement,id:'unit'}]});
@@ -39,5 +47,14 @@ const plain=value=>JSON.parse(JSON.stringify(value));
  const {createElement}=require('react'),{renderToStaticMarkup}=require('react-dom/server');
  const {UnknownKnowledgeCard}=load(root+'/features/collection/UnknownKnowledgeCard.tsx');const hidden=renderToStaticMarkup(createElement(UnknownKnowledgeCard));assert(hidden.includes('？？？'));assert(hidden.includes('data-uncollected-card'));assert(!/<button|href=|title=/.test(hidden));
  const {FinalLearningRewards}=load(root+'/features/learning/rewards/FinalLearningRewards.tsx');const html=renderToStaticMarkup(createElement(FinalLearningRewards,{rewards:second}));assert(html.includes('この単元で獲得した実績'));assert(html.includes('data-achievement-id="phase"'));assert(html.includes('data-achievement-id="unit"'));assert(html.includes('/collection'));assert(html.includes('/achievements'));assert(html.includes('この単元で手に入れた知識カード'),'final result lists the earned cards');assert(html.includes('data-awarded-card="first"'));assert(html.includes('data-awarded-card="second"'));
- console.log('Learning rewards: bounded stages/rarity, phase-only boundaries, final achievements, non-blocking boundary queue with unmount guard, click-to-reveal contract, neutral unknown cards and sorting passed.');
+ // #333: 結果画面のバンドは、そのフェーズで解除された分だけを見出し・題名・説明つきで出す。空なら何も出ない。
+ const {AchievementBand,NewAchievementZone}=load(root+'/features/learning/rewards/AchievementPresentation.tsx');
+ const band=renderToStaticMarkup(createElement(AchievementBand,{items:[achievement],phaseKey:'check'}));
+ assert(band.includes('data-achievement-band'));assert(band.includes('実績を獲得しました'));assert(band.includes('data-achievement-id="phase"'));assert(band.includes('確認できた役割'));assert(band.includes('初回の回答で確認'));
+ assert.equal(renderToStaticMarkup(createElement(AchievementBand,{items:[]})),'','Band renders nothing without unlocks');
+ // 最終リザルトの新着ゾーンは、新しく解除された分だけを出す（提示済みの分は含めない）。
+ const zone=renderToStaticMarkup(createElement(NewAchievementZone,{items:[{...achievement,id:'unit',title:'単元を修了した'}]}));
+ assert(zone.includes('data-new-achievements'));assert(zone.includes('新しい実績'));assert(zone.includes('data-achievement-id="unit"'));assert(!zone.includes('data-achievement-id="phase"'),'Final zone shows only the newly unlocked achievements');
+ assert.equal(renderToStaticMarkup(createElement(NewAchievementZone,{items:[]})),'','Final zone renders nothing without new unlocks');
+ console.log('Learning rewards: bounded stages/rarity, card-only boundaries, result-screen achievement band, final new-achievement zone, final achievements, non-blocking boundary queue with unmount guard, click-to-reveal contract, neutral unknown cards and sorting passed.');
 })().catch(e=>{console.error(e);process.exitCode=1});

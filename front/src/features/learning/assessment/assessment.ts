@@ -45,6 +45,12 @@ export type ParsonsQuestion = Omit<ChoiceQuestion, "kind" | "choices" | "correct
   readonly correctAnswer: OrderAnswer;
   /** 正解順で隣接する、グループ内だけ順不同の行。未指定なら完全一致。 */
   readonly interchangeableLineGroups?: readonly (readonly string[])[];
+  /**
+   * フェード型（2026-11-09 決定）: 正解位置に固定表示し、並び替え対象から外す行。
+   * 未指定なら全行が並び替え対象。固定できるのは学習目標の中核でない行に限り、
+   * 入れ替え可能グループの行は固定しない（グループの扱いを保つため）。
+   */
+  readonly fixedLineIds?: readonly string[];
 };
 export type DiagnosticAssessment = {
   readonly version: 1;
@@ -58,13 +64,26 @@ export type NodeTapAssessment = {
   readonly id: string;
   readonly questions: readonly [NodeTapQuestion, ...NodeTapQuestion[]];
 };
+/**
+ * フェーズ3（動きの確認問題）用。タップ設問と文章選択肢の設問を1つの
+ * 連結セッションに混在させる形式（二分探索フェーズ3の Q2 が文章4択のため）。
+ * choice 設問を diagnostic-check（フェーズ6の診断）へ寄せると、完了時に
+ * 診断閲覧イベントが誤って発火するため、確認問題側に独立した種別を持つ。
+ * 進行・完了・初回回答の集計は全形式共通の規則をそのまま使う。
+ */
+export type ConceptCheckAssessment = {
+  readonly version: 1;
+  readonly kind: "concept-check";
+  readonly id: string;
+  readonly questions: readonly [NodeTapQuestion | ChoiceQuestion, ...(NodeTapQuestion | ChoiceQuestion)[]];
+};
 export type CodeBlankAssessment = {
   readonly version: 1;
   readonly kind: "code-blank-check";
   readonly id: string;
   readonly questions: readonly [CodeBlankQuestion, ...CodeBlankQuestion[]];
 };
-export type AssessmentContent = NodeTapAssessment | CodeBlankAssessment | DiagnosticAssessment;
+export type AssessmentContent = NodeTapAssessment | CodeBlankAssessment | DiagnosticAssessment | ConceptCheckAssessment;
 type Question = NodeTapQuestion | CodeBlankQuestion | ChoiceQuestion | ParsonsQuestion;
 export type QuestionRecord = {
   readonly questionId: string;
@@ -108,7 +127,7 @@ function allowed(question: Question, answer: AssessmentAnswer): boolean {
   return answer.kind === "none" ? question.allowNone : answer.kind === "node" && question.nodeIds.includes(answer.nodeId);
 }
 export function validateAssessment(content: AssessmentContent): void {
-  if (content.version !== 1 || !["node-tap-check", "code-blank-check", "diagnostic-check"].includes(content.kind) || !content.id.trim() || !content.questions.length) throw new Error("Invalid assessment");
+  if (content.version !== 1 || !["node-tap-check", "code-blank-check", "diagnostic-check", "concept-check"].includes(content.kind) || !content.id.trim() || !content.questions.length) throw new Error("Invalid assessment");
   const earlier = new Map<string, Question>();
   for (const question of content.questions) {
     if (!question.id.trim() || earlier.has(question.id) || !question.prompt.trim() || /[\r\n]/u.test(question.prompt) ||
@@ -121,7 +140,7 @@ export function validateAssessment(content: AssessmentContent): void {
         new Set(question.choices.map(choice => choice.text)).size !== question.choices.length ||
         question.choices.some(choice => !choice.id.trim() || !choice.text.trim() || /[\r\n]/u.test(choice.text))) throw new Error("Invalid code-blank question");
     } else if ("kind" in question && question.kind === "choice") {
-      if (content.kind !== "diagnostic-check" || question.requires !== null || question.choices.length < 2 ||
+      if ((content.kind !== "diagnostic-check" && content.kind !== "concept-check") || question.requires !== null || question.choices.length < 2 ||
         new Set(question.choices.map(choice => choice.id)).size !== question.choices.length || new Set(question.choices.map(choice => choice.text)).size !== question.choices.length ||
         question.choices.some(choice => !choice.id.trim() || !choice.text.trim())) throw new Error("Invalid choice question");
     } else if ("kind" in question && question.kind === "parsons") {
@@ -134,6 +153,10 @@ export function validateAssessment(content: AssessmentContent): void {
           new Set(group).size !== group.length || positions.some((position, index) => position !== positions[0] + index)) throw new Error("Invalid interchangeable line group");
         group.forEach(id => grouped.add(id));
       }
+      // 固定行は提示行の一部で、重複なく、全行固定にはせず、入れ替え可能グループの行は含めない。
+      const fixedLineIds = question.fixedLineIds ?? [];
+      if (new Set(fixedLineIds).size !== fixedLineIds.length || fixedLineIds.some(id => !question.lineIds.includes(id)) ||
+        fixedLineIds.some(id => grouped.has(id)) || fixedLineIds.length >= question.lineIds.length) throw new Error("Invalid fixed line set");
     } else if (content.kind === "code-blank-check" || !question.nodeIds.length || new Set(question.nodeIds).size !== question.nodeIds.length) {
       throw new Error("Invalid node-tap question");
     }

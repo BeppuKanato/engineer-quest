@@ -24,6 +24,10 @@
 | [concept/learning-materials-v2.md](concept/learning-materials-v2.md) | 要約 | 7フェーズ新フローの確定事項と実装上の含意。全文は `learning-materials-guideline.md` |
 | [concept/learning-player-ui.md](concept/learning-player-ui.md) | 正本 | 学習プレイヤー UI の実装定義（画面構成と占有率、色とテキストの規則、操作系の配置、アニメーション、共通グラフの描画数値と等倍比の拡縮） |
 | [concept/dfs-unit-baseline.md](concept/dfs-unit-baseline.md) | 正本 | DFS 単元の基準データ設計書（グラフ、実行トレース、各フェーズの問題、正解コード契約 dfs-order-stack、テスト、知識カード案）。実装（#121 以降）は本書を正本として参照する |
+| [concept/wall-extension-unit-baseline.md](concept/wall-extension-unit-baseline.md) | 正本 | 棒倒し法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 wall-extension-v1、各フェーズの問題、グリッド描画基盤、知識カード案）。実装（#206 以降）は本書を正本として参照する |
+| [concept/bubble-sort-unit-baseline.md](concept/bubble-sort-unit-baseline.md) | 正本 | バブルソート単元の基準データ設計書（主教材 [4, 2, 5, 1, 3] の検証済みトレース、参照コード契約 bubble-sort-v1、各フェーズの問題、配列描画基盤、知識カード案）。実装（#227 以降）は本書を正本として参照する |
+| [concept/maze-digging-unit-baseline.md](concept/maze-digging-unit-baseline.md) | 正本 | 穴掘り法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 maze-digging-v1、各フェーズの問題、グリッド描画基盤の再利用、知識カード案）。実装（#257 以降）は本書を正本として参照する |
+| [concept/binary-search-unit-baseline.md](concept/binary-search-unit-baseline.md) | 正本 | 二分探索単元の基準データ設計書（主教材 [3,7,12,19,25,31,42] で 25 を探す検証済みトレース、参照コード契約 binary-search-v1、各フェーズの問題、配列描画基盤の再利用、知識カード案）。実装（#286 以降）は本書を正本として参照する |
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
@@ -36,7 +40,7 @@
 | [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
 | [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
 | [BFS フェーズ5](../front/src/features/learning/bfs/code-check/README.md) | 現行 | Issue #73 の独立した穴埋め2問、共有コード表示・設問セッション・任意復習、結果と確認手順 |
-| [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート |
+| [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート。全単元のParsons誤答時の表示は [UI定義 §5.2](concept/learning-player-ui.md#52-質問画面の3段組)（#352） |
 | [BFS 視覚的デバッグ](../front/src/features/learning/bfs/trace/README.md) | 現行 | Issue #76 のD1限定トレース・共通キャンバス再生・停止／上限／最終状態と対応範囲 |
 | [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の5テスト・4段階ヒントと、Issue #110 のダークエディタ・D1フリー実行・確認手順 |
 | [BFS 単元フロー](../front/src/features/learning/bfs/unit/README.md) | 現行 | Issue #77 のフェーズ1〜7の接続、遷移3類型、リザルト画面、単元内ナビゲーションと確認手順 |
@@ -55,9 +59,78 @@
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
 | [unit-final-result-150.md](unit-final-result-150.md) | 記録 | Issue #150の単元最終リザルト視覚強化（一段強い紙吹雪、全灯ミニマップ、要約タイル、実績のコンパクト要約、獲得カードのタイル表示） |
+| [achievement-presentation-333.md](achievement-presentation-333.md) | 記録 | Issue #333の実績提示の再設計（解除されたフェーズの結果画面に実績バンド、最終リザルトに「新しい実績」ゾーン、切れ目ダイアログはカード専用化） |
+| [mainstream-layout-results-298.md](mainstream-layout-results-298.md) | 記録 | Issue #298の主流レイアウト移行 第1弾（結果・ブリッジ・最終結果のスクロールを単元コンテナのラッパーに一元化） |
+| [mainstream-layout-phase6-298.md](mainstream-layout-phase6-298.md) | 記録 | Issue #298の主流レイアウト移行 第2弾（フェーズ6の3段組化、図の固定高、Parsons窓の固定高368px、通知の固定ゾーン化） |
+| [mainstream-layout-phase3-298.md](mainstream-layout-phase3-298.md) | 記録 | Issue #298の主流レイアウト移行 第3弾（フェーズ3の3段組化、キャンバスの固定高枠、下部固定ゾーン） |
+| [mainstream-layout-phase5-298.md](mainstream-layout-phase5-298.md) | 記録 | Issue #298の主流レイアウト移行 第4弾（フェーズ5の3段組化、コード窓の固定高320px、下部固定ゾーン） |
+| [mainstream-layout-migration-298.md](mainstream-layout-migration-298.md) | 記録 | Issue #298の主流レイアウト移行の総括（全5弾の内訳、置き換えた旧契約、単品プレビューの同型性） |
 | [phase-bridge-141.md](phase-bridge-141.md) | 記録 | Issue #141のフェーズ間ブリッジ追加（全遷移に目標提示のステップを統一、リザルト予告の廃止、教材指針の遷移モデル改訂） |
 | [question-flow-softgate.md](question-flow-softgate.md) | 記録 | 確認問題のソフトゲート統一（フェーズ3・5でも「次の問題へ」で進行可能に）とフェーズ6の正解後固定、教材指針の完了定義改訂 |
 | [player-transport-140.md](player-transport-140.md) | 記録 | Issue #140のプレイヤー操作系の中央寄せ・拡大（UI定義§3の改訂）と出現ボタンのフェードイン |
+| [unreachable-review-182.md](unreachable-review-182.md) | 記録 | Issue #182のフェーズ6「たどり着けない場所」の復習先の修正（発見の関門ステップへの差し替え） |
+| [create-work-align-184.md](create-work-align-184.md) | 記録 | Issue #184の作る画面3カラムのカード上端揃え（要件カラムの外付け見出しを撤去） |
+| [home-target-achievement-183.md](home-target-achievement-183.md) | 記録 | Issue #183の目標実績のホーム表示（API既存の targetAchievement を左カラムに描画） |
+| [phase5-preview-unify-181.md](phase5-preview-unify-181.md) | 記録 | Issue #181のフェーズ5単品画面のフェーズ3単品への統一（再回答の合図とボタンの出方） |
+| [phase7-result-presentation-180.md](phase7-result-presentation-180.md) | 記録 | Issue #180のフェーズ7テスト結果の作り直し（通過ごとの描き込みチェックと全通過時の祝福） |
+| [phase5-layout-completion-317.md](phase5-layout-completion-317.md) | 記録 | Issue #317/#315のフェーズ5レイアウト組み替え（コードのみスクロール・選択肢とボタンの下部固定）とフェーズ3・5完了ビューのバイパス（保存を待たず結果画面へ即時遷移） |
+| [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
+| [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
+| [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
+| [feedback-composition-332.md](feedback-composition-332.md) | 記録 | Issue #332のフィードバック構成の見直し（Sadler／Hattie & Timperley に照らした表示文章の要件・合計200〜300字の目安・reason の表示、purpose は内部用） |
+| [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
+| [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
+| [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
+| [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
+| [binary-search-phase3-288.md](binary-search-phase3-288.md) | 記録 | Issue #288の二分探索フェーズ3（動きの確認問題）、連結2問（セルタップ＋文章4択）、出題エンジンへの concept-check 形式追加などの留保 |
+| [binary-search-phase4-289.md](binary-search-phase4-289.md) | 記録 | Issue #289の二分探索フェーズ4（動きとコードの対応）、18フレームとCPythonトレース照合、基準データの行数表記（11行/12行）などの留保 |
+| [binary-search-phase5-290.md](binary-search-phase5-290.md) | 記録 | Issue #290の二分探索フェーズ5（コードの確認問題）、独立2問（mid の式・mid 自身を外す増分）、基準データの行数表記修正などの留保 |
+| [binary-search-phase6-291.md](binary-search-phase6-291.md) | 記録 | Issue #291の二分探索フェーズ6（応用問題）、転移タップ・不在ケース・Parsons主要8行・前提の選択の4問、場面を共通配列基盤で持つ判断などの留保 |
+| [binary-search-phase7-292.md](binary-search-phase7-292.md) | 記録 | Issue #292の二分探索フェーズ7（自分で実装）、表示用D1＋判定用J1〜J3、ヒント4段階ラダー、位置表示の新設、視覚デバッグ未接続などの留保 |
+| [binary-search-trace-293.md](binary-search-trace-293.md) | 記録 | Issue #293の二分探索の視覚デバッグ、共有ハーネスへの lo・hi・mid・target 記録の加算、フェーズ2正準11コマとの完全一致、発見判定は戻り値ではなく最後の比較から行う留保 |
+| [binary-search-unit-294.md](binary-search-unit-294.md) | 記録 | Issue #294の二分探索単元コンテナと学習フロー接続、アプリ登録（unitRegistry / LearningScreen）、結果図、プレビュー登録の [contentId] 方式への統一などの留保 |
+| [preserving-seed-policy-282.md](preserving-seed-policy-282.md) | 記録 | Issue #282の preserve seed のモデル名誤り修正（KnowledgeCardPhaseScheduleEntry、検証とポリシーが同じ誤名を共有していた件） |
+| [phase7-grading-sequence-305.md](phase7-grading-sequence-305.md) | 記録 | Issue #305のフェーズ7採点シーケンス表示（案A'、全5単元）、自動遷移の廃止と達成バナーのオーバーレイ化、Pyodide読み込みリトライ、図の高さ210/260配分を規約として留保した判断 |
+| [phase7-test-list-325.md](phase7-test-list-325.md) | 記録 | Issue #325のフェーズ7テストタブ一覧主構造化（全5単元）、表示テストの図の一覧下への分離と通過時の既定閉じ、行の印のテキスト一本化、結果表示の共通コンポーネント化 |
+| [phase7-input-levels-328.md](phase7-input-levels-328.md) | 記録 | Issue #328のフェーズ7入力量レベル（全部書く／骨格から書く／穴埋めで書く）の仕組みと穴掘り法への適用（PR 1）、レベル別下書き・学習ログへのレベル記録・ガイドライン7-4の追加。残り単元への展開は後続PR |
+| [phase7-error-line-325.md](phase7-error-line-325.md) | 記録 | Issue #325のフェーズ7エラー行サポート（Pyodideエラーからの行番号抽出を共通化、表示文言への行番号付加、Monaco行ハイライト、文法エラー時に「printを含め1行も実行されない」旨の説明、全5単元） |
+| [wall-extension-phase1-206.md](wall-extension-phase1-206.md) | 記録 | Issue #206のグリッド描画基盤と棒倒し法フェーズ1（導入）、検証済み迷路トレースとの照合と壁色の留保 |
+| [wall-extension-phase2-207.md](wall-extension-phase2-207.md) | 記録 | Issue #207の棒倒し法フェーズ2（動きの説明）13ステップ、壁マスhighlightの実線枠と検証済みトレースとの照合 |
+| [wall-extension-phase3-208.md](wall-extension-phase3-208.md) | 記録 | Issue #208の棒倒し法フェーズ3（動きの確認問題）連結2問、フェーズ2盤面の参照と検証済みトレースとの正解照合 |
+| [wall-extension-phase4-209.md](wall-extension-phase4-209.md) | 記録 | Issue #209の棒倒し法フェーズ4（動きとコードの対応）137フレーム、CPythonトレースとの全行・全変数照合とelse行の説明フレーム |
+| [wall-extension-phase5-210.md](wall-extension-phase5-210.md) | 記録 | Issue #210の棒倒し法フェーズ5（コードの確認問題）独立2問、文脈で一意化する空欄位置と設問固有の解説フィードバック、フェーズ4参照コードとの照合 |
+| [wall-extension-phase6-211.md](wall-extension-phase6-211.md) | 記録 | Issue #211の棒倒し法フェーズ6（応用問題）転移タップ・性質と理由の選択・21行Parsons、完全迷路の独立検証と初回診断、ParsonsBoardの汎用化 |
+| [wall-extension-phase7-212.md](wall-extension-phase7-212.md) | 記録 | Issue #212の棒倒し法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保 |
+| [wall-extension-trace-213.md](wall-extension-trace-213.md) | 記録 | Issue #213の棒倒し法フェーズ7視覚デバッグ、フェーズ2盤面での生成過程再生と段階適用、トレース基盤へのgrid検出の最小拡張 |
+| [wall-extension-unit-214.md](wall-extension-unit-214.md) | 記録 | Issue #214の棒倒し法フェーズ接続・単元コンテナ接続、フェーズ1・2・4への接続ポート追加、unitRegistry登録とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [wall-extension-integration-215.md](wall-extension-integration-215.md) | 記録 | Issue #215の棒倒し法アプリ統合、コース・知識カード3枚・実績6件のシード追加、コレクション検証の単元汎用化、サムネイルの迷路図、シード再実行の要否 |
+| [bubble-sort-phase1-227.md](bubble-sort-phase1-227.md) | 記録 | Issue #227の配列描画基盤とバブルソートフェーズ1（導入）、検証済みトレースとの照合と場面圧縮・基準データ未取り込みの留保 |
+| [bubble-sort-phase2-228.md](bubble-sort-phase2-228.md) | 記録 | Issue #228のバブルソートフェーズ2（動きの説明）16ステップ、検証済みトレースとの照合と比較・交換・確定の表現、確定キャプションと基準データ未取り込みの留保 |
+| [bubble-sort-phase3-229.md](bubble-sort-phase3-229.md) | 記録 | Issue #229のバブルソートフェーズ3（動きの確認問題）連結2問、フェーズ2場面の参照と検証済みトレースとの正解照合 |
+| [bubble-sort-phase4-230.md](bubble-sort-phase4-230.md) | 記録 | Issue #230のバブルソートフェーズ4（動きとコードの対応）39フレーム、CPythonトレースとの全行・変数照合と交換行チェックポイント、基準データ未取り込みの留保 |
+| [bubble-sort-phase5-231.md](bubble-sort-phase5-231.md) | 記録 | Issue #231のバブルソートフェーズ5（コードの確認問題）独立2問、空欄の式だけを覆う位置決めとバイト単位の原文復元、全候補のPython構文確認、基準データ未取り込みの留保 |
+| [bubble-sort-phase6-232.md](bubble-sort-phase6-232.md) | 記録 | Issue #232のバブルソートフェーズ6（応用問題）転移タップ・並び済み配列と右端の理由の選択・8行Parsons、独立トレースとの正解照合と誤答の反証、初回診断、基準データ未取り込みの留保 |
+| [bubble-sort-phase7-233.md](bubble-sort-phase7-233.md) | 記録 | Issue #233のバブルソートフェーズ7（自分で実装）5テストと4段ヒント、試し実行の配列表示、入力不変と範囲の縮小が結果ベース判定で検出できない留保 |
+| [bubble-sort-trace-234.md](bubble-sort-trace-234.md) | 記録 | Issue #234のバブルソートフェーズ7視覚デバッグ（共通トレース基盤への数値リスト記録の追加、フェーズ2正準16コマと一致する遡及変換、候補が曖昧な場合の最終状態表示） |
+| [bubble-sort-unit-235.md](bubble-sort-unit-235.md) | 記録 | Issue #235のバブルソートフェーズ接続・単元コンテナ接続、フェーズ1・2・4への接続ポート追加、unitRegistry登録（既存コース course-algorithm-bubble-sort-v2）とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [bubble-sort-integration-236.md](bubble-sort-integration-236.md) | 記録 | Issue #236のバブルソートアプリ統合、知識カード3枚（安定なソート／値の交換／計算量）と実績6件のシード追加、配布スケジュールとコレクション検証の単元ごと汎用化（シード再実行が必要） |
+| [maze-digging-phase1-257.md](maze-digging-phase1-257.md) | 記録 | Issue #257の穴掘り法フェーズ1（導入）、グリッド基盤の状態意味の反転（検証は単元側）と参照手続きからの盤面導出、最初のバックトラックの圧縮表示 |
+| [maze-digging-phase2-258.md](maze-digging-phase2-258.md) | 記録 | Issue #258の穴掘り法フェーズ2（動きの説明）21ステップ、掘削列からのバックトラック導出（戻る部屋数2・1・4）とスタック経路の常時表示、検証済みトレースとの照合 |
+| [maze-digging-phase3-259.md](maze-digging-phase3-259.md) | 記録 | Issue #259の穴掘り法フェーズ3（動きの確認問題）連結2問、場面 dig-3 の候補集合そのものを回答対象にし、方向は問題文で提示（基準 §6-6） |
+| [maze-digging-phase4-260.md](maze-digging-phase4-260.md) | 記録 | Issue #260の穴掘り法フェーズ4（動きとコードの対応）669フレーム、参照コード契約 maze-digging-v1（22行）と CPython トレース照合、チェックポイントは掘削=push行・バックトラック=戻り切ったpop行・完成=while終了判定 |
+| [maze-digging-phase5-261.md](maze-digging-phase5-261.md) | 記録 | Issue #261の穴掘り法フェーズ5（コードの確認問題）独立2問、2マス先の座標計算（11行目）と未掘削の条件（12行目）の空欄補充、Q1は形式の制約で dx 側の「2」のみ空欄（留保あり） |
+| [maze-digging-phase6-262.md](maze-digging-phase6-262.md) | 記録 | Issue #262の穴掘り法フェーズ6（応用問題）4問、転移7×7のタップ（掘削5回目まで・左へ掘る部屋）・完成迷路の性質・バックトラックの理由（復習はフェーズ4の pop 行）・参照コード22行の Parsons（順序自由な行なし） |
+| [maze-digging-phase7-263.md](maze-digging-phase7-263.md) | 記録 | Issue #263の穴掘り法フェーズ7（自分で実装）5テストと4段ヒント、試し実行の盤面表示、完全迷路の性質検証とJ3完全一致の留保（視覚デバッグは #264） |
+| [maze-digging-trace-264.md](maze-digging-trace-264.md) | 記録 | Issue #264の穴掘り法フェーズ7視覚デバッグ、フェーズ2正準21コマと一致する掘削・バックトラック再生（スタック経路は通路の木構造から導出）、イベント上限1000の実測根拠 |
+| [maze-digging-unit-265.md](maze-digging-unit-265.md) | 記録 | Issue #265の穴掘り法フェーズ接続・単元コンテナ接続、unitRegistry登録とLearningScreenのkind出し分け、フィードバック接続（#202） |
+| [maze-digging-integration-266.md](maze-digging-integration-266.md) | 記録 | Issue #266の穴掘り法アプリ統合、コース・知識カード3枚（バックトラッキング／スタック／全域木）・実績6件のシード追加、配布スケジュールの単元ごと生成への汎用化とコレクション検証の汎用化、単元サムネイル（完成迷路＋フェーズ1経路） |
+| [binary-search-integration-295.md](binary-search-integration-295.md) | 記録 | Issue #295の二分探索アプリ統合、知識カード3枚（探索範囲を半分にする／中央の値と比べる／対数時間）・実績6件のシード追加、コレクション検証への単元登録、単元サムネイルを主教材の図へ差し替え、シード再実行の要否 |
+| [parsons-overflow-feedback-318.md](parsons-overflow-feedback-318.md) | 記録 | Issue #318の Parsons 盤面はみ出し修正（盤面のみ内部スクロール・行ピッチ52→46px・全5単元）と、Issue #302/#303/#318共通の「直前の回答」表示ポリシー（対象の問題を開いている間だけ表示） |
+| [parsons-order-feedback-327.md](parsons-order-feedback-327.md) | 記録 | Issue #327の Parsons 相対順序フィードバック（最長部分列で「動かさなくてよい行」に✓、全5単元の応用問題へ接続、フェーズ7ヒントL4は対象外） |
+| [parsons-marks-answer-time-354.md](parsons-marks-answer-time-354.md) | 記録 | Issue #354の Parsons キープ印の判定固定（印は提出した並びへの判定として固定し、ドラッグ中は更新しない） |
+| [faded-parsons-phase6.md](faded-parsons-phase6.md) | 記録 | フェーズ6の Parsons 問題のフェード型化（固定行の仕組み、セグメント内だけの並び替え、印は可動行のみ判定、5単元の固定／可動の切り分け） |
+| [result-cheer-179.md](result-cheer-179.md) | 記録 | Issue #179の紙吹雪への歓声の追加（効果音ラボ「歓声と拍手」、フェーズ結果=中／単元最終=大） |
+| [prisma-tmp-cleanup-278.md](prisma-tmp-cleanup-278.md) | 記録 | Issue #278のPrisma生成一時ファイル（.tmp 9件・約173MB）の追跡削除と.gitignore追加（Cloud Buildソースアーカイブ肥大の主因対策） |
 | [home-terminology-177.md](home-terminology-177.md) | 記録 | Issue #177のホーム画面の用語統一（一覧への案内を「単元一覧へ」に置き換え） |
 | [course-card-badge-176.md](course-card-badge-176.md) | 記録 | Issue #176のコースカードの二重バッジ解消（完了表示を StatusChip の「クリア済み」に一本化） |
 | [progress-loading-175.md](progress-loading-175.md) | 記録 | Issue #175の読み込み中表示の改善（進捗読み込みを素のテキストからスケルトンへ） |
@@ -88,6 +161,14 @@
 | [bfs-code-mapping-72.md](bfs-code-mapping-72.md) | 記録 | Issue #72 のコード契約・62フレーム、Pythonトレース検証、PR #93 の可読性・変数差分表示と確認画像 |
 | [graph-unify-91.md](graph-unify-91.md) | 記録 | Issue #91 の共通描画・迷路配置、検証結果と同じ画面幅でのフェーズ1・2・3比較 |
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
+| [phase3-situation-captions-297.md](phase3-situation-captions-297.md) | 記録 | Issue #297のフェーズ3状況キャプション追加（バブルソート・棒倒し法）、青い処理中色の時制をトレース由来の文言で固定、他単元への適用判定 |
+| [code-mapping-scroll-grey-band-301-303.md](code-mapping-scroll-grey-band-301-303.md) | 記録 | Issue #301のフェーズ4コード見切れ修正（コード専用の横スクロールを全6単元へ）と、Issue #303の画面下グレー帯の特定（body背景のはみ出し）と単元プレビューの内側スクロール化（全5単元） |
+| [parsons-editor-usability-327-325.md](parsons-editor-usability-327-325.md) | 記録 | Issue #327の応用問題レイアウト修正（安全な中央寄せで問題文と通知の重なりを解消、全5単元）とParsons盤面の高さ下限・濃色ドラッグカーソル、Issue #325のフェーズ7エディタ共有テーマ（キャレット色明示）と濃色Iビームカーソル |
+| [wall-extension-phase2-314-316.md](wall-extension-phase2-314-316.md) | 記録 | Issue #314/#316の「図の変化とコード実行単位の対応」原則と説明専用ステップの導入、棒倒し法フェーズ2の32ステップ再構成とフェーズ4チェックポイント契約の改訂、フェーズ7トレース再生への波及 |
+| [maze-digging-loop-explanation-334.md](maze-digging-loop-explanation-334.md) | 記録 | Issue #334の穴掘り法フェーズ2への輪の説明ステップ追加（説明専用2ステップ: 理由＋仮定盤面の実演）とフェーズ4チェックポイント契約のコード対応ステップへの改訂 |
+| [binary-search-phase1-unsorted-329.md](binary-search-phase1-unsorted-329.md) | 記録 | Issue #329の二分探索フェーズ1場面1の未ソート化（主教材の並び替え [19,3,31,7,42,12,25]、25を最後尾に置き最悪のケースを場面内で起こす）、配列場面への並び方（sorted/unsorted）の導入 |
+| [binary-search-review-fixes-330-331.md](binary-search-review-fixes-330-331.md) | 記録 | Issue #331の応用問題の表示被り修正（図領域のフレックス化、全5単元）と lo/hi 定義行の追加、Issue #330のフェーズ2「残った範囲」の強調（remaining 状態）とソート前提のキャプション追加 |
+| [maze-digging-coordinate-order-326.md](maze-digging-coordinate-order-326.md) | 記録 | Issue #326の穴掘り法の座標表示 (y, x) 統一（フェーズ2・3・4・6とトレース再生の表示反転、参照コードとセルキーは不変） |
 
 ## 図
 

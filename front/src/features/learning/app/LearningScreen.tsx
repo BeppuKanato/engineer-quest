@@ -4,19 +4,26 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/app/component/appHeader";
+import { FeedbackV1 } from "@/app/component/feedbackV1";
 import { useUserSession } from "@/app/component/userSession";
-import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress } from "@/api/learning.api";
+import { fetcher } from "@/lib/fetcher";
+import { completeLearningPhase, completeLearningUnit, startLearningUnit, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
+import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
 import type { BfsUnitPhaseSummary } from "../bfs/unit/unit.types";
+import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
+import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
+import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
-import { phaseBoundaryAchievements } from "../rewards/presentation";
+import { AchievementBand, NewAchievementZone } from "../rewards/AchievementPresentation";
+import { phaseResultAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
-import { readCodeDraft, writeCodeDraft } from "./codeDraft";
+import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { LearningRewardsContext } from "./LearningRewardsContext";
-import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
+import { emptyLearningRewards, mergeLearningRewards, type LearningRewards } from "./rewards";
 import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
 import { learningErrorMessage, useLearningProgress } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
@@ -40,6 +47,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const [draft, setDraft] = useState<{ code?: string } | null>(null), [draftError, setDraftError] = useState(false);
   const [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
   const [rewards, setRewards] = useState(emptyLearningRewards);
+  // 実績の提示先（#333）。フェーズ結果画面用はフェーズキー別、最終リザルトの新着用は一括で持つ。
+  const [phaseUnlocks, setPhaseUnlocks] = useState<Readonly<Record<string, readonly UnlockedAchievement[]>>>({});
+  const [finalUnlocks, setFinalUnlocks] = useState<readonly UnlockedAchievement[]>([]);
   const { boundary, present, finish } = useRewardBoundary();
   const [finalShown, setFinalShown] = useState(false), [unitSaved, setUnitSaved] = useState(progress.unit?.status === "COMPLETED");
   const [unitError, setUnitError] = useState(false), [unitRevision, setUnitRevision] = useState(0);
@@ -68,10 +78,32 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     const result = await completeLearningPhase(await getToken(), courseId, phaseKey, summary);
     if (auth.currentUser?.uid !== uid) return;
     setRewards(current => mergeLearningRewards(current, result));
-    // 提示はフェーズの切れ目に重ねて出し、遷移は待たせない（#147）。提示側の完了は待たない。エラー時はここへ到達しない。
-    const achievements = phaseBoundaryAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
-    if (result.awardedCard || achievements.length) present({ phaseKey, achievements });
+    // 実績は解除されたフェーズの結果画面で提示する（#333）。最終フェーズ分は最終リザルトの新着へ。
+    const forResult = phaseResultAchievements(phaseKey, unit.phases.at(-1)?.id, result.unlockedAchievements);
+    if (forResult.length) setPhaseUnlocks(current => ({ ...current, [phaseKey]: [...(current[phaseKey] ?? []), ...forResult.filter(item => !(current[phaseKey] ?? []).some(x => x.id === item.id))] }));
+    const forFinal = result.unlockedAchievements.filter(item => !forResult.some(x => x.id === item.id));
+    if (forFinal.length) setFinalUnlocks(current => [...current, ...forFinal.filter(item => !current.some(x => x.id === item.id))]);
+    // 切れ目ダイアログは知識カード専用（#333）。提示は遷移を待たせない（#147）。エラー時はここへ到達しない。
+    if (result.awardedCard) present({ phaseKey });
   }, [getToken, courseId, uid, unit, present]);
+  // フィードバックの先行生成と表示（#202）。生成の成否は学習の進行に影響させない。
+  const startFeedback = useCallback((kind: "phase" | "unit", eventId: string) => {
+    void getToken().then(token => fetcher(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { method: "POST", token })).catch(() => undefined);
+  }, [getToken]);
+  const phaseFeedbackEventId = useCallback((phaseKey: string, nextPhaseKey: string | null) => `${courseId}:${phaseKey}${nextPhaseKey ? `:${nextPhaseKey}` : ""}`, [courseId]);
+  const onCheckPhaseCompleted = useCallback((phaseKey: string, nextPhaseKey: string | null) => {
+    startFeedback("phase", phaseFeedbackEventId(phaseKey, nextPhaseKey));
+  }, [startFeedback, phaseFeedbackEventId]);
+  const renderPhaseFeedback = useCallback((phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void }) => (
+    <FeedbackV1 kind="phase" eventId={phaseFeedbackEventId(phaseKey, nextPhaseKey)} onAction={href => {
+      if (!href) return false;
+      const target = new URL(href, window.location.origin).searchParams.get("phase");
+      if (!target) return false;
+      if (target === nextPhaseKey) nav.goNext(); else nav.goToPhase(target);
+      return true;
+    }} />
+  ), [phaseFeedbackEventId]);
+  const renderUnitFeedback = useCallback(() => <FeedbackV1 kind="unit" eventId={courseId} />, [courseId]);
   const onFinalResult = useCallback(() => setFinalShown(true), []);
   useEffect(() => {
     if (!finalShown || unitSaved || completedUnitRequest.current) return;
@@ -80,20 +112,49 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     void getToken().then(token => completeLearningUnit(token, courseId)).then(result => {
       if (!current) return;
       setUnitSaved(true); setRewards(rewards => mergeLearningRewards(rewards, result));
+      // 単元完了で解除された実績は最終リザルトの「新しい実績」に出す（#333）。
+      if (result.unlockedAchievements.length) setFinalUnlocks(current => [...current, ...result.unlockedAchievements.filter(item => !current.some(x => x.id === item.id))]);
       log({ eventType: "unit_complete" });
+      startFeedback("unit", courseId);
     }, () => { if (current) { completedUnitRequest.current = false; setUnitError(true); } });
     return () => { current = false; };
-  }, [finalShown, unitSaved, courseId, getToken, log, unitRevision]);
+  }, [finalShown, unitSaved, courseId, getToken, log, unitRevision, startFeedback]);
   const saveCode = useCallback((code: string) => setDraftError(!writeCodeDraft(courseId, uid, code)), [courseId, uid]);
   const dismissAwardedCard = useCallback((cardId: string) => setRewards(current => ({ ...current, awardedCards: current.awardedCards.filter(item => item.card.id !== cardId) })), []);
   if (!draft) return <Typography role="status">学習を開いています。</Typography>;
+  // 単元コンテナは kind で出し分ける。進捗保存・下書き・学習ログ・フィードバック（#202）の経路は単元共通で、
+  // コンテナ側の受け口（props の形）も単元間で同一にそろえてある。
+  const unitPreviewProps = {
+    embedded: true,
+    initialPhaseIndex: initialPhase,
+    initialFurthestIndex: next ?? unit.phases.length - 1,
+    initialUnitComplete: progress.unit?.status === "COMPLETED",
+    initialCompletedPhases: progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey),
+    initialSummaries: savedPhaseSummaries(unit, progress),
+    initialCode: draft.code,
+    onCodeChange: saveCode,
+    // 入力量レベル別下書きの基底キー（Issue #328）。レベル対応済みの単元はこのキーからレベル別に読み書きする。
+    codeDraftBaseKey: codeDraftKey(courseId, uid),
+    onCodeDraftError: (failed: boolean) => setDraftError(failed),
+    onPhaseComplete: completePhase,
+    onFinalResult,
+    onLearningEvent: log,
+    rewards,
+    renderRewards: (value: LearningRewards) => <FinalLearningRewards rewards={value} onEvent={log} />,
+    renderPhaseAchievements: (phaseKey: string) => {
+      const items = phaseUnlocks[phaseKey];
+      return items?.length ? <AchievementBand items={items} phaseKey={phaseKey} onEvent={log} /> : null;
+    },
+    renderNewAchievements: () => finalUnlocks.length ? <NewAchievementZone items={finalUnlocks} onEvent={log} /> : null,
+    onCheckPhaseCompleted,
+    renderPhaseFeedback,
+    renderUnitFeedback,
+  };
   return <LearningRewardsContext.Provider value={{ rewards, dismissAwardedCard }}>
     {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
-    <BfsUnitPreview embedded initialPhaseIndex={initialPhase} initialFurthestIndex={next ?? unit.phases.length - 1} initialUnitComplete={progress.unit?.status === "COMPLETED"}
-      initialCompletedPhases={progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey)} initialSummaries={savedPhaseSummaries(unit, progress)}
-      initialCode={draft.code} onCodeChange={saveCode} onPhaseComplete={completePhase} onFinalResult={onFinalResult} onLearningEvent={log} rewards={rewards} renderRewards={value => <FinalLearningRewards rewards={value} onEvent={log} />} />
+    {unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
   </LearningRewardsContext.Provider>;
 }

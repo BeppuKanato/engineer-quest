@@ -37,6 +37,9 @@ assert.equal(content.questions.length, 5);
 assert.equal(content.code, bfsCode);
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
 assert.deepEqual(plain(content.questions.map(question => question.tags[0])), ["処理順序の追跡", "キューの状態の追跡", "たどり着けない場所の扱い", "距離が決まった場所の扱い", "コード全体の流れ"]);
+// たどり着けない場所の復習先は、結果ではなく「発見の関門」のステップ列を指す（#182）。
+const unreachable = content.questions.find(question => question.id === "unreachable-z");
+assert.deepEqual(plain(unreachable.reviewStepIds), ["for-a-b", "if-a-b", "assign-a-b", "execution-discover-b"], "unreachable review must show how a found neighbor is recorded and enqueued");
 assert.equal(q1.scene.graph, searchGraph); assert.equal(q4.scene.graph, searchGraph);
 assert.equal(q3.scene.graph.edges, searchGraph.edges);
 assert.deepEqual(plain(q3.scene.graph.nodes.slice(0, 6)), plain(searchGraph.nodes));
@@ -107,7 +110,21 @@ for (const question of content.questions) {
   }
 }
 const parsonsHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: q5, code: bfsCode, onAnswer: () => {} }));
-assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), plain(q5.lineIds));
+// フェード型: 固定行は正解位置に固定表示され、可動行は初期並びの相対順序のまま残りの位置を埋める。
+assert.deepEqual(plain(q5.fixedLineIds), ["import-deque", "define-function", "while-queue", "return-distances"], "Faded split as designed");
+{
+  const fixedSet = new Set(q5.fixedLineIds);
+  const movableInitial = q5.lineIds.filter(id => !fixedSet.has(id));
+  let cursor = 0;
+  const expectedOrder = q5.correctAnswer.lineIds.map(id => fixedSet.has(id) ? id : movableInitial[cursor++]);
+  assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder], "Fixed lines render pinned at their solution positions");
+  const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
+  assert.deepEqual(fixedRendered, plain(q5.fixedLineIds), "Exactly the fixed lines render as non-operable");
+  const { parsonsMovableSegments } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
+  for (const segment of parsonsMovableSegments(q5.correctAnswer.lineIds, q5.fixedLineIds)) {
+    assert.deepEqual([...q5.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable by reordering within each segment");
+  }
+}
 for (const line of bfsCode.lines) assert(parsonsHtml.includes(line.text), "Preserve original indentation and every line");
 
 const wrong = question => question.kind === "node" ? { kind: "node", nodeId: "B" } : question.kind === "choice" ?
@@ -189,11 +206,15 @@ console.log("BFS consolidation: independent BFS on all four graphs, corrected J 
 // ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
 const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
 const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/ParsonsBoard.tsx"), "utf8");
-assert.match(previewSource, /height: "min\(54dvh, 600px\)"/);
+assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
+assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
+assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
+assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(parsonsSource, /variant="contained" disabled=\{disabled\} onClick=\{\(\) => onAnswer/);
 // 正解後の固定契約: 正解した問題は選択肢・ノード・Parsons のいずれも選び直せない。
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "choices lock after a correct answer");
 assert.match(previewSource, /question.kind === "node" && !attempt\?\.correct/, "graph locks after a correct answer");
-assert.match(previewSource, /disabled=\{attempt\?\.correct === true\} \/>/, "parsons locks after a correct answer");
+assert.match(previewSource, /<ParsonsBoard[^>]*disabled=\{attempt\?\.correct === true\}/, "parsons locks after a correct answer");
+assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
 console.log("BFS consolidation: primary-action buttons and graph-height cap contract passed.");

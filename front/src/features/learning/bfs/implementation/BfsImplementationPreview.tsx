@@ -1,12 +1,20 @@
 "use client";
 
 import Editor, { type OnMount } from "@monaco-editor/react";
+import { LEARNING_EDITOR_THEME, learningEditorTextCursor, setupLearningEditor } from "../../code/learningEditor";
 import { Box, Button, LinearProgress, Tab, Tabs, Typography } from "@mui/material";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRunner";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
+import { ImplementationLevelSelector } from "../../implementation/ImplementationLevelSelector";
+import type { ImplementationInputLevel } from "../../implementation/inputLevel";
+import { useImplementationInputLevel } from "../../implementation/useImplementationInputLevel";
 
+import { DrawnCheck } from "../../app/DrawnCheck";
+import { ResultConfetti } from "../../app/ResultConfetti";
+import { useSoundEffect } from "../../../../app/component/soundFeedback";
+import { useErrorLineDecoration } from "../../../../hooks/useErrorLineDecoration";
 import { playerTokens } from "../../player/player.tokens";
 import { BfsTraceDialog } from "../trace/BfsTraceDialog";
 import { traceBfsCode } from "../trace/acquireTrace";
@@ -24,8 +32,10 @@ import { bfsImplementationContent as content } from "./implementation.content";
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
 /** embedded / onComplete は単元フロー（#77）からの埋め込み用。未指定なら単品ページとして従来どおり動く。 */
-export function BfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, initialCode, onCodeChange }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void; initialCode?: string; onCodeChange?: (code: string) => void }) {
-  const [code, setCode] = useState<string>(initialCode ?? content.template);
+export function BfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BfsUnitPhaseSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
+  // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。
+  const draftBaseKey = codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`;
+  const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
   const [tracing, setTracing] = useState(false);
@@ -46,10 +56,13 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
   const editor = useRef<Parameters<OnMount>[0] | null>(null);
+  const [errorLine, setErrorLine] = useState<number | undefined>(undefined);
+  useErrorLineDecoration(editor, editorReady, errorLine);
   const lock = useRef(false);
   const generation = useRef(0);
   const completedRef = useRef(false);
-  const resultRef = useRef<HTMLParagraphElement>(null);
+  const { play } = useSoundEffect();
+  const prevPassedRef = useRef(0);
   const passed = outcomes.filter(outcome => outcome.passed).length;
   const complete = !running && allTestsPassed(content.tests, outcomes);
   const prepare = useCallback(async () => {
@@ -63,26 +76,33 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     void prepare();
     return () => { lifetime.current++; disposePyodideRunner(); };
   }, [prepare]);
-  useEffect(() => { if (complete) resultRef.current?.focus(); }, [complete]);
   // 全テスト通過した瞬間だけ単元フローへ通知する。
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ testRuns: runs, hintUsage: usage });
+      onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level });
     }
     if (!complete) completedRef.current = false;
-  }, [complete, onComplete, runs, usage]);
+  }, [complete, onComplete, runs, usage, level]);
+  // テストが新たに通過するたび、小さな確認音で採点の進みを伝える（#305 案A'）。
+  // 全通過時の紙吹雪と歓声は ResultConfetti が担当し、演出の強弱を分ける。
   useEffect(() => {
-    if (panel === "console" && freeRunning && window.matchMedia("(max-width: 899px)").matches) sidePanel.current?.scrollIntoView({ block: "start" });
-  }, [panel, freeRunning]);
+    const passedCount = outcomes.filter(outcome => outcome.passed).length;
+    if (passedCount > prevPassedRef.current) play("answerCorrect");
+    prevPassedRef.current = passedCount;
+  }, [outcomes, play]);
+  useEffect(() => {
+    const shouldScroll = (panel === "console" && freeRunning) || (panel === "tests" && running);
+    if (shouldScroll && window.matchMedia("(max-width: 899px)").matches) sidePanel.current?.scrollIntoView({ block: "start" });
+  }, [panel, freeRunning, running]);
   const runFree = async () => {
     if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
     lock.current = true;
     const current = generation.current;
-    setFreeStatus("preparing"); setFreeResult(null); setPanel("console");
+    setFreeStatus("preparing"); setFreeResult(null); setErrorLine(undefined); setPanel("console");
     try {
       const result = await runBfsFreeCode(code, () => { if (current === generation.current) setFreeStatus("running"); }, () => current === generation.current);
-      if (current === generation.current) setFreeResult(result);
+      if (current === generation.current) { setFreeResult(result); setErrorLine(result.returned ? undefined : result.errorLine); }
     } catch {
       if (current === generation.current) setFreeResult({ stdout: "", outputTruncated: false, returned: false, error: "unavailable" });
     } finally {
@@ -95,14 +115,14 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     lock.current = true;
     const current = generation.current;
     setPanel("tests");
-    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code } });
-    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null);
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code, level } });
+    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null); setErrorLine(undefined);
     try {
-      const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) setOutcomes(next); }, () => current === generation.current);
+      const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) { setOutcomes(next); setErrorLine(next.find(outcome => outcome.errorLine !== undefined)?.errorLine); } }, () => current === generation.current);
       if (current === generation.current) {
         setLastOutcomes(result);
-        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
-        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage } });
+        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, level, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
+        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, level } });
       }
     } finally {
       lock.current = false;
@@ -114,7 +134,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     lock.current = true;
     const current = generation.current;
     traceRuns.current++;
-    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code } });
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code, level } });
     setTracing(true); setTraceError(null);
     try {
       const trace = await traceBfsCode(code, () => current === generation.current);
@@ -149,24 +169,30 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
     onLearningEvent?.({ eventType: "hint_open", payload: { level, count: usage[level - 1] + 1 } });
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
+  // レベルの切り替えはログに残し、表示中の結果は切り替えたレベルのコードに合わせて消す（Issue #328）。
+  const changeLevel = (next: ImplementationInputLevel) => {
+    if (busy || next === level) return;
+    onLearningEvent?.({ eventType: "implementation_level_select", payload: { level: next, previousLevel: level } });
+    selectLevel(next);
+    setOutcomes([]); setTraceError(null); setFreeResult(null);
+  };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
-    <Box component="section" aria-label={complete ? "BFS 自分で実装の完了" : "BFSの自分で実装"}
+    <Box component="section" aria-label="BFSの自分で実装"
       sx={{ width: "100%", height: "100%", minHeight: 0, display: "flex", flexDirection: "column", gap: 1 }}>
-      <Typography component="p" ref={resultRef} tabIndex={-1} sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", outline: "none", flexShrink: 0 }}>
-        {complete ? content.result.title : content.caption}
+      <Typography component="p" sx={{ textAlign: "center", fontWeight: 700, fontSize: "clamp(18px, 1.5vw, 24px)", flexShrink: 0 }}>
+        {content.caption}
       </Typography>
+      {complete && <ResultConfetti />}
       <Typography component="p" role="status" aria-live="polite" sx={{ textAlign: "center", fontSize: 16, flexShrink: 0 }}>{passed}/{content.tests.length} 本通過</Typography>
       <LinearProgress aria-label="テスト通過数" variant="determinate" value={passed / content.tests.length * 100}
         sx={{ flexShrink: 0, bgcolor: colors.button, "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus } }} />
-      {complete ? <Box sx={{ my: "auto", textAlign: "center", overflowY: "auto" }}>
-        <Typography component="p">{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
-        {usage.map((count, index) => <Typography component="p" key={index}>{content.result.hintLabel.replace("{level}", String(index + 1)).replace("{count}", String(count))}</Typography>)}
-        <Typography component="p" sx={{ mt: 2 }}>{content.result.closing}</Typography>
-        <Box sx={{ mt: 2 }}>{traceButton}</Box>
-        {tracing && <Typography component="p" role="status">{bfsTraceText.loading}</Typography>}
-      </Box> : <>
+      {!complete && <Box sx={{ flexShrink: 0 }}>
+        <ImplementationLevelSelector level={level} onChange={changeLevel} disabled={busy || !editorReady} />
+      </Box>}
+      <>
         <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 2.4fr) minmax(300px, 1fr)", gap: 2 }}>
-          <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `2px solid ${colors.focus}`, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel }}>
+          <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: `2px solid ${colors.focus}`, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel,
+            "& .monaco-editor .monaco-scrollable-element, & .monaco-editor .view-lines, & .monaco-editor .inputarea": { cursor: learningEditorTextCursor } }}>
             <Box role="group" aria-label={text.panel} sx={{ flexShrink: 0, p: 1, bgcolor: colors.panelAlt, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
               <Typography component="p" sx={{ fontWeight: 800, fontSize: 16, mr: 0.5 }}>{text.code}</Typography>
               <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runFree()} sx={outlinedButton}>{text.freeRun}</Button>
@@ -174,10 +200,20 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
               <Button variant="contained" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void run()}
                 sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke }, "&.Mui-disabled": { bgcolor: colors.button, color: colors.text, opacity: 0.45 } }}>{content.controls.run}</Button>
             </Box>
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-              <Editor height="100%" language="python" theme="vs" value={code} loading={content.status.editorLoading}
+            <Box sx={{ flex: 1, minHeight: 0, position: "relative" }}>
+              {complete && <Box data-completion-banner sx={{ position: "absolute", top: 8, right: 8, zIndex: 6, maxWidth: "min(440px, calc(100% - 16px))", display: "flex", gap: 1.25, alignItems: "flex-start", p: 1.5, bgcolor: colors.panel, border: `2px solid ${colors.focus}`, borderRadius: 1.5, boxShadow: 3 }}>
+                <Box sx={{ flexShrink: 0 }}><DrawnCheck size={44} /></Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography component="p" sx={{ fontWeight: 800, fontSize: 17 }}>{content.result.title}</Typography>
+                  <Typography component="p" sx={{ fontSize: 13.5, mt: 0.25 }}>{content.result.closing}</Typography>
+                  <Typography component="p" sx={{ fontSize: 13.5, mt: 0.5 }}>{content.result.runsLabel.replace("{count}", String(runs))}</Typography>
+                  {onShowFinalResult && <Button variant="contained" onClick={onShowFinalResult}
+                    sx={{ mt: 1, minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{content.result.finalButton}</Button>}
+                </Box>
+              </Box>}
+              <Editor height="100%" language="python" theme={LEARNING_EDITOR_THEME} beforeMount={setupLearningEditor} value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { onCodeChange?.(next ?? ""); setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); }}
+                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); setErrorLine(undefined); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
@@ -213,7 +249,7 @@ export function BfsImplementationPreview({ embedded = false, onComplete, onLearn
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           {runtime === "error" && <Button onClick={() => void prepare()} sx={outlinedButton}>{content.controls.reload}</Button>}
         </Box>
-      </>}
+      </>
       {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
     </Box>
     {tracePlayback && <BfsTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}

@@ -109,27 +109,30 @@ const MergeSortFigure = () => (
 );
 
 const BinarySearchFigure = () => {
-  const values = [3, 7, 12, 18, 24, 31, 38, 45, 52];
-  const mid = 4;
+  // 教材（フェーズ2）と同じ主教材 [3, 7, 12, 19, 25, 31, 42]。範囲全体を括弧で示し、
+  // 最初に見る中央（インデックス3の 19）を強調する。
+  const values = [3, 7, 12, 19, 25, 31, 42];
+  const mid = 3;
+  const cellX = (index: number) => 16 + index * 24;
   return (
     <g>
-      <line x1={14} y1={30} x2={186} y2={30} stroke={EDGE} strokeWidth={2} />
-      <line x1={14} y1={30} x2={14} y2={38} stroke={EDGE} strokeWidth={2} />
-      <line x1={186} y1={30} x2={186} y2={38} stroke={EDGE} strokeWidth={2} />
+      <line x1={16} y1={30} x2={181} y2={30} stroke={EDGE} strokeWidth={2} />
+      <line x1={16} y1={30} x2={16} y2={38} stroke={EDGE} strokeWidth={2} />
+      <line x1={181} y1={30} x2={181} y2={38} stroke={EDGE} strokeWidth={2} />
       {values.map((value, index) => {
-        const x = 14 + index * 19.5;
+        const x = cellX(index);
         const isMid = index === mid;
         return (
           <g key={value}>
-            <rect x={x} y={44} width={17.5} height={30} rx={3} fill={isMid ? ACCENT : "#eff6ff"} stroke={ACCENT} strokeWidth={isMid ? 2 : 1} />
-            <text x={x + 8.75} y={59} textAnchor="middle" dominantBaseline="central" fontSize={9} fontWeight={isMid ? 800 : 600} fill={isMid ? "#fff" : INK}>
+            <rect x={x} y={44} width={21} height={30} rx={3} fill={isMid ? ACCENT : "#eff6ff"} stroke={ACCENT} strokeWidth={isMid ? 2 : 1} />
+            <text x={x + 10.5} y={59} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={isMid ? 800 : 600} fill={isMid ? "#fff" : INK}>
               {value}
             </text>
           </g>
         );
       })}
-      <path d={`M ${14 + mid * 19.5 + 8.75} 88 l 6 9 h -12 z`} fill={ACCENT} />
-      <text x={14 + mid * 19.5 + 8.75} y={110} textAnchor="middle" fontSize={10} fontWeight={700} fill={ACCENT}>
+      <path d={`M ${cellX(mid) + 10.5} 88 l 6 9 h -12 z`} fill={ACCENT} />
+      <text x={cellX(mid) + 10.5} y={110} textAnchor="middle" fontSize={10} fontWeight={700} fill={ACCENT}>
         中央
       </text>
     </g>
@@ -157,7 +160,83 @@ const KmpFigure = () => {
   );
 };
 
+const MazeFigure = () => {
+  // 教材（フェーズ1・2）と同じ主教材 9×9 の完成迷路。行文字列の # が壁。
+  const rows = [
+    "#########",
+    "#.......#",
+    "#.#####.#",
+    "#...#...#",
+    "#.#.###.#",
+    "#.#...#.#",
+    "#.#####.#",
+    "#.....#.#",
+    "#########",
+  ];
+  const cell = 11;
+  const ox = 50;
+  const oy = 10;
+  const center = (cx: number, cy: number): [number, number] => [ox + (cx + 0.5) * cell, oy + (cy + 0.5) * cell];
+  // フェーズ1で示すスタート (1,7) → ゴール (7,7) の経路の折れ点。
+  const route: Array<[number, number]> = [[1, 7], [1, 1], [7, 1], [7, 7]];
+  const routePoints = route.map(([cx, cy]) => center(cx, cy).join(",")).join(" ");
+  const [start, goal] = [center(1, 7), center(7, 7)];
+  return (
+    <g>
+      {rows.flatMap((row, y) =>
+        [...row].map((ch, x) =>
+          ch === "#" ? (
+            <rect key={`${x}-${y}`} x={ox + x * cell} y={oy + y * cell} width={cell} height={cell} fill={INK} />
+          ) : null,
+        ),
+      )}
+      <polyline points={routePoints} fill="none" stroke={ACCENT} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={start[0]} cy={start[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+      <circle cx={goal[0]} cy={goal[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+    </g>
+  );
+};
+
+const MazeDiggingFigure = () => {
+  // 教材（フェーズ1・2）と同じ主教材 9×9 の完成迷路。行文字列の # が壁（壁50・通路31）。
+  const rows = [
+    "#########",
+    "#...#...#",
+    "###.###.#",
+    "#.#.....#",
+    "#.#####.#",
+    "#...#...#",
+    "#.###.###",
+    "#.......#",
+    "#########",
+  ];
+  const cell = 11;
+  const ox = 50;
+  const oy = 10;
+  const center = (cx: number, cy: number): [number, number] => [ox + (cx + 0.5) * cell, oy + (cy + 0.5) * cell];
+  // フェーズ1で示すスタート (1,1) → ゴール (7,7) の一本道（17マス）の折れ点。
+  const route: Array<[number, number]> = [[1, 1], [3, 1], [3, 3], [7, 3], [7, 5], [5, 5], [5, 7], [7, 7]];
+  const routePoints = route.map(([cx, cy]) => center(cx, cy).join(",")).join(" ");
+  const [start, goal] = [center(1, 1), center(7, 7)];
+  return (
+    <g>
+      {rows.flatMap((row, y) =>
+        [...row].map((ch, x) =>
+          ch === "#" ? (
+            <rect key={`${x}-${y}`} x={ox + x * cell} y={oy + y * cell} width={cell} height={cell} fill={INK} />
+          ) : null,
+        ),
+      )}
+      <polyline points={routePoints} fill="none" stroke={ACCENT} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={start[0]} cy={start[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+      <circle cx={goal[0]} cy={goal[1]} r={3.5} fill={ACCENT} stroke="#fff" strokeWidth={1.5} />
+    </g>
+  );
+};
+
 const FIGURES: Record<string, React.ReactElement> = {
+  "course-algorithm-wall-extension-v1": <MazeFigure />,
+  "course-algorithm-maze-digging-v1": <MazeDiggingFigure />,
   "course-algorithm-breadth-first-search-v1": <GraphFigure dfs={false} />,
   "course-algorithm-depth-first-search-v1": <GraphFigure dfs={true} />,
   "course-algorithm-bubble-sort-v2": <BubbleSortFigure />,

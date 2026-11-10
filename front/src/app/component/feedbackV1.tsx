@@ -4,7 +4,7 @@ import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { fetcher } from "@/lib/fetcher";
+import { ApiError, fetcher } from "@/lib/fetcher";
 
 // Keep target/state identifiers, never copy shared code/body or arbitrary query text into telemetry.
 function canonicalRoute(route: string) {
@@ -17,10 +17,19 @@ function canonicalRoute(route: string) {
   return url.pathname + (params.size ? `?${params.toString()}` : "") + url.hash;
 }
 
-type Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; actionLabel: string; actionHref: string | null } };
-export function FeedbackV1({ kind, eventId }: { kind: "mission" | "create"; eventId: string }) {
+type Result = { id: string; status: string; feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null } };
+export function FeedbackV1({ kind, eventId, onAction }: {
+  kind: "mission" | "create" | "phase" | "unit";
+  eventId: string;
+  // Called when the recommended action is clicked. Return true to handle the
+  // navigation in-app (e.g. moving between phases) instead of following the link.
+  onAction?: (href: string | null) => boolean;
+}) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState(false);
+  // No experiment assignment (409) or no such completion event (404): feedback
+  // simply does not apply to this user/event, so render nothing.
+  const [unavailable, setUnavailable] = useState(false);
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -34,18 +43,23 @@ export function FeedbackV1({ kind, eventId }: { kind: "mission" | "create"; even
           if (stopped) return;
           setResult(data);
           if (data.status === "GENERATING") timer = setTimeout(() => void load("GET"), 1500);
-        } catch { if (!stopped) setError(true); }
+        } catch (e) {
+          if (stopped) return;
+          if (e instanceof ApiError && (e.status === 404 || e.status === 409)) { setUnavailable(true); return; }
+          setError(true);
+        }
       };
       void load("POST");
     });
     return () => { stopped = true; clearTimeout(timer); unsubscribe(); };
   }, [eventId, kind]);
   const f = result?.feedback;
+  if (unavailable) return null;
   return <Paper variant="outlined" sx={{ p: 3, my: 2 }}>
     {error || result?.status === "FAILED" ? <Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert> : !f ? <Alert severity="info">フィードバックを準備しています。</Alert> : <Stack spacing={2}>
       <FeedbackObservation id={result.id} href={f.actionHref} />
-      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal], ["次の一歩", f.nextStep]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
-      {f.actionHref && <Button component={Link} href={f.actionHref} variant="contained">{f.actionLabel}</Button>}
+      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal], ["次の一歩", f.nextStep], ["この一歩の理由", f.reason]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
+      {f.actionHref && <Button component={Link} href={f.actionHref} variant="contained" onClick={event => { if (onAction?.(f.actionHref)) event.preventDefault(); }}>{f.actionLabel}</Button>}
     </Stack>}
   </Paper>;
 }

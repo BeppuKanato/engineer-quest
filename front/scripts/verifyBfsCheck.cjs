@@ -132,6 +132,11 @@ assert(skipped.records.every(record => record.firstCorrect === false && !record.
 
 // 画面側の契約：誤答後に「次の問題へ／結果を見る」で進める導線を持つ。
 const checkPreviewSource = fs.readFileSync(path.join(root, "bfs/check/BfsCheckPreview.tsx"), "utf8");
+// レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
+assert.match(checkPreviewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
+assert.match(checkPreviewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
+assert.match(checkPreviewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
+
 assert.match(checkPreviewSource, /advanceAssessment\(bfsCheckContent, current, question\.id\)/);
 assert.match(checkPreviewSource, /"結果を見る" : "次の問題へ"/);
 

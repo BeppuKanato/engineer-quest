@@ -7,7 +7,7 @@ for (const model of ["User", "HexadResponse", "ExperimentAssignment", "UserMissi
   }
   assert.doesNotThrow(() => assertPreservingSeedOperation(model, "findMany"));
 }
-for (const model of ["Course", "Mission", "MissionActivity", "Achievement", "KnowledgeCard", "KnowledgeCardScheduleEntry", "CreateQuest", "CreateQuestRequirement", "CreateQuestCourse"]) {
+for (const model of ["Course", "Mission", "MissionActivity", "Achievement", "KnowledgeCard", "KnowledgeCardPhaseScheduleEntry", "CreateQuest", "CreateQuestRequirement", "CreateQuestCourse"]) {
   assert.doesNotThrow(() => assertPreservingSeedOperation(model, "upsert"));
   assert.throws(() => assertPreservingSeedOperation(model, "deleteMany"));
   assert.throws(() => assertPreservingSeedOperation(model, "delete"));

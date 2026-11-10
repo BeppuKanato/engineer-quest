@@ -44,6 +44,10 @@ assert(homeGrid.includes('CourseCard'), 'home unit grid must reuse CourseCard');
 const homePage = read('app/home/page.tsx');
 assert(!homePage.includes('ほかの単元を探す'), 'home page must not keep the duplicated find-units card');
 assert(homePage.includes('<HomeUnitGrid'), 'home page must render the unit grid');
+// 目標に設定した実績の進捗をホームにも出す（#183）。API は既に targetAchievement を返している。
+assert(homePage.includes('homeData.targetAchievement'), 'home must render the pinned target achievement when present');
+assert(homePage.includes('目標の実績'), 'home must label the target achievement card');
+assert(homePage.includes('factor.progress'), 'home must show per-factor progress toward the target');
 
 // 5. ContinueLearning: rich hero when a unit is in progress, nothing when none is.
 const cont = read('features/learning/app/ContinueLearning.tsx');

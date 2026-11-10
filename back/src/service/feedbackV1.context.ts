@@ -15,11 +15,11 @@ const withoutFields = (value: object, fields: string[]) =>
   Object.fromEntries(Object.entries(value).filter(([key]) => !fields.includes(key)));
 
 const definitions = [
-  ["新しいコースを始める", "新しい知識・技能の習得", "未着手の公開コースで最初のMissionが解放済み"],
-  ["途中のコースを再開する", "学習の継続", "開始済み未完了で続きが解放済み"],
-  ["完了済みコースを復習する", "知識の再整理・定着", "完了済みで教材が閲覧可能"],
-  ["通常Missionを復習する", "理解が不確かな点の補強", "完了済み通常Missionの復習画面が利用可能"],
-  ["コース末尾の演習に取り組む・再挑戦する", "自力での実装と理解の確認", "演習が解放済み"],
+  ["新しい単元を始める", "新しい知識・技能の習得", "未着手の公開単元がある"],
+  ["途中の単元を再開する", "学習の継続", "開始済み未完了の単元がある"],
+  ["完了済み単元を復習する", "知識の再整理・定着", "完了済みの単元がある"],
+  ["単元のフェーズを復習する", "理解が不確かな点の補強", "完了済みフェーズが閲覧可能"],
+  ["自分で実装に取り組む・再挑戦する", "自力での実装と理解の確認", "フェーズ7（自分で実装）が解放済み"],
   ["新しい作る課題を始める", "学んだ知識の応用", "未着手の公開課題"],
   ["途中の作る課題を再開する", "実装の継続・完成への取り組み", "開始済み未完了で保存コードから再開可能"],
   ["提出済みの作る課題を改善する", "実装の改善・応用の深化", "提出済みで再編集可能。未達要件への挑戦は未達がある場合だけ"],
@@ -37,8 +37,9 @@ const definitions = [
   ["学習メモを掲示板に投稿する", "学習内容の言語化・整理と共有", "公開メモフォームが利用可能"],
   ["作ったものを共有する", "成果の説明・知識や工夫の共有", "共有可能な保存コードまたは提出作品がある"],
   ["他の人の投稿へ返信する", "他者への支援・説明を通じた理解の整理", "他者の公開・返信可能投稿がある"],
+  ["次のフェーズへ進む", "学習の継続", "現在のフェーズの次のフェーズがある"],
 ];
-export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create", eventId: string) {
+export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create" | "phase" | "unit", eventId: string) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, include: { hexadResponse: true, experimentAssignments: { where: { experimentKey: HEXAD_FEEDBACK_EXPERIMENT_KEY } } } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   const assignment = user.experimentAssignments[0];
@@ -46,9 +47,32 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   if (assignment.condition === "PERSONALIZED" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
   const cutoff = new Date();
   let learning: unknown;
+  // Set for the new-flow kinds; the phase event may name the next phase so the
+  // "proceed" action (id 23) can be offered with a concrete target.
+  let phaseEvent: { courseId: string; phaseKey: string; nextPhaseKey: string | null } | null = null;
   if (kind === "mission") {
     // Mission completion events no longer exist; mission-kind feedback is redefined with the new flow.
     throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+  } else if (kind === "phase" || kind === "unit") {
+    const courseId = kind === "unit" ? eventId : eventId.split(":")[0];
+    const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } });
+    if (!course) throw new AppError(404, "EVENT_NOT_FOUND", "Unit not found");
+    const [unitRow, phaseRows] = await Promise.all([
+      prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
+      prisma.phaseLearningProgress.findMany({ where: { userId: user.id, courseId }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] }),
+    ]);
+    const phases = phaseRows.map(p => ({ id: p.phaseKey, status: p.status, summary: p.summary ?? null }));
+    const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
+    if (kind === "unit") {
+      if (!unitRow || unitRow.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+      learning = { id: `unit-event:${courseId}`, unit: { id: course.id, title: course.title, status: unitRow.status }, sequence: phaseSequence, phases };
+    } else {
+      const [, phaseKey, nextPhaseKey] = eventId.split(":");
+      const current = phaseRows.find(p => p.phaseKey === phaseKey);
+      if (!current || current.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+      phaseEvent = { courseId, phaseKey, nextPhaseKey: nextPhaseKey ?? null };
+      learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, summary: current.summary ?? null } };
+    }
   } else {
     const event = await prisma.createQuestSubmission.findFirst({ where: { id: eventId, attempt: { userId: user.id } }, include: { attempt: { include: { quest: { include: { requirements: true } }, executions: { orderBy: { executedAt: "asc" } }, hintViews: { orderBy: { viewedAt: "asc" } }, submissions: { orderBy: { submittedAt: "asc" } } } } } });
     if (!event) throw new AppError(404, "EVENT_NOT_FOUND", "Submission not found");
@@ -57,22 +81,40 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       ...a.executions.map(t => ({ id: t.id, type: "test", at: t.executedAt })), ...a.hintViews.map(t => ({ id: t.id, type: "hint", at: t.viewedAt })), ...a.submissions.map(t => ({ id: t.id, type: "submission", at: t.submittedAt })),
     ]), currentQuest: a.quest, selectedRequirementIds: a.selectedRequirementIds, tests: a.executions.map(v => withoutFields(v, ["executedAt"])), hints: a.hintViews.map(v => withoutFields(v, ["viewedAt"])), submissions: a.submissions.map(v => withoutFields(v, ["submittedAt"])) };
   }
-  const [courseRows, quests, cards, achievements, posts, history] = await Promise.all([
-    prisma.course.findMany({ where: { isPublished: true }, select: { id: true } }),
+  const [courseRows, quests, cards, achievements, posts, history, allUnitRows, allPhaseRows] = await Promise.all([
+    prisma.course.findMany({ where: { isPublished: true }, select: { id: true, title: true } }),
     prisma.createQuest.findMany({ where: { isPublished: true }, include: { attempts: { where: { userId: user.id }, select: { status: true, bestScore: true, code: true } }, relatedCourses: true, requirements: { select: { id: true, title: true, description: true, kind: true } } } }),
     prisma.knowledgeCard.findMany({ where: { isPublished: true, userKnowledgeCards: { some: { userId: user.id } } } }),
     prisma.achievement.findMany({ where: { OR: [{ isSecret: false }, { userAchievements: { some: { userId: user.id } } }] }, include: { userAchievements: { where: { userId: user.id }, select: { id: true } } } }),
     prisma.questPost.findMany({ where: { visibility: "PUBLIC" }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], include: { comments: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] } } }),
     prisma.feedbackV1.findMany({ where: { userId: user.id, createdAt: { gte: assignment.assignedAt, lte: cutoff } }, orderBy: { createdAt: "asc" }, select: { id: true, result: true, interactions: true, status: true } }),
+    prisma.unitLearningProgress.findMany({ where: { userId: user.id } }),
+    prisma.phaseLearningProgress.findMany({ where: { userId: user.id } }),
   ]);
   const legacyWhere = { createdAt: { gte: assignment.assignedAt, lte: cutoff } };
   const legacyCreateHistory = await prisma.createQuestFeedback.findMany({ where: { ...legacyWhere, submission: { attempt: { userId: user.id } } }, select: { id: true, actionType: true, status: true, generatedAt: true } });
   const achievementProgress = await getAchievementsByUser(user);
-  // Legacy courses/missions no longer exist; course-related actions (ids 1-5) simply
-  // have no available targets until the new flow is connected. Action ids are not renumbered.
+  // Legacy courses/missions no longer exist. Unit actions (ids 1-4) take their
+  // targets from the new-flow progress tables below; action ids are not renumbered.
   const courses = courseRows.map(c => ({ id: c.id, status: "not_started", missions: [] as never[] }));
+  const units = courseRows.map(c => {
+    const unitRow = allUnitRows.find(r => r.courseId === c.id);
+    return { id: c.id, title: c.title, status: unitRow?.status ?? "NOT_STARTED", phases: allPhaseRows.filter(p => p.courseId === c.id).map(p => ({ id: p.phaseKey, status: p.status })) };
+  });
   const targets: Record<number, Target[]> = Object.fromEntries(definitions.map((_, i) => [i + 1, []]));
   const add = (id: number, targetId: string, href: string) => targets[id].push({ id: targetId, href });
+  if (kind === "unit") {
+    for (const u of units) {
+      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
+      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`);
+      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
+    }
+    for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
+  }
+  if (kind === "phase" && phaseEvent) {
+    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
+    if (phaseEvent.nextPhaseKey) add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`);
+  }
   for (const q of quests) {
     const a = q.attempts[0];
     add(!a ? 6 : a.status === "COMPLETED" ? 8 : 7, q.id, `/create/quests/${encodeURIComponent(q.id)}/work`);
@@ -92,17 +134,28 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`);
   }
   for (const [id, category] of [[18, "QUESTION"], [19, "ERROR_HELP"], [20, "MEMO"]] as const) add(id, category, `/quest-board/new?category=${category}`);
-  const actions: Action[] = definitions.map(([label, purpose, condition], i) => ({ id: i + 1, label, purpose, condition, targetIds: targets[i + 1].map(t => t.id) })).filter(a => a.targetIds.length);
+  const allActions: Action[] = definitions.map(([label, purpose, condition], i) => ({ id: i + 1, label, purpose, condition, targetIds: targets[i + 1].map(t => t.id) })).filter(a => a.targetIds.length);
+  // Phase-result feedback recommends only inside the learning flow: proceed,
+  // review a completed phase of this unit, or review with an acquired card.
+  const actions = kind === "phase" ? allActions.filter(a => [23, 4, 9].includes(a.id)) : allActions;
   const h = user.hexadResponse;
   const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores: { Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore, FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore, Disruptor: h.disruptorScore, Player: h.playerScore } } : null;
-  const input: Input = { learning, targets, actions, hexad, state: {
-    courses, quests: quests.map(({ attempts, id, title, description, scenario, requirements, relatedCourses }) => ({ id, title, description, scenario, requirements, relatedCourses, attempts: attempts.map(({ code, ...a }) => ({ ...a, hasSavedCode: Boolean(code) })) })), cards: cards.map(c => ({ ...withoutFields(c, ["createdAt", "updatedAt"]), acquired: true, viewed: history.some(h => h.interactions.some(i => i.type === "ARRIVED" && (i.data as Record<string, unknown>).targetId === c.id)) ? "observed_arrival" : "not_observed" })),
+  const historyView = history.map(h => {
+    const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string }; validation?: { actionHref: string | null } } | null;
+    const s = result?.selection;
+    return { id: h.id, status: h.status, observation: summarizeReaction(h.interactions), recommendation: s ? { actionId: s.actionId, targetId: s.targetId, purpose: s.purpose, reason: s.reason } : null, interactions: h.interactions };
+  });
+  // The phase kind gets a lean state: the selection prompt carries the state, so
+  // trimming it (no board posts / quest details) keeps generation fast.
+  const state: Input["state"] = kind === "phase" ? {
+    unit: units.find(u => u.id === phaseEvent?.courseId) ?? null,
+    cards: cards.map(c => ({ id: c.id, title: c.title, acquired: true })),
+    history: historyView,
+  } : {
+    courses, units, quests: quests.map(({ attempts, id, title, description, scenario, requirements, relatedCourses }) => ({ id, title, description, scenario, requirements, relatedCourses, attempts: attempts.map(({ code, ...a }) => ({ ...a, hasSavedCode: Boolean(code) })) })), cards: cards.map(c => ({ ...withoutFields(c, ["createdAt", "updatedAt"]), acquired: true, viewed: history.some(h => h.interactions.some(i => i.type === "ARRIVED" && (i.data as Record<string, unknown>).targetId === c.id)) ? "observed_arrival" : "not_observed" })),
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
-    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: history.map(h => {
-      const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string }; validation?: { actionHref: string | null } } | null;
-      const s = result?.selection;
-      return { id: h.id, status: h.status, observation: summarizeReaction(h.interactions), recommendation: s ? { actionId: s.actionId, targetId: s.targetId, purpose: s.purpose, reason: s.reason } : null, interactions: h.interactions };
-    }),
-  } };
+    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
+  };
+  const input: Input = { learning, targets, actions, hexad, state };
   return { input, userId: user.id, condition: assignment.condition };
 }

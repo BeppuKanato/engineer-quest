@@ -91,6 +91,14 @@ assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻�
 const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
+// フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
+const phaseResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("export function UnitFinalResult"));
+assert.doesNotMatch(phaseResultOnly, /overflowY: "auto"/, "phase result does not own an inner scroll area (#298)");
+assert.doesNotMatch(read(`${root}/bfs/unit/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
+// 結果・ブリッジ・最終結果では内側カラムが内容の高さで伸び、スクロールはラッパー側で起きる（#298）。
+assert.match(container, /height: screen\.kind === "phase" \? "100%" : "auto"/, "result/bridge/final columns grow with content (#298)");
+// 「直前の回答」は内側カラムの中ではなく、ヘッダー直下の固定ゾーン（ラッパーより前）に置く（#298）。
+assert.ok(container.indexOf("AnswerFeedbackNotice") > -1 && container.indexOf("AnswerFeedbackNotice") < container.indexOf("画面より高い内容はこの中でスクロールさせ"), "answer notice sits in the fixed zone under the header (#298)");
 assert.match(finalResultOnly, /<ResultConfetti preset="final"/, "final result fires the stronger confetti preset");
 assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-lit mini map");
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
@@ -202,6 +210,24 @@ assert.match(confettiSource, /firedRef/, "Confetti fires once per mount, never o
 assert.match(confettiSource, /preset === "final"/, "The launcher carries a final-result preset");
 assert.match(confettiSource, /particleCount: 110/, "The final preset fires 110 pieces per popper");
 assert.match(confettiSource, /angle: 90, origin: \{ x: 0\.5, y: 0\.6 \}/, "The final preset adds a centre popper");
+// 紙吹雪には歓声が付く（#179）。プリセットで音の大きさが変わり、全体のサウンド設定に従う。
+assert.match(confettiSource, /resultCheerLarge/, "The final preset plays the large cheer");
+// フィードバック接続（#202）：確認フェーズの結果と最終結果にだけ差し込み、先行生成する。
+const fbPreviewSource = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+assert.match(fbPreviewSource, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
+assert.match(fbPreviewSource, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
+assert.match(fbPreviewSource, /renderUnitFeedback/, "The final result carries the unit feedback slot");
+const fbScreenSource = read(path.resolve(__dirname, "../src/features/learning/app/LearningScreen.tsx"));
+assert.match(fbScreenSource, /kind="phase"/, "Phase results mount phase feedback");
+assert.match(fbScreenSource, /kind="unit"/, "The final result mounts unit feedback");
+assert.match(fbScreenSource, /startFeedback/, "Generation starts at completion time, before the result is read");
+const fbComponentSource = read(path.resolve(__dirname, "../src/app/component/feedbackV1.tsx"));
+assert.match(fbComponentSource, /e.status === 404 \|\| e.status === 409/, "Users without an experiment assignment see no feedback card");
+assert.match(fbComponentSource, /onAction/, "Phase feedback actions can be handled inside the learning flow");
+assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
+const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
+assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
+assert.match(soundSource, /resultCheerLarge: \{ src: "\/audio\/se\/cheer-large\.ogg"/, "The large cheer is registered in the sound config");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
