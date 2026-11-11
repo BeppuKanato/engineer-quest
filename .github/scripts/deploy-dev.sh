@@ -75,7 +75,8 @@ gcloud run deploy "$BACK_SERVICE" "${run_flags[@]}" \
   --service-account "$back_account" \
   --platform managed --allow-unauthenticated --ingress all \
   --port 8080 --cpu 1 --memory 512Mi --min 0 --max 2 \
-  --concurrency 20 --timeout 300 --cpu-throttling \
+  # Allow feedback generation to continue after the response returns (dev only).
+  --concurrency 20 --timeout 300 --no-cpu-throttling \
   --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}" \
   --update-secrets "DATABASE_URL=DATABASE_URL_DEV:latest,OPENAI_API_KEY=OPENAI_API_KEY_DEV:latest"
 
