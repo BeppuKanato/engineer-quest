@@ -1,6 +1,6 @@
 import { summarizeReaction } from "../service/feedbackV1.observation";
 import assert from "node:assert/strict";
-import { generate, selectionSchema, validateSelection, validateAnalysis, analysisPrompt, selectionPrompt, type Input, type Analysis, type Candidate } from "../service/feedbackV1.engine";
+import { generate, analysisSchema, selectionSchema, validateSelection, validateAnalysis, analysisPrompt, selectionPrompt, type Input, type Analysis, type Candidate } from "../service/feedbackV1.engine";
 import { aggregateConcepts, conceptDefinitions } from "../service/feedbackConcepts";
 async function main() {
   const unit = conceptDefinitions[0];
@@ -27,9 +27,14 @@ async function main() {
   }
   assert.throws(()=>selectionSchema.parse({nextGoal:"確認",candidates:[]}));
   assert.throws(()=>selectionSchema.parse({nextGoal:"確認",candidates:[...candidates,...candidates]}));
-  assert.throws(()=>selectionSchema.parse({nextGoal:"確認",candidates:[{...candidates[0],reason:"長".repeat(101)}]}));
+  assert.doesNotThrow(()=>selectionSchema.parse({nextGoal:"目標".repeat(300),candidates:[{...candidates[0],nextStep:"手順".repeat(300),reason:"理由".repeat(300),actionLabel:"行動".repeat(100),purpose:"目的".repeat(100)}]}));
+  assert.doesNotThrow(()=>analysisSchema.parse({...analysis,currentState:"学習状況".repeat(300)}));
+  assert.throws(()=>selectionSchema.parse({nextGoal:" ",candidates:[candidates[0]]}));
   const select = (cs:Candidate[])=>({nextGoal:"確認",...cs[0],candidates:cs});
-  assert.throws(()=>validateSelection(input,select([candidates[0],candidates[0]])),/DUPLICATE/);
+  assert.doesNotThrow(()=>validateSelection(input,select([candidates[0],candidates[0]])),"duplicate text and targets are allowed");
+  const sameTarget=validateSelection(input,select([candidates[0],{...candidates[0],nextStep:"同じ図で発見済みの場所を確認する"}]));
+  assert.equal(sameTarget.candidates[0].actionHref,sameTarget.candidates[1].actionHref);
+  assert.notEqual(sameTarget.candidates[0].candidateId,sameTarget.candidates[1].candidateId);
   assert.throws(()=>validateSelection(input,select([{...candidates[1],capabilityId:"unavailable-auto-solver"}])),/ACTION_NOT_ALLOWED/);
   assert.throws(()=>validateSelection(input,select([{...candidates[0],targetId:"unavailable"}])),/TARGET_NOT_AVAILABLE/);
   assert.throws(()=>validateSelection({...input,targets:{4:[{id:"bfs-check",href:"https://example.com"}]}},select([candidates[0]])),/UNSAFE/);
