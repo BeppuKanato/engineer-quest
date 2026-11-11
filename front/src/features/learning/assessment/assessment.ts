@@ -94,6 +94,7 @@ export type QuestionRecord = {
 };
 export type AssessmentState = {
   readonly assessmentId: string;
+  readonly evidenceSession?: { id: string; startedAt: number };
   readonly records: readonly QuestionRecord[];
   /** 現在の問題の位置。全形式共通で、回答後の再挑戦と「次へ」を分離する。 */
   readonly position?: number;
@@ -170,7 +171,7 @@ export function validateAssessment(content: AssessmentContent): void {
 }
 export function createAssessmentState(content: AssessmentContent): AssessmentState {
   validateAssessment(content);
-  return { assessmentId: content.id, position: 0, records: content.questions.map(question => ({ questionId: question.id, attemptCount: 0, firstCorrect: null, solved: false, attempts: [] })) };
+  return { evidenceSession: newEvidenceSession(), assessmentId: content.id, position: 0, records: content.questions.map(question => ({ questionId: question.id, attemptCount: 0, firstCorrect: null, solved: false, attempts: [] })) };
 }
 /** 進行は全形式で位置ベース。正解しても止まらない問題（確認問題）も、位置が進んだ問題へは戻らない。 */
 export function activeQuestion<T extends AssessmentContent>(content: T, state: AssessmentState): T["questions"][number] | null {
@@ -211,4 +212,18 @@ export function diagnoseAssessment(content: DiagnosticAssessment, state: Assessm
     return { tag, correct, total: questions.length, passed: correct === questions.length };
   });
   return { correct: state.records.filter(record => record.firstCorrect === true).length, total: content.questions.length, tags };
+}
+
+let lastSessionTime = 0;
+function newEvidenceSession() {
+  lastSessionTime = Math.max(Date.now(), lastSessionTime + 1);
+  return { id: globalThis.crypto?.randomUUID?.() ?? `assessment-${lastSessionTime}-${Math.random().toString(36).slice(2)}`, startedAt: lastSessionTime };
+}
+/** 完了保存の根拠。非同期の観測キューとは独立して同じ回答状態から取り出す。 */
+export function assessmentEvidence(content: AssessmentContent, state: AssessmentState) {
+  if (!state.evidenceSession) throw new Error("Missing assessment session");
+  return { version: 1 as const, assessmentId: content.id, sessionId: state.evidenceSession.id,
+    startedAt: state.evidenceSession.startedAt,
+    records: state.records.map(record => ({ questionId: record.questionId,
+      attempts: record.attempts.map(attempt => ({ number: attempt.number, correct: attempt.correct })) })) };
 }

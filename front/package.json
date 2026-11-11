@@ -81,7 +81,10 @@
     "verify:parsons-order-feedback": "node scripts/verifyParsonsOrderFeedback.cjs",
     "verify:home-layout": "node scripts/verifyHomeLayout.cjs",
     "verify:unit-overview": "node scripts/verifyUnitOverview.cjs",
-    "verify:app-breadcrumbs": "node scripts/verifyAppBreadcrumbs.cjs"
+    "verify:app-breadcrumbs": "node scripts/verifyAppBreadcrumbs.cjs",
+    "verify:feedback-concepts": "node scripts/verifyFeedbackConcepts.cjs",
+    "verify:feedback-map": "node scripts/verifyFeedbackMap.cjs",
+    "verify:feedback-candidates": "node scripts/verifyFeedbackCandidates.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

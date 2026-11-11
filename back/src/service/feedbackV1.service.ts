@@ -30,7 +30,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   // Previously generated results remain immutable; v1 applies to new events.
   if (kind === "create") {
     const legacy = await prisma.createQuestFeedback.findFirst({ where: { submissionId: eventId, submission: { attempt: { userId: user.id } }, status: "COMPLETED" } });
-    if (legacy) return { id: undefined, status: legacy.status, source: "GENERATED", requestedAt: legacy.createdAt.toISOString(), completedAt: legacy.generatedAt?.toISOString() ?? null, feedback: { currentState: legacy.currentState, nextGoal: legacy.nextGoal, nextStep: legacy.nextStep, actionType: legacy.actionType, actionLabel: legacy.actionLabel } };
+    if (legacy) return { conceptSnapshot: null, id: undefined, status: legacy.status, source: "GENERATED", requestedAt: legacy.createdAt.toISOString(), completedAt: legacy.generatedAt?.toISOString() ?? null, feedback: { currentState: legacy.currentState, nextGoal: legacy.nextGoal, nextStep: legacy.nextStep, actionType: legacy.actionType, actionLabel: legacy.actionLabel } };
   }
   const key = await resolveEventKey(user.id, kind, eventId);
   let row = await prisma.feedbackV1.findUnique({ where: { eventKey: key } });
@@ -44,6 +44,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   }
   if (!row && start) {
     const context = await buildFeedbackV1Context(firebaseUid, kind, eventId);
+    if (await resolveEventKey(user.id, kind, eventId) !== key) throw new AppError(409, "COMPLETION_CHANGED", "Completion changed; retry feedback request");
     try {
       row = await prisma.feedbackV1.create({ data: { userId: user.id, eventKey: key, condition: context.condition, status: "GENERATING", input: json(context.input) } });
     } catch (error) {
@@ -70,8 +71,13 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   return response(row);
 }
 
-function response(row: { id: string; status: string; createdAt: Date; generatedAt: Date | null; result: Prisma.JsonValue | null }) {
+function response(row: { id: string; status: string; createdAt: Date; generatedAt: Date | null; result: Prisma.JsonValue | null; input?: Prisma.JsonValue }) {
   const result = row.result as unknown as Awaited<ReturnType<typeof generate>> | null;
-  return { id: row.id, status: row.status, source: "GENERATED", requestedAt: row.createdAt.toISOString(), completedAt: row.generatedAt?.toISOString() ?? null,
-    feedback: result ? { currentState: result.analysis.currentState, nextGoal: result.selection.nextGoal, nextStep: result.selection.nextStep, reason: result.selection.reason, actionType: "V1_ACTION", actionLabel: result.selection.actionLabel, actionHref: result.validation.actionHref, recommendation: result.selection } : null };
+  const learning = (row.input as unknown as { learning?: { conceptSnapshot?: unknown } } | undefined)?.learning;
+  return { conceptSnapshot: learning?.conceptSnapshot ?? null, id: row.id, status: row.status, source: "GENERATED", requestedAt: row.createdAt.toISOString(), completedAt: row.generatedAt?.toISOString() ?? null,
+    feedback: result ? { currentState: result.analysis.currentState, nextGoal: result.selection.nextGoal, nextStep: result.selection.nextStep, reason: result.selection.reason, actionType: "V1_ACTION", actionLabel: result.selection.actionLabel, actionHref: result.validation.actionHref, recommendations: (result.selection.candidates ?? [result.selection]).map((candidate, index) => ({
+      candidateId: result.validation.candidates?.[index]?.candidateId ?? `candidate-${index+1}`,
+      nextStep: candidate.nextStep, reason: candidate.reason, actionLabel: candidate.actionLabel,
+      actionHref: result.validation.candidates?.[index]?.actionHref ?? (index === 0 ? result.validation.actionHref : null),
+    })), recommendation: result.selection } : null };
 }

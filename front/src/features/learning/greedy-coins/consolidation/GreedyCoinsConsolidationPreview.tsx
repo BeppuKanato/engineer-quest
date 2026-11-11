@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
@@ -78,10 +79,10 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
   useEffect(() => {
     if (diagnosis && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
+      onComplete?.({ assessmentEvidence: assessmentEvidence(content, session), firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
     }
     if (!diagnosis) completedRef.current = false;
-  }, [diagnosis, onComplete]);
+  }, [diagnosis, onComplete, session]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "応用問題の結果" : "貪欲法の応用問題"}

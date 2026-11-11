@@ -5,7 +5,7 @@ import { analysisPrompt, selectionPrompt, generate, validateSelection, type Inpu
 
 async function main() {
   const input: Input = { learning: { answers: [{ id: "answer-1", code: "RAW_CODE_SENTINEL", isCorrect: true }] }, state: { posts: Array.from({ length: 101 }, (_, i) => ({ id: `post-${i}`, body: `body-${i}`, comments: [{ body: `reply-${i}` }] })), history: [{ status: "PRESENTED" }] }, actions: [{ id: 9, label: "復習", purpose: "理解の確認", condition: "獲得済み", targetIds: ["card-1", "card-2"] }], targets: { 9: [{ id: "card-1", href: "/knowledge-cards?cardId=card-1" }, { id: "card-2", href: "/knowledge-cards?cardId=card-2" }] }, hexad: null, bigGoal: null };
-  const analysis: Analysis = { currentState: "テストに合格した", understood: ["基本操作"], needsImprovement: [], uncertain: ["応用の理解は未観測"], evidence: [{ sourceId: "answer-1", fact: "正答した", inference: false }] };
+  const analysis: Analysis = { currentState: "テストに合格した", conceptClaims: [], understood: ["基本操作"], needsImprovement: [], uncertain: ["応用の理解は未観測"], evidence: [{ sourceId: "answer-1", fact: "正答した", inference: false }] };
   const selection: Selection = { nextGoal: "操作の理由を説明する", nextStep: "カードで確認する", actionLabel: "カードを開く", actionId: 9, targetId: "card-2", purpose: "理解の確認", reason: "基本操作を根拠とする", personalizationAdjustment: null };
   const personalized: Input = { ...input, hexad: { questionnaireVersion: "hexad-24-ja-v1", scoreRange: [4, 28], scores: { Philanthropist: 20, Socialiser: 8, FreeSpirit: 24, Achiever: 28, Disruptor: 8, Player: 16 } } };
   const adjusted: Selection = { ...selection, personalizationAdjustment: { scores: Object.entries(personalized.hexad!.scores).map(([trait, score]) => ({ trait, score })), interpretation: "6得点を比較", selectionEffect: "学習上同じ行動が妥当", goalWording: "理解の達成を強調", stepWording: "自力確認を強調", reasonWording: "理由を明示", learningBasis: "answer-1", limitation: "効果の客観的証明ではない", actionId: 9, targetId: "card-2" } };
@@ -20,15 +20,15 @@ async function main() {
   assert(analysisPrompt(goalInput).includes("幅優先探索の単元を完了する"));
   assert(analysisPrompt(goalInput).includes("completedPhaseCount"));
   assert(!analysisPrompt(goalPersonalized).includes("Achiever"));
-  assert(!analysisPrompt(input).includes("bigGoal"));
-  assert(!selectionPrompt(goalInput, analysis).includes("幅優先探索の単元を完了する"));
+  assert(!analysisPrompt(input).includes('"bigGoal":'));
+  assert(selectionPrompt(goalInput, analysis).includes("幅優先探索の単元を完了する"));
   assert(selectionPrompt(input, analysis).includes("reply-100"));
   assert(!selectionPrompt(input, analysis).includes("RAW_CODE_SENTINEL"));
   assert(!selectionPrompt(input, analysis).includes("hexad-24-ja-v1"));
   assert(selectionPrompt(personalized, analysis).includes("hexad-24-ja-v1"));
   for (const [context, output] of [[input, selection], [personalized, adjusted]] as const) {
     const calls: string[] = []; const saved: unknown[] = [];
-    const call: Call = async (stage, prompt, hasHexad) => { calls.push(stage); assert.equal(hasHexad, stage === "selection" && !!context.hexad); return { output: stage === "analysis" ? analysis : output, model: "test-model", responseId: stage, usage: { input_tokens: prompt.length, output_tokens: 100 } }; };
+    const call: Call = async (stage, prompt, hasHexad) => { calls.push(stage); assert.equal(hasHexad, stage === "selection" && !!context.hexad); return { output: stage === "analysis" ? analysis : { nextGoal: output.nextGoal, candidates: [{...output, capabilityId: null}] }, model: "test-model", responseId: stage, usage: { input_tokens: prompt.length, output_tokens: 100 } }; };
     const result = await generate(context, call, async entry => { saved.push(entry); });
     assert.deepEqual(calls, ["analysis", "selection"]);
     assert.equal(result.validation.actionHref, "/knowledge-cards?cardId=card-2");

@@ -4,7 +4,9 @@
  * 学習イベントの一括投入を担う。教材コンテンツ自体は repo のデータモジュールが
  * 正本であり、ここでは courseId と phaseKey（文字列）でだけ参照する。
  */
+import { conceptDefinitions, validateEvidence } from "./feedbackConcepts";
 import { LearningProgressStatus, Prisma } from "@prisma/client";
+import { createHash, randomUUID } from "node:crypto";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
@@ -146,15 +148,58 @@ export const completePhaseByUser = async (
 ) => {
   const course = await getPublishedCourse(courseId);
   const now = new Date();
+  const assessed = conceptDefinitions.find(u => u.courseId === courseId)?.concepts.some(c => c.questions.some(q => q.phaseKey === phaseKey));
+  let evidence: ReturnType<typeof validateEvidence> | undefined;
+  if (assessed && summary?.assessmentEvidence === undefined) {
+    summary = { ...summary, assessmentEvidenceStatus: "missing" };
+  } else if (assessed) {
+    try { evidence = validateEvidence(courseId, phaseKey, summary?.assessmentEvidence, true); }
+    catch { throw new AppError(400, "INVALID_ASSESSMENT_EVIDENCE", "回答証拠が揃っていません。保存を再試行してください。"); }
+  }
 
-  const { phase, awardedCard } = await prisma.$transaction(async (tx) => {
+  const saveCompletion = () => prisma.$transaction(async (tx) => {
+    const scope = { userId: user.id, courseId, phaseKey };
+    if (assessed && !evidence) await tx.learningEvent.create({ data: {
+      ...scope, sessionId: randomUUID(), eventType: "assessment_evidence_missing", targetId: phaseKey,
+      payload: { reason: "missing_assessment_evidence" }, clientTimestamp: now,
+    } });
+    let current: Awaited<ReturnType<typeof tx.phaseLearningProgress.findUnique>> = null;
+    if (evidence) {
+      // 旧版のランダムIDの原本も照合する。同じセッションの再送は新しい完了にしない。
+      const previous = await tx.learningEvent.findFirst({
+        where: { ...scope, sessionId: evidence.sessionId, eventType: "assessment_snapshot", targetId: evidence.assessmentId },
+        orderBy: [{ serverTimestamp: "asc" }, { id: "asc" }],
+      });
+      if (previous) {
+        const canonical = (value: unknown) => {
+          const parsed = validateEvidence(courseId, phaseKey, value, true);
+          return JSON.stringify({ ...parsed, records: [...parsed.records].sort((a, b) => a.questionId.localeCompare(b.questionId)) });
+        };
+        if (canonical(previous.payload) !== canonical(evidence)) {
+          throw new AppError(409, "ASSESSMENT_EVIDENCE_CONFLICT", "同じ回答セッションに異なる完了証拠が送信されました。");
+        }
+      }
+      current = await tx.phaseLearningProgress.findUnique({ where: { userId_courseId_phaseKey: scope } });
+      // 後から別セッションを完了していても、古い要求の再送で巻き戻さない。
+      if (previous && current?.status === LearningProgressStatus.COMPLETED) return { phase: current, awardedCard: null };
+      if (!previous) {
+        const digest = createHash("sha256").update(JSON.stringify([user.id, courseId, phaseKey, evidence.assessmentId, evidence.sessionId])).digest("hex");
+        await tx.learningEvent.create({ data: {
+          id: `assessment-snapshot-${digest}`, ...scope, eventType: "assessment_snapshot", targetId: evidence.assessmentId,
+          sessionId: evidence.sessionId, payload: JSON.parse(JSON.stringify(evidence)), clientTimestamp: now,
+        } });
+      }
+    }
+    // 非同期キューに先行して、回答原本を進捗と同じトランザクションで確定する。
+    const completedAt = evidence && current?.completedAt
+      ? new Date(Math.max(now.getTime(), current.completedAt.getTime() + 1)) : now;
     const phase = await tx.phaseLearningProgress.upsert({
       where: {
         userId_courseId_phaseKey: { userId: user.id, courseId, phaseKey },
       },
       update: {
         status: LearningProgressStatus.COMPLETED,
-        completedAt: now,
+        completedAt,
         ...(summary !== undefined
           ? { summary: summary as Prisma.InputJsonValue }
           : {}),
@@ -164,7 +209,7 @@ export const completePhaseByUser = async (
         courseId,
         phaseKey,
         status: LearningProgressStatus.COMPLETED,
-        completedAt: now,
+        completedAt,
         ...(summary !== undefined
           ? { summary: summary as Prisma.InputJsonValue }
           : {}),
@@ -182,7 +227,17 @@ export const completePhaseByUser = async (
     });
     const awardedCard = await awardPhaseCard(tx, user, course, phaseKey);
     return { phase, awardedCard };
-  });
+  }, evidence ? { isolationLevel: Prisma.TransactionIsolationLevel.Serializable } : undefined);
+
+  let saved: Awaited<ReturnType<typeof saveCompletion>>;
+  for (let retry = 0; ; retry++) {
+    try { saved = await saveCompletion(); break; }
+    catch (error) {
+      // 同時POSTの競合はトランザクション全体を再試行し、勝った保存結果を読む。
+      if (!evidence || retry >= 2 || !(error instanceof Prisma.PrismaClientKnownRequestError) || !["P2034", "P2002"].includes(error.code)) throw error;
+    }
+  }
+  const { phase, awardedCard } = saved;
 
   const unlockedAchievements = await evaluateAchievementsForUser(user.id);
   // 大目標の達成判定も、実績評価と同じ保存タイミングで再評価する（#365）。
