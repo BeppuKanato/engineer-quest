@@ -80,6 +80,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   if (assignment.condition === "PERSONALIZED" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
   const cutoff = new Date();
   let learning: unknown;
+  let stageGoals: Input["stageGoals"] = null;
   // Set for the new-flow kinds; the phase event may name the next phase so the
   // "proceed" action (id 23) can be offered with a concrete target.
   let phaseEvent: { courseId: string; phaseKey: string; nextPhaseKey: string | null } | null = null;
@@ -100,6 +101,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
     if (kind === "unit") {
       if (!unitRow || unitRow.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+      stageGoals = { current: { phaseKey: null, goal: "単元で確認できた内容を振り返り、次の学習方法を選ぶ" }, next: null };
       learning = { id: `unit-event:${courseId}`, unit: { id: course.id, title: course.title, status: unitRow.status }, conceptSnapshot, sequence: phaseSequence, phases };
     } else {
       const [, phaseKey, nextPhaseKey] = eventId.split(":");
@@ -110,6 +112,9 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       const allowedNext = phaseIndex >= 0 ? unitDefinition?.phases[phaseIndex+1]?.id ?? null : null;
       phaseEvent = { courseId, phaseKey, nextPhaseKey: allowedNext };
       if (nextPhaseKey && nextPhaseKey !== allowedNext) throw new AppError(400, "INVALID_NEXT_PHASE", "Invalid next phase");
+      const currentStage = unitDefinition?.phases[phaseIndex];
+      const nextStage = unitDefinition?.phases[phaseIndex+1];
+      stageGoals = currentStage ? { current: {phaseKey,goal:currentStage.formalName}, next: nextStage ? {phaseKey:nextStage.id,goal:nextStage.formalName} : null } : null;
       learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, conceptSnapshot, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, stageNumber: unitDefinition?.phases.find(p=>p.id===phaseKey)?.phase ?? null, stageGoal: unitDefinition?.phases.find(p=>p.id===phaseKey)?.formalName ?? null, nextStage: unitDefinition?.phases[phaseIndex+1]?.formalName ?? null, summary: current.summary ?? null } };
     }
   } else {
@@ -196,6 +201,6 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
     posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
-  const input: Input = { learning, targets, actions, hexad, state, bigGoal };
+  const input: Input = { learning, targets, actions, hexad, state, bigGoal, stageGoals };
   return { input, userId: user.id, condition: assignment.condition };
 }

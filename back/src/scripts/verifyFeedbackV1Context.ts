@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { prisma } from "../lib/prisma";
 import { buildFeedbackV1Context } from "../service/feedbackV1.context";
-import { analysisPrompt } from "../service/feedbackV1.engine";
+import { analysisPrompt, selectionPrompt, type Analysis } from "../service/feedbackV1.engine";
 import * as achievements from "../service/achievement.service";
 import * as goals from "../service/bigGoal.service";
 async function main() {
@@ -33,6 +33,12 @@ async function main() {
   assert.equal(normalize(standard.input.learning),normalize(personalized.input.learning));
   assert.equal(normalize(analysisPrompt(standard.input)),normalize(analysisPrompt({...standard.input,hexad:personalized.input.hexad})));
   assert.deepEqual(standard.input.actions,personalized.input.actions);
+  assert.deepEqual(standard.input.stageGoals,personalized.input.stageGoals);
+  const analysis:Analysis={currentState:"回答を記録しました",conceptClaims:[],understood:[],needsImprovement:[],uncertain:[],evidence:[{sourceId:"answer",fact:"記録",inference:false}]};
+  const prompt=selectionPrompt(standard.input,analysis);
+  const selectionInput=JSON.parse(prompt.slice(prompt.lastIndexOf("\n")+1));
+  assert.deepEqual(selectionInput.stageGoals,{current:{phaseKey:"bfs-check",goal:"動きの確認問題"},next:{phaseKey:"bfs-code-mapping",goal:"動きとコードの対応"}});
+  assert.equal(analysisPrompt(standard.input),analysisPrompt({...standard.input,stageGoals:null}),"selection-only structure does not change analysis input");
   const learning=standard.input.learning as {conceptSnapshot:{concepts:{state:string}[]}};
   assert.equal(learning.conceptSnapshot.concepts[0].state,"needs_check");
   assert.ok(standard.input.targets[23].some(t=>t.id==="bfs-code-mapping"));
