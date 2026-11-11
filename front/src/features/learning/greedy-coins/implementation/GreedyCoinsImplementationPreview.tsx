@@ -16,6 +16,11 @@ import { ResultConfetti } from "../../app/ResultConfetti";
 import { useSoundEffect } from "../../../../app/component/soundFeedback";
 import { useErrorLineDecoration } from "../../../../hooks/useErrorLineDecoration";
 import { playerTokens } from "../../player/player.tokens";
+import { GreedyCoinsTraceDialog } from "../trace/GreedyCoinsTraceDialog";
+import { traceGreedyCoinsCode } from "../trace/acquireTrace";
+import { convertGreedyCoinsTrace } from "../trace/convertTrace";
+import { greedyCoinsTraceText } from "../trace/trace.content";
+import type { GreedyCoinsTracePlayback } from "../trace/trace.types";
 import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runGreedyCoinsFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { greedyCoinsEditorText as text } from "./editor.content";
@@ -26,23 +31,27 @@ import { greedyCoinsImplementationContent as content } from "./implementation.co
 import { allTestsPassed, runImplementationTests, recordHintUsage, runningMessage, type GreedyCoinsImplementationSummary, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
 /** embedded / onComplete は単元フロー接続（後続Issue）からの埋め込み用。未指定なら単品ページとして従来どおり動く。
- * 視覚デバッグ（ボタン文言「硬貨が選ばれる様子を見る」）は Issue #388 の対象で、本画面にはまだ接続していない（二分探索フェーズ7とトレースIssueの分担と同じ）。 */
-export function GreedyCoinsImplementationPreview({ embedded = false, onComplete, onLearningEvent, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: GreedyCoinsImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
+ * 視覚デバッグ（ボタン文言「硬貨が選ばれる様子を見る」）は Issue #388 でトレース再生へ接続した。 */
+export function GreedyCoinsImplementationPreview({ embedded = false, onComplete, onLearningEvent, active = true, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: GreedyCoinsImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
   // 入力量レベルとレベル別下書き（Issue #328）。単品ページではプレビュー専用のキーで下書きを分ける。
   const draftBaseKey = codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`;
   const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
   const [runtime, setRuntime] = useState<"loading" | "ready" | "error">("loading");
   const [running, setRunning] = useState(false);
+  const [tracing, setTracing] = useState(false);
   const [freeStatus, setFreeStatus] = useState<"idle" | "preparing" | "running">("idle");
   const [freeResult, setFreeResult] = useState<FreeExecutionResult | null>(null);
   const [panel, setPanel] = useState<"tests" | "console">("tests");
   const freeRunning = freeStatus !== "idle";
-  const busy = running || freeRunning;
+  const busy = running || tracing || freeRunning;
   const panelId = useId();
   const sidePanel = useRef<HTMLElement>(null);
+  const [tracePlayback, setTracePlayback] = useState<GreedyCoinsTracePlayback | null>(null);
+  const [traceError, setTraceError] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<readonly TestOutcome[]>([]);
   const [lastOutcomes, setLastOutcomes] = useState<readonly TestOutcome[]>([]);
   const [runs, setRuns] = useState(0);
+  const traceRuns = useRef(0);
   const [usage, setUsage] = useState<HintUsage>([0, 0, 0, 0]);
   const [hint, setHint] = useState<HintLevel | null>(null);
   const [editorReady, setEditorReady] = useState(false);
@@ -107,7 +116,7 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
     const current = generation.current;
     setPanel("tests");
     onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "test", count: runs + 1, code, level } });
-    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setErrorLine(undefined);
+    setRunning(true); setRuns(count => count + 1); setOutcomes([]); setTraceError(null); setErrorLine(undefined);
     try {
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) { setOutcomes(next); setErrorLine(next.find(outcome => outcome.errorLine !== undefined)?.errorLine); } }, () => current === generation.current);
       if (current === generation.current) {
@@ -120,9 +129,33 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
       if (current === generation.current) setRunning(false);
     }
   };
+  const runTrace = async () => {
+    if (lock.current || runtime !== "ready" || !editorReady || !code.trim()) return;
+    lock.current = true;
+    const current = generation.current;
+    traceRuns.current++;
+    onLearningEvent?.({ eventType: "implementation_run", payload: { kind: "trace", count: traceRuns.current, code, level } });
+    setTracing(true); setTraceError(null);
+    try {
+      const trace = await traceGreedyCoinsCode(code, () => current === generation.current);
+      if (current === generation.current) {
+        const playback = convertGreedyCoinsTrace(trace);
+        setTracePlayback(playback);
+        onLearningEvent?.({ eventType: "trace_result", payload: { mode: playback.mode, states: playback.content.steps.length, status: trace.status, partial: !!playback.notice, errorKind: trace.error?.kind ?? null } });
+      }
+    } catch (error) {
+      onLearningEvent?.({ eventType: "trace_result", payload: { status: "failed", states: 0, timeout: error instanceof Error && error.message.includes("タイムアウト") } });
+      if (current === generation.current) setTraceError(error instanceof Error && error.message.includes("タイムアウト") ? greedyCoinsTraceText.timeout : greedyCoinsTraceText.unavailable);
+    } finally {
+      lock.current = false;
+      if (current === generation.current) setTracing(false);
+    }
+  };
   const outlinedButton = { minHeight: 44, color: colors.text, borderColor: colors.border,
     "&:hover": { borderColor: colors.text, bgcolor: colors.button },
     "&.Mui-disabled": { color: colors.text, borderColor: colors.border, opacity: 0.45 } };
+  const traceButton = <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runTrace()}
+    sx={outlinedButton}>{complete ? greedyCoinsTraceText.resultButton : greedyCoinsTraceText.button}</Button>;
   const insert = (token: string) => {
     const instance = editor.current, selection = instance?.getSelection();
     if (!instance || !selection || busy) return;
@@ -141,7 +174,7 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
     if (busy || next === level) return;
     onLearningEvent?.({ eventType: "implementation_level_select", payload: { level: next, previousLevel: level } });
     selectLevel(next);
-    setOutcomes([]); setFreeResult(null);
+    setOutcomes([]); setTraceError(null); setFreeResult(null);
   };
   return <Box component={embedded ? "div" : "main"} sx={{ height: embedded ? "100%" : "100dvh", minHeight: 0, bgcolor: colors.background, color: colors.text, p: { xs: 1, sm: 2 } }}>
     <Box component="section" aria-label="貪欲法の自分で実装"
@@ -163,6 +196,7 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
             <Box role="group" aria-label={text.panel} sx={{ flexShrink: 0, p: 1, bgcolor: colors.panelAlt, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
               <Typography component="p" sx={{ fontWeight: 800, fontSize: 16, mr: 0.5 }}>{text.code}</Typography>
               <Button variant="outlined" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void runFree()} sx={outlinedButton}>{text.freeRun}</Button>
+              {traceButton}
               <Button variant="contained" disabled={runtime !== "ready" || busy || !editorReady || !code.trim()} onClick={() => void run()}
                 sx={{ minHeight: 44, bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke }, "&.Mui-disabled": { bgcolor: colors.button, color: colors.text, opacity: 0.45 } }}>{content.controls.run}</Button>
             </Box>
@@ -179,7 +213,7 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
               </Box>}
               <Editor height="100%" language="python" theme={LEARNING_EDITOR_THEME} beforeMount={setupLearningEditor} value={code} loading={content.status.editorLoading}
                 onMount={instance => { editor.current = instance; setEditorReady(true); }}
-                onChange={next => { setCode(next ?? ""); setOutcomes([]); setFreeResult(null); setErrorLine(undefined); }}
+                onChange={next => { setCode(next ?? ""); setOutcomes([]); setTraceError(null); setFreeResult(null); setErrorLine(undefined); }}
                 options={{ fontSize: 16, lineHeight: 29, fontFamily: "monospace", minimap: { enabled: false }, tabSize: 4, insertSpaces: true,
                   readOnly: busy, automaticLayout: true, scrollBeyondLastLine: false, lineNumbersMinChars: 2, wordWrap: "on", padding: { top: 8, bottom: 8 } }} />
             </Box>
@@ -211,12 +245,14 @@ export function GreedyCoinsImplementationPreview({ embedded = false, onComplete,
           </Box>
         </Box>
         <Box sx={{ flexShrink: 0 }}>
-          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{freeStatus === "preparing" ? text.preparing : freeStatus === "running" ? text.running : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
+          <Typography component="p" role="status" sx={{ textAlign: "center", fontSize: 16 }}>{freeStatus === "preparing" ? text.preparing : freeStatus === "running" ? text.running : tracing ? greedyCoinsTraceText.loading : running ? runningMessage(outcomes.length, content.tests.length) : runtime === "error" ? content.status.unavailable : content.status[runtime]}</Typography>
           {running && <Typography component="p" sx={{ textAlign: "center", fontSize: 16 }}>{content.status.timeoutNotice}</Typography>}
           {runtime === "error" && <Button onClick={() => void prepare()} sx={outlinedButton}>{content.controls.reload}</Button>}
         </Box>
       </>
+      {traceError && <Typography component="p" role="alert">{traceError}</Typography>}
       </Box>
+    {tracePlayback && <GreedyCoinsTraceDialog onLearningEvent={onLearningEvent} active={active} playback={tracePlayback} onClose={() => setTracePlayback(null)} />}
     {hint && <ImplementationHints level={hint} onInsert={token => { setHint(null); requestAnimationFrame(() => insert(token)); }} onClose={() => setHint(null)} />}
   </Box>;
 }
