@@ -139,6 +139,44 @@ const BinarySearchFigure = () => {
   );
 };
 
+const GreedyCoinsFigure = () => {
+  // 教材（フェーズ2）と同じ額面 [500, 100, 50, 10, 5, 1] と、786円を9枚で払ったトレイ。
+  // 一番大きい500を最初に選ぶ（貪欲な選択）ことを強調する。
+  const denominations = [500, 100, 50, 10, 5, 1];
+  const tray = [500, 100, 100, 50, 10, 10, 10, 5, 1];
+  return (
+    <g>
+      {denominations.map((coin, index) => {
+        const cx = 26 + index * 30;
+        const isFirst = index === 0;
+        return (
+          <g key={coin}>
+            <circle cx={cx} cy={26} r={13} fill={isFirst ? ACCENT : "#eff6ff"} stroke={ACCENT} strokeWidth={isFirst ? 2 : 1} />
+            <text x={cx} y={26} textAnchor="middle" dominantBaseline="central" fontSize={9} fontWeight={isFirst ? 800 : 600} fill={isFirst ? "#fff" : INK}>
+              {coin}
+            </text>
+          </g>
+        );
+      })}
+      <rect x={30} y={56} width={140} height={42} rx={6} fill="#f8fafc" stroke={EDGE} strokeWidth={1.5} />
+      {tray.map((coin, index) => {
+        const cx = 44 + index * 14;
+        return (
+          <g key={index}>
+            <circle cx={cx} cy={77} r={7} fill="#dbeafe" stroke={ACCENT} />
+            <text x={cx} y={77} textAnchor="middle" dominantBaseline="central" fontSize={5.5} fontWeight={700} fill={INK}>
+              {coin}
+            </text>
+          </g>
+        );
+      })}
+      <text x={100} y={112} textAnchor="middle" fontSize={10} fontWeight={700} fill={INK}>
+        786円・9枚
+      </text>
+    </g>
+  );
+};
+
 const KmpFigure = () => {
   const text = ["A", "B", "A", "B", "A", "B", "C"];
   const pattern = ["A", "B", "A", "B", "C"];
@@ -243,6 +281,7 @@ const FIGURES: Record<string, React.ReactElement> = {
   "course-algorithm-selection-sort-v1": <SelectionSortFigure />,
   "course-algorithm-merge-sort-v1": <MergeSortFigure />,
   "course-algorithm-binary-search-v1": <BinarySearchFigure />,
+  "course-algorithm-greedy-coins-v1": <GreedyCoinsFigure />,
   "course-algorithm-kmp-v1": <KmpFigure />,
 };
 

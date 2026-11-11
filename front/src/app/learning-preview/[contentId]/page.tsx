@@ -50,6 +50,14 @@ import { BinarySearchCodeCheckPreview } from "@/features/learning/binary-search/
 import { BinarySearchConsolidationPreview } from "@/features/learning/binary-search/consolidation/BinarySearchConsolidationPreview";
 import { BinarySearchImplementationPreview } from "@/features/learning/binary-search/implementation/BinarySearchImplementationPreview";
 import { BinarySearchUnitPreview } from "@/features/learning/binary-search/unit/BinarySearchUnitPreview";
+import { GreedyCoinsMotivationPreview } from "@/features/learning/greedy-coins/motivation/GreedyCoinsMotivationPreview";
+import { GreedyCoinsExecutionPreview } from "@/features/learning/greedy-coins/execution/GreedyCoinsExecutionPreview";
+import { GreedyCoinsCheckPreview } from "@/features/learning/greedy-coins/check/GreedyCoinsCheckPreview";
+import { GreedyCoinsCodeMappingPreview } from "@/features/learning/greedy-coins/code-mapping/GreedyCoinsCodeMappingPreview";
+import { GreedyCoinsCodeCheckPreview } from "@/features/learning/greedy-coins/code-check/GreedyCoinsCodeCheckPreview";
+import { GreedyCoinsConsolidationPreview } from "@/features/learning/greedy-coins/consolidation/GreedyCoinsConsolidationPreview";
+import { GreedyCoinsImplementationPreview } from "@/features/learning/greedy-coins/implementation/GreedyCoinsImplementationPreview";
+import { GreedyCoinsUnitPreview } from "@/features/learning/greedy-coins/unit/GreedyCoinsUnitPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -82,6 +90,14 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "binary-search-consolidation") return <BinarySearchConsolidationPreview />;
   if (contentId === "binary-search-implementation") return <BinarySearchImplementationPreview />;
   if (contentId === "binary-search-unit") return <BinarySearchUnitPreview />;
+  if (contentId === "greedy-coins-motivation") return <GreedyCoinsMotivationPreview />;
+  if (contentId === "greedy-coins-execution") return <GreedyCoinsExecutionPreview />;
+  if (contentId === "greedy-coins-check") return <GreedyCoinsCheckPreview />;
+  if (contentId === "greedy-coins-code-mapping") return <GreedyCoinsCodeMappingPreview />;
+  if (contentId === "greedy-coins-code-check") return <GreedyCoinsCodeCheckPreview />;
+  if (contentId === "greedy-coins-consolidation") return <GreedyCoinsConsolidationPreview />;
+  if (contentId === "greedy-coins-implementation") return <GreedyCoinsImplementationPreview />;
+  if (contentId === "greedy-coins-unit") return <GreedyCoinsUnitPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;

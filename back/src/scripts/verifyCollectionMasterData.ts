@@ -10,6 +10,8 @@ import {
   BUBBLE_SORT_COURSE_ID,
   DFS_CARD_PHASE_SLOTS,
   DFS_COURSE_ID,
+  GREEDY_COINS_CARD_PHASE_SLOTS,
+  GREEDY_COINS_COURSE_ID,
   KNOWLEDGE_CARD_TABLE_COUNT,
   MAZE_DIGGING_CARD_PHASE_SLOTS,
   MAZE_DIGGING_COURSE_ID,
@@ -23,7 +25,7 @@ const fail = (message: string): never => { throw new Error(message); };
 const courseIds = new Set(courseSeed.map((course) => course.id));
 const questIds = new Set<string>(createQuestSeed.map((quest) => quest.id));
 
-if (courseSeed.length !== 9) fail(`Expected 9 courses, found ${courseSeed.length}`);
+if (courseSeed.length !== 10) fail(`Expected 10 courses, found ${courseSeed.length}`);
 if (new Set(achievementSeed.map((a) => a.id)).size !== achievementSeed.length) fail("Duplicate achievement ids");
 
 // フェーズキー（front の単元コンテンツが正本。seed 側の参照整合性のためにここで固定する）
@@ -85,6 +87,16 @@ const BINARY_SEARCH_PHASE_KEYS: readonly string[] = [
   "binary-search-implementation",
 ];
 
+const GREEDY_COINS_PHASE_KEYS: readonly string[] = [
+  "greedy-coins-motivation",
+  "greedy-coins-execution",
+  "greedy-coins-check",
+  "greedy-coins-code-mapping",
+  "greedy-coins-code-check",
+  "greedy-coins-consolidation",
+  "greedy-coins-implementation",
+];
+
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
@@ -93,9 +105,10 @@ const CARD_COURSES = [
   { courseId: BUBBLE_SORT_COURSE_ID, slots: BUBBLE_SORT_CARD_PHASE_SLOTS, phaseKeys: BUBBLE_SORT_PHASE_KEYS },
   { courseId: MAZE_DIGGING_COURSE_ID, slots: MAZE_DIGGING_CARD_PHASE_SLOTS, phaseKeys: MAZE_DIGGING_PHASE_KEYS },
   { courseId: BINARY_SEARCH_COURSE_ID, slots: BINARY_SEARCH_CARD_PHASE_SLOTS, phaseKeys: BINARY_SEARCH_PHASE_KEYS },
+  { courseId: GREEDY_COINS_COURSE_ID, slots: GREEDY_COINS_CARD_PHASE_SLOTS, phaseKeys: GREEDY_COINS_PHASE_KEYS },
 ] as const;
 
-// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法、Issue #295 で二分探索を追加）
+// 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法、Issue #295 で二分探索、Issue #390 で貪欲法を追加）
 const expectedCardCount = CARD_COURSES.reduce((sum, course) => sum + course.slots.length, 0);
 if (knowledgeCardSeed.length !== expectedCardCount) fail(`Card pool must contain ${expectedCardCount} cards, got ${knowledgeCardSeed.length}`);
 for (const card of knowledgeCardSeed) {

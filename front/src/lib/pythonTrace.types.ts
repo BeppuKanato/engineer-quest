@@ -22,6 +22,10 @@ export type PythonTraceLocals = {
   readonly hi?: number | null;
   readonly mid?: number | null;
   readonly target?: number | null;
+  /** 貪欲法（硬貨問題）単元用（Issue #388）。残額・今見ている額面・元の金額の整数だけをコピーする。 */
+  readonly remaining?: number | null;
+  readonly coin?: number | null;
+  readonly amount?: number | null;
 };
 export type PythonTraceEvent = {
   readonly line: number;
