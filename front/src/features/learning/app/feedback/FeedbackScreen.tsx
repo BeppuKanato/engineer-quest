@@ -1,14 +1,16 @@
 "use client";
 
 import { Alert, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
-import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import {
   FeedbackObservation,
+  FeedbackCandidates,
   useFeedbackV1,
   type FeedbackV1Kind,
 } from "@/app/component/feedbackV1";
+import { feedbackCandidates } from "@/api/feedbackV1.api";
+import { ConceptMap } from "./ConceptMap";
 import { playerTokens } from "../../player/player.tokens";
 
 /** 専用画面に出す大目標の進捗。数値は API のコード計算の結果をそのまま使う。 */
@@ -69,10 +71,11 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
   }, [unavailable, onUnavailable]);
   const f = result?.feedback;
   const failed = error || result?.status === "FAILED";
-  return <Box component="section" aria-label={heading}
+  return <Box component="section" data-feedback-scope aria-label={heading}
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2, width: "100%" }}>
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{heading}</Typography>
-    {figure}
+    <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, pb: 2 }}>
+    <Box sx={{ width: "100%", maxWidth: 360 }}>{figure}</Box>
     {goalSummary && <Box sx={{ width: "100%", maxWidth: 640 }}>
       <Typography sx={{ fontSize: 13, fontWeight: 800, color: playerTokens.control }}>大目標</Typography>
       <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{goalSummary.displayText}</Typography>
@@ -84,24 +87,24 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
       </Box>}
       {goalSummary.fact && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{goalSummary.fact}</Typography>}
     </Box>}
+    {result?.conceptSnapshot && <Box sx={{ width: "100%", maxWidth: 1040 }}><ConceptMap snapshot={result.conceptSnapshot} /></Box>}
     {unavailable ? <Typography role="status" color="text.secondary">フィードバックはありません。次へ進みます。</Typography>
       : failed ? <Alert severity="warning" sx={{ width: "100%", maxWidth: 640 }}>フィードバックを生成できませんでした。学習は続けられます。</Alert>
       : !f ? <Alert severity="info" sx={{ width: "100%", maxWidth: 640 }}>フィードバックを準備しています。</Alert>
       : <Stack spacing={2} sx={{ width: "100%", maxWidth: 640 }}>
-          <FeedbackObservation id={result.id} href={f.actionHref} />
-          {([["現在の状態", f.currentState], ["次の目標", f.nextGoal], ["次の一歩", f.nextStep], ["この一歩の理由", f.reason]] as const).map(([label, body]) => (
+          <FeedbackObservation id={result.id} href={f.actionHref} candidates={feedbackCandidates(f)} />
+          {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
             <div key={label}>
               <Typography fontWeight={900}>{label}</Typography>
               <Typography sx={{ fontSize: 16 }}>{body}</Typography>
             </div>
           ))}
+          <FeedbackCandidates candidates={feedbackCandidates(f)} onAction={onAction} />
         </Stack>}
     {children}
-    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ justifyContent: "center", mt: 1 }}>
-      {f?.actionHref && <Button component={Link} href={f.actionHref} variant="contained"
-        onClick={event => { if (onAction?.(f.actionHref)) event.preventDefault(); }}
-        sx={primaryButtonSx}>{f.actionLabel}</Button>}
-      <Button variant={f?.actionHref ? "text" : "contained"} onClick={onProceed}
+    </Box>
+    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ justifyContent: "center", mt: 1, flexShrink: 0 }}>
+      <Button data-feedback-skip variant={f?.actionHref ? "text" : "contained"} onClick={onProceed}
         sx={f?.actionHref ? { minHeight: 48, px: 2, fontSize: 15, fontWeight: 700, color: playerTokens.control } : primaryButtonSx}>
         {proceedLabel}
       </Button>

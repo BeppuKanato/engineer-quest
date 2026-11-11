@@ -8,6 +8,7 @@ import { useUserSession } from "@/app/component/userSession";
 import { ApiError, fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type AchievedBigGoal, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
 import { getCurrentBigGoal, type BigGoal } from "@/api/bigGoal.api";
+import { FeedbackDestination } from "@/app/component/feedbackV1";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
@@ -50,7 +51,12 @@ export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string;
 function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; progress: LearningProgress; reviewPhaseKey?: string }) {
   const { firebaseUser } = useUserSession();
   const uid = firebaseUser!.uid, courseId = unit.courseId;
-  const log = useLearningLog(courseId);
+  const rawLog = useLearningLog(courseId);
+  const [renderedPhase, setRenderedPhase] = useState<{phaseKey:string;visit:number} | null>(null);
+  const log = useCallback((event: Parameters<typeof rawLog>[0]) => {
+    rawLog(event);
+    if (event.eventType === "phase_start" && event.phaseKey) setRenderedPhase(current=>({phaseKey:event.phaseKey!,visit:(current?.visit ?? 0)+1}));
+  }, [rawLog]);
   const [draft, setDraft] = useState<{ code?: string } | null>(null), [draftError, setDraftError] = useState(false);
   const [entryError, setEntryError] = useState<string | null>(null), [entryRevision, setEntryRevision] = useState(0);
   const [rewards, setRewards] = useState(emptyLearningRewards);
@@ -237,6 +243,8 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     renderUnitFeedbackScreen,
   };
   return <LearningRewardsContext.Provider value={{ rewards, dismissAwardedCard }}>
+    <FeedbackDestination key={renderedPhase?.visit} ready={renderedPhase !== null} targetId={renderedPhase?.phaseKey}
+      actualRoute={renderedPhase ? `/courses/roadmap/${encodeURIComponent(courseId)}/learn?phase=${encodeURIComponent(renderedPhase.phaseKey)}` : undefined} />
     {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
