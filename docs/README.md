@@ -28,6 +28,7 @@
 | [concept/bubble-sort-unit-baseline.md](concept/bubble-sort-unit-baseline.md) | 正本 | バブルソート単元の基準データ設計書（主教材 [4, 2, 5, 1, 3] の検証済みトレース、参照コード契約 bubble-sort-v1、各フェーズの問題、配列描画基盤、知識カード案）。実装（#227 以降）は本書を正本として参照する |
 | [concept/maze-digging-unit-baseline.md](concept/maze-digging-unit-baseline.md) | 正本 | 穴掘り法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 maze-digging-v1、各フェーズの問題、グリッド描画基盤の再利用、知識カード案）。実装（#257 以降）は本書を正本として参照する |
 | [concept/binary-search-unit-baseline.md](concept/binary-search-unit-baseline.md) | 正本 | 二分探索単元の基準データ設計書（主教材 [3,7,12,19,25,31,42] で 25 を探す検証済みトレース、参照コード契約 binary-search-v1、各フェーズの問題、配列描画基盤の再利用、知識カード案）。実装（#286 以降）は本書を正本として参照する |
+| [concept/greedy-coins-unit-baseline.md](concept/greedy-coins-unit-baseline.md) | 正本 | 貪欲法（硬貨問題）単元の基準データ設計書（主教材 786円の検証済みトレース、参照コード契約 greedy-coins-v1、各フェーズの問題、硬貨描画基盤、知識カード）。実装（#380 以降）は本書を正本として参照する |
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
@@ -91,6 +92,7 @@
 | [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け） |
 | [big-goal-celebration-370.md](big-goal-celebration-370.md) | 記録 | Issue #370の大目標の称賛演出の統合（結果画面の紙吹雪・歓声を最大級へ引き上げる一元化、単元完了と重なる達成は最終リザルトへ統合、結果画面の無いフェーズからの持ち越し、達成バンド／ゾーンの提示） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
+| [greedy-coins-baseline-import-380.md](greedy-coins-baseline-import-380.md) | 記録 | Issue #380の貪欲法（硬貨問題）単元の基準データ取り込み |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
 | [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
