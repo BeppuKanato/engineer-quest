@@ -1,3 +1,4 @@
+import { aggregateConcepts, conceptDefinitions } from "./feedbackConcepts";
 import { deriveLevel } from "./profile.service";
 import { summarizeReaction } from "./feedbackV1.observation";
 import { prisma } from "../lib/prisma";
@@ -93,17 +94,23 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
       prisma.phaseLearningProgress.findMany({ where: { userId: user.id, courseId }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] }),
     ]);
+    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot"] } } });
+    const conceptSnapshot = aggregateConcepts(courseId, answerEvents, phaseRows, crypto.randomUUID());
     const phases = phaseRows.map(p => ({ id: p.phaseKey, status: p.status, summary: p.summary ?? null }));
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
     if (kind === "unit") {
       if (!unitRow || unitRow.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
-      learning = { id: `unit-event:${courseId}`, unit: { id: course.id, title: course.title, status: unitRow.status }, sequence: phaseSequence, phases };
+      learning = { id: `unit-event:${courseId}`, unit: { id: course.id, title: course.title, status: unitRow.status }, conceptSnapshot, sequence: phaseSequence, phases };
     } else {
       const [, phaseKey, nextPhaseKey] = eventId.split(":");
       const current = phaseRows.find(p => p.phaseKey === phaseKey);
       if (!current || current.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
-      phaseEvent = { courseId, phaseKey, nextPhaseKey: nextPhaseKey ?? null };
-      learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, summary: current.summary ?? null } };
+      const unitDefinition = conceptDefinitions.find(u=>u.courseId===courseId);
+      const phaseIndex = unitDefinition?.phases.findIndex(p=>p.id===phaseKey) ?? -1;
+      const allowedNext = phaseIndex >= 0 ? unitDefinition?.phases[phaseIndex+1]?.id ?? null : null;
+      phaseEvent = { courseId, phaseKey, nextPhaseKey: allowedNext };
+      if (nextPhaseKey && nextPhaseKey !== allowedNext) throw new AppError(400, "INVALID_NEXT_PHASE", "Invalid next phase");
+      learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, conceptSnapshot, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, summary: current.summary ?? null } };
     }
   } else {
     const event = await prisma.createQuestSubmission.findFirst({ where: { id: eventId, attempt: { userId: user.id } }, include: { attempt: { include: { quest: { include: { requirements: true } }, executions: { orderBy: { executedAt: "asc" } }, hintViews: { orderBy: { viewedAt: "asc" } }, submissions: { orderBy: { submittedAt: "asc" } } } } } });
@@ -174,9 +181,9 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   const h = user.hexadResponse;
   const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores: { Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore, FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore, Disruptor: h.disruptorScore, Player: h.playerScore } } : null;
   const historyView = history.map(h => {
-    const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string }; validation?: { actionHref: string | null } } | null;
+    const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string; candidates?: { actionId: number | null; targetId: string | null; capabilityId?: string | null; purpose: string; reason: string }[] }; validation?: { actionHref: string | null } } | null;
     const s = result?.selection;
-    return { id: h.id, status: h.status, observation: summarizeReaction(h.interactions), recommendation: s ? { actionId: s.actionId, targetId: s.targetId, purpose: s.purpose, reason: s.reason } : null, interactions: h.interactions };
+    return { id: h.id, status: h.status, observation: summarizeReaction(h.interactions), recommendations: s ? (s.candidates ?? [s]).map((c,index)=>({ candidateId: `candidate-${index+1}`, actionId: c.actionId, targetId: c.targetId, purpose: c.purpose, reason: c.reason })) : [], interactions: h.interactions };
   });
   // The phase kind gets a lean state: the selection prompt carries the state, so
   // trimming it (no board posts / quest details) keeps generation fast.
