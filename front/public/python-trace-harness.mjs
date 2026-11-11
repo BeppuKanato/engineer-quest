@@ -117,7 +117,8 @@ def _eq_locals(frame):
     if array_name is not None:
         result["array"] = array_value
     # lo / hi / mid / target は二分探索単元（Issue #293）向けの加算。対象名の変数が無い単元では何も記録されず、既存単元の結果は変わらない。
-    for key in ("i", "j", "n", "lo", "hi", "mid", "target"):
+    # remaining / coin / amount は貪欲法（硬貨問題）単元（Issue #388）向けの加算。同様に additive で、対象名の変数が無い単元では何も記録されない。
+    for key in ("i", "j", "n", "lo", "hi", "mid", "target", "remaining", "coin", "amount"):
         if key in values:
             value = values[key]
             result[key] = value if type(value) is int and value.bit_length() < 256 else None
