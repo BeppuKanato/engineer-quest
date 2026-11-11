@@ -163,7 +163,8 @@ const projected = canvas => ({
   assert.equal((firstHtml.match(/data-coin-chip=/g) || []).length, 6, "The figure shows the 6 denominations");
   assert.equal((firstHtml.match(/data-tray-coin=/g) || []).length, 1, "The tray shows the first selected coin");
   assert(firstHtml.includes('data-remaining="286"'), "The remaining amount is shown");
-  assert(firstHtml.includes('data-coin-status="processing"'), "The current denomination is marked as processing");
+  assert(firstHtml.includes('data-coin-status="current"'), "The current denomination is marked as current");
+  assert(firstHtml.includes('fill="#2563eb"'), "The current denomination renders in the processing blue");
   const summaryHtml = renderToStaticMarkup(createElement(GreedyCoinsExecutionCanvas, { canvas: playback.content.steps.at(-1).canvas }));
   assert.equal((summaryHtml.match(/data-tray-coin=/g) || []).length, 9, "The summary tray shows all 9 coins");
   // ---- 取得はD1だけを新しいWorkerへ送る ----
