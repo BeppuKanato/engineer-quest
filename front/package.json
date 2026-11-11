@@ -49,6 +49,7 @@
     "verify:binary-search-unit": "node scripts/verifyBinarySearchUnit.cjs",
     "verify:greedy-coins-motivation": "node scripts/verifyGreedyCoinsMotivation.cjs",
     "verify:greedy-coins-execution": "node scripts/verifyGreedyCoinsExecution.cjs",
+    "verify:greedy-coins-check": "node scripts/verifyGreedyCoinsCheck.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
