@@ -44,6 +44,17 @@ async function main() {
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"完全に理解しました"}),/UNSUPPORTED/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"99問に正答しました"}),/UNSUPPORTED_NUMERIC_CLAIM/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"理解度は100%です"}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
+  const createInput={...input,learning:{id:"answer",testRuns:1},stageGoals:null};
+  const extraClaims={...analysis,currentState:"テスト結果を記録しました",conceptClaims:[{conceptId:"not-applicable",state:"confirmed" as const,sourceIds:["invented"],observation:"完全に理解99"}]};
+  const saved: {stage?:string;output?:unknown}[]=[];
+  const createResult=await generate(createInput,async stage=>({output:stage==="analysis"?extraClaims:{nextGoal:"テストを振り返る",candidates:[candidates[1]]},model:"fixture",responseId:stage,usage:null}),async log=>{saved.push(log as {stage?:string;output?:unknown});});
+  assert.deepEqual(createResult.analysis.conceptClaims,[]);
+  assert.equal((saved.find(l=>l.stage==="analysis")!.output as Analysis).conceptClaims.length,1,"raw ignored output stays in audit log");
+  assert.equal(extraClaims.conceptClaims.length,1,"normalization never changes raw response");
+  assert.deepEqual(validateAnalysis(createInput,extraClaims).conceptClaims,[]);
+  assert.ok(analysisPrompt(createInput).includes("conceptClaimsは空配列"));
+  assert.throws(()=>validateAnalysis(createInput,{...extraClaims,currentState:"完全に理解しました"}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
+  await assert.rejects(generate(createInput,async()=>({output:{...extraClaims,evidence:[{sourceId:"invented",fact:"架空",inference:false}]},model:"fixture",responseId:"analysis",usage:null})),/UNKNOWN_EVIDENCE_SOURCE/);
   const hexad = {questionnaireVersion:"test",scoreRange:[4,28] as [number,number],scores:{Philanthropist:4,Socialiser:8,FreeSpirit:12,Achiever:16,Disruptor:20,Player:24}};
   for (const type of ["UNIT_COMPLETION","ACHIEVEMENT","CREATE_QUEST","INTEGRATION","SHARING"]) {
     const goal={displayText:`目標-${type}`,type,condition:{target:"goal-target"},progress:{outcome:"ONGOING",fraction:null,detail:{}},status:"ACTIVE",confirmedAt:null,daysSinceConfirmed:null};
