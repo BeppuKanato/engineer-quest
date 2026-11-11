@@ -18,7 +18,7 @@ async function main() {
   db.phaseLearningProgress={findMany:async()=>phaseRows};
   db.learningEvent={findMany:async({where}:{where:{userId:string;courseId:string}})=>{
     assert.equal(where.userId,"owner");assert.equal(where.courseId,courseId);
-    return [{id:"answer",courseId,phaseKey:"bfs-check",targetId:"take-next",sessionId:"tab",eventType:"answer_attempt",clientTimestamp:new Date(),serverTimestamp:new Date(),
+    return [{id:"answer",courseId,phaseKey:"bfs-check",targetId:"take-next",sessionId:"tab",eventType:"answer_attempt",clientTimestamp:new Date(1000),serverTimestamp:new Date(1000),
       payload:{correct:false,attempt:1,assessmentId:"bfs-check",assessmentSessionId:"s",assessmentStartedAt:1}}];
   }};
   for (const name of ["createQuest","knowledgeCard","achievement","questPost","feedbackV1","createQuestFeedback"]) db[name]={findMany:async()=>[]};

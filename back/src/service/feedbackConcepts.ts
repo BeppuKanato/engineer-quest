@@ -21,9 +21,9 @@ export function validateEvidence(courseId: string, phaseKey: string, value: unkn
   return evidence;
 }
 type Event = { id: string; phaseKey: string | null; eventType: string; targetId: string | null; sessionId: string; payload: unknown; clientTimestamp: Date; serverTimestamp: Date };
-type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; confirmed: boolean };
+type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; confirmed: boolean; recordedAt: number; observedAt: number };
 const object = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
-/** 回答順は設問セッションとattemptで同定する。重複配信・キューの到着順には依存しない。 */
+/** 完了証拠は最初の確定受信時刻、未完了回答は最新attemptの最初の受信時刻で比較する。 */
 export function aggregateConcepts(courseId: string, events: Event[], phases: { phaseKey: string; status: string; summary: unknown }[], snapshotId: string) {
   const unit = definitions.find(u => u.courseId === courseId);
   if (!unit) return null;
@@ -32,38 +32,59 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
     const map = byQuestion.get(key) ?? new Map<string, Attempt>();
     const identity = `${attempt.sessionId}/${attempt.number}`;
     const previous = map.get(identity);
-    // 完了保存の確定証拠を優先。矛盾した同一attemptは保守的に誤答を採用する。
-    if (!previous || Number(attempt.confirmed) > Number(previous.confirmed) ||
-      (attempt.confirmed === previous.confirmed && (!attempt.correct && previous.correct || attempt.correct === previous.correct && attempt.sourceId < previous.sourceId))) map.set(identity, attempt);
+    // 同一attemptの再配信は順序を進めない。矛盾した正誤は確定証拠、次に誤答を優先する。
+    const preferred = !previous || Number(attempt.confirmed) > Number(previous.confirmed) ||
+      (attempt.confirmed === previous.confirmed && (!attempt.correct && previous.correct || attempt.correct === previous.correct &&
+        (attempt.recordedAt < previous.recordedAt || attempt.recordedAt === previous.recordedAt && attempt.sourceId < previous.sourceId)));
+    const selected = preferred ? attempt : previous!;
+    map.set(identity, previous ? { ...selected, recordedAt: Math.min(previous.recordedAt,attempt.recordedAt), observedAt: Math.min(previous.observedAt,attempt.observedAt) } : selected);
     byQuestion.set(key, map);
   };
   const questions = unit.concepts.flatMap(c => c.questions);
+  const sessionKey = (phaseKey:string, assessmentId:string, sessionId:string)=>JSON.stringify([phaseKey,assessmentId,sessionId]);
+  const snapshots: {event:Event;evidence:AssessmentEvidence;key:string}[]=[];
+  const confirmedAt = new Map<string,number>();
+  const raw: {key:string;sessionKey:string;attempt:Attempt}[]=[];
   for (const event of events) {
     if (!event.phaseKey) continue;
-    const payload = object(event.payload);
+    const payload = object(event.payload), receivedAt=event.serverTimestamp.getTime();
     if (event.eventType === "assessment_snapshot") {
       try {
-        const evidence = validateEvidence(courseId, event.phaseKey, payload);
-        for (const record of evidence.records) for (const a of record.attempts) add(questionKey({phaseKey: event.phaseKey, assessmentId: evidence.assessmentId, questionId: record.questionId}),
-          { sourceId: event.id, sessionId: evidence.sessionId, startedAt: evidence.startedAt, ...a, confirmed: true });
-      } catch { /* 不完全な旧ログから推定しない。原本は維持する。 */ }
+        const evidence=validateEvidence(courseId,event.phaseKey,payload);
+        const key=sessionKey(event.phaseKey,evidence.assessmentId,evidence.sessionId);
+        snapshots.push({event,evidence,key});confirmedAt.set(key,Math.min(confirmedAt.get(key) ?? Infinity,receivedAt));
+      } catch { /* 不完全な旧ログを回答証拠と推定しない。 */ }
     }
-    if (event.eventType === "answer_attempt" && typeof payload.correct === "boolean" && Number.isInteger(payload.attempt) && Number(payload.attempt) > 0) {
-      const q = questions.find(q => q.phaseKey === event.phaseKey && q.questionId === event.targetId && q.assessmentId === payload.assessmentId);
-      if (!q) continue;
-      // セッション識別のない旧回答はattempt再開の区別が不能。確実な根拠にはしない。
-      if (typeof payload.assessmentSessionId !== "string" || typeof payload.assessmentStartedAt !== "number" || !Number.isSafeInteger(payload.assessmentStartedAt) || payload.assessmentStartedAt <= 0 || !payload.assessmentSessionId) continue;
-      add(questionKey(q), { sourceId: event.id, sessionId: payload.assessmentSessionId, startedAt: payload.assessmentStartedAt, number: Number(payload.attempt), correct: payload.correct, confirmed: false });
+    if (event.eventType === "answer_attempt" && typeof payload.correct === "boolean" && Number.isInteger(payload.attempt) && Number(payload.attempt)>0) {
+      const q=questions.find(q=>q.phaseKey===event.phaseKey && q.questionId===event.targetId && q.assessmentId===payload.assessmentId);
+      if (!q || typeof payload.assessmentSessionId!=="string" || !payload.assessmentSessionId || typeof payload.assessmentStartedAt!=="number" || !Number.isSafeInteger(payload.assessmentStartedAt) || payload.assessmentStartedAt<=0) continue;
+      raw.push({key:questionKey(q),sessionKey:sessionKey(q.phaseKey,q.assessmentId,payload.assessmentSessionId),attempt:{sourceId:event.id,sessionId:payload.assessmentSessionId,startedAt:payload.assessmentStartedAt,number:Number(payload.attempt),correct:payload.correct,confirmed:false,recordedAt:receivedAt,observedAt:receivedAt}});
     }
+  }
+  const firstReceipts=new Map<string,number>();
+  const receiptKey=(key:string,a:Pick<Attempt,"sessionId"|"number"|"correct">)=>JSON.stringify([key,a.sessionId,a.number,a.correct]);
+  for (const row of raw) {
+    const id=receiptKey(row.key,row.attempt);firstReceipts.set(id,Math.min(firstReceipts.get(id) ?? Infinity,row.attempt.recordedAt));
+    // 完了済みセッションへの遅延ログは、確定時刻も確定回答も変更しない。
+    if(!confirmedAt.has(row.sessionKey))add(row.key,row.attempt);
+  }
+  for(const {event,evidence,key} of snapshots) for(const record of evidence.records) for(const a of record.attempts) {
+    const qkey=questionKey({phaseKey:event.phaseKey!,assessmentId:evidence.assessmentId,questionId:record.questionId});
+    const recordedAt=confirmedAt.get(key)!;
+    add(qkey,{sourceId:event.id,sessionId:evidence.sessionId,startedAt:evidence.startedAt,...a,confirmed:true,recordedAt,
+      observedAt:Math.min(recordedAt,firstReceipts.get(receiptKey(qkey,{sessionId:evidence.sessionId,...a})) ?? Infinity)});
   }
   return { id: snapshotId, version: 1 as const, courseId, title: unit.title,
     missingCompletionEvidence: events.filter(e=>e.eventType==="assessment_evidence_missing").map(e=>({sourceId:e.id,phaseKey:e.phaseKey})).sort((a,b)=>a.sourceId.localeCompare(b.sourceId)), relation: "unit-components" as const,
     concepts: unit.concepts.map(c => {
       const evidence = c.questions.map(q => {
-        const attempts = [...(byQuestion.get(questionKey(q))?.values() ?? [])].sort((a,b) => a.startedAt-b.startedAt || a.sessionId.localeCompare(b.sessionId) || a.number-b.number);
-        const latest = attempts.at(-1) ?? null;
-        const currentSession = latest ? attempts.filter(a => a.sessionId === latest.sessionId) : [];
-        return { ...q, first: attempts[0]?.number === 1 ? attempts[0] : null, latest, retried: attempts.some(a=>a.number>1), latestSessionFirst: currentSession.find(a=>a.number===1) ?? null, sessions: new Set(attempts.map(a=>a.sessionId)).size };
+        const groups=new Map<string,Attempt[]>();
+        for(const attempt of byQuestion.get(questionKey(q))?.values() ?? [])groups.set(attempt.sessionId,[...(groups.get(attempt.sessionId) ?? []),attempt]);
+        const sessions=[...groups.values()].map(group=>group.sort((a,b)=>a.number-b.number));
+        sessions.sort((a,b)=>a.at(-1)!.recordedAt-b.at(-1)!.recordedAt || a[0].sessionId.localeCompare(b[0].sessionId));
+        const attempts=sessions.flat(), currentSession=sessions.at(-1) ?? [], latest=currentSession.at(-1) ?? null;
+        const firstSession=[...sessions].sort((a,b)=>Math.min(...a.map(x=>x.observedAt))-Math.min(...b.map(x=>x.observedAt)) || a[0].sessionId.localeCompare(b[0].sessionId))[0];
+        return { ...q, first: firstSession?.find(a=>a.number===1) ?? null, latest, retried: attempts.some(a=>a.number>1), latestSessionFirst: currentSession.find(a=>a.number===1) ?? null, sessions: sessions.length };
       });
       const answered = evidence.filter(q=>q.latest);
       const implementationPhase = phases.find(p => p.phaseKey === c.phaseKey);

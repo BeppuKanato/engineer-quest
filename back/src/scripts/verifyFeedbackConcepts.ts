@@ -37,4 +37,23 @@ assert.equal(failedImplementation.state,"unobserved");
 assert.equal(failedImplementation.implementation?.testsPassed,false);
 assert.equal(failedImplementation.implementation?.inputLevel,"skeleton");
 assert.equal(failedImplementation.implementation?.lastTest?.sourceId,"test-failed");
+
+const raw = (id:string,sessionId:string,number:number,correct:boolean,received:number,clock=1000) => ({...event(id,{}),eventType:"answer_attempt",targetId:"take-next",serverTimestamp:new Date(received),clientTimestamp:new Date(clock),
+  payload:{assessmentId:phaseKey,assessmentSessionId:sessionId,assessmentStartedAt:clock,attempt:number,correct}});
+const completed = (id:string,sessionId:string,received:number,answers:boolean[][],clock=1) => ({...event(id,make(sessionId,clock,answers)),serverTimestamp:new Date(received),clientTimestamp:new Date(clock)});
+const aFirst=raw("a-first","a",1,false,10,999999), b=completed("b","b",20,[[false],[true]],1), aRetry=raw("a-retry","a",2,true,30,999999);
+assert.equal(state([aFirst,b,aRetry]).state,"confirmed","an early-started tab's later answer is latest");
+assert.equal(state([aFirst,b,aRetry]).evidence[0].latest?.sessionId,"a");
+const aCompleted=completed("a-complete","a",40,[[false,true],[true]],999999);
+const c=completed("c","c",50,[[false],[true]],2);
+const late=raw("late-a","a",2,true,80,999999);
+const duplicateSnapshot={...aCompleted,id:"duplicate-a",serverTimestamp:new Date(90)};
+const ordered=[aFirst,b,aRetry,aCompleted,c,late,duplicateSnapshot];
+assert.equal(state(ordered).evidence[0].latest?.sessionId,"c","late raw/duplicate completion cannot refresh a sealed session");
+assert.equal(state(ordered).evidence[0].first?.sessionId,"a","first answer remains tied to earliest observed session");
+assert.deepEqual(snapshot(ordered),snapshot([...ordered].reverse()));
+assert.equal(state([aFirst,aRetry,c,{...aRetry,id:"retry-delivery",serverTimestamp:new Date(100)}]).evidence[0].latest?.sessionId,"c","duplicate attempt receipt does not change recency");
+assert.equal(state([aRetry,c,raw("late-first","a",1,false,100)]).evidence[0].latest?.sessionId,"c","late lower attempt cannot make its session newer");
+const tied=[completed("tie-a","a",100,[[true],[true]],99999),completed("tie-b","b",100,[[false],[true]],1)];
+assert.deepEqual(snapshot(tied),snapshot([...tied].reverse()),"ties use stable session IDs, not client clocks or array order");
 console.log("PASS: deterministic concepts, first/latest, retry, partial, relearn, reordered/duplicate events, P7 separate evidence");
