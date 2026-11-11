@@ -4,6 +4,7 @@ import { wallExtensionUnitIntro, wallExtensionUnitPhases, wallExtensionUnitTitle
 import { bubbleSortUnitIntro, bubbleSortUnitPhases, bubbleSortUnitTitle } from "../bubble-sort/unit/unit.content";
 import { mazeDiggingUnitIntro, mazeDiggingUnitPhases, mazeDiggingUnitTitle } from "../maze-digging/unit/unit.content";
 import { binarySearchUnitIntro, binarySearchUnitPhases, binarySearchUnitTitle } from "../binary-search/unit/unit.content";
+import { greedyCoinsUnitIntro, greedyCoinsUnitPhases, greedyCoinsUnitTitle } from "../greedy-coins/unit/unit.content";
 import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../dfs/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";
 
@@ -14,6 +15,7 @@ export const learningUnits = [
   { courseId: "course-algorithm-bubble-sort-v2", title: bubbleSortUnitTitle, intro: bubbleSortUnitIntro, kind: "bubble-sort", phases: bubbleSortUnitPhases },
   { courseId: "course-algorithm-maze-digging-v1", title: mazeDiggingUnitTitle, intro: mazeDiggingUnitIntro, kind: "maze-digging", phases: mazeDiggingUnitPhases },
   { courseId: "course-algorithm-binary-search-v1", title: binarySearchUnitTitle, intro: binarySearchUnitIntro, kind: "binary-search", phases: binarySearchUnitPhases },
+  { courseId: "course-algorithm-greedy-coins-v1", title: greedyCoinsUnitTitle, intro: greedyCoinsUnitIntro, kind: "greedy-coins", phases: greedyCoinsUnitPhases },
 ] as const;
 export const findLearningUnit = (courseId: string) => learningUnits.find(unit => unit.courseId === courseId);
 export type LearningUnit = (typeof learningUnits)[number];
