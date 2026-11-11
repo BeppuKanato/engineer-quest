@@ -1,3 +1,4 @@
+import { summarizeReaction } from "../service/feedbackV1.observation";
 import assert from "node:assert/strict";
 import { generate, selectionSchema, validateSelection, validateAnalysis, analysisPrompt, selectionPrompt, type Input, type Analysis, type Candidate } from "../service/feedbackV1.engine";
 import { aggregateConcepts, conceptDefinitions } from "../service/feedbackConcepts";
@@ -36,6 +37,8 @@ async function main() {
   assert.throws(()=>validateAnalysis(input,{...analysis,conceptClaims:[{...analysis.conceptClaims[0],state:"confirmed"}]}),/INVALID_CONCEPT_CLAIM/);
   assert.throws(()=>validateAnalysis(input,{...analysis,conceptClaims:[{...analysis.conceptClaims[0],sourceIds:["invented"]}]}),/INVALID_CONCEPT_EVIDENCE/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"完全に理解しました"}),/UNSUPPORTED/);
+  assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"99問に正答しました"}),/UNSUPPORTED_NUMERIC_CLAIM/);
+  assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"理解度は100%です"}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
   const hexad = {questionnaireVersion:"test",scoreRange:[4,28] as [number,number],scores:{Philanthropist:4,Socialiser:8,FreeSpirit:12,Achiever:16,Disruptor:20,Player:24}};
   for (const type of ["UNIT_COMPLETION","ACHIEVEMENT","CREATE_QUEST","INTEGRATION","SHARING"]) {
     const goal={displayText:`目標-${type}`,type,condition:{target:"goal-target"},progress:{outcome:"ONGOING",fraction:null,detail:{}},status:"ACTIVE",confirmedAt:null,daysSinceConfirmed:null};
@@ -50,6 +53,14 @@ async function main() {
   assert.throws(()=>validateSelection(input,select(adjusted)),/STANDARD_HEXAD_LEAK/);
   adjusted[2].personalizationAdjustment.scores[0].score++;
   assert.throws(()=>validateSelection({...input,hexad},select(adjusted)),/HEXAD_SCORE_MISMATCH/);
+  const reactions = summarizeReaction([
+    ...[1,2,3].map(n=>({type:"PRESENTED",data:{candidateId:`candidate-${n}`,order:n}})),
+    {type:"VIEWED",data:{candidateId:"candidate-2"}},
+    {type:"CLICKED",data:{candidateId:"candidate-2",notSelectedCandidateIds:["candidate-1","candidate-3"],choiceId:"first",selectedAt:"2026-11-11T00:00:00Z",expected:"/two"}},
+    {type:"ARRIVED",data:{candidateId:"candidate-2",choiceId:"first",actual:"/two"}},
+  ]);
+  assert.equal(reactions.judgement,"MATCH");
+  assert.deepEqual(reactions.candidates.map(c=>[c.candidateId,c.firstSelected,c.explicitlyNotSelected,c.viewportObserved]),[["candidate-1",false,true,false],["candidate-2",true,false,true],["candidate-3",false,true,false]]);
   console.log("PASS: 1–3 mixed candidates, limits, offline fallback, URL/capability validation, grounded claims, all goal types, HEXAD per candidate");
 }
 void main().catch(e=>{console.error(e);process.exitCode=1;});

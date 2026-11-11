@@ -16,9 +16,12 @@ const window={location:{origin:'https://fixture.invalid',href:'https://fixture.i
 const sessionStorage={setItem:(key,value)=>storage.set(key,value),getItem:key=>storage.get(key)||null,removeItem:key=>storage.delete(key)};
 vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText,{
   exports:exportsObject, document, window, sessionStorage, URL, URLSearchParams, performance, crypto:require('node:crypto').webcrypto,
-  IntersectionObserver:class {constructor(callback){observer=this;this.callback=callback;}observe(){}disconnect(){}},
+  IntersectionObserver:class {constructor(callback){observer={callback};}observe(){}disconnect(){}},
   require:name=>{
-    if(name==='react')return {...React,useRef:value=>mockHooks?{current:marker}:React.useRef(value),useEffect:fn=>mockHooks?effects.push(fn):React.useEffect(fn)};
+    if(name==='react')return {...React,
+      useRef:value=>{const reference=mockHooks ? ()=>({current:marker}) : React.useRef;return reference(value);},
+      useEffect:fn=>{const effect=mockHooks ? callback=>effects.push(callback) : React.useEffect;return effect(fn);},
+    };
     if(name==='@/lib/firebase')return {auth};
     if(name==='firebase/auth')return {};
     if(name==='@/lib/fetcher')return {fetcher:async(url,options)=>{records.push(JSON.parse(options.body));}};

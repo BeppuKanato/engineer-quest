@@ -126,7 +126,8 @@ export async function generate(input: Input, call: Call = openAiCall, log: (entr
     await log({ stage: "validation", valid: false, error: "UNKNOWN_EVIDENCE_SOURCE" });
     throw new Error("UNKNOWN_EVIDENCE_SOURCE");
   }
-  validateAnalysis(input, analysis);
+  try { validateAnalysis(input, analysis); }
+  catch (error) { await log({stage:"validation",valid:false,error:error instanceof Error ? error.message : "INVALID_ANALYSIS"}); throw error; }
   const parsed = selectionSchema.parse(await run("selection", selectionPrompt(input, analysis)));
   const selection: Selection = { nextGoal: parsed.nextGoal, ...parsed.candidates[0], candidates: parsed.candidates };
   let validation;
@@ -140,6 +141,15 @@ export function validateAnalysis(input: Input, analysis: Analysis) {
   const snapshot = (input.learning as { conceptSnapshot?: import("./feedbackConcepts").ConceptSnapshot } | null)?.conceptSnapshot;
   const text = [analysis.currentState, ...analysis.understood, ...analysis.needsImprovement, ...analysis.uncertain, ...analysis.conceptClaims.map(c=>c.observation)].join(" ");
   if (/完全に理解|完全に習得|理解度.{0,10}[0-9０-９]+[%％]|能力不足/.test(text)) throw new Error("UNSUPPORTED_LEARNING_JUDGEMENT");
+  const observedNumbers = new Set<number>();
+  const collectNumbers = (value: unknown): void => {
+    if (typeof value === "number" && Number.isFinite(value)) observedNumbers.add(value);
+    if (Array.isArray(value)) { observedNumbers.add(value.length); value.forEach(collectNumbers); }
+    else if (value && typeof value === "object") Object.values(value).forEach(collectNumbers);
+  };
+  collectNumbers(input.learning); collectNumbers(input.bigGoal);
+  if (input.bigGoal?.progress.fraction !== null && input.bigGoal?.progress.fraction !== undefined) observedNumbers.add(Math.round(input.bigGoal.progress.fraction*100));
+  if ([...text.normalize("NFKC").matchAll(/[0-9]+(?:\.[0-9]+)?/g)].some(m=>!observedNumbers.has(Number(m[0])))) throw new Error("UNSUPPORTED_NUMERIC_CLAIM");
   if (snapshot?.concepts.some(c=>c.attemptedQuestions>0) && !analysis.conceptClaims.length) throw new Error("MISSING_CONCEPT_CLAIMS");
   for (const claim of analysis.conceptClaims) {
     const concept = snapshot?.concepts.find(c=>c.conceptId===claim.conceptId);

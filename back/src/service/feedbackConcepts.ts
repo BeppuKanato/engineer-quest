@@ -49,10 +49,10 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
       } catch { /* 不完全な旧ログから推定しない。原本は維持する。 */ }
     }
     if (event.eventType === "answer_attempt" && typeof payload.correct === "boolean" && Number.isInteger(payload.attempt) && Number(payload.attempt) > 0) {
-      const q = questions.find(q => q.phaseKey === event.phaseKey && q.questionId === event.targetId && (!payload.assessmentId || q.assessmentId === payload.assessmentId));
+      const q = questions.find(q => q.phaseKey === event.phaseKey && q.questionId === event.targetId && q.assessmentId === payload.assessmentId);
       if (!q) continue;
       // セッション識別のない旧回答はattempt再開の区別が不能。確実な根拠にはしない。
-      if (typeof payload.assessmentSessionId !== "string" || typeof payload.assessmentStartedAt !== "number") continue;
+      if (typeof payload.assessmentSessionId !== "string" || typeof payload.assessmentStartedAt !== "number" || !Number.isSafeInteger(payload.assessmentStartedAt) || payload.assessmentStartedAt <= 0 || !payload.assessmentSessionId) continue;
       add(questionKey(q), { sourceId: event.id, sessionId: payload.assessmentSessionId, startedAt: payload.assessmentStartedAt, number: Number(payload.attempt), correct: payload.correct, confirmed: false });
     }
   }
@@ -62,7 +62,7 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
         const attempts = [...(byQuestion.get(questionKey(q))?.values() ?? [])].sort((a,b) => a.startedAt-b.startedAt || a.sessionId.localeCompare(b.sessionId) || a.number-b.number);
         const latest = attempts.at(-1) ?? null;
         const currentSession = latest ? attempts.filter(a => a.sessionId === latest.sessionId) : [];
-        return { ...q, first: attempts[0] ?? null, latest, retried: currentSession.some(a=>a.number>1), sessions: new Set(attempts.map(a=>a.sessionId)).size };
+        return { ...q, first: attempts[0]?.number === 1 ? attempts[0] : null, latest, retried: attempts.some(a=>a.number>1), latestSessionFirst: currentSession.find(a=>a.number===1) ?? null, sessions: new Set(attempts.map(a=>a.sessionId)).size };
       });
       const answered = evidence.filter(q=>q.latest);
       const implementationPhase = phases.find(p => p.phaseKey === c.phaseKey);
@@ -70,13 +70,33 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
       return { conceptId: c.conceptId, label: c.label, kind: c.kind,
         state: answered.length === 0 ? "unobserved" as const : answered.some(q=>q.latest?.correct === false) ? "needs_check" as const : "confirmed" as const,
         attemptedQuestions: answered.length, totalQuestions: evidence.length, evidence,
-        implementation: c.kind === "implementation" ? {
-          completed: implementationPhase?.status === "COMPLETED" ? true : "unknown" as const,
-          testsPassed: implementationPhase?.status === "COMPLETED" ? true : "unknown" as const,
-          testRuns: typeof summary.testRuns === "number" ? summary.testRuns : "unknown" as const,
-          hintUsage: Array.isArray(summary.hintUsage) ? summary.hintUsage : "unknown" as const,
-          inputLevel: typeof summary.inputLevel === "string" ? summary.inputLevel : "unknown" as const,
-        } : null };
+        implementation: c.kind === "implementation" ? implementationEvidence(c.phaseKey!, implementationPhase?.status, summary, events) : null };
     }) };
 }
 export type ConceptSnapshot = NonNullable<ReturnType<typeof aggregateConcepts>>;
+
+function implementationEvidence(phaseKey: string, status: string | undefined, summary: Record<string, unknown>, events: Event[]) {
+  const unique = new Map<string, Event>();
+  for (const event of events.filter(e=>e.phaseKey===phaseKey && ["implementation_test_result","hint_open","implementation_level_select","implementation_complete"].includes(e.eventType))) {
+    const sequence = object(event.payload).sequence;
+    const key = Number.isInteger(sequence) ? `${event.sessionId}/${sequence}` : event.id;
+    const previous = unique.get(key);
+    if (!previous || event.id < previous.id) unique.set(key,event);
+  }
+  const ordered = [...unique.values()].sort((a,b)=>a.clientTimestamp.getTime()-b.clientTimestamp.getTime() || a.sessionId.localeCompare(b.sessionId) || Number(object(a.payload).sequence ?? 0)-Number(object(b.payload).sequence ?? 0) || a.id.localeCompare(b.id));
+  const lastTest = ordered.filter(e=>e.eventType==="implementation_test_result").at(-1);
+  const result = object(lastTest?.payload);
+  const results = Array.isArray(result.results) ? result.results.flatMap(r=>{
+    const item=object(r); return typeof item.id === "string" && typeof item.passed === "boolean" ? [{testId:item.id,passed:item.passed}] : [];
+  }) : [];
+  const lastLevel = ordered.filter(e=>typeof object(e.payload).level === "string").at(-1);
+  const hints = ordered.filter(e=>e.eventType==="hint_open").map(e=>({sourceId:e.id,level:object(e.payload).level,count:object(e.payload).count}));
+  return {
+    completed: status === "COMPLETED" ? true : "unknown" as const,
+    testsPassed: status === "COMPLETED" ? true : results.some(r=>!r.passed) ? false : "unknown" as const,
+    testRuns: typeof summary.testRuns === "number" ? summary.testRuns : typeof result.count === "number" ? result.count : "unknown" as const,
+    hintUsage: Array.isArray(summary.hintUsage) && summary.hintUsage.every(n=>typeof n === "number" && n>=0) ? summary.hintUsage : "unknown" as const,
+    inputLevel: typeof summary.inputLevel === "string" ? summary.inputLevel : lastLevel ? String(object(lastLevel.payload).level) : "unknown" as const,
+    sourceIds: ordered.map(e=>e.id), lastTest: lastTest ? {sourceId:lastTest.id,results} : null, observedHints: hints,
+  };
+}

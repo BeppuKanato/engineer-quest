@@ -175,7 +175,9 @@ for (const [answer, label] of [["A", "次の問題へ"], ["E", "結果を見る"
   canvas().onAnswer(node(answer)); render(); button(label).onClick(); render();
 }
 render();
-assert.deepEqual(JSON.parse(JSON.stringify(summaries)), [{ firstAttemptCorrect: 1, totalQuestions: 2 }]);
+assert.deepEqual(JSON.parse(JSON.stringify(summaries.map(summary=>({firstAttemptCorrect:summary.firstAttemptCorrect,totalQuestions:summary.totalQuestions})))), [{ firstAttemptCorrect: 1, totalQuestions: 2 }]);
+assert.equal(summaries[0].assessmentEvidence.assessmentId, "dfs-check");
+assert.deepEqual(JSON.parse(JSON.stringify(summaries[0].assessmentEvidence.records.map(r=>r.attempts.map(a=>a.correct)))), [[false],[true]]);
 
 const overlay = fs.readFileSync(file("assessment/NodeAnswerOverlay.tsx"), "utf8");
 assert.match(overlay, /prefers-reduced-motion: reduce/u); assert.match(overlay, /answer-cue 700ms ease-in-out 2/u);

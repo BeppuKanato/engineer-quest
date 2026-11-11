@@ -94,7 +94,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
       prisma.phaseLearningProgress.findMany({ where: { userId: user.id, courseId }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] }),
     ]);
-    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot"] } } });
+    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot", "implementation_test_result", "hint_open", "implementation_level_select", "implementation_complete"] } } });
     const conceptSnapshot = aggregateConcepts(courseId, answerEvents, phaseRows, crypto.randomUUID());
     const phases = phaseRows.map(p => ({ id: p.phaseKey, status: p.status, summary: p.summary ?? null }));
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
@@ -110,7 +110,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       const allowedNext = phaseIndex >= 0 ? unitDefinition?.phases[phaseIndex+1]?.id ?? null : null;
       phaseEvent = { courseId, phaseKey, nextPhaseKey: allowedNext };
       if (nextPhaseKey && nextPhaseKey !== allowedNext) throw new AppError(400, "INVALID_NEXT_PHASE", "Invalid next phase");
-      learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, conceptSnapshot, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, summary: current.summary ?? null } };
+      learning = { id: `phase-event:${courseId}:${phaseKey}`, unit: { id: course.id, title: course.title, status: unitRow?.status ?? "IN_PROGRESS" }, conceptSnapshot, sequence: phaseSequence, phases, currentPhase: { id: phaseKey, stageNumber: unitDefinition?.phases.find(p=>p.id===phaseKey)?.phase ?? null, stageGoal: unitDefinition?.phases.find(p=>p.id===phaseKey)?.formalName ?? null, nextStage: unitDefinition?.phases[phaseIndex+1]?.formalName ?? null, summary: current.summary ?? null } };
     }
   } else {
     const event = await prisma.createQuestSubmission.findFirst({ where: { id: eventId, attempt: { userId: user.id } }, include: { attempt: { include: { quest: { include: { requirements: true } }, executions: { orderBy: { executedAt: "asc" } }, hintViews: { orderBy: { viewedAt: "asc" } }, submissions: { orderBy: { submittedAt: "asc" } } } } } });
@@ -161,7 +161,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (a) add(16, q.id, `/create/quests/${encodeURIComponent(q.id)}`);
     if (a?.code) add(21, q.id, `/quest-board/new?category=WORK_SHARE&targetId=${encodeURIComponent(q.id)}&title=${encodeURIComponent(q.title)}`);
   }
-  for (const card of cards) for (const id of [9, 10]) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`);
+  for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`);
   if (cards.length) add(11, "collection", "/knowledge-cards");
   add(12, "history", "/history"); // The authorized completion/submission itself is a history item.
   for (const a of achievements) {

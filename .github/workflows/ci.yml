@@ -50,6 +50,10 @@ jobs:
         working-directory: ./back
         run: npm run typecheck
       
+      - name: Verify feedback contracts and rendering
+        working-directory: ./front
+        run: npm run verify:feedback-concepts && npm run verify:feedback-map && npm run verify:feedback-candidates
+
       - name: Static verify back
         working-directory: ./back
         run: npm run verify:static

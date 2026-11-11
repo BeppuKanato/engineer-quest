@@ -1,5 +1,7 @@
 # フィードバックv1 実装報告（2026-11-03）
 
+> 2026-11-11追記: 新フローの現行仕様（7単元の概念・回答証拠、1〜3候補、表示・計測）は [learning-feedback-402.md](learning-feedback-402.md) を参照。本書の1件推薦・従来文章構成の記述は変更当時の記録。
+
 基準: GitHub の develop `6b201f475e259d89b51bace51c5abffd8ce56b60`。
 作業ブランチ: `feat/feedback-v1`。本番への反映は行っていない。Neon devへのDB適用については末尾の追記を参照。
 
