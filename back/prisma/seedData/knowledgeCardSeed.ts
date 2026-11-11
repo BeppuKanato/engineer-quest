@@ -12,6 +12,7 @@ export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
 export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
 export const MAZE_DIGGING_COURSE_ID = "course-algorithm-maze-digging-v1";
 export const BINARY_SEARCH_COURSE_ID = "course-algorithm-binary-search-v1";
+export const GREEDY_COINS_COURSE_ID = "course-algorithm-greedy-coins-v1";
 
 export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
   {
@@ -307,6 +308,57 @@ export const knowledgeCardSeed: Prisma.KnowledgeCardUncheckedCreateInput[] = [
     sortOrder: 18,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-greedy-coins-greedy-choice",
+    courseId: GREEDY_COINS_COURSE_ID,
+    label: "選択",
+    title: "貪欲な選択",
+    description:
+      "その時点で使える一番よい選択を、そのつど繰り返す考え方。先の展開は考えず、今の最良を積み重ねていく。",
+    connection:
+      "硬貨問題では、残額以下で一番大きい硬貨を選び続ける。786円なら500円から順に選んでいき、9枚で払える。",
+    useCase:
+      "支払いや両替で使う硬貨を少なくしたいとき、そのつど一番大きい硬貨から使う日常の工夫と同じ発想。",
+    searchKeywords: ["貪欲法", "Greedy", "貪欲な選択", "硬貨問題"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 19,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-greedy-coins-remaining",
+    courseId: GREEDY_COINS_COURSE_ID,
+    label: "残額",
+    title: "残額を減らしていく",
+    description:
+      "使った分を全体から引いて、残りに対して同じ判断を続ける進め方。問題を少しずつ小さくしながら解いていく。",
+    connection:
+      "硬貨を1枚選ぶたびに、残額からその額面を引く（786→286→186→…→0）。残額が0になったら支払いは完了する。",
+    useCase:
+      "予算から使った分を引いて残りでやりくりする家計の管理や、残り時間に合わせて作業を割り当てる計画に使える。",
+    searchKeywords: ["残額", "貪欲法", "硬貨問題", "繰り返し"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 20,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-greedy-coins-not-always-optimal",
+    courseId: GREEDY_COINS_COURSE_ID,
+    label: "最適性",
+    title: "最適とは限らない",
+    description:
+      "そのつど最良を選んでも、全体で最良の結果になるとは限らないこと。貪欲法がうまくいくかどうかは、問題の性質による。",
+    connection:
+      "額面が [4, 3, 1] の硬貨で6円を払うと、貪欲法では [4, 1, 1] の3枚になるが、[3, 3] の2枚が本当の最少になる。日本の硬貨では、貪欲法で最少になることが確かめられている。",
+    useCase:
+      "目先の得を優先する判断が長い目で見ると損になる場面を見分けるときに役立つ考え方。",
+    searchKeywords: ["最適", "貪欲法", "反例", "硬貨問題"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 21,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -348,6 +400,13 @@ export const BINARY_SEARCH_CARD_PHASE_SLOTS = [
   { phaseKey: "binary-search-execution", knowledgeCardId: "knowledge-card-binary-search-halving-range" },
   { phaseKey: "binary-search-code-check", knowledgeCardId: "knowledge-card-binary-search-compare-middle" },
   { phaseKey: "binary-search-implementation", knowledgeCardId: "knowledge-card-binary-search-logarithmic-time" },
+] as const;
+
+/** フェーズ完了のタイミングとカードの対応（貪欲法。配布位置とレアリティは BFS と同じ）。 */
+export const GREEDY_COINS_CARD_PHASE_SLOTS = [
+  { phaseKey: "greedy-coins-execution", knowledgeCardId: "knowledge-card-greedy-coins-greedy-choice" },
+  { phaseKey: "greedy-coins-code-check", knowledgeCardId: "knowledge-card-greedy-coins-remaining" },
+  { phaseKey: "greedy-coins-implementation", knowledgeCardId: "knowledge-card-greedy-coins-not-always-optimal" },
 ] as const;
 
 /**
@@ -394,4 +453,5 @@ export const knowledgeCardPhaseScheduleSeed: Array<
   ...buildCardPhaseSchedule(MAZE_DIGGING_COURSE_ID, "maze-digging", MAZE_DIGGING_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(BINARY_SEARCH_COURSE_ID, "binary-search", BINARY_SEARCH_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(DFS_COURSE_ID, "dfs", DFS_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(GREEDY_COINS_COURSE_ID, "greedy-coins", GREEDY_COINS_CARD_PHASE_SLOTS),
 ];
