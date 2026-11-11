@@ -1,6 +1,33 @@
 import { z } from "zod";
-import definitions from "../learning/feedback/concepts.json";
+import definitionData from "../learning/feedback/concepts.json";
 
+const nonempty=z.string().trim().min(1);
+const questionDefinitionSchema=z.object({phaseKey:nonempty,assessmentId:nonempty,questionId:nonempty,tags:z.array(nonempty).min(1),stageLabel:nonempty,questionLabel:nonempty});
+const definitionsSchema=z.array(z.object({courseId:nonempty,kind:nonempty,title:nonempty,
+  phases:z.array(z.object({id:nonempty,phase:z.number().int().min(1).max(7),formalName:nonempty})).min(1),
+  concepts:z.array(z.object({conceptId:nonempty,label:nonempty,kind:z.enum(["assessment","implementation"]),phaseKey:nonempty.optional(),questions:z.array(questionDefinitionSchema)})).min(1),
+})).min(1);
+/** バックエンド単独でも定義の欠陥を検出し、誤った概念状態を計算しない。 */
+export function validateConceptDefinitions(value:unknown) {
+  const units=definitionsSchema.parse(value), courses=new Set<string>(), kinds=new Set<string>(), ids=new Set<string>();
+  for(const unit of units) {
+    if(courses.has(unit.courseId) || kinds.has(unit.kind) || new Set(unit.phases.map(p=>p.id)).size!==unit.phases.length || new Set(unit.phases.map(p=>p.phase)).size!==unit.phases.length)throw new Error("INVALID_CONCEPT_DEFINITIONS");
+    courses.add(unit.courseId);kinds.add(unit.kind);
+    const keys=new Set<string>();
+    for(const concept of unit.concepts) {
+      if(ids.has(concept.conceptId))throw new Error("INVALID_CONCEPT_DEFINITIONS");
+      ids.add(concept.conceptId);
+      if(concept.kind==="implementation" ? concept.questions.length!==0 || !unit.phases.some(p=>p.id===concept.phaseKey && p.phase===7) : !concept.questions.length || concept.phaseKey!==undefined)throw new Error("INVALID_CONCEPT_DEFINITIONS");
+      for(const question of concept.questions) {
+        const phase=unit.phases.find(p=>p.id===question.phaseKey), key=JSON.stringify([question.phaseKey,question.assessmentId,question.questionId]);
+        if(!phase || ![3,5,6].includes(phase.phase) || question.stageLabel!==phase.formalName || !/[一-龯ぁ-んァ-ヶ]/u.test(question.questionLabel) || keys.has(key))throw new Error("INVALID_CONCEPT_DEFINITIONS");
+        keys.add(key);
+      }
+    }
+  }
+  return units;
+}
+const definitions=validateConceptDefinitions(definitionData);
 export { definitions as conceptDefinitions };
 export const evidenceSchema = z.object({
   version: z.literal(1), assessmentId: z.string().min(1), sessionId: z.string().min(1).max(160),
@@ -103,9 +130,9 @@ function implementationEvidence(phaseKey: string, status: string | undefined, su
     const sequence = object(event.payload).sequence;
     const key = Number.isInteger(sequence) ? `${event.sessionId}/${sequence}` : event.id;
     const previous = unique.get(key);
-    if (!previous || event.id < previous.id) unique.set(key,event);
+    if (!previous || event.serverTimestamp.getTime()<previous.serverTimestamp.getTime() || event.serverTimestamp.getTime()===previous.serverTimestamp.getTime() && event.id < previous.id) unique.set(key,event);
   }
-  const ordered = [...unique.values()].sort((a,b)=>a.clientTimestamp.getTime()-b.clientTimestamp.getTime() || a.sessionId.localeCompare(b.sessionId) || Number(object(a.payload).sequence ?? 0)-Number(object(b.payload).sequence ?? 0) || a.id.localeCompare(b.id));
+  const ordered = [...unique.values()].sort((a,b)=>a.serverTimestamp.getTime()-b.serverTimestamp.getTime() || a.sessionId.localeCompare(b.sessionId) || Number(object(a.payload).sequence ?? 0)-Number(object(b.payload).sequence ?? 0) || a.id.localeCompare(b.id));
   const lastTest = ordered.filter(e=>e.eventType==="implementation_test_result").at(-1);
   const result = object(lastTest?.payload);
   const results = Array.isArray(result.results) ? result.results.flatMap(r=>{

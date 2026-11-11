@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { aggregateConcepts, conceptDefinitions, validateEvidence } from "../service/feedbackConcepts";
+import { aggregateConcepts, conceptDefinitions, validateEvidence, validateConceptDefinitions } from "../service/feedbackConcepts";
 const unit = conceptDefinitions[0], phaseKey = "bfs-check";
 const make = (sessionId: string, startedAt: number, answers: boolean[][]) => ({ version: 1, assessmentId: phaseKey, sessionId, startedAt,
   records: ["take-next", "after-c"].map((questionId, i) => ({ questionId, attempts: (answers[i] ?? []).map((correct, j)=>({number:j+1,correct})) })) });
@@ -56,4 +56,33 @@ assert.equal(state([aFirst,aRetry,c,{...aRetry,id:"retry-delivery",serverTimesta
 assert.equal(state([aRetry,c,raw("late-first","a",1,false,100)]).evidence[0].latest?.sessionId,"c","late lower attempt cannot make its session newer");
 const tied=[completed("tie-a","a",100,[[true],[true]],99999),completed("tie-b","b",100,[[false],[true]],1)];
 assert.deepEqual(snapshot(tied),snapshot([...tied].reverse()),"ties use stable session IDs, not client clocks or array order");
+// 仕様§2.3の具体例: 初回正答＋再挑戦正答＋未回答を同じ概念へ合成する。
+const evidenceFor=(id:string,phase:string,sessionId:string,received:number,questionId:string,answers:boolean[])=>({...event(id,{}),phaseKey:phase,serverTimestamp:new Date(received),payload:{version:1,assessmentId:phase,sessionId,startedAt:1,records:[{questionId,attempts:answers.map((correct,i)=>({number:i+1,correct}))}]}});
+const example=[evidenceFor("p3","bfs-check","p3",10,"after-c",[true]),evidenceFor("p5","bfs-code-check","p5",20,"undiscovered-condition",[false,true]),evidenceFor("p6","bfs-consolidation","p6",30,"start-already-discovered",[])];
+const discovered=snapshot(example).concepts.find(c=>c.conceptId==="bfs:discovered")!;
+assert.equal(discovered.state,"confirmed");assert.equal(discovered.attemptedQuestions,2);assert.equal(discovered.totalQuestions,3);
+const p5=discovered.evidence.find(q=>q.phaseKey==="bfs-code-check")!;
+assert.equal(p5.first?.correct,false);assert.equal(p5.latest?.correct,true);assert.equal(p5.retried,true);
+assert.equal(snapshot([...example,evidenceFor("p5-new","bfs-code-check","p5-new",40,"undiscovered-condition",[false])]).concepts.find(c=>c.conceptId==="bfs:discovered")!.state,"needs_check");
+for(const other of conceptDefinitions) {
+  const q=other.concepts.flatMap(c=>c.questions)[0];
+  const proof=evidenceFor(`proof-${other.kind}`,q.phaseKey,"one",10,q.questionId,[false,true]);
+  const result=aggregateConcepts(other.courseId,[proof],[],"shared")!;
+  const concept=result.concepts.find(c=>c.evidence.some(e=>e.questionId===q.questionId && e.phaseKey===q.phaseKey))!;
+  assert.equal(concept.state,"confirmed");assert.equal(concept.evidence.find(e=>e.questionId===q.questionId && e.phaseKey===q.phaseKey)!.retried,true);
+  const impl=other.concepts.find(c=>c.kind==="implementation")!;
+  const completed=aggregateConcepts(other.courseId,[],[{phaseKey:impl.phaseKey!,status:"COMPLETED",summary:{testRuns:2}}],"shared")!.concepts.find(c=>c.conceptId===impl.conceptId)!;
+  assert.equal(completed.implementation?.testsPassed,true);assert.equal(completed.implementation?.testRuns,2);assert.equal(completed.state,"unobserved");
+}
+const p7Events=[{...event("p7-old-clock",{count:1,results:[{id:"test",passed:false}]}),eventType:"implementation_test_result",phaseKey:"bfs-implementation",serverTimestamp:new Date(10),clientTimestamp:new Date(99999)},
+  {...event("p7-new-clock",{count:2,results:[{id:"test",passed:true}]}),eventType:"implementation_test_result",phaseKey:"bfs-implementation",serverTimestamp:new Date(20),clientTimestamp:new Date(1)}];
+assert.equal(aggregateConcepts(unit.courseId,p7Events,[],"p7")!.concepts.at(-1)!.implementation?.lastTest?.sourceId,"p7-new-clock");
+for(const mutation of ["empty-assessment","wrong-kind","missing-implementation-phase","duplicate-question"]) {
+  const changed=structuredClone(conceptDefinitions);
+  if(mutation==="empty-assessment")changed[0].concepts[0].questions=[];
+  if(mutation==="wrong-kind")changed[0].concepts[0].kind="implementation";
+  if(mutation==="missing-implementation-phase")changed[0].concepts.at(-1)!.phaseKey="missing";
+  if(mutation==="duplicate-question")changed[0].concepts[0].questions.push(changed[0].concepts[0].questions[0]);
+  assert.throws(()=>validateConceptDefinitions(changed),mutation);
+}
 console.log("PASS: deterministic concepts, first/latest, retry, partial, relearn, reordered/duplicate events, P7 separate evidence");
