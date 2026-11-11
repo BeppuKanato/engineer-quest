@@ -53,6 +53,7 @@
     "verify:greedy-coins-code-mapping": "node scripts/verifyGreedyCoinsCodeMapping.cjs",
     "verify:greedy-coins-code-check": "node scripts/verifyGreedyCoinsCodeCheck.cjs",
     "verify:greedy-coins-consolidation": "node scripts/verifyGreedyCoinsConsolidation.cjs",
+    "verify:greedy-coins-implementation": "node scripts/verifyGreedyCoinsImplementation.cjs",
     "verify:dfs-execution": "node scripts/verifyDfsExecution.cjs",
     "verify:dfs-check": "node scripts/verifyDfsCheck.cjs",
     "verify:dfs-code-mapping": "node scripts/verifyDfsCodeMapping.cjs",
