@@ -40,7 +40,7 @@ async function main() {
     rows.set(row.id,row);
     return row;
   };
-  db.feedbackV1.updateMany = async ({where,data}:{where:{id:string;status?:string;runToken?:string;OR?:unknown};data:Partial<Row> & {runAttempts?:{increment:number}}}) => {
+  db.feedbackV1.updateMany = async ({where,data}:{where:{id:string;status?:string;runToken?:string;OR?:unknown};data:Partial<Omit<Row,"runAttempts">> & {runAttempts?:{increment:number}}}) => {
     const row=rows.get(where.id);
     if(!row || (where.status && row.status!==where.status) || (where.runToken && row.runToken!==where.runToken)) return {count:0};
     if(where.OR && row.runExpiresAt && row.runExpiresAt.getTime()>Date.now()) return {count:0};
