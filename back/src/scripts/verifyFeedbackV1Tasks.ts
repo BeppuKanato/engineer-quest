@@ -54,7 +54,7 @@ async function main() {
 
   let llmCalls=0;
   const good:typeof generate = async (_input,_call,log) => {
-    llmCalls++; await log({stage:"analysis",model:"fixture"});
+    llmCalls++; await log?.({stage:"analysis",model:"fixture"});
     const selection={nextGoal:"次の目標",nextStep:"XPを見る",actionLabel:"プロフィール",actionId:15,targetId:"profile",capabilityId:null,purpose:"振り返り",reason:"学習を確認",personalizationAdjustment:null};
     return {
       analysis:{currentState:"確認した",understood:[],needsImprovement:[],uncertain:[],conceptClaims:[],evidence:[{sourceId:"answer-1",fact:"記録",inference:false}]},
