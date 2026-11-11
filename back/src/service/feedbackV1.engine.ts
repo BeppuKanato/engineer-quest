@@ -68,6 +68,7 @@ export function validateSelection(input: Input, output: Selection) {
   if (candidates.length < 1 || candidates.length > 3) throw new Error("INVALID_CANDIDATE_COUNT");
   const resolved = candidates.map((candidate, index) => {
     candidateSchema.parse({ ...candidate, capabilityId: candidate.capabilityId ?? null });
+    if (unsupportedJudgement([output.nextGoal,candidate.nextStep,candidate.reason,candidate.actionLabel].join("。"))) throw new Error("UNSUPPORTED_LEARNING_JUDGEMENT");
     const action = input.actions.find(a => a.id === candidate.actionId);
     const offline = candidate.actionId === null && candidate.targetId === null && learningCapabilities.some(c => c.id === candidate.capabilityId);
     if (!action && !offline) throw new Error("ACTION_NOT_ALLOWED");
@@ -143,7 +144,7 @@ export function validateAnalysis(input: Input, analysis: Analysis) {
   const snapshot = conceptSnapshotFor(input);
   if (!snapshot) analysis = { ...analysis, conceptClaims: [] };
   const text = [analysis.currentState, ...analysis.understood, ...analysis.needsImprovement, ...analysis.uncertain, ...analysis.conceptClaims.map(c=>c.observation)].join(" ");
-  if (/完全に理解|完全に習得|理解度.{0,10}[0-9０-９]+[%％]|能力不足/.test(text)) throw new Error("UNSUPPORTED_LEARNING_JUDGEMENT");
+  if (unsupportedJudgement(text)) throw new Error("UNSUPPORTED_LEARNING_JUDGEMENT");
   const observedNumbers = new Set<number>();
   const collectNumbers = (value: unknown): void => {
     if (typeof value === "number" && Number.isFinite(value)) observedNumbers.add(value);
@@ -161,4 +162,20 @@ export function validateAnalysis(input: Input, analysis: Analysis) {
     if (!claim.sourceIds.length || claim.sourceIds.some(id=>!ids.has(id))) throw new Error("INVALID_CONCEPT_EVIDENCE");
   }
   return analysis;
+}
+
+/** 限定された断定表現を検出する。否定・判断保留・目標の文脈を区別する。 */
+function unsupportedJudgement(value: string): boolean {
+  const text=value.normalize("NFKC");
+  if (/理解度[^。！？\n]*[0-9]+(?:\.[0-9]+)?[%％]|能力不足/.test(text)) return true;
+  for (const sentence of text.split(/[。！？\n]/u)) {
+    const assertions=sentence.matchAll(/完全に(?:理解|習得)|(?:習得|マスター)(?:しました|した(?!い)|できました|できた)|身に(?:ついた|付いた|つきました|付きました)/gu);
+    for(const match of assertions) {
+      const suffix=sentence.slice(match.index!+match[0].length).replace(/^[\s」』"'”’）)]+/u, "");
+      const withheld=/^(?:(?:した|しました|できた|できました))?(?:(?:と(?:は)?|という判断は?)(?:言え(?:ない|ません)|いえ(?:ない|ません)|言い切れ(?:ない|ません)|判断でき(?:ない|ません)|断定でき(?:ない|ません)|限らない|限りません)|わけでは(?:ない|ありません)|かどうか|かは(?:未確認|不明|判断でき))/u.test(suffix);
+      const goal=/^(?:する|できる)(?:こと)?を(?:目指|目標)/u.test(suffix);
+      if(!withheld && !goal)return true;
+    }
+  }
+  return false;
 }

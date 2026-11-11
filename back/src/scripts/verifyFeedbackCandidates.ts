@@ -44,6 +44,12 @@ async function main() {
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"完全に理解しました"}),/UNSUPPORTED/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"99問に正答しました"}),/UNSUPPORTED_NUMERIC_CLAIM/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"理解度は100%です"}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
+  for(const currentState of ["この内容を習得した。","キューの操作をマスターしました。","考え方が身についた。","完全に理解できています。"])
+    assert.throws(()=>validateAnalysis(input,{...analysis,currentState}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
+  for(const currentState of ["操作の習得を目指す。","この内容を習得したい。","習得したとは言えません。","「マスターした」とは判断できません。","身についたかどうかは未確認です。","完全に理解したとは判断できません。"])
+    assert.doesNotThrow(()=>validateAnalysis(input,{...analysis,currentState}));
+  assert.throws(()=>validateSelection(input,select([{...candidates[0],reason:"操作をマスターしました。"}])),/UNSUPPORTED_LEARNING_JUDGEMENT/);
+  assert.doesNotThrow(()=>validateSelection(input,{...select([candidates[0]]),nextGoal:"操作の習得を目指す"}));
   const createInput={...input,learning:{id:"answer",testRuns:1},stageGoals:null};
   const extraClaims={...analysis,currentState:"テスト結果を記録しました",conceptClaims:[{conceptId:"not-applicable",state:"confirmed" as const,sourceIds:["invented"],observation:"完全に理解99"}]};
   const saved: {stage?:string;output?:unknown}[]=[];
