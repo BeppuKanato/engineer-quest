@@ -13,7 +13,16 @@ for (const unit of definitions) {
   const html = renderToStaticMarkup(React.createElement(ConceptMap,{snapshot:{id:'snapshot',version:1,title:unit.title,courseId:unit.courseId,relation:'unit-components',concepts}}));
   assert.equal((html.match(/<details/g)||[]).length,concepts.length);
   assert.equal((html.match(/<summary/g)||[]).length,concepts.length,'native keyboard/touch disclosure for every node');
-  for(const c of concepts) assert.ok(html.includes(c.label));
+  for(const c of concepts) {
+    assert.ok(html.includes(c.label));
+    if(c.kind!=='implementation')assert.ok(html.includes(`${c.attemptedQuestions}/${c.totalQuestions}問回答済み`));
+    for(const q of c.questions){
+      assert.ok(!html.includes(q.questionId),q.questionId);
+      for(const tag of q.tags.filter(t=>/^[a-z0-9-]+$/.test(t)))assert.ok(!html.includes(tag),tag);
+      assert.ok(html.includes(q.stageLabel));
+    }
+  }
+  assert.ok(html.includes('正答は完全な理解を示すものではありません。'));
   assert.ok(html.includes('未確認') && html.includes('確認できた') && html.includes('追加確認が必要'));
   assert.ok(html.includes('初回 誤答 → 直近 正答') && html.includes('再挑戦あり'));
   assert.ok(html.includes('テスト通過・完了'));

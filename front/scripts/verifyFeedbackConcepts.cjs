@@ -17,7 +17,7 @@ function validate(units) {
     const expected = [];
     for (const [dir, file] of [['check','check'], ['code-check','codeCheck'], ['consolidation','consolidation']]) {
       const content = Object.values(load(`${root}/${unit.kind}/${dir}/${file}.content.ts`)).find(v => v?.questions);
-      expected.push(...plain(content.questions.map(q => ({phaseKey:content.id, assessmentId:content.id, questionId:q.id, tags:q.tags}))));
+      expected.push(...plain(content.questions.map(q => ({phaseKey:content.id, assessmentId:content.id, questionId:q.id, tags:q.tags, stageLabel:unit.phases.find(p=>p.id===content.id).formalName, questionLabel:q.prompt}))));
     }
     const actual = definition.concepts.flatMap(c => c.questions);
     const key = q => `${q.phaseKey}/${q.assessmentId}/${q.questionId}`;

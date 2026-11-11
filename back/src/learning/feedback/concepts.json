@@ -52,7 +52,9 @@
             "questionId": "take-next",
             "tags": [
               "dequeue-order"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "キューから次に取り出すのは、どれ？"
           },
           {
             "phaseKey": "bfs-consolidation",
@@ -60,7 +62,9 @@
             "questionId": "last-from-f",
             "tags": [
               "処理順序の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "出発点をFに変えると、最後に取り出されるのはどれ？"
           }
         ]
       },
@@ -75,7 +79,9 @@
             "questionId": "enqueue-method",
             "tags": [
               "enqueue-tail"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "調べた隣の場所をキュー（待ち行列）の末尾に加えるために、10行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "bfs-consolidation",
@@ -83,7 +89,9 @@
             "questionId": "queue-after-j",
             "tags": [
               "キューの状態の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "Jの隣を調べ終えた直後、キューに入っているのはどれ？"
           }
         ]
       },
@@ -98,7 +106,9 @@
             "questionId": "after-c",
             "tags": [
               "avoid-duplicate"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "Cを取り出して調べたあと、キューに新しく入るのはどれ？"
           },
           {
             "phaseKey": "bfs-code-check",
@@ -106,7 +116,9 @@
             "questionId": "undiscovered-condition",
             "tags": [
               "undiscovered-test"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "隣の場所の距離がまだ決まっていないことを確かめるために、8行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "bfs-consolidation",
@@ -114,7 +126,9 @@
             "questionId": "start-already-discovered",
             "tags": [
               "距離が決まった場所の扱い"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "隣の場所を調べている途中で、出発点Aが隣として見つかったとき、Aの距離はどうなりますか？"
           }
         ]
       },
@@ -129,7 +143,9 @@
             "questionId": "unreachable-z",
             "tags": [
               "たどり着けない場所の扱い"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "出発点Aからつながっていない場所Zは、結果（distances）にどうなりますか？"
           }
         ]
       },
@@ -144,7 +160,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "幅優先探索のコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -210,7 +228,9 @@
             "questionId": "take-next",
             "tags": [
               "next-pop"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "次に取り出すのは、どれ？"
           },
           {
             "phaseKey": "dfs-consolidation",
@@ -218,7 +238,9 @@
             "questionId": "last-from-f",
             "tags": [
               "処理順序の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "出発点をFに変えると、最後に訪れるのはどれ？"
           }
         ]
       },
@@ -233,7 +255,9 @@
             "questionId": "after-f",
             "tags": [
               "after-dead-end"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "Fを調べ終えたあと、次に取り出すのは、どれ？"
           }
         ]
       },
@@ -248,7 +272,9 @@
             "questionId": "stack-push",
             "tags": [
               "stack-push"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "まだ調べていない隣の場所を、あとで調べられるようにスタックへ入れるために、11行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "dfs-consolidation",
@@ -256,7 +282,9 @@
             "questionId": "stack-after-j-k",
             "tags": [
               "スタックの状態の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "JとKを取り出して調べ終えた直後、スタックに入っているのはどれ？"
           }
         ]
       },
@@ -271,7 +299,9 @@
             "questionId": "unvisited-test",
             "tags": [
               "unvisited-test"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "隣の場所がまだ調べられていないことを確かめるために、9行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "dfs-consolidation",
@@ -279,7 +309,9 @@
             "questionId": "start-already-discovered",
             "tags": [
               "発見済みの場所の扱い"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "Bの隣を調べている途中で、出発点Aが隣として見つかったとき、どうなりますか？"
           }
         ]
       },
@@ -294,7 +326,9 @@
             "questionId": "unreachable-z",
             "tags": [
               "たどり着けない場所の扱い"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "出発点Aからつながっていない場所Zは、結果（訪問順）にどうなりますか？"
           }
         ]
       },
@@ -309,7 +343,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "深さ優先探索のコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -375,7 +411,9 @@
             "questionId": "next-pillar",
             "tags": [
               "pillar-order"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "次に処理する柱はどれですか"
           },
           {
             "phaseKey": "wall-extension-code-check",
@@ -383,7 +421,9 @@
             "questionId": "pillar-column-step",
             "tags": [
               "pillar-step"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "柱を立てる位置の間隔を決めるために、10行目の空欄に入る正しいコードを選んでください。"
           }
         ]
       },
@@ -398,7 +438,9 @@
             "questionId": "wall-target",
             "tags": [
               "extension-target"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "壁になるマスはどれですか"
           },
           {
             "phaseKey": "wall-extension-code-check",
@@ -406,7 +448,9 @@
             "questionId": "up-delta",
             "tags": [
               "direction-delta"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "方向の対応表で「上」への移動量を決めるために、13行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "wall-extension-consolidation",
@@ -414,7 +458,9 @@
             "questionId": "transfer-wall-target",
             "tags": [
               "壁が伸びる先の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "壁になるマスはどれですか"
           }
         ]
       },
@@ -429,7 +475,9 @@
             "questionId": "no-upward-extension",
             "tags": [
               "上に伸ばせない理由"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "一番上の段以外の柱が、上へ壁を伸ばせないのはなぜですか"
           }
         ]
       },
@@ -444,7 +492,9 @@
             "questionId": "completed-maze-properties",
             "tags": [
               "完成した迷路の性質"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "棒倒し法で作った迷路について、正しい説明はどれですか"
           }
         ]
       },
@@ -459,7 +509,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "迷路を作るコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -525,7 +577,9 @@
             "questionId": "next-pair",
             "tags": [
               "compare-order"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "次に比べるペアの左側のマスはどれか"
           }
         ]
       },
@@ -540,7 +594,9 @@
             "questionId": "larger-destination",
             "tags": [
               "swap-destination"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "比べた後、大きい方の 5 はどのマスへ行くか"
           },
           {
             "phaseKey": "bubble-sort-code-check",
@@ -548,7 +604,9 @@
             "questionId": "swap-condition",
             "tags": [
               "right-neighbor"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "左の要素と比べる相手を決めるために、6行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "bubble-sort-consolidation",
@@ -556,7 +614,9 @@
             "questionId": "next-swap-pair",
             "tags": [
               "交換が起きるペアの追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "この後、入れ替えが起きるペアの左側はどれか"
           }
         ]
       },
@@ -571,7 +631,9 @@
             "questionId": "inner-loop-range",
             "tags": [
               "range-shrink"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "周が進むにつれて比べる範囲を狭めるために、5行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "bubble-sort-consolidation",
@@ -579,7 +641,9 @@
             "questionId": "why-right-end-fixed",
             "tags": [
               "右端が決まる理由"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "並び替えで、右端から順に値が決まっていくのはなぜですか"
           }
         ]
       },
@@ -594,7 +658,9 @@
             "questionId": "sorted-array-behavior",
             "tags": [
               "並び済みの配列の扱い"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "最初から並んでいる配列 [1, 2, 3, 4] では、どうなりますか"
           }
         ]
       },
@@ -609,7 +675,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "バブルソートのコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -675,7 +743,9 @@
             "questionId": "next-room",
             "tags": [
               "dig-target"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "(3, 5) から右へ掘ります。掘られる部屋はどれですか"
           },
           {
             "phaseKey": "maze-digging-code-check",
@@ -683,7 +753,9 @@
             "questionId": "next-room-distance",
             "tags": [
               "next-room-distance"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "掘る部屋の座標（2マス先）を求めるために、11行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "maze-digging-consolidation",
@@ -691,7 +763,9 @@
             "questionId": "transfer-dig-target",
             "tags": [
               "掘り進める先の追跡"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "(5, 3) から左へ掘ります。掘られる部屋はどれですか"
           }
         ]
       },
@@ -706,7 +780,9 @@
             "questionId": "between-wall",
             "tags": [
               "dig-between"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "そのとき通路になる、間の壁マスはどれですか"
           }
         ]
       },
@@ -721,7 +797,9 @@
             "questionId": "undug-room-condition",
             "tags": [
               "undug-condition"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "まだ掘っていない部屋かどうかを調べるために、12行目の空欄に入る正しいコードを選んでください。"
           }
         ]
       },
@@ -736,7 +814,9 @@
             "questionId": "backtrack-reason",
             "tags": [
               "バックトラックが必要な理由"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "行き止まりの部屋では、なぜ戻る（バックトラックする）必要があるのですか"
           }
         ]
       },
@@ -751,7 +831,9 @@
             "questionId": "completed-maze-properties",
             "tags": [
               "完成した迷路の性質"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "穴掘り法で作った迷路について、正しい説明はどれですか"
           }
         ]
       },
@@ -766,7 +848,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "迷路を作るコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -832,7 +916,9 @@
             "questionId": "next-center",
             "tags": [
               "next-center"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "左側を捨てました。次に調べる真ん中のマスはどれか"
           },
           {
             "phaseKey": "binary-search-code-check",
@@ -840,7 +926,9 @@
             "questionId": "mid-formula",
             "tags": [
               "mid-formula"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "範囲の真ん中の位置を求めるために、5行目の空欄に入る正しいコードを選んでください。"
           },
           {
             "phaseKey": "binary-search-consolidation",
@@ -848,7 +936,9 @@
             "questionId": "first-center-transfer",
             "tags": [
               "新しいリストでの真ん中の位置"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "新しいリスト [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] で 23 を探すとき、最初に調べる真ん中のマスはどれか"
           }
         ]
       },
@@ -863,7 +953,9 @@
             "questionId": "range-after-compare",
             "tags": [
               "drop-side"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "31 と 25 を比べた後、次に残る範囲はどうなるか"
           },
           {
             "phaseKey": "binary-search-code-check",
@@ -871,7 +963,9 @@
             "questionId": "skip-mid",
             "tags": [
               "skip-mid"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "真ん中の値より大きい側だけを残すために、9行目の空欄に入る正しいコードを選んでください。"
           }
         ]
       },
@@ -886,7 +980,9 @@
             "questionId": "absent-target",
             "tags": [
               "探す値が無いときの終わり方"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "主教材のリスト [3, 7, 12, 19, 25, 31, 42] で 20 を探すと、どうなりますか"
           }
         ]
       },
@@ -901,7 +997,9 @@
             "questionId": "why-sorted-matters",
             "tags": [
               "並んでいることが前提の理由"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "並んでいないリスト [25, 3, 42, 7, 19] で、同じやり方で探すとうまくいかないのはなぜですか"
           }
         ]
       },
@@ -916,7 +1014,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "二分探索のコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },
@@ -982,7 +1082,9 @@
             "questionId": "next-coin",
             "tags": [
               "next-coin"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "残りは86円です。次に選ぶ硬貨はどれか"
           },
           {
             "phaseKey": "greedy-coins-check",
@@ -990,7 +1092,9 @@
             "questionId": "why-not-100",
             "tags": [
               "why-largest-usable"
-            ]
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "なぜ100円ではなく50円を選ぶのか"
           },
           {
             "phaseKey": "greedy-coins-consolidation",
@@ -998,7 +1102,9 @@
             "questionId": "next-coin-transfer",
             "tags": [
               "新しい金額での次に選ぶ硬貨"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "342円を払っています。100円を3枚使って、残りは42円です。次に選ぶ硬貨はどれか"
           }
         ]
       },
@@ -1013,7 +1119,9 @@
             "questionId": "while-condition",
             "tags": [
               "while-condition"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "残額と今の額面を比べるために、5行目の空欄に入る正しいコードを選んでください。"
           }
         ]
       },
@@ -1028,7 +1136,9 @@
             "questionId": "remaining-update",
             "tags": [
               "remaining-update"
-            ]
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "使った硬貨の分だけ残額を減らすために、7行目の空欄に入る正しいコードを選んでください。"
           }
         ]
       },
@@ -1043,7 +1153,9 @@
             "questionId": "counterexample-greedy-result",
             "tags": [
               "別の額面での貪欲な払い方"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "額面が [4, 3, 1] の硬貨で6円を、残額以下で一番大きい硬貨をくり返し選ぶ同じ方法で払うとどうなるか"
           },
           {
             "phaseKey": "greedy-coins-consolidation",
@@ -1051,7 +1163,9 @@
             "questionId": "counterexample-why-greedy-loses",
             "tags": [
               "貪欲が最適にならない理由"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "額面が [4, 3, 1] の硬貨で6円を払うとき、一番少ない払い方と、同じ方法が負ける理由はどれか"
           }
         ]
       },
@@ -1066,7 +1180,9 @@
             "questionId": "whole-code-order",
             "tags": [
               "コード全体の流れ"
-            ]
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "貪欲法のコードを、実行の流れに合う順序に並べてください。"
           }
         ]
       },

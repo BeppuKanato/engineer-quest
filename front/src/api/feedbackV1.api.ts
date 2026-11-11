@@ -6,7 +6,7 @@ export type ConceptSnapshot = {
   concepts: {
     conceptId: string; label: string; kind: string; state: "unobserved" | "confirmed" | "needs_check";
     attemptedQuestions: number; totalQuestions: number;
-    evidence: { phaseKey: string; assessmentId: string; questionId: string; tags: string[];
+    evidence: { phaseKey: string; assessmentId: string; questionId: string; tags: string[]; stageLabel?: string; questionLabel?: string;
       first: AnswerEvidence | null; latest: AnswerEvidence | null; retried: boolean; sessions: number }[];
     implementation: null | { completed: true | "unknown"; testsPassed: boolean | "unknown"; testRuns: number | "unknown"; hintUsage: unknown; inputLevel: string };
   }[];

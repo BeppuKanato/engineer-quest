@@ -12,7 +12,7 @@ const states = {
 export function ConceptMap({ snapshot }: { snapshot: ConceptSnapshot }) {
   return <Box component="section" aria-label="単元の構成要素と確認状況" sx={{ width: "100%" }}>
     <Typography component="h3" fontWeight={800} textAlign="center">{snapshot.title}の構成要素</Typography>
-    <Typography variant="body2" color="text.secondary" textAlign="center">線は単元との所属関係です。確認問題の結果を示しています。</Typography>
+    <Typography variant="body2" color="text.secondary" textAlign="center">単元の構成要素をまとめています。確認問題の結果を示しています。</Typography>
     <Box sx={{ borderTop: 2, borderColor: "divider", mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" }, gap: 1.5 }}>
       {snapshot.concepts.map(concept => {
         const state = states[concept.state];
@@ -32,7 +32,7 @@ export function ConceptMap({ snapshot }: { snapshot: ConceptSnapshot }) {
               ヒント利用: {Array.isArray(implementation.hintUsage) ? `${implementation.hintUsage.reduce((sum: number, count: number)=>sum+count,0)}回` : "記録なし"}。個々の概念の理解を認定する結果ではありません。
             </Typography> : <Stack component="ul" spacing={1} sx={{ pl: 2, mt: 1 }}>
               {concept.evidence.map(q=><Typography component="li" variant="body2" key={`${q.phaseKey}/${q.assessmentId}/${q.questionId}`} sx={{ overflowWrap: "anywhere" }}>
-                {q.tags.join("・")}（{q.questionId}）<br />
+                {q.stageLabel ?? (q.phaseKey.endsWith("-consolidation") ? "応用問題" : q.phaseKey.endsWith("-code-check") ? "コードの確認問題" : "動きの確認問題")}：{q.questionLabel ?? `${concept.label}の設問`}<br />
                 {q.latest ? `初回 ${q.first ? q.first.correct ? "正答" : "誤答" : "記録なし"} → 直近 ${q.latest.correct ? "正答" : "誤答"}。${q.retried ? "再挑戦あり" : "再挑戦なし"}${q.sessions > 1 ? `、再学習を含む${q.sessions}回の記録` : ""}` : "回答の記録は未確認"}
               </Typography>)}
             </Stack>}
