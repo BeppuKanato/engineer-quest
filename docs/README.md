@@ -92,6 +92,7 @@
 | [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [greedy-coins-baseline-import-380.md](greedy-coins-baseline-import-380.md) | 記録 | Issue #380の貪欲法（硬貨問題）単元の基準データ取り込み |
+| [greedy-coins-figure-381.md](greedy-coins-figure-381.md) | 記録 | Issue #381の貪欲法（硬貨問題）硬貨図基盤（額面列・残額・トレイの盤面型と描画）とフェーズ1（導入）7場面、配置を基準設計 §4 に従い単元側に置いた判断などの留保 |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
 | [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
