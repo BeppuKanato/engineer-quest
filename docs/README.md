@@ -99,6 +99,7 @@
 | [greedy-coins-phase5-385.md](greedy-coins-phase5-385.md) | 記録 | Issue #385の貪欲法（硬貨問題）フェーズ5（コードの確認問題）独立2問（while の条件＝ remaining、残額の更新＝ coin）、選択肢を変数名3択で統一した判断 |
 | [greedy-coins-phase6-386.md](greedy-coins-phase6-386.md) | 記録 | Issue #386の貪欲法（硬貨問題）フェーズ6（応用問題）4問（転移タップ・反例トレース・反例の理解・フェード型 Parsons）、Parsons の append／subtract 行を互換グループとして実装した判断 |
 | [greedy-coins-phase7-387.md](greedy-coins-phase7-387.md) | 記録 | Issue #387の貪欲法（硬貨問題）フェーズ7（自分で実装）テスト5件（判定用に反例 J4 を含む）、入力レベル3段階のテンプレートを基準設計のコードブロックどおりとした判断、視覚デバッグ未接続（#388）の留保 |
+| [greedy-coins-trace-388.md](greedy-coins-trace-388.md) | 記録 | Issue #388の貪欲法（硬貨問題）の視覚デバッグ、共有ハーネスへの remaining・coin・amount 記録の加算、フェーズ2正準11コマとの完全一致、選択の確定は記録と残額更新がそろったイベントで行う留保 |
 | [binary-search-phase1-286.md](binary-search-phase1-286.md) | 記録 | Issue #286の二分探索フェーズ1（導入）、数当てゲームと半分に絞る発想の6場面、検証済みトレースとの照合とプレビュー登録方法などの留保 |
 | [binary-search-phase1-reply-329.md](binary-search-phase1-reply-329.md) | 記録 | Issue #329の二分探索フェーズ1の数当てゲーム、真ん中を聞く場面を「聞く」「答え」の2場面に分け、答え（50より大きい）を吹き出しとキャプションで明示（全7場面化、消えた側の色はグレー据え置き） |
 | [binary-search-phase2-287.md](binary-search-phase2-287.md) | 記録 | Issue #287の二分探索フェーズ2（動きの説明）、盤面型（セル状態・lo/hi/mid）の定義、共通配列基盤の cellStatuses 拡張、キャプション圧縮などの留保 |
