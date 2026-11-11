@@ -136,12 +136,13 @@ export function FeedbackObservation({ id, href, candidates }: { id: string; href
       if (!rawRoute && !skip) return;
       const route = rawRoute ? canonicalRoute(rawRoute) : null;
       const candidateId = target.closest("[data-feedback-candidate-id]")?.getAttribute("data-feedback-candidate-id");
-      const chosen = presented.find(c=>c.candidateId===candidateId) ?? presented.find(c=>c.href && c.href===route);
+      const matching = presented.filter(c=>c.href && c.href===route);
+      const chosen = presented.find(c=>c.candidateId===candidateId) ?? (matching.length===1 ? matching[0] : undefined);
       const expected = chosen?.href ?? presented[0]?.href ?? null;
       const choiceId = crypto.randomUUID();
       const selectedAt = new Date().toISOString();
-      void log(chosen ? "CLICKED" : "NAVIGATION_SELECTED", { href: route, expected, isRecommendation: !!chosen, candidateId:chosen?.candidateId ?? null,
-        notSelectedCandidateIds:presented.filter(c=>c.candidateId!==chosen?.candidateId).map(c=>c.candidateId), choiceId, selectedAt, skipped:skip });
+      void log(chosen ? "CLICKED" : "NAVIGATION_SELECTED", { href: route, expected, isRecommendation: !!chosen || matching.length>0, candidateId:chosen?.candidateId ?? null,
+        notSelectedCandidateIds:!chosen && matching.length>1 && !skip ? [] : presented.filter(c=>c.candidateId!==chosen?.candidateId).map(c=>c.candidateId), choiceId, selectedAt, skipped:skip });
       if (!route || sessionStorage.getItem("feedback-v1-pending")) return;
       sessionStorage.setItem("feedback-v1-pending", JSON.stringify({ id, href: route, expected, candidateId:chosen?.candidateId ?? null, selectedAt, choiceId }));
     };

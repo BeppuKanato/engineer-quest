@@ -51,10 +51,16 @@ async function main(){
   assert.equal(clicked.data.expected,'/learn?phase=one','shared routes keep the selected candidate identity');
   assert.deepEqual(clicked.data.notSelectedCandidateIds,['candidate-1','candidate-3']);
   assert.equal(JSON.parse(storage.get('feedback-v1-pending')).candidateId,'candidate-2');
+  const external={getAttribute:name=>name==='href'?candidates[0].actionHref:null,hasAttribute:()=>false,closest:()=>null};
+  listeners.get('click')({target:{closest:()=>external}});
+  await new Promise(resolve=>setImmediate(resolve));
+  const ambiguous=records.find(r=>r.type==='NAVIGATION_SELECTED' && !r.data.skipped);
+  assert.equal(ambiguous.data.candidateId,null,'a shared URL without candidate ID must not be assigned to the first candidate');
+  assert.equal(ambiguous.data.notSelectedCandidateIds.length,0,'unknown candidate choice is not explicit non-selection');
   const skip={getAttribute:()=>null,hasAttribute:name=>name==='data-feedback-skip',closest:()=>null};
   listeners.get('click')({target:{closest:()=>skip}});
   await new Promise(resolve=>setImmediate(resolve));
-  const skipped=records.find(r=>r.type==='NAVIGATION_SELECTED');
+  const skipped=records.find(r=>r.type==='NAVIGATION_SELECTED' && r.data.skipped);
   assert.equal(skipped.data.skipped,true);assert.equal(skipped.data.notSelectedCandidateIds.length,3);
   exportsObject.FeedbackDestination({ready:true,targetId:'two',actualRoute:'/learn?phase=one'});effects.shift()();
   await new Promise(resolve=>setImmediate(resolve));
