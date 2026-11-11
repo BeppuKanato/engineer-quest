@@ -43,6 +43,19 @@ async function main() {
   assert.throws(()=>validateAnalysis(input,{...analysis,conceptClaims:[{...analysis.conceptClaims[0],sourceIds:["invented"]}]}),/INVALID_CONCEPT_EVIDENCE/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"完全に理解しました"}),/UNSUPPORTED/);
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"99問に正答しました"}),/UNSUPPORTED_NUMERIC_CLAIM/);
+  // Reproduce dev failure: numeric values in curriculum question labels are not JSON numbers.
+  const labeledSnapshot = {
+    ...conceptSnapshot,
+    concepts: conceptSnapshot.concepts.map(concept => ({
+      ...concept,
+      evidence: concept.evidence.map(item => ({ ...item, questionLabel: "残り86円で100円ではなく50円を選ぶ理由" })),
+    })),
+  };
+  const labeledInput: Input = { ...input, learning: { conceptSnapshot: labeledSnapshot } };
+  assert.doesNotThrow(()=>validateAnalysis(labeledInput,{...analysis,currentState:"86円の設問で100円ではなく50円を選ぶ理由を確認しました。"}));
+  assert.throws(()=>validateAnalysis(labeledInput,{...analysis,currentState:"99問に正答しました"}),/UNSUPPORTED_NUMERIC_CLAIM/);
+  const ratioInput: Input = {...input,bigGoal:{displayText:"単元を完了する",type:"UNIT_COMPLETION",condition:{},progress:{outcome:"ONGOING",fraction:3/7,detail:{firstAttempt:{rate:0.875}}},status:"ACTIVE",confirmedAt:null,daysSinceConfirmed:null}};
+  assert.doesNotThrow(()=>validateAnalysis(ratioInput,{...analysis,currentState:"初回正答率は87.5%、目標の進捗は43%です。"}));
   assert.throws(()=>validateAnalysis(input,{...analysis,currentState:"理解度は100%です"}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
   for(const currentState of ["この内容を習得した。","キューの操作をマスターしました。","考え方が身についた。","完全に理解できています。"])
     assert.throws(()=>validateAnalysis(input,{...analysis,currentState}),/UNSUPPORTED_LEARNING_JUDGEMENT/);
