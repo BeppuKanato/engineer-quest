@@ -28,5 +28,11 @@ for (const unit of definitions) {
   assert.ok(html.includes('テスト通過・完了'));
   assert.ok(html.includes('repeat(2') && html.includes('repeat(3'),'responsive grid rules');
   assert.ok(!html.includes('理解度%'));
+  const legacy=structuredClone(concepts);
+  for(const c of legacy)for(const q of c.evidence){delete q.stageLabel;delete q.questionLabel;}
+  const oldHtml=renderToStaticMarkup(React.createElement(ConceptMap,{snapshot:{id:'legacy',title:unit.title,concepts:legacy}}));
+  for(const c of legacy)for(const q of c.evidence)assert.ok(!oldHtml.includes(q.questionId),'old stored snapshots also hide internal IDs');
+  assert.ok(!oldHtml.includes('undefined'));
+
 }
 console.log('PASS: seven-unit concept map SSR, labels/counts/evidence, keyboard disclosure, separate P7, responsive layout rules');

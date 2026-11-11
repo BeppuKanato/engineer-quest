@@ -33,9 +33,11 @@ vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleK
 async function main(){
   for(const n of [1,2,3]){
     const html=renderToStaticMarkup(React.createElement(exportsObject.FeedbackCandidates,{candidates:candidates.slice(0,n)}));
+    assert.ok(html.includes('取り組むかどうかは自分で選べます。'));
     assert.equal((html.match(/<article/g)||[]).length,n);
     assert.equal((html.match(/<a /g)||[]).length,Math.min(n,2),'offline suggestion is useful text, no fake button/link');
   }
+  candidates[1].actionHref=candidates[0].actionHref; // 同じ遷移先でも選んだ候補IDを区別する。
   mockHooks=true;
   exportsObject.FeedbackObservation({id:'feedback',href:candidates[0].actionHref,candidates});effects.shift()();
   await new Promise(resolve=>setImmediate(resolve));
@@ -46,7 +48,7 @@ async function main(){
   await new Promise(resolve=>setImmediate(resolve));
   const clicked=records.find(r=>r.type==='CLICKED');
   assert.equal(clicked.data.candidateId,'candidate-2');
-  assert.equal(clicked.data.expected,'/learn?phase=two','phase routes remain distinguishable');
+  assert.equal(clicked.data.expected,'/learn?phase=one','shared routes keep the selected candidate identity');
   assert.deepEqual(clicked.data.notSelectedCandidateIds,['candidate-1','candidate-3']);
   assert.equal(JSON.parse(storage.get('feedback-v1-pending')).candidateId,'candidate-2');
   const skip={getAttribute:()=>null,hasAttribute:name=>name==='data-feedback-skip',closest:()=>null};
@@ -54,7 +56,7 @@ async function main(){
   await new Promise(resolve=>setImmediate(resolve));
   const skipped=records.find(r=>r.type==='NAVIGATION_SELECTED');
   assert.equal(skipped.data.skipped,true);assert.equal(skipped.data.notSelectedCandidateIds.length,3);
-  exportsObject.FeedbackDestination({ready:true,targetId:'two',actualRoute:'/learn?phase=two'});effects.shift()();
+  exportsObject.FeedbackDestination({ready:true,targetId:'two',actualRoute:'/learn?phase=one'});effects.shift()();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(records.find(r=>r.type==='ARRIVED').data.candidateId,'candidate-2');
   assert.equal(storage.has('feedback-v1-pending'),false);

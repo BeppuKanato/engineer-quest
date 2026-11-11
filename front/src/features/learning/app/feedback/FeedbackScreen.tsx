@@ -96,7 +96,7 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
           {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
             <div key={label}>
               <Typography fontWeight={900}>{label}</Typography>
-              <Typography sx={{ fontSize: 16 }}>{body}</Typography>
+              <Typography sx={{ fontSize: 16, overflowWrap: "anywhere" }}>{body}</Typography>
             </div>
           ))}
           <FeedbackCandidates candidates={feedbackCandidates(f)} onAction={onAction} />
