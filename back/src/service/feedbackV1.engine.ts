@@ -5,6 +5,7 @@ import type { AutoParseableTextFormat } from "openai/lib/parser";
 import type { ZodTypeAny } from "zod";
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
 const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-6.1-terra";
+const REASONING_EFFORT = "low";
 
 const text = z.string().trim().min(1);
 export const analysisSchema = z.object({
@@ -92,7 +93,7 @@ export type Call = (stage: "analysis" | "selection", prompt: string, personalize
 export const openAiCall: Call = async (stage, prompt, personalized) => {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120_000, maxRetries: 0 });
   const schema = stage === "analysis" ? analysisSchema : selectionSchema.extend({ candidates: z.array(candidateSchema.extend({ personalizationAdjustment: personalized ? adjustmentSchema : z.null() })).min(1).max(3) });
-  const response = await client.responses.parse({ model: getFeedbackModel(), input: prompt, reasoning: { effort: "medium" }, text: { format: format(schema, stage) } });
+  const response = await client.responses.parse({ model: getFeedbackModel(), input: prompt, reasoning: { effort: REASONING_EFFORT }, text: { format: format(schema, stage) } });
   if (!response.output_parsed) throw new Error("EMPTY_LLM_RESPONSE");
   return { output: response.output_parsed, model: response.model, responseId: response.id, usage: response.usage ?? null };
 };
@@ -102,10 +103,10 @@ export async function generate(input: Input, call: Call = openAiCall, log: (entr
     const started = Date.now();
     try {
       const result = await call(stage, prompt, stage === "selection" && input.hexad !== null);
-      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, ...result, durationMs: Date.now() - started, error: null });
+      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: REASONING_EFFORT, model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, ...result, durationMs: Date.now() - started, error: null });
       return result.output;
     } catch (error) {
-      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: "medium", model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, durationMs: Date.now() - started, error: error instanceof Error ? error.message : "UNKNOWN" });
+      await log({ stage, promptVersion: PROMPT_VERSION, settings: { reasoningEffort: REASONING_EFFORT, model: getFeedbackModel(), sdkRetries: 0 }, input: prompt, durationMs: Date.now() - started, error: error instanceof Error ? error.message : "UNKNOWN" });
       throw error;
     }
   };
@@ -146,13 +147,29 @@ export function validateAnalysis(input: Input, analysis: Analysis) {
   const text = [analysis.currentState, ...analysis.understood, ...analysis.needsImprovement, ...analysis.uncertain, ...analysis.conceptClaims.map(c=>c.observation)].join(" ");
   if (unsupportedJudgement(text)) throw new Error("UNSUPPORTED_LEARNING_JUDGEMENT");
   const observedNumbers = new Set<number>();
-  const collectNumbers = (value: unknown): void => {
-    if (typeof value === "number" && Number.isFinite(value)) observedNumbers.add(value);
-    if (Array.isArray(value)) { observedNumbers.add(value.length); value.forEach(collectNumbers); }
-    else if (value && typeof value === "object") Object.values(value).forEach(collectNumbers);
+  const collectNumbers = (value: unknown, key?: string): void => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      observedNumbers.add(value);
+      // Progress fractions and first-attempt rates may be expressed as percentages.
+      if ((key === "rate" || key === "fraction") && value >= 0 && value <= 1) {
+        observedNumbers.add(Math.round(value * 100));
+        observedNumbers.add(Number((value * 100).toFixed(1)));
+      }
+    }
+    if (Array.isArray(value)) { observedNumbers.add(value.length); value.forEach(child => collectNumbers(child)); }
+    else if (value && typeof value === "object") Object.entries(value).forEach(([childKey, child]) => collectNumbers(child, childKey));
   };
   collectNumbers(input.learning); collectNumbers(input.bigGoal);
-  if (input.bigGoal?.progress.fraction !== null && input.bigGoal?.progress.fraction !== undefined) observedNumbers.add(Math.round(input.bigGoal.progress.fraction*100));
+  // Question numbers are part of trusted curriculum labels, not numeric JSON fields.
+  // Allow referencing those numbers without accepting arbitrary figures from the model.
+  for (const concept of snapshot?.concepts ?? []) {
+    for (const evidence of concept.evidence) {
+      if (typeof evidence.questionLabel !== "string") continue;
+      for (const match of evidence.questionLabel.normalize("NFKC").matchAll(/[0-9]+(?:\.[0-9]+)?/g)) {
+        observedNumbers.add(Number(match[0]));
+      }
+    }
+  }
   if ([...text.normalize("NFKC").matchAll(/[0-9]+(?:\.[0-9]+)?/g)].some(m=>!observedNumbers.has(Number(m[0])))) throw new Error("UNSUPPORTED_NUMERIC_CLAIM");
   if (snapshot?.concepts.some(c=>c.attemptedQuestions>0) && !analysis.conceptClaims.length) throw new Error("MISSING_CONCEPT_CLAIMS");
   for (const claim of analysis.conceptClaims) {
