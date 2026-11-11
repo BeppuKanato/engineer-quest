@@ -12,11 +12,15 @@ const reducedStyle = {
   "@media (prefers-reduced-motion: reduce)": { transform: "none !important", opacity: "1 !important" },
 } as const;
 
-/** リザルト自身の初回出現だけを演出する。報酬キューや保存・遷移には接続しない。 */
-export function UnitResultCelebration({ heading, headingRef }: { heading: string; headingRef: Ref<HTMLHeadingElement> }) {
+/**
+ * リザルト自身の初回出現だけを演出する。報酬キューや保存・遷移には接続しない。
+ * 紙吹雪と歓声はこの1回の発火に一元化する：大目標の達成が重なる結果画面では
+ * preset を "final" に引き上げて最大級で祝い、二重には発火しない（#370）。
+ */
+export function UnitResultCelebration({ heading, headingRef, preset = "phase" }: { heading: string; headingRef: Ref<HTMLHeadingElement>; preset?: "phase" | "final" }) {
   const reduced = useReducedMotion();
   return <Box data-phase-result-celebration sx={{ position: "relative", width: "100%", maxWidth: 640, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-    {!reduced && <ResultConfetti />}
+    {!reduced && <ResultConfetti preset={preset} />}
     <Box component={motion.div} aria-hidden="true" data-phase-result-mark
       initial={reduced ? false : { scale: 0.8, opacity: 0.5 }} animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: reduced ? 0 : 0.6, repeat: 0, ease: "easeOut" }}
