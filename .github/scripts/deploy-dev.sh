@@ -70,12 +70,12 @@ back_build_id="$(gcloud builds submit ./back "${gcloud_flags[@]}" \
   --tag "$back_image" --timeout=1200s --async --format='value(id)')"
 wait_for_build "$back_build_id"
 
+# Dev backend only: allocate CPU outside requests for feedback generation.
 gcloud run deploy "$BACK_SERVICE" "${run_flags[@]}" \
   --image "$back_image" \
   --service-account "$back_account" \
   --platform managed --allow-unauthenticated --ingress all \
   --port 8080 --cpu 1 --memory 512Mi --min 0 --max 2 \
-  # Allow feedback generation to continue after the response returns (dev only).
   --concurrency 20 --timeout 300 --no-cpu-throttling \
   --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}" \
   --update-secrets "DATABASE_URL=DATABASE_URL_DEV:latest,OPENAI_API_KEY=OPENAI_API_KEY_DEV:latest"
