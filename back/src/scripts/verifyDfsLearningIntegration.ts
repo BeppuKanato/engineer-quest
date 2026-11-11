@@ -65,6 +65,7 @@ Object.assign(prisma.unitLearningProgress, {
   },
 });
 Object.assign(prisma.phaseLearningProgress, {
+  findUnique: async ({ where }: { where: { userId_courseId_phaseKey: PhaseScope } }) => records.get(phaseKey(where.userId_courseId_phaseKey)) ?? null,
   findMany: async ({ where }: { where: Scope }) => [...records.values()].filter(row => row.userId === where.userId && (!where.courseId || row.courseId === where.courseId)),
   upsert: async ({ where, create, update }: { where: { userId_courseId_phaseKey: PhaseScope }; create: PhaseRow; update: Partial<PhaseRow> }) => {
     const key = phaseKey(where.userId_courseId_phaseKey), existing = records.get(key);
@@ -104,7 +105,11 @@ Object.assign(prisma.userAchievement, {
     return { achievement: awards.find(item => item.id === create.achievementId), achievedAt: now };
   },
 });
-Object.assign(prisma.learningEvent, { create: async () => ({}), createMany: async ({ data }: { data: Prisma.LearningEventCreateManyInput[] }) => {
+const snapshots: Prisma.LearningEventCreateManyInput[] = [];
+Object.assign(prisma.learningEvent, {
+  findFirst: async ({where}:{where: Record<string,unknown>}) => snapshots.find(row=>Object.entries(where).every(([key,value])=>row[key as keyof typeof row]===value)) ?? null,
+  create: async ({data}:{data:Prisma.LearningEventCreateManyInput}) => { snapshots.push(data); return data; },
+  createMany: async ({ data }: { data: Prisma.LearningEventCreateManyInput[] }) => {
   logged.push(...data);
   return { count: data.length };
 } });
