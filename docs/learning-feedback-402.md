@@ -72,6 +72,24 @@
 - 8: conceptSnapshotのないcreate等ではconceptClaimsを空に正規化し、余分な欄だけで全生成を失敗させない。元のAI出力は監査ログに残し、本文・source IDの検証を維持。snapshotのある場合の厳密な概念検証は維持。
 - 9: 分析文と候補文の習得・マスター・身についた等の断定を検出し、否定・判断保留・目標表現は許可する。語句パターンの検証であり、自然言語の妥当性を完全に保証するものではない。
 
+### 指摘別の変更ファイルと検証結果
+
+| 指摘 | 主な変更ファイル | 自動検証結果 |
+| --- | --- | --- |
+| 1 | `back/src/learning/feedback/concepts.json`、`front/src/api/feedbackV1.api.ts`、`front/src/features/learning/app/feedback/ConceptMap.tsx` | front `verify:feedback-concepts` / `verify:feedback-map`: PASS。全設問の日本語説明を現行教材と照合し、内部ID・ASCIIタグの非表示を検証 |
+| 2 | `back/src/service/learning.service.ts`、`feedbackConcepts.ts`、`feedbackV1.context.ts`、frontのConceptMap/API型 | back `verify:feedback-evidence-storage`: PASS。欠落受付・欠落イベント・過去証拠保持・不正証拠の書込防止 |
+| 3 | `back/src/service/feedbackConcepts.ts`、`back/src/scripts/verifyFeedbackConcepts.ts` | back `verify:feedback-concepts`: PASS。A→B→Aの回答、時計逆転、遅延・重複・低attempt配信、同点・逆順、P7受信順 |
+| 4/6 | `back/src/service/feedbackV1.engine.ts`、`back/src/scripts/verifyFeedbackCandidates.ts`、frontのfeedbackV1表示・観測 | back/front `verify:feedback-candidates`: PASS。長文・重複受入、共通URLでの候補ID識別と候補不明時の非推定 |
+| 5 | `back/src/scripts/verifyFeedbackConcepts.ts` | back `verify:feedback-concepts`: PASS。BFS発見済み概念2/3の具体例と直近誤答への変形 |
+| 7 | `back/src/service/feedbackV1.context.ts`、`feedbackV1.engine.ts`、`back/src/scripts/verifyFeedbackV1Context.ts` | back `verify:feedback-v1-context`: PASS。選択段のcurrent/next目標、分析段への非混入、条件間の共通性 |
+| 8 | `back/src/service/feedbackV1.engine.ts`、`back/src/scripts/verifyFeedbackCandidates.ts` | back `verify:feedback-candidates`: PASS。snapshotなし＋余分なclaimsでも成功し、claimsを空として引き継ぐ。原出力ログ・本文と根拠検証は維持 |
+| 9 | 同上 | back `verify:feedback-candidates`: PASS。習得断定の拒否、否定・判断保留・目標の受入、候補文の検証 |
+| 10（前回対応・回帰確認） | `back/src/service/learning.service.ts`、`back/src/scripts/verifyFeedbackEvidenceStorage.ts`、`verifyDfsLearningIntegration.ts` | back `verify:feedback-evidence-storage` / `verify:dfs-learning`: PASS。冪等化・別セッション・利用者分離・競合再試行 |
+| 11 | `front/src/app/component/feedbackV1.tsx`、`ConceptMap.tsx`、`FeedbackScreen.tsx`、`front/scripts/verifyFeedbackMap.cjs` / `verifyFeedbackCandidates.cjs` | front `verify:feedback-map` / `verify:feedback-candidates`: PASS。任意性の可視注記、件数・注意文・旧スナップショット互換・長文の折り返し |
+| 12 | `back/src/service/feedbackConcepts.ts`、`back/src/scripts/verifyFeedbackConcepts.ts`、本書・README | back `verify:feedback-concepts`: PASS。全7単元/P7の集約と不正定義の検出。申告ベース・受信順の限界を文書化 |
+
+最終ローカル検証: front/backのlint・typecheck・build、backの`verify:static`・`verify:big-goal`・`verify:big-goal-proposal`、frontの新3検証・learning-screens・learning-player・response-feedback・answer-feedback、7単元のcheck/code-check/consolidation/unit（28検証）はすべてPASS。実DB・実LLM・ブラウザを使う検証、デプロイ、マージは未実施。既存警告5件とmodule/lockfile警告のみ残る。
+
 ### 残るデータの限界
 
 回答証拠の正誤はクライアント申告であり、サーバー側で教材を再採点していない。スナップショットと到着済みの実回答イベントの正誤突合もしていない。形式・ID・attempt・根拠の整合性を検証し、矛盾した同一attemptは確定スナップショットを優先する。serverTimestampによる「最新」はサーバーが受信・確定した順序であり、通信中断中の実際の回答時刻を復元するものではない。P7の観測結果もサーバー受信時刻で比較する。証拠なし旧要求にはセッションIDがないため、再送を解き直しと確実に区別できず、修正10の同一セッションの冪等化の対象にはできない。
