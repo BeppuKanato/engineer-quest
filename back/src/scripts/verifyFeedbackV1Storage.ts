@@ -1,4 +1,5 @@
 // Service contract test with an in-memory Prisma adapter; not a PostgreSQL test.
+import { aggregateConcepts, conceptDefinitions } from "../service/feedbackConcepts";
 import { Prisma } from "@prisma/client";
 import assert from "node:assert/strict";
 import { prisma } from "../lib/prisma";
@@ -12,7 +13,7 @@ async function main() {
   const rows = new Map<string, Row>();
   const calls: { data: { stage: string } }[] = [];
   const interactions: { type: string }[] = [];
-  const input: Input = { learning: { id: "a1" }, state: {}, actions: [{ id: 15, label: "XP確認", purpose: "達成の実感", condition: "表示可能", targetIds: ["profile"] }], targets: { 15: [{ id: "profile", href: "/profile" }] }, hexad: null, bigGoal: null };
+  const input: Input = { learning: { id: "a1", conceptSnapshot: aggregateConcepts(conceptDefinitions[0].courseId,[],[],"frozen") }, state: {}, actions: [{ id: 15, label: "XP確認", purpose: "達成の実感", condition: "表示可能", targetIds: ["profile"] }], targets: { 15: [{ id: "profile", href: "/profile" }] }, hexad: null, bigGoal: null };
   (contextModule as { buildFeedbackV1Context: unknown }).buildFeedbackV1Context = async () => ({ userId: "pseudonym-1", condition: "STANDARD", input });
   db.user.findUnique = async () => ({ id: "pseudonym-1" });
   db.createQuestFeedback.findFirst = async () => null;
@@ -29,7 +30,7 @@ async function main() {
   let llmCalls = 0;
   const generator: typeof generate = (i, _, log) => generate(i, async stage => {
     llmCalls++;
-    return { model: "fixture", responseId: `r-${llmCalls}`, usage: { input_tokens: 100, output_tokens: 100 }, output: stage === "analysis" ? { currentState: "完了した", understood: [], needsImprovement: [], uncertain: ["未観測"], evidence: [{ sourceId: "a1", fact: "完了", inference: false }] } : { nextGoal: "進展を確認する", nextStep: "XPを確認する", actionId: 15, targetId: "profile", actionLabel: "XPを確認", purpose: "達成の実感", reason: "完了を振り返る", personalizationAdjustment: null } };
+    return { model: "fixture", responseId: `r-${llmCalls}`, usage: { input_tokens: 100, output_tokens: 100 }, output: stage === "analysis" ? { currentState: "完了した", conceptClaims: [], understood: [], needsImprovement: [], uncertain: ["未観測"], evidence: [{ sourceId: "a1", fact: "完了", inference: false }] } : { nextGoal: "進展を確認する", candidates: [{ capabilityId: null, nextStep: "XPを確認する", actionId: 15, targetId: "profile", actionLabel: "XPを確認", purpose: "達成の実感", reason: "完了を振り返る", personalizationAdjustment: null }] } };
   }, log);
   for (const kind of ["mission", "create"] as const) {
     const id = kind === "mission" ? "reward-run-1" : "submission-1";
@@ -37,10 +38,15 @@ async function main() {
     for (let i = 0; i < 20 && rows.get(`${kind}:${id}`)!.status === "GENERATING"; i++) await new Promise(resolve => setImmediate(resolve));
     const first = await feedbackV1("uid", kind, id);
     assert.equal(first.status, "COMPLETED");
+    assert.equal((first.conceptSnapshot as {id:string}).id,"frozen");
+    const originalLearning = input.learning;
+    input.learning = { id: "a1", conceptSnapshot: aggregateConcepts(conceptDefinitions[0].courseId,[],[],"changed-after-generation") };
     const before = llmCalls;
     const reloaded = await feedbackV1("uid", kind, id, true, generator);
     assert.deepEqual(first.feedback, reloaded.feedback);
     assert.equal(llmCalls, before);
+    assert.deepEqual(first.conceptSnapshot,reloaded.conceptSnapshot);
+    input.learning = originalLearning;
     assert.equal(rows.get(`${kind}:${id}`)!.input.hexad, null);
   }
   db.user.findUnique = async () => ({ id: "someone-else" });
