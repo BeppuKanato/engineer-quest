@@ -1,5 +1,6 @@
 import bigGoalRouter from "./router/bigGoal.router";
 import feedbackV1Router from "./router/feedbackV1.router";
+import feedbackV1TaskRouter from "./router/feedbackV1Task.router";
 import learningRouter from "./router/learning.router";
 import express from 'express';
 import { Request, Response } from 'express';
@@ -54,6 +55,7 @@ app.use('/api/quest-board', questBoardRouter);
 app.use('/api/hexad', hexadRouter);
 app.use('/api', createQuestRouter);
 
+app.use('/internal/feedback', feedbackV1TaskRouter);
 app.use('/api/feedback-v1', feedbackV1Router);
 app.use('/api/learning', learningRouter);
 app.use('/api/big-goals', bigGoalRouter);
