@@ -106,6 +106,16 @@ export const courseSeed: CourseSeedEntry[] = [
     version: 1,
     categories: [CourseCategoryType.SORT],
   },
+  {
+    id: "course-algorithm-greedy-coins-v1",
+    title: "貪欲法（硬貨問題）",
+    description: "金額を硬貨の枚数が少なくなるように払うために、そのつど使える一番大きい硬貨を選ぶ貪欲法を学びます。残額と選んだ硬貨を一手ずつ追い、それが最適とは限らないことも確かめ、最後はPythonで支払い関数を完成させます。リスト・while・関数を一度学んだ方が対象です。",
+    difficulty: CourseDifficulty.EASY,
+    isInitiallyUnlocked: true,
+    isPublished: true,
+    version: 1,
+    categories: [CourseCategoryType.ALGORITHM],
+  },
 ];
 
 /**
