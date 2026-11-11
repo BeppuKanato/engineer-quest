@@ -19,6 +19,7 @@ image_tag="${SOURCE_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 back_image="${image_root}/back:${image_tag}"
 front_image="${image_root}/front:${image_tag}"
 back_account="engineer-quest-dev-back@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
+tasks_account="eq-feedback-tasks-dev@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 front_account="engineer-quest-dev-front@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 
 gcloud_flags=(--project "$GCP_PROJECT_ID" --quiet)
@@ -66,18 +67,20 @@ if [[ -n "$front_url" ]]; then
   allowed_origins="$(get_front_origins "$front_url")"
 fi
 
+back_url_before="$(gcloud run services describe "$BACK_SERVICE" "${run_flags[@]}" --format='value(status.url)')"
+[[ "$back_url_before" == https://* ]]
+
 back_build_id="$(gcloud builds submit ./back "${gcloud_flags[@]}" \
   --tag "$back_image" --timeout=1200s --async --format='value(id)')"
 wait_for_build "$back_build_id"
 
-# Dev backend only: allocate CPU outside requests for feedback generation.
 gcloud run deploy "$BACK_SERVICE" "${run_flags[@]}" \
   --image "$back_image" \
   --service-account "$back_account" \
   --platform managed --allow-unauthenticated --ingress all \
   --port 8080 --cpu 1 --memory 512Mi --min 0 --max 2 \
-  --concurrency 20 --timeout 300 --no-cpu-throttling \
-  --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}" \
+  --concurrency 20 --timeout 300 --cpu-throttling \
+  --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}@FEEDBACK_TASKS_ENABLED=true@FEEDBACK_TASKS_QUEUE=feedback-generation-dev@FEEDBACK_TASKS_REGION=${REGION}@FEEDBACK_TASKS_CALLER_SA=${tasks_account}@FEEDBACK_TASKS_HANDLER_URL=${back_url_before}/internal/feedback/generate@FEEDBACK_TASKS_AUDIENCE=${back_url_before}" \
   --update-secrets "DATABASE_URL=DATABASE_URL_DEV:latest,OPENAI_API_KEY=OPENAI_API_KEY_DEV:latest"
 
 back_url="$(gcloud run services describe "$BACK_SERVICE" "${run_flags[@]}" --format='value(status.url)')"
