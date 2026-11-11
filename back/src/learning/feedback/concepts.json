@@ -1,0 +1,1082 @@
+[
+  {
+    "courseId": "course-algorithm-breadth-first-search-v1",
+    "kind": "bfs",
+    "title": "幅優先探索（BFS）",
+    "phases": [
+      {
+        "id": "bfs-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "bfs-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "bfs-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "bfs-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "bfs-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "bfs-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "bfs-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "bfs:order",
+        "label": "探索順序",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bfs-check",
+            "assessmentId": "bfs-check",
+            "questionId": "take-next",
+            "tags": [
+              "dequeue-order"
+            ]
+          },
+          {
+            "phaseKey": "bfs-consolidation",
+            "assessmentId": "bfs-consolidation",
+            "questionId": "last-from-f",
+            "tags": [
+              "処理順序の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bfs:queue",
+        "label": "キューの操作",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bfs-code-check",
+            "assessmentId": "bfs-code-check",
+            "questionId": "enqueue-method",
+            "tags": [
+              "enqueue-tail"
+            ]
+          },
+          {
+            "phaseKey": "bfs-consolidation",
+            "assessmentId": "bfs-consolidation",
+            "questionId": "queue-after-j",
+            "tags": [
+              "キューの状態の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bfs:discovered",
+        "label": "発見済みノードの扱い",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bfs-check",
+            "assessmentId": "bfs-check",
+            "questionId": "after-c",
+            "tags": [
+              "avoid-duplicate"
+            ]
+          },
+          {
+            "phaseKey": "bfs-code-check",
+            "assessmentId": "bfs-code-check",
+            "questionId": "undiscovered-condition",
+            "tags": [
+              "undiscovered-test"
+            ]
+          },
+          {
+            "phaseKey": "bfs-consolidation",
+            "assessmentId": "bfs-consolidation",
+            "questionId": "start-already-discovered",
+            "tags": [
+              "距離が決まった場所の扱い"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bfs:unreachable",
+        "label": "到達できないノード",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bfs-consolidation",
+            "assessmentId": "bfs-consolidation",
+            "questionId": "unreachable-z",
+            "tags": [
+              "たどり着けない場所の扱い"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bfs:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bfs-consolidation",
+            "assessmentId": "bfs-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bfs:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "bfs-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-depth-first-search-v1",
+    "kind": "dfs",
+    "title": "深さ優先探索（DFS）",
+    "phases": [
+      {
+        "id": "dfs-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "dfs-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "dfs-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "dfs-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "dfs-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "dfs-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "dfs-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "dfs:order",
+        "label": "探索・訪問の順序",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-check",
+            "assessmentId": "dfs-check",
+            "questionId": "take-next",
+            "tags": [
+              "next-pop"
+            ]
+          },
+          {
+            "phaseKey": "dfs-consolidation",
+            "assessmentId": "dfs-consolidation",
+            "questionId": "last-from-f",
+            "tags": [
+              "処理順序の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:dead-end",
+        "label": "行き止まり後の探索",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-check",
+            "assessmentId": "dfs-check",
+            "questionId": "after-f",
+            "tags": [
+              "after-dead-end"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:stack",
+        "label": "スタックの操作",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-code-check",
+            "assessmentId": "dfs-code-check",
+            "questionId": "stack-push",
+            "tags": [
+              "stack-push"
+            ]
+          },
+          {
+            "phaseKey": "dfs-consolidation",
+            "assessmentId": "dfs-consolidation",
+            "questionId": "stack-after-j-k",
+            "tags": [
+              "スタックの状態の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:discovered",
+        "label": "発見済みノードの扱い",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-code-check",
+            "assessmentId": "dfs-code-check",
+            "questionId": "unvisited-test",
+            "tags": [
+              "unvisited-test"
+            ]
+          },
+          {
+            "phaseKey": "dfs-consolidation",
+            "assessmentId": "dfs-consolidation",
+            "questionId": "start-already-discovered",
+            "tags": [
+              "発見済みの場所の扱い"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:unreachable",
+        "label": "到達できないノード",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-consolidation",
+            "assessmentId": "dfs-consolidation",
+            "questionId": "unreachable-z",
+            "tags": [
+              "たどり着けない場所の扱い"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dfs-consolidation",
+            "assessmentId": "dfs-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "dfs:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "dfs-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-wall-extension-v1",
+    "kind": "wall-extension",
+    "title": "棒倒し法",
+    "phases": [
+      {
+        "id": "wall-extension-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "wall-extension-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "wall-extension-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "wall-extension-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "wall-extension-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "wall-extension-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "wall-extension-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "wall-extension:pillar",
+        "label": "柱の配置と処理順",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "wall-extension-check",
+            "assessmentId": "wall-extension-check",
+            "questionId": "next-pillar",
+            "tags": [
+              "pillar-order"
+            ]
+          },
+          {
+            "phaseKey": "wall-extension-code-check",
+            "assessmentId": "wall-extension-code-check",
+            "questionId": "pillar-column-step",
+            "tags": [
+              "pillar-step"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "wall-extension:direction",
+        "label": "壁を伸ばす方向と対象",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "wall-extension-check",
+            "assessmentId": "wall-extension-check",
+            "questionId": "wall-target",
+            "tags": [
+              "extension-target"
+            ]
+          },
+          {
+            "phaseKey": "wall-extension-code-check",
+            "assessmentId": "wall-extension-code-check",
+            "questionId": "up-delta",
+            "tags": [
+              "direction-delta"
+            ]
+          },
+          {
+            "phaseKey": "wall-extension-consolidation",
+            "assessmentId": "wall-extension-consolidation",
+            "questionId": "transfer-wall-target",
+            "tags": [
+              "壁が伸びる先の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "wall-extension:no-up",
+        "label": "上方への伸長制約",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "wall-extension-consolidation",
+            "assessmentId": "wall-extension-consolidation",
+            "questionId": "no-upward-extension",
+            "tags": [
+              "上に伸ばせない理由"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "wall-extension:properties",
+        "label": "完成した迷路の性質",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "wall-extension-consolidation",
+            "assessmentId": "wall-extension-consolidation",
+            "questionId": "completed-maze-properties",
+            "tags": [
+              "完成した迷路の性質"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "wall-extension:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "wall-extension-consolidation",
+            "assessmentId": "wall-extension-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "wall-extension:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "wall-extension-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-bubble-sort-v2",
+    "kind": "bubble-sort",
+    "title": "バブルソート",
+    "phases": [
+      {
+        "id": "bubble-sort-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "bubble-sort-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "bubble-sort-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "bubble-sort-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "bubble-sort-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "bubble-sort-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "bubble-sort-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "bubble-sort:order",
+        "label": "比較の順序",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bubble-sort-check",
+            "assessmentId": "bubble-sort-check",
+            "questionId": "next-pair",
+            "tags": [
+              "compare-order"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bubble-sort:swap",
+        "label": "隣接要素の比較と交換",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bubble-sort-check",
+            "assessmentId": "bubble-sort-check",
+            "questionId": "larger-destination",
+            "tags": [
+              "swap-destination"
+            ]
+          },
+          {
+            "phaseKey": "bubble-sort-code-check",
+            "assessmentId": "bubble-sort-code-check",
+            "questionId": "swap-condition",
+            "tags": [
+              "right-neighbor"
+            ]
+          },
+          {
+            "phaseKey": "bubble-sort-consolidation",
+            "assessmentId": "bubble-sort-consolidation",
+            "questionId": "next-swap-pair",
+            "tags": [
+              "交換が起きるペアの追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bubble-sort:range",
+        "label": "確定範囲と比較範囲",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bubble-sort-code-check",
+            "assessmentId": "bubble-sort-code-check",
+            "questionId": "inner-loop-range",
+            "tags": [
+              "range-shrink"
+            ]
+          },
+          {
+            "phaseKey": "bubble-sort-consolidation",
+            "assessmentId": "bubble-sort-consolidation",
+            "questionId": "why-right-end-fixed",
+            "tags": [
+              "右端が決まる理由"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bubble-sort:sorted",
+        "label": "整列済み配列の扱い",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bubble-sort-consolidation",
+            "assessmentId": "bubble-sort-consolidation",
+            "questionId": "sorted-array-behavior",
+            "tags": [
+              "並び済みの配列の扱い"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bubble-sort:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "bubble-sort-consolidation",
+            "assessmentId": "bubble-sort-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "bubble-sort:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "bubble-sort-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-maze-digging-v1",
+    "kind": "maze-digging",
+    "title": "穴掘り法",
+    "phases": [
+      {
+        "id": "maze-digging-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "maze-digging-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "maze-digging-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "maze-digging-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "maze-digging-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "maze-digging-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "maze-digging-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "maze-digging:target",
+        "label": "掘る先の決定",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-check",
+            "assessmentId": "maze-digging-check",
+            "questionId": "next-room",
+            "tags": [
+              "dig-target"
+            ]
+          },
+          {
+            "phaseKey": "maze-digging-code-check",
+            "assessmentId": "maze-digging-code-check",
+            "questionId": "next-room-distance",
+            "tags": [
+              "next-room-distance"
+            ]
+          },
+          {
+            "phaseKey": "maze-digging-consolidation",
+            "assessmentId": "maze-digging-consolidation",
+            "questionId": "transfer-dig-target",
+            "tags": [
+              "掘り進める先の追跡"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:wall",
+        "label": "間の壁を通路にする",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-check",
+            "assessmentId": "maze-digging-check",
+            "questionId": "between-wall",
+            "tags": [
+              "dig-between"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:undug",
+        "label": "未掘削の判定",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-code-check",
+            "assessmentId": "maze-digging-code-check",
+            "questionId": "undug-room-condition",
+            "tags": [
+              "undug-condition"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:backtrack",
+        "label": "行き止まりとバックトラック",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-consolidation",
+            "assessmentId": "maze-digging-consolidation",
+            "questionId": "backtrack-reason",
+            "tags": [
+              "バックトラックが必要な理由"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:properties",
+        "label": "完成した迷路の性質",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-consolidation",
+            "assessmentId": "maze-digging-consolidation",
+            "questionId": "completed-maze-properties",
+            "tags": [
+              "完成した迷路の性質"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "maze-digging-consolidation",
+            "assessmentId": "maze-digging-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "maze-digging:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "maze-digging-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-binary-search-v1",
+    "kind": "binary-search",
+    "title": "二分探索",
+    "phases": [
+      {
+        "id": "binary-search-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "binary-search-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "binary-search-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "binary-search-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "binary-search-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "binary-search-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "binary-search-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "binary-search:center",
+        "label": "中央位置の決定",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "binary-search-check",
+            "assessmentId": "binary-search-check",
+            "questionId": "next-center",
+            "tags": [
+              "next-center"
+            ]
+          },
+          {
+            "phaseKey": "binary-search-code-check",
+            "assessmentId": "binary-search-code-check",
+            "questionId": "mid-formula",
+            "tags": [
+              "mid-formula"
+            ]
+          },
+          {
+            "phaseKey": "binary-search-consolidation",
+            "assessmentId": "binary-search-consolidation",
+            "questionId": "first-center-transfer",
+            "tags": [
+              "新しいリストでの真ん中の位置"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "binary-search:range",
+        "label": "探索範囲の更新",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "binary-search-check",
+            "assessmentId": "binary-search-check",
+            "questionId": "range-after-compare",
+            "tags": [
+              "drop-side"
+            ]
+          },
+          {
+            "phaseKey": "binary-search-code-check",
+            "assessmentId": "binary-search-code-check",
+            "questionId": "skip-mid",
+            "tags": [
+              "skip-mid"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "binary-search:absent",
+        "label": "見つからない場合の終了",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "binary-search-consolidation",
+            "assessmentId": "binary-search-consolidation",
+            "questionId": "absent-target",
+            "tags": [
+              "探す値が無いときの終わり方"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "binary-search:sorted",
+        "label": "整列済みという前提",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "binary-search-consolidation",
+            "assessmentId": "binary-search-consolidation",
+            "questionId": "why-sorted-matters",
+            "tags": [
+              "並んでいることが前提の理由"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "binary-search:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "binary-search-consolidation",
+            "assessmentId": "binary-search-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "binary-search:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "binary-search-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-greedy-coins-v1",
+    "kind": "greedy-coins",
+    "title": "貪欲法（硬貨問題）",
+    "phases": [
+      {
+        "id": "greedy-coins-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "greedy-coins-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "greedy-coins-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "greedy-coins-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "greedy-coins-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "greedy-coins-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "greedy-coins-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "greedy-coins:choice",
+        "label": "残額以下で最大の硬貨を選ぶ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "greedy-coins-check",
+            "assessmentId": "greedy-coins-check",
+            "questionId": "next-coin",
+            "tags": [
+              "next-coin"
+            ]
+          },
+          {
+            "phaseKey": "greedy-coins-check",
+            "assessmentId": "greedy-coins-check",
+            "questionId": "why-not-100",
+            "tags": [
+              "why-largest-usable"
+            ]
+          },
+          {
+            "phaseKey": "greedy-coins-consolidation",
+            "assessmentId": "greedy-coins-consolidation",
+            "questionId": "next-coin-transfer",
+            "tags": [
+              "新しい金額での次に選ぶ硬貨"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "greedy-coins:repeat",
+        "label": "同じ硬貨を使う条件",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "greedy-coins-code-check",
+            "assessmentId": "greedy-coins-code-check",
+            "questionId": "while-condition",
+            "tags": [
+              "while-condition"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "greedy-coins:remaining",
+        "label": "残額の更新",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "greedy-coins-code-check",
+            "assessmentId": "greedy-coins-code-check",
+            "questionId": "remaining-update",
+            "tags": [
+              "remaining-update"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "greedy-coins:limit",
+        "label": "貪欲法と最少枚数の違い",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "greedy-coins-consolidation",
+            "assessmentId": "greedy-coins-consolidation",
+            "questionId": "counterexample-greedy-result",
+            "tags": [
+              "別の額面での貪欲な払い方"
+            ]
+          },
+          {
+            "phaseKey": "greedy-coins-consolidation",
+            "assessmentId": "greedy-coins-consolidation",
+            "questionId": "counterexample-why-greedy-loses",
+            "tags": [
+              "貪欲が最適にならない理由"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "greedy-coins:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "greedy-coins-consolidation",
+            "assessmentId": "greedy-coins-consolidation",
+            "questionId": "whole-code-order",
+            "tags": [
+              "コード全体の流れ"
+            ]
+          }
+        ]
+      },
+      {
+        "conceptId": "greedy-coins:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "greedy-coins-implementation",
+        "questions": []
+      }
+    ]
+  }
+]
