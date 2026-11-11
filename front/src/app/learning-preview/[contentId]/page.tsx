@@ -50,6 +50,7 @@ import { BinarySearchCodeCheckPreview } from "@/features/learning/binary-search/
 import { BinarySearchConsolidationPreview } from "@/features/learning/binary-search/consolidation/BinarySearchConsolidationPreview";
 import { BinarySearchImplementationPreview } from "@/features/learning/binary-search/implementation/BinarySearchImplementationPreview";
 import { BinarySearchUnitPreview } from "@/features/learning/binary-search/unit/BinarySearchUnitPreview";
+import { GreedyCoinsMotivationPreview } from "@/features/learning/greedy-coins/motivation/GreedyCoinsMotivationPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -82,6 +83,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "binary-search-consolidation") return <BinarySearchConsolidationPreview />;
   if (contentId === "binary-search-implementation") return <BinarySearchImplementationPreview />;
   if (contentId === "binary-search-unit") return <BinarySearchUnitPreview />;
+  if (contentId === "greedy-coins-motivation") return <GreedyCoinsMotivationPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
