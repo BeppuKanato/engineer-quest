@@ -94,7 +94,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
       prisma.phaseLearningProgress.findMany({ where: { userId: user.id, courseId }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] }),
     ]);
-    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot", "implementation_test_result", "hint_open", "implementation_level_select", "implementation_complete"] } } });
+    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot", "assessment_evidence_missing", "implementation_test_result", "hint_open", "implementation_level_select", "implementation_complete"] } } });
     const conceptSnapshot = aggregateConcepts(courseId, answerEvents, phaseRows, crypto.randomUUID());
     const phases = phaseRows.map(p => ({ id: p.phaseKey, status: p.status, summary: p.summary ?? null }));
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));

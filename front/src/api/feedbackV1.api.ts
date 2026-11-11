@@ -3,6 +3,7 @@ import { fetcher } from "@/lib/fetcher";
 type AnswerEvidence = { sourceId: string; sessionId: string; number: number; correct: boolean };
 export type ConceptSnapshot = {
   id: string; version: 1; courseId: string; title: string; relation: "unit-components";
+  missingCompletionEvidence?: {sourceId:string;phaseKey:string|null}[];
   concepts: {
     conceptId: string; label: string; kind: string; state: "unobserved" | "confirmed" | "needs_check";
     attemptedQuestions: number; totalQuestions: number;

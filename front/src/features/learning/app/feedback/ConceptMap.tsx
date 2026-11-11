@@ -40,6 +40,7 @@ export function ConceptMap({ snapshot }: { snapshot: ConceptSnapshot }) {
         </Box>;
       })}
     </Box>
+    {!!snapshot.missingCompletionEvidence?.length && <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>回答の詳細が保存されていない学習回があります。確認状況は取得できた回答記録に基づきます。</Typography>}
     <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>正答は完全な理解を示すものではありません。未回答の内容は判断していません。</Typography>
   </Box>;
 }

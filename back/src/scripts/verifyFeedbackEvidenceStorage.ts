@@ -21,8 +21,8 @@ async function main() {
     learningEvent: {
       findFirst: async({where}:{where:Record<string,unknown>})=>stored.find(row=>Object.entries(where).every(([key,value])=>row[key]===value)) ?? null,
       create: async({data}:{data:Record<string,unknown>})=>{
-        assert.ok(!stored.some(row=>row.id===data.id),"unique event identity");
-        const event = {...data,serverTimestamp:new Date()}; stored.push(event); return event;
+        assert.ok(!data.id || !stored.some(row=>row.id===data.id),"unique event identity");
+        const event = {...data,id:data.id ?? `event-${stored.length}`,serverTimestamp:new Date()}; stored.push(event); return event;
       },
     },
     phaseLearningProgress: {
@@ -40,8 +40,8 @@ async function main() {
   let retryFailures: string[] = [];
   let transactionAttempts=0;
   // アダプタは原子的なトランザクション境界をモデル化する。実DBのロック検証ではない。
-  db.$transaction = (work:(client:unknown)=>Promise<unknown>,options:{isolationLevel:string})=>{
-    assert.equal(options.isolationLevel,"Serializable"); transactionAttempts++;
+  db.$transaction = (work:(client:unknown)=>Promise<unknown>,options?:{isolationLevel:string})=>{
+    if(options)assert.equal(options.isolationLevel,"Serializable"); transactionAttempts++;
     const run=transactionTail.then(()=>{
       const failure=retryFailures.shift();
       if(failure) throw new Prisma.PrismaClientKnownRequestError("fixture conflict",{code:failure,clientVersion:"5.22.0"});
@@ -107,9 +107,22 @@ async function main() {
   assert.equal(transactionAttempts,beforeRetry+3,"retry serialization/unique conflicts with a bounded budget");
   retryFailures=["P2034","P2034","P2034"];
   await assert.rejects(completePhaseByUser(user,courseId,phaseKey,{assessmentEvidence:evidence}),/fixture conflict/);
-  const count = stored.length;
-  await assert.rejects(completePhaseByUser({id:"owner",knowledgeCardTableNumber:1},conceptDefinitions[0].courseId,"bfs-check",{}),/回答証拠/);
-  assert.equal(stored.length,count,"invalid completion never starts persistence");
+  const missingOwner={...user,id:"missing-owner"};
+  const missing=await completePhaseByUser(missingOwner,courseId,phaseKey,{});
+  assert.equal((missing.phase.summary as {assessmentEvidenceStatus:string}).assessmentEvidenceStatus,"missing");
+  const missingEvents=stored.filter(e=>e.userId===missingOwner.id) as unknown as Parameters<typeof aggregateConcepts>[1];
+  const missingSnapshot=aggregateConcepts(courseId,missingEvents,[],"missing")!;
+  assert.ok(missingSnapshot.concepts.every(c=>c.state==="unobserved"));
+  assert.equal(missingSnapshot.missingCompletionEvidence.length,1);
+  const validBefore=aggregateConcepts(courseId,stored.filter(e=>e.userId===user.id && e.courseId===courseId) as unknown as Parameters<typeof aggregateConcepts>[1],[],"snapshot")!;
+  await completePhaseByUser(user,courseId,phaseKey);
+  const validAfter=aggregateConcepts(courseId,stored.filter(e=>e.userId===user.id && e.courseId===courseId) as unknown as Parameters<typeof aggregateConcepts>[1],[],"snapshot")!;
+  assert.deepEqual(validBefore.concepts,validAfter.concepts,"missing completion does not erase reliable previous answers");
+  const count = stored.length, writes = phases.length;
+  for(const invalid of [null,{}, {...evidence,records:[]}]) {
+    await assert.rejects(completePhaseByUser(user,courseId,phaseKey,{assessmentEvidence:invalid}),/回答証拠/);
+    assert.equal(stored.length,count);assert.equal(phases.length,writes,"invalid evidence never starts persistence");
+  }
   console.log("PASS: seven units evidence, delayed answers, completion retry/concurrency, unchanged feedback identity, separate relearning/owners, conflict rejection and bounded transaction retries");
 }
 void main().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>prisma.$disconnect());

@@ -6,7 +6,7 @@
  */
 import { conceptDefinitions, validateEvidence } from "./feedbackConcepts";
 import { LearningProgressStatus, Prisma } from "@prisma/client";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
@@ -150,13 +150,19 @@ export const completePhaseByUser = async (
   const now = new Date();
   const assessed = conceptDefinitions.find(u => u.courseId === courseId)?.concepts.some(c => c.questions.some(q => q.phaseKey === phaseKey));
   let evidence: ReturnType<typeof validateEvidence> | undefined;
-  if (assessed) {
+  if (assessed && summary?.assessmentEvidence === undefined) {
+    summary = { ...summary, assessmentEvidenceStatus: "missing" };
+  } else if (assessed) {
     try { evidence = validateEvidence(courseId, phaseKey, summary?.assessmentEvidence, true); }
     catch { throw new AppError(400, "INVALID_ASSESSMENT_EVIDENCE", "回答証拠が揃っていません。保存を再試行してください。"); }
   }
 
   const saveCompletion = () => prisma.$transaction(async (tx) => {
     const scope = { userId: user.id, courseId, phaseKey };
+    if (assessed && !evidence) await tx.learningEvent.create({ data: {
+      ...scope, sessionId: randomUUID(), eventType: "assessment_evidence_missing", targetId: phaseKey,
+      payload: { reason: "missing_assessment_evidence" }, clientTimestamp: now,
+    } });
     let current: Awaited<ReturnType<typeof tx.phaseLearningProgress.findUnique>> = null;
     if (evidence) {
       // 旧版のランダムIDの原本も照合する。同じセッションの再送は新しい完了にしない。

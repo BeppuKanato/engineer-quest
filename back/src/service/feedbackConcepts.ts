@@ -56,7 +56,8 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
       add(questionKey(q), { sourceId: event.id, sessionId: payload.assessmentSessionId, startedAt: payload.assessmentStartedAt, number: Number(payload.attempt), correct: payload.correct, confirmed: false });
     }
   }
-  return { id: snapshotId, version: 1 as const, courseId, title: unit.title, relation: "unit-components" as const,
+  return { id: snapshotId, version: 1 as const, courseId, title: unit.title,
+    missingCompletionEvidence: events.filter(e=>e.eventType==="assessment_evidence_missing").map(e=>({sourceId:e.id,phaseKey:e.phaseKey})).sort((a,b)=>a.sourceId.localeCompare(b.sourceId)), relation: "unit-components" as const,
     concepts: unit.concepts.map(c => {
       const evidence = c.questions.map(q => {
         const attempts = [...(byQuestion.get(questionKey(q))?.values() ?? [])].sort((a,b) => a.startedAt-b.startedAt || a.sessionId.localeCompare(b.sessionId) || a.number-b.number);
