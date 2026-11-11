@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -37,7 +38,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
 
   useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
   useAssessmentFeedback(content, session, active && !review);
-  useAssessmentCompletion(complete, diagnosis?.correct ?? 0, content.questions.length, onComplete);
+  useAssessmentCompletion(complete, diagnosis?.correct ?? 0, content.questions.length, onComplete, assessmentEvidence(content, session));
 
   useEffect(() => {
     captionRef.current?.focus({ preventScroll: question?.kind === "parsons" && (record?.attemptCount ?? 0) > 0 });

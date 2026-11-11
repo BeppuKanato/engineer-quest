@@ -6,17 +6,20 @@ import { useLearningVisit } from "./useLearningVisit";
 
 export function useAssessmentObservation(content: AssessmentContent, session: AssessmentState, onEvent?: LearningObserver, active = true, reviewId?: string) {
   const seen = useRef<Record<string, number>>({});
+  const seenSession = useRef(session.evidenceSession?.id);
   const completed = useRef(false);
   const question = activeQuestion(content, session);
   const questionTime = useRef({ id: question?.id, began: 0 });
   useEffect(() => {
     if (!active || !onEvent) return;
+    if (seenSession.current !== session.evidenceSession?.id) { seen.current = {}; completed.current = false; seenSession.current = session.evidenceSession?.id; }
     for (const record of session.records) {
       if (record.attemptCount < (seen.current[record.questionId] ?? 0)) seen.current[record.questionId] = 0;
       const item = content.questions.find(item => item.id === record.questionId)!;
       for (const attempt of record.attempts.slice(seen.current[record.questionId] ?? 0)) {
         if (attempt.number > 1) onEvent({ eventType: "assessment_retry", targetId: record.questionId, payload: { attempt: attempt.number, tags: item.tags } });
         onEvent({ eventType: "answer_attempt", targetId: record.questionId, payload: {
+          assessmentId: content.id, assessmentSessionId: session.evidenceSession?.id, assessmentStartedAt: session.evidenceSession?.startedAt,
           answer: attempt.answer, correct: attempt.correct, attempt: attempt.number, firstAttempt: attempt.number === 1, tags: item.tags,
           responseMs: questionTime.current.id === record.questionId ? Math.max(0, Math.round(performance.now() - questionTime.current.began)) : 0,
           ..."lineId" in item ? { lineId: item.lineId } : {},

@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
@@ -78,10 +79,10 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
   useEffect(() => {
     if (diagnosis && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
+      onComplete?.({ assessmentEvidence: assessmentEvidence(content, session), firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
     }
     if (!diagnosis) completedRef.current = false;
-  }, [diagnosis, onComplete]);
+  }, [diagnosis, onComplete, session]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     {/* 画面は3段組（Issue #298）: 中央のスクロール領域に問題文・図・指示・選択肢を上から流し、

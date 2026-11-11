@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -31,7 +32,7 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
   useAssessmentObservation(dfsCheckContent, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   useAssessmentFeedback(dfsCheckContent, session, active && !reviewOpen);
   const firstCorrect = session.records.filter(record => record.firstCorrect === true).length;
-  useAssessmentCompletion(complete, firstCorrect, dfsCheckContent.questions.length, onComplete);
+  useAssessmentCompletion(complete, firstCorrect, dfsCheckContent.questions.length, onComplete, assessmentEvidence(dfsCheckContent, session));
   const caption = complete ? `初回の正解は2問中${firstCorrect}問でした。` : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const step = getLearningStep(dfsExecutionContent, question?.stepId ?? dfsCheckContent.completion.stepId);
   const submit = (answer: NodeAnswer) => {

@@ -31,6 +31,7 @@ export type GreedyCoinsCheckContent = Omit<ConceptCheckAssessment, "questions"> 
 
 /** 単元フロー接続時（後続Issue）に渡す要約。集計は初回回答のみから導く。 */
 export type GreedyCoinsCheckSummary = {
+  assessmentEvidence?: ReturnType<typeof import("../../assessment/assessment").assessmentEvidence>;
   readonly firstAttemptCorrect: number;
   readonly totalQuestions: number;
 };

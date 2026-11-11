@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -31,7 +32,7 @@ export function DfsCodeCheckPreview({ embedded = false, active = true, onLearnin
   const firstCorrect = session.records.filter(entry => entry.firstCorrect).length;
   useAssessmentObservation(content, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
   useAssessmentFeedback(content, session, active && !reviewOpen);
-  useAssessmentCompletion(complete, firstCorrect, content.questions.length, onComplete);
+  useAssessmentCompletion(complete, firstCorrect, content.questions.length, onComplete, assessmentEvidence(content, session));
 
   useEffect(() => {
     captionRef.current?.focus();

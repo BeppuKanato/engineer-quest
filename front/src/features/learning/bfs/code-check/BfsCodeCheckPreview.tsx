@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -36,13 +37,13 @@ export function BfsCodeCheckPreview({ embedded = false, onLearningEvent, active 
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({
+      onComplete?.({ assessmentEvidence: assessmentEvidence(content, session),
         firstAttemptCorrect: session.records.filter(entry => entry.attempts[0]?.correct).length,
         totalQuestions: content.questions.length,
       });
     }
     if (!complete) completedRef.current = false;
-  }, [complete, onComplete, session.records]);
+  }, [complete, onComplete, session]);
   useEffect(() => {
     const host = codeRef.current;
     if (!host) return;

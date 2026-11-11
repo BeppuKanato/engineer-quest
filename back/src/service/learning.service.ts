@@ -4,6 +4,7 @@
  * 学習イベントの一括投入を担う。教材コンテンツ自体は repo のデータモジュールが
  * 正本であり、ここでは courseId と phaseKey（文字列）でだけ参照する。
  */
+import { conceptDefinitions, validateEvidence } from "./feedbackConcepts";
 import { LearningProgressStatus, Prisma } from "@prisma/client";
 
 import { AppError } from "../error/appError";
@@ -146,8 +147,19 @@ export const completePhaseByUser = async (
 ) => {
   const course = await getPublishedCourse(courseId);
   const now = new Date();
+  const assessed = conceptDefinitions.find(u => u.courseId === courseId)?.concepts.some(c => c.questions.some(q => q.phaseKey === phaseKey));
+  let evidence: ReturnType<typeof validateEvidence> | undefined;
+  if (assessed) {
+    try { evidence = validateEvidence(courseId, phaseKey, summary?.assessmentEvidence, true); }
+    catch { throw new AppError(400, "INVALID_ASSESSMENT_EVIDENCE", "回答証拠が揃っていません。保存を再試行してください。"); }
+  }
 
   const { phase, awardedCard } = await prisma.$transaction(async (tx) => {
+    // 非同期キューに先行して、回答原本を進捗と同じトランザクションで確定する。
+    if (evidence) await tx.learningEvent.create({ data: {
+      userId: user.id, courseId, phaseKey, eventType: "assessment_snapshot", targetId: evidence.assessmentId,
+      sessionId: evidence.sessionId, payload: JSON.parse(JSON.stringify(evidence)), clientTimestamp: now,
+    } });
     const phase = await tx.phaseLearningProgress.upsert({
       where: {
         userId_courseId_phaseKey: { userId: user.id, courseId, phaseKey },

@@ -1,4 +1,5 @@
 "use client";
+import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -47,13 +48,13 @@ export function WallExtensionCheckPreview({ embedded = false, onLearningEvent, a
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({
+      onComplete?.({ assessmentEvidence: assessmentEvidence(wallExtensionCheckContent, session),
         firstAttemptCorrect: session.records.filter(entry => entry.attempts[0]?.correct).length,
         totalQuestions: wallExtensionCheckContent.questions.length,
       });
     }
     if (!complete) completedRef.current = false;
-  }, [complete, onComplete, session.records]);
+  }, [complete, onComplete, session]);
 
   return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, width: "100%", display: "grid", gridTemplateColumns: "minmax(0, 1fr)", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label="棒倒し法の動きの確認問題" sx={{ width: embedded ? "100%" : { xs: "100%", sm: "84vw" }, maxWidth: "100%", minWidth: 0, height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500, p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>

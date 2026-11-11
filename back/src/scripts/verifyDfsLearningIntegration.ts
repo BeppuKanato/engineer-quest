@@ -1,3 +1,4 @@
+import { conceptDefinitions } from "../service/feedbackConcepts";
 import assert from "node:assert/strict";
 import { LearningProgressStatus, type Prisma } from "@prisma/client";
 import { achievementSeed } from "../../prisma/seedData/achievementSeed";
@@ -103,7 +104,7 @@ Object.assign(prisma.userAchievement, {
     return { achievement: awards.find(item => item.id === create.achievementId), achievedAt: now };
   },
 });
-Object.assign(prisma.learningEvent, { createMany: async ({ data }: { data: Prisma.LearningEventCreateManyInput[] }) => {
+Object.assign(prisma.learningEvent, { create: async () => ({}), createMany: async ({ data }: { data: Prisma.LearningEventCreateManyInput[] }) => {
   logged.push(...data);
   return { count: data.length };
 } });
@@ -119,7 +120,11 @@ async function main() {
   await startUnitByUser(learner, DFS_COURSE_ID, phases[0]);
 
   const score = { firstAttemptCorrect: 2, totalQuestions: 2 };
-  const completed = async (index: number, summary?: Record<string, unknown>) => completePhaseByUser(learner, DFS_COURSE_ID, phases[index], summary);
+  const completed = async (index: number, summary?: Record<string, unknown>) => {
+    const questions = conceptDefinitions.find(u=>u.courseId===DFS_COURSE_ID)!.concepts.flatMap(c=>c.questions).filter(q=>q.phaseKey===phases[index]);
+    const evidence = questions.length ? { assessmentEvidence:{version:1,assessmentId:phases[index],sessionId:`fixture-${index}`,startedAt:1,records:questions.map(q=>({questionId:q.questionId,attempts:[{number:1,correct:true}]}))} } : {};
+    return completePhaseByUser(learner, DFS_COURSE_ID, phases[index], {...summary,...evidence});
+  };
   await completed(0);
   assert.equal((await completed(1)).awardedCard?.id, dfsCards[0].id);
   assert.equal((await completed(1)).awardedCard, null, "A repeated completion cannot grant the same card");
@@ -127,7 +132,7 @@ async function main() {
   const interrupted = await getUnitProgressByUser(learner, DFS_COURSE_ID);
   assert.equal(interrupted.unit?.status, "IN_PROGRESS");
   assert.equal(interrupted.unit?.lastPhaseKey, phases[2]);
-  assert.deepEqual(interrupted.phases.at(-1)?.summary, score);
+  assert.equal((interrupted.phases.at(-1)?.summary as {firstAttemptCorrect:number}).firstAttemptCorrect,score.firstAttemptCorrect);
 
   await completed(3);
   const codeCheck = await completed(4, score);
