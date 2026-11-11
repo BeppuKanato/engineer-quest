@@ -54,6 +54,7 @@ import { GreedyCoinsMotivationPreview } from "@/features/learning/greedy-coins/m
 import { GreedyCoinsExecutionPreview } from "@/features/learning/greedy-coins/execution/GreedyCoinsExecutionPreview";
 import { GreedyCoinsCheckPreview } from "@/features/learning/greedy-coins/check/GreedyCoinsCheckPreview";
 import { GreedyCoinsCodeMappingPreview } from "@/features/learning/greedy-coins/code-mapping/GreedyCoinsCodeMappingPreview";
+import { GreedyCoinsCodeCheckPreview } from "@/features/learning/greedy-coins/code-check/GreedyCoinsCodeCheckPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
@@ -90,6 +91,7 @@ export default async function LearningPreviewPage({ params }: { params: Promise<
   if (contentId === "greedy-coins-execution") return <GreedyCoinsExecutionPreview />;
   if (contentId === "greedy-coins-check") return <GreedyCoinsCheckPreview />;
   if (contentId === "greedy-coins-code-mapping") return <GreedyCoinsCodeMappingPreview />;
+  if (contentId === "greedy-coins-code-check") return <GreedyCoinsCodeCheckPreview />;
   if (contentId === "wall-extension-motivation") return <WallExtensionMotivationPreview />;
   if (contentId === "wall-extension-execution") return <WallExtensionExecutionPreview />;
   if (contentId === "wall-extension-check") return <WallExtensionCheckPreview />;
