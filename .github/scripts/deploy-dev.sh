@@ -80,7 +80,7 @@ gcloud run deploy "$BACK_SERVICE" "${run_flags[@]}" \
   --platform managed --allow-unauthenticated --ingress all \
   --port 8080 --cpu 1 --memory 512Mi --min 0 --max 2 \
   --concurrency 20 --timeout 300 --cpu-throttling \
-  --update-env-vars "^@^NODE_ENV=production@GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}@ALLOWED_ORIGINS=${allowed_origins}@FEEDBACK_TASKS_ENABLED=true@FEEDBACK_TASKS_QUEUE=feedback-generation-dev@FEEDBACK_TASKS_REGION=${REGION}@FEEDBACK_TASKS_CALLER_SA=${tasks_account}@FEEDBACK_TASKS_HANDLER_URL=${back_url_before}/internal/feedback/generate@FEEDBACK_TASKS_AUDIENCE=${back_url_before}" \
+  --update-env-vars "^|^NODE_ENV=production|GOOGLE_CLOUD_PROJECT=${GCP_PROJECT_ID}|ALLOWED_ORIGINS=${allowed_origins}|FEEDBACK_TASKS_ENABLED=true|FEEDBACK_TASKS_QUEUE=feedback-generation-dev|FEEDBACK_TASKS_REGION=${REGION}|FEEDBACK_TASKS_CALLER_SA=${tasks_account}|FEEDBACK_TASKS_HANDLER_URL=${back_url_before}/internal/feedback/generate|FEEDBACK_TASKS_AUDIENCE=${back_url_before}" \
   --update-secrets "DATABASE_URL=DATABASE_URL_DEV:latest,OPENAI_API_KEY=OPENAI_API_KEY_DEV:latest"
 
 back_url="$(gcloud run services describe "$BACK_SERVICE" "${run_flags[@]}" --format='value(status.url)')"
