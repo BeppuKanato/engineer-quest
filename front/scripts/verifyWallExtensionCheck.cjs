@@ -25,9 +25,9 @@ const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const cell = nodeId => ({ kind: "node", nodeId });
-const { wallExtensionCheckContent: content, getWallExtensionCheckScene } = load(file("wall-extension/check/check.content.ts"));
-const { wallExtensionExecutionContent: execution } = load(file("wall-extension/execution/execution.content.ts"));
-const maze = load(file("wall-extension/wallExtensionMaze.ts"));
+const { wallExtensionCheckContent: content, getWallExtensionCheckScene } = load(file("units/wall-extension/check/check.content.ts"));
+const { wallExtensionExecutionContent: execution } = load(file("units/wall-extension/execution/execution.content.ts"));
+const maze = load(file("units/wall-extension/wallExtensionMaze.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateMazeGridCanvas } = load(file("player/mazeGrid.types.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
@@ -132,7 +132,7 @@ assert.throws(() => validateAssessment(invalid));
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
 // 実描画: 場面の壁数と、回答ボタン（候補ごとに1つ、aria-label 付き）が一致する。
-const { WallExtensionCheckCanvas } = load(file("wall-extension/check/WallExtensionCheckCanvas.tsx"));
+const { WallExtensionCheckCanvas } = load(file("units/wall-extension/check/WallExtensionCheckCanvas.tsx"));
 const scenes = { [q1.id]: scene1, [q2.id]: scene2 };
 const ariaLabel = key => { const [x, y] = key.split(",").map(Number); return `${x + 1}列目、${y + 1}行目のマスを選ぶ`; };
 for (const q of content.questions) {
@@ -157,9 +157,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect() {},
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { WallExtensionCheckPreview } = ui(file("wall-extension/check/WallExtensionCheckPreview.tsx"));
-const Canvas = ui(file("wall-extension/check/WallExtensionCheckCanvas.tsx")).WallExtensionCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { WallExtensionCheckPreview } = ui(file("units/wall-extension/check/WallExtensionCheckPreview.tsx"));
+const Canvas = ui(file("units/wall-extension/check/WallExtensionCheckCanvas.tsx")).WallExtensionCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -198,7 +198,7 @@ button("結果を見る").onClick(); render();
 assert(tree.some(element => element.props?.children === content.completion.caption), "Completion shows the completion caption");
 assert.equal(canvasProps().questionId, undefined);
 
-const previewSource = fs.readFileSync(file("wall-extension/check/WallExtensionCheckPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/wall-extension/check/WallExtensionCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

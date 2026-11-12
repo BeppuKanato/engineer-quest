@@ -17,11 +17,11 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { wallExtensionCode, wallExtensionCodeLineNumber } = load(`${root}/wall-extension/code-mapping/wallExtensionCode.ts`);
-const { wallExtensionImplementationContent } = load(`${root}/wall-extension/implementation/implementation.content.ts`);
-const { wallExtensionExecutionContent } = load(`${root}/wall-extension/execution/execution.content.ts`);
-const { convertWallExtensionTrace } = load(`${root}/wall-extension/trace/convertTrace.ts`);
-const { traceWallExtensionCode, wallExtensionTraceEventLimit } = load(`${root}/wall-extension/trace/acquireTrace.ts`);
+const { wallExtensionCode, wallExtensionCodeLineNumber } = load(`${root}/units/wall-extension/code-mapping/wallExtensionCode.ts`);
+const { wallExtensionImplementationContent } = load(`${root}/units/wall-extension/implementation/implementation.content.ts`);
+const { wallExtensionExecutionContent } = load(`${root}/units/wall-extension/execution/execution.content.ts`);
+const { convertWallExtensionTrace } = load(`${root}/units/wall-extension/trace/convertTrace.ts`);
+const { traceWallExtensionCode, wallExtensionTraceEventLimit } = load(`${root}/units/wall-extension/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = wallExtensionCode.lines.map(line => line.text).join("\n");
@@ -109,7 +109,7 @@ const expectedSequence = dedupe(plain(codeMappedSteps(wallExtensionExecutionCont
   assert.equal(limited.mode, "replay"); assert(limited.content.steps.at(-1).caption.includes("途中まで"));
   // 実描画: 最終ステップの盤面が全マス分のセルで描ける。
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { WallExtensionExecutionCanvas } = load(`${root}/wall-extension/execution/WallExtensionExecutionCanvas.tsx`);
+  const { WallExtensionExecutionCanvas } = load(`${root}/units/wall-extension/execution/WallExtensionExecutionCanvas.tsx`);
   const html = renderToStaticMarkup(createElement(WallExtensionExecutionCanvas, { canvas: playback.content.steps.at(-1).canvas }));
   assert.equal((html.match(/data-maze-cell=/g) || []).length, 81);
   assert.equal((html.match(/data-maze-wall=/g) || []).length, expectedSequence.at(-1).length);
@@ -126,9 +126,9 @@ const expectedSequence = dedupe(plain(codeMappedSteps(wallExtensionExecutionCont
   await assert.rejects(() => traceWallExtensionCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
   // 画面接続のピン: フェーズ7画面がダイアログと取得・変換を使う。
-  const preview = fs.readFileSync(`${root}/wall-extension/implementation/WallExtensionImplementationPreview.tsx`, "utf8");
+  const preview = fs.readFileSync(`${root}/units/wall-extension/implementation/WallExtensionImplementationPreview.tsx`, "utf8");
   assert(preview.includes("WallExtensionTraceDialog")); assert(preview.includes("traceWallExtensionCode")); assert(preview.includes("convertWallExtensionTrace"));
-  const traceText = fs.readFileSync(`${root}/wall-extension/trace/trace.content.ts`, "utf8");
+  const traceText = fs.readFileSync(`${root}/units/wall-extension/trace/trace.content.ts`, "utf8");
   assert(traceText.includes("盤面で動きを見る"));
   console.log("Wall-extension trace: CPython harness grid detection, canonical phase-2 wall sequence, renamed grid, wrong-maze fidelity, midway error/stop line, helper-built final-only fallback, syntax error, ambiguity, invalid tail partial replay, truncation, real rendering and isolated D1-only acquisition passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

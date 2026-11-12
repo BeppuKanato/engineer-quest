@@ -21,12 +21,12 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { wallExtensionCodeCheckContent: content, validateWallExtensionCodeCheck, fillCodeBlank } = load(`${root}/wall-extension/code-check/codeCheck.content.ts`);
-const { wallExtensionCode, wallExtensionCodeLineNumber, wallExtensionCodeSource } = load(`${root}/wall-extension/code-mapping/wallExtensionCode.ts`);
-const { wallExtensionCodeMappingContent: mapping } = load(`${root}/wall-extension/code-mapping/codeMapping.content.ts`);
+const { wallExtensionCodeCheckContent: content, validateWallExtensionCodeCheck, fillCodeBlank } = load(`${root}/units/wall-extension/code-check/codeCheck.content.ts`);
+const { wallExtensionCode, wallExtensionCodeLineNumber, wallExtensionCodeSource } = load(`${root}/units/wall-extension/code-mapping/wallExtensionCode.ts`);
+const { wallExtensionCodeMappingContent: mapping } = load(`${root}/units/wall-extension/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
 const { newAnswerFeedback } = load(`${root}/assessment/answerFeedbackState.ts`);
-const { wallExtensionCheckContent: nodeContent } = load(`${root}/wall-extension/check/check.content.ts`);
+const { wallExtensionCheckContent: nodeContent } = load(`${root}/units/wall-extension/check/check.content.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { CodeDisplay } = load(`${root}/code/CodeDisplay.tsx`);
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -150,7 +150,7 @@ skipped = advanceAssessment(content, skipped, q2.id);
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
-const codeCheckPreviewSource = fs.readFileSync(`${root}/wall-extension/code-check/WallExtensionCodeCheckPreview.tsx`, "utf8");
+const codeCheckPreviewSource = fs.readFileSync(`${root}/units/wall-extension/code-check/WallExtensionCodeCheckPreview.tsx`, "utf8");
 
 // レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
 assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");

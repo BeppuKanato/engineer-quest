@@ -21,19 +21,19 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { wallExtensionImplementationContent: content } = load(`${root}/wall-extension/implementation/implementation.content.ts`);
-const { wallExtensionCode, wallExtensionCodeSource } = load(`${root}/wall-extension/code-mapping/wallExtensionCode.ts`);
-const { wallExtensionConsolidationContent } = load(`${root}/wall-extension/consolidation/consolidation.content.ts`);
-const { wallExtensionExecutionContent } = load(`${root}/wall-extension/execution/execution.content.ts`);
-const { ImplementationResults } = load(`${root}/wall-extension/implementation/ImplementationResults.tsx`);
-const { ImplementationHints } = load(`${root}/wall-extension/implementation/ImplementationHints.tsx`);
-const { FreeExecutionConsole } = load(`${root}/wall-extension/implementation/FreeExecutionConsole.tsx`);
+const { wallExtensionImplementationContent: content } = load(`${root}/units/wall-extension/implementation/implementation.content.ts`);
+const { wallExtensionCode, wallExtensionCodeSource } = load(`${root}/units/wall-extension/code-mapping/wallExtensionCode.ts`);
+const { wallExtensionConsolidationContent } = load(`${root}/units/wall-extension/consolidation/consolidation.content.ts`);
+const { wallExtensionExecutionContent } = load(`${root}/units/wall-extension/execution/execution.content.ts`);
+const { ImplementationResults } = load(`${root}/units/wall-extension/implementation/ImplementationResults.tsx`);
+const { ImplementationHints } = load(`${root}/units/wall-extension/implementation/ImplementationHints.tsx`);
+const { FreeExecutionConsole } = load(`${root}/units/wall-extension/implementation/FreeExecutionConsole.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isMazeGridValue, mazeGridCanvas, gridDifferences,
-} = load(`${root}/wall-extension/implementation/implementation.ts`);
-const { freeDisplayCase, runWallExtensionFreeCode } = load(`${root}/wall-extension/implementation/freeExecution.ts`);
+} = load(`${root}/units/wall-extension/implementation/implementation.ts`);
+const { freeDisplayCase, runWallExtensionFreeCode } = load(`${root}/units/wall-extension/implementation/freeExecution.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -51,8 +51,8 @@ assert.equal(content.hints.labels.length, 4);
 assert.deepEqual(plain(content.hints.flow), ["外周を壁にする", "2マスおきに柱を立てる", "柱ごとに許される方向から1つ選び、隣のマスを壁にする"]);
 assert.equal(new Set(content.hints.tokens).size, content.hints.tokens.length);
 assert.equal(content.hints.parsonsQuestion, wallExtensionConsolidationContent.questions.find(question => question.kind === "parsons"));
-for (const file of fs.readdirSync(`${root}/wall-extension/implementation`).filter(file => /\.tsx?$/u.test(file))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/wall-extension/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
+for (const file of fs.readdirSync(`${root}/units/wall-extension/implementation`).filter(file => /\.tsx?$/u.test(file))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/units/wall-extension/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
 
 // ---- テストの入力は基準データの確定値 ----
@@ -268,7 +268,7 @@ assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: 
 assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
 assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
 assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
-const { wallExtensionEditorText: editorText } = load(`${root}/wall-extension/implementation/editor.content.ts`);
+const { wallExtensionEditorText: editorText } = load(`${root}/units/wall-extension/implementation/editor.content.ts`);
 const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -398,7 +398,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.deepEqual(plain(free.actual), d1Expected);
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
-  const impl = (file) => fs.readFileSync(`${root}/wall-extension/implementation/${file}`, "utf8");
+  const impl = (file) => fs.readFileSync(`${root}/units/wall-extension/implementation/${file}`, "utf8");
   const adapterSource = impl("WallExtensionImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -432,7 +432,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitAdapter = fs.readFileSync(`${root}/wall-extension/unit/WallExtensionUnitPreview.tsx`, "utf8");
+  const unitAdapter = fs.readFileSync(`${root}/units/wall-extension/unit/WallExtensionUnitPreview.tsx`, "utf8");
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");

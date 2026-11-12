@@ -20,14 +20,14 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "wall-extension/code-mapping";
+const feature = "units/wall-extension/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { wallExtensionCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { wallExtensionCode, wallExtensionCodeSource, wallExtensionCodeLineNumber } = load(file(`${feature}/wallExtensionCode.ts`));
 const { validateWallExtensionCodeMappingCanvas: validate, defineWallExtensionCodeMappingContent } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { wallExtensionExecutionContent: execution } = load(file("wall-extension/execution/execution.content.ts"));
-const maze = load(file("wall-extension/wallExtensionMaze.ts"));
+const { wallExtensionExecutionContent: execution } = load(file("units/wall-extension/execution/execution.content.ts"));
+const maze = load(file("units/wall-extension/wallExtensionMaze.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { WallExtensionCodeMappingCanvas } = load(file(`${feature}/WallExtensionCodeMappingCanvas.tsx`));
 const { WallExtensionCodeMappingPreview } = load(file(`${feature}/WallExtensionCodeMappingPreview.tsx`));

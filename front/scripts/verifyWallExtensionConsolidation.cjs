@@ -24,11 +24,11 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
-const { wallExtensionConsolidationContent: content, validateWallExtensionConsolidation } = load(file("wall-extension/consolidation/consolidation.content.ts"));
-const maze = load(file("wall-extension/wallExtensionMaze.ts"));
-const { wallExtensionExecutionContent: execution } = load(file("wall-extension/execution/execution.content.ts"));
-const { wallExtensionCodeMappingContent: mapping } = load(file("wall-extension/code-mapping/codeMapping.content.ts"));
-const { wallExtensionCode: code } = load(file("wall-extension/code-mapping/wallExtensionCode.ts"));
+const { wallExtensionConsolidationContent: content, validateWallExtensionConsolidation } = load(file("units/wall-extension/consolidation/consolidation.content.ts"));
+const maze = load(file("units/wall-extension/wallExtensionMaze.ts"));
+const { wallExtensionExecutionContent: execution } = load(file("units/wall-extension/execution/execution.content.ts"));
+const { wallExtensionCodeMappingContent: mapping } = load(file("units/wall-extension/code-mapping/codeMapping.content.ts"));
+const { wallExtensionCode: code } = load(file("units/wall-extension/code-mapping/wallExtensionCode.ts"));
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateMazeGridCanvas } = load(file("player/mazeGrid.types.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
@@ -182,7 +182,7 @@ const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
 for (const line of code.lines) assert(parsonsText.includes(line.text), "Preserve original indentation and every line");
 
 // 実描画: Q1は候補マスごとに回答ボタン1つ、選択問題の場面は表示のみ。正解後は全ボタンが固定される。
-const { WallExtensionCheckCanvas } = load(file("wall-extension/check/WallExtensionCheckCanvas.tsx"));
+const { WallExtensionCheckCanvas } = load(file("units/wall-extension/check/WallExtensionCheckCanvas.tsx"));
 const ariaLabel = key => { const [x, y] = key.split(",").map(Number); return `${x + 1}列目、${y + 1}行目のマスを選ぶ`; };
 const sceneBeforeRender = JSON.stringify(q1.scene);
 const q1Html = renderToStaticMarkup(React.createElement(WallExtensionCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, onAnswer() {} }));
@@ -282,7 +282,7 @@ rejects(broken => broken.questions[3].interchangeableLineGroups = [["border-top"
 rejects(broken => broken.questions[3].interchangeableLineGroups = [["border-top", "initialize-pillars"]]);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
-const previewSource = fs.readFileSync(file("wall-extension/consolidation/WallExtensionConsolidationPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/wall-extension/consolidation/WallExtensionConsolidationPreview.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
 assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");

@@ -18,11 +18,11 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/wall-extension/execution`;
+const feature = `${root}/units/wall-extension/execution`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { wallExtensionExecutionContent: content } = load(`${feature}/execution.content.ts`);
 const { validateWallExtensionExecutionCanvas: validate } = load(`${feature}/execution.types.ts`);
-const maze = load(`${root}/wall-extension/wallExtensionMaze.ts`);
+const maze = load(`${root}/units/wall-extension/wallExtensionMaze.ts`);
 const { WallExtensionExecutionCanvas } = load(`${feature}/WallExtensionExecutionCanvas.tsx`);
 const { WallExtensionExecutionPreview } = load(`${feature}/WallExtensionExecutionPreview.tsx`);
 const { steps } = content;

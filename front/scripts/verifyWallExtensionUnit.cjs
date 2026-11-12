@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { wallExtensionUnitPhases, wallExtensionUnitTitle, wallExtensionUnitText, nextPhaseLabel } = load(`${root}/wall-extension/unit/unit.content.ts`);
+const { wallExtensionUnitPhases, wallExtensionUnitTitle, wallExtensionUnitText, nextPhaseLabel } = load(`${root}/units/wall-extension/unit/unit.content.ts`);
 
 // 単元は棒倒し法で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(wallExtensionUnitTitle, "棒倒し法");
@@ -78,7 +78,7 @@ assert.match(screenSource, /<WallExtensionUnitPreview \{\.\.\.unitPreviewProps\}
 assert.match(screenSource, /<BfsUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "BFS container receives the same connection props");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const adapter = read(`${root}/wall-extension/unit/WallExtensionUnitPreview.tsx`);
+const adapter = read(`${root}/units/wall-extension/unit/WallExtensionUnitPreview.tsx`);
 assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["WallExtensionMotivationPreview", "WallExtensionExecutionPreview", "WallExtensionCheckPreview", "WallExtensionCodeMappingPreview", "WallExtensionCodeCheckPreview", "WallExtensionConsolidationPreview", "WallExtensionImplementationPreview"]) {
@@ -97,18 +97,18 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている。
 for (const file of ["motivation/WallExtensionMotivationPreview", "execution/WallExtensionExecutionPreview", "check/WallExtensionCheckPreview", "code-mapping/WallExtensionCodeMappingPreview", "code-check/WallExtensionCodeCheckPreview", "consolidation/WallExtensionConsolidationPreview", "implementation/WallExtensionImplementationPreview"]) {
-  const adapter = read(`${root}/wall-extension/${file}.tsx`);
+  const adapter = read(`${root}/units/wall-extension/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/wall-extension/consolidation/WallExtensionConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/wall-extension/consolidation/WallExtensionConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 到達図の壁は正本の choices から導出し、教材の迷路と一致する（9×9: 外周32＋柱9＋伸長9＝50）。
-const { buildWallExtensionWalls, wallExtensionMainChoices, wallExtensionMainSize } = load(`${root}/wall-extension/wallExtensionMaze.ts`);
+const { buildWallExtensionWalls, wallExtensionMainChoices, wallExtensionMainSize } = load(`${root}/units/wall-extension/wallExtensionMaze.ts`);
 assert.equal(buildWallExtensionWalls(wallExtensionMainSize, wallExtensionMainChoices).length, 50, "Result figure walls derive from the canonical choices");
-const figureSource = read(`${root}/wall-extension/unit/WallExtensionResultFigure.tsx`);
+const figureSource = read(`${root}/units/wall-extension/unit/WallExtensionResultFigure.tsx`);
 assert.match(figureSource, /buildWallExtensionWalls/, "The figure derives walls from the canonical maze data");
 assert.match(figureSource, /wallExtensionMainPath/, "The figure reuses the phase-1 route for the start-to-goal path");
 
@@ -141,7 +141,7 @@ assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the sc
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（完成した迷路）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { WallExtensionResultFigure } = load(`${root}/wall-extension/unit/WallExtensionResultFigure.tsx`);
+const { WallExtensionResultFigure } = load(`${root}/units/wall-extension/unit/WallExtensionResultFigure.tsx`);
 for (const phase of wallExtensionUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(WallExtensionResultFigure), onNext: () => {} }));
