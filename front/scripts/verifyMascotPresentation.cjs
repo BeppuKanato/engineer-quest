@@ -25,7 +25,7 @@ const sites = [
   'app/component/appHeader.tsx',
   'components/ui/BlockingProcessOverlay.tsx',
   'components/ui/PageTransitionOverlay.tsx',
-  'app/create/_components/mascotHint.tsx',
+  'features/create/components/MascotHint.tsx',
   'features/home/HomeScreen.tsx',
   'app/page.tsx',
   'app/profile/page.tsx',
