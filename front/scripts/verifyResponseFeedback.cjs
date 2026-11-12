@@ -16,7 +16,7 @@ assert(!header.includes('PageTransitionOverlay'), 'appHeader must not render Pag
 assert(!header.includes('isNavigating'), 'appHeader must not track a blocking navigation state');
 
 // 2. Home / courses keep previous data and use the shared session token (#138 N1, N2).
-for (const page of ['features/home/HomeScreen.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'features/collection/CollectionScreen.tsx', 'features/history/HistoryScreen.tsx', 'features/collection/KnowledgeCardsScreen.tsx', 'features/collection/AchievementsScreen.tsx', 'app/profile/page.tsx', 'features/quest-board/QuestBoardScreen.tsx', 'features/quest-board/NewQuestPostScreen.tsx', 'features/quest-board/QuestPostDetailScreen.tsx', 'features/create/CreateScreen.tsx', 'features/create/CreateQuestDetailScreen.tsx', 'features/create/MyWorksScreen.tsx']) {
+for (const page of ['features/home/HomeScreen.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'features/collection/CollectionScreen.tsx', 'features/history/HistoryScreen.tsx', 'features/collection/KnowledgeCardsScreen.tsx', 'features/collection/AchievementsScreen.tsx', 'features/profile/ProfileScreen.tsx', 'features/quest-board/QuestBoardScreen.tsx', 'features/quest-board/NewQuestPostScreen.tsx', 'features/quest-board/QuestPostDetailScreen.tsx', 'features/create/CreateScreen.tsx', 'features/create/CreateQuestDetailScreen.tsx', 'features/create/MyWorksScreen.tsx']) {
   const source = read(page);
   assert(source.includes('useUserSession'), `${page} must use the session token`);
   assert(!source.includes('onAuthStateChanged'), `${page} must not subscribe to auth state itself`);

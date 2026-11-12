@@ -28,7 +28,7 @@ const sites = [
   'features/create/components/MascotHint.tsx',
   'features/home/HomeScreen.tsx',
   'app/page.tsx',
-  'app/profile/page.tsx',
+  'features/profile/ProfileScreen.tsx',
 ];
 for (const site of sites) {
   const source = read(site);
