@@ -29,7 +29,7 @@ const greedy = load(file("greedy-coins/greedyCoins.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
 const { selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateGreedyCoinsExecutionCanvas } = load(file("greedy-coins/execution/execution.types.ts"));
-const { ParsonsBoard } = load(file("bfs/consolidation/ParsonsBoard.tsx"));
+const { ParsonsBoard } = load(file("components/assessment/ParsonsBoard.tsx"));
 const { GreedyCoinsCheckCanvas } = load(file("greedy-coins/check/GreedyCoinsCheckCanvas.tsx"));
 const { renderToStaticMarkup } = require("react-dom/server");
 const { createElement } = require("react");
@@ -152,7 +152,7 @@ assert.deepEqual(plain(q4.correctAnswer.lineIds), canonicalIds, "Answer follows 
 assert.deepEqual(plain(q4.fixedLineIds), ["define-function", "return-result"], "Faded split as designed");
 assert.deepEqual(plain(q4.interchangeableLineGroups), [["append-coin", "subtract-coin"]], "Append and subtract are interchangeable");
 {
-  const { parsonsMovableSegments } = load(file("bfs/consolidation/parsonsOrderFeedback.ts"));
+  const { parsonsMovableSegments } = load(file("assessment/parsonsOrderFeedback.ts"));
   const segments = parsonsMovableSegments(q4.correctAnswer.lineIds, q4.fixedLineIds);
   assert.equal(segments.length, 1, "Movable lines form a single segment between the fixed lines");
   assert.deepEqual(plain(segments[0]), canonicalIds.slice(1, 7));

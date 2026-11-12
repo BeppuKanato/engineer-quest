@@ -5,7 +5,7 @@ import { Box, Button, Chip, Dialog, DialogContent, DialogTitle, Typography } fro
 
 import { playerTokens } from "../../player/player.tokens";
 
-import { ParsonsBoard } from "../../bfs/consolidation/ParsonsBoard";
+import { ParsonsBoard } from "../../components/assessment/ParsonsBoard";
 import { wallExtensionCode } from "../code-mapping/wallExtensionCode";
 import { wallExtensionImplementationContent as content } from "./implementation.content";
 import type { HintLevel } from "./implementation";

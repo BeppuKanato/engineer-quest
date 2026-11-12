@@ -126,7 +126,7 @@ assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not
 // フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
 const phaseResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(phaseResultOnly, /overflowY: "auto"/, "phase result does not own an inner scroll area (#298)");
-assert.doesNotMatch(read(`${root}/bfs/unit/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
+assert.doesNotMatch(read(`${root}/components/results/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
 // 結果・ブリッジ・最終結果では内側カラムが内容の高さで伸び、スクロールはラッパー側で起きる（#298）。
 assert.match(container, /height: screen\.kind === "phase" \? "100%" : "auto"/, "result/bridge/final columns grow with content (#298)");
 // 「直前の回答」は内側カラムの中ではなく、ヘッダー直下の固定ゾーン（ラッパーより前）に置く（#298）。
@@ -169,7 +169,7 @@ for (const phase of binarySearchUnitPhases.filter(phase => phase.transitionOut =
   }
 }
 // ブリッジ画面（BFS 側の共通部品）は二分探索のフェーズでも、ステージ名・つなぎ文・行き先ボタンだけを持つ（#141）。
-const { PhaseBridgeScreen } = load(`${root}/bfs/unit/PhaseBridgeScreen.tsx`);
+const { PhaseBridgeScreen } = load(`${root}/components/results/PhaseBridgeScreen.tsx`);
 for (const phase of binarySearchUnitPhases.filter(phase => phase.phase > 1)) {
   const html = renderToStaticMarkup(createElement(PhaseBridgeScreen, { phase, onProceed: () => {} }));
   assert.ok(html.includes(`次は「${phase.formalName}」`), `bridge heading for phase ${phase.phase}`);

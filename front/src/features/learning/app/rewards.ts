@@ -1,8 +1,5 @@
-import type { AwardedCard, PhaseCompletion, UnlockedAchievement } from "../../../api/learning.api";
-export type LearningRewards = {
-  awardedCards: readonly { phaseKey: string; card: AwardedCard }[];
-  unlockedAchievements: readonly UnlockedAchievement[];
-};
+import type { LearningRewards } from "../types/rewards";
+import type { PhaseCompletion, UnlockedAchievement } from "../../../api/learning.api";
 export const emptyLearningRewards: LearningRewards = { awardedCards: [], unlockedAchievements: [] };
 export function mergeLearningRewards(current: LearningRewards, response: { unlockedAchievements: readonly UnlockedAchievement[] } & Partial<Pick<PhaseCompletion, "phase" | "awardedCard">>): LearningRewards {
   return {

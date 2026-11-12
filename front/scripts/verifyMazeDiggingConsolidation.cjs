@@ -177,7 +177,7 @@ assert.deepEqual([...q4.lineIds].sort(), [...canonicalIds].sort());
 assert.notDeepEqual(plain(q4.lineIds), canonicalIds, "Presentation order is shuffled");
 assert.deepEqual(plain(q4.correctAnswer.lineIds), canonicalIds);
 assert.equal(q4.interchangeableLineGroups, undefined, "No interchangeable lines");
-const { ParsonsBoard } = load(file("bfs/consolidation/ParsonsBoard.tsx"));
+const { ParsonsBoard } = load(file("components/assessment/ParsonsBoard.tsx"));
 const parsonsHtml = renderToStaticMarkup(React.createElement(ParsonsBoard, { question: q4, code, onAnswer: () => {} }));
 // フェード型: 固定行は正解位置に固定表示され、可動行は初期並びの相対順序のまま残りの位置を埋める。
 assert.deepEqual(plain(q4.fixedLineIds), ["define-function", "initialize-grid", "define-directions", "dig-start", "initialize-stack", "initialize-step", "while-stack", "return-grid"], "Faded split as designed");
@@ -189,11 +189,11 @@ assert.deepEqual(plain(q4.fixedLineIds), ["define-function", "initialize-grid", 
   assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder], "Fixed lines render pinned at their solution positions");
   const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
   assert.deepEqual(fixedRendered, plain(q4.fixedLineIds), "Exactly the fixed lines render as non-operable");
-  const { parsonsMovableSegments } = load(file("bfs/consolidation/parsonsOrderFeedback.ts"));
+  const { parsonsMovableSegments } = load(file("assessment/parsonsOrderFeedback.ts"));
   for (const segment of parsonsMovableSegments(q4.correctAnswer.lineIds, q4.fixedLineIds)) {
     assert.deepEqual([...q4.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable by reordering within each segment");
   }
-  const parsonsBoardSourceFaded = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+  const parsonsBoardSourceFaded = fs.readFileSync(file("components/assessment/ParsonsBoard.tsx"), "utf8");
   assert.match(parsonsBoardSourceFaded, /data-parsons-fixed="true"/, "board renders fixed rows with the non-operable marker");
 }
 const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
@@ -300,7 +300,7 @@ assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[con
 // 3段組は維持し、Parsons は盤面と中央のどちらか一方だけをスクロールさせる（#352）。
 assert(!previewSource.includes('flexDirection: "column", justifyContent: "center"'), "consolidation does not center with justifyContent (overflow would spill upward)");
 assert.match(previewSource, /minHeight: "3em"/, "prompt keeps its reserved height so the figure position is stable");
-const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+const parsonsBoardSource = fs.readFileSync(file("components/assessment/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /question\?\.kind === "parsons" \? parsonsQuestionBodySx/, "parsons uses the shared scroll layout");
 assert.match(parsonsBoardSource, /height: 368/, "parsons scroll viewport has a fixed height (#298)");
 assert.match(parsonsBoardSource, /minHeight: 276/, "parsons scroll viewport keeps a usable minimum height");

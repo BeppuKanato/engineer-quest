@@ -19,8 +19,8 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { parsonsKeepLineIds, isParsonsOrderCorrect } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { parsonsKeepLineIds, isParsonsOrderCorrect } = load(`${root}/assessment/parsonsOrderFeedback.ts`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const sorted = set => [...set].sort();
@@ -96,7 +96,7 @@ const plain = board(undefined);
 assert(!plain.includes("data-parsons-keep") && !plain.includes("data-parsons-order-legend"), "default board is unchanged");
 
 // フェード型: 固定行は正解位置に固定表示され、印は可動行だけを判定する。
-const { parsonsMovableLineIds, parsonsMovableSegments } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
+const { parsonsMovableLineIds, parsonsMovableSegments } = load(`${root}/assessment/parsonsOrderFeedback.ts`);
 const solution5 = ["s1", "s2", "s3", "s4", "s5"];
 const fixed5 = ["s1", "s5"];
 assert.deepEqual([...parsonsMovableLineIds(solution5, fixed5)], ["s2", "s3", "s4"]);

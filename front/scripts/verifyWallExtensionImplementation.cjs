@@ -28,7 +28,7 @@ const { wallExtensionExecutionContent } = load(`${root}/wall-extension/execution
 const { ImplementationResults } = load(`${root}/wall-extension/implementation/ImplementationResults.tsx`);
 const { ImplementationHints } = load(`${root}/wall-extension/implementation/ImplementationHints.tsx`);
 const { FreeExecutionConsole } = load(`${root}/wall-extension/implementation/FreeExecutionConsole.tsx`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isMazeGridValue, mazeGridCanvas, gridDifferences,

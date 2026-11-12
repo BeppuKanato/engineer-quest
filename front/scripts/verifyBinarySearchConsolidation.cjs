@@ -149,7 +149,7 @@ assert.deepEqual([...q3.lineIds].sort(), [...selectedIds].sort());
 assert.notDeepEqual(plain(q3.lineIds), selectedIds, "Presentation order is shuffled");
 assert.deepEqual(plain(q3.correctAnswer.lineIds), selectedIds, "Answer follows the canonical order of the selected lines");
 assert.equal(q3.interchangeableLineGroups, undefined, "No interchangeable line groups");
-const { ParsonsBoard } = load(file("bfs/consolidation/ParsonsBoard.tsx"));
+const { ParsonsBoard } = load(file("components/assessment/ParsonsBoard.tsx"));
 const parsonsHtml = renderToStaticMarkup(React.createElement(ParsonsBoard, { question: q3, code, onAnswer: () => {} }));
 // フェード型: 固定行は正解位置に固定表示され、可動行は初期並びの相対順序のまま残りの位置を埋める。
 assert.deepEqual(plain(q3.fixedLineIds), ["define-function", "return-missing"], "Faded split as designed");
@@ -161,11 +161,11 @@ assert.deepEqual(plain(q3.fixedLineIds), ["define-function", "return-missing"], 
   assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder], "Fixed lines render pinned at their solution positions");
   const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
   assert.deepEqual(fixedRendered, plain(q3.fixedLineIds), "Exactly the fixed lines render as non-operable");
-  const { parsonsMovableSegments } = load(file("bfs/consolidation/parsonsOrderFeedback.ts"));
+  const { parsonsMovableSegments } = load(file("assessment/parsonsOrderFeedback.ts"));
   for (const segment of parsonsMovableSegments(q3.correctAnswer.lineIds, q3.fixedLineIds)) {
     assert.deepEqual([...q3.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable by reordering within each segment");
   }
-  const parsonsBoardSource = fs.readFileSync(file("bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+  const parsonsBoardSource = fs.readFileSync(file("components/assessment/ParsonsBoard.tsx"), "utf8");
   assert.match(parsonsBoardSource, /data-parsons-fixed="true"/, "board renders fixed rows with the non-operable marker");
 }
 const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&");

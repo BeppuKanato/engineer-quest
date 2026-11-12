@@ -8,7 +8,7 @@ import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/An
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
-import type { UnitPhaseSummary } from "../../unit/unit.types";
+import type { UnitPhaseSummary } from "../../types/unit.types";
 import { playerTokens } from "../../player/player.tokens";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";

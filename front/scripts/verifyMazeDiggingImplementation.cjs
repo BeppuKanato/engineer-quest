@@ -28,7 +28,7 @@ const { mazeDiggingExecutionContent } = load(`${root}/maze-digging/execution/exe
 const { ImplementationResults } = load(`${root}/maze-digging/implementation/ImplementationResults.tsx`);
 const { ImplementationHints } = load(`${root}/maze-digging/implementation/ImplementationHints.tsx`);
 const { FreeExecutionConsole } = load(`${root}/maze-digging/implementation/FreeExecutionConsole.tsx`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isMazeGridValue, mazeGridCanvas, gridDifferences,

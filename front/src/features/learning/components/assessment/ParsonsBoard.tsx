@@ -10,7 +10,7 @@ import { useId, useState } from "react";
 import type { OrderAnswer, ParsonsQuestion } from "../../assessment/assessment";
 import { playerTokens } from "../../player/player.tokens";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
-import { isParsonsOrderCorrect, parsonsKeepLineIds, parsonsMovableLineIds, parsonsMovableSegments, type ParsonsInterchangeableGroups } from "./parsonsOrderFeedback";
+import { isParsonsOrderCorrect, parsonsKeepLineIds, parsonsMovableLineIds, parsonsMovableSegments, type ParsonsInterchangeableGroups } from "../../assessment/parsonsOrderFeedback";
 
 /** 並び替え対象のコード契約。行の意味IDと本文だけを使うため、単元を問わず使える。 */
 export type ParsonsCode = { readonly lines: readonly { readonly id: string; readonly text: string }[] };

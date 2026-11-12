@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { learningPhaseIcons } from "../../app/learningPhaseIcons";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
-import type { UnitPhase } from "../../unit/unit.types";
+import type { UnitPhase } from "../../types/unit.types";
 
 /**
  * フェーズ間のブリッジ（Issue #141）。前進の完了フローでのみ挟み、

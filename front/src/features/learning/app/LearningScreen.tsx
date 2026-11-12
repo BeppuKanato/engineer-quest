@@ -1,4 +1,6 @@
 "use client";
+
+import type { LearningRewards } from "../types/rewards";
 import { Alert, Box, Button, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -12,7 +14,7 @@ import { FeedbackDestination } from "@/app/component/feedbackV1";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
-import type { UnitPhaseSummary } from "../unit/unit.types";
+import type { UnitPhaseSummary } from "../types/unit.types";
 import { DfsUnitPreview } from "../dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
@@ -26,7 +28,7 @@ import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
 import { LearningRewardsContext } from "./LearningRewardsContext";
-import { emptyLearningRewards, mergeLearningRewards, type LearningRewards } from "./rewards";
+import { emptyLearningRewards, mergeLearningRewards } from "./rewards";
 import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
 import { learningErrorMessage, useLearningProgress } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";

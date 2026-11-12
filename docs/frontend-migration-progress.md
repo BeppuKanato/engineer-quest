@@ -232,3 +232,22 @@ M00は既存挙動の基準記録であり、既存画面の見た目を承認�
 [改善後1366×768](assets/frontend-migration/responsive-1366x768.png) / [1536×864](assets/frontend-migration/responsive-1536x864.png) / [2560×1440](assets/frontend-migration/responsive-2560x1440.png) / [799×640](assets/frontend-migration/responsive-799x640.png)
 
 基準画像は回答の一時演出・行移動が終了した状態の画像へ補正した。M01-Aの寸法一致に基づく差し替えであり、変更後の表示を変更前と扱ったものではない。
+
+
+## M02: 単元共通部品の配置整理
+
+| 移動元（learning配下） | 移動先 |
+| --- | --- |
+| bfs/consolidation/ParsonsBoard.tsx | components/assessment/ParsonsBoard.tsx |
+| bfs/consolidation/parsonsOrderFeedback.ts | assessment/parsonsOrderFeedback.ts |
+| bfs/unit/PhaseBridgeScreen.tsx | components/results/PhaseBridgeScreen.tsx |
+| bfs/unit/UnitResultScreens.tsx | components/results/UnitResultScreens.tsx |
+| bfs/unit/UnitResultCelebration.tsx | components/results/UnitResultCelebration.tsx |
+| unit/unit.types.ts | types/unit.types.ts |
+| app/rewards.ts内のLearningRewards型 | types/rewards.ts（報酬マージ処理はapp/rewardsに維持） |
+
+全利用先・パスを直接読むverifyを更新。旧パスの再exportは作らず、旧ファイルを削除した。共有の結果画面にあったBFS図の既定値を削除し、単元定義が図を渡す契約に変更。既存のBFS・DFS定義はすでに固有図を渡していたので、学習画面の結果図は変わらない。新しい共有UIからBFS固有教材へのimportはない。盤面寸法・文言・採点・保存制御は変更していない。
+
+既存80件（build・Lint・型・77のverify）成功。報酬型の追加分離後も型・報酬verify・Lint・buildを再確認。追加のブラウザー検証は4サイズの末尾到達・ドラッグ・キーボード移動・誤答提出が成功。7単元の応用問題・実装ヒント・採点・結果に関する既存検証も成功。実機ディスプレイ、認証後の進捗保存・実LLM生成は未実施。
+
+残る配置は次段階の対象: 5単元の個別UnitPreview・結果画面・型、BFS内のImplementationWorkspace、app/componentからの基盤参照、API型から教材型への既存参照。BFS/DFSのグラフ描画は今回新たな共通部品へ引き上げていない。単元固有図を共通結果UIから切り離すだけで依存を解消できたため、描画仕様の変更はしない。

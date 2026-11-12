@@ -45,8 +45,8 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const { LearningUnitPreview } = load(root + "/unit/LearningUnitPreview.tsx");
 const { DfsUnitPreview } = load(root + "/dfs/unit/DfsUnitPreview.tsx");
 const { BfsUnitPreview } = load(root + "/bfs/unit/BfsUnitPreview.tsx");
-const { PhaseBridgeScreen } = load(root + "/bfs/unit/PhaseBridgeScreen.tsx");
-const { UnitResultScreen, UnitFinalResult } = load(root + "/bfs/unit/UnitResultScreens.tsx");
+const { PhaseBridgeScreen } = load(root + "/components/results/PhaseBridgeScreen.tsx");
+const { UnitResultScreen, UnitFinalResult } = load(root + "/components/results/UnitResultScreens.tsx");
 const plain = value => JSON.parse(JSON.stringify(value));
 const elements = value => Array.isArray(value) ? value.flatMap(elements)
   : value && typeof value === "object" && value.props ? [value, ...elements(value.props.children)] : [];

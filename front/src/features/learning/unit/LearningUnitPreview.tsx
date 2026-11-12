@@ -8,14 +8,14 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type Compo
 
 import type { LearningObserver } from "../../../lib/learningEvents";
 import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
-import type { LearningRewards } from "../app/rewards";
+import type { LearningRewards } from "../types/rewards";
 import { AnswerFeedbackNotice } from "../assessment/AnswerFeedback";
 
 import { playerTokens } from "../player/player.tokens";
 import { unitText } from "./unit.content";
-import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
-import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
-import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
+import type { UnitPhase, UnitPhaseSummary } from "../types/unit.types";
+import { PhaseBridgeScreen } from "../components/results/PhaseBridgeScreen";
+import { UnitFinalResult, UnitResultScreen } from "../components/results/UnitResultScreens";
 import { FeedbackPositionFigure } from "../app/feedback/FeedbackPositionFigure";
 
 type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" } | { kind: "feedback"; index: number } | { kind: "unitFeedback" };

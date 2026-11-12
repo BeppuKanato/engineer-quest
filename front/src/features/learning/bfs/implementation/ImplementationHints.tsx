@@ -7,7 +7,7 @@ import { playerTokens } from "../../player/player.tokens";
 import type { ParsonsQuestion } from "../../assessment/assessment";
 
 import { bfsCode } from "../code-mapping/bfsCode";
-import { ParsonsBoard, type ParsonsCode } from "../consolidation/ParsonsBoard";
+import { ParsonsBoard, type ParsonsCode } from "../../components/assessment/ParsonsBoard";
 import { bfsImplementationContent as content } from "./implementation.content";
 import type { HintLevel } from "./implementation";
 

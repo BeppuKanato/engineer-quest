@@ -53,7 +53,7 @@ for (const phase of bfsUnitPhases.slice(0, -1)) {
   assert.doesNotMatch(nextPhaseLabel(phase), /フェーズ/, `phase ${phase.phase} label has no developer term`);
 }
 // 遷移ボタンは共通部品 PhaseNextButton に統一されている（#142）。
-for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCanvas.tsx", "bfs/unit/UnitResultScreens.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
+for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCanvas.tsx", "components/results/UnitResultScreens.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
   assert.match(read(`${root}/${file}`), /PhaseNextButton/, `${file} uses the shared transition button`);
 }
 assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "動きの説明へ進む"/, "motivation exit label names the destination");
@@ -92,13 +92,13 @@ assert.match(read(`${root}/app/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overv
 assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
 assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
-const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
+const resultScreensSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
 // フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
 const phaseResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(phaseResultOnly, /overflowY: "auto"/, "phase result does not own an inner scroll area (#298)");
-assert.doesNotMatch(read(`${root}/bfs/unit/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
+assert.doesNotMatch(read(`${root}/components/results/PhaseBridgeScreen.tsx`), /overflowY: "auto"/, "bridge does not own an inner scroll area (#298)");
 // 結果・ブリッジ・最終結果では内側カラムが内容の高さで伸び、スクロールはラッパー側で起きる（#298）。
 assert.match(container, /height: screen\.kind === "phase" \? "100%" : "auto"/, "result/bridge/final columns grow with content (#298)");
 // 「直前の回答」は内側カラムの中ではなく、ヘッダー直下の固定ゾーン（ラッパーより前）に置く（#298）。
@@ -129,7 +129,7 @@ assert.equal(ResultScoreDots({ total: 0, firstAttemptCorrect: 0 }), null);
 assert.equal(ResultScoreDots({ total: 2, firstAttemptCorrect: 3 }), null);
 
 // 実コンポーネントの宣言を検査する。限定された一度きりの演出で、操作や報酬と結び付けない。
-const { UnitResultCelebration } = load(`${root}/bfs/unit/UnitResultCelebration.tsx`);
+const { UnitResultCelebration } = load(`${root}/components/results/UnitResultCelebration.tsx`);
 const nodes = element => {
   const list = [];
   const visit = item => {
@@ -164,10 +164,11 @@ for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"])
   assert.equal(element.props.transition.delay ?? 0, 0);
 }
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
-const { UnitResultScreen } = load(`${root}/bfs/unit/UnitResultScreens.tsx`);
+const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
+const { BfsResultFigure } = load(`${root}/bfs/unit/BfsResultFigure.tsx`);
 for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
-    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
+    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BfsResultFigure), onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading));
     if (summary?.totalQuestions !== undefined) {
       assert.ok(html.includes("data-score-dots"), "Phase results visualize the score as dots");
@@ -183,7 +184,7 @@ for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "resul
 }
 reducedMotion = false;
 // ブリッジ画面は次のステージ名・つなぎ文・行き先ボタンだけを持つ（#141）。
-const { PhaseBridgeScreen } = load(`${root}/bfs/unit/PhaseBridgeScreen.tsx`);
+const { PhaseBridgeScreen } = load(`${root}/components/results/PhaseBridgeScreen.tsx`);
 for (const phase of bfsUnitPhases.filter(phase => phase.phase > 1)) {
   const html = renderToStaticMarkup(createElement(PhaseBridgeScreen, { phase, onProceed: () => {} }));
   assert.ok(html.includes(`次は「${phase.formalName}」`), `bridge heading for phase ${phase.phase}`);
@@ -193,7 +194,7 @@ for (const phase of bfsUnitPhases.filter(phase => phase.phase > 1)) {
 const previewSource = container;
 assert.match(previewSource, /kind: "bridge"/, "preview routes forward completion through the bridge screen");
 assert.match(previewSource, /"phase_bridge_view"/, "bridge views are logged with the target phase");
-const celebrationSource = read(`${root}/bfs/unit/UnitResultCelebration.tsx`);
+const celebrationSource = read(`${root}/components/results/UnitResultCelebration.tsx`);
 assert.doesNotMatch(celebrationSource, /mascot|Mascot|useSoundEffect|useLearningRewards|setTimeout|setInterval|whileInView|onAnimationComplete|Math\.random/);
 assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stops animation before hydration");
 // 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
@@ -240,12 +241,13 @@ assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium c
 const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
 assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
 assert.match(soundSource, /resultCheerLarge: \{ src: "\/audio\/se\/cheer-large\.ogg"/, "The large cheer is registered in the sound config");
-const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
+const resultSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const phaseResultSource = resultSource.slice(resultSource.indexOf("export function UnitResultScreen"), resultSource.indexOf("function summaryLine"));
 const finalResultSource = resultSource.slice(resultSource.indexOf("export function UnitFinalResult"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
-assert.match(phaseResultSource, /<BfsResultFigure/, "Phase results render the reached figure");
+assert.match(phaseResultSource, /\{figure\}/, "Shared phase results render the figure supplied by the unit");
+assert.match(bfsPreview, /resultFigure: <BfsResultFigure/, "BFS supplies its own reached figure");
 assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
 const figureSource = read(`${root}/bfs/unit/BfsResultFigure.tsx`);
 assert.match(figureSource, /bfsDistancesFrom/, "The figure derives distances from the canonical graph");

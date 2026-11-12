@@ -7,8 +7,8 @@
  * - final: 単元完了時の最終リザルト（フェーズ7の後）
  * ブリッジは前進の完了フローでのみ出す。復習・ナビゲーションからの移動や途中再開では出さない。
  */
-import type { UnitPhase } from "../../unit/unit.types";
-export type { UnitPhase as BfsUnitPhase, UnitTransition as BfsUnitTransition } from "../../unit/unit.types";
+import type { UnitPhase } from "../../types/unit.types";
+export type { UnitPhase as BfsUnitPhase, UnitTransition as BfsUnitTransition } from "../../types/unit.types";
 export { unitText as bfsUnitText } from "../../unit/unit.content";
 
 export const bfsUnitTitle = "幅優先探索（BFS）";

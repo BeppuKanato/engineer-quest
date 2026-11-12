@@ -11,8 +11,8 @@ import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { ResultConfetti } from "../../app/ResultConfetti";
 import { ResultScoreDots } from "../../app/ResultScoreDots";
 import { UnitPathMiniMap } from "../../app/UnitPathMiniMap";
-import type { LearningRewards } from "../../app/rewards";
-import { UnitResultCelebration } from "../../bfs/unit/UnitResultCelebration";
+import type { LearningRewards } from "../../types/rewards";
+import { UnitResultCelebration } from "../../components/results/UnitResultCelebration";
 
 import { playerTokens } from "../../player/player.tokens";
 import { binarySearchImplementationContent } from "../implementation/implementation.content";

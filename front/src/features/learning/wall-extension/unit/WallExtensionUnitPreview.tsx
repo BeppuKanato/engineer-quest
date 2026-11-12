@@ -8,9 +8,9 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type React
 
 import type { LearningObserver } from "../../../../lib/learningEvents";
 import { useLearningVisit } from "../../instrumentation/useLearningVisit";
-import type { LearningRewards } from "../../app/rewards";
+import type { LearningRewards } from "../../types/rewards";
 import { AnswerFeedbackNotice } from "../../assessment/AnswerFeedback";
-import { PhaseBridgeScreen } from "../../bfs/unit/PhaseBridgeScreen";
+import { PhaseBridgeScreen } from "../../components/results/PhaseBridgeScreen";
 
 import { playerTokens } from "../../player/player.tokens";
 import { WallExtensionCheckPreview } from "../check/WallExtensionCheckPreview";

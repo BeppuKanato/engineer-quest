@@ -28,7 +28,7 @@ const { bubbleSortExecutionContent } = load(`${root}/bubble-sort/execution/execu
 const { ImplementationResults } = load(`${root}/bubble-sort/implementation/ImplementationResults.tsx`);
 const { ImplementationHints } = load(`${root}/bubble-sort/implementation/ImplementationHints.tsx`);
 const { FreeExecutionConsole } = load(`${root}/bubble-sort/implementation/FreeExecutionConsole.tsx`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isNumberListValue, isDrawableArrayValue, arrayBarsCanvas, arrayDifferences,

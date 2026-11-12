@@ -20,7 +20,7 @@ import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import type { BfsUnitPhaseSummary } from "../unit/unit.types";
 import { ConsolidationGraph } from "./ConsolidationGraph";
-import { ParsonsBoard, parsonsQuestionBodySx } from "./ParsonsBoard";
+import { ParsonsBoard, parsonsQuestionBodySx } from "../../components/assessment/ParsonsBoard";
 import { bfsConsolidationContent as content, type ConsolidationQuestion } from "./consolidation.content";
 
 /** 結果のスコア表示。正解数とゲージがアニメーションで増えて最終値に届く。動きを減らす設定では即座に最終値を出す。 */

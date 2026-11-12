@@ -11,12 +11,11 @@ import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { ResultConfetti } from "../../app/ResultConfetti";
 import { ResultScoreDots } from "../../app/ResultScoreDots";
 import { UnitPathMiniMap } from "../../app/UnitPathMiniMap";
-import type { LearningRewards } from "../../app/rewards";
+import type { LearningRewards } from "../../types/rewards";
 
 import { playerTokens } from "../../player/player.tokens";
 import { unitText } from "../../unit/unit.content";
-import type { UnitPhase, UnitPhaseSummary } from "../../unit/unit.types";
-import { BfsResultFigure } from "./BfsResultFigure";
+import type { UnitPhase, UnitPhaseSummary } from "../../types/unit.types";
 import { UnitResultCelebration } from "./UnitResultCelebration";
 
 const headingSx = {
@@ -31,10 +30,10 @@ const nextButtonSx = {
 
 /** フェーズ3・5の後に単元側が出すリザルト画面。到達状況（事実）と次フェーズの予告、次のフェーズへの導線を持つ。
  * スクロールはこの画面専用に持たず、単元コンテナのラッパーに一元化する（#298）。 */
-export function UnitResultScreen({ phase, summary, figure = <BfsResultFigure />, firstAttemptOnly = false, onNext, achievements, goalAchievement }: {
+export function UnitResultScreen({ phase, summary, figure, firstAttemptOnly = false, onNext, achievements, goalAchievement }: {
   phase: UnitPhase;
   summary?: UnitPhaseSummary;
-  figure?: ReactNode;
+  figure: ReactNode;
   firstAttemptOnly?: boolean;
   onNext: () => void;
   achievements?: ReactNode;

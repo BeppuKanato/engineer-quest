@@ -28,7 +28,7 @@ const { runBinarySearch } = load(`${root}/binary-search/binarySearch.ts`);
 const { ImplementationResults } = load(`${root}/binary-search/implementation/ImplementationResults.tsx`);
 const { ImplementationHints } = load(`${root}/binary-search/implementation/ImplementationHints.tsx`);
 const { FreeExecutionConsole } = load(`${root}/binary-search/implementation/FreeExecutionConsole.tsx`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isIndexValue, indexCanvas,

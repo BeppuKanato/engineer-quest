@@ -11,10 +11,10 @@ import {
   activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer,
 } from "../../assessment/assessment";
 import { ConsolidationGraph } from "../../bfs/consolidation/ConsolidationGraph";
-import { ParsonsBoard, parsonsQuestionBodySx } from "../../bfs/consolidation/ParsonsBoard";
+import { ParsonsBoard, parsonsQuestionBodySx } from "../../components/assessment/ParsonsBoard";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
-import type { UnitPhaseSummary } from "../../unit/unit.types";
+import type { UnitPhaseSummary } from "../../types/unit.types";
 import { playerTokens } from "../../player/player.tokens";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";

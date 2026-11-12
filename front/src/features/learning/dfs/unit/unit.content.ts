@@ -1,4 +1,4 @@
-import type { UnitPhase } from "../../unit/unit.types";
+import type { UnitPhase } from "../../types/unit.types";
 
 export const dfsUnitTitle = "深さ優先探索（DFS）";
 export const dfsUnitIntro = "一つの道を奥まで進み、行き止まりから戻って別の道を調べる深さ優先探索を、図とスタックで学びます。";

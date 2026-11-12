@@ -12,7 +12,7 @@ import {
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { AssessmentLayout } from "../../components/layouts/AssessmentLayout";
-import { ParsonsBoard, parsonsQuestionBodySx } from "../../bfs/consolidation/ParsonsBoard";
+import { ParsonsBoard, parsonsQuestionBodySx } from "../../components/assessment/ParsonsBoard";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { playerTokens } from "../../player/player.tokens";

@@ -27,7 +27,7 @@ import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runBfsFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { bfsEditorText as text } from "./editor.content";
 import { editorTokens as colors } from "./editor.tokens";
-import type { ParsonsCode } from "../consolidation/ParsonsBoard";
+import type { ParsonsCode } from "../../components/assessment/ParsonsBoard";
 import { ImplementationHints, type ImplementationHintContent } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { bfsImplementationContent, type ImplementationTest } from "./implementation.content";

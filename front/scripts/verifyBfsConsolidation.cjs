@@ -26,7 +26,7 @@ const { bfsCodeMappingContent: mapping } = load(`${root}/bfs/code-mapping/codeMa
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(`${root}/assessment/assessment.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { ConsolidationGraph } = load(`${root}/bfs/consolidation/ConsolidationGraph.tsx`);
-const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
+const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -120,7 +120,7 @@ assert.deepEqual(plain(q5.fixedLineIds), ["import-deque", "define-function", "wh
   assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder], "Fixed lines render pinned at their solution positions");
   const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
   assert.deepEqual(fixedRendered, plain(q5.fixedLineIds), "Exactly the fixed lines render as non-operable");
-  const { parsonsMovableSegments } = load(`${root}/bfs/consolidation/parsonsOrderFeedback.ts`);
+  const { parsonsMovableSegments } = load(`${root}/assessment/parsonsOrderFeedback.ts`);
   for (const segment of parsonsMovableSegments(q5.correctAnswer.lineIds, q5.fixedLineIds)) {
     assert.deepEqual([...q5.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable by reordering within each segment");
   }
@@ -205,7 +205,7 @@ console.log("BFS consolidation: independent BFS on all four graphs, corrected J 
 
 // ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
 const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
-const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/ParsonsBoard.tsx"), "utf8");
+const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/assessment/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");

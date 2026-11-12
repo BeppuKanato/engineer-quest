@@ -1,1 +1,1 @@
-export type { UnitPhaseSummary as BfsUnitPhaseSummary } from "../../unit/unit.types";
+export type { UnitPhaseSummary as BfsUnitPhaseSummary } from "../../types/unit.types";

@@ -32,7 +32,7 @@ const { searchGraph, searchGraphAdjacency } = load(root + "/graphs/searchGraph.t
 const { runImplementationTests, allTestsPassed } = load(root + "/bfs/implementation/implementation.ts");
 const { runFreeDisplayCase } = load(root + "/bfs/implementation/freeExecution.ts");
 const { countImplementationPlaceholders } = load(root + "/implementation/inputLevel.ts");
-const { ParsonsBoard } = load(root + "/bfs/consolidation/ParsonsBoard.tsx");
+const { ParsonsBoard } = load(root + "/components/assessment/ParsonsBoard.tsx");
 const { DfsImplementationResults, VisitOrderOutput } = load(root + "/dfs/implementation/ImplementationResults.tsx");
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
