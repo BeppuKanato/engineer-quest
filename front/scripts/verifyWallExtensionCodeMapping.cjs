@@ -191,9 +191,11 @@ assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.s
 assert.throws(() => defineWallExtensionCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-extend-4-4") }), /29/u);
 
 const renderer = fs.readFileSync(file(`${feature}/WallExtensionCodeMappingCanvas.tsx`), "utf8");
-assert.match(renderer, /prefers-reduced-motion: reduce/u);
-assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
-assert.match(renderer, /Math.max\(620/u);
+assert.match(renderer, /<CodeVariableList/u, "renderer uses shared variable display");
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /prefers-reduced-motion: reduce/u);
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /bgcolor: changed \? playerTokens.focus : "transparent"/u);
+assert.match(renderer, /<CodeMappingLayout/u, "renderer uses shared diagram/code layout");
+assert.match(fs.readFileSync(file("components/code/CodeMappingLayout.tsx"), "utf8"), /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/WallExtensionCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
 // 接続ポートは単元フロー（#214）向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。

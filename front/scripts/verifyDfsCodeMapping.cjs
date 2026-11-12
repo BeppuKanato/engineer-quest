@@ -125,9 +125,11 @@ assert.throws(() => defineDfsCodeMappingContent({ ...content, steps: content.ste
 const shared = fs.readFileSync(file("code/CodeDisplay.tsx"), "utf8");
 const renderer = fs.readFileSync(file(`${feature}/DfsCodeMappingCanvas.tsx`), "utf8");
 assert.match(shared, /prefers-reduced-motion: reduce/u); assert.match(shared, /fontSize: "clamp\(16px/u);
-assert.match(renderer, /prefers-reduced-motion: reduce/u);
-assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
-assert.match(renderer, /Math.max\(620/u);
+assert.match(renderer, /<CodeVariableList/u, "renderer uses shared variable display");
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /prefers-reduced-motion: reduce/u);
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /bgcolor: changed \? playerTokens.focus : "transparent"/u);
+assert.match(renderer, /<CodeMappingLayout/u, "renderer uses shared diagram/code layout");
+assert.match(fs.readFileSync(file("components/code/CodeMappingLayout.tsx"), "utf8"), /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/DfsCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
 assert(!/fetch\(|localStorage/u.test(entry));

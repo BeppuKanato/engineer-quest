@@ -302,3 +302,36 @@ M03完了時点ではM04以降が未着手だった。以降の進捗は下記�
 既存のcheck・code-check・consolidationの21検証、型・Lint・buildが成功。復習ダイアログを探す実行ハーネスは、新しい共有枠を描画してoverlayスロットも確認する形へ更新し、操作の検証を維持した。追加ブラウザー検証verify:assessment-screens:browserで21画面・計58設問を実際に回答して完了表示へ到達し、画面エラー・ページ全体の横はみ出しがないことを確認した（1366×768）。検証中に選択肢中の「もう一度」を操作ボタンと誤認したため、実際の選択肢グループを優先する検証へ修正し、未完了の6画面を再実行して成功した。
 
 コード確認の6組の位置寸法比較も本文抽出後に再実行して一致。貪欲法Parsonsの4サイズの末尾到達・ドラッグ・キーボード移動・回答も再実行成功。認証後の保存、実機ディスプレイ比較は未実施。
+
+
+## M05: 図とコード・復習の配置
+
+### A: 図・コード・変数表示の共通化
+
+7単元にCodeMappingLayoutとCodeVariableListを適用。幅の観測、コード最低620px、図の配分、コード内スクロール、変数行の描画を共有し、図・強調行・変数差分の計算は各単元に残した。DFSのコード配分52%・幅だけの観測・minWidth:0、他6単元の48%・幅と高さがあるときの観測を維持。BFSの変数の余白・字体と、他単元のコンパクト表示の差も維持した。
+
+7単元のcode-mapping verify（元のPythonトレース・行・変数・元図との同一性を含む）、型・Lint・buildが成功。下表の21条件で変更前と変更後をブラウザー比較し、最初と次のステップの配置・強調行・変数文字列・差分フラグが全件一致した。狭い画面の教材領域内横スクロールは従来どおりで、新たな折り返し・縮小は入れていない。
+
+| 単元 | viewport | 図の幅 | コードの幅 | 最初→次の強調行 |
+| --- | --- | --- | --- | --- |
+| bfs | 1366×768 | 693.67 | 640.31 | import-deque → define-function |
+| bfs | 2560×1440 | 1314.55 | 1213.44 | import-deque → define-function |
+| bfs | 799×640 | 480.00 | 620.00 | import-deque → define-function |
+| dfs | 1366×768 | 495.44 | 620.00 | define-function → initialize-visited |
+| dfs | 2560×1440 | 1016.81 | 1101.56 | define-function → initialize-visited |
+| dfs | 799×640 | 480.00 | 620.00 | define-function → initialize-visited |
+| bubble-sort | 1366×768 | 495.44 | 620.00 | define-function → copy-values |
+| bubble-sort | 2560×1440 | 1101.56 | 1016.81 | define-function → copy-values |
+| bubble-sort | 799×640 | 480.00 | 620.00 | define-function → copy-values |
+| binary-search | 1366×768 | 495.44 | 620.00 | define-function → init-lo |
+| binary-search | 2560×1440 | 1101.56 | 1016.81 | define-function → init-lo |
+| binary-search | 799×640 | 480.00 | 620.00 | define-function → init-lo |
+| greedy-coins | 1366×768 | 495.44 | 620.00 | define-function → init-result |
+| greedy-coins | 2560×1440 | 1101.56 | 1016.81 | define-function → init-result |
+| greedy-coins | 799×640 | 480.00 | 620.00 | define-function → init-result |
+| wall-extension | 1366×768 | 495.44 | 620.00 | define-function → initialize-grid |
+| wall-extension | 2560×1440 | 1101.56 | 1016.81 | define-function → initialize-grid |
+| wall-extension | 799×640 | 480.00 | 620.00 | define-function → initialize-grid |
+| maze-digging | 1366×768 | 495.44 | 620.00 | define-function → initialize-grid |
+| maze-digging | 2560×1440 | 1101.56 | 1016.81 | define-function → initialize-grid |
+| maze-digging | 799×640 | 480.00 | 620.00 | define-function → initialize-grid |

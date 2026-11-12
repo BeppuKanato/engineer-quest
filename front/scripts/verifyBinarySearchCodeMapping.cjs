@@ -186,9 +186,11 @@ assert.throws(() => defineBinarySearchCodeMappingContent({ ...content, steps: co
 assert.throws(() => defineBinarySearchCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "else-larger-2") }), /Unvisited/u);
 
 const renderer = fs.readFileSync(file(`${feature}/BinarySearchCodeMappingCanvas.tsx`), "utf8");
-assert.match(renderer, /prefers-reduced-motion: reduce/u);
-assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
-assert.match(renderer, /Math.max\(620/u);
+assert.match(renderer, /<CodeVariableList/u, "renderer uses shared variable display");
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /prefers-reduced-motion: reduce/u);
+assert.match(fs.readFileSync(file("components/code/CodeVariableList.tsx"), "utf8"), /bgcolor: changed \? playerTokens.focus : "transparent"/u);
+assert.match(renderer, /<CodeMappingLayout/u, "renderer uses shared diagram/code layout");
+assert.match(fs.readFileSync(file("components/code/CodeMappingLayout.tsx"), "utf8"), /Math.max\(620/u);
 const entry = fs.readFileSync(file(`${feature}/BinarySearchCodeMappingPreview.tsx`), "utf8");
 assert.match(entry, /84vw/u); assert.match(entry, /84dvh/u);
 // 接続ポートは単元フロー向けの任意 props。単品では未指定で従来どおり動き、外部通信や保存は持たない。
