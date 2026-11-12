@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { playerTokens } from "../../player/player.tokens";
-import { WAVE, wavePath, wavePoint } from "../unitPathGeometry";
+import { playerTokens } from "../player/player.tokens";
+import { WAVE, wavePath, wavePoint } from "../utils/unitPathGeometry";
 
 export type FeedbackNodeState = "done" | "current" | "upcoming";
 

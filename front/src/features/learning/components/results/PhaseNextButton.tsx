@@ -2,7 +2,7 @@
 
 import { Button } from "@mui/material";
 
-import { playerTokens } from "../player/player.tokens";
+import { playerTokens } from "../../player/player.tokens";
 
 /**
  * フェーズ間の遷移ボタンの共通形（#142）。

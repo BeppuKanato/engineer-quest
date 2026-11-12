@@ -455,7 +455,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
-  const learningScreenSource = fs.readFileSync(`${root}/app/LearningScreen.tsx`, "utf8");
+  const learningScreenSource = fs.readFileSync(`${root}/screens/LearningScreen.tsx`, "utf8");
   assert.match(learningScreenSource, /codeDraftBaseKey: codeDraftKey\(courseId, uid\)/, "the app shell provides the code draft base key (#328)");
   console.log("Maze-digging implementation: five cases verified against an independent reimplementation and CPython reference, perfect-maze properties (J3 included), typical-mistake mutations (one-cell dig, candidate order, dug-room condition, undug between wall), canonical skeleton and Parsons reuse, hint gating, grid difference display, free-execution board rendering, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,8 +1,8 @@
 # 深さ優先探索「導入」
 
 - 目的・適用範囲: Issue #121の18場面を単品で操作する。状態: 現行。最終確認日: 2026-11-06。
-- 正本: [DFS基準データ§3](../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/dfs-motivation-121.md)。
+- 正本: [DFS基準データ§3](../../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/dfs-motivation-121.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/dfs-motivation を開く。認証・DBは不要。
 
@@ -14,3 +14,6 @@
 - `DfsMotivationPreview.tsx`: 共通LearningPlayerへの単品入口。保存や計装ポートは持たない。
 
 検証: `npm run verify:dfs-motivation`。BFSと共有する格子・道筋・現在地の描画は`player/MotivationDrawing.tsx`、グラフは`graphs/searchGraph.ts`と`player/GraphDrawing.tsx`を参照する。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

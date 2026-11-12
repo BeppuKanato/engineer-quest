@@ -45,7 +45,7 @@ for (const overlay of ['components/ui/BlockingProcessOverlay.tsx', 'components/u
 }
 
 // 4. The learning path stays mascot-free.
-const unitOverview = read('features/learning/app/UnitOverview.tsx');
+const unitOverview = read('features/learning/screens/UnitOverview.tsx');
 assert(!unitOverview.includes('MascotFigure') && !unitOverview.includes('getMascotImagePath'),
   'UnitOverview must not display the mascot');
 

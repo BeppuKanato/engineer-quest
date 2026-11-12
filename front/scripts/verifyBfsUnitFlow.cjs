@@ -90,9 +90,9 @@ assert.match(read(`${root}/units/bfs/consolidation/BfsConsolidationPreview.tsx`)
 // 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
 assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
 // 単元画面は共通パンくず AppBreadcrumbs を使い、教材内（学習画面）にはパンくずを置かない（#139, #140）。
-assert.match(read(`${root}/app/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overview uses the shared breadcrumbs");
-assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
-assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
+assert.match(read(`${root}/screens/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overview uses the shared breadcrumbs");
+assert.doesNotMatch(read(`${root}/screens/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
+assert.doesNotMatch(read(`${root}/screens/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
 const resultScreensSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
@@ -110,7 +110,7 @@ assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
 assert.match(finalResultOnly, /<DrawnCheck/, "final result mark uses the same drawn check as phase results");
 assert.match(finalResultOnly, /data-final-result-mark/, "final result mark pops in like the phase mark");
-const miniMapSource = read(`${root}/app/UnitPathMiniMap.tsx`);
+const miniMapSource = read(`${root}/components/results/UnitPathMiniMap.tsx`);
 assert.match(miniMapSource, /motion\.path/, "mini map draws its path with motion");
 assert.match(miniMapSource, /pathLength/, "mini map path draws in over time");
 assert.match(miniMapSource, /scale: \[1, 1\.05, 1\.03\]/, "mini map grows once the path completes");
@@ -123,7 +123,7 @@ assert.ok(!fs.existsSync(`${root}/units/bfs/unit/unitResult.presentation.ts`), "
 const { bfsDistancesFrom } = load(`${root}/units/bfs/bfsDistances.ts`);
 assert.deepEqual(plain(Object.fromEntries(bfsDistancesFrom("A"))), { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 }, "Result figure distances derive from the canonical graph");
 // スコアのドットは件数の集計表示。初回正解が塗り、再挑戦分が輪郭。不正な件数では描かない。
-const { ResultScoreDots } = load(`${root}/app/ResultScoreDots.tsx`);
+const { ResultScoreDots } = load(`${root}/components/results/ResultScoreDots.tsx`);
 const dotStates = value => value === null ? null : value.props.children.map(child => child.props["data-dot-state"]);
 assert.deepEqual(plain(dotStates(ResultScoreDots({ total: 2, firstAttemptCorrect: 2 }))), ["first", "first"]);
 assert.deepEqual(plain(dotStates(ResultScoreDots({ total: 2, firstAttemptCorrect: 1 }))), ["first", "retry"]);
@@ -202,10 +202,10 @@ assert.match(celebrationSource, /prefers-reduced-motion: reduce/, "CSS also stop
 // 紙吹雪は共通部品 ResultConfetti（canvas-confetti）の発射契約として固定する。自前粒子の生成は持たない。
 assert.match(celebrationSource, /<ResultConfetti/, "Phase results mount the shared confetti launcher");
 assert.match(celebrationSource, /<DrawnCheck/, "Phase results mount the shared drawn check");
-const drawnCheckSource = read(`${root}/app/DrawnCheck.tsx`);
+const drawnCheckSource = read(`${root}/components/results/DrawnCheck.tsx`);
 assert.match(drawnCheckSource, /data-phase-result-check/, "The shared mark draws its check");
 assert.match(drawnCheckSource, /pathLength/, "The mark's circle and check draw in with path animation");
-const confettiSource = read(`${root}/app/ResultConfetti.tsx`);
+const confettiSource = read(`${root}/components/results/ResultConfetti.tsx`);
 assert.match(confettiSource, /from "canvas-confetti"/, "Confetti comes from the library");
 assert.doesNotMatch(confettiSource, /data-confetti-piece/, "No hand-rolled confetti pieces remain");
 assert.match(confettiSource, /particleCount: 90/, "Each popper fires 90 pieces (strengthened phase preset)");
@@ -226,7 +226,7 @@ assert.match(fbPreviewSource, /onCheckPhaseCompleted/, "Check-phase completion r
 assert.match(fbPreviewSource, /renderPhaseFeedbackScreen/, "Check-phase results route to the dedicated feedback screen");
 assert.match(fbPreviewSource, /renderUnitFeedbackScreen/, "The final result leads to the dedicated unit feedback screen");
 assert.match(fbPreviewSource, /kind: "unitFeedback"/, "The container carries a unit feedback screen state");
-const fbScreenSource = read(path.resolve(__dirname, "../src/features/learning/app/LearningScreen.tsx"));
+const fbScreenSource = read(path.resolve(__dirname, "../src/features/learning/screens/LearningScreen.tsx"));
 assert.match(fbScreenSource, /kind="phase"/, "Phase results mount phase feedback");
 assert.match(fbScreenSource, /kind="unit"/, "The final result mounts unit feedback");
 assert.match(fbScreenSource, /startFeedback/, "Generation starts at completion time, before the result is read");
@@ -236,7 +236,7 @@ assert.match(fbComponentSource, /useFeedbackV1/, "Feedback fetching and polling 
 assert.match(fbComponentSource, /status === 409/, "Users without an experiment assignment see no feedback");
 assert.match(fbComponentSource, /status === 404/, "Missing completion events resolve to no feedback after a retry");
 assert.match(fbComponentSource, /onAction/, "Phase feedback actions can be handled inside the learning flow");
-const fbDedicatedSource = read(path.resolve(__dirname, "../src/features/learning/app/feedback/FeedbackScreen.tsx"));
+const fbDedicatedSource = read(path.resolve(__dirname, "../src/features/learning/feedback/FeedbackScreen.tsx"));
 assert.match(fbDedicatedSource, /FeedbackObservation/, "The dedicated screen keeps the uptake observation");
 assert.match(fbDedicatedSource, /onUnavailable/, "The dedicated screen never strands a learner without feedback");
 assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
@@ -262,7 +262,7 @@ assert.match(consolidationSource, /<ResultTagRow/, "Phase 6 renders per-tag resu
 assert.match(consolidationSource, /<ResultConfetti/, "Phase 6 results also celebrate with confetti");
 assert.match(consolidationSource, /useTransform/, "Phase 6 score count and gauge animate up to the result");
 assert.match(consolidationSource, /function DiagnosisScore/, "Phase 6 score display is a dedicated animated component");
-const tagRowSource = read(`${root}/app/ResultTagRow.tsx`);
+const tagRowSource = read(`${root}/components/results/ResultTagRow.tsx`);
 assert.match(tagRowSource, /復習で確認できます/, "Tags not reached on the first attempt point at review instead of blame");
 assert.doesNotMatch(tagRowSource, /初回不正解/, "Tag rows never label a first attempt as a failure");
 assert.doesNotMatch(phaseResultSource, /mascot|Mascot|<UnitResultCelebration[^>]*key=/);

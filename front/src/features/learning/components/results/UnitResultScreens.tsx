@@ -6,11 +6,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { DrawnCheck } from "../../app/DrawnCheck";
-import { PhaseNextButton } from "../../app/PhaseNextButton";
-import { ResultConfetti } from "../../app/ResultConfetti";
-import { ResultScoreDots } from "../../app/ResultScoreDots";
-import { UnitPathMiniMap } from "../../app/UnitPathMiniMap";
+import { DrawnCheck } from "./DrawnCheck";
+import { PhaseNextButton } from "./PhaseNextButton";
+import { ResultConfetti } from "./ResultConfetti";
+import { ResultScoreDots } from "./ResultScoreDots";
+import { UnitPathMiniMap } from "./UnitPathMiniMap";
 import type { LearningRewards } from "../../types/rewards";
 
 import { playerTokens } from "../../player/player.tokens";

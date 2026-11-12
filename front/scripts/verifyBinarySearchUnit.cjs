@@ -56,7 +56,7 @@ for (const phase of binarySearchUnitPhases.slice(0, -1)) {
 }
 
 // レジストリに既存単元と並んで登録され、コースIDで引ける（コース seed は既存の course-algorithm-binary-search-v1）。
-const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/app/unitRegistry.ts`);
+const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/config/unitRegistry.ts`);
 assert.equal(learningUnits[0].courseId, "course-algorithm-breadth-first-search-v1", "BFS stays first in the registry");
 assert.ok(findLearningUnit("course-algorithm-wall-extension-v1"), "wall-extension unit stays registered");
 assert.ok(findLearningUnit("course-algorithm-bubble-sort-v2"), "bubble-sort unit stays registered");
@@ -77,7 +77,7 @@ assert.match(page, /contentId === "binary-search-motivation"/);
 assert.ok(!fs.existsSync(path.resolve(__dirname, "../src/app/learning-preview/binary-search-unit/page.tsx")), "dedicated phase-1 preview page is removed");
 
 // 学習画面は kind で単元コンテナを出し分ける（進捗・フィードバックの経路は共通）。
-const screenSource = read(`${root}/app/LearningScreen.tsx`);
+const screenSource = read(`${root}/screens/LearningScreen.tsx`);
 assert.match(screenSource, /unit\.kind === "binary-search"/, "learning screen dispatches on unit kind");
 assert.match(screenSource, /<BinarySearchUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "binary-search container receives the shared connection props");
 assert.match(screenSource, /<MazeDiggingUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "maze-digging container receives the same connection props");

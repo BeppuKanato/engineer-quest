@@ -51,7 +51,7 @@ assert(homePage.includes('目標の実績'), 'home must label the target achieve
 assert(homePage.includes('factor.progress'), 'home must show per-factor progress toward the target');
 
 // 5. ContinueLearning: rich hero when a unit is in progress, nothing when none is.
-const cont = read('features/learning/app/ContinueLearning.tsx');
+const cont = read('features/learning/catalog/ContinueLearning.tsx');
 assert(cont.includes('return null'), 'ContinueLearning must render nothing when no unit is in progress');
 // ホームの用語は「単元」に統一する（#177）。一覧ページ自体の表記は別途判断。
 assert(!homeGrid.includes('コース一覧へ'), 'home grid must not link with the old terminology');

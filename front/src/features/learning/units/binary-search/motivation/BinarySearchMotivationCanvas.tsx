@@ -3,7 +3,7 @@
 import Box from "@mui/material/Box";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { ArrayDrawing } from "../../../player/ArrayDrawing";
 import type { ArrayBarsCanvasState } from "../../../player/arrayBars.types";
 import { GraphViewport } from "../../../player/GraphDrawing";

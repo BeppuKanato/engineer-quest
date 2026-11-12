@@ -1,0 +1,366 @@
+{
+  "validatedOn": "2026-11-12",
+  "unresolvedFailures": 0,
+  "reruns": [
+    {
+      "name": "verify:learning-screens",
+      "exitCode": 0
+    },
+    {
+      "name": "verify:architecture",
+      "exitCode": 0
+    }
+  ],
+  "notVerified": [
+    "physical displays",
+    "real login and account switching",
+    "real authenticated submissions and settings",
+    "Monaco editing to localStorage and browser Pyodide end-to-end"
+  ],
+  "distinctChecks": 84,
+  "browser": {
+    "parsonsViewports": 4,
+    "assessmentQuestions": 58,
+    "assessmentScreens": 21,
+    "pageLayoutComparisons": 32
+  },
+  "baseCommit": "07bf7ed",
+  "firstRun": [
+    {
+      "exitCode": 0,
+      "name": "verify:architecture"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:implementation-workspace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:assessment-completion"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:shared-unit-flow"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:learning-player"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:wall-extension-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bubble-sort-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:maze-digging-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:binary-search-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-motivation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:greedy-coins-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:dfs-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-execution"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-code-mapping"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-code-check"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-consolidation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-implementation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-trace"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-unit"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:bfs-free-execution"
+    },
+    {
+      "exitCode": 1,
+      "name": "verify:learning-screens"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:learning-rewards"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:mascot-presentation"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:response-feedback"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:answer-feedback"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:parsons-order-feedback"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:home-layout"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:unit-overview"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:app-breadcrumbs"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:feedback-concepts"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:feedback-map"
+    },
+    {
+      "exitCode": 0,
+      "name": "verify:feedback-candidates"
+    },
+    {
+      "exitCode": 0,
+      "name": "typecheck"
+    },
+    {
+      "exitCode": 0,
+      "name": "lint"
+    },
+    {
+      "exitCode": 0,
+      "name": "build"
+    }
+  ]
+}

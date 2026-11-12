@@ -1,8 +1,8 @@
 # 貪欲法（硬貨問題）「応用問題」
 
 - 目的・適用範囲: Issue #386の4問（転移タップ・反例トレース・反例の理解・フェード型 Parsons）を、初回結果の診断と任意復習まで単品で操作する。状態: 現行。最終確認日: 2026-11-11。
-- 正本: [貪欲法（硬貨問題）基準データ§3](../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/greedy-coins-phase6-386.md)。
+- 正本: [貪欲法（硬貨問題）基準データ§3](../../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/greedy-coins-phase6-386.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/greedy-coins-consolidation を開く。認証・DBは不要。
 
@@ -28,3 +28,6 @@
 - `GreedyCoinsConsolidationPreview.tsx`: 診断型のアセスメント画面。embedded / onComplete（要約通知）/ onNext（診断画面から次へ進む導線）を持つ。盤面の表示とタップ回答はフェーズ3の `GreedyCoinsCheckCanvas` を再利用する。
 
 検証: `npm run verify:greedy-coins-consolidation`。単元フローへの接続・進捗保存は後続Issueの対象で、このモジュールは保存処理を持たない。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

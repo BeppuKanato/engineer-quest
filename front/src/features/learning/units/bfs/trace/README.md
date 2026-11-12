@@ -3,7 +3,7 @@
 - 目的: 現在の学習者コードを表示用D1で実行し、共通キャンバス・プレイヤーで状態を再生する。
 - 適用範囲: トレース取得、BFSキャンバス変換、モーダル、単品ページとの接続。状態: 現行。最終確認日: 2026-11-05。
 - 起点: `develop` `6d013f4`（PR #99マージ済み）。
-- 正本: [Issue #76](https://github.com/BeppuKanato/engineer-quest/issues/76)、[教材指針 §1・7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。
+- 正本: [Issue #76](https://github.com/BeppuKanato/engineer-quest/issues/76)、[教材指針 §1・7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。
 
 ## 操作
 
@@ -44,6 +44,9 @@ queue・distancesという名前のローカル変数を優先する。なけれ
 ## 検証・対象外
 
 `npm run verify:bfs-trace`は同じハーネスをpython3で実行し、正解・listキュー・初期化順交換と正準状態列の一致、LIFOの誤り、誤距離、コピー、途中エラーと停止行、再帰の最終状態、構文エラー、改名que／q・distと正準18状態、優先名・曖昧な候補、トップレベルの試し呼び出し・多数の呼び出し・定義前後の例外、無効な末尾の部分再生と回復、上限・捕捉された上限、D1限定・新規Worker・キャンセルを確認する。
-既存verify一式、lint・typecheck・buildと、ブラウザの実Pyodide確認・画像は[実装報告](../../../../../../docs/bfs-visual-debug-76.md)を参照する。
+既存verify一式、lint・typecheck・buildと、ブラウザの実Pyodide確認・画像は[実装報告](../../../../../../../docs/bfs-visual-debug-76.md)を参照する。
 
 bfsCode、テスト内容、4段階ヒント、従来のMission/Activityは変更しない。エディタ改善・printコンソール・他フェーズへの組み込み・DB・進捗／ログ保存・フェーズ接続は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

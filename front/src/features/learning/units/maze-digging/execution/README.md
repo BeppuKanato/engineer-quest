@@ -1,8 +1,8 @@
 # 穴掘り法「動きの説明」
 
 - 目的・適用範囲: Issue #258の21ステップを単品で操作する。状態: 現行。最終確認日: 2026-11-07。Issue #334で完成の後に説明専用ステップ2つ（輪ができない理由・仮定盤面の実演）を追加し、現在は全23ステップ（うちコード対応21）。
-- 正本: [穴掘り法基準データ§3](../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/maze-digging-phase2-258.md)。
+- 正本: [穴掘り法基準データ§3](../../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/maze-digging-phase2-258.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/maze-digging-execution を開く。認証・DBは不要。
 
@@ -14,3 +14,6 @@
 - `MazeDiggingExecutionPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（接続 Issue）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。onComplete 指定時は共通プレイヤーの endAction で次へ進む。
 
 検証: `npm run verify:maze-digging-execution`。グリッドの型・描画は`player/mazeGrid.types.ts`・`player/MazeGridDrawing.tsx`を共有し、状態の意味（processing = 現在の部屋、target = まだ壁の部屋）は棒倒し法と逆のため、検証は単元側の `../mazeDiggingCanvas.ts` で行う。フェーズ3はステップIDと canvas をそのまま問いの図に参照できる（例: `dig-3` は掘削3回目まで進んだ状態で、フェーズ3の場面になる）。フェーズ4は同じトレースへコード対応を付加する。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

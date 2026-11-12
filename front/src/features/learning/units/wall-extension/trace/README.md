@@ -2,7 +2,7 @@
 
 - 目的: 現在の学習者コードを表示用D1（9×9、主教材の choices）で実行し、フェーズ2と同じ盤面で生成過程をステップ再生する。
 - 適用範囲: トレース取得、盤面キャンバス変換、モーダル、フェーズ7画面との接続。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #213](https://github.com/BeppuKanato/engineer-quest/issues/213)、[棒倒し法基準データ §3 フェーズ7・§5](../../../../../../docs/concept/wall-extension-unit-baseline.md)、[教材指針 §7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[BFS 視覚的デバッグ](../../bfs/trace/README.md)。
+- 正本: [Issue #213](https://github.com/BeppuKanato/engineer-quest/issues/213)、[棒倒し法基準データ §3 フェーズ7・§5](../../../../../../../docs/concept/wall-extension-unit-baseline.md)、[教材指針 §7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[BFS 視覚的デバッグ](../../bfs/trace/README.md)。
 
 ## 操作
 
@@ -34,3 +34,6 @@ BFSトレース（Issue #76）と同じ構造に揃える。
 `npm run verify:wall-extension-trace` は同じハーネスをpython3で実行し、参照コードの再生がフェーズ2の正準の壁列と一致すること、改名した盤面変数の形検出、途中エラーと停止行、補助関数内で作る盤面の最終状態表示、構文エラー、打ち切り、曖昧な候補、D1限定・新規Worker・キャンセルを確認する。
 
 参照コード、テスト内容、4段階ヒントは変更しない。DB・進捗／ログ保存・フェーズ接続・単元コンテナは後続Issueの対象。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

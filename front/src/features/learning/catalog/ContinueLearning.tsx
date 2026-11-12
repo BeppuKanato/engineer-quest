@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { useUserSession } from "@/lib/session/userSession";
 import { getLearningProgress, type LearningProgress } from "@/api/learning.api";
 import { ApiError } from "@/lib/fetcher";
-import { learningUnits, resumePhaseIndex, unitUrl, type LearningUnit } from "./unitRegistry";
-import { appLearningTokens as tokens } from "./appLearning.tokens";
+import { learningUnits, resumePhaseIndex, unitUrl, type LearningUnit } from "../config/unitRegistry";
+import { appLearningTokens as tokens } from "../config/appLearning.tokens";
 
 type Resume = { unit: LearningUnit; progress: LearningProgress };
 

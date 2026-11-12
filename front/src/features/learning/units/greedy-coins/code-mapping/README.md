@@ -1,8 +1,8 @@
 # 貪欲法（硬貨問題）「動きとコードの対応」
 
 - 目的・適用範囲: Issue #384の44フレームを単品で操作する。状態: 現行。最終確認日: 2026-11-11。
-- 正本: [貪欲法（硬貨問題）基準データ§2・§3](../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/greedy-coins-phase4-384.md)。
+- 正本: [貪欲法（硬貨問題）基準データ§2・§3](../../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/greedy-coins-phase4-384.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/greedy-coins-code-mapping を開く。認証・DBは不要。
 
@@ -18,3 +18,6 @@
 検証: `npm run verify:greedy-coins-code-mapping`。参照コードを CPython で実際に実行したトレース（`front/scripts/fixtures/greedyCoinsCodeMappingTrace.py`）と、全フレームの行・ローカル変数を突き合わせる。
 
 留保: チェックポイント（append 行の実行）のフレームでは、盤面はフェーズ2の選択完了後の状態（残額は引かれた後）を示すが、コード変数 remaining はまだ引かれる前の値である。次の `remaining -= coin` のフレームで両者が一致する。変数は CPython の実行どおりを優先した（実施記録に明示）。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

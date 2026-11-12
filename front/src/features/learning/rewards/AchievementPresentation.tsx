@@ -5,7 +5,7 @@ import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import type { UnlockedAchievement } from "../../../api/learning.api";
 import type { LearningObserver } from "../../../lib/learningEvents";
-import { appLearningTokens as colors } from "../app/appLearning.tokens";
+import { appLearningTokens as colors } from "../config/appLearning.tokens";
 import { useLearningVisit } from "../instrumentation/useLearningVisit";
 import { presentationFor, rewardText as text } from "./presentation";
 

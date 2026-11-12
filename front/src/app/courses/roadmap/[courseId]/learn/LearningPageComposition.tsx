@@ -1,8 +1,8 @@
 "use client";
 
 import { AppHeader } from "@/app/component/appHeader";
-import { LearningScreen } from "@/features/learning/app/LearningScreen";
-import type { FeedbackBindings } from "@/features/learning/app/feedback/FeedbackBindings";
+import { LearningScreen } from "@/features/learning/screens/LearningScreen";
+import type { FeedbackBindings } from "@/features/learning/feedback/FeedbackBindings";
 import { FeedbackCandidates, FeedbackDestination, FeedbackObservation, useFeedbackV1 } from "@/features/feedback/FeedbackV1";
 
 const feedback = {

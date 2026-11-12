@@ -15,9 +15,9 @@ import type { LearningInstrumentation } from "../../../instrumentation/useLearni
 
 import { playerTokens } from "../../../player/player.tokens";
 import { LearningReviewDialog } from "../../../review/LearningReviewDialog";
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
-import { ResultConfetti } from "../../../app/ResultConfetti";
-import { ResultTagRow } from "../../../app/ResultTagRow";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
+import { ResultConfetti } from "../../../components/results/ResultConfetti";
+import { ResultTagRow } from "../../../components/results/ResultTagRow";
 import { AssessmentReviewButton } from "../../../review/AssessmentReviewButton";
 import { BfsCodeMappingCanvas } from "../code-mapping/BfsCodeMappingCanvas";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";

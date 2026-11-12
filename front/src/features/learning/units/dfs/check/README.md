@@ -2,8 +2,8 @@
 
 - 目的・適用範囲: Issue #123。DFSの動きを図の1タップ選択・連動2問で確認する単品教材。
 - 最終確認日: 2026-11-06。状態: 現行。
-- 正本: [DFS基準データ §4](../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針 §1・フェーズ3](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../docs/concept/learning-player-ui.md)。
-- 実施記録・基準書との差: [dfs-check-123.md](../../../../../../docs/dfs-check-123.md)。
+- 正本: [DFS基準データ §4](../../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針 §1・フェーズ3](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実施記録・基準書との差: [dfs-check-123.md](../../../../../../../docs/dfs-check-123.md)。
 
 URL: `/learning-preview/dfs-check`。通常のfront開発サーバーなら`http://localhost:3000/learning-preview/dfs-check`。ログイン・バックエンド不要。
 
@@ -30,3 +30,6 @@ URL: `/learning-preview/dfs-check`。通常のfront開発サーバーなら`http
 検証: `npm run verify:dfs-check`。設問とDFSスタックの対応、元ステップの参照同一性、全候補の誤答と再試行、初回結果の保持、ソフトゲート、実際のPreviewコールバックの入力固定・復習・完了・やり直し、SSRのボタン・色・二重リングの抑制を確認する。実行トレースの回帰は`verify:dfs-execution`、BFS側は`verify:bfs-check`、共通の正誤提示は`verify:answer-feedback`で確認する。
 
 アプリ組み込み、進捗・学習ログ保存、他段階との接続、専用リザルト演出は対象外。DB・seed適用不要。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

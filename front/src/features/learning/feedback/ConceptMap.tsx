@@ -1,8 +1,8 @@
 "use client";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import type { ConceptSnapshot } from "@/api/feedbackV1.api";
-import { implementationInputLevelText, type ImplementationInputLevel } from "../../implementation/inputLevel";
-import { playerTokens } from "../../player/player.tokens";
+import { implementationInputLevelText, type ImplementationInputLevel } from "../implementation/inputLevel";
+import { playerTokens } from "../player/player.tokens";
 
 const states = {
   unobserved: { label: "未確認", icon: "−", color: "default" },

@@ -2,7 +2,7 @@
 
 - 目的: 単品ページで確認済みの二分探索フェーズ1〜7を、1つの単元として通して学習できるよう接続する。
 - 適用範囲: 単元内のフェーズ遷移、リザルト画面、単元内ナビゲーション、アプリへの登録（unitRegistry / LearningScreen）とフィードバック接続（#202）。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #294](https://github.com/BeppuKanato/engineer-quest/issues/294)、[二分探索単元 基準データ](../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針の遷移モデル](../../../../../../docs/concept/learning-materials-guideline.md)、[フィードバックの学習フロー接続](../../../../../../docs/feedback-learning-flow-202.md)
+- 正本: [Issue #294](https://github.com/BeppuKanato/engineer-quest/issues/294)、[二分探索単元 基準データ](../../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針の遷移モデル](../../../../../../../docs/concept/learning-materials-guideline.md)、[フィードバックの学習フロー接続](../../../../../../../docs/feedback-learning-flow-202.md)
 
 ## 操作
 
@@ -30,3 +30,6 @@
 ## 対象外
 
 知識カード・実績のシード追加は Issue #295 で扱う。コースシード（`course-algorithm-binary-search-v1`）は既存のため、本モジュールの登録で単元一覧・学習画面に現れる。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

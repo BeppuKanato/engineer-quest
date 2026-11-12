@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 import Link from "next/link";
 import type { LearningObserver } from "../../../lib/learningEvents";
 import type { LearningRewards } from "../types/rewards";
-import { appLearningTokens as colors } from "../app/appLearning.tokens";
+import { appLearningTokens as colors } from "../config/appLearning.tokens";
 import { AchievementList } from "./AchievementList";
 import { presentationFor, rewardText as text } from "./presentation";
 

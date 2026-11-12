@@ -31,7 +31,7 @@
 | `front/src/api/` | バックエンド API クライアントと API 境界の型 |
 | `front/src/lib/` | fetcher、API base URL、キャッシュなどアプリ共通の基盤 |
 | `front/src/hooks/` | 複数画面で再利用する React hooks |
-| `front/src/app/component/` | 未移行の共通UI・機能が残る既存例外。新規の共有部品は採用方針の配置を使い、既存部品の移動は利用先と一緒に計画する |
+| `front/src/app/component/` | ヘッダーの機能接続とルートガード。共通UI・セッション・音はcomponents/libへ移行済み。未使用の旧部品は新規の雛形にしない |
 
 学習機能は `front/src/features/learning/` を優先する。ルートの `page.tsx` に、認証確認、データ取得の開始、画面構成を持たせ、教材の描画や判定などの本質的ロジックを直接書き込まない。
 

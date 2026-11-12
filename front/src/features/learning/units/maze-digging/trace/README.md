@@ -2,7 +2,7 @@
 
 - 目的: 現在の学習者コードを表示用D1（9×9、主教材の choices）で実行し、フェーズ2と同じ盤面で掘削過程（バックトラックを含む）をステップ再生する。
 - 適用範囲: トレース取得、盤面キャンバス変換、モーダル、フェーズ7画面との接続。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #264](https://github.com/BeppuKanato/engineer-quest/issues/264)、[穴掘り法基準データ §3 フェーズ7](../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針 §7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[棒倒し法 視覚的デバッグ](../../wall-extension/trace/README.md)。
+- 正本: [Issue #264](https://github.com/BeppuKanato/engineer-quest/issues/264)、[穴掘り法基準データ §3 フェーズ7](../../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針 §7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[棒倒し法 視覚的デバッグ](../../wall-extension/trace/README.md)。
 
 ## 操作
 
@@ -34,3 +34,6 @@ MonacoとPyodideの読込完了後、「盤面で掘る様子を見る」を押�
 `npm run verify:maze-digging-trace` は同じハーネスをpython3で実行し、参照コードの再生がフェーズ2の正準フレーム列（盤面・処理中・経路・highlight）と一致すること、改名した盤面変数の形検出、誤った迷路の忠実な再生、途中エラーと停止行、補助関数内で作る盤面の最終状態表示、構文エラー、曖昧な候補、末尾だけ描けない盤面の部分再生、打ち切り、実描画、D1限定・新規Worker・キャンセルを確認する。
 
 参照コード、テスト内容、4段階ヒントは変更しない。DB・進捗／ログ保存・フェーズ接続・単元コンテナは後続Issueの対象。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

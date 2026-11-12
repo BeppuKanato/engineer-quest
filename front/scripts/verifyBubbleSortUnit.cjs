@@ -56,7 +56,7 @@ for (const phase of bubbleSortUnitPhases.slice(0, -1)) {
 }
 
 // レジストリに BFS と並んで登録され、既存コースIDで引ける。
-const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/app/unitRegistry.ts`);
+const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/config/unitRegistry.ts`);
 assert.equal(learningUnits[0].courseId, "course-algorithm-breadth-first-search-v1", "BFS stays first in the registry");
 const bubbleUnit = findLearningUnit("course-algorithm-bubble-sort-v2");
 assert.ok(bubbleUnit, "bubble-sort unit is registered");
@@ -72,7 +72,7 @@ assert.match(page, /contentId === "bubble-sort-unit"/);
 assert.match(page, /BubbleSortUnitPreview/);
 
 // 学習画面は kind で単元コンテナを出し分ける（進捗・フィードバックの経路は共通）。
-const screenSource = read(`${root}/app/LearningScreen.tsx`);
+const screenSource = read(`${root}/screens/LearningScreen.tsx`);
 assert.match(screenSource, /unit\.kind === "bubble-sort"/, "learning screen dispatches on unit kind");
 assert.match(screenSource, /<BubbleSortUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "bubble-sort container receives the shared connection props");
 assert.match(screenSource, /<BfsUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "BFS container receives the same connection props");

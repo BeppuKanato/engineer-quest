@@ -6,11 +6,11 @@ const frontRoot = path.resolve(__dirname, '..');
 const readFront = (relative) => fs.readFileSync(path.join(frontRoot, relative), 'utf8');
 const readRepo = (relative) => fs.readFileSync(path.join(frontRoot, '..', relative), 'utf8');
 
-const overview = readFront('src/features/learning/app/UnitOverview.tsx');
+const overview = readFront('src/features/learning/screens/UnitOverview.tsx');
 
 // 1. The path is a sine wave with the nodes on it, drawn as one SVG layer.
 // The wave geometry is shared with the final result's mini map (unitPathGeometry).
-const geometry = readFront('src/features/learning/app/unitPathGeometry.ts');
+const geometry = readFront('src/features/learning/utils/unitPathGeometry.ts');
 assert(geometry.includes('Math.sin'), 'unit path must be a sine curve');
 assert(geometry.includes('wavePoint'), 'node positions must derive from the wave function');
 assert(overview.includes('unitPathGeometry'), 'the overview must use the shared wave geometry');
@@ -48,6 +48,6 @@ assert(cardComplete && cardComplete.includes('courseId: BFS_COURSE_ID'), 'the BF
 
 // 6. The unit intro comes from the content layer through the registry.
 assert(content.includes('bfsUnitIntro'), 'the unit content must define the intro line');
-assert(readFront('src/features/learning/app/unitRegistry.ts').includes('intro: bfsUnitIntro'), 'the registry must expose the intro');
+assert(readFront('src/features/learning/config/unitRegistry.ts').includes('intro: bfsUnitIntro'), 'the registry must expose the intro');
 
 console.log('verifyUnitOverview: all contracts hold');

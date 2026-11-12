@@ -3,8 +3,8 @@
 import { Box, Typography } from "@mui/material";
 import { useEffect, useRef } from "react";
 
-import { learningPhaseIcons } from "../../app/learningPhaseIcons";
-import { PhaseNextButton } from "../../app/PhaseNextButton";
+import { learningPhaseIcons } from "../../config/learningPhaseIcons";
+import { PhaseNextButton } from "./PhaseNextButton";
 import { playerTokens } from "../../player/player.tokens";
 import type { UnitPhase } from "../../types/unit.types";
 

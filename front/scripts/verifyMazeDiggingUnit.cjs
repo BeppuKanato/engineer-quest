@@ -56,7 +56,7 @@ for (const phase of mazeDiggingUnitPhases.slice(0, -1)) {
 }
 
 // レジストリに BFS・棒倒し法と並んで登録され、コースIDで引ける。
-const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/app/unitRegistry.ts`);
+const { learningUnits, findLearningUnit, resumePhaseIndex } = load(`${root}/config/unitRegistry.ts`);
 assert.equal(learningUnits[0].courseId, "course-algorithm-breadth-first-search-v1", "BFS stays first in the registry");
 assert.ok(findLearningUnit("course-algorithm-wall-extension-v1"), "wall-extension unit stays registered");
 const diggingUnit = findLearningUnit("course-algorithm-maze-digging-v1");
@@ -73,7 +73,7 @@ assert.match(page, /contentId === "maze-digging-unit"/);
 assert.match(page, /MazeDiggingUnitPreview/);
 
 // 学習画面は kind で単元コンテナを出し分ける（進捗・フィードバックの経路は共通）。
-const screenSource = read(`${root}/app/LearningScreen.tsx`);
+const screenSource = read(`${root}/screens/LearningScreen.tsx`);
 assert.match(screenSource, /unit\.kind === "maze-digging"/, "learning screen dispatches on unit kind");
 assert.match(screenSource, /<MazeDiggingUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "maze-digging container receives the shared connection props");
 assert.match(screenSource, /<WallExtensionUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "wall-extension container receives the same connection props");

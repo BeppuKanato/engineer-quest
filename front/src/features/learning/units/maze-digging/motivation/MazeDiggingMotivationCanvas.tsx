@@ -3,7 +3,7 @@
 import Box from "@mui/material/Box";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { MazeGridDrawing } from "../../../player/MazeGridDrawing";
 import { playerTokens } from "../../../player/player.tokens";
 import type { MazeDiggingMotivationCanvasState } from "./motivation.types";

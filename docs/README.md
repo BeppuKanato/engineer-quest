@@ -14,8 +14,8 @@
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
 | [development-rules.md](development-rules.md) | 正本 | フロント、バック、API、Prisma、seed、検証の実装ルール |
-| [frontend-architecture.md](frontend-architecture.md) | 正本（採用方針） | Bulletproof Reactを基準にしたフロントの責務・依存方向・状態管理・共通化・既存例外と移行方針。コード移行は段階的に進行中 |
-| [frontend-migration-plan.md](frontend-migration-plan.md) | 計画（進行中） | 共通化・移行の10作業。M00〜M03は実装・自動検証済み。対象ファイル、依存順、PR分割、完了条件、既存verifyと実画面の確認、切り戻し方針 |
+| [frontend-architecture.md](frontend-architecture.md) | 正本（採用方針） | Bulletproof Reactを基準にしたフロントの責務・依存方向・状態管理・共通化・既存例外と移行方針。計画対象のコード移行と自動検証を実施済み。実機・認証後の確認範囲は作業記録を参照 |
+| [frontend-migration-plan.md](frontend-migration-plan.md) | 計画・実装記録 | 共通化・移行の10作業。M00〜M09のコード移行と自動検証を実施。対象ファイル、依存順、PR分割、完了条件、既存verifyと実画面の確認、切り戻し方針 |
 | [references/bulletproof-react/README.md](references/bulletproof-react/README.md) | 外部参考（固定版） | 公式GitHubの原文12文書・README・LICENSE・画像。取得コミットとハッシュを記録。プロジェクト方針は上記採用方針を優先 |
 | [development-cloud-run.md](development-cloud-run.md) | 現行 | develop 用 Cloud Run の構成、デプロイ、確認手順 |
 
@@ -35,19 +35,19 @@
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
-| [BFS フェーズ1](../front/src/features/learning/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
-| [DFS 導入](../front/src/features/learning/dfs/motivation/README.md) | 現行 | Issue #121の宝探し18場面、BFSと共有する迷路・グラフ、A→B→D→F→E→Cの歩行と確認手順 |
-| [DFS 動きの説明](../front/src/features/learning/dfs/execution/README.md) | 現行 | Issue #122の17ステップ、共有グラフ、スタックと訪問順、Python実行トレース検証と確認手順 |
-| [DFS 動きの確認問題](../front/src/features/learning/dfs/check/README.md) | 現行 | Issue #123の連動2問（F/E）、共通assessmentと回答操作面、任意復習・初回結果・確認手順 |
-| [DFS 動きとコードの対応](../front/src/features/learning/dfs/code-mapping/README.md) | 現行 | Issue #124の68フレーム、コード契約、17場面への参照、実Pythonとの全行照合・確認手順 |
-| [BFS フェーズ2](../front/src/features/learning/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
-| [BFS フェーズ3](../front/src/features/learning/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
-| [BFS フェーズ4](../front/src/features/learning/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
-| [BFS フェーズ5](../front/src/features/learning/bfs/code-check/README.md) | 現行 | Issue #73 の独立した穴埋め2問、共有コード表示・設問セッション・任意復習、結果と確認手順 |
-| [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート。全単元のParsons誤答時の表示は [UI定義 §5.2](concept/learning-player-ui.md#52-質問画面の3段組)（#352） |
-| [BFS 視覚的デバッグ](../front/src/features/learning/bfs/trace/README.md) | 現行 | Issue #76 のD1限定トレース・共通キャンバス再生・停止／上限／最終状態と対応範囲 |
-| [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の5テスト・4段階ヒントと、Issue #110 のダークエディタ・D1フリー実行・確認手順 |
-| [BFS 単元フロー](../front/src/features/learning/bfs/unit/README.md) | 現行 | Issue #77 のフェーズ1〜7の接続、遷移3類型、リザルト画面、単元内ナビゲーションと確認手順 |
+| [BFS フェーズ1](../front/src/features/learning/units/bfs/motivation/README.md) | 現行 | Issue #69 の場面列、用語表、単品確認方法、サンプル・指針との判断点 |
+| [DFS 導入](../front/src/features/learning/units/dfs/motivation/README.md) | 現行 | Issue #121の宝探し18場面、BFSと共有する迷路・グラフ、A→B→D→F→E→Cの歩行と確認手順 |
+| [DFS 動きの説明](../front/src/features/learning/units/dfs/execution/README.md) | 現行 | Issue #122の17ステップ、共有グラフ、スタックと訪問順、Python実行トレース検証と確認手順 |
+| [DFS 動きの確認問題](../front/src/features/learning/units/dfs/check/README.md) | 現行 | Issue #123の連動2問（F/E）、共通assessmentと回答操作面、任意復習・初回結果・確認手順 |
+| [DFS 動きとコードの対応](../front/src/features/learning/units/dfs/code-mapping/README.md) | 現行 | Issue #124の68フレーム、コード契約、17場面への参照、実Pythonとの全行照合・確認手順 |
+| [BFS フェーズ2](../front/src/features/learning/units/bfs/execution/README.md) | 現行 | Issue #70 の19ステップ、フェーズ3・4で使う実行状態契約、単品確認・機械検証と共有グラフの判断点 |
+| [BFS フェーズ3](../front/src/features/learning/units/bfs/check/README.md) | 現行 | Issue #71 の連動2問、共通の進行・回答記録、任意復習、単品確認と検証方法 |
+| [BFS フェーズ4](../front/src/features/learning/units/bfs/code-mapping/README.md) | 現行 | Issue #72 のコード本文・意味ID契約、62フレーム、フェーズ2参照、単品確認とPythonトレース検証 |
+| [BFS フェーズ5](../front/src/features/learning/units/bfs/code-check/README.md) | 現行 | Issue #73 の独立した穴埋め2問、共有コード表示・設問セッション・任意復習、結果と確認手順 |
+| [BFS フェーズ6](../front/src/features/learning/units/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート。全単元のParsons誤答時の表示は [UI定義 §5.2](concept/learning-player-ui.md#52-質問画面の3段組)（#352） |
+| [BFS 視覚的デバッグ](../front/src/features/learning/units/bfs/trace/README.md) | 現行 | Issue #76 のD1限定トレース・共通キャンバス再生・停止／上限／最終状態と対応範囲 |
+| [BFS フェーズ7](../front/src/features/learning/units/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の5テスト・4段階ヒントと、D1フリー実行・現行ライトエディタの確認手順 |
+| [BFS 単元フロー](../front/src/features/learning/units/bfs/unit/README.md) | 現行 | Issue #77 のフェーズ1〜7の接続、遷移3類型、リザルト画面、単元内ナビゲーションと確認手順 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 

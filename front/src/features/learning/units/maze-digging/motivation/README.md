@@ -1,7 +1,7 @@
 # 穴掘り法「導入」
 
 - 目的・適用範囲: Issue #257の7場面を単品で操作する。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [穴掘り法基準データ§3](../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
+- 正本: [穴掘り法基準データ§3](../../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/maze-digging-motivation を開く。認証・DBは不要。
 
@@ -13,3 +13,6 @@
 - `MazeDiggingMotivationPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（接続Issue）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete）を持ち、未指定なら単品ページとして動く。最終場面の出口ボタンが onComplete につながる。
 
 検証: `npm run verify:maze-digging-motivation`。迷路データの生成（参照コードの手続きの実行）は`../mazeDiggingMaze.ts`、グリッドの型・描画・幾何は`player/mazeGrid.types.ts`・`player/MazeGridDrawing.tsx`・`player/mazeGridGeometry.ts`を共有する。状態の意味（processing = 現在の部屋、target = まだ壁の部屋）は棒倒し法と逆のため、検証は共有の `validateMazeGridCanvas` ではなく単元側の `validateMazeDiggingCanvas` で行う。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

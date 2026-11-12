@@ -1,8 +1,8 @@
 # 棒倒し法「自分で実装」
 
 - 目的・適用範囲: Issue #212の自由記述課題 `generate_maze(size, choices)`（表示用2件＋判定用3件、全通過が完了条件のハードゲート）と段階式ヒント4段、D1専用の試しに実行を単品で操作する。状態: 現行。最終確認日: 2026-11-06。
-- 正本: [棒倒し法基準データ§2・§3](../../../../../../docs/concept/wall-extension-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/wall-extension-phase7-212.md)。
+- 正本: [棒倒し法基準データ§2・§3](../../../../../../../docs/concept/wall-extension-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/wall-extension-phase7-212.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/wall-extension-implementation を開く。認証・DBは不要。
 
@@ -28,3 +28,6 @@
 - `ImplementationResults.tsx` / `MazeGridOutput.tsx` / `FreeExecutionConsole.tsx` / `ImplementationHints.tsx` / `freeExecution.ts` / `editor.content.ts` / `editor.tokens.ts`: 結果表示、戻り値の盤面表示、試しに実行のコンソール、ヒントダイアログ、D1専用フリー実行、画面文言、エディタ専用トークン。
 
 検証: `npm run verify:wall-extension-implementation`。単元フローへの接続・進捗保存は後続Issueの対象で、このモジュールは保存処理を持たない。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

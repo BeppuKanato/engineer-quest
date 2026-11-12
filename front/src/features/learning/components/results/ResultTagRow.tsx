@@ -6,7 +6,7 @@ import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
-import { playerTokens } from "../player/player.tokens";
+import { playerTokens } from "../../player/player.tokens";
 
 /**
  * 結果画面の論点1行分。正解は青いチェックで示し、初回で届かなかった論点は赤や❌で責めず、

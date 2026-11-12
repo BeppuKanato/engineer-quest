@@ -6,7 +6,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import type { FeedbackBindings } from "./FeedbackBindings";
 import { feedbackCandidates } from "@/api/feedbackV1.api";
 import { ConceptMap } from "./ConceptMap";
-import { playerTokens } from "../../player/player.tokens";
+import { playerTokens } from "../player/player.tokens";
 
 /** 専用画面に出す大目標の進捗。数値は API のコード計算の結果をそのまま使う。 */
 export type FeedbackGoalSummary = {

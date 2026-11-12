@@ -1,8 +1,8 @@
 # 二分探索「導入」
 
 - 目的・適用範囲: Issue #286の6場面を単品で操作する。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [二分探索基準データ§3フェーズ1](../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/binary-search-phase1-286.md)。
+- 正本: [二分探索基準データ§3フェーズ1](../../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/binary-search-phase1-286.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/binary-search-motivation を開く（単元フロー全体は http://localhost:3000/learning-preview/binary-search-unit から）。認証・DBは不要。
 
@@ -14,3 +14,6 @@
 - `BinarySearchMotivationPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（接続Issue）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete）を持ち、未指定なら単品ページとして動く。最終場面の出口ボタンが onComplete につながる。
 
 検証: `npm run verify:binary-search-motivation`。配列データと探索の実行記録は`../binarySearch.ts`、配列の型・検証・描画は`player/arrayBars.types.ts`・`player/arrayBarsGeometry.ts`・`player/ArrayDrawing.tsx`を参照する。プレビューの入口は他単元と同じ`[contentId]`方式（`binary-search-motivation`）で、単元フローは`binary-search-unit`から開く（単元接続 #294 でフェーズ1専用ページを廃止し登録を統一）。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

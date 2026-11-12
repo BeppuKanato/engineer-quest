@@ -5,7 +5,7 @@ const { renderToStaticMarkup } = require('react-dom/server');
 const { load } = require('./learningModuleLoader.cjs');
 const path = require('node:path');
 const root = path.resolve(__dirname,'../src/features/learning');
-const { ConceptMap } = load(`${root}/app/feedback/ConceptMap.tsx`);
+const { ConceptMap } = load(`${root}/feedback/ConceptMap.tsx`);
 const definitions = require('../../back/src/learning/feedback/concepts.json');
 for (const unit of definitions) {
   const concepts = unit.concepts.map((c,i)=>({...c, state:['unobserved','confirmed','needs_check'][i%3],attemptedQuestions: i===0?0:1,totalQuestions:c.questions.length,

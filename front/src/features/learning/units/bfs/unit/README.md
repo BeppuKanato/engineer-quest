@@ -2,7 +2,7 @@
 
 - 目的: 単品ページで確認済みの BFS フェーズ1〜7を、1つの単元として通して学習できるよう接続する。
 - 適用範囲: 単元内のフェーズ遷移、リザルト画面、単元内ナビゲーション。状態: 現行。最終確認日: 2026-11-05。
-- 正本: [Issue #77](https://github.com/BeppuKanato/engineer-quest/issues/77)、[教材指針の遷移モデル](../../../../../../docs/concept/learning-materials-guideline.md)、[学習フロー要約](../../../../../../docs/concept/learning-materials-v2.md)
+- 正本: [Issue #77](https://github.com/BeppuKanato/engineer-quest/issues/77)、[教材指針の遷移モデル](../../../../../../../docs/concept/learning-materials-guideline.md)、[学習フロー要約](../../../../../../../docs/concept/learning-materials-v2.md)
 
 ## 操作
 
@@ -26,4 +26,7 @@
 
 ## 対象外
 
-アプリ本体への組み込み・進捗保存・下書き・ログはIssue #109の[実装報告](../../../../../../docs/learning-screens-109.md)を参照する。今回、単元側は接続用の任意ポートと保存失敗時の再試行だけを追加した。プレイヤー UI 定義への適合（#83）も本モジュールでは扱わない。
+アプリ本体への組み込み・進捗保存・下書き・ログはIssue #109の[実装報告](../../../../../../../docs/learning-screens-109.md)を参照する。今回、単元側は接続用の任意ポートと保存失敗時の再試行だけを追加した。プレイヤー UI 定義への適合（#83）も本モジュールでは扱わない。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

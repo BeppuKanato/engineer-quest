@@ -1,8 +1,8 @@
 # 穴掘り法「動きの確認問題」
 
 - 目的・適用範囲: Issue #259の連結2問を単品で最後まで操作する。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [穴掘り法基準データ§3](../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/maze-digging-phase3-259.md)。
+- 正本: [穴掘り法基準データ§3](../../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/maze-digging-phase3-259.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/maze-digging-check を開く。認証・DBは不要。
 
@@ -34,3 +34,6 @@
 - `MazeDiggingCheckPreview.tsx`: アセスメント画面。BFSフェーズ3と同じく embedded / onComplete（要約通知）を持つ。
 
 検証: `npm run verify:maze-digging-check`。単元フローへの接続・進捗保存は後続Issueの対象で、このモジュールは保存処理を持たない。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

@@ -3,7 +3,7 @@
 - 目的: Issue #73 の独立した穴埋め2問を、再挑戦・任意復習・タイプCの結果まで単品で操作する。
 - 適用範囲: フェーズ5のコンテンツ、共通assessmentのコード穴埋め種別、コード表示の共有、単品プレビューと検証。状態: 現行。最終確認日: 2026-11-05。
 - 起点: `develop` `425215c`（PR #93・#94 マージ済み）。
-- 正本: [教材指針 §1・フェーズ5](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../docs/concept/learning-materials-v2.md)、[Issue #73](https://github.com/BeppuKanato/engineer-quest/issues/73)。
+- 正本: [教材指針 §1・フェーズ5](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../../docs/concept/learning-materials-v2.md)、[Issue #73](https://github.com/BeppuKanato/engineer-quest/issues/73)。
 
 ## 確認方法
 
@@ -68,3 +68,6 @@ npm run verify:bfs-code-check
 
 新verifyは、正解補完のバイト一致、6候補すべてのPython構文、選択肢の一意性、共有コード表示の11行・対象1か所だけの空欄、元の復習フレームの参照同一性を確認する。
 共通セッションでは誤答・再挑戦・初回正誤・全試行、独立性、異なる回答種別の拒否、連打・完了後の回答の拒否、不正な空欄・選択肢・行・復習先の拒否を確認する。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

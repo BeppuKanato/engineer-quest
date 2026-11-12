@@ -1,5 +1,5 @@
 import { getLearningProgress } from "@/api/learning.api";
-import { findLearningUnit } from "@/features/learning/app/unitRegistry";
+import { findLearningUnit } from "@/features/learning/config/unitRegistry";
 
 import type { Course } from "@/types/course";
 

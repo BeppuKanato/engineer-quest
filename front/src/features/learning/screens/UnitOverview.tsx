@@ -13,13 +13,13 @@ import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { CourseThumbnail } from "@/features/learning/catalog/components/CourseThumbnail";
 import { useUserSession } from "@/lib/session/userSession";
 import { startLearningUnit } from "@/api/learning.api";
-import { appLearningTokens as tokens } from "./appLearning.tokens";
-import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";
-import { learningPhaseIcons } from "./learningPhaseIcons";
-import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
-import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
-import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
-import { useLearningLog } from "./useLearningLog";
+import { appLearningTokens as tokens } from "../config/appLearning.tokens";
+import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "../config/unitRegistry";
+import { learningPhaseIcons } from "../config/learningPhaseIcons";
+import { WAVE, wavePath, wavePoint } from "../utils/unitPathGeometry";
+import { useLearningProgress, learningErrorMessage } from "../hooks/useLearningProgress";
+import { ProgressLoadingSkeleton } from "../components/ui/ProgressLoadingSkeleton";
+import { useLearningLog } from "../hooks/useLearningLog";
 
 
 // 波形の形状は unitPathGeometry に共通化（最終リザルトのミニマップと共有）。

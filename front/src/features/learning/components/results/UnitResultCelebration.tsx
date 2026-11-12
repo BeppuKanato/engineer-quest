@@ -4,8 +4,8 @@ import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Ref } from "react";
 
-import { DrawnCheck } from "../../app/DrawnCheck";
-import { ResultConfetti } from "../../app/ResultConfetti";
+import { DrawnCheck } from "./DrawnCheck";
+import { ResultConfetti } from "./ResultConfetti";
 import { playerTokens } from "../../player/player.tokens";
 
 const reducedStyle = {

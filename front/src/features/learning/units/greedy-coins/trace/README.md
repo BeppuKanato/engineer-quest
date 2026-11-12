@@ -2,7 +2,7 @@
 
 - 目的: 現在の学習者コードを表示用D1で実行し、フェーズ2と同じ硬貨の図・プレイヤーで硬貨が1枚ずつ選ばれる過程を再生する。
 - 適用範囲: トレース取得、盤面スナップショット変換、モーダル、フェーズ7画面との接続。状態: 現行。最終確認日: 2026-11-11。
-- 正本: [Issue #388](https://github.com/BeppuKanato/engineer-quest/issues/388)、[貪欲法（硬貨問題）基準データ §3 フェーズ7・§4](../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針 §7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。二分探索の視覚デバッグ（Issue #293）と同じ段階適用・構造に揃える。
+- 正本: [Issue #388](https://github.com/BeppuKanato/engineer-quest/issues/388)、[貪欲法（硬貨問題）基準データ §3 フェーズ7・§4](../../../../../../../docs/concept/greedy-coins-unit-baseline.md)、[教材指針 §7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。二分探索の視覚デバッグ（Issue #293）と同じ段階適用・構造に揃える。
 
 ## 操作
 
@@ -37,3 +37,6 @@ MonacoとPyodideの読込完了後、「硬貨が選ばれる様子を見る」�
 
 `npm run verify:greedy-coins-trace`は同じハーネスをpython3で実行し、正解コードとフェーズ2正準11コマの完全一致（盤面・キャプション）、ハーネス加算が既存単元の記録を変えないこと、途中エラーと停止行、打ち切り、構文エラー、候補が曖昧な場合の最終状態、remaining・coin を使わない実装の最終状態、D1限定・新規Worker・キャンセルを確認する。
 参照コード（greedyCoinsCode）、テスト内容、4段階ヒント、試しに実行は変更しない。単元フローへの接続・DB・進捗／ログ保存は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

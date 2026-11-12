@@ -3,7 +3,7 @@
 import Box from "@mui/material/Box";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { ArrayDrawing } from "../../../player/ArrayDrawing";
 import { playerTokens } from "../../../player/player.tokens";
 import type { BubbleSortMotivationCanvasState } from "./motivation.types";

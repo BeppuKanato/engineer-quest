@@ -2,7 +2,7 @@
 
 - 目的: 現在の学習者コードを表示用D1で実行し、フェーズ2と同じ盤面キャンバス・プレイヤーで探索範囲が狭まる過程を再生する。
 - 適用範囲: トレース取得、盤面スナップショット変換、モーダル、フェーズ7画面との接続。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #293](https://github.com/BeppuKanato/engineer-quest/issues/293)、[二分探索基準データ §3 フェーズ7・§4](../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針 §7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。バブルソートの視覚デバッグ（Issue #234）と同じ段階適用・構造に揃える。
+- 正本: [Issue #293](https://github.com/BeppuKanato/engineer-quest/issues/293)、[二分探索基準データ §3 フェーズ7・§4](../../../../../../../docs/concept/binary-search-unit-baseline.md)、[教材指針 §7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。バブルソートの視覚デバッグ（Issue #234）と同じ段階適用・構造に揃える。
 
 ## 操作
 
@@ -38,3 +38,6 @@ MonacoとPyodideの読込完了後、「範囲が狭まる様子を見る」を�
 
 `npm run verify:binary-search-trace`は同じハーネスをpython3で実行し、正解コードとフェーズ2正準11コマの完全一致（盤面・強調・キャプション）、ハーネス加算が既存単元の記録を変えないこと、比較の向きを逆にした誤探索の再生、`lo = mid` の誤りの再生、途中エラーと停止行、打ち切り、構文エラー、候補が曖昧な場合の最終状態、lo・hi・mid を使わない実装の最終状態、D1限定・新規Worker・キャンセルを確認する。
 参照コード（binarySearchCode）、テスト内容、4段階ヒント、試しに実行は変更しない。単元フローへの接続・DB・進捗／ログ保存は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AwardedCard } from "../../../api/learning.api";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import type { LearningObserver } from "../../../lib/learningEvents";
-import { appLearningTokens as colors } from "../app/appLearning.tokens";
-import { useLearningRewards } from "../app/LearningRewardsContext";
+import { appLearningTokens as colors } from "../config/appLearning.tokens";
+import { useLearningRewards } from "./LearningRewardsContext";
 import { useLearningVisit } from "../instrumentation/useLearningVisit";
 import { presentationFor, rewardText as text, type RewardBoundary, type RewardStage } from "./presentation";
 

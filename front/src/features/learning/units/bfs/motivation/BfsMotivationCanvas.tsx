@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-
 import { GraphEdges, GraphNodes, GraphViewport } from "../../../player/GraphDrawing";
 import { graphGeometry } from "../../../player/graphGeometry";
 import { motivationMazeGeometry, MotivationMazeTiles, MotivationTrail, MotivationCurrentPlace } from "../../../player/MotivationDrawing";
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { playerTokens } from "../../../player/player.tokens";
 import type { MotivationCanvasState } from "./motivation.types";
 

@@ -2,7 +2,7 @@
 
 - 目的: 単品ページで確認済みの穴掘り法フェーズ1〜7を、1つの単元として通して学習できるよう接続する。
 - 適用範囲: 単元内のフェーズ遷移、リザルト画面、単元内ナビゲーション、アプリへの登録（unitRegistry / LearningScreen）とフィードバック接続（#202）。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #265](https://github.com/BeppuKanato/engineer-quest/issues/265)、[穴掘り法単元 基準データ](../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針の遷移モデル](../../../../../../docs/concept/learning-materials-guideline.md)、[フィードバックの学習フロー接続](../../../../../../docs/feedback-learning-flow-202.md)
+- 正本: [Issue #265](https://github.com/BeppuKanato/engineer-quest/issues/265)、[穴掘り法単元 基準データ](../../../../../../../docs/concept/maze-digging-unit-baseline.md)、[教材指針の遷移モデル](../../../../../../../docs/concept/learning-materials-guideline.md)、[フィードバックの学習フロー接続](../../../../../../../docs/feedback-learning-flow-202.md)
 
 ## 操作
 
@@ -29,3 +29,6 @@
 ## 対象外
 
 コースシード・知識カード・実績のシード追加と単元一覧への表示は Issue #266 で扱う。本モジュールの登録だけでは、コース一覧に穴掘り法は現れない。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

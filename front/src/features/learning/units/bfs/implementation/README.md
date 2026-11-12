@@ -3,8 +3,8 @@
 - 目的: Issue #75 の自由記述・5テスト・段階式ヒント・全通過リザルトを単品で操作する。
 - 適用範囲: フェーズ7のフロントエンド・教材データ・検証。状態: 現行（4段階ヒントの試行版とIssue #110のエディタ改善）。最終確認日: 2026-11-05。
 - 起点: `develop` `262cc2b`、レビュー修正の起点: `feat/bfs-implementation-75` `cc93757`。
-- 正本: [Issue #75](https://github.com/BeppuKanato/engineer-quest/issues/75)、[PR #99](https://github.com/BeppuKanato/engineer-quest/pull/99)、[教材指針 §1・フェーズ7](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。今回の明示的な修正依頼を指針の3段階ヒント・常時チップ・差分表示に優先する。
-- 確認画像・検証結果: [初回実装・レビュー記録](../../../../../../docs/bfs-implementation-75.md)、[エディタ改善・フリー実行](../../../../../../docs/bfs-editor-110.md)。
+- 正本: [Issue #75](https://github.com/BeppuKanato/engineer-quest/issues/75)、[PR #99](https://github.com/BeppuKanato/engineer-quest/pull/99)、[教材指針 §1・フェーズ7](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。今回の明示的な修正依頼を指針の3段階ヒント・常時チップ・差分表示に優先する。
+- 確認画像・検証結果: [初回実装・レビュー記録](../../../../../../../docs/bfs-implementation-75.md)、[エディタ改善・フリー実行](../../../../../../../docs/bfs-editor-110.md)。
 
 ## 起動・操作
 
@@ -88,3 +88,6 @@ npm run verify:bfs-free-execution
 視覚的デバッグはIssue #76／PR #100で追加・修正した「実行する」から利用できる。D1限定のトレース・対応範囲・操作は[trace README](../trace/README.md)を参照する。採点回数・ヒント回数はトレースで変更しない。完了後は「動きを確認する」で再生を開く。
 
 DB適用なし。アプリ組み込み・Mission/Activity・進捗／ログ保存・新しいフェーズ接続は対象外。フリー実行のプロトコル・D1限定・エラー／タイムアウト・出力制限の検証は`verify:bfs-free-execution`を使う。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

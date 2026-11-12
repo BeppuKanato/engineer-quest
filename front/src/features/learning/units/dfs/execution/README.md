@@ -2,7 +2,7 @@
 
 - 目的・適用範囲: Issue #122。DFSの17ステップを共有プレイヤーで再生する単品教材。
 - 最終確認日: 2026-11-06
-- 正本: [DFS基準データ §2](../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../docs/concept/learning-player-ui.md)
+- 正本: [DFS基準データ §2](../../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../../docs/concept/learning-player-ui.md)
 
 URL: `/learning-preview/dfs-execution`（ローカル確認: `http://localhost:3122/learning-preview/dfs-execution`）。
 
@@ -20,3 +20,6 @@ URL: `/learning-preview/dfs-execution`（ローカル確認: `http://localhost:3
 検証: `npm run verify:dfs-execution`。Python 3が必要（既定`python3`、別名の場合は環境変数`PYTHON`を指定）。基準書§7.1のコード本文を読み、表で省略されたインデントのみ復元して実CPythonで実行する。トレーサーは関数を変更せず行イベントを観測し、基準書§2.3と同じ粒度で17場面を採取する。全状態をトレース・基準書§2.2の双方と照合し、逆順復元、不正状態の拒否、共有参照、色、モーション、単品の責務も検証する。
 
 アプリ組み込み、進捗・学習ログ保存、他段階への接続は対象外。基本グラフではEから新しい枝へ潜り直す場面がないという基準書§1.4の留保は維持する。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

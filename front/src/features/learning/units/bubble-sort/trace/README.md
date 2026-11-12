@@ -2,7 +2,7 @@
 
 - 目的: 現在の学習者コードを表示用D1で実行し、フェーズ2と同じ配列キャンバス・プレイヤーで比較・交換の過程を再生する。
 - 適用範囲: トレース取得、配列キャンバス変換、モーダル、単品ページとの接続。状態: 現行。最終確認日: 2026-11-07。
-- 正本: [Issue #234](https://github.com/BeppuKanato/engineer-quest/issues/234)、[バブルソート基準データ §3 フェーズ7](../../../../../../docs/concept/bubble-sort-unit-baseline.md)、[教材指針 §7-3](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。BFS の視覚デバッグ（Issue #76）と同じ段階適用・構造に揃える。
+- 正本: [Issue #234](https://github.com/BeppuKanato/engineer-quest/issues/234)、[バブルソート基準データ §3 フェーズ7](../../../../../../../docs/concept/bubble-sort-unit-baseline.md)、[教材指針 §7-3](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。BFS の視覚デバッグ（Issue #76）と同じ段階適用・構造に揃える。
 
 ## 操作
 
@@ -37,3 +37,6 @@ MonacoとPyodideの読込完了後、「配列で動きを見る」を押す。�
 
 `npm run verify:bubble-sort-trace`は同じハーネスをpython3で実行し、正解コードとフェーズ2正準16コマの一致、スナップショットのコピー、交換しない比較と誤った交換の再現、途中エラーと停止行、打ち切り、構文エラー、候補が曖昧な場合の最終状態、再帰の最終状態、D1限定・新規Worker・キャンセルを確認する。
 bfsCodeに相当する参照コード（bubbleSortCode）、テスト内容、4段階ヒント、試しに実行は変更しない。単元フローへの接続・DB・進捗／ログ保存は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

@@ -1,8 +1,8 @@
 # バブルソート「動きとコードの対応」
 
 - 目的・適用範囲: Issue #230の39フレームを単品で操作する。状態: 現行。最終確認日: 2026-11-06。
-- 正本: [バブルソート基準データ§2・§3](../../../../../../docs/concept/bubble-sort-unit-baseline.md)（取り込みは Issue #226。未取り込みの間は承認済み原本に従う）、[教材指針](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装・検証・指針との留保: [実施記録](../../../../../../docs/bubble-sort-phase4-230.md)。
+- 正本: [バブルソート基準データ§2・§3](../../../../../../../docs/concept/bubble-sort-unit-baseline.md)（取り込みは Issue #226。未取り込みの間は承認済み原本に従う）、[教材指針](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装・検証・指針との留保: [実施記録](../../../../../../../docs/bubble-sort-phase4-230.md)。
 
 `front`で`npm run dev`を実行して http://localhost:3000/learning-preview/bubble-sort-code-mapping を開く。認証・DBは不要。
 
@@ -16,3 +16,6 @@
 - `BubbleSortCodeMappingPreview.tsx`: 共通LearningPlayerへの入口。単元フロー（#235）向けに任意の接続ポート（embedded / onLearningEvent / active / onComplete / nextLabel）を持ち、未指定なら単品ページとして動く。共通プレイヤーの endAction が onComplete につながる。
 
 検証: `npm run verify:bubble-sort-code-mapping`。参照コードを CPython で実際に実行したトレース（`front/scripts/fixtures/bubbleSortCodeMappingTrace.py`）と、全フレームの行・ローカル変数を突き合わせる。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

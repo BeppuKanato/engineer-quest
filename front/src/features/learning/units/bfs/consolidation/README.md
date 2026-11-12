@@ -3,8 +3,8 @@
 - 目的: Issue #74 の転移2問・境界ケース2問・Parsons 1問を、初回結果の診断と任意復習まで単品で操作する。
 - 適用範囲: フェーズ6のコンテンツ、共通assessmentの診断・選択・並び替え、単品プレビューと検証。状態: 現行。最終確認日: 2026-11-05。
 - 起点: `develop` `bb64e28`（PR #95 マージ済み）。
-- 正本: [教材指針 §1・フェーズ6](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義 §2.3](../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../docs/concept/learning-materials-v2.md)、[Issue #74](https://github.com/BeppuKanato/engineer-quest/issues/74)。
-- 確認画像・検証記録: [実装報告](../../../../../../docs/bfs-consolidation-74.md)。
+- 正本: [教材指針 §1・フェーズ6](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義 §2.3](../../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../../docs/concept/learning-materials-v2.md)、[Issue #74](https://github.com/BeppuKanato/engineer-quest/issues/74)。
+- 確認画像・検証記録: [実装報告](../../../../../../../docs/bfs-consolidation-74.md)。
 
 ## 確認方法
 
@@ -77,3 +77,6 @@ Parsonsの固定提示順・全11行の順列・正解順との相違・本文�
 PR #96の追加検証では、初期化2行の交換のみ正解であること、他の隣接行の交換はすべて不正解であること、グループ未指定時の完全一致、存在しない行・重複・非隣接・重なるグループの拒否も確認する。
 
 DB適用なし。アプリ組み込み、Mission/Activity、進捗・ログ保存、他フェーズの実装・フェーズ間接続は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

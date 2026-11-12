@@ -3,7 +3,7 @@
 - 目的: Issue #69 の場面列を共通プレイヤーで単品確認する。
 - 適用範囲: フェーズ1の教材データ・描画・未接続の出口。状態: 現行。最終確認日: 2026-11-05。
 - 起点: develop `a485553`。
-- 正本: [教材指針全文](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../docs/concept/learning-player-ui.md)。
+- 正本: [教材指針全文](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI定義](../../../../../../../docs/concept/learning-player-ui.md)。
 - レビュー済みサンプルの構成を基に、PR #85 の場面構成修正指示（ラベル付き迷路・グラフでの再演・SNS削除・話題切替のクッション）を反映した。Drive スライド自体は未参照。
 
 ## 確認方法
@@ -119,4 +119,7 @@ DB適用、バックエンド・他フェーズの検証は不要。フェーズ
 390px幅でも予告の表示を確認し、横スクロールなし。
 build は既存 next/font のフォント取得のためネットワークアクセス可能な環境で実行した。既存の複数lockfileによる workspace root 警告と ESLint設定の module type 警告は残る。
 
-#91 の同一画面幅での比較・実施結果は [描画統一の検証記録](../../../../../../docs/graph-unify-91.md) を参照。
+#91 の同一画面幅での比較・実施結果は [描画統一の検証記録](../../../../../../../docs/graph-unify-91.md) を参照。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

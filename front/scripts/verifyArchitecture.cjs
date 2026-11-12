@@ -22,7 +22,7 @@ for(const [file,code,id] of rejected) {
 }
 for(const [file,code] of [
   ["features/learning/units/bfs/X.ts", 'import X from "../../components/X";'],
-  ["features/learning/unit/X.ts", 'import X from "../app/feedback/X";'],
+  ["features/learning/unit/X.ts", 'import X from "../feedback/X";'],
   ["app/test.tsx", 'import X from "@/features/learning/X";'],
   ["lib/test.ts", 'import X from "@/types/test";'],
   ["features/home/test.tsx", 'import X from "react";'],

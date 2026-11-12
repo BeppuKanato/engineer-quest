@@ -5,8 +5,8 @@ import { assessmentEvidence } from "../../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ResultTagRow } from "../../../app/ResultTagRow";
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { ResultTagRow } from "../../../components/results/ResultTagRow";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../../assessment/AnswerFeedback";
 import { useAssessmentCompletion } from "../../../assessment/useAssessmentCompletion";
 import {

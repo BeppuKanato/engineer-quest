@@ -3,7 +3,7 @@
 import Box from "@mui/material/Box";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { playerTokens } from "../../../player/player.tokens";
 import { GreedyCoinsDrawing } from "../figure/GreedyCoinsDrawing";
 import { toGreedyCoinsCanvas, type GreedyCoinsMotivationCanvasState } from "./motivation.types";

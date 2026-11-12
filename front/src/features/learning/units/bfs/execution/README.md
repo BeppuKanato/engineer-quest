@@ -3,7 +3,7 @@
 - 目的: Issue #70 の19ステップを単品確認し、フェーズ3・4で共用する実行状態の形式を定める。
 - 適用範囲: フェーズ2の教材・描画・機械検証。状態: 現行。最終確認日: 2026-11-05。
 - 起点: develop `85d8dd6`。
-- 正本: [教材指針全文](../../../../../../docs/concept/learning-materials-guideline.md) §1・フェーズ2〜4、[UI定義](../../../../../../docs/concept/learning-player-ui.md)。サンプルは Issue #70 の実装指示にある19ステップを用いる。
+- 正本: [教材指針全文](../../../../../../../docs/concept/learning-materials-guideline.md) §1・フェーズ2〜4、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)。サンプルは Issue #70 の実装指示にある19ステップを用いる。
 
 ## 確認方法
 
@@ -110,4 +110,7 @@ OSの「動きを減らす」設定では動きを省略する。
 既存の複数lockfileによる workspace root 警告と ESLint設定の module type 警告は残るが、コマンドは exit 0。build は既存 next/font のフォント取得のためネットワーク可能な環境で実行した。
 DB・外部API・他フェーズの接続の検証は対象外。
 
-#91 の同一画面幅での比較・実施結果は [描画統一の検証記録](../../../../../../docs/graph-unify-91.md) を参照。
+#91 の同一画面幅での比較・実施結果は [描画統一の検証記録](../../../../../../../docs/graph-unify-91.md) を参照。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

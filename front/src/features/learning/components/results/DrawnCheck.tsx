@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 
-import { playerTokens } from "../player/player.tokens";
+import { playerTokens } from "../../player/player.tokens";
 
 /**
  * リザルト共通のチェック図形。円が描かれたあと、チェックが描き込まれる。

@@ -17,9 +17,9 @@ import { ParsonsBoard, parsonsQuestionBodySx } from "../../../components/assessm
 import { useAssessmentObservation } from "../../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../../instrumentation/useLearningVisit";
 import { playerTokens } from "../../../player/player.tokens";
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
-import { ResultConfetti } from "../../../app/ResultConfetti";
-import { ResultTagRow } from "../../../app/ResultTagRow";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
+import { ResultConfetti } from "../../../components/results/ResultConfetti";
+import { ResultTagRow } from "../../../components/results/ResultTagRow";
 import { AssessmentReviewButton } from "../../../review/AssessmentReviewButton";
 import { LearningReviewDialog } from "../../../review/LearningReviewDialog";
 import { BinarySearchCodeMappingCanvas } from "../code-mapping/BinarySearchCodeMappingCanvas";

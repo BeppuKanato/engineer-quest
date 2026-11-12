@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '../src/features/learning');
 const definitions = require('../../back/src/learning/feedback/concepts.json');
 const plain = value => JSON.parse(JSON.stringify(value));
 function validate(units) {
-  const registry = load(`${root}/app/unitRegistry.ts`).learningUnits;
+  const registry = load(`${root}/config/unitRegistry.ts`).learningUnits;
   assert.equal(units.length, registry.length);
   assert.equal(new Set(units.map(u => u.courseId)).size, units.length);
   const ids = new Set();

@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 
-import { playerTokens } from "../player/player.tokens";
+import { playerTokens } from "../../player/player.tokens";
 
 /**
  * リザルトのスコア図示。総問題数分のドットを並べ、初回正解は塗り、再挑戦で正解した分は輪郭にする。

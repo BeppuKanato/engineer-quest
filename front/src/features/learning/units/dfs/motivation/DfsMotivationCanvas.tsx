@@ -6,7 +6,7 @@ import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 
-import { PhaseNextButton } from "../../../app/PhaseNextButton";
+import { PhaseNextButton } from "../../../components/results/PhaseNextButton";
 import { GraphEdges, GraphNodes, GraphViewport } from "../../../player/GraphDrawing";
 import { motivationMazeGeometry, MotivationMazeTiles, MotivationTrail, MotivationCurrentPlace } from "../../../player/MotivationDrawing";
 import { playerTokens, type PlayerStatus } from "../../../player/player.tokens";

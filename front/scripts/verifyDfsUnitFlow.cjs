@@ -169,9 +169,9 @@ assert.equal(find(bfs.props.unit.views["bfs-code-mapping"]).props.active, true, 
 
 const page = fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8");
 assert.match(page, /if \(contentId === "dfs-unit"\) return <DfsUnitPreview \/>/u);
-const learningScreen = fs.readFileSync(root + "/app/LearningScreen.tsx", "utf8");
+const learningScreen = fs.readFileSync(root + "/screens/LearningScreen.tsx", "utf8");
 assert.match(learningScreen, /unit.kind === "dfs" \? <DfsUnitPreview \{\.\.\.unitPreviewProps\}/u);
-const overview = fs.readFileSync(root + "/app/UnitOverview.tsx", "utf8");
+const overview = fs.readFileSync(root + "/screens/UnitOverview.tsx", "utf8");
 assert.match(overview, /next === null && <Button[^>]+href=\{learnUrl\(courseId\)\}[^>]*>単元の結果を見る/u);
 async function verifyBfsSaving() {
   slots = [];

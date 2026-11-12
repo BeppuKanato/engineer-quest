@@ -3,7 +3,7 @@
 - 目的: Issue #71 の連動2問と任意復習を単品で最後まで操作する。
 - 適用範囲: ノードの1タップ回答、再挑戦、メモリ上の回答記録、復習。状態: 現行。最終確認日: 2026-11-06。
 - 起点: develop `ff52aa9`（#88 の共有グラフ統一を含む）。
-- 正本: [教材指針](../../../../../../docs/concept/learning-materials-guideline.md) §1・フェーズ3、[UI定義](../../../../../../docs/concept/learning-player-ui.md)、Issue #71 と実装指示。
+- 正本: [教材指針](../../../../../../../docs/concept/learning-materials-guideline.md) §1・フェーズ3、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)、Issue #71 と実装指示。
 
 ## 確認方法
 
@@ -82,3 +82,6 @@ Chromeで2560×1440・1366×768・390×844の表示、単品と単元内、両�
 復習の再生・次へ・末尾停止、閉じる・Esc・再度開いたときの先頭復帰、ノードのTab / Enter / Space操作も確認した。
 1366×768と390×844で表示し、狭い画面でもノードのタップ領域44px以上、最大3要素のキュー表示、横スクロールなし。console error / warnなし。
 既存の複数lockfileによるworkspace root警告とESLint設定のmodule type警告は残るがexit 0。buildは既存next/fontの取得のためネットワーク可能な環境で実施した。DB・外部API・保存・フェーズ間接続の検証は対象外。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

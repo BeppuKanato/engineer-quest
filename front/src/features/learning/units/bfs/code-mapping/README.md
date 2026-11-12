@@ -3,7 +3,7 @@
 - 目的: Issue #72 のコード接続を、共通プレイヤー上の単品プレビューで最初から最後まで確認する。
 - 適用範囲: フェーズ4のコード契約・対応フレーム・描画・検証。状態: 現行。最終確認日: 2026-11-05。
 - 起点: `develop` `402db26`（PR #92 マージ済み）。
-- 正本: [教材指針 §1・フェーズ4](../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../docs/concept/learning-materials-v2.md)、[Issue #72](https://github.com/BeppuKanato/engineer-quest/issues/72)。
+- 正本: [教材指針 §1・フェーズ4](../../../../../../../docs/concept/learning-materials-guideline.md)、[UI定義](../../../../../../../docs/concept/learning-player-ui.md)、[要約](../../../../../../../docs/concept/learning-materials-v2.md)、[Issue #72](https://github.com/BeppuKanato/engineer-quest/issues/72)。
 
 ## 確認方法
 
@@ -94,8 +94,11 @@ DB適用なし。依存関係・ロックファイル・既存の図や19ステ�
 
 ## PR #93 レビュー修正の確認
 
-[検証記録と更新済みの1366×768の画像](../../../../../../docs/bfs-code-mapping-72.md#pr-93-レビュー修正)を参照。
+[検証記録と更新済みの1366×768の画像](../../../../../../../docs/bfs-code-mapping-72.md#pr-93-レビュー修正)を参照。
 1. 9/62へシークし、コード・変数が16px以上で読め、図＋コード領域に横スクロールがないことを確認する。
 2. 距離代入で変わった `distances[neighbor]` と `distances` の値だけが青・太字であることを確認する。
 3. 10/62で `queue` だけが変化表示になり、距離表示は通常色へ戻ることを確認する。
 4. 9/62へ逆送り・直接シークし、同じ強調が復元されることを確認する。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

@@ -5,7 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
-import { playerTokens } from "../player/player.tokens";
+import { playerTokens } from "../../player/player.tokens";
 
 /**
  * リザルト画面の紙吹雪。マウント時に一度だけ撃つ。

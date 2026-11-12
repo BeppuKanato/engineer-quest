@@ -2,8 +2,8 @@
 
 - 目的・適用範囲: Issue #124。DFSの同じ実行過程をコードと重ねて再生する単品教材。
 - 最終確認日: 2026-11-06。状態: 現行。
-- 正本: [DFS基準データ §§2.4/7.1/9-12](../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針・フェーズ4](../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../docs/concept/learning-player-ui.md)。
-- 実装判断と検証記録: [dfs-code-mapping-124.md](../../../../../../docs/dfs-code-mapping-124.md)。
+- 正本: [DFS基準データ §§2.4/7.1/9-12](../../../../../../../docs/concept/dfs-unit-baseline.md)、[教材指針・フェーズ4](../../../../../../../docs/concept/learning-materials-guideline.md)、[プレイヤーUI](../../../../../../../docs/concept/learning-player-ui.md)。
+- 実装判断と検証記録: [dfs-code-mapping-124.md](../../../../../../../docs/dfs-code-mapping-124.md)。
 
 URL: `/learning-preview/dfs-code-mapping`。通常のfront開発サーバーなら`http://localhost:3000/learning-preview/dfs-code-mapping`。認証・DB不要。
 
@@ -33,3 +33,6 @@ URL: `/learning-preview/dfs-code-mapping`。通常のfront開発サーバーな�
 `npm run verify:dfs-code-mapping`は実CPythonで、表示と同じコードを改変せず実行する。全67実行行と変数、12行のバイト一致、17参照とその図、行の間の中間状態、変更変数、SSRの表示本文・ハイライト、不正状態の拒否を検証する。Python 3が必要（既定python3、別名は環境変数PYTHON）。関連するDFS全verify・BFS全verifyも回帰確認する。
 
 §9-12の教え方は、別の反例グラフを足さず、同じ実行に同期したキャプションで説明する案を採った。採用案・字下げの補足は実施記録とPRに明示する。アプリ組み込み・進捗・学習ログ保存は対象外。DB・seed適用不要。
+
+
+> 2026-11-12: 単元固有ファイルは `learning/units` へ移動。共通部品・画面・フックの現行配置と検証範囲は[移行作業記録](../../../../../../../docs/frontend-migration-progress.md)を参照。

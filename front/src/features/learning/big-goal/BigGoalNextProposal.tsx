@@ -10,7 +10,7 @@ import {
   type BigGoalProposal,
 } from "@/api/bigGoal.api";
 import type { AchievedBigGoal } from "@/api/learning.api";
-import { playerTokens } from "../../player/player.tokens";
+import { playerTokens } from "../player/player.tokens";
 import { BigGoalSetting } from "./BigGoalSetting";
 
 const POLL_INTERVAL_MS = 1500;

@@ -10,7 +10,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useLearningVisit, type LearningInstrumentation } from "../instrumentation/useLearningVisit";
-import { PhaseNextButton } from "../app/PhaseNextButton";
+import { PhaseNextButton } from "../components/results/PhaseNextButton";
 
 import type { CanvasSnapshot, LearningContent } from "./content.types";
 import { advancePlayback, type PlaybackAction, type PlaybackState } from "./playback";

@@ -16,7 +16,7 @@ import { unitText } from "./unit.content";
 import type { UnitPhase, UnitPhaseSummary } from "../types/unit.types";
 import { PhaseBridgeScreen } from "../components/results/PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "../components/results/UnitResultScreens";
-import { FeedbackPositionFigure } from "../app/feedback/FeedbackPositionFigure";
+import { FeedbackPositionFigure } from "../feedback/FeedbackPositionFigure";
 
 type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" } | { kind: "feedback"; index: number } | { kind: "unitFeedback" };
 

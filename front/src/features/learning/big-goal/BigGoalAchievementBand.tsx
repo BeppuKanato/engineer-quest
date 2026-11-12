@@ -6,8 +6,8 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import type { AchievedBigGoal } from "@/api/learning.api";
 import type { LearningObserver } from "@/lib/learningEvents";
-import { useLearningVisit } from "../../instrumentation/useLearningVisit";
-import { playerTokens } from "../../player/player.tokens";
+import { useLearningVisit } from "../instrumentation/useLearningVisit";
+import { playerTokens } from "../player/player.tokens";
 
 /**
  * 達成した大目標1件の提示（Issue #370）。実績の提示（#333）と同じ語彙で、

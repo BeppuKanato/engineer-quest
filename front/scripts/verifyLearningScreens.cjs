@@ -32,7 +32,7 @@ const plain = value => JSON.parse(JSON.stringify(value));
   assert.deepEqual(requests.map(item=>item.url), ['/learning/units/c%2Fa/progress','/learning/units/c%2Fa/start','/learning/units/c%2Fa/phases/p%2Fa/complete','/learning/units/c%2Fa/complete','/learning/events/batch']);
   assert(requests.every(item=>item.options.token==='jwt')); assert(requests.at(-1).options.keepalive);
   assert.deepEqual(JSON.parse(requests[2].options.body),{summary}); assert.equal(invalidations.length,3);
-  const { learningUnits,findLearningUnit,resumePhaseIndex,savedPhaseSummaries,unitUrl,learnUrl } = load(root+'/features/learning/app/unitRegistry.ts');
+  const { learningUnits,findLearningUnit,resumePhaseIndex,savedPhaseSummaries,unitUrl,learnUrl } = load(root+'/features/learning/config/unitRegistry.ts');
   const unit = learningUnits[0]; assert.equal(unit.courseId,'course-algorithm-breadth-first-search-v1'); assert.equal(findLearningUnit('unknown'),undefined);
   const empty={courseId:unit.courseId,unit:null,phases:[]}; assert.equal(resumePhaseIndex(unit,empty),0);
   const gap={...empty,unit:{lastPhaseKey:unit.phases[6].id},phases:[{phaseKey:unit.phases[0].id,status:'COMPLETED',summary},{phaseKey:unit.phases[2].id,status:'COMPLETED',summary:{testRuns:'bad',hintUsage:[-1]}},{phaseKey:unit.phases[1].id,status:'IN_PROGRESS',summary:null}]};
@@ -54,11 +54,11 @@ const plain = value => JSON.parse(JSON.stringify(value));
   assert.deepEqual(plain(savedPhaseSummaries(dfs,dfsProgress)[2]),{firstAttemptCorrect:1,totalQuestions:2});
   await api.completeLearningPhase('jwt',dfsId,'dfs-check',dfsProgress.phases[2].summary);
   assert.equal(requests.at(-1).url,'/learning/units/' + dfsId + '/phases/dfs-check/complete');
-  const draft = load(root+'/features/learning/app/codeDraft.ts');
+  const draft = load(root+'/features/learning/utils/codeDraft.ts');
   assert(draft.writeCodeDraft(unit.courseId,'u1','learner source')); assert.equal(draft.readCodeDraft(unit.courseId,'u1'),'learner source');
   assert.equal(draft.readCodeDraft(unit.courseId,'u2'),undefined); assert.equal(draft.readCodeDraft('another-course','u1'),undefined);
   assert(draft.codeDraftKey(unit.courseId,'u1').includes(unit.courseId)); assert(draft.writeCodeDraft(unit.courseId,'u1','')); assert.equal(draft.readCodeDraft(unit.courseId,'u1'),'');
-  const {mergeLearningRewards,emptyLearningRewards}=load(root+'/features/learning/app/rewards.ts');
+  const {mergeLearningRewards,emptyLearningRewards}=load(root+'/features/learning/rewards/rewards.ts');
   const reward1=mergeLearningRewards(emptyLearningRewards,{phase:{phaseKey:'p1'},awardedCard:{id:'card1'},unlockedAchievements:[{id:'a1'}]});
   const reward2=mergeLearningRewards(reward1,{phase:{phaseKey:'p2'},awardedCard:{id:'card2'},unlockedAchievements:[{id:'a1'},{id:'a2'}]});
   assert.deepEqual(plain(reward2.awardedCards.map(item=>item.card.id)),['card1','card2']); assert.deepEqual(plain(reward2.unlockedAchievements.map(item=>item.id)),['a1','a2']);
@@ -103,10 +103,10 @@ const plain = value => JSON.parse(JSON.stringify(value));
   assert.deepEqual(observed.map(event=>event.eventType),['player_step_view','player_step_dwell','player_step_dwell']);
   assert.deepEqual(observed.slice(1).map(event=>event.payload.visibleMs),[100,50]);
   // 読み込み中は素のテキストではなく、形の近いスケルトンで示す（#175）。
-const skeletonSource = fs.readFileSync(path.join(root, "features/learning/app/ProgressLoadingSkeleton.tsx"), "utf8");
+const skeletonSource = fs.readFileSync(path.join(root, "features/learning/components/ui/ProgressLoadingSkeleton.tsx"), "utf8");
 assert(skeletonSource.includes('role="status"'), "loading skeleton keeps the status role");
 for (const screenFile of ["LearningScreen.tsx", "UnitOverview.tsx"]) {
-  const screenSource = fs.readFileSync(path.join(root, "features/learning/app", screenFile), "utf8");
+  const screenSource = fs.readFileSync(path.join(root, "features/learning/screens", screenFile), "utf8");
   assert(screenSource.includes("ProgressLoadingSkeleton"), `${screenFile} uses the progress loading skeleton`);
   assert(!/<Typography role="status">進捗を読み込んでいます。<\/Typography>/.test(screenSource), `${screenFile} no longer shows the bare loading text`);
 }

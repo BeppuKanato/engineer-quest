@@ -54,7 +54,7 @@ assert(unit.includes('role="status"'), 'saving indicator must be announced via r
 assert(unit.includes('pointerEvents: "none"'), 'saving indicator must not block interaction');
 
 // 5. The learning screen must not gate rendering on the start record POST (#140 P3).
-const learningScreen = read('features/learning/app/LearningScreen.tsx');
+const learningScreen = read('features/learning/screens/LearningScreen.tsx');
 assert(!learningScreen.includes('setReady'), 'learning screen must not gate on a ready flag after the start POST');
 assert(learningScreen.includes('severity="warning"'), 'start-record failure must surface as a non-blocking warning');
 
