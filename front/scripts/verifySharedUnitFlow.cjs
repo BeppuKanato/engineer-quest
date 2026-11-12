@@ -53,6 +53,7 @@ const cases = [
   ["bfs", "Bfs", "bfs"], ["dfs", "Dfs", "dfs"],
   ["bubble-sort", "BubbleSort", "bubbleSort"],
   ["binary-search", "BinarySearch", "binarySearch"],
+  ["greedy-coins", "GreedyCoins", "greedyCoins"],
 ];
 let tree;
 function draw(entry) {

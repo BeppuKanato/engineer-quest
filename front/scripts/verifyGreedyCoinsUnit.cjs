@@ -89,9 +89,12 @@ assert.match(screenSource, /renderPhaseFeedback/, "phase feedback slot is shared
 assert.match(screenSource, /renderUnitFeedback/, "unit feedback slot is shared");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const container = read(`${root}/greedy-coins/unit/GreedyCoinsUnitPreview.tsx`);
+const adapter = read(`${root}/greedy-coins/unit/GreedyCoinsUnitPreview.tsx`);
+assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
+const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["GreedyCoinsMotivationPreview", "GreedyCoinsExecutionPreview", "GreedyCoinsCheckPreview", "GreedyCoinsCodeMappingPreview", "GreedyCoinsCodeCheckPreview", "GreedyCoinsConsolidationPreview", "GreedyCoinsImplementationPreview"]) {
-  assert.ok(container.includes(`<${component} embedded`), `container renders ${component} embedded`);
+  assert.ok(adapter.includes(`: ${component}`), `unit registers ${component}`);
+  assert.match(container, /<View embedded/, "shared controller embeds every registered view");
 }
 // 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
 assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
@@ -101,7 +104,7 @@ assert.match(container, /"phase_bridge_view"/, "bridge views are logged with the
 assert.match(container, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
 assert.match(container, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
 assert.match(container, /renderUnitFeedback/, "The final result carries the unit feedback slot");
-assert.match(container, /<UnitResultScreen phase=\{greedyCoinsUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
+assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/GreedyCoinsMotivationPreview", "execution/GreedyCoinsExecutionPreview", "check/GreedyCoinsCheckPreview", "code-mapping/GreedyCoinsCodeMappingPreview", "code-check/GreedyCoinsCodeCheckPreview", "consolidation/GreedyCoinsConsolidationPreview", "implementation/GreedyCoinsImplementationPreview"]) {
@@ -120,7 +123,7 @@ assert.match(figureSource, /runGreedyCoins/, "The figure derives the tray from t
 assert.match(figureSource, /validateGreedyCoinsExecutionCanvas/, "The figure validates with the unit-side board validator");
 
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
-const resultScreensSource = read(`${root}/greedy-coins/unit/UnitResultScreens.tsx`);
+const resultScreensSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
 // フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
@@ -141,15 +144,17 @@ assert.equal(greedyCoinsUnitText.backToCourses, "コース一覧に戻る", "fin
 const phaseResultSource = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("function summaryLine"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
-assert.match(phaseResultSource, /<GreedyCoinsResultFigure/, "Phase results render the reached figure");
+assert.match(adapter, /resultFigure: <GreedyCoinsResultFigure/, "The unit supplies its reached figure");
+assert.match(phaseResultSource, /\{figure\}/, "Shared result screens render the supplied figure");
 assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
 
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（786円・9枚の盤面）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
-const { UnitResultScreen } = load(`${root}/greedy-coins/unit/UnitResultScreens.tsx`);
+const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
+const { GreedyCoinsResultFigure } = load(`${root}/greedy-coins/unit/GreedyCoinsResultFigure.tsx`);
 for (const phase of greedyCoinsUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
-    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
+    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(GreedyCoinsResultFigure), onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading));
     assert.ok(html.includes("data-result-figure"), "Phase results show the unit's completed figure");
     assert.equal((html.match(/data-coin-chip=/g) ?? []).length, 6, "The figure shows the 6 denominations");
