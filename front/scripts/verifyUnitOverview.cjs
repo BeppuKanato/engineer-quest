@@ -30,7 +30,7 @@ assert(overview.includes('スタート') && overview.includes('ゴール'), 'the
 
 // 4. Card awards stay recorded in the unit content, but stages must not advertise them:
 //    which card (if any) is presented is a table outcome, not a per-stage promise (#178).
-const content = readFront('src/features/learning/bfs/unit/unit.content.ts');
+const content = readFront('src/features/learning/units/bfs/unit/unit.content.ts');
 for (const rarity of ['RARE', 'COMMON', 'EPIC']) {
   assert(content.includes(`cardRarity: "${rarity}"`), `a phase must declare cardRarity ${rarity}`);
 }

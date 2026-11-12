@@ -187,5 +187,5 @@ const preview = fs.readFileSync(file("dfs/check/DfsCheckPreview.tsx"), "utf8");
 assert.match(preview, /useAssessmentFeedback\(dfsCheckContent, session, active && !reviewOpen\)/u);
 assert.match(preview, /AnswerFeedbackNotice assessmentId=\{dfsCheckContent.id\}/u);
 assert(!/fetch\(|localStorage|sessionStorage/u.test(preview), "The preview does not persist progress");
-for (const relative of ["bfs/check/BfsCheckCanvas.tsx", "dfs/check/DfsCheckCanvas.tsx"]) assert.match(fs.readFileSync(file(relative), "utf8"), /<NodeAnswerOverlay/u);
+for (const relative of ["units/bfs/check/BfsCheckCanvas.tsx", "dfs/check/DfsCheckCanvas.tsx"]) assert.match(fs.readFileSync(file(relative), "utf8"), /<NodeAnswerOverlay/u);
 console.log("DFS check verified: F/E linked questions, original DFS snapshots/review, soft gate and retries, immutable first results, callback locking, shared answer controls, feedback wiring and standalone scope.");

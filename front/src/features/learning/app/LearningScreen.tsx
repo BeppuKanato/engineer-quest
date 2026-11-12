@@ -11,7 +11,7 @@ import { completeLearningPhase, completeLearningUnit, startLearningUnit, type Ac
 import { getCurrentBigGoal, type BigGoal } from "@/api/bigGoal.api";
 import type { FeedbackBindings } from "./feedback/FeedbackBindings";
 import { auth } from "@/lib/firebase";
-import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
+import { BfsUnitPreview } from "../units/bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
 import type { UnitPhaseSummary } from "../types/unit.types";
 import { DfsUnitPreview } from "../dfs/unit/DfsUnitPreview";

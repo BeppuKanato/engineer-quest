@@ -1,6 +1,6 @@
 import type { LearningContent } from "../../player/content.types";
 import { validateMazeGridCanvas, type MazeGridCanvasState } from "../../player/mazeGrid.types";
-import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
+import type { VocabularyEntry } from "../../units/bfs/motivation/motivation.types";
 
 /**
  * フェーズ1の Canvas は共通グリッド基盤の具体型に、出口（次フェーズへの区切り）だけを足す。

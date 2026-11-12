@@ -18,10 +18,10 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bfsCodeMappingContent: content } = load(`${root}/bfs/code-mapping/codeMapping.content.ts`);
-const { bfsCode, bfsCodeLineNumber } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
-const { validateCodeMappingCanvas, defineCodeMappingContent } = load(`${root}/bfs/code-mapping/codeMapping.types.ts`);
-const { bfsExecutionContent: execution } = load(`${root}/bfs/execution/execution.content.ts`);
+const { bfsCodeMappingContent: content } = load(`${root}/units/bfs/code-mapping/codeMapping.content.ts`);
+const { bfsCode, bfsCodeLineNumber } = load(`${root}/units/bfs/code-mapping/bfsCode.ts`);
+const { validateCodeMappingCanvas, defineCodeMappingContent } = load(`${root}/units/bfs/code-mapping/codeMapping.types.ts`);
+const { bfsExecutionContent: execution } = load(`${root}/units/bfs/execution/execution.content.ts`);
 const plain = value => JSON.parse(JSON.stringify(value));
 const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
 assert.equal(content.phase, 4);
@@ -103,7 +103,7 @@ for (const [index, step] of functionFrames.entries()) {
   assert.deepEqual(plain(step.canvas.state.variables), actual.trace[index].variables, `Frame ${step.id}: actual Python variables`);
 }
 // 直前フレームの実際のPython変数と比較して、初出・代入・不変を検証する。
-const { codeVariableRows } = load(`${root}/bfs/code-mapping/codeMapping.presentation.ts`);
+const { codeVariableRows } = load(`${root}/units/bfs/code-mapping/codeMapping.presentation.ts`);
 for (const [index, step] of functionFrames.entries()) {
   const rows = codeVariableRows(step.canvas.state.variables, content.steps[index + 1].canvas.state.variables);
   const before = index === 0 ? content.steps[1].canvas.state.variables : actual.trace[index - 1].variables;
@@ -139,7 +139,7 @@ assert.throws(() => defineCodeMappingContent({ ...content, steps: content.steps.
 console.log(`BFS code mapping: ${content.steps.length} frames, 19 snapshot identities, 11 stable source lines, complete Python trace and variables, reverse seek and invalid-data rejection passed.`);
 
 // 変化した変数は、コード行ハイライトと同じ背景ハイライト（focus 背景＋surface 文字）で示す（#145）。
-const rendererSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/code-mapping/BfsCodeMappingCanvas.tsx"), "utf8");
+const rendererSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/units/bfs/code-mapping/BfsCodeMappingCanvas.tsx"), "utf8");
 assert.match(rendererSource, /<CodeVariableList/, "BFS uses the common variable display");
 const canvasSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/code/CodeVariableList.tsx"), "utf8");
 assert.match(canvasSource, /bgcolor: changed \? playerTokens\.focus : "transparent"/);

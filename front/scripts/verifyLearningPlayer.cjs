@@ -122,11 +122,11 @@ function loadRenderer(filename) {
   return exports;
 }
 const sourceRoot = path.resolve(__dirname, "../src/features/learning");
-const { bfsMotivationContent } = loadRenderer(`${sourceRoot}/bfs/motivation/motivation.content.ts`);
-const { bfsExecutionContent } = loadRenderer(`${sourceRoot}/bfs/execution/execution.content.ts`);
+const { bfsMotivationContent } = loadRenderer(`${sourceRoot}/units/bfs/motivation/motivation.content.ts`);
+const { bfsExecutionContent } = loadRenderer(`${sourceRoot}/units/bfs/execution/execution.content.ts`);
 const { searchGraph } = loadRenderer(`${sourceRoot}/graphs/searchGraph.ts`);
-const { BfsMotivationCanvas } = loadRenderer(`${sourceRoot}/bfs/motivation/BfsMotivationCanvas.tsx`);
-const { BfsExecutionCanvas } = loadRenderer(`${sourceRoot}/bfs/execution/BfsExecutionCanvas.tsx`);
+const { BfsMotivationCanvas } = loadRenderer(`${sourceRoot}/units/bfs/motivation/BfsMotivationCanvas.tsx`);
+const { BfsExecutionCanvas } = loadRenderer(`${sourceRoot}/units/bfs/execution/BfsExecutionCanvas.tsx`);
 const { GraphCanvas } = loadRenderer(`${sourceRoot}/player/GraphCanvas.tsx`);
 const generic = { data: searchGraph, state: { nodes: searchGraph.nodes.map(node => ({ id: node.id, status: "idle" })), structures: [], variables: [] },
   highlights: [{ kind: "node", id: "B", tone: "processing" }, { kind: "edge", id: "ab", tone: "processing" }] };

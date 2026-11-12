@@ -17,11 +17,11 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bfsCode } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
-const { bfsImplementationContent } = load(`${root}/bfs/implementation/implementation.content.ts`);
-const { bfsExecutionContent } = load(`${root}/bfs/execution/execution.content.ts`);
-const { convertBfsTrace } = load(`${root}/bfs/trace/convertTrace.ts`);
-const { traceBfsCode, bfsTraceEventLimit } = load(`${root}/bfs/trace/acquireTrace.ts`);
+const { bfsCode } = load(`${root}/units/bfs/code-mapping/bfsCode.ts`);
+const { bfsImplementationContent } = load(`${root}/units/bfs/implementation/implementation.content.ts`);
+const { bfsExecutionContent } = load(`${root}/units/bfs/execution/execution.content.ts`);
+const { convertBfsTrace } = load(`${root}/units/bfs/trace/convertTrace.ts`);
+const { traceBfsCode, bfsTraceEventLimit } = load(`${root}/units/bfs/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = bfsCode.lines.map(line => line.text).join("\n");
@@ -135,7 +135,7 @@ const dedupe = values => values.filter((value, index) => index === 0 || JSON.str
   assert(wrongView.content.steps.some(step => step.canvas.state.nodes.some(node => node.distance < 0)));
   assert.equal(wrongView.content.steps.at(-1).canvas.data.graph.layers.length, 0, "Do not label wrong distances with canonical bands");
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { BfsExecutionCanvas } = load(`${root}/bfs/execution/BfsExecutionCanvas.tsx`);
+  const { BfsExecutionCanvas } = load(`${root}/units/bfs/execution/BfsExecutionCanvas.tsx`);
   const html = renderToStaticMarkup(createElement(BfsExecutionCanvas, { canvas: wrongView.content.steps.at(-1).canvas }));
   assert.equal((html.match(/data-node-id=/g) || []).length, 6);
   assert(html.includes("-1歩"), "Keep the learner's wrong distance visible");

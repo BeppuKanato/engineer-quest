@@ -1,3 +1,4 @@
+const unitPath = require("./learningUnitPath.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -26,7 +27,7 @@ const stages = {"code-check":["codeCheck.content.ts","CodeCheckContent"],check:[
   for(const [stage,[filename,suffix]] of Object.entries(stages))for(const [slug,camel] of units){
     if(process.env.LEARNING_TEST_STAGE && stage !== process.env.LEARNING_TEST_STAGE) continue;
     if(process.env.LEARNING_TEST_UNITS && !process.env.LEARNING_TEST_UNITS.split(",").includes(slug)) continue;
-    const content=load(path.join(base,slug,stage,filename))[camel+suffix];
+    const content=load(path.join(unitPath(base,slug),stage,filename))[camel+suffix];
     assert(content,`${slug}/${stage}: content fixture exists`);
     const response=await page.goto(`${baseUrl}/learning-preview/${slug}-${stage}`,{waitUntil:"networkidle0",timeout:120000});
     assert.equal(response.status(),200);await page.waitForSelector("section");

@@ -16,7 +16,7 @@ function load(filename) {
   vm.runInNewContext(source, { exports, require: (name) => load(path.resolve(path.dirname(filename), `${name}.ts`)) }, { filename });
   return exports;
 }
-const feature = path.resolve(__dirname, "../src/features/learning/bfs/motivation");
+const feature = path.resolve(__dirname, "../src/features/learning/units/bfs/motivation");
 const { bfsMotivationContent: content } = load(path.join(feature, "motivation.content.ts"));
 const { validateMotivationCanvas } = load(path.join(feature, "motivation.types.ts"));
 const { steps, vocabulary } = content;
@@ -119,5 +119,5 @@ assert.throws(() => validateMotivationCanvas({ ...first, highlights: [{ kind: "n
 console.log("BFS motivation: 22 scenes, unchanged transition snapshots, graph replay, vocabulary, entrance and exit passed.");
 
 // 出口ボタンは突然出さずフェードインさせる（#140）。
-const motivationCanvasSource = fs.readFileSync(path.join(__dirname, "../src/features/learning/bfs/motivation/BfsMotivationCanvas.tsx"), "utf8");
+const motivationCanvasSource = fs.readFileSync(path.join(__dirname, "../src/features/learning/units/bfs/motivation/BfsMotivationCanvas.tsx"), "utf8");
 assert.match(motivationCanvasSource, /component=\{motion\.div\}/, "motivation exit button fades in");

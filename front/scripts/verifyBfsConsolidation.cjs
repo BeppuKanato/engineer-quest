@@ -19,13 +19,13 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bfsConsolidationContent: content, validateConsolidation } = load(`${root}/bfs/consolidation/consolidation.content.ts`);
+const { bfsConsolidationContent: content, validateConsolidation } = load(`${root}/units/bfs/consolidation/consolidation.content.ts`);
 const { searchGraph } = load(`${root}/graphs/searchGraph.ts`);
-const { bfsCode } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
-const { bfsCodeMappingContent: mapping } = load(`${root}/bfs/code-mapping/codeMapping.content.ts`);
+const { bfsCode } = load(`${root}/units/bfs/code-mapping/bfsCode.ts`);
+const { bfsCodeMappingContent: mapping } = load(`${root}/units/bfs/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(`${root}/assessment/assessment.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
-const { ConsolidationGraph } = load(`${root}/bfs/consolidation/ConsolidationGraph.tsx`);
+const { ConsolidationGraph } = load(`${root}/units/bfs/consolidation/ConsolidationGraph.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -204,7 +204,7 @@ rejects(broken => broken.questions[4].interchangeableLineGroups.push(["initializ
 console.log("BFS consolidation: independent BFS on all four graphs, corrected J timing, 11-line Parsons with interchangeable initializers only, shared rendering/review, 0/5 completion and immutable first-attempt diagnosis passed.");
 
 // ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
-const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/units/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
 const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/assessment/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

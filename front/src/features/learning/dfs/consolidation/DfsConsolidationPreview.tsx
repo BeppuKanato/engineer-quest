@@ -12,7 +12,7 @@ import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletio
 import {
   activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, diagnoseAssessment, type AssessmentAnswer,
 } from "../../assessment/assessment";
-import { ConsolidationGraph } from "../../bfs/consolidation/ConsolidationGraph";
+import { ConsolidationGraph } from "../../units/bfs/consolidation/ConsolidationGraph";
 import { ParsonsBoard, parsonsQuestionBodySx } from "../../components/assessment/ParsonsBoard";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";

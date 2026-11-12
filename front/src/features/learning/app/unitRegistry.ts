@@ -1,4 +1,4 @@
-import { bfsUnitIntro, bfsUnitPhases, bfsUnitTitle } from "../bfs/unit/unit.content";
+import { bfsUnitIntro, bfsUnitPhases, bfsUnitTitle } from "../units/bfs/unit/unit.content";
 import type { UnitPhase, UnitPhaseSummary } from "../types/unit.types";
 import { wallExtensionUnitIntro, wallExtensionUnitPhases, wallExtensionUnitTitle } from "../wall-extension/unit/unit.content";
 import { bubbleSortUnitIntro, bubbleSortUnitPhases, bubbleSortUnitTitle } from "../bubble-sort/unit/unit.content";

@@ -21,12 +21,12 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bfsImplementationContent: content } = load(`${root}/bfs/implementation/implementation.content.ts`);
-const { bfsCode } = load(`${root}/bfs/code-mapping/bfsCode.ts`);
-const { bfsConsolidationContent } = load(`${root}/bfs/consolidation/consolidation.content.ts`);
-const { ImplementationResults } = load(`${root}/bfs/implementation/ImplementationResults.tsx`);
+const { bfsImplementationContent: content } = load(`${root}/units/bfs/implementation/implementation.content.ts`);
+const { bfsCode } = load(`${root}/units/bfs/code-mapping/bfsCode.ts`);
+const { bfsConsolidationContent } = load(`${root}/units/bfs/consolidation/consolidation.content.ts`);
+const { ImplementationResults } = load(`${root}/units/bfs/implementation/ImplementationResults.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
-const { recordHintUsage, resultKinds, classifyExecutionError, runningMessage, distanceEntries, allTestsPassed, runImplementationTests } = load(`${root}/bfs/implementation/implementation.ts`);
+const { recordHintUsage, resultKinds, classifyExecutionError, runningMessage, distanceEntries, allTestsPassed, runImplementationTests } = load(`${root}/units/bfs/implementation/implementation.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -41,8 +41,8 @@ assert.deepEqual(plain(content.hints.skeletonLineIds), ["while-queue", "for-neig
 content.hints.skeletonLines.forEach((line, index) => assert.equal(line, bfsCode.lines.find(line => line.id === content.hints.skeletonLineIds[index])));
 assert.equal(content.hints.labels.length, 4);
 assert.equal(content.hints.flow.length, 4);
-for (const file of fs.readdirSync(`${root}/bfs/implementation`).filter(file => /\.tsx?$/u.test(file))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/bfs/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
+for (const file of fs.readdirSync(`${root}/units/bfs/implementation`).filter(file => /\.tsx?$/u.test(file))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/units/bfs/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
 assert.equal(content.hints.parsonsQuestion, bfsConsolidationContent.questions.find(question => question.kind === "parsons"));
@@ -97,8 +97,8 @@ assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: 
 assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
 assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
 assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
-const { bfsEditorText: editorText } = load(`${root}/bfs/implementation/editor.content.ts`);
-const { FreeExecutionConsole } = load(`${root}/bfs/implementation/FreeExecutionConsole.tsx`);
+const { bfsEditorText: editorText } = load(`${root}/units/bfs/implementation/editor.content.ts`);
+const { FreeExecutionConsole } = load(`${root}/units/bfs/implementation/FreeExecutionConsole.tsx`);
 const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -123,7 +123,7 @@ for (let done = 0; done < 5; done++) assert.equal(runningMessage(done, 5), `テ�
 const entries = distanceEntries({ A: 0, B: 1, C: 1 }, { A: 0, B: 99, Z: 3 });
 assert.deepEqual(plain(entries.map(entry => [entry.node, entry.state])), [["A", "same"], ["B", "different"], ["C", "missing"], ["Z", "extra"]]);
 const { searchGraph } = load(`${root}/graphs/searchGraph.ts`);
-const { transferGraph } = load(`${root}/bfs/consolidation/consolidation.graphs.ts`);
+const { transferGraph } = load(`${root}/units/bfs/consolidation/consolidation.graphs.ts`);
 assert.equal(content.displayScenes[0].graph, searchGraph); assert.equal(content.displayScenes[1].graph, transferGraph);
 for (const scene of content.displayScenes) {
   const test = content.tests.find(test => test.id === scene.testId), graph = scene.graph;
@@ -226,7 +226,7 @@ for (const id of ["J1", "J2", "J3"]) {
   const item = html.match(new RegExp(`data-test-id="${id}"[\\s\\S]*?</li>`))[0];
   assert(!/入力|期待値|実際の出力|PRIVATE_OUTPUT_SENTINEL/u.test(item));
 }
-const { ImplementationHints } = load(`${root}/bfs/implementation/ImplementationHints.tsx`);
+const { ImplementationHints } = load(`${root}/units/bfs/implementation/ImplementationHints.tsx`);
 // Dialog portals are tested in the browser; verify the shared board has no scoring action here.
 assert.equal(typeof ImplementationHints, "function");
 const unchangedHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [] }));
@@ -273,7 +273,7 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   const cancelled = await runImplementationTests("learner code", content.tests, () => { active = false; }, () => active);
   assert.equal(cancelled.length, 1, "Unmounting stops subsequent case requests");
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
-  const impl = (file) => fs.readFileSync(`${root}/bfs/implementation/${file}`, "utf8");
+  const impl = (file) => fs.readFileSync(`${root}/units/bfs/implementation/${file}`, "utf8");
   const adapterSource = impl("BfsImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "BFS uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -311,7 +311,7 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
-  const traceText = fs.readFileSync(`${root}/bfs/trace/trace.content.ts`, "utf8");
+  const traceText = fs.readFileSync(`${root}/units/bfs/trace/trace.content.ts`, "utf8");
   assert.match(traceText, /button: "グラフで動きを見る"/, "trace button says what it does");
   console.log("BFS implementation: independent BFS on five cases, canonical skeleton, hint-1 tokens, four staged hints, mini graphs and distance differences, timeout classification, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

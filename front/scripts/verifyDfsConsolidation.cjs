@@ -30,7 +30,7 @@ const { dfsCodeMappingContent: mapping } = load(root + "/dfs/code-mapping/codeMa
 const { searchGraph } = load(root + "/graphs/searchGraph.ts");
 const { createAssessmentState, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment } = load(root + "/assessment/assessment.ts");
 const { selectReviewContent } = load(root + "/review/reviewContent.ts");
-const { ConsolidationGraph } = load(root + "/bfs/consolidation/ConsolidationGraph.tsx");
+const { ConsolidationGraph } = load(root + "/units/bfs/consolidation/ConsolidationGraph.tsx");
 const { ParsonsBoard } = load(root + "/components/assessment/ParsonsBoard.tsx");
 const { parsonsMovableSegments } = load(root + "/assessment/parsonsOrderFeedback.ts");
 const plain = value => JSON.parse(JSON.stringify(value));

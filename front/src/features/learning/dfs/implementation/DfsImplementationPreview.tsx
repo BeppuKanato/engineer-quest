@@ -2,11 +2,11 @@
 
 import { ImplementationWorkspace, type ImplementationWorkspaceProps } from "../../implementation/ImplementationWorkspace";
 import { runFreeDisplayCase } from "../../implementation/freeExecution";
-import { ImplementationHints } from "../../bfs/implementation/ImplementationHints";
-import { FreeExecutionConsole } from "../../bfs/implementation/FreeExecutionConsole";
-import { bfsEditorText } from "../../bfs/implementation/editor.content";
-import { bfsTraceText } from "../../bfs/trace/trace.content";
-import { runImplementationTests } from "../../bfs/implementation/implementation";
+import { ImplementationHints } from "../../units/bfs/implementation/ImplementationHints";
+import { FreeExecutionConsole } from "../../units/bfs/implementation/FreeExecutionConsole";
+import { bfsEditorText } from "../../units/bfs/implementation/editor.content";
+import { bfsTraceText } from "../../units/bfs/trace/trace.content";
+import { runImplementationTests } from "../../units/bfs/implementation/implementation";
 import type { WorkspaceHintProps, WorkspaceConsoleProps } from "../../implementation/ImplementationWorkspace";
 import { dfsCode } from "../code-mapping/dfsCode";
 import { traceDfsCode } from "../trace/acquireTrace";

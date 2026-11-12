@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { bfsUnitPhases, bfsUnitTitle, bfsUnitText, nextPhaseLabel } = load(`${root}/bfs/unit/unit.content.ts`);
+const { bfsUnitPhases, bfsUnitTitle, bfsUnitText, nextPhaseLabel } = load(`${root}/units/bfs/unit/unit.content.ts`);
 
 // 単元は幅優先探索（BFS）で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(bfsUnitTitle, "幅優先探索（BFS）");
@@ -53,12 +53,12 @@ for (const phase of bfsUnitPhases.slice(0, -1)) {
   assert.doesNotMatch(nextPhaseLabel(phase), /フェーズ/, `phase ${phase.phase} label has no developer term`);
 }
 // 遷移ボタンは共通部品 PhaseNextButton に統一されている（#142）。
-for (const file of ["player/LearningPlayer.tsx", "bfs/motivation/BfsMotivationCanvas.tsx", "components/results/UnitResultScreens.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
+for (const file of ["player/LearningPlayer.tsx", "units/bfs/motivation/BfsMotivationCanvas.tsx", "components/results/UnitResultScreens.tsx", "units/bfs/consolidation/BfsConsolidationPreview.tsx"]) {
   assert.match(read(`${root}/${file}`), /PhaseNextButton/, `${file} uses the shared transition button`);
 }
-assert.match(read(`${root}/bfs/motivation/motivation.content.ts`), /exit: \{ label: "動きの説明へ進む"/, "motivation exit label names the destination");
+assert.match(read(`${root}/units/bfs/motivation/motivation.content.ts`), /exit: \{ label: "動きの説明へ進む"/, "motivation exit label names the destination");
 // フェーズ1の出口ボタンは SVG の外に置き、拡大率で大きさが変わらないようにする（#157）。
-assert.doesNotMatch(read(`${root}/bfs/motivation/BfsMotivationCanvas.tsx`), /<foreignObject/, "motivation exit button stays outside the SVG");
+assert.doesNotMatch(read(`${root}/units/bfs/motivation/BfsMotivationCanvas.tsx`), /<foreignObject/, "motivation exit button stays outside the SVG");
 
 // 単品プレビューのルートに単元フローが接続されている。
 const page = read(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"));
@@ -67,7 +67,7 @@ assert.match(page, /BfsUnitPreview/);
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
-const bfsPreview = read(`${root}/bfs/unit/BfsUnitPreview.tsx`);
+const bfsPreview = read(`${root}/units/bfs/unit/BfsUnitPreview.tsx`);
 assert.match(bfsPreview, /<LearningUnitPreview .*unit=\{bfsUnit\}/u);
 assert.match(container, /<View embedded/u);
 const components = ["BfsMotivationPreview", "BfsExecutionPreview", "BfsCheckPreview", "BfsCodeMappingPreview", "BfsCodeCheckPreview", "BfsConsolidationPreview", "BfsImplementationPreview"];
@@ -77,15 +77,15 @@ bfsUnitPhases.forEach((phase, index) => {
 
 // 接続の前提となる各部品の受け口が残っている。
 assert.match(read(`${root}/player/LearningPlayer.tsx`), /endAction/, "player endAction");
-assert.match(read(`${root}/bfs/motivation/BfsMotivationCanvas.tsx`), /onExit/, "motivation canvas onExit");
+assert.match(read(`${root}/units/bfs/motivation/BfsMotivationCanvas.tsx`), /onExit/, "motivation canvas onExit");
 for (const file of ["motivation/BfsMotivationPreview", "execution/BfsExecutionPreview", "check/BfsCheckPreview", "code-mapping/BfsCodeMappingPreview", "code-check/BfsCodeCheckPreview", "consolidation/BfsConsolidationPreview", "implementation/BfsImplementationPreview"]) {
-  const adapter = read(`${root}/bfs/${file}.tsx`);
+  const adapter = read(`${root}/units/bfs/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/bfs/consolidation/BfsConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/bfs/consolidation/BfsConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
 assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
@@ -117,10 +117,10 @@ assert.match(miniMapSource, /scale: \[1, 1\.05, 1\.03\]/, "mini map grows once t
 assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
 assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
-assert.ok(!fs.existsSync(`${root}/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
+assert.ok(!fs.existsSync(`${root}/units/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
 
 // 到達図の距離は正本グラフから導出し、教材の距離と一致する。
-const { bfsDistancesFrom } = load(`${root}/bfs/bfsDistances.ts`);
+const { bfsDistancesFrom } = load(`${root}/units/bfs/bfsDistances.ts`);
 assert.deepEqual(plain(Object.fromEntries(bfsDistancesFrom("A"))), { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 }, "Result figure distances derive from the canonical graph");
 // スコアのドットは件数の集計表示。初回正解が塗り、再挑戦分が輪郭。不正な件数では描かない。
 const { ResultScoreDots } = load(`${root}/app/ResultScoreDots.tsx`);
@@ -167,7 +167,7 @@ for (const attribute of ["data-phase-result-mark", "data-phase-result-heading"])
 }
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { BfsResultFigure } = load(`${root}/bfs/unit/BfsResultFigure.tsx`);
+const { BfsResultFigure } = load(`${root}/units/bfs/unit/BfsResultFigure.tsx`);
 for (const phase of bfsUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BfsResultFigure), onNext: () => {} }));
@@ -251,11 +251,11 @@ assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-prai
 assert.match(phaseResultSource, /\{figure\}/, "Shared phase results render the figure supplied by the unit");
 assert.match(bfsPreview, /resultFigure: <BfsResultFigure/, "BFS supplies its own reached figure");
 assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
-const figureSource = read(`${root}/bfs/unit/BfsResultFigure.tsx`);
+const figureSource = read(`${root}/units/bfs/unit/BfsResultFigure.tsx`);
 assert.match(figureSource, /bfsDistancesFrom/, "The figure derives distances from the canonical graph");
 assert.match(figureSource, /status: "processing"/, "The figure paints nodes in achievement blue");
 assert.doesNotMatch(figureSource, /status: "completed"/, "The figure never uses the completed grey for achievement");
-const consolidationSource = read(`${root}/bfs/consolidation/BfsConsolidationPreview.tsx`);
+const consolidationSource = read(`${root}/units/bfs/consolidation/BfsConsolidationPreview.tsx`);
 assert.match(consolidationSource, /"応用問題の結果"/, "Phase 6 result screen is named as a result, not a diagnosis");
 assert.doesNotMatch(consolidationSource, /応用問題の診断結果|診断結果を見る|診断には初回の回答|初回不正解/, "No diagnosis wording or failure labels in phase 6 user-facing strings");
 assert.match(consolidationSource, /<ResultTagRow/, "Phase 6 renders per-tag result rows");

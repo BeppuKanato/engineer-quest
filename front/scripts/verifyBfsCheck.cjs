@@ -22,8 +22,8 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bfsCheckContent: content } = load(path.join(root, "bfs/check/check.content.ts"));
-const { bfsExecutionContent: execution } = load(path.join(root, "bfs/execution/execution.content.ts"));
+const { bfsCheckContent: content } = load(path.join(root, "units/bfs/check/check.content.ts"));
+const { bfsExecutionContent: execution } = load(path.join(root, "units/bfs/execution/execution.content.ts"));
 const { searchGraphNodes, searchGraphEdges } = load(path.join(root, "graphs/searchGraph.ts"));
 const { getLearningStep, selectReviewContent } = load(path.join(root, "review/reviewContent.ts"));
 const { validateAssessment, createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete } = load(path.join(root, "assessment/assessment.ts"));
@@ -131,7 +131,7 @@ assert(assessmentComplete(content, skipped), "An all-wrong run still completes")
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
 // 画面側の契約：誤答後に「次の問題へ／結果を見る」で進める導線を持つ。
-const checkPreviewSource = fs.readFileSync(path.join(root, "bfs/check/BfsCheckPreview.tsx"), "utf8");
+const checkPreviewSource = fs.readFileSync(path.join(root, "units/bfs/check/BfsCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(checkPreviewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(checkPreviewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
@@ -156,8 +156,8 @@ console.log("BFS check verified: exact phase-2 references, shared graph identity
 // 描画の回帰: 回答中だけ状態強調リングを抑え、ノードの状態色と通常再生の描画は保つ。
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
-const { BfsCheckCanvas } = load(path.join(root, "bfs/check/BfsCheckCanvas.tsx"));
-const { BfsExecutionCanvas } = load(path.join(root, "bfs/execution/BfsExecutionCanvas.tsx"));
+const { BfsCheckCanvas } = load(path.join(root, "units/bfs/check/BfsCheckCanvas.tsx"));
+const { BfsExecutionCanvas } = load(path.join(root, "units/bfs/execution/BfsExecutionCanvas.tsx"));
 for (const question of content.questions) {
   const canvas = getLearningStep(execution, question.stepId).canvas;
   const snapshot = JSON.stringify(canvas);

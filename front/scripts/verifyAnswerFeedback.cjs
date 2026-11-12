@@ -28,9 +28,9 @@ const load = createLoader();
 const file = name => path.join(root, "features/learning", name);
 const { newAnswerFeedback, answerFeedbackText } = load(file("assessment/answerFeedbackState.ts"));
 const assessment = load(file("assessment/assessment.ts"));
-const concept = load(file("bfs/check/check.content.ts")).bfsCheckContent;
-const code = load(file("bfs/code-check/codeCheck.content.ts")).bfsCodeCheckContent;
-const diagnostic = load(file("bfs/consolidation/consolidation.content.ts")).bfsConsolidationContent;
+const concept = load(file("units/bfs/check/check.content.ts")).bfsCheckContent;
+const code = load(file("units/bfs/code-check/codeCheck.content.ts")).bfsCodeCheckContent;
+const diagnostic = load(file("units/bfs/consolidation/consolidation.content.ts")).bfsConsolidationContent;
 const { createAssessmentState, answerQuestion, advanceAssessment, assessmentComplete } = assessment;
 
 let before = createAssessmentState(concept);
@@ -182,7 +182,7 @@ for (const correct of [true, false]) {
   assert.equal(quiet.props.animate.scale, 1); assert.equal(quiet.props.animate.opacity, 1);
 }
 
-for (const preview of ["bfs/check/BfsCheckPreview.tsx", "bfs/code-check/BfsCodeCheckPreview.tsx", "bfs/consolidation/BfsConsolidationPreview.tsx"]) {
+for (const preview of ["units/bfs/check/BfsCheckPreview.tsx", "units/bfs/code-check/BfsCodeCheckPreview.tsx", "units/bfs/consolidation/BfsConsolidationPreview.tsx"]) {
   const source = fs.readFileSync(file(preview), "utf8");
   assert.match(source, /useAssessmentFeedback\(/, `${preview}: shared response hook`);
   assert.match(source, /!embedded && <AnswerFeedbackNotice\b/, `${preview}: shared persistent message outside the unit`);

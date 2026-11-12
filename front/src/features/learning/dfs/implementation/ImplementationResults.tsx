@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
-import { ConsolidationGraph } from "../../bfs/consolidation/ConsolidationGraph";
-import { bfsImplementationContent } from "../../bfs/implementation/implementation.content";
-import { resultKinds, type TestOutcome } from "../../bfs/implementation/implementation";
+import { ConsolidationGraph } from "../../units/bfs/consolidation/ConsolidationGraph";
+import { bfsImplementationContent } from "../../units/bfs/implementation/implementation.content";
+import { resultKinds, type TestOutcome } from "../../units/bfs/implementation/implementation";
 import { ImplementationTestResults, type ImplementationTestRow } from "../../implementation/ImplementationTestResults";
 import { playerTokens } from "../../player/player.tokens";
 import { dfsImplementationContent as content } from "./implementation.content";

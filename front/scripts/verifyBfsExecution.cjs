@@ -16,7 +16,7 @@ function load(filename) {
   vm.runInNewContext(source, { exports, require: name => load(path.resolve(path.dirname(filename), `${name}.ts`)) }, { filename });
   return exports;
 }
-const feature = path.resolve(__dirname, "../src/features/learning/bfs/execution");
+const feature = path.resolve(__dirname, "../src/features/learning/units/bfs/execution");
 const { bfsExecutionContent: content } = load(path.join(feature, "execution.content.ts"));
 const { validateBfsExecutionCanvas } = load(path.join(feature, "execution.types.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));

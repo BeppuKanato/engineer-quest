@@ -3,7 +3,7 @@
 import { LearningDialogFrame } from "../../components/dialogs/LearningDialogFrame";
 
 import { Box, Typography } from "@mui/material";
-import { bfsTraceText as text } from "../../bfs/trace/trace.content";
+import { bfsTraceText as text } from "../../units/bfs/trace/trace.content";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { LearningPlayer } from "../../player/LearningPlayer";
 import { playerTokens } from "../../player/player.tokens";

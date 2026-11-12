@@ -1,4 +1,4 @@
-import { bfsImplementationContent, type ImplementationTest } from "../../bfs/implementation/implementation.content";
+import { bfsImplementationContent, type ImplementationTest } from "../../units/bfs/implementation/implementation.content";
 import { searchGraph, searchGraphAdjacency } from "../../graphs/searchGraph";
 import { implementationPlaceholderMarker, implementationPlaceholderStatement, type ImplementationInputLevel } from "../../implementation/inputLevel";
 import { dfsCode, type DfsCodeLineId } from "../code-mapping/dfsCode";

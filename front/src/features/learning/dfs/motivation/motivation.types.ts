@@ -1,7 +1,7 @@
 import type { LearningContent } from "../../player/content.types";
 import type { GraphCanvasState } from "../../player/graphCanvas.types";
 import type { MazeLayout } from "../../player/MotivationDrawing";
-import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
+import type { VocabularyEntry } from "../../units/bfs/motivation/motivation.types";
 import { searchGraph, searchMaze } from "../../graphs/searchGraph";
 
 export type DfsMotivationCanvasState = {

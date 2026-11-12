@@ -1,6 +1,6 @@
 import type { LearningContent } from "../../player/content.types";
 import type { MazeGridCanvasState } from "../../player/mazeGrid.types";
-import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
+import type { VocabularyEntry } from "../../units/bfs/motivation/motivation.types";
 import { validateMazeDiggingCanvas } from "../mazeDiggingCanvas";
 
 /**

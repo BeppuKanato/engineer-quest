@@ -1,5 +1,5 @@
 import type { LearningContent } from "../../player/content.types";
-import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
+import type { VocabularyEntry } from "../../units/bfs/motivation/motivation.types";
 import {
   validateGreedyCoinsBoard, type GreedyCoinsBoardState, type GreedyCoinsCanvasState,
 } from "../figure/greedyCoins.types";

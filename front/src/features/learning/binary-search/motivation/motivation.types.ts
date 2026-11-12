@@ -1,5 +1,5 @@
 import type { LearningContent } from "../../player/content.types";
-import type { VocabularyEntry } from "../../bfs/motivation/motivation.types";
+import type { VocabularyEntry } from "../../units/bfs/motivation/motivation.types";
 
 /**
  * フェーズ1の Canvas は場面ごとに3種の図を持つ（基準データ §3 フェーズ1）。

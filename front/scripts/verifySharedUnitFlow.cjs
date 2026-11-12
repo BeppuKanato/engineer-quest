@@ -1,3 +1,4 @@
+const unitPath = require("./learningUnitPath.cjs");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -66,7 +67,7 @@ function draw(entry) {
 const find = type => tree.find(item => item.type === type);
 const nav = index => tree.find(item => item.props.children?.[0] === index + 1 && item.props.onClick);
 async function verify([slug, name]) {
-  const Preview = load(`${root}/${slug}/unit/${name}UnitPreview.tsx`)[`${name}UnitPreview`];
+  const Preview = load(`${unitPath(root,slug)}/unit/${name}UnitPreview.tsx`)[`${name}UnitPreview`];
   slots = [];
   const draftError = () => {};
   const entry = Preview({ codeDraftBaseKey: "account:unit:draft", onCodeDraftError: draftError });

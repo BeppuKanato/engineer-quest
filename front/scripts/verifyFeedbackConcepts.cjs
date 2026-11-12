@@ -1,3 +1,4 @@
+const unitPath = require("./learningUnitPath.cjs");
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { load } = require('./learningModuleLoader.cjs');
@@ -16,7 +17,7 @@ function validate(units) {
     assert.deepEqual(definition.phases, plain(unit.phases.map(({id, phase, formalName}) => ({id, phase, formalName}))));
     const expected = [];
     for (const [dir, file] of [['check','check'], ['code-check','codeCheck'], ['consolidation','consolidation']]) {
-      const content = Object.values(load(`${root}/${unit.kind}/${dir}/${file}.content.ts`)).find(v => v?.questions);
+      const content = Object.values(load(`${unitPath(root,unit.kind)}/${dir}/${file}.content.ts`)).find(v => v?.questions);
       expected.push(...plain(content.questions.map(q => ({phaseKey:content.id, assessmentId:content.id, questionId:q.id, tags:q.tags, stageLabel:unit.phases.find(p=>p.id===content.id).formalName, questionLabel:q.prompt}))));
     }
     const actual = definition.concepts.flatMap(c => c.questions);
