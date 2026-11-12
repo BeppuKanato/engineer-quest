@@ -23,8 +23,8 @@ assert(figure.includes('prefers-reduced-motion'), 'motion must stop under reduce
 // 2. Every mascot display site goes through the shared component.
 const sites = [
   'app/component/appHeader.tsx',
-  'app/component/blockingProcessOverlay.tsx',
-  'app/component/pageTransitionOverlay.tsx',
+  'components/ui/BlockingProcessOverlay.tsx',
+  'components/ui/PageTransitionOverlay.tsx',
   'app/create/_components/mascotHint.tsx',
   'features/home/HomeScreen.tsx',
   'app/page.tsx',
@@ -38,7 +38,7 @@ for (const site of sites) {
 }
 
 // 3. Waiting overlays are the only looping-motion sites and cannot request the unused states.
-for (const overlay of ['app/component/blockingProcessOverlay.tsx', 'app/component/pageTransitionOverlay.tsx']) {
+for (const overlay of ['components/ui/BlockingProcessOverlay.tsx', 'components/ui/PageTransitionOverlay.tsx']) {
   const source = read(overlay);
   assert(source.includes('motion='), `${overlay} must pass its waiting motion to MascotFigure`);
   assert(source.includes('"surprise"') && source.includes('"celebrate"'), `${overlay} must exclude surprise/celebrate from its state type`);

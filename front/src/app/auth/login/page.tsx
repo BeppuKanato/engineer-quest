@@ -15,7 +15,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ensureUser } from "@/api/auth.api";
 import { useUserSession } from "@/lib/session/userSession";

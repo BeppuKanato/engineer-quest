@@ -16,7 +16,7 @@ assert(!header.includes('PageTransitionOverlay'), 'appHeader must not render Pag
 assert(!header.includes('isNavigating'), 'appHeader must not track a blocking navigation state');
 
 // 2. Home / courses keep previous data and use the shared session token (#138 N1, N2).
-for (const page of ['features/home/HomeScreen.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'features/collection/CollectionScreen.tsx', 'features/history/HistoryScreen.tsx', 'features/collection/KnowledgeCardsScreen.tsx', 'features/collection/AchievementsScreen.tsx', 'app/profile/page.tsx', 'app/quest-board/page.tsx', 'app/quest-board/new/page.tsx', 'app/quest-board/[postId]/page.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
+for (const page of ['features/home/HomeScreen.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'features/collection/CollectionScreen.tsx', 'features/history/HistoryScreen.tsx', 'features/collection/KnowledgeCardsScreen.tsx', 'features/collection/AchievementsScreen.tsx', 'app/profile/page.tsx', 'features/quest-board/QuestBoardScreen.tsx', 'features/quest-board/NewQuestPostScreen.tsx', 'features/quest-board/QuestPostDetailScreen.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
   const source = read(page);
   assert(source.includes('useUserSession'), `${page} must use the session token`);
   assert(!source.includes('onAuthStateChanged'), `${page} must not subscribe to auth state itself`);
@@ -33,7 +33,7 @@ assert(!createWork.includes('onAuthStateChanged'), 'create work page must not su
 assert(createWork.includes('invalidateClientQueries([queryTags.works])'), 'create work page must invalidate works caches after save/submit');
 // Board list and new-post share the same cached board/courses entries, so the form
 // opens instantly after visiting the list (#174).
-const boardNew = read('app/quest-board/new/page.tsx');
+const boardNew = read('features/quest-board/NewQuestPostScreen.tsx');
 assert(boardNew.includes('peekClientQueryData<QuestBoardListResponse>("quest-board")'), 'new post page must seed from the shared board cache');
 
 const courses = read('features/learning/catalog/CoursesScreen.tsx');
