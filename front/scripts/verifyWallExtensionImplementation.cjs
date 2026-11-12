@@ -408,7 +408,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(editorSetupSource, /base: "vs"/, "shared editor theme is based on the light vs theme");
   assert.match(editorSetupSource, /"editorCursor\.foreground": "#111827"/, "shared editor theme pins a dark caret colour");
   assert.match(previewSource, /border: `2px solid \$\{colors\.focus\}`/, "editor area is framed in the focus colour");
-  assert(!impl("editor.tokens.ts").includes("#1e1e1e"), "editor tokens are light");
+  assert(!fs.readFileSync(`${root}/implementation/editor.tokens.ts`, "utf8").includes("#1e1e1e"), "editor tokens are light");
   const hintsSource = impl("ImplementationHints.tsx");
   assert.match(hintsSource, /content\.hints\.loopLabel/, "hint 2 shows the loop as a flow");
   assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");

@@ -19,7 +19,7 @@ import { playerTokens } from "../../player/player.tokens";
 import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runMazeDiggingFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { mazeDiggingEditorText as text } from "./editor.content";
-import { editorTokens as colors } from "./editor.tokens";
+import { editorTokens as colors } from "../../implementation/editor.tokens";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { mazeDiggingImplementationContent as content } from "./implementation.content";

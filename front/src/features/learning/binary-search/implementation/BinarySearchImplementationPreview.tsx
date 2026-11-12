@@ -24,7 +24,7 @@ import type { BinarySearchTracePlayback } from "../trace/trace.types";
 import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runBinarySearchFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { binarySearchEditorText as text } from "./editor.content";
-import { editorTokens as colors } from "./editor.tokens";
+import { editorTokens as colors } from "../../implementation/editor.tokens";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { binarySearchImplementationContent as content } from "./implementation.content";

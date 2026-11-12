@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { IndexOutput } from "./IndexOutput";
 import { binarySearchEditorText as text } from "./editor.content";
-import { editorTokens as colors } from "./editor.tokens";
+import { editorTokens as colors } from "../../implementation/editor.tokens";
 import { freeDisplayCase, freeOutputLimit, type FreeExecutionResult } from "./freeExecution";
 
 export function FreeExecutionConsole({ result, busy }: { result: FreeExecutionResult | null; busy: boolean }) {

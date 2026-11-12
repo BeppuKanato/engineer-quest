@@ -24,7 +24,7 @@ import type { GreedyCoinsTracePlayback } from "../trace/trace.types";
 import { FreeExecutionConsole } from "./FreeExecutionConsole";
 import { runGreedyCoinsFreeCode, type FreeExecutionResult } from "./freeExecution";
 import { greedyCoinsEditorText as text } from "./editor.content";
-import { editorTokens as colors } from "./editor.tokens";
+import { editorTokens as colors } from "../../implementation/editor.tokens";
 import { ImplementationHints } from "./ImplementationHints";
 import { ImplementationResults } from "./ImplementationResults";
 import { greedyCoinsImplementationContent as content } from "./implementation.content";

@@ -2,8 +2,9 @@ import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { DistanceOutput } from "./DistanceOutput";
 import { bfsEditorText as text } from "./editor.content";
-import { editorTokens as colors } from "./editor.tokens";
-import { freeDisplayCase, freeOutputLimit, type FreeExecutionResult } from "./freeExecution";
+import { editorTokens as colors } from "../../implementation/editor.tokens";
+import { freeDisplayCase } from "./freeExecution";
+import { freeOutputLimit, type FreeExecutionResult } from "../../implementation/freeExecution";
 
 export function FreeExecutionConsole({ result, busy, returnedLabel = text.returned, renderReturn }: {
   result: FreeExecutionResult | null; busy: boolean; returnedLabel?: string; renderReturn?: (actual: unknown) => ReactNode;

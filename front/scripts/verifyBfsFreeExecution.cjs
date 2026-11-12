@@ -23,7 +23,8 @@ function load(filename) {
 const root=path.resolve(__dirname,'../src'),plain=value=>JSON.parse(JSON.stringify(value));
 const runner=load(root+'/lib/pyodideRunner.ts');
 const {bfsImplementationContent:content}=load(root+'/features/learning/bfs/implementation/implementation.content.ts');
-const {runBfsFreeCode,freeDisplayCase,freeOutputLimit}=load(root+'/features/learning/bfs/implementation/freeExecution.ts');
+const {runBfsFreeCode,freeDisplayCase}=load(root+'/features/learning/bfs/implementation/freeExecution.ts');
+const {freeOutputLimit}=load(root+'/features/learning/implementation/freeExecution.ts');
 const {FreeExecutionConsole}=load(root+'/features/learning/bfs/implementation/FreeExecutionConsole.tsx');
 const {createElement}=require('react'),{renderToStaticMarkup}=require('react-dom/server');
 (async()=>{

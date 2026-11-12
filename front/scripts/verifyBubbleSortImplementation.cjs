@@ -256,7 +256,7 @@ assert(!runtimeFreeHtml.includes(editorText.syntaxNote), "the nothing-runs note 
 const lineSummaryHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [{ id: "D1", passed: false, error: "runtime", errorLine: 7 }] }));
 assert(lineSummaryHtml.includes(content.display.messages.runtime + "（7行目付近）"), "test summary names the learner line");
 assert(lineSummaryHtml.includes('data-error-line="7"'), "test summary exposes the error line");
-const errorLinePreviewSource = fs.readFileSync(`${root}/bubble-sort/implementation/BubbleSortImplementationPreview.tsx`, "utf8");
+const errorLinePreviewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
 assert.match(errorLinePreviewSource, /useErrorLineDecoration/, "preview highlights the error line in the editor (#325)");
 assert.match(errorLinePreviewSource, /setErrorLine\(undefined\)/, "changing code or rerunning clears the error line");
 assert(fs.readFileSync(path.resolve(root, "../../app/globals.css"), "utf8").includes(".eq-error-line-highlight"), "the error line highlight has a global style");
@@ -376,7 +376,9 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
   const impl = (file) => fs.readFileSync(`${root}/bubble-sort/implementation/${file}`, "utf8");
-  const previewSource = impl("BubbleSortImplementationPreview.tsx");
+  const adapterSource = impl("BubbleSortImplementationPreview.tsx");
+  assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
+  const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
   assert.match(previewSource, /theme={LEARNING_EDITOR_THEME}/, "editor uses the shared learning theme");
   assert.match(previewSource, /beforeMount={setupLearningEditor}/, "editor setup is shared");
   assert.match(previewSource, /learningEditorTextCursor/, "editor text cursor is the shared dark I-beam");
@@ -385,7 +387,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(editorSetupSource, /base: "vs"/, "shared editor theme is based on the light vs theme");
   assert.match(editorSetupSource, /"editorCursor\.foreground": "#111827"/, "shared editor theme pins a dark caret colour");
   assert.match(previewSource, /border: `2px solid \$\{colors\.focus\}`/, "editor area is framed in the focus colour");
-  assert(!impl("editor.tokens.ts").includes("#1e1e1e"), "editor tokens are light");
+  assert(!fs.readFileSync(`${root}/implementation/editor.tokens.ts`, "utf8").includes("#1e1e1e"), "editor tokens are light");
   const hintsSource = impl("ImplementationHints.tsx");
   assert.match(hintsSource, /content\.hints\.loopLabel/, "hint 2 shows the loop as a flow");
   assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");
@@ -411,7 +413,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
-  assert.match(previewSource, /BubbleSortTraceDialog/, "visual debugging is wired in issue #234");
-  assert.match(previewSource, /traceBubbleSortCode/, "preview acquires the trace through the trace module");
+  assert.match(adapterSource, /BubbleSortTraceDialog/, "visual debugging is wired in issue #234");
+  assert.match(adapterSource, /traceBubbleSortCode/, "preview acquires the trace through the trace module");
   console.log("Bubble-sort implementation: five cases verified against an independent sort and CPython reference, typical-mistake mutations (reversed swap condition, too-wide and too-narrow inner ranges), documented non-failing variants (non-narrowing range, in-place sorting), canonical skeleton and Parsons reuse, hint gating, array difference display, free-execution array rendering, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

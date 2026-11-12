@@ -113,7 +113,7 @@ assert(!runtimeFreeHtml.includes(editorText.syntaxNote), "the nothing-runs note 
 const lineSummaryHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [{ id: "D1", passed: false, error: "runtime", errorLine: 7 }] }));
 assert(lineSummaryHtml.includes(content.display.messages.runtime + "（7行目付近）"), "test summary names the learner line");
 assert(lineSummaryHtml.includes('data-error-line="7"'), "test summary exposes the error line");
-const errorLinePreviewSource = fs.readFileSync(`${root}/bfs/implementation/BfsImplementationPreview.tsx`, "utf8");
+const errorLinePreviewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
 assert.match(errorLinePreviewSource, /useErrorLineDecoration/, "preview highlights the error line in the editor (#325)");
 assert.match(errorLinePreviewSource, /setErrorLine\(undefined\)/, "changing code or rerunning clears the error line");
 assert(fs.readFileSync(path.resolve(root, "../../app/globals.css"), "utf8").includes(".eq-error-line-highlight"), "the error line highlight has a global style");
@@ -274,7 +274,9 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.equal(cancelled.length, 1, "Unmounting stops subsequent case requests");
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
   const impl = (file) => fs.readFileSync(`${root}/bfs/implementation/${file}`, "utf8");
-  const previewSource = impl("BfsImplementationPreview.tsx");
+  const adapterSource = impl("BfsImplementationPreview.tsx");
+  assert.match(adapterSource, /<ImplementationWorkspace/, "BFS uses the shared editor workspace");
+  const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
   assert.match(previewSource, /theme={LEARNING_EDITOR_THEME}/, "editor uses the shared learning theme");
   assert.match(previewSource, /beforeMount={setupLearningEditor}/, "editor setup is shared");
   assert.match(previewSource, /learningEditorTextCursor/, "editor text cursor is the shared dark I-beam");
@@ -284,7 +286,7 @@ assert(!review.includes("この順序で回答する"), "Hint Parsons has no sco
   assert.match(editorSetupSource, /"editorCursor\.foreground": "#111827"/, "shared editor theme pins a dark caret colour");
   assert.match(previewSource, /border: `2px solid \$\{colors\.focus\}`/, "editor area is framed in the focus colour");
   assert(!/Implementation(Results|Hints) dark/.test(previewSource), "no dark variants remain");
-  assert(!impl("editor.tokens.ts").includes("#1e1e1e"), "editor tokens are light");
+  assert(!fs.readFileSync(`${root}/implementation/editor.tokens.ts`, "utf8").includes("#1e1e1e"), "editor tokens are light");
   const hintsSource = impl("ImplementationHints.tsx");
   assert.match(hintsSource, /キューが空になるまでくり返し/, "hint 2 shows the loop as a flow");
   assert.match(hintsSource, /min\(92vw, 760px\)/, "hint dialog width is capped for readability");
