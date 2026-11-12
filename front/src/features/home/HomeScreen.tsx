@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -11,7 +13,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
   LinearProgress,
   Skeleton,
   Stack,
@@ -93,10 +94,10 @@ export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, Feedba
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
         {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
-        <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+        <PageLayout>
           {continueLearning}
           <HomeSkeleton />
-        </Container>
+        </PageLayout>
       </Box>
     );
   }
@@ -105,10 +106,10 @@ export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, Feedba
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
         {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
-        <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+        <PageLayout>
           {continueLearning}
           <Alert severity="error">{errorMessage ?? "ホーム情報がありません。"}</Alert>
-        </Container>
+        </PageLayout>
       </Box>
     );
   }
@@ -125,7 +126,7 @@ export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, Feedba
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
 
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         {continueLearning}
         {bigGoal}
         {errorMessage && (
@@ -293,7 +294,7 @@ export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, Feedba
 
           {unitGrid}
         </Box>
-      </Container>
+      </PageLayout>
     </Box>
   );
 }

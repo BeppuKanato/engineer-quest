@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import type { ComponentType } from "react";
@@ -172,7 +174,7 @@ export function CreateQuestWorkScreen({ header, FeedbackDestination, FeedbackObs
 
   if (!quest) return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>{header}<FeedbackDestination failed={!!error} ready={!!quest && !error} /><Container sx={{ py: 4 }}>{error ? <Alert severity="error">{error}</Alert> : <Skeleton variant="rounded" height={760} />}</Container></Box>;
 
-  return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>{header}<Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}><CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest.title, href: `/create/quests/${quest.id}` }, { label: "実装" }]} /></Container><Container maxWidth={false} sx={{ maxWidth: 1440, pt: 3, pb: 3 }}><Stack spacing={2.5}>
+  return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>{header}<PageLayout variant="breadcrumbs"><CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest.title, href: `/create/quests/${quest.id}` }, { label: "実装" }]} /></PageLayout><PageLayout variant="workspace"><Stack spacing={2.5}>
     <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}><Box><Typography variant="h3" fontWeight={950}>{quest.title}</Typography><Typography color="text.secondary" sx={{ mt: 0.5 }}>{quest.scenario}</Typography></Box><Paper elevation={0} sx={{ p: 2, minWidth: 230, border: "1px solid #c7d8f7", borderRadius: 2 }}><Stack direction="row" justifyContent="space-between"><Typography fontWeight={900}>現在の得点</Typography><Typography variant="h5" fontWeight={950} color="primary">{score} / {quest.maxScore}</Typography></Stack><LinearProgress variant="determinate" value={(score / quest.maxScore) * 100} sx={{ mt: 1, height: 9, borderRadius: 99 }} /><Typography fontSize={12} color="text.secondary" sx={{ mt: 0.7 }}>{basicPassed ? "基本要件クリア" : `基本要件 ${quest.basicScore}点分をすべて通すと提出できます`}</Typography></Paper></Stack>
     {error && <Alert severity="error">{error}</Alert>}
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(460px, 1fr) 280px" }, gap: 2, alignItems: "start" }}>
@@ -198,5 +200,5 @@ export function CreateQuestWorkScreen({ header, FeedbackDestination, FeedbackObs
         {submission && <Paper elevation={0} sx={{ p: 2, border: "2px solid #86efac", bgcolor: "#f0fdf4", borderRadius: 2 }}><Typography variant="h5" fontWeight={950}>提出完了 {submission.score} / {submission.maxScore}点</Typography>{unlockedAchievements.length > 0 && <Alert severity="success" sx={{ mt: 1 }}>実績を解除しました：{unlockedAchievements.map((item) => `${item.title}（${item.rarity}）`).join("、")}</Alert>}{feedback?.status === "GENERATING" && <Alert severity="info" sx={{ mt: 1 }}>AIレビューを生成しています。</Alert>}{feedback?.status === "FAILED" && <Alert severity="error" sx={{ mt: 1 }}>AIレビューを生成できませんでした。</Alert>}{feedback?.id && feedback.feedback && <FeedbackObservation id={feedback.id} href={feedback.feedback.actionHref} />}{feedback?.feedback && <Stack spacing={1.2} sx={{ mt: 1.5 }}><Box><Typography fontWeight={950}>現在の状態</Typography><Typography fontSize={13}>{feedback.feedback.currentState}</Typography></Box><Box><Typography fontWeight={950}>次の目標</Typography><Typography fontSize={13}>{feedback.feedback.nextGoal}</Typography></Box><Box><Typography fontWeight={950}>次の一歩</Typography><Typography fontSize={13}>{feedback.feedback.nextStep}</Typography></Box>{feedback.feedback.actionType === "RETRY_CREATE_QUEST" ? <Button variant="contained" onClick={() => { setSubmission(null); setFeedback(null); setUnlockedAchievements([]); }} sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : feedbackActionHref ? <Button component={Link} href={feedbackActionHref} variant="contained" sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : null}</Stack>}<Button component={Link} href={shareHref} startIcon={<ForumIcon />} variant="outlined" sx={{ mt: 1.5, fontWeight: 900 }}>掲示板で共有する</Button></Paper>}
       </Stack>
     </Box>
-  </Stack></Container></Box>;
+  </Stack></PageLayout></Box>;
 }

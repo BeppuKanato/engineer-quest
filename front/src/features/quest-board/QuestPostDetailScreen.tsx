@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -14,7 +16,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -246,10 +247,10 @@ export function QuestPostDetailScreen({ header, FeedbackDestination, postId }: P
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!post && !errorMessage} />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+      <PageLayout variant="breadcrumbs">
           <AppBreadcrumbs items={[{ label: "掲示板", href: "/quest-board" }, { label: post?.title ?? "投稿詳細" }]} />
-        </Container>
-      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 4 }}>
+        </PageLayout>
+      <PageLayout variant="reading">
         <Stack spacing={3}>
 
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -559,7 +560,7 @@ export function QuestPostDetailScreen({ header, FeedbackDestination, postId }: P
             </>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
       <BlockingProcessOverlay
         open={isDeleting}
         title="投稿を削除しています"

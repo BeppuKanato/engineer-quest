@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
@@ -18,7 +20,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   IconButton,
   Paper,
   Skeleton,
@@ -222,7 +223,7 @@ export function HistoryScreen({ header, FeedbackDestination }: PageIntegration) 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "履歴" }]} />
           <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
@@ -301,7 +302,7 @@ export function HistoryScreen({ header, FeedbackDestination }: PageIntegration) 
             </>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
     </Box>
   );
 }

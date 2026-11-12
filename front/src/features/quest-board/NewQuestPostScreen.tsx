@@ -1,12 +1,13 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
   Box,
-  Container,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -193,15 +194,15 @@ export function NewQuestPostScreen({ header, FeedbackDestination }: PageIntegrat
         description="投稿の保存が完了しました。詳細画面を開いています。"
       />
 
-      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+      <PageLayout variant="breadcrumbs">
           <AppBreadcrumbs
             items={[
               { label: "掲示板", href: "/quest-board" },
               { label: "新規投稿" },
             ]}
           />
-        </Container>
-      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 4 }}>
+        </PageLayout>
+      <PageLayout variant="reading">
         <Stack spacing={3}>
           <Box>
             <Typography variant="h4" fontWeight={900}>
@@ -344,7 +345,7 @@ export function NewQuestPostScreen({ header, FeedbackDestination }: PageIntegrat
             </Stack>
           </Paper>
         </Stack>
-      </Container>
+      </PageLayout>
 
       <AppSnackbar
         open={successSnackbarOpen}

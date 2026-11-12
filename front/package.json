@@ -8,6 +8,7 @@
     "start": "next start -p ${PORT:-8080}",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "verify:page-layout:browser": "node scripts/verifyPageLayout.browser.cjs",
     "verify:learning-layout:browser": "node scripts/verifyLearningLayout.browser.cjs",
     "verify:implementation-workspace": "node scripts/verifyImplementationWorkspace.cjs",
     "verify:assessment-screens:browser": "node scripts/verifyAssessmentScreens.browser.cjs",

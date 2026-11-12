@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -17,7 +19,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -161,7 +162,7 @@ export function ProfileScreen({ header, FeedbackDestination, HexadRadarChart }: 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!profile && !errorMessage} />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "プロフィール" }]} />
           {isLoading ? (
@@ -310,7 +311,7 @@ export function ProfileScreen({ header, FeedbackDestination, HexadRadarChart }: 
             </>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
       <AppSnackbar open={snackbarOpen} message="相棒が変更されました。" onClose={() => setSnackbarOpen(false)} />
     </Box>
   );

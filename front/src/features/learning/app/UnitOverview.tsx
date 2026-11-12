@@ -1,4 +1,6 @@
 "use client";
+
+import { PageLayout } from "@/components/layouts/PageLayout";
 import { Alert, Box, Button, Chip, Container, LinearProgress, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -42,9 +44,9 @@ export function UnitOverview({ courseId, header }: { courseId: string; header: R
   };
   return <Box sx={{ minHeight: "100dvh", bgcolor: tokens.background, color: tokens.text }}>
     {header}
-    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+    <PageLayout variant="breadcrumbs">
       <AppBreadcrumbs items={[{ label: "コース", href: "/courses" }, { label: unit?.title ?? "単元" }]} />
-    </Container>
+    </PageLayout>
     <Container component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ pt: 1, pb: 5, maxWidth: 1200 }}>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt: 2 }}>{unit?.title ?? "単元"}</Typography>
       {!unit ? <Box sx={{ py: 6 }}><Typography>この単元は準備中です。</Typography><Typography>公開まで、ほかのコースをご覧ください。</Typography></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : loading ? <ProgressLoadingSkeleton variant="overview" /> : error ?

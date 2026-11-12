@@ -1,12 +1,14 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CodeIcon from "@mui/icons-material/Code";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Alert, Box, Button, Chip, Container, LinearProgress, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, LinearProgress, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -68,10 +70,10 @@ export function CreateScreen({ header, FeedbackDestination }: PageIntegration) {
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
     {header}<FeedbackDestination failed={!!error} ready={!loading && !error} />
-    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+    <PageLayout variant="breadcrumbs">
         <CreateBreadcrumbs items={[{ label: "作る" }]} />
-      </Container>
-    <Container maxWidth={false} sx={{ maxWidth: 1180, pt: 3, pb: 4 }}>
+      </PageLayout>
+    <PageLayout variant="creationList">
       <Stack spacing={3}>
         <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
           <Box><Typography variant="h3" fontWeight={950}>作る</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Pythonで機能を完成させ、達成した要件の分だけ得点を伸ばします。</Typography></Box>
@@ -82,6 +84,6 @@ export function CreateScreen({ header, FeedbackDestination }: PageIntegration) {
         {loading ? <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>{[0,1,2].map((item) => <Skeleton key={item} variant="rounded" height={470} />)}</Box> :
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>{quests.map((quest) => <QuestCard key={quest.id} quest={quest} />)}</Box>}
       </Stack>
-    </Container>
+    </PageLayout>
   </Box>;
 }

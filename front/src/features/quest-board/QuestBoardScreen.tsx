@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -13,7 +15,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   FormControl,
   InputAdornment,
   InputLabel,
@@ -210,10 +211,10 @@ export function QuestBoardScreen({ header, FeedbackDestination }: PageIntegratio
         description="新しい投稿を作成する画面へ移動しています。"
         mascotState="thinking"
       />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+      <PageLayout variant="breadcrumbs">
           <AppBreadcrumbs items={[{ label: "掲示板" }]} />
-        </Container>
-      <Container maxWidth={false} sx={{ maxWidth: 1120, pt: 3, pb: 4 }}>
+        </PageLayout>
+      <PageLayout variant="detail">
         <Stack spacing={3}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
             <Stack
@@ -361,7 +362,7 @@ export function QuestBoardScreen({ header, FeedbackDestination }: PageIntegratio
             )}
           </Stack>
         </Stack>
-      </Container>
+      </PageLayout>
     </Box>
   );
 }

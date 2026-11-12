@@ -1,9 +1,11 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StarIcon from "@mui/icons-material/Star";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 
 import { getCourses } from "@/api/courses.api";
@@ -97,7 +99,7 @@ export function CoursesScreen({ header, FeedbackDestination }: { header: ReactNo
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
 
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "コース" }]} />
           <Box>
@@ -184,7 +186,7 @@ export function CoursesScreen({ header, FeedbackDestination }: { header: ReactNo
             </Stack>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
     </Box>
   );
 }

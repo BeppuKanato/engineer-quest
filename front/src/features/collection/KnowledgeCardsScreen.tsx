@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -7,7 +9,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import { Alert, Box, Chip, Container, Dialog, DialogContent, IconButton, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Alert, Box, Chip, Dialog, DialogContent, IconButton, LinearProgress, MenuItem, Paper, Select, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -78,7 +80,7 @@ export function KnowledgeCardsScreen({ header, FeedbackDestination }: PageIntegr
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} targetId={selectedCard?.id} />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         <Stack spacing={2.5}>
           <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "知識カード" }]} />
           {isLoading ? (
@@ -159,7 +161,7 @@ export function KnowledgeCardsScreen({ header, FeedbackDestination }: PageIntegr
             </>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
     </Box>
   );
 }

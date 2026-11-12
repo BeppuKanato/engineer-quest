@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -7,7 +9,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SchoolIcon from "@mui/icons-material/School";
 import StarIcon from "@mui/icons-material/Star";
-import { Alert, Box, Button, Chip, Container, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Divider, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -40,10 +42,10 @@ export function CreateQuestDetailScreen({ header, FeedbackDestination, questId }
 
   return <Box sx={{ minHeight: "100vh", bgcolor: "#f3f7fc" }}>
     {header}<FeedbackDestination failed={!!error} ready={!!quest && !error} />
-    <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
+    <PageLayout variant="breadcrumbs">
         <CreateBreadcrumbs items={[{ label: "作る", href: "/create" }, { label: quest?.title ?? "課題" }]} />
-      </Container>
-    <Container maxWidth={false} sx={{ maxWidth: 1120, pt: 3, pb: 4 }}>
+      </PageLayout>
+    <PageLayout variant="detail">
       {loading ? <Skeleton variant="rounded" height={700} /> : <Stack spacing={3}>
         {error && <Alert severity="error">{error}</Alert>}
         {quest && <>
@@ -81,6 +83,6 @@ export function CreateQuestDetailScreen({ header, FeedbackDestination, questId }
           </Paper>
         </>}
       </Stack>}
-    </Container>
+    </PageLayout>
   </Box>;
 }

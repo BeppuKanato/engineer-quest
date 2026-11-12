@@ -1,5 +1,7 @@
 "use client";
 
+import { PageLayout } from "@/components/layouts/PageLayout";
+
 import type { PageIntegration } from "@/types/pageIntegration";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -13,7 +15,6 @@ import {
   Box,
   Button,
   Chip,
-  Container,
   LinearProgress,
   Paper,
   Skeleton,
@@ -290,7 +291,7 @@ function AchievementsPageContent({ header, FeedbackDestination }: PageIntegratio
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
       {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !errorMessage} />
-      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+      <PageLayout>
         <Stack spacing={3}>
           <AppBreadcrumbs items={[{ label: "コレクション", href: "/collection" }, { label: "実績" }]} />
           {isLoading ? (
@@ -378,7 +379,7 @@ function AchievementsPageContent({ header, FeedbackDestination }: PageIntegratio
             </>
           )}
         </Stack>
-      </Container>
+      </PageLayout>
       <AppSnackbar open={snackbar.open} message={snackbar.message} severity={snackbar.severity} onClose={() => setSnackbar((current) => ({ ...current, open: false }))} />
     </Box>
   );
@@ -387,9 +388,9 @@ function AchievementsPageContent({ header, FeedbackDestination }: PageIntegratio
 const AchievementsPageFallback = ({ header }: Pick<PageIntegration, "header">) => (
   <Box sx={{ minHeight: "100vh", bgcolor: "#f5f8fc" }}>
     {header}
-    <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+    <PageLayout>
       <AchievementsSkeleton />
-    </Container>
+    </PageLayout>
   </Box>
 );
 
