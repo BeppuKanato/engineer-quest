@@ -1,6 +1,8 @@
 import { summarizeReaction } from "../service/feedbackV1.observation";
 import assert from "node:assert/strict";
-import { generate, analysisSchema, selectionSchema, validateSelection, validateAnalysis, analysisPrompt, selectionPrompt, type Input, type Analysis, type Candidate } from "../service/feedbackV1.engine";
+import { zodTextFormat } from "openai/helpers/zod";
+import type { ZodTypeAny } from "zod";
+import { generate, analysisSchema, selectionSchema, selectionGenerationSchema, validateSelection, validateAnalysis, analysisPrompt, selectionPrompt, type Input, type Analysis, type Candidate } from "../service/feedbackV1.engine";
 import { aggregateConcepts, conceptDefinitions } from "../service/feedbackConcepts";
 async function main() {
   const unit = conceptDefinitions[0];
@@ -16,6 +18,39 @@ async function main() {
     {nextStep:"取り出す順番を頭の中でたどる",reason:"同じ順序を自分で再現できるか確かめるため",purpose:"手順の整理",actionLabel:"頭の中で追う",actionId:null,targetId:null,capabilityId:"mental-rehearsal",personalizationAdjustment:null},
     {nextStep:"先に入れた場所から取り出す理由を言葉にする",reason:"図で追った順番とキューの規則を結びつけるため",purpose:"規則の説明",actionLabel:"理由を整理する",actionId:null,targetId:null,capabilityId:"explain-reasoning",personalizationAdjustment:null},
   ];
+  const outputSchema = selectionGenerationSchema(false);
+  for (const n of [1,2,3]) {
+    assert.doesNotThrow(()=>outputSchema.parse({nextGoal:"確認する",candidates:candidates.slice(0,n)}));
+  }
+  for (const invalid of ["purpose",",null","null","null?","capabilityId: null?","", "  "]) {
+    assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:[{...candidates[0],capabilityId:invalid}]}).success,false);
+    assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:[{...candidates[1],targetId:invalid}]}).success,false);
+  }
+  for (const invalid of [
+    {...candidates[0],capabilityId:"explain-reasoning"},
+    {...candidates[0],targetId:null},
+    {...candidates[1],actionId:4},
+    {...candidates[1],capabilityId:"unavailable-auto-solver"},
+  ]) assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:[invalid]}).success,false);
+  assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:[]}).success,false);
+  assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:[...candidates,candidates[0]]}).success,false);
+  // Inspect the actual SDK-generated API format without calling OpenAI.
+  const toApiFormat = zodTextFormat as unknown as (schema:ZodTypeAny,name:string)=>{strict:boolean;schema:Record<string,unknown>};
+  for (const personalized of [false,true]) {
+    const apiFormat = toApiFormat(selectionGenerationSchema(personalized),"selection");
+    assert.equal(apiFormat.strict,true);
+    assert.equal(apiFormat.schema.type,"object");
+    assert.equal(apiFormat.schema.anyOf,undefined,"root stays an object; union belongs to candidates");
+    const branches = (selectionGenerationSchema(personalized).shape.candidates.element.options);
+    const apiBranches = branches.map(branch=>toApiFormat(branch,"candidate").schema);
+    const navigationProps = apiBranches[0].properties as Record<string,Record<string,unknown>>;
+    const offlineProps = apiBranches[1].properties as Record<string,Record<string,unknown>>;
+    assert.equal(navigationProps.capabilityId.type,"null");
+    assert.equal(offlineProps.actionId.type,"null");
+    assert.equal(offlineProps.targetId.type,"null");
+    assert.deepEqual(offlineProps.capabilityId.enum,["mental-rehearsal","explain-reasoning"]);
+    if (!personalized) assert.equal(navigationProps.personalizationAdjustment.type,"null");
+  }
   for (const n of [1,2,3]) {
     const logs: unknown[]=[];
     const result = await generate(input,async(stage)=>({output:stage==="analysis"?analysis:{nextGoal:"キューから取り出す順序を説明する",candidates:candidates.slice(0,n)},model:"fixture",responseId:stage,usage:null}),async log=>{logs.push(log);});
@@ -35,6 +70,29 @@ async function main() {
   const sameTarget=validateSelection(input,select([candidates[0],{...candidates[0],nextStep:"同じ図で発見済みの場所を確認する"}]));
   assert.equal(sameTarget.candidates[0].actionHref,sameTarget.candidates[1].actionHref);
   assert.notEqual(sameTarget.candidates[0].candidateId,sameTarget.candidates[1].candidateId);
+  // Reproduce raw LLM output: navigation uses an empty capability and offline uses an empty target.
+  const emptyIds = candidates.map(c => ({...c, capabilityId:c.actionId === null ? c.capabilityId : "", targetId:c.actionId === null ? "" : c.targetId}));
+  const rawSelection = {nextGoal:"手順を確認する",candidates:emptyIds};
+  const rawBefore = JSON.stringify(rawSelection);
+  const rawLogs: {stage?:string;output?:unknown}[] = [];
+  const normalized = await generate(input,async stage=>({output:stage === "analysis" ? analysis : rawSelection,model:"fixture",responseId:stage,usage:null}),async log=>{rawLogs.push(log as {stage?:string;output?:unknown});});
+  assert.equal(normalized.validation.valid,true);
+  assert.equal(normalized.selection.capabilityId,null,"top-level compatibility fields are normalized");
+  assert.equal(normalized.selection.candidates![0].capabilityId,null);
+  assert.equal(normalized.selection.candidates![1].targetId,null);
+  assert.equal(normalized.selection.candidates![2].targetId,null);
+  assert.equal(normalized.validation.candidates[0].actionHref,input.targets[4][0].href);
+  assert.equal(normalized.validation.candidates[1].actionHref,null);
+  assert.equal(JSON.stringify(rawSelection),rawBefore,"normalization must not mutate the raw response");
+  assert.equal(JSON.stringify(rawLogs.find(l=>l.stage === "selection")!.output),rawBefore,"audit log preserves empty strings");
+  assert.doesNotThrow(()=>validateSelection(input,select(emptyIds)),"saved outputs use the same normalization");
+  for (const invalid of ["purpose",",null","null"," "]) {
+    assert.throws(()=>validateSelection(input,select([{...candidates[0],capabilityId:invalid}])),/ACTION_NOT_ALLOWED/);
+    assert.throws(()=>validateSelection(input,select([{...candidates[1],targetId:invalid}])),/ACTION_NOT_ALLOWED/);
+  }
+  assert.throws(()=>validateSelection(input,select([{...candidates[0],actionId:9,capabilityId:""}])),/ACTION_NOT_ALLOWED/);
+  assert.throws(()=>validateSelection(input,select([{...candidates[0],targetId:""}])),/TARGET_NOT_AVAILABLE/);
+  assert.throws(()=>validateSelection(input,select([{...candidates[1],capabilityId:""}])),/ACTION_NOT_ALLOWED/);
   assert.throws(()=>validateSelection(input,select([{...candidates[1],capabilityId:"unavailable-auto-solver"}])),/ACTION_NOT_ALLOWED/);
   assert.throws(()=>validateSelection(input,select([{...candidates[0],targetId:"unavailable"}])),/TARGET_NOT_AVAILABLE/);
   assert.throws(()=>validateSelection({...input,targets:{4:[{id:"bfs-check",href:"https://example.com"}]}},select([candidates[0]])),/UNSAFE/);
@@ -85,6 +143,17 @@ async function main() {
   // 全候補に正確なHEXAD記録を要求し、後続候補の改ざんも拒否する。
   const adjusted=candidates.map(c=>({...c,personalizationAdjustment:{scores:Object.entries(hexad.scores).map(([trait,score])=>({trait,score})),interpretation:"関係を考慮",selectionEffect:"順序",goalWording:"目標",stepWording:"手順",reasonWording:"理由",learningBasis:"answer",limitation:"効果は未検証",actionId:c.actionId,targetId:c.targetId}}));
   assert.doesNotThrow(()=>validateSelection({...input,hexad},select(adjusted)));
+  const personalizedSchema = selectionGenerationSchema(true);
+  assert.doesNotThrow(()=>personalizedSchema.parse({nextGoal:"確認する",candidates:adjusted}));
+  assert.equal(outputSchema.safeParse({nextGoal:"確認する",candidates:adjusted}).success,false);
+  assert.equal(personalizedSchema.safeParse({nextGoal:"確認する",candidates}).success,false);
+  assert.equal(personalizedSchema.safeParse({nextGoal:"確認する",candidates:[{...adjusted[1],personalizationAdjustment:{...adjusted[1].personalizationAdjustment,targetId:"null"}}]}).success,false);
+  const emptyAdjusted = adjusted.map(c=>({...c,capabilityId:c.actionId === null ? c.capabilityId : "",targetId:c.actionId === null ? "" : c.targetId,
+    personalizationAdjustment:{...c.personalizationAdjustment,targetId:c.actionId === null ? "" : c.personalizationAdjustment.targetId}}));
+  const personalized = await generate({...input,hexad},async stage=>({output:stage === "analysis" ? analysis : {nextGoal:"確認する",candidates:emptyAdjusted},model:"fixture",responseId:stage,usage:null}));
+  assert.equal(personalized.selection.candidates![1].personalizationAdjustment!.targetId,null);
+  assert.equal(emptyAdjusted[1].personalizationAdjustment.targetId,"","HEXAD audit input remains unchanged");
+  assert.throws(()=>validateSelection({...input,hexad},select([{...emptyAdjusted[1],personalizationAdjustment:{...emptyAdjusted[1].personalizationAdjustment,targetId:"purpose"}}])),/HEXAD_SELECTION_MISMATCH/);
   assert.throws(()=>validateSelection(input,select(adjusted)),/STANDARD_HEXAD_LEAK/);
   adjusted[2].personalizationAdjustment.scores[0].score++;
   assert.throws(()=>validateSelection({...input,hexad},select(adjusted)),/HEXAD_SCORE_MISMATCH/);

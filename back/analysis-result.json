@@ -1,0 +1,57 @@
+{
+  "stage": "analysis",
+  "durationMs": 9047,
+  "output": {
+    "currentState": "目標は「バブルソートの単元を完了する」（UNIT_COMPLETION）。全7段階中3段階が完了し、単元は進行中。動きの確認問題は直近の2問とも初回正答。",
+    "conceptClaims": [
+      {
+        "conceptId": "bubble-sort:order",
+        "state": "confirmed",
+        "sourceIds": [
+          "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
+          "assessment-snapshot-2fd4d3e867b924c76e68c510a3bc844248f6167b4044eee890c44641f7f33a1a"
+        ],
+        "observation": "次に比べるペアの問題は、初回・直近とも初回正答。再挑戦なし。"
+      },
+      {
+        "conceptId": "bubble-sort:swap",
+        "state": "confirmed",
+        "sourceIds": [
+          "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
+          "assessment-snapshot-2fd4d3e867b924c76e68c510a3bc844248f6167b4044eee890c44641f7f33a1a"
+        ],
+        "observation": "大きい方の移動先の問題は、初回・直近とも初回正答。再挑戦なし。関連3問中の回答済みは1問。"
+      }
+    ],
+    "understood": [
+      "動きの確認問題では、次に比べるペアと大きい方の移動先を選べている。"
+    ],
+    "needsImprovement": [
+      "次の「動きとコードの対応」で、隣接する比較相手と比較範囲がコードでどう表されるか確かめる。"
+    ],
+    "uncertain": [
+      "コード全体の流れや実装・動作確認の状態は、まだ観測されていない。"
+    ],
+    "evidence": [
+      {
+        "sourceId": "assessment-snapshot-2fd4d3e867b924c76e68c510a3bc844248f6167b4044eee890c44641f7f33a1a",
+        "fact": "直近の動きの確認問題は対象2問とも初回正答。",
+        "inference": false
+      }
+    ]
+  },
+  "model": "gpt-6.1-terra",
+  "responseId": "resp_0412e837767bcb95006af54377666487d295940ae9aece8f34",
+  "usage": {
+    "input_tokens": 3197,
+    "input_tokens_details": {
+      "cache_write_tokens": 3194,
+      "cached_tokens": 0
+    },
+    "output_tokens": 659,
+    "output_tokens_details": {
+      "reasoning_tokens": 36
+    },
+    "total_tokens": 3856
+  }
+}

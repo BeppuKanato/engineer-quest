@@ -1,0 +1,1248 @@
+{
+  "hexad": null,
+  "state": {
+    "unit": {
+      "id": "course-algorithm-bubble-sort-v2",
+      "title": "バブルソート",
+      "phases": [
+        {
+          "id": "bubble-sort-check",
+          "status": "COMPLETED"
+        },
+        {
+          "id": "bubble-sort-motivation",
+          "status": "COMPLETED"
+        },
+        {
+          "id": "bubble-sort-execution",
+          "status": "COMPLETED"
+        }
+      ],
+      "status": "IN_PROGRESS"
+    },
+    "cards": [
+      {
+        "id": "knowledge-card-greedy-coins-greedy-choice",
+        "title": "貪欲な選択",
+        "acquired": true
+      }
+    ],
+    "history": [
+      {
+        "id": "cmwboee0t003gjkqzh5oy7wb8",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwby0iqz005d77x7jcmczepu",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwby8uoi006j77x70tg6ypxr",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcuetcf000qldmftq09c0ng",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcupzd3001wldmfwkofwa7l",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcuq8ht002mldmf0vbhdlvz",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcvf7yf000u7q9e5zx5149j",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcvs4pj003qldmfa996cnxr",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcwotj5008kldmfy8uirk5t",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcyn2np000u1400obbitlv8",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwcyvj6m000uh9yysl0z33nq",
+        "status": "FAILED",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      },
+      {
+        "id": "cmwd0sf5k000v2j9s6udlaxol",
+        "status": "GENERATING",
+        "observation": {
+          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
+          "judgement": "PENDING",
+          "presented": false,
+          "candidates": [],
+          "ruleVersion": "first-selection-v1",
+          "viewportObserved": false
+        },
+        "interactions": [],
+        "recommendations": []
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": 4,
+      "label": "単元のフェーズを復習する",
+      "purpose": "理解が不確かな点の補強",
+      "condition": "完了済みフェーズが閲覧可能",
+      "targetIds": [
+        "bubble-sort-check",
+        "bubble-sort-motivation",
+        "bubble-sort-execution"
+      ]
+    },
+    {
+      "id": 23,
+      "label": "次のフェーズへ進む",
+      "purpose": "学習の継続",
+      "condition": "現在のフェーズの次のフェーズがある",
+      "targetIds": [
+        "bubble-sort-code-mapping"
+      ]
+    }
+  ],
+  "bigGoal": {
+    "type": "UNIT_COMPLETION",
+    "status": "ACTIVE",
+    "progress": {
+      "detail": {
+        "phase7": {
+          "noHint": true,
+          "hintUsage": null,
+          "inputLevel": null
+        },
+        "unitStatus": "IN_PROGRESS",
+        "firstAttempt": {
+          "rate": 1,
+          "total": 2,
+          "correct": 2
+        },
+        "challengeChecks": {
+          "noHint": null,
+          "inputLevel": null,
+          "firstAttemptRate": null
+        },
+        "totalPhaseCount": 7,
+        "completedPhaseCount": 3
+      },
+      "outcome": "ONGOING",
+      "fraction": 0.4285714285714285
+    },
+    "condition": {
+      "courseId": "course-algorithm-bubble-sort-v2"
+    },
+    "confirmedAt": "2026-11-12T02:04:54.342Z",
+    "displayText": "バブルソートの単元を完了する",
+    "daysSinceConfirmed": 0
+  },
+  "targets": {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [
+      {
+        "id": "bubble-sort-check",
+        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-check"
+      },
+      {
+        "id": "bubble-sort-motivation",
+        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-motivation"
+      },
+      {
+        "id": "bubble-sort-execution",
+        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-execution"
+      }
+    ],
+    "5": [],
+    "6": [
+      {
+        "id": "create-quest-turn-order-v1",
+        "href": "/create/quests/create-quest-turn-order-v1/work"
+      },
+      {
+        "id": "create-quest-product-search-v1",
+        "href": "/create/quests/create-quest-product-search-v1/work"
+      },
+      {
+        "id": "create-quest-chat-keyword-v1",
+        "href": "/create/quests/create-quest-chat-keyword-v1/work"
+      },
+      {
+        "id": "create-quest-skill-tree-v1",
+        "href": "/create/quests/create-quest-skill-tree-v1/work"
+      },
+      {
+        "id": "create-quest-dungeon-route-v1",
+        "href": "/create/quests/create-quest-dungeon-route-v1/work"
+      }
+    ],
+    "7": [],
+    "8": [],
+    "9": [],
+    "10": [],
+    "11": [
+      {
+        "id": "collection",
+        "href": "/knowledge-cards"
+      }
+    ],
+    "12": [
+      {
+        "id": "history",
+        "href": "/history"
+      }
+    ],
+    "13": [
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-skill-tree-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-skill-tree-v1-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-clear",
+        "href": "/achievements?focus=ach-phase-wall-extension-implementation-clear"
+      },
+      {
+        "id": "ach-phase-wall-extension-check-perfect",
+        "href": "/achievements?focus=ach-phase-wall-extension-check-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-wall-extension-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-wall-extension-implementation-nohint"
+      },
+      {
+        "id": "ach-unit-bubble-sort-complete",
+        "href": "/achievements?focus=ach-unit-bubble-sort-complete"
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-clear",
+        "href": "/achievements?focus=ach-phase-bubble-sort-implementation-clear"
+      },
+      {
+        "id": "ach-phase-maze-digging-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-maze-digging-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-maze-digging-implementation-nohint"
+      },
+      {
+        "id": "ach-maze-digging-card-complete",
+        "href": "/achievements?focus=ach-maze-digging-card-complete"
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-clear",
+        "href": "/achievements?focus=ach-phase-binary-search-implementation-clear"
+      },
+      {
+        "id": "ach-phase-binary-search-check-perfect",
+        "href": "/achievements?focus=ach-phase-binary-search-check-perfect"
+      },
+      {
+        "id": "ach-phase-binary-search-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-binary-search-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-binary-search-implementation-nohint"
+      },
+      {
+        "id": "ach-binary-search-card-complete",
+        "href": "/achievements?focus=ach-binary-search-card-complete"
+      },
+      {
+        "id": "ach-unit-dfs-complete",
+        "href": "/achievements?focus=ach-unit-dfs-complete"
+      },
+      {
+        "id": "ach-phase-dfs-implementation-clear",
+        "href": "/achievements?focus=ach-phase-dfs-implementation-clear"
+      },
+      {
+        "id": "ach-phase-dfs-check-perfect",
+        "href": "/achievements?focus=ach-phase-dfs-check-perfect"
+      },
+      {
+        "id": "ach-phase-dfs-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-dfs-consolidation-perfect"
+      },
+      {
+        "id": "ach-unit-greedy-coins-complete",
+        "href": "/achievements?focus=ach-unit-greedy-coins-complete"
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-clear",
+        "href": "/achievements?focus=ach-phase-greedy-coins-implementation-clear"
+      },
+      {
+        "id": "ach-phase-greedy-coins-check-perfect",
+        "href": "/achievements?focus=ach-phase-greedy-coins-check-perfect"
+      },
+      {
+        "id": "ach-phase-greedy-coins-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-greedy-coins-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-greedy-coins-implementation-nohint"
+      },
+      {
+        "id": "ach-create-complete-lv1",
+        "href": "/achievements?focus=ach-create-complete-lv1"
+      },
+      {
+        "id": "ach-create-complete-lv2",
+        "href": "/achievements?focus=ach-create-complete-lv2"
+      },
+      {
+        "id": "ach-create-complete-lv3",
+        "href": "/achievements?focus=ach-create-complete-lv3"
+      },
+      {
+        "id": "ach-unit-count-lv2",
+        "href": "/achievements?focus=ach-unit-count-lv2"
+      },
+      {
+        "id": "ach-unit-count-lv3",
+        "href": "/achievements?focus=ach-unit-count-lv3"
+      },
+      {
+        "id": "ach-unit-bfs-complete",
+        "href": "/achievements?focus=ach-unit-bfs-complete"
+      },
+      {
+        "id": "ach-phase-bfs-implementation-clear",
+        "href": "/achievements?focus=ach-phase-bfs-implementation-clear"
+      },
+      {
+        "id": "ach-phase-bfs-check-perfect",
+        "href": "/achievements?focus=ach-phase-bfs-check-perfect"
+      },
+      {
+        "id": "ach-phase-bfs-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-bfs-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-bfs-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-bfs-implementation-nohint"
+      },
+      {
+        "id": "ach-bfs-card-complete",
+        "href": "/achievements?focus=ach-bfs-card-complete"
+      },
+      {
+        "id": "ach-unit-wall-extension-complete",
+        "href": "/achievements?focus=ach-unit-wall-extension-complete"
+      },
+      {
+        "id": "ach-wall-extension-card-complete",
+        "href": "/achievements?focus=ach-wall-extension-card-complete"
+      },
+      {
+        "id": "ach-create-optional-lv1",
+        "href": "/achievements?focus=ach-create-optional-lv1"
+      },
+      {
+        "id": "ach-create-optional-lv2",
+        "href": "/achievements?focus=ach-create-optional-lv2"
+      },
+      {
+        "id": "ach-create-optional-lv3",
+        "href": "/achievements?focus=ach-create-optional-lv3"
+      },
+      {
+        "id": "ach-create-perfect-lv1",
+        "href": "/achievements?focus=ach-create-perfect-lv1"
+      },
+      {
+        "id": "ach-create-perfect-lv2",
+        "href": "/achievements?focus=ach-create-perfect-lv2"
+      },
+      {
+        "id": "ach-create-perfect-lv3",
+        "href": "/achievements?focus=ach-create-perfect-lv3"
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-turn-order-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-turn-order-v1-perfect"
+      },
+      {
+        "id": "ach-unit-count-lv1",
+        "href": "/achievements?focus=ach-unit-count-lv1"
+      },
+      {
+        "id": "ach-phase-bubble-sort-check-perfect",
+        "href": "/achievements?focus=ach-phase-bubble-sort-check-perfect"
+      },
+      {
+        "id": "ach-phase-bubble-sort-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-bubble-sort-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-bubble-sort-implementation-nohint"
+      },
+      {
+        "id": "ach-bubble-sort-card-complete",
+        "href": "/achievements?focus=ach-bubble-sort-card-complete"
+      },
+      {
+        "id": "ach-unit-maze-digging-complete",
+        "href": "/achievements?focus=ach-unit-maze-digging-complete"
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-clear",
+        "href": "/achievements?focus=ach-phase-maze-digging-implementation-clear"
+      },
+      {
+        "id": "ach-phase-maze-digging-check-perfect",
+        "href": "/achievements?focus=ach-phase-maze-digging-check-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-dungeon-route-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-dungeon-route-v1-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-chat-keyword-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-chat-keyword-v1-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-product-search-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-product-search-v1-perfect"
+      },
+      {
+        "id": "ach-unit-binary-search-complete",
+        "href": "/achievements?focus=ach-unit-binary-search-complete"
+      },
+      {
+        "id": "ach-phase-dfs-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-dfs-implementation-nohint"
+      },
+      {
+        "id": "ach-dfs-card-complete",
+        "href": "/achievements?focus=ach-dfs-card-complete"
+      },
+      {
+        "id": "ach-greedy-coins-card-complete",
+        "href": "/achievements?focus=ach-greedy-coins-card-complete"
+      },
+      {
+        "id": "ach-knowledge-lv1",
+        "href": "/achievements?focus=ach-knowledge-lv1"
+      },
+      {
+        "id": "ach-knowledge-lv2",
+        "href": "/achievements?focus=ach-knowledge-lv2"
+      }
+    ],
+    "14": [
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-skill-tree-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-skill-tree-v1-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-clear",
+        "href": "/achievements?focus=ach-phase-wall-extension-implementation-clear"
+      },
+      {
+        "id": "ach-phase-wall-extension-check-perfect",
+        "href": "/achievements?focus=ach-phase-wall-extension-check-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-wall-extension-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-wall-extension-implementation-nohint"
+      },
+      {
+        "id": "ach-unit-bubble-sort-complete",
+        "href": "/achievements?focus=ach-unit-bubble-sort-complete"
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-clear",
+        "href": "/achievements?focus=ach-phase-bubble-sort-implementation-clear"
+      },
+      {
+        "id": "ach-phase-maze-digging-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-maze-digging-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-maze-digging-implementation-nohint"
+      },
+      {
+        "id": "ach-maze-digging-card-complete",
+        "href": "/achievements?focus=ach-maze-digging-card-complete"
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-clear",
+        "href": "/achievements?focus=ach-phase-binary-search-implementation-clear"
+      },
+      {
+        "id": "ach-phase-binary-search-check-perfect",
+        "href": "/achievements?focus=ach-phase-binary-search-check-perfect"
+      },
+      {
+        "id": "ach-phase-binary-search-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-binary-search-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-binary-search-implementation-nohint"
+      },
+      {
+        "id": "ach-binary-search-card-complete",
+        "href": "/achievements?focus=ach-binary-search-card-complete"
+      },
+      {
+        "id": "ach-unit-dfs-complete",
+        "href": "/achievements?focus=ach-unit-dfs-complete"
+      },
+      {
+        "id": "ach-phase-dfs-implementation-clear",
+        "href": "/achievements?focus=ach-phase-dfs-implementation-clear"
+      },
+      {
+        "id": "ach-phase-dfs-check-perfect",
+        "href": "/achievements?focus=ach-phase-dfs-check-perfect"
+      },
+      {
+        "id": "ach-phase-dfs-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-dfs-consolidation-perfect"
+      },
+      {
+        "id": "ach-unit-greedy-coins-complete",
+        "href": "/achievements?focus=ach-unit-greedy-coins-complete"
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-clear",
+        "href": "/achievements?focus=ach-phase-greedy-coins-implementation-clear"
+      },
+      {
+        "id": "ach-phase-greedy-coins-check-perfect",
+        "href": "/achievements?focus=ach-phase-greedy-coins-check-perfect"
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-greedy-coins-implementation-nohint"
+      },
+      {
+        "id": "ach-create-complete-lv1",
+        "href": "/achievements?focus=ach-create-complete-lv1"
+      },
+      {
+        "id": "ach-create-complete-lv2",
+        "href": "/achievements?focus=ach-create-complete-lv2"
+      },
+      {
+        "id": "ach-create-complete-lv3",
+        "href": "/achievements?focus=ach-create-complete-lv3"
+      },
+      {
+        "id": "ach-unit-count-lv2",
+        "href": "/achievements?focus=ach-unit-count-lv2"
+      },
+      {
+        "id": "ach-unit-count-lv3",
+        "href": "/achievements?focus=ach-unit-count-lv3"
+      },
+      {
+        "id": "ach-unit-bfs-complete",
+        "href": "/achievements?focus=ach-unit-bfs-complete"
+      },
+      {
+        "id": "ach-phase-bfs-implementation-clear",
+        "href": "/achievements?focus=ach-phase-bfs-implementation-clear"
+      },
+      {
+        "id": "ach-phase-bfs-check-perfect",
+        "href": "/achievements?focus=ach-phase-bfs-check-perfect"
+      },
+      {
+        "id": "ach-phase-bfs-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-bfs-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-bfs-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-bfs-implementation-nohint"
+      },
+      {
+        "id": "ach-bfs-card-complete",
+        "href": "/achievements?focus=ach-bfs-card-complete"
+      },
+      {
+        "id": "ach-unit-wall-extension-complete",
+        "href": "/achievements?focus=ach-unit-wall-extension-complete"
+      },
+      {
+        "id": "ach-wall-extension-card-complete",
+        "href": "/achievements?focus=ach-wall-extension-card-complete"
+      },
+      {
+        "id": "ach-create-optional-lv1",
+        "href": "/achievements?focus=ach-create-optional-lv1"
+      },
+      {
+        "id": "ach-create-optional-lv2",
+        "href": "/achievements?focus=ach-create-optional-lv2"
+      },
+      {
+        "id": "ach-create-optional-lv3",
+        "href": "/achievements?focus=ach-create-optional-lv3"
+      },
+      {
+        "id": "ach-create-perfect-lv1",
+        "href": "/achievements?focus=ach-create-perfect-lv1"
+      },
+      {
+        "id": "ach-create-perfect-lv2",
+        "href": "/achievements?focus=ach-create-perfect-lv2"
+      },
+      {
+        "id": "ach-create-perfect-lv3",
+        "href": "/achievements?focus=ach-create-perfect-lv3"
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-turn-order-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-turn-order-v1-perfect"
+      },
+      {
+        "id": "ach-unit-count-lv1",
+        "href": "/achievements?focus=ach-unit-count-lv1"
+      },
+      {
+        "id": "ach-phase-bubble-sort-check-perfect",
+        "href": "/achievements?focus=ach-phase-bubble-sort-check-perfect"
+      },
+      {
+        "id": "ach-phase-bubble-sort-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-bubble-sort-consolidation-perfect"
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-bubble-sort-implementation-nohint"
+      },
+      {
+        "id": "ach-bubble-sort-card-complete",
+        "href": "/achievements?focus=ach-bubble-sort-card-complete"
+      },
+      {
+        "id": "ach-unit-maze-digging-complete",
+        "href": "/achievements?focus=ach-unit-maze-digging-complete"
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-clear",
+        "href": "/achievements?focus=ach-phase-maze-digging-implementation-clear"
+      },
+      {
+        "id": "ach-phase-maze-digging-check-perfect",
+        "href": "/achievements?focus=ach-phase-maze-digging-check-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-dungeon-route-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-dungeon-route-v1-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-chat-keyword-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-chat-keyword-v1-perfect"
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-advanced",
+        "href": "/achievements?focus=ach-create-create-quest-product-search-v1-advanced"
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-perfect",
+        "href": "/achievements?focus=ach-create-create-quest-product-search-v1-perfect"
+      },
+      {
+        "id": "ach-unit-binary-search-complete",
+        "href": "/achievements?focus=ach-unit-binary-search-complete"
+      },
+      {
+        "id": "ach-phase-dfs-implementation-nohint",
+        "href": "/achievements?focus=ach-phase-dfs-implementation-nohint"
+      },
+      {
+        "id": "ach-dfs-card-complete",
+        "href": "/achievements?focus=ach-dfs-card-complete"
+      },
+      {
+        "id": "ach-greedy-coins-card-complete",
+        "href": "/achievements?focus=ach-greedy-coins-card-complete"
+      },
+      {
+        "id": "ach-knowledge-lv2",
+        "href": "/achievements?focus=ach-knowledge-lv2"
+      }
+    ],
+    "15": [
+      {
+        "id": "profile",
+        "href": "/profile"
+      }
+    ],
+    "16": [],
+    "17": [],
+    "18": [
+      {
+        "id": "QUESTION",
+        "href": "/quest-board/new?category=QUESTION"
+      }
+    ],
+    "19": [
+      {
+        "id": "ERROR_HELP",
+        "href": "/quest-board/new?category=ERROR_HELP"
+      }
+    ],
+    "20": [
+      {
+        "id": "MEMO",
+        "href": "/quest-board/new?category=MEMO"
+      }
+    ],
+    "21": [],
+    "22": [],
+    "23": [
+      {
+        "id": "bubble-sort-code-mapping",
+        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-code-mapping"
+      }
+    ]
+  },
+  "learning": {
+    "id": "phase-event:course-algorithm-bubble-sort-v2:bubble-sort-check",
+    "unit": {
+      "id": "course-algorithm-bubble-sort-v2",
+      "title": "バブルソート",
+      "status": "IN_PROGRESS"
+    },
+    "phases": [
+      {
+        "id": "bubble-sort-motivation",
+        "status": "COMPLETED",
+        "summary": null
+      },
+      {
+        "id": "bubble-sort-execution",
+        "status": "COMPLETED",
+        "summary": null
+      },
+      {
+        "id": "bubble-sort-check",
+        "status": "COMPLETED",
+        "summary": {
+          "totalQuestions": 2,
+          "assessmentEvidence": {
+            "records": [
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "next-pair"
+              },
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "larger-destination"
+              }
+            ],
+            "version": 1,
+            "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+            "startedAt": 1794459859948,
+            "assessmentId": "bubble-sort-check"
+          },
+          "firstAttemptCorrect": 2
+        }
+      }
+    ],
+    "sequence": [
+      {
+        "id": "bubble-sort-motivation",
+        "type": "phase",
+        "order": 1
+      },
+      {
+        "id": "bubble-sort-execution",
+        "type": "phase",
+        "order": 2
+      },
+      {
+        "id": "bubble-sort-check",
+        "type": "phase",
+        "order": 3
+      }
+    ],
+    "currentPhase": {
+      "id": "bubble-sort-check",
+      "summary": {
+        "totalQuestions": 2,
+        "assessmentEvidence": {
+          "records": [
+            {
+              "attempts": [
+                {
+                  "number": 1,
+                  "correct": true
+                }
+              ],
+              "questionId": "next-pair"
+            },
+            {
+              "attempts": [
+                {
+                  "number": 1,
+                  "correct": true
+                }
+              ],
+              "questionId": "larger-destination"
+            }
+          ],
+          "version": 1,
+          "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+          "startedAt": 1794459859948,
+          "assessmentId": "bubble-sort-check"
+        },
+        "firstAttemptCorrect": 2
+      },
+      "nextStage": "動きとコードの対応",
+      "stageGoal": "動きの確認問題",
+      "stageNumber": 3
+    },
+    "conceptSnapshot": {
+      "id": "cdb48f98-dac5-4b9a-a6de-f4409ff6e753",
+      "title": "バブルソート",
+      "version": 1,
+      "concepts": [
+        {
+          "kind": "assessment",
+          "label": "比較の順序",
+          "state": "confirmed",
+          "evidence": [
+            {
+              "tags": [
+                "compare-order"
+              ],
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
+                "confirmed": true,
+                "sessionId": "af7c7a00-bc66-4aa3-8236-741667b768f1",
+                "startedAt": 1794449119428,
+                "observedAt": 1794449130195,
+                "recordedAt": 1794449140541
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "confirmed": true,
+                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+                "startedAt": 1794459859948,
+                "observedAt": 1794459863933,
+                "recordedAt": 1794459866178
+              },
+              "retried": false,
+              "phaseKey": "bubble-sort-check",
+              "sessions": 5,
+              "questionId": "next-pair",
+              "stageLabel": "動きの確認問題",
+              "assessmentId": "bubble-sort-check",
+              "questionLabel": "次に比べるペアの左側のマスはどれか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "confirmed": true,
+                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+                "startedAt": 1794459859948,
+                "observedAt": 1794459863933,
+                "recordedAt": 1794459866178
+              }
+            }
+          ],
+          "conceptId": "bubble-sort:order",
+          "implementation": null,
+          "totalQuestions": 1,
+          "attemptedQuestions": 1
+        },
+        {
+          "kind": "assessment",
+          "label": "隣接要素の比較と交換",
+          "state": "confirmed",
+          "evidence": [
+            {
+              "tags": [
+                "swap-destination"
+              ],
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
+                "confirmed": true,
+                "sessionId": "af7c7a00-bc66-4aa3-8236-741667b768f1",
+                "startedAt": 1794449119428,
+                "observedAt": 1794449130195,
+                "recordedAt": 1794449140541
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "confirmed": true,
+                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+                "startedAt": 1794459859948,
+                "observedAt": 1794459864685,
+                "recordedAt": 1794459866178
+              },
+              "retried": false,
+              "phaseKey": "bubble-sort-check",
+              "sessions": 5,
+              "questionId": "larger-destination",
+              "stageLabel": "動きの確認問題",
+              "assessmentId": "bubble-sort-check",
+              "questionLabel": "比べた後、大きい方の 5 はどのマスへ行くか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "confirmed": true,
+                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
+                "startedAt": 1794459859948,
+                "observedAt": 1794459864685,
+                "recordedAt": 1794459866178
+              }
+            },
+            {
+              "tags": [
+                "right-neighbor"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-code-check",
+              "sessions": 0,
+              "questionId": "swap-condition",
+              "stageLabel": "コードの確認問題",
+              "assessmentId": "bubble-sort-code-check",
+              "questionLabel": "左の要素と比べる相手を決めるために、6行目の空欄に入る正しいコードを選んでください。",
+              "latestSessionFirst": null
+            },
+            {
+              "tags": [
+                "交換が起きるペアの追跡"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-consolidation",
+              "sessions": 0,
+              "questionId": "next-swap-pair",
+              "stageLabel": "応用問題",
+              "assessmentId": "bubble-sort-consolidation",
+              "questionLabel": "この後、入れ替えが起きるペアの左側はどれか",
+              "latestSessionFirst": null
+            }
+          ],
+          "conceptId": "bubble-sort:swap",
+          "implementation": null,
+          "totalQuestions": 3,
+          "attemptedQuestions": 1
+        },
+        {
+          "kind": "assessment",
+          "label": "確定範囲と比較範囲",
+          "state": "unobserved",
+          "evidence": [
+            {
+              "tags": [
+                "range-shrink"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-code-check",
+              "sessions": 0,
+              "questionId": "inner-loop-range",
+              "stageLabel": "コードの確認問題",
+              "assessmentId": "bubble-sort-code-check",
+              "questionLabel": "周が進むにつれて比べる範囲を狭めるために、5行目の空欄に入る正しいコードを選んでください。",
+              "latestSessionFirst": null
+            },
+            {
+              "tags": [
+                "右端が決まる理由"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-consolidation",
+              "sessions": 0,
+              "questionId": "why-right-end-fixed",
+              "stageLabel": "応用問題",
+              "assessmentId": "bubble-sort-consolidation",
+              "questionLabel": "並び替えで、右端から順に値が決まっていくのはなぜですか",
+              "latestSessionFirst": null
+            }
+          ],
+          "conceptId": "bubble-sort:range",
+          "implementation": null,
+          "totalQuestions": 2,
+          "attemptedQuestions": 0
+        },
+        {
+          "kind": "assessment",
+          "label": "整列済み配列の扱い",
+          "state": "unobserved",
+          "evidence": [
+            {
+              "tags": [
+                "並び済みの配列の扱い"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-consolidation",
+              "sessions": 0,
+              "questionId": "sorted-array-behavior",
+              "stageLabel": "応用問題",
+              "assessmentId": "bubble-sort-consolidation",
+              "questionLabel": "最初から並んでいる配列 [1, 2, 3, 4] では、どうなりますか",
+              "latestSessionFirst": null
+            }
+          ],
+          "conceptId": "bubble-sort:sorted",
+          "implementation": null,
+          "totalQuestions": 1,
+          "attemptedQuestions": 0
+        },
+        {
+          "kind": "assessment",
+          "label": "コード全体の流れ",
+          "state": "unobserved",
+          "evidence": [
+            {
+              "tags": [
+                "コード全体の流れ"
+              ],
+              "first": null,
+              "latest": null,
+              "retried": false,
+              "phaseKey": "bubble-sort-consolidation",
+              "sessions": 0,
+              "questionId": "whole-code-order",
+              "stageLabel": "応用問題",
+              "assessmentId": "bubble-sort-consolidation",
+              "questionLabel": "バブルソートのコードを、実行の流れに合う順序に並べてください。",
+              "latestSessionFirst": null
+            }
+          ],
+          "conceptId": "bubble-sort:flow",
+          "implementation": null,
+          "totalQuestions": 1,
+          "attemptedQuestions": 0
+        },
+        {
+          "kind": "implementation",
+          "label": "実装と動作確認",
+          "state": "unobserved",
+          "evidence": [],
+          "conceptId": "bubble-sort:implementation",
+          "implementation": {
+            "lastTest": null,
+            "testRuns": "unknown",
+            "completed": "unknown",
+            "hintUsage": "unknown",
+            "sourceIds": [],
+            "inputLevel": "unknown",
+            "testsPassed": "unknown",
+            "observedHints": []
+          },
+          "totalQuestions": 0,
+          "attemptedQuestions": 0
+        }
+      ],
+      "courseId": "course-algorithm-bubble-sort-v2",
+      "relation": "unit-components",
+      "missingCompletionEvidence": []
+    }
+  },
+  "stageGoals": {
+    "next": {
+      "goal": "動きとコードの対応",
+      "phaseKey": "bubble-sort-code-mapping"
+    },
+    "current": {
+      "goal": "動きの確認問題",
+      "phaseKey": "bubble-sort-check"
+    }
+  }
+}

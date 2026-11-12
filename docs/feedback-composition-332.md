@@ -36,7 +36,7 @@
 
 ## 変更していないもの
 
-- 生成の2段構成、モデル（gpt-6.1-terra）、reasoning effort（medium）、出力スキーマ、検証（`validateSelection`）。
+- 生成の2段構成、モデル（gpt-6-1-luna）、reasoning effort（medium）、出力スキーマ、検証（`validateSelection`）。
 - DB スキーマ、migration、seed（すべて不要）。
 - 過去に保存済みの生成結果はそのまま再表示される（reason は v1 の当初から保存されているため、旧結果でも表示できる）。
 

@@ -2,7 +2,9 @@
 
 - 目的・範囲: 7単元の回答証拠、概念マップ、二段階LLM分析、任意の1〜3学習候補を既存フィードバック専用画面へ統合する。
 - 状態: 実装・自動検証。dev実機検証 #408 は未実施・対象外。
-- 最終確認日: 2026-11-11。
+- 最終確認日: 2026-11-12。
+- 2026-11-12修正: 候補の `targetId` / `capabilityId` とHEXAD適応記録の `targetId` は、空文字だけを検証前に `null` へ正規化する。保存結果も正規化し、元のLLM出力ログは変更しない。非空の不正ID、許可されない行動・対象、HEXAD不一致は引き続き拒否する。
+- 2026-11-12生成スキーマ修正: APIへ渡す候補を移動あり／なしの入れ子のunionに分割する。移動ありは `capabilityId: null`、移動なしは `actionId/targetId: null` と許可された2種類のcapability IDを要求する。PERSONALIZEDの適応記録も候補種別ごとにIDの型を制約する。候補は従来どおり1〜3件。保存済み出力の互換性、空文字正規化、許可対象・HEXAD一致の後段検証は維持する。
 - 基準: 貪欲法統合済みdevelop `a7945f2`。ブランチ `feat/learning-feedback-402`。
 - 正本: [#402](https://github.com/BeppuKanato/engineer-quest/issues/402)、[#403](https://github.com/BeppuKanato/engineer-quest/issues/403)〜[#407](https://github.com/BeppuKanato/engineer-quest/issues/407)、今回のユーザー指示、`AGENTS.md`、`development-rules.md`、教材指針、現行コード。
 

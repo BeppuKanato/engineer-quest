@@ -83,10 +83,10 @@
 | [phase5-layout-completion-317.md](phase5-layout-completion-317.md) | 記録 | Issue #317/#315のフェーズ5レイアウト組み替え（コードのみスクロール・選択肢とボタンの下部固定）とフェーズ3・5完了ビューのバイパス（保存を待たず結果画面へ即時遷移） |
 | [unit-overview-card-badge-178.md](unit-overview-card-badge-178.md) | 記録 | Issue #178の単元画面ステージからの知識カード予告バッジ撤去 |
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
-| [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6.1-terra、料金試算と判断根拠） |
+| [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6-1-luna、料金試算と判断根拠） |
 | [feedback-composition-332.md](feedback-composition-332.md) | 記録 | Issue #332のフィードバック構成の見直し（Sadler／Hattie & Timperley に照らした表示文章の要件・合計200〜300字の目安・reason の表示、purpose は内部用） |
 | [big-goal-model-365.md](big-goal-model-365.md) | 記録 | Issue #365の大目標データモデルと達成判定基盤（Prismaモデルとmigration、到達型・実績型・応用型の条件評価、進捗の部分充足計算、学習保存時へのフック） |
-| [big-goal-proposal-366.md](big-goal-proposal-366.md) | 記録 | Issue #366の大目標の候補生成・適合度採点・提案API（タイミングA/Bのルール、gpt-6.1-terra固定の採点とコードブック、検証ログ、合意による確定と再検証） |
+| [big-goal-proposal-366.md](big-goal-proposal-366.md) | 記録 | Issue #366の大目標の候補生成・適合度採点・提案API（タイミングA/Bのルール、gpt-6-1-luna固定の採点とコードブック、検証ログ、合意による確定と再検証） |
 | [big-goal-ui-367.md](big-goal-ui-367.md) | 記録 | Issue #367の大目標の設定UIとホーム表示（単元開始時の目標設定ゲート、本命＋2件の候補表示と合意操作、ホームのバナーと履歴表示、進捗はAPIの計算結果をそのまま表示） |
 | [feedback-big-goal-input-368.md](feedback-big-goal-input-368.md) | 記録 | Issue #368のフィードバック生成入力への大目標統合（分析段へ表示文・達成条件・進捗の内訳を渡し、currentStateを大目標に対する位置として書かせる。PROMPT_VERSION更新とverify追随） |
 | [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け） |

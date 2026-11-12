@@ -1,11 +1,11 @@
 # フィードバック生成モデルの変更（Issue #280）
 
-目的: フィードバック v1 の生成モデル既定値を `gpt-5.4-mini` から `gpt-6.1-terra` へ移行する。
+目的: フィードバック v1 の生成モデル既定値を `gpt-5.4-mini` から `gpt-6-1-luna` へ移行する。
 最終確認日: 2026-11-07
 
 ## 変更内容
 
-- `back/src/service/feedbackV1.engine.ts` の `getFeedbackModel` の既定値を `gpt-6.1-terra` に変更した。環境変数 `OPENAI_MODEL` が設定されている場合は、従来どおりそちらが優先される。
+- `back/src/service/feedbackV1.engine.ts` の `getFeedbackModel` の既定値を `gpt-6-1-luna` に変更した。環境変数 `OPENAI_MODEL` が設定されている場合は、従来どおりそちらが優先される。
 - reasoning effort は `medium` のまま。プロンプト文面・スキーマ・検証（`validateSelection`）は変更していないため、PROMPT_VERSION は据え置いた。生成ログ（`FeedbackV1Call`）にはモデル名が記録されるため、いつの生成がどのモデルかは追跡できる。
 - `docs/feedback-v1-implementation.md`（2026-11-03 の実装報告）の「既定値 `gpt-5.4-mini`」の記述は実装時点の記録として残し、本書が現在の既定値を示す。
 

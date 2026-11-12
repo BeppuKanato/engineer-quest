@@ -1,0 +1,44 @@
+{"type":"json_schema","name":"selection","strict":true,"schema":{"type":"object","properties":{"nextGoal":{"type":"string","minLength":1},"candidates":{"type":"array","items":{"anyOf":[{"type":"object","properties":{"nextStep":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionLabel":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionId":{"type":"integer","minimum":1,"maximum":23},"targetId":{"$ref":"#/definitions/selection_properties_nextGoal"},"capabilityId":{"type":"null"},"purpose":{"$ref":"#/definitions/selection_properties_nextGoal"},"reason":{"$ref":"#/definitions/selection_properties_nextGoal"},"personalizationAdjustment":{"type":"null"}},"required":["nextStep","actionLabel","actionId","targetId","capabilityId","purpose","reason","personalizationAdjustment"],"additionalProperties":false},{"type":"object","properties":{"nextStep":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionLabel":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionId":{"type":"null"},"targetId":{"type":"null"},"capabilityId":{"type":"string","enum":["mental-rehearsal","explain-reasoning"]},"purpose":{"$ref":"#/definitions/selection_properties_nextGoal"},"reason":{"$ref":"#/definitions/selection_properties_nextGoal"},"personalizationAdjustment":{"type":"null"}},"required":["nextStep","actionLabel","actionId","targetId","capabilityId","purpose","reason","personalizationAdjustment"],"additionalProperties":false}]},"minItems":1,"maxItems":3}},"required":["nextGoal","candidates"],"additionalProperties":false,"definitions":{"selection_properties_nextGoal":{"type":"string","minLength":1},"selection":{"type":"object","properties":{"nextGoal":{"type":"string","minLength":1},"candidates":{"type":"array","items":{"anyOf":[{"type":"object","properties":{"nextStep":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionLabel":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionId":{"type":"integer","minimum":1,"maximum":23},"targetId":{"$ref":"#/definitions/selection_properties_nextGoal"},"capabilityId":{"type":"null"},"purpose":{"$ref":"#/definitions/selection_properties_nextGoal"},"reason":{"$ref":"#/definitions/selection_properties_nextGoal"},"personalizationAdjustment":{"type":"null"}},"required":["nextStep","actionLabel","actionId","targetId","capabilityId","purpose","reason","personalizationAdjustment"],"additionalProperties":false},{"type":"object","properties":{"nextStep":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionLabel":{"$ref":"#/definitions/selection_properties_nextGoal"},"actionId":{"type":"null"},"targetId":{"type":"null"},"capabilityId":{"type":"string","enum":["mental-rehearsal","explain-reasoning"]},"purpose":{"$ref":"#/definitions/selection_properties_nextGoal"},"reason":{"$ref":"#/definitions/selection_properties_nextGoal"},"personalizationAdjustment":{"type":"null"}},"required":["nextStep","actionLabel","actionId","targetId","capabilityId","purpose","reason","personalizationAdjustment"],"additionalProperties":false}]},"minItems":1,"maxItems":3}},"required":["nextGoal","candidates"],"additionalProperties":false}},"$schema":"http://json-schema.org/draft-07/schema#"}}
+{
+  "stage": "selection",
+  "durationMs": 5800,
+  "output": {
+    "nextGoal": "「動きとコードの対応」で、隣接する比較相手と比較範囲がコードでどう表されるか説明できるようにする。",
+    "candidates": [
+      {
+        "nextStep": "次のフェーズに進み、隣接する要素の比較相手と比較範囲を表すコードを、動きと照らして確認する。",
+        "actionLabel": "次のフェーズへ進む",
+        "actionId": 23,
+        "targetId": "bubble-sort-code-mapping",
+        "capabilityId": null,
+        "purpose": "動きとコードの対応を確認する",
+        "reason": "動きの確認問題は直近の2問とも初回正答で、次の段階に進めるため。",
+        "personalizationAdjustment": null
+      },
+      {
+        "nextStep": "動きの確認問題で選んだ次の比較ペアと、大きい方の移動先について、そう選んだ理由を自分の言葉で整理する。",
+        "actionLabel": "選んだ答えの理由を整理する",
+        "actionId": null,
+        "targetId": null,
+        "capabilityId": "explain-reasoning",
+        "purpose": "確認した動きの規則を整理する",
+        "reason": "既に選べた動きを言葉にしてからコードに対応づけられるため。",
+        "personalizationAdjustment": null
+      }
+    ]
+  },
+  "model": "gpt-6.1-terra",
+  "responseId": "resp_0dedea3dca5edb3c006af548098ce087d2b03356e56784705c",
+  "usage": {
+    "input_tokens": 2631,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 2628
+    },
+    "output_tokens": 296,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 2927
+  }
+}
