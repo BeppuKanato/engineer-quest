@@ -1,0 +1,317 @@
+"use client";
+
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import FlagIcon from "@mui/icons-material/Flag";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  LinearProgress,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode, type ComponentType } from "react";
+
+
+import { getHome, type HomeResponse } from "@/api/home.api";
+import { isMascotId, type MascotId } from "@/config/mascots";
+import { MascotFigure } from "@/components/ui/MascotFigure";
+import { useUserSession } from "@/lib/session/userSession";
+import { peekClientQueryData } from "@/lib/clientQueryCache";
+
+const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
+const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
+  const today = new Date(calendar.year, calendar.month, calendar.date);
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + index);
+    const isCurrentMonth = date.getFullYear() === calendar.year && date.getMonth() === calendar.month;
+    return {
+      label: weekDays[date.getDay()],
+      day: date.getDate(),
+      checked: isCurrentMonth && calendar.learnedDays.includes(date.getDate()),
+      isToday: date.toDateString() === today.toDateString(),
+    };
+  });
+};
+
+export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, FeedbackDestination }: { header: ReactNode; continueLearning: ReactNode; bigGoal: ReactNode; unitGrid: ReactNode; FeedbackDestination: ComponentType<{ ready: boolean; failed?: boolean }> }) {
+  const { status, token } = useUserSession();
+  const [cachedHome] = useState(() => peekClientQueryData<HomeResponse>("home"));
+  const [homeData, setHomeData] = useState<HomeResponse | null>(cachedHome ?? null);
+  const [mascotId, setMascotId] = useState<MascotId>(() =>
+    cachedHome && isMascotId(cachedHome.user.selectedMascotId) ? cachedHome.user.selectedMascotId : "red-panda",
+  );
+  const [isLoading, setIsLoading] = useState(!cachedHome);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const homeDataRef = useRef(homeData);
+  homeDataRef.current = homeData;
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated" || !token) {
+      setIsLoading(false);
+      if (!homeDataRef.current) setErrorMessage("ログインが必要です。");
+      return;
+    }
+
+    let isMounted = true;
+    void (async () => {
+      try {
+        setErrorMessage(null);
+        const data = await getHome(token);
+        if (!isMounted) return;
+        setHomeData(data);
+        setMascotId(isMascotId(data.user.selectedMascotId) ? data.user.selectedMascotId : "red-panda");
+      } catch (error) {
+        console.error(error);
+        if (!isMounted) return;
+        // 前回データがある場合は保持したまま警告だけ出す（再訪時に画面を空にしない）。
+        setErrorMessage("ホーム情報を取得できませんでした。");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [status, token]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
+        {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
+        <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+          {continueLearning}
+          <HomeSkeleton />
+        </Container>
+      </Box>
+    );
+  }
+
+  if (!homeData) {
+    return (
+      <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
+        {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
+        <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+          {continueLearning}
+          <Alert severity="error">{errorMessage ?? "ホーム情報がありません。"}</Alert>
+        </Container>
+      </Box>
+    );
+  }
+
+  const userData = homeData.user;
+  const weekEntries = buildCurrentWeek(homeData.calendar);
+  const levelProgress =
+    userData.requireNextLevelExp === 0
+      ? 0
+      : Math.min(100, (userData.exp / userData.requireNextLevelExp) * 100);
+  const displayName = userData.displayName?.trim() || "Engineer";
+
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
+      {header}<FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
+
+      <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
+        {continueLearning}
+        {bigGoal}
+        {errorMessage && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            {errorMessage}
+          </Alert>
+        )}
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr)" },
+            gap: 3,
+            alignItems: "start",
+          }}
+        >
+          <Stack spacing={3}>
+            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+              <CardContent sx={{ p: 3 }}>
+                <Stack spacing={2.5}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <MascotFigure mascotId={mascotId} state="normal" alt="ユーザーの相棒" size="L" grounding="disc" />
+                    <Box>
+                      <Chip label="エンジニア見習い" size="small" sx={{ mb: 1, fontWeight: 900, bgcolor: "#dbeafe", color: "#0b4ac8" }} />
+                      <Typography sx={{ fontSize: 28, fontWeight: 950, lineHeight: 1.1 }}>{displayName}</Typography>
+                      <Chip label={`Lv. ${userData.level}`} sx={{ mt: 1.5, bgcolor: "#0057e7", color: "#fff", fontWeight: 900 }} />
+                    </Box>
+                  </Stack>
+
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                      <Typography fontWeight={900}>EXP</Typography>
+                      <Typography color="text.secondary" fontWeight={800}>
+                        {userData.exp.toLocaleString()} / {userData.requireNextLevelExp.toLocaleString()}
+                      </Typography>
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={levelProgress}
+                      sx={{ height: 10, borderRadius: 999, bgcolor: "#e5e7eb", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#0057e7" } }}
+                    />
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+              <CardContent sx={{ p: 3 }}>
+                <Stack spacing={2.5}>
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <EmojiEventsIcon sx={{ color: "#b45309" }} />
+                    <Typography variant="h6" fontWeight={950}>ランク</Typography>
+                  </Stack>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 3,
+                        display: "grid",
+                        placeItems: "center",
+                        color: "#b45309",
+                        bgcolor: "#ffedd5",
+                      }}
+                    >
+                      <EmojiEventsIcon sx={{ fontSize: 42 }} />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontSize: 24, fontWeight: 950 }}>{userData.rank}</Typography>
+                      <Typography color="text.secondary">
+                        {homeData.nextRank
+                          ? `次のランクは「${homeData.nextRank.name}」`
+                          : "最高ランクに到達済み"}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+              <CardContent sx={{ p: 3 }}>
+                <Stack spacing={2.5}>
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <LocalFireDepartmentIcon sx={{ color: "#ea580c" }} />
+                    <Typography variant="h6" fontWeight={950}>学習ストリーク</Typography>
+                  </Stack>
+                  <Box>
+                    <Typography sx={{ fontSize: 34, fontWeight: 950 }}>
+                      {userData.continuationDays}
+                      <Box component="span" sx={{ fontSize: 16, ml: 0.75 }}>日連続中</Box>
+                    </Typography>
+                    <Stack direction="row" spacing={1.1} sx={{ mt: 2 }}>
+                      {weekEntries.map((entry) => {
+                        return (
+                          <Stack key={`${entry.label}-${entry.day}`} spacing={1} alignItems="center">
+                            <Typography variant="caption" color={entry.isToday ? "#0057e7" : "text.secondary"} fontWeight={900}>
+                              {entry.label}
+                            </Typography>
+                            <Box
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: "50%",
+                                display: "grid",
+                                placeItems: "center",
+                                bgcolor: entry.checked ? "#0057e7" : "#fff",
+                                border: "2px solid",
+                                borderColor: entry.checked ? "#0057e7" : entry.isToday ? "#0057e7" : "#f59e0b",
+                                color: entry.checked ? "#fff" : entry.isToday ? "#0057e7" : "#f59e0b",
+                              }}
+                            >
+                              {entry.checked ? <CheckCircleIcon sx={{ fontSize: 18 }} /> : entry.day}
+                            </Box>
+                          </Stack>
+                        );
+                      })}
+                    </Stack>
+                  </Box>
+                  <Box sx={{ p: 2, borderRadius: 3, bgcolor: "#eff6ff", display: "flex", gap: 1.5 }}>
+                    <MascotFigure mascotId={mascotId} alt="応援する相棒" size="S" presentation="circle" />
+                    <Box>
+                      <Typography fontWeight={900}>いいペースだよ！</Typography>
+                      <Typography variant="body2" color="text.secondary">この調子でスキルをレベルアップしよう。</Typography>
+                    </Box>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {homeData.targetAchievement && (
+              <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={2.5}>
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                      <FlagIcon sx={{ color: "#0057e7" }} />
+                      <Typography variant="h6" fontWeight={950}>目標の実績</Typography>
+                    </Stack>
+                    <Typography sx={{ fontSize: 18, fontWeight: 900 }}>{homeData.targetAchievement.title}</Typography>
+                    {homeData.targetAchievement.factor.map((factor) => (
+                      <Box key={factor.name}>
+                        <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Typography fontWeight={900}>{factor.name}</Typography>
+                          <Typography color="text.secondary" fontWeight={800}>
+                            {factor.progress} / {factor.goal}
+                          </Typography>
+                        </Stack>
+                        <LinearProgress
+                          variant="determinate"
+                          value={factor.goal === 0 ? 0 : Math.min(100, (factor.progress / factor.goal) * 100)}
+                          sx={{ height: 10, borderRadius: 999, bgcolor: "#e5e7eb", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#0057e7" } }}
+                        />
+                      </Box>
+                    ))}
+                    {homeData.targetAchievement.href && homeData.targetAchievement.actionLabel && (
+                      <Button component={Link} href={homeData.targetAchievement.href} variant="outlined" sx={{ fontWeight: 900, alignSelf: "flex-start" }}>
+                        {homeData.targetAchievement.actionLabel}
+                      </Button>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
+          </Stack>
+
+          {unitGrid}
+        </Box>
+      </Container>
+    </Box>
+  );
+}
+
+const HomeSkeleton = () => (
+  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr)" }, gap: 3 }}>
+    <Stack spacing={3}>
+      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
+      <Skeleton variant="rounded" height={190} sx={{ borderRadius: 3 }} />
+      <Skeleton variant="rounded" height={280} sx={{ borderRadius: 3 }} />
+    </Stack>
+    <Box>
+      <Skeleton variant="text" width={120} height={36} sx={{ mb: 2 }} />
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 2.5 }}>
+        {[0, 1, 2, 3].map((index) => (
+          <Skeleton key={index} variant="rounded" height={320} sx={{ borderRadius: 2 }} />
+        ))}
+      </Box>
+    </Box>
+  </Box>
+);

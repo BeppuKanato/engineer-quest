@@ -30,7 +30,7 @@ import {
 import { ActionButton } from "@/components/ui/ActionButton";
 import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
-import { AppSnackbar } from "@/app/component/appSnackbar";
+import { AppSnackbar } from "@/components/ui/AppSnackbar";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import type { Course } from "@/types/course";

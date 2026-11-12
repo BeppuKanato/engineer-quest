@@ -5,8 +5,9 @@ import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import { Box, CircularProgress, Paper, Typography, keyframes } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { useUserMascot, type MascotState } from "./mascot";
-import { MascotFigure } from "./mascotFigure";
+import { useUserMascot } from "@/hooks/useUserMascot";
+import { type MascotState } from "@/config/mascots";
+import { MascotFigure } from "@/components/ui/MascotFigure";
 
 type BlockingProcessOverlayProps = {
   open: boolean;

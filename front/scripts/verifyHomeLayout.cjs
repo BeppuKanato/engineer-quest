@@ -41,9 +41,10 @@ assert(homeGrid.includes('STATUS_ORDER'), 'home unit grid must order by learning
 assert(homeGrid.includes('CourseCard'), 'home unit grid must reuse CourseCard');
 
 // 4. Home page: the link-only "find other units" card is gone; the grid takes its place.
-const homePage = read('app/home/page.tsx');
+const homePage = read('features/home/HomeScreen.tsx');
 assert(!homePage.includes('ほかの単元を探す'), 'home page must not keep the duplicated find-units card');
-assert(homePage.includes('<HomeUnitGrid'), 'home page must render the unit grid');
+assert(homePage.includes('{unitGrid}'), 'home screen retains the unit-grid slot');
+assert(read('app/home/page.tsx').includes('unitGrid={<HomeUnitGrid />}'), 'app composes the learning unit grid');
 // 目標に設定した実績の進捗をホームにも出す（#183）。API は既に targetAchievement を返している。
 assert(homePage.includes('homeData.targetAchievement'), 'home must render the pinned target achievement when present');
 assert(homePage.includes('目標の実績'), 'home must label the target achievement card');

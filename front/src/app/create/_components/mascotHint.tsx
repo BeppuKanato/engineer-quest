@@ -2,8 +2,8 @@
 
 import { Paper, Stack, Typography } from "@mui/material";
 
-import { useUserMascot } from "@/app/component/mascot";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { useUserMascot } from "@/hooks/useUserMascot";
+import { MascotFigure } from "@/components/ui/MascotFigure";
 
 export const MascotHint = ({ text }: { text: string }) => {
   const mascotId = useUserMascot();

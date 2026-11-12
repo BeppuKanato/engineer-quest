@@ -6,7 +6,7 @@ const srcRoot = path.resolve(__dirname, '../src');
 const read = (relative) => fs.readFileSync(path.join(srcRoot, relative), 'utf8');
 
 // 1. The shared figure component carries the guideline's size tiers and grounding variants.
-const figure = read('app/component/mascotFigure.tsx');
+const figure = read('components/ui/MascotFigure.tsx');
 for (const tier of ['S', 'M', 'L', 'XL']) {
   assert(figure.includes(`${tier}: { width:`), `size tier ${tier} must be defined`);
 }
@@ -26,7 +26,7 @@ const sites = [
   'app/component/blockingProcessOverlay.tsx',
   'app/component/pageTransitionOverlay.tsx',
   'app/create/_components/mascotHint.tsx',
-  'app/home/page.tsx',
+  'features/home/HomeScreen.tsx',
   'app/page.tsx',
   'app/profile/page.tsx',
 ];

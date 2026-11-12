@@ -1,4 +1,4 @@
-import type { Mission, Status, TargetAchievement } from "@/app/home/type";
+import type { Mission, Status, TargetAchievement } from "@/api/types/home";
 import { fetcher } from "@/lib/fetcher";
 import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 

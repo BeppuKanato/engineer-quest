@@ -41,10 +41,10 @@ import {
 } from "@/api/profile.api";
 import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { ActionButton } from "@/components/ui/ActionButton";
-import { AppSnackbar } from "@/app/component/appSnackbar";
+import { AppSnackbar } from "@/components/ui/AppSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
-import { isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { isMascotId, mascotOptions, type MascotId } from "@/config/mascots";
+import { MascotFigure } from "@/components/ui/MascotFigure";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import {
   useAchievementNotificationMode,

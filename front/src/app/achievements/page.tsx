@@ -38,7 +38,7 @@ import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData
 import { useUserSession } from "@/lib/session/userSession";
 import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
-import { AppSnackbar } from "@/app/component/appSnackbar";
+import { AppSnackbar } from "@/components/ui/AppSnackbar";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { auth } from "@/lib/firebase";
 

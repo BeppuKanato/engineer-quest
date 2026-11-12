@@ -16,7 +16,7 @@ assert(!header.includes('PageTransitionOverlay'), 'appHeader must not render Pag
 assert(!header.includes('isNavigating'), 'appHeader must not track a blocking navigation state');
 
 // 2. Home / courses keep previous data and use the shared session token (#138 N1, N2).
-for (const page of ['app/home/page.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'app/collection/page.tsx', 'app/history/page.tsx', 'app/knowledge-cards/page.tsx', 'app/achievements/page.tsx', 'app/profile/page.tsx', 'app/quest-board/page.tsx', 'app/quest-board/new/page.tsx', 'app/quest-board/[postId]/page.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
+for (const page of ['features/home/HomeScreen.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'app/collection/page.tsx', 'app/history/page.tsx', 'app/knowledge-cards/page.tsx', 'app/achievements/page.tsx', 'app/profile/page.tsx', 'app/quest-board/page.tsx', 'app/quest-board/new/page.tsx', 'app/quest-board/[postId]/page.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
   const source = read(page);
   assert(source.includes('useUserSession'), `${page} must use the session token`);
   assert(!source.includes('onAuthStateChanged'), `${page} must not subscribe to auth state itself`);

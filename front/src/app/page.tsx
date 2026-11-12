@@ -26,7 +26,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { MascotFigure } from "@/components/ui/MascotFigure";
 import { auth } from "@/lib/firebase";
 
 const brandGradient = "linear-gradient(90deg, #0047c7 0%, #0053df 48%, #0041b8 100%)";

@@ -3,8 +3,8 @@
 import { Skeleton } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { AppHeaderView } from "@/components/layouts/AppHeaderView";
-import { useUserMascotState } from "./mascot";
-import { MascotFigure } from "./mascotFigure";
+import { useUserMascotState } from "@/hooks/useUserMascot";
+import { MascotFigure } from "@/components/ui/MascotFigure";
 
 /** アプリの利用者状態を表示専用ヘッダーへ接続する。 */
 export function AppHeader() {

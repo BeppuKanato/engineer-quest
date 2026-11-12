@@ -2,7 +2,7 @@
 
 import { Avatar, Box, keyframes, type SxProps, type Theme } from "@mui/material";
 
-import { getMascotImagePath, type MascotId, type MascotState } from "./mascot";
+import { getMascotImagePath, type MascotId, type MascotState } from "@/config/mascots";
 
 export type MascotFigureSize = "S" | "M" | "L" | "XL";
 export type MascotGrounding = "disc" | "shadow" | "frame";
