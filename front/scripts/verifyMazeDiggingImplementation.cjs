@@ -299,7 +299,7 @@ assert(!runtimeFreeHtml.includes(editorText.syntaxNote), "the nothing-runs note 
 const lineSummaryHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [{ id: "D1", passed: false, error: "runtime", errorLine: 7 }] }));
 assert(lineSummaryHtml.includes(content.display.messages.runtime + "（7行目付近）"), "test summary names the learner line");
 assert(lineSummaryHtml.includes('data-error-line="7"'), "test summary exposes the error line");
-const errorLinePreviewSource = fs.readFileSync(`${root}/maze-digging/implementation/MazeDiggingImplementationPreview.tsx`, "utf8");
+const errorLinePreviewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
 assert.match(errorLinePreviewSource, /useErrorLineDecoration/, "preview highlights the error line in the editor (#325)");
 assert.match(errorLinePreviewSource, /setErrorLine\(undefined\)/, "changing code or rerunning clears the error line");
 assert(fs.readFileSync(path.resolve(root, "../../app/globals.css"), "utf8").includes(".eq-error-line-highlight"), "the error line highlight has a global style");
@@ -416,7 +416,9 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
   const impl = (file) => fs.readFileSync(`${root}/maze-digging/implementation/${file}`, "utf8");
-  const previewSource = impl("MazeDiggingImplementationPreview.tsx");
+  const adapterSource = impl("MazeDiggingImplementationPreview.tsx");
+  assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
+  const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
   assert.match(previewSource, /theme={LEARNING_EDITOR_THEME}/, "editor uses the shared learning theme");
   assert.match(previewSource, /beforeMount={setupLearningEditor}/, "editor setup is shared");
   assert.match(previewSource, /learningEditorTextCursor/, "editor text cursor is the shared dark I-beam");
@@ -443,8 +445,8 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /DrawnCheck size=\{44\}/, "the completion banner leads with a drawn check");
   assert.match(previewSource, /onShowFinalResult/, "the final result is reached by the learner's button, not automatically (#305)");
   assert.match(previewSource, /answerCorrect/, "each newly passed test plays the small check sound (#305)");
-  assert.match(previewSource, /MazeDiggingTraceDialog/, "visual debugging is wired by issue #264");
-  assert.match(previewSource, /traceMazeDiggingCode/, "visual debugging is wired by issue #264");
+  assert.match(adapterSource, /MazeDiggingTraceDialog/, "visual debugging is wired by issue #264");
+  assert.match(adapterSource, /traceMazeDiggingCode/, "visual debugging is wired by issue #264");
   assert.match(previewSource, /useImplementationInputLevel/, "phase 7 manages code per input level (#328)");
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
