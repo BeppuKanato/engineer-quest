@@ -153,6 +153,18 @@ npm run verify:static
 
 既知の例外: `verify:selection-course` は DB 不要だが、現行 develop の教材トレース（1つの Activity 内で複数例を切り替える `selection-boundary-return`）に対して検証前提が合わず失敗するため、`verify:static` には含めていない。検証スクリプト側の前提と教材側の表現のどちらを直すかは、教材修正として別途判断する。
 
+### ローカルでの独立プレビュー
+
+普段の開発サーバーとbuildを同時に動かすと`.next`が競合する。移行の画面検証では、別ポートに加えて生成先も分ける。
+
+```powershell
+cd front
+$env:ENGINEER_QUEST_NEXT_DIST_DIR = ".next-migration"
+npx next dev -p 3100
+```
+
+この環境変数を指定しない通常の開発・buildは従来の`.next`を使う。検証後はサーバーを終了し、同じシェルでbuildする場合は環境変数を解除する。Nextが`next-env.d.ts`の生成先参照を変更することがあるため、その自動変更はコミットに含めない。
+
 ### 6.2 DB や外部環境が必要な検証
 
 次は CI の基本検証とは分ける。対象 DB と環境を明示し、結果を PR に記録する。
