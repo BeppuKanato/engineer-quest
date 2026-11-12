@@ -54,6 +54,7 @@ const cases = [
   ["bubble-sort", "BubbleSort", "bubbleSort"],
   ["binary-search", "BinarySearch", "binarySearch"],
   ["greedy-coins", "GreedyCoins", "greedyCoins"],
+  ["wall-extension", "WallExtension", "wallExtension"],
 ];
 let tree;
 function draw(entry) {
