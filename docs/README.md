@@ -14,6 +14,9 @@
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
 | [development-rules.md](development-rules.md) | 正本 | フロント、バック、API、Prisma、seed、検証の実装ルール |
+| [frontend-architecture.md](frontend-architecture.md) | 正本（採用方針） | Bulletproof Reactを基準にしたフロントの責務・依存方向・状態管理・共通化・既存例外と移行方針。コード移行は未実施 |
+| [frontend-migration-plan.md](frontend-migration-plan.md) | 計画（未着手） | 共通化・移行の10作業。対象ファイル、依存順、PR分割、完了条件、既存verifyと実画面の確認、切り戻し方針 |
+| [references/bulletproof-react/README.md](references/bulletproof-react/README.md) | 外部参考（固定版） | 公式GitHubの原文12文書・README・LICENSE・画像。取得コミットとハッシュを記録。プロジェクト方針は上記採用方針を優先 |
 | [development-cloud-run.md](development-cloud-run.md) | 現行 | develop 用 Cloud Run の構成、デプロイ、確認手順 |
 
 ## 学習設計
