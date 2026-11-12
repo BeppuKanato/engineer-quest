@@ -2,7 +2,7 @@
 
 - 目的: 機能の責務・依存方向・共通化の判断を揃え、単元や画面を追加しても表示と動作の一貫性を保つ。
 - 適用範囲: `front/` の新規実装と、明示的に計画した既存コードの移行。バックエンドの構成は対象外。
-- 状態: 採用方針。2026-11-12時点では文書の追加のみ。コード・依存関係・ESLint設定の移行は未実施。
+- 状態: 採用方針に沿って段階移行中。完了範囲・未実施事項は[作業記録](frontend-migration-progress.md)を参照。
 - 最終確認日: 2026-11-12。
 - 正本: 本書、[開発ガイド](../AGENTS.md)、[実装ルール](development-rules.md)。教材内容・UIの規則は[教材指針](concept/learning-materials-guideline.md)、[プレイヤーUI定義](concept/learning-player-ui.md)、[アプリUI/UX方針](concept/app-ui-ux-guideline.md)に従う。
 - 外部の基準: [Bulletproof React公式文書の固定版](references/bulletproof-react/README.md)。参照コミットは `9506629ed003a561c6627735480cce4994244bb4`。

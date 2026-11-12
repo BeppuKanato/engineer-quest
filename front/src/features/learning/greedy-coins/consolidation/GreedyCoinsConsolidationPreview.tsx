@@ -86,10 +86,10 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
     if (!diagnosis) completedRef.current = false;
   }, [diagnosis, onComplete, session]);
 
-  return <LearningContentLayout embedded={embedded} label={complete ? "応用問題の結果" : "貪欲法の応用問題"}
+  return <LearningContentLayout embedded={embedded} presentation={question && isParsons(question) ? "code-order" : "visual"} label={complete ? "応用問題の結果" : "貪欲法の応用問題"}
     overlay={review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={greedyCoinsCodeMappingContent} stepIds={review.reviewStepIds}
       renderCanvas={canvas => <GreedyCoinsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}>
-    <AssessmentLayout bodySx={question && isParsons(question) ? parsonsQuestionBodySx : undefined}
+    <AssessmentLayout bodySx={question && isParsons(question) ? { ...parsonsQuestionBodySx, overflowY: "hidden", "@media (max-height: 640px), (max-width: 799.95px)": { overflowY: "auto" } } : undefined}
       footer={<>
       {question && !isParsons(question) && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
         {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
@@ -126,7 +126,7 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
                 color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
                 "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
           </Box>}
-          {isParsons(question) && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable disabled={attempt?.correct === true}
+          {isParsons(question) && <ParsonsBoard key={question.id} question={question} code={content.code} onAnswer={submit} scrollable fillAvailableSpace disabled={attempt?.correct === true}
             instruction={question.instruction} attemptActions={attempt && {
               correct: attempt.correct, message: attempt.correct ? question.correctFeedback : question.incorrectFeedback,
               advanceLabel: session.position === content.questions.length - 1 ? "結果を見る" : "次の問題へ",

@@ -8,6 +8,7 @@
     "start": "next start -p ${PORT:-8080}",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "verify:learning-layout:browser": "node scripts/verifyLearningLayout.browser.cjs",
     "verify:learning-player": "node scripts/verifyLearningPlayer.cjs",
     "verify:bfs-motivation": "node scripts/verifyBfsMotivation.cjs",
     "verify:dfs-motivation": "node scripts/verifyDfsMotivation.cjs",

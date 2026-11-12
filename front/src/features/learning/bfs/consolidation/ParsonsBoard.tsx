@@ -116,6 +116,7 @@ type ParsonsAttemptActions = {
  * 下書きの並びだけを保持する。提出後の判定・試行記録は共通assessmentへ渡す。
  * scrollable のときは表示窓を固定高368px（下限276px）とし、ボタン行は盤面の下に置く。
  * 画面高640px以下または幅800px未満では窓の高さ制限を外し、盤面を設問と同じ中央領域に流す（Issue #352）。
+ * fillAvailableSpace は親の残り高を盤面に使う。既存の固定窓は未指定時に維持する。
  * 行ピッチは 46px（行44px＋間隔2px）。行44pxは↑↓ボタンのタッチ標的44pxが下限であり、これ以上は詰められない。
  *
  * フェード型（2026-11-09 決定）: question.fixedLineIds の行は正解位置に固定表示し、
@@ -123,8 +124,9 @@ type ParsonsAttemptActions = {
  * （セグメント）の中だけで並び替えでき、固定行を越えた移動は受け付けない。
  * fixedLineIds 未指定なら全行が1つのセグメントになり、従来の全行並び替えと同じになる。
  */
-export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, orderFeedback, instruction, attemptActions }: {
+export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrollable = false, fillAvailableSpace = false, orderFeedback, instruction, attemptActions }: {
   question: ParsonsQuestion; code: ParsonsCode; onAnswer?: (answer: OrderAnswer) => void; disabled?: boolean;
+  fillAvailableSpace?: boolean;
   scrollable?: boolean; orderFeedback?: ParsonsOrderFeedback; instruction?: string; attemptActions?: ParsonsAttemptActions;
 }) {
   const solutionLineIds = question.correctAnswer.lineIds;
@@ -189,7 +191,7 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
       else if (!inSegment) { renderRows.push({ type: "segment", index: segmentIndex++ }); inSegment = true; }
     }
   }
-  return <Box sx={{ minWidth: 0, ...(scrollable ? { minHeight: 0, display: "flex", flexDirection: "column", [compactViewport]: { flexShrink: 0 } } : {}) }}>
+  return <Box sx={{ minWidth: 0, ...(fillAvailableSpace ? { flex: 1 } : {}), ...(scrollable ? { minHeight: 0, display: "flex", flexDirection: "column", [compactViewport]: { flexShrink: 0 } } : {}) }}>
     {(instruction || showOrderFeedback || attemptActions) && <Box sx={{ minHeight: 40, mb: 1, px: 0.5, flexShrink: 0,
       display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", columnGap: 1 }}>
       <Box role="status" sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 1 }}>
@@ -206,13 +208,15 @@ export function ParsonsBoard({ question, code, onAnswer, disabled = false, scrol
     <Box component={motion.div} layoutScroll sx={{ overflowX: "auto", fontFamily: "monospace", fontSize: "clamp(16px, 1vw, 18px)", lineHeight: 1.5,
       display: "flex", flexDirection: "column", gap: 2,
       ...(scrollable ? { height: 368, minHeight: 276, flexShrink: 0, overflowY: "auto", overscrollBehaviorY: "contain",
-        [compactViewport]: { height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" } } : {}) }}>
+        [compactViewport]: { height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" } } : {}),
+      ...(scrollable && fillAvailableSpace ? { flex: "0 1 auto", height: "auto", minHeight: 0, flexShrink: 1,
+        [compactViewport]: { flex: "0 0 auto", height: "auto", minHeight: "max-content", overflowY: "visible" } } : {}) }}>
       {renderRows.map(row => row.type === "fixed"
         ? <FixedLine key={row.id} id={row.id} text={text(row.id)} marksColumn={orderFeedback !== undefined} />
         : <Reorder.Group key={`segment-${row.index}`} as="div" role="group" aria-label="コード行の並び替え" axis="y"
             values={movable.slice(segmentOffsets[row.index], segmentOffsets[row.index] + segments[row.index].length)}
             onReorder={disabled ? () => {} : reorderSegment(row.index)}
-            style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            style={{ display: "flex", flexDirection: "column", gap: 2, ...(fillAvailableSpace ? { flexShrink: 0 } : {}) }}>
             {movable.slice(segmentOffsets[row.index], segmentOffsets[row.index] + segments[row.index].length).map((id, index, segmentValues) => <SortableLine key={id} id={id} text={text(id)} index={index} count={segmentValues.length} duration={duration} disabled={disabled}
               keep={orderFeedback ? keepIds?.has(id) ?? false : undefined}
               onMove={offset => move(id, offset)} />)}
