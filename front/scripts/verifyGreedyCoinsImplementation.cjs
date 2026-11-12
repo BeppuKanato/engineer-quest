@@ -320,13 +320,15 @@ assert(resultsHtml.includes('data-error-kind="mismatch"'), "Diagnostics classify
 
 // ---- 画面契約: ライトテーマ、トレース接続（#388） ----
 const impl = name => fs.readFileSync(file(`greedy-coins/implementation/${name}`), "utf8");
-const previewSource = impl("GreedyCoinsImplementationPreview.tsx");
+const adapterSource = impl("GreedyCoinsImplementationPreview.tsx");
+  assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
+  const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
 assert.match(previewSource, /theme=\{LEARNING_EDITOR_THEME\}/, "editor uses the shared learning theme");
 assert.match(previewSource, /beforeMount=\{setupLearningEditor\}/, "editor setup is shared");
 assert(!previewSource.includes("vs-dark"), "editor is light themed");
-assert(previewSource.includes("GreedyCoinsTraceDialog"), "Visual debugging is connected to the trace dialog (#388)");
-assert(previewSource.includes("traceGreedyCoinsCode"), "Visual debugging acquires the trace (#388)");
-assert(previewSource.includes("硬貨が選ばれる様子を見る") && previewSource.includes("#388"), "The trace button label and its owning issue are recorded");
+assert(adapterSource.includes("GreedyCoinsTraceDialog"), "Visual debugging is connected to the trace dialog (#388)");
+assert(adapterSource.includes("traceGreedyCoinsCode"), "Visual debugging acquires the trace (#388)");
+assert(load(file("greedy-coins/trace/trace.content.ts")).greedyCoinsTraceText.button === "硬貨が選ばれる様子を見る" && adapterSource.includes("traceText: greedyCoinsTraceText"), "The unit trace button label is injected (#388)");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "greedy-coins-implementation"'), "Standalone preview is registered");
 console.log("Greedy-coins implementation verified: five cases (D1 display, J1-J4 judgement including the counterexample J4 that an optimal solver fails), byte-exact baseline skeleton/fill-in templates with 0/3/2 placeholders and untouched-template failures, canonical Parsons reuse as an unfaded hint-4 board, hint gating, coin-tray output, free-execution and hidden-case redaction.");
