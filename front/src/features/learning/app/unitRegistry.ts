@@ -3,7 +3,7 @@ import type { UnitPhase, UnitPhaseSummary } from "../types/unit.types";
 import { wallExtensionUnitIntro, wallExtensionUnitPhases, wallExtensionUnitTitle } from "../wall-extension/unit/unit.content";
 import { bubbleSortUnitIntro, bubbleSortUnitPhases, bubbleSortUnitTitle } from "../units/bubble-sort/unit/unit.content";
 import { mazeDiggingUnitIntro, mazeDiggingUnitPhases, mazeDiggingUnitTitle } from "../maze-digging/unit/unit.content";
-import { binarySearchUnitIntro, binarySearchUnitPhases, binarySearchUnitTitle } from "../binary-search/unit/unit.content";
+import { binarySearchUnitIntro, binarySearchUnitPhases, binarySearchUnitTitle } from "../units/binary-search/unit/unit.content";
 import { greedyCoinsUnitIntro, greedyCoinsUnitPhases, greedyCoinsUnitTitle } from "../greedy-coins/unit/unit.content";
 import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../units/dfs/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";

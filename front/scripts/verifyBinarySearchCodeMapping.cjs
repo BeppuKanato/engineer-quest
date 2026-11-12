@@ -20,14 +20,14 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "binary-search/code-mapping";
+const feature = "units/binary-search/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { binarySearchCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { binarySearchCode, binarySearchCodeSource, binarySearchCodeLineNumber } = load(file(`${feature}/binarySearchCode.ts`));
 const { validateBinarySearchCodeMappingCanvas: validate, defineBinarySearchCodeMappingContent, checkpointStepIds } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { binarySearchExecutionContent: execution } = load(file("binary-search/execution/execution.content.ts"));
-const search = load(file("binary-search/binarySearch.ts"));
+const { binarySearchExecutionContent: execution } = load(file("units/binary-search/execution/execution.content.ts"));
+const search = load(file("units/binary-search/binarySearch.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { BinarySearchCodeMappingCanvas } = load(file(`${feature}/BinarySearchCodeMappingCanvas.tsx`));
 const { BinarySearchCodeMappingPreview } = load(file(`${feature}/BinarySearchCodeMappingPreview.tsx`));

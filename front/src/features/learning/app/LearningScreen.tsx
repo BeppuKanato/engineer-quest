@@ -17,7 +17,7 @@ import type { UnitPhaseSummary } from "../types/unit.types";
 import { DfsUnitPreview } from "../units/dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
-import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";
+import { BinarySearchUnitPreview } from "../units/binary-search/unit/BinarySearchUnitPreview";
 import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";

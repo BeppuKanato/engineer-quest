@@ -18,11 +18,11 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/binary-search/execution`;
+const feature = `${root}/units/binary-search/execution`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { binarySearchExecutionContent: content } = load(`${feature}/execution.content.ts`);
 const { validateBinarySearchExecutionCanvas: validate } = load(`${feature}/execution.types.ts`);
-const searchModule = load(`${root}/binary-search/binarySearch.ts`);
+const searchModule = load(`${root}/units/binary-search/binarySearch.ts`);
 const { BinarySearchExecutionCanvas } = load(`${feature}/BinarySearchExecutionCanvas.tsx`);
 const { BinarySearchExecutionPreview } = load(`${feature}/BinarySearchExecutionPreview.tsx`);
 const { validateArrayBarsCanvas } = load(`${root}/player/arrayBars.types.ts`);

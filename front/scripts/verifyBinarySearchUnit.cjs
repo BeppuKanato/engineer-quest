@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { binarySearchUnitPhases, binarySearchUnitTitle, binarySearchUnitText, nextPhaseLabel } = load(`${root}/binary-search/unit/unit.content.ts`);
+const { binarySearchUnitPhases, binarySearchUnitTitle, binarySearchUnitText, nextPhaseLabel } = load(`${root}/units/binary-search/unit/unit.content.ts`);
 
 // 単元は二分探索で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(binarySearchUnitTitle, "二分探索");
@@ -88,7 +88,7 @@ assert.match(screenSource, /renderPhaseFeedback/, "phase feedback slot is shared
 assert.match(screenSource, /renderUnitFeedback/, "unit feedback slot is shared");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const adapter = read(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`);
+const adapter = read(`${root}/units/binary-search/unit/BinarySearchUnitPreview.tsx`);
 assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["BinarySearchMotivationPreview", "BinarySearchExecutionPreview", "BinarySearchCheckPreview", "BinarySearchCodeMappingPreview", "BinarySearchCodeCheckPreview", "BinarySearchConsolidationPreview", "BinarySearchImplementationPreview"]) {
@@ -107,19 +107,19 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/BinarySearchMotivationPreview", "execution/BinarySearchExecutionPreview", "check/BinarySearchCheckPreview", "code-mapping/BinarySearchCodeMappingPreview", "code-check/BinarySearchCodeCheckPreview", "consolidation/BinarySearchConsolidationPreview", "implementation/BinarySearchImplementationPreview"]) {
-  const adapter = read(`${root}/binary-search/${file}.tsx`);
+  const adapter = read(`${root}/units/binary-search/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/binary-search/consolidation/BinarySearchConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/binary-search/consolidation/BinarySearchConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 到達図は正本の実行記録から導出し、主教材 [3,7,12,19,25,31,42] で 25 がインデックス4に見つかった盤面と一致する。
-const { binarySearchMainValues, binarySearchMainTarget, binarySearchProbes, runBinarySearch } = load(`${root}/binary-search/binarySearch.ts`);
+const { binarySearchMainValues, binarySearchMainTarget, binarySearchProbes, runBinarySearch } = load(`${root}/units/binary-search/binarySearch.ts`);
 assert.equal(runBinarySearch(binarySearchMainValues, binarySearchMainTarget), 4, "Result figure target is found at index 4");
 assert.equal(binarySearchProbes(binarySearchMainValues, binarySearchMainTarget).length, 3, "Main example takes 3 probes");
-const figureSource = read(`${root}/binary-search/unit/BinarySearchResultFigure.tsx`);
+const figureSource = read(`${root}/units/binary-search/unit/BinarySearchResultFigure.tsx`);
 assert.match(figureSource, /binarySearchProbes/, "The figure derives the board from the canonical run record");
 assert.match(figureSource, /runBinarySearch/, "The figure derives the found index from the canonical contract");
 assert.match(figureSource, /validateBinarySearchExecutionCanvas/, "The figure validates with the unit-side board validator");
@@ -153,7 +153,7 @@ assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the sc
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（25 が見つかった盤面）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { BinarySearchResultFigure } = load(`${root}/binary-search/unit/BinarySearchResultFigure.tsx`);
+const { BinarySearchResultFigure } = load(`${root}/units/binary-search/unit/BinarySearchResultFigure.tsx`);
 for (const phase of binarySearchUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BinarySearchResultFigure), onNext: () => {} }));

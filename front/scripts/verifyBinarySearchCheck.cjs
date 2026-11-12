@@ -26,11 +26,11 @@ const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const cell = nodeId => ({ kind: "node", nodeId });
 const choice = choiceId => ({ kind: "choice", choiceId });
-const { binarySearchCheckContent: content, getBinarySearchCheckScene } = load(file("binary-search/check/check.content.ts"));
-const { binarySearchExecutionContent: execution } = load(file("binary-search/execution/execution.content.ts"));
-const search = load(file("binary-search/binarySearch.ts"));
+const { binarySearchCheckContent: content, getBinarySearchCheckScene } = load(file("units/binary-search/check/check.content.ts"));
+const { binarySearchExecutionContent: execution } = load(file("units/binary-search/execution/execution.content.ts"));
+const search = load(file("units/binary-search/binarySearch.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
-const { validateBinarySearchExecutionCanvas } = load(file("binary-search/execution/execution.types.ts"));
+const { validateBinarySearchExecutionCanvas } = load(file("units/binary-search/execution/execution.types.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
 const { newAnswerFeedback } = load(file("assessment/answerFeedbackState.ts"));
 const [q1, q2] = content.questions;
@@ -160,7 +160,7 @@ assert.throws(() => validateAssessment(invalidKind), "Choice questions are not a
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
 // 実描画: Q1 の場面では候補マスごとに回答ボタンが1つ、Q2 の場面と完了盤面ではボタンなし。
-const { BinarySearchCheckCanvas } = load(file("binary-search/check/BinarySearchCheckCanvas.tsx"));
+const { BinarySearchCheckCanvas } = load(file("units/binary-search/check/BinarySearchCheckCanvas.tsx"));
 {
   const saved = JSON.stringify(scene1);
   const html = renderToStaticMarkup(React.createElement(BinarySearchCheckCanvas, { canvas: scene1, questionId: q1.id, cellIds: q1.nodeIds, onAnswer() {} }));
@@ -187,9 +187,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect() {},
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { BinarySearchCheckPreview } = ui(file("binary-search/check/BinarySearchCheckPreview.tsx"));
-const Canvas = ui(file("binary-search/check/BinarySearchCheckCanvas.tsx")).BinarySearchCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { BinarySearchCheckPreview } = ui(file("units/binary-search/check/BinarySearchCheckPreview.tsx"));
+const Canvas = ui(file("units/binary-search/check/BinarySearchCheckCanvas.tsx")).BinarySearchCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -229,7 +229,7 @@ button("結果を見る").onClick(); render();
 assert(tree.some(element => element.props?.children === content.completion.caption), "Completion shows the completion caption");
 assert.equal(canvasProps().questionId, undefined);
 
-const previewSource = fs.readFileSync(file("binary-search/check/BinarySearchCheckPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/binary-search/check/BinarySearchCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

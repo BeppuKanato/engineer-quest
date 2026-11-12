@@ -21,20 +21,20 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { binarySearchImplementationContent: content } = load(`${root}/binary-search/implementation/implementation.content.ts`);
-const { binarySearchCode, binarySearchCodeSource } = load(`${root}/binary-search/code-mapping/binarySearchCode.ts`);
-const { binarySearchConsolidationContent } = load(`${root}/binary-search/consolidation/consolidation.content.ts`);
-const { runBinarySearch } = load(`${root}/binary-search/binarySearch.ts`);
-const { ImplementationResults } = load(`${root}/binary-search/implementation/ImplementationResults.tsx`);
-const { ImplementationHints } = load(`${root}/binary-search/implementation/ImplementationHints.tsx`);
-const { FreeExecutionConsole } = load(`${root}/binary-search/implementation/FreeExecutionConsole.tsx`);
+const { binarySearchImplementationContent: content } = load(`${root}/units/binary-search/implementation/implementation.content.ts`);
+const { binarySearchCode, binarySearchCodeSource } = load(`${root}/units/binary-search/code-mapping/binarySearchCode.ts`);
+const { binarySearchConsolidationContent } = load(`${root}/units/binary-search/consolidation/consolidation.content.ts`);
+const { runBinarySearch } = load(`${root}/units/binary-search/binarySearch.ts`);
+const { ImplementationResults } = load(`${root}/units/binary-search/implementation/ImplementationResults.tsx`);
+const { ImplementationHints } = load(`${root}/units/binary-search/implementation/ImplementationHints.tsx`);
+const { FreeExecutionConsole } = load(`${root}/units/binary-search/implementation/FreeExecutionConsole.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isIndexValue, indexCanvas,
-} = load(`${root}/binary-search/implementation/implementation.ts`);
+} = load(`${root}/units/binary-search/implementation/implementation.ts`);
 const { validateArrayBarsCanvas } = load(`${root}/player/arrayBars.types.ts`);
-const { freeDisplayCase, runBinarySearchFreeCode } = load(`${root}/binary-search/implementation/freeExecution.ts`);
+const { freeDisplayCase, runBinarySearchFreeCode } = load(`${root}/units/binary-search/implementation/freeExecution.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -58,8 +58,8 @@ assert.deepEqual(plain(content.hints.flow), [
 ]);
 assert.equal(new Set(content.hints.tokens).size, content.hints.tokens.length);
 assert.equal(content.hints.parsonsQuestion, binarySearchConsolidationContent.questions.find(question => question.kind === "parsons"));
-for (const file of fs.readdirSync(`${root}/binary-search/implementation`).filter(file => /\.tsx?$/.test(file))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/binary-search/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
+for (const file of fs.readdirSync(`${root}/units/binary-search/implementation`).filter(file => /\.tsx?$/.test(file))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/units/binary-search/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
 
 // ---- テストの入力は基準データの確定値、期待値は独立に（indexOf の意味論）確認 ----
@@ -250,7 +250,7 @@ assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: 
 assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
 assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
 assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
-const { binarySearchEditorText: editorText } = load(`${root}/binary-search/implementation/editor.content.ts`);
+const { binarySearchEditorText: editorText } = load(`${root}/units/binary-search/implementation/editor.content.ts`);
 const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -389,7 +389,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.equal(free.actual, 4);
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
-  const impl = (file) => fs.readFileSync(`${root}/binary-search/implementation/${file}`, "utf8");
+  const impl = (file) => fs.readFileSync(`${root}/units/binary-search/implementation/${file}`, "utf8");
   const adapterSource = impl("BinarySearchImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -423,7 +423,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitAdapter = fs.readFileSync(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`, "utf8");
+  const unitAdapter = fs.readFileSync(`${root}/units/binary-search/unit/BinarySearchUnitPreview.tsx`, "utf8");
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");

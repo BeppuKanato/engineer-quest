@@ -46,8 +46,8 @@ const projected = canvas => ({
   assert.equal(normal.ambiguous, false);
   assert(normal.events.some(event => event.locals.remaining === 286 && event.locals.coin === 500 && event.locals.amount === 786 && Array.isArray(event.locals.array)),
     "harness records remaining, coin, amount and the result list");
-  const { binarySearchCodeSource } = load(`${root}/binary-search/code-mapping/binarySearchCode.ts`);
-  const binaryArgs = load(`${root}/binary-search/implementation/implementation.content.ts`).binarySearchImplementationContent.tests.find(test => test.id === "D1").args;
+  const { binarySearchCodeSource } = load(`${root}/units/binary-search/code-mapping/binarySearchCode.ts`);
+  const binaryArgs = load(`${root}/units/binary-search/implementation/implementation.content.ts`).binarySearchImplementationContent.tests.find(test => test.id === "D1").args;
   const binary = trace(binarySearchCodeSource, "binary_search", binaryArgs);
   assert.equal(binary.status, "returned");
   assert(binary.events.every(event => !("remaining" in event.locals) && !("coin" in event.locals) && !("amount" in event.locals)),

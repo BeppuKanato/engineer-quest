@@ -17,11 +17,11 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { binarySearchCodeSource } = load(`${root}/binary-search/code-mapping/binarySearchCode.ts`);
-const { binarySearchImplementationContent } = load(`${root}/binary-search/implementation/implementation.content.ts`);
-const { binarySearchExecutionContent } = load(`${root}/binary-search/execution/execution.content.ts`);
-const { convertBinarySearchTrace } = load(`${root}/binary-search/trace/convertTrace.ts`);
-const { traceBinarySearchCode, binarySearchTraceEventLimit } = load(`${root}/binary-search/trace/acquireTrace.ts`);
+const { binarySearchCodeSource } = load(`${root}/units/binary-search/code-mapping/binarySearchCode.ts`);
+const { binarySearchImplementationContent } = load(`${root}/units/binary-search/implementation/implementation.content.ts`);
+const { binarySearchExecutionContent } = load(`${root}/units/binary-search/execution/execution.content.ts`);
+const { convertBinarySearchTrace } = load(`${root}/units/binary-search/trace/convertTrace.ts`);
+const { traceBinarySearchCode, binarySearchTraceEventLimit } = load(`${root}/units/binary-search/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = binarySearchCodeSource;
@@ -177,7 +177,7 @@ const projected = canvas => ({
   assert.equal(convertBinarySearchTrace(recursive).mode, "final", "Nested frames are not part of the root trace");
   // ---- キャンバス描画: バーの本数・状態・発見の強調が図に出る ----
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { BinarySearchExecutionCanvas } = load(`${root}/binary-search/execution/BinarySearchExecutionCanvas.tsx`);
+  const { BinarySearchExecutionCanvas } = load(`${root}/units/binary-search/execution/BinarySearchExecutionCanvas.tsx`);
   const probeHtml = renderToStaticMarkup(createElement(BinarySearchExecutionCanvas, { canvas: playback.content.steps[2].canvas }));
   assert.equal((probeHtml.match(/data-array-bar=/g) || []).length, 7);
   assert(probeHtml.includes('data-array-status="processing"'), "The centre bar is marked as processing");
@@ -196,7 +196,7 @@ const projected = canvas => ({
   await assert.rejects(() => traceBinarySearchCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
   // ---- ソースpin: 変換は教材の正準データを流用して状態を作らない ----
-  const convertSource = fs.readFileSync(`${root}/binary-search/trace/convertTrace.ts`, "utf8");
+  const convertSource = fs.readFileSync(`${root}/units/binary-search/trace/convertTrace.ts`, "utf8");
   assert(!convertSource.includes("binarySearchExecutionContent"), "converter must not substitute canonical phase-2 data");
   assert(!convertSource.includes("binarySearchProbes"), "converter must not re-run the reference procedure");
   console.log("Binary-search trace: harness passthrough addition with no leakage into existing units, canonical phase-2 board/caption equality, copied snapshots, reversed-search and lo=mid replays, midway error stop line, undrawable-board partial notice, truncation, syntax fallback, ambiguous final-only mode, non-lo/hi/mid implementations final-only, canvas rendering and isolated D1-only acquisition passed.");

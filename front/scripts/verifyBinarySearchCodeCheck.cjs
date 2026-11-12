@@ -21,12 +21,12 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { binarySearchCodeCheckContent: content, validateBinarySearchCodeCheck, fillCodeBlank } = load(`${root}/binary-search/code-check/codeCheck.content.ts`);
-const { binarySearchCode, binarySearchCodeLineNumber, binarySearchCodeSource } = load(`${root}/binary-search/code-mapping/binarySearchCode.ts`);
-const { binarySearchCodeMappingContent: mapping } = load(`${root}/binary-search/code-mapping/codeMapping.content.ts`);
+const { binarySearchCodeCheckContent: content, validateBinarySearchCodeCheck, fillCodeBlank } = load(`${root}/units/binary-search/code-check/codeCheck.content.ts`);
+const { binarySearchCode, binarySearchCodeLineNumber, binarySearchCodeSource } = load(`${root}/units/binary-search/code-mapping/binarySearchCode.ts`);
+const { binarySearchCodeMappingContent: mapping } = load(`${root}/units/binary-search/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
 const { newAnswerFeedback } = load(`${root}/assessment/answerFeedbackState.ts`);
-const { binarySearchCheckContent: nodeContent } = load(`${root}/binary-search/check/check.content.ts`);
+const { binarySearchCheckContent: nodeContent } = load(`${root}/units/binary-search/check/check.content.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { CodeDisplay } = load(`${root}/code/CodeDisplay.tsx`);
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -183,7 +183,7 @@ skipped = advanceAssessment(content, skipped, q2.id);
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
-const codeCheckPreviewSource = fs.readFileSync(`${root}/binary-search/code-check/BinarySearchCodeCheckPreview.tsx`, "utf8");
+const codeCheckPreviewSource = fs.readFileSync(`${root}/units/binary-search/code-check/BinarySearchCodeCheckPreview.tsx`, "utf8");
 
 // レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
 assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");
