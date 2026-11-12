@@ -68,7 +68,8 @@ const nav = index => tree.find(item => item.props.children?.[0] === index + 1 &&
 async function verify([slug, name]) {
   const Preview = load(`${root}/${slug}/unit/${name}UnitPreview.tsx`)[`${name}UnitPreview`];
   slots = [];
-  const entry = Preview();
+  const draftError = () => {};
+  const entry = Preview({ codeDraftBaseKey: "account:unit:draft", onCodeDraftError: draftError });
   assert.equal(entry.type, LearningUnitPreview, `${slug}: shared controller`);
   const { unit } = entry.props;
   const view = index => find(unit.views[unit.phases[index].id]);
@@ -80,7 +81,10 @@ async function verify([slug, name]) {
     assert(view(index).props.embedded);
     view(index).props.onComplete({ totalQuestions: 2, firstAttemptCorrect: 1, testRuns: 2 });
     draw(entry);
-    if (index === 6) { view(index).props.onShowFinalResult(); draw(entry); break; }
+    if (index === 6) {
+      assert.equal(view(index).props.codeDraftBaseKey, "account:unit:draft");
+      assert.equal(view(index).props.onCodeDraftError, draftError);
+      view(index).props.onShowFinalResult(); draw(entry); break; }
     if ([2,4].includes(index)) {
       const result = find(UnitResultScreen);
       assert.equal(result.props.figure, unit.resultFigure);

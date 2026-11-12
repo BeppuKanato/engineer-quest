@@ -421,7 +421,9 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitSource = fs.readFileSync(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`, "utf8");
+  const unitAdapter = fs.readFileSync(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`, "utf8");
+  assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
+  const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
   // プレビュー登録（視覚デバッグの接続は Issue #293 で行うため、ここでは登録だけを確認する）。
   const pageSource = fs.readFileSync(path.resolve(root, "../../app/learning-preview/[contentId]/page.tsx"), "utf8");
