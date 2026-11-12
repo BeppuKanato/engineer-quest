@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const appRoot = path.resolve(__dirname, "../src/app");
-const screenOwners = { "history/page.tsx": "features/history/HistoryScreen.tsx", "courses/page.tsx": "features/learning/catalog/CoursesScreen.tsx" };
+const screenOwners = { "achievements/page.tsx": "features/collection/AchievementsScreen.tsx", "knowledge-cards/page.tsx": "features/collection/KnowledgeCardsScreen.tsx", "collection/page.tsx": "features/collection/CollectionScreen.tsx", "history/page.tsx": "features/history/HistoryScreen.tsx", "courses/page.tsx": "features/learning/catalog/CoursesScreen.tsx" };
 const read = (relative) => fs.readFileSync(screenOwners[relative] ? path.resolve(appRoot, "..", screenOwners[relative]) : path.join(appRoot, relative), "utf8");
 const ROW = 'maxWidth: 1440, pt: { xs: 3, md: 4 }';
 
