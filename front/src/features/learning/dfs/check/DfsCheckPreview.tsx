@@ -1,4 +1,5 @@
 "use client";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -41,11 +42,8 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
       ? current : answerQuestion(dfsCheckContent, current, question.id, answer));
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
-  return <Box component={embedded ? "div" : "main"} aria-label={dfsCheckContent.stageName}
-    sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label="DFSの動きの確認問題"
-      sx={{ width: embedded ? "100%" : { xs: "100%", sm: "84vw" }, maxWidth: "100%", minWidth: 0, height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500,
-        p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+  return <LearningContentLayout embedded={embedded} frame="check-flow" label="DFSの動きの確認問題" rootLabel={dfsCheckContent.stageName} overlay={<>{active && reviewOpen && question && <LearningReviewDialog content={dfsExecutionContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
+      renderCanvas={canvas => <DfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}</>}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
         sx={{ color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none" }}>{caption}</Typography>
@@ -66,8 +64,5 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
         {complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(dfsCheckContent))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>}
       </Box>
-    </Box>
-    {active && reviewOpen && question && <LearningReviewDialog content={dfsExecutionContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
-      renderCanvas={canvas => <DfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
-  </Box>;
+    </LearningContentLayout>;
 }

@@ -200,7 +200,9 @@ const { MazeDiggingCheckPreview } = ui(file("maze-digging/check/MazeDiggingCheck
 const Canvas = ui(file("maze-digging/check/MazeDiggingCheckCanvas.tsx")).MazeDiggingCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
-const elements = value => !value || typeof value !== "object" ? [] : Array.isArray(value) ? value.flatMap(elements) : [value, ...elements(value.props?.children)];
+const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
+const elements = value => !value || typeof value !== "object" ? [] : Array.isArray(value) ? value.flatMap(elements)
+  : value.type === SharedLayout ? elements(SharedLayout(value.props)) : [value, ...elements(value.props?.children)];
 let tree;
 const render = () => { cursor = 0; tree = elements(MazeDiggingCheckPreview({})); };
 const canvasProps = () => tree.find(element => element.type === Canvas).props;
@@ -237,7 +239,8 @@ assert.equal(canvasProps().questionId, undefined);
 const previewSource = fs.readFileSync(file("maze-digging/check/MazeDiggingCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
-assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
+assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
+assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 
 assert.match(previewSource, /advanceAssessment\(mazeDiggingCheckContent, current, question\.id\)/);

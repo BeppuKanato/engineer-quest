@@ -1,4 +1,5 @@
 "use client";
+import { AssessmentLayout } from "../../components/layouts/AssessmentLayout";
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
 import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
@@ -61,7 +62,7 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
       renderCanvas={canvas => <MazeDiggingCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}</>}>
       {/* 3段組（#298）: 中央はスクロール領域。問題文とコード窓はここに置き、
           コード窓の高さは 320px の固定（#321 の残り高さ方式から変更）。窓の内側スクロールと空欄への寄せは維持する。 */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <AssessmentLayout>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
           color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none", flexShrink: 0,
         }}>{complete ? mazeDiggingCodeCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`}</Typography>
@@ -73,7 +74,7 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
               </Box>
             </Box>
           </Box> : <Box sx={{ height: 320, flexShrink: 0 }} />}
-      </Box>
+      </AssessmentLayout>
       {/* 下部の固定ゾーン（#298）: 指示・選択肢・注記・進行操作は常時表示する。 */}
       <Box sx={{ flexShrink: 0, display: "flex", flexDirection: "column", borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>
         {question && <>

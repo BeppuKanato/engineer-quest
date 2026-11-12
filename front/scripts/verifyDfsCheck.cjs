@@ -134,7 +134,9 @@ const { DfsCheckPreview } = ui(file("dfs/check/DfsCheckPreview.tsx"));
 const Canvas = ui(file("dfs/check/DfsCheckCanvas.tsx")).DfsCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
-const elements = value => !value || typeof value !== "object" ? [] : Array.isArray(value) ? value.flatMap(elements) : [value, ...elements(value.props?.children)];
+const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
+const elements = value => !value || typeof value !== "object" ? [] : Array.isArray(value) ? value.flatMap(elements)
+  : value.type === SharedLayout ? elements(SharedLayout(value.props)) : [value, ...elements(value.props?.children)];
 let tree, props;
 const render = () => { cursor = 0; tree = elements(DfsCheckPreview(props)); };
 const canvas = () => tree.find(element => element.type === Canvas).props;

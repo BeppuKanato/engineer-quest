@@ -1,4 +1,7 @@
 "use client";
+import { AssessmentLayout } from "../../components/layouts/AssessmentLayout";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -58,7 +61,7 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [review, setReview] = useState<BubbleSortConsolidationQuestion | null>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
-  const completedRef = useRef(false);
+
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
@@ -76,23 +79,11 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
     captionRef.current?.focus({ preventScroll: question?.kind === "parsons" && (record?.attemptCount ?? 0) > 0 });
   }, [question?.id, question?.kind, complete, record?.attemptCount]);
   // 診断が出た瞬間だけ単元フローへ通知する。
-  useEffect(() => {
-    if (diagnosis && !completedRef.current) {
-      completedRef.current = true;
-      onComplete?.({ assessmentEvidence: assessmentEvidence(content, session), firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
-    }
-    if (!diagnosis) completedRef.current = false;
-  }, [diagnosis, onComplete, session]);
+  useAssessmentCompletion(diagnosis !== null, diagnosis?.correct ?? 0, diagnosis?.total ?? 0, onComplete, assessmentEvidence(content, session));
 
-  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    {/* 画面は3段組（Issue #298）: 中央のスクロール領域に問題文・図・指示・選択肢を上から流し、
-        再回答の注記と進行ボタンは下部の固定ゾーンに置く。図の高さは設問と viewport だけで決まり、
-        テキスト量では変わらない。旧来の marginTop: "auto" による中央寄せ（#327）は廃止した。 */}
-    <Box component="section" aria-label={complete ? "応用問題の結果" : "バブルソートの応用問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh",
-        minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column",
-        ...(question?.kind === "parsons" ? parsonsQuestionBodySx : {}) }}>
+  return <LearningContentLayout embedded={embedded} frame="standard" label={complete ? "応用問題の結果" : "バブルソートの応用問題"} overlay={<>{review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bubbleSortCodeMappingContent} stepIds={review.reviewStepIds}
+      renderCanvas={canvas => <BubbleSortCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}</>}>
+      <AssessmentLayout bodySx={{...(question?.kind === "parsons" ? parsonsQuestionBodySx : {})}}>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
           color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -134,7 +125,7 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
           </Box>
           <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
         </>}
-      </Box>
+      </AssessmentLayout>
       {question && question.kind !== "parsons" && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
         {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
         <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
@@ -147,8 +138,5 @@ export function BubbleSortConsolidationPreview({ embedded = false, onLearningEve
       {diagnosis && onNext && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1, display: "flex", justifyContent: "center" }}>
         <PhaseNextButton label={nextLabel ?? "次へ進む"} onClick={onNext} />
       </Box>}
-    </Box>
-    {review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bubbleSortCodeMappingContent} stepIds={review.reviewStepIds}
-      renderCanvas={canvas => <BubbleSortCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}
-  </Box>;
+    </LearningContentLayout>;
 }

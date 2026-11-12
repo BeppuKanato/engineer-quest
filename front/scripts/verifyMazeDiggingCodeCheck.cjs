@@ -161,7 +161,8 @@ const codeCheckPreviewSource = fs.readFileSync(`${root}/maze-digging/code-check/
 // レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
 assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");
 assert.doesNotMatch(codeCheckPreviewSource, /flex: 1, minHeight: 0, overflow: "auto"/, "code window no longer takes the leftover height (#298)");
-assert.match(codeCheckPreviewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "prompt and code window flow in the middle scroll region (#298)");
+assert.match(codeCheckPreviewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
+assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "prompt and code window flow in the middle scroll region (#298)");
 assert.match(codeCheckPreviewSource, /borderTop: `1px solid/, "choices live in the fixed bottom zone (#298)");
 assert.match(codeCheckPreviewSource, /advanceAssessment\(mazeDiggingCodeCheckContent, current, question\.id\)/);
 assert.match(codeCheckPreviewSource, /"結果を見る" : "次の問題へ"/);

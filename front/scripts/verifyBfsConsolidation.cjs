@@ -207,7 +207,8 @@ console.log("BFS consolidation: independent BFS on all four graphs, corrected J 
 const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
 const parsonsSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/assessment/ParsonsBoard.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
-assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
+assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
+assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.doesNotMatch(previewSource, /marginTop: "auto",/, "safe centering via margin auto is retired (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);

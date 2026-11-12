@@ -134,7 +134,8 @@ assert(skipped.records.every(record => record.firstCorrect === false && !record.
 const checkPreviewSource = fs.readFileSync(path.join(root, "bfs/check/BfsCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(checkPreviewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
-assert.match(checkPreviewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
+assert.match(checkPreviewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
+assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "check body flows in the middle scroll region (#298)");
 assert.match(checkPreviewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 
 assert.match(checkPreviewSource, /advanceAssessment\(bfsCheckContent, current, question\.id\)/);

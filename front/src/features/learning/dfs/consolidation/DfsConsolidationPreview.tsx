@@ -1,4 +1,6 @@
 "use client";
+import { AssessmentLayout } from "../../components/layouts/AssessmentLayout";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -54,12 +56,9 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
     if (question) setSession(current => advanceAssessment(content, current, question.id));
   }
 
-  return <Box component={embedded ? "div" : "main"} aria-label={content.stageName}
-    sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label={complete ? "応用問題の結果" : "DFSの応用問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minWidth: 0, boxSizing: "border-box", p: 1, display: "flex", flexDirection: "column" }}>
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column",
-        ...(question?.kind === "parsons" ? parsonsQuestionBodySx : {}) }}>
+  return <LearningContentLayout embedded={embedded} frame="diagnostic-flow" label={complete ? "応用問題の結果" : "DFSの応用問題"} rootLabel={content.stageName} overlay={<>{active && review && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={review.reviewStepIds} onLearningEvent={onLearningEvent}
+      renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}</>}>
+      <AssessmentLayout bodySx={{...(question?.kind === "parsons" ? parsonsQuestionBodySx : {})}}>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
           sx={{ fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", flexShrink: 0,
             minHeight: question?.kind === "parsons" ? 0 : "3em", display: "grid", alignItems: "center", mb: 1, outline: "none" }}>
@@ -106,7 +105,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
           </Box>
           {achievements}
         </>}
-      </Box>
+      </AssessmentLayout>
       {(diagnosis || (question && question.kind !== "parsons" && attempt)) &&
         <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
           {question && attempt?.correct === false && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>
@@ -125,8 +124,5 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
               </Button>}
           </Box>
         </Box>}
-    </Box>
-    {active && review && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={review.reviewStepIds} onLearningEvent={onLearningEvent}
-      renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}
-  </Box>;
+    </LearningContentLayout>;
 }

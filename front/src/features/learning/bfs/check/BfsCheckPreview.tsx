@@ -1,4 +1,7 @@
 "use client";
+import { AssessmentLayout } from "../../components/layouts/AssessmentLayout";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -24,7 +27,7 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
   const [session, setSession] = useState(() => createAssessmentState(bfsCheckContent));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
-  const completedRef = useRef(false);
+
   const question = activeQuestion(bfsCheckContent, session);
   const complete = assessmentComplete(bfsCheckContent, session);
   useAssessmentObservation(bfsCheckContent, session, onLearningEvent, active, reviewOpen ? question?.id : undefined);
@@ -39,22 +42,13 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
   // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
-  useEffect(() => {
-    if (complete && !completedRef.current) {
-      completedRef.current = true;
-      onComplete?.({ assessmentEvidence: assessmentEvidence(bfsCheckContent, session),
-        firstAttemptCorrect: session.records.filter(entry => entry.attempts[0]?.correct).length,
-        totalQuestions: bfsCheckContent.questions.length,
-      });
-    }
-    if (!complete) completedRef.current = false;
-  }, [complete, onComplete, session]);
+  useAssessmentCompletion(complete, session.records.filter(entry => entry.attempts[0]?.correct).length, bfsCheckContent.questions.length, onComplete, assessmentEvidence(bfsCheckContent, session));
 
-  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, width: "100%", display: "grid", gridTemplateColumns: "minmax(0, 1fr)", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label="BFSの動きの確認問題" sx={{ width: embedded ? "100%" : { xs: "100%", sm: "84vw" }, maxWidth: "100%", minWidth: 0, height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500, p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+  return <LearningContentLayout embedded={embedded} frame="check" label="BFSの動きの確認問題" overlay={<>{reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsExecutionContent} stepIds={question.reviewStepIds}
+      renderCanvas={canvas => <BfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}</>}>
       {/* 3段組（#298）: 中央はスクロール領域。本文（問題文・図・指示・選択肢）はここに上から流れ、
           図の高さは min(54dvh, 600px) の固定で、テキスト量や通知では変わらない。 */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      <AssessmentLayout>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true" sx={{
           color: playerTokens.text, fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)",
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none",
@@ -67,7 +61,7 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
           <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
             allowNone={question?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
         </Box>
-      </Box>
+      </AssessmentLayout>
       {/* 下部の固定ゾーン: 再回答の注記と進行操作は常時表示し、スクロールなしで押せる。 */}
       <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>
         {attempt && !attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
@@ -80,8 +74,5 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
             sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
         </Box>
       </Box>
-    </Box>
-    {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={bfsExecutionContent} stepIds={question.reviewStepIds}
-      renderCanvas={canvas => <BfsExecutionCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
-  </Box>;
+    </LearningContentLayout>;
 }

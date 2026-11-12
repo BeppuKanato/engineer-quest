@@ -1,4 +1,5 @@
 "use client";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -62,7 +63,7 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
   const [session, setSession] = useState(() => createAssessmentState(content));
   const [review, setReview] = useState<GreedyCoinsConsolidationQuestion | null>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
-  const completedRef = useRef(false);
+
   const question = activeQuestion(content, session);
   const complete = assessmentComplete(content, session);
   useAssessmentObservation(content, session, onLearningEvent, active, review?.id);
@@ -78,13 +79,7 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
   useEffect(() => {
     captionRef.current?.focus({ preventScroll: question !== null && isParsons(question) && (record?.attemptCount ?? 0) > 0 });
   }, [question, complete, record?.attemptCount]);
-  useEffect(() => {
-    if (diagnosis && !completedRef.current) {
-      completedRef.current = true;
-      onComplete?.({ assessmentEvidence: assessmentEvidence(content, session), firstAttemptCorrect: diagnosis.correct, totalQuestions: diagnosis.total });
-    }
-    if (!diagnosis) completedRef.current = false;
-  }, [diagnosis, onComplete, session]);
+  useAssessmentCompletion(diagnosis !== null, diagnosis?.correct ?? 0, diagnosis?.total ?? 0, onComplete, assessmentEvidence(content, session));
 
   return <LearningContentLayout embedded={embedded} presentation={question && isParsons(question) ? "code-order" : "visual"} label={complete ? "応用問題の結果" : "貪欲法の応用問題"}
     overlay={review && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={greedyCoinsCodeMappingContent} stepIds={review.reviewStepIds}
