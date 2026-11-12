@@ -371,3 +371,10 @@ ActionButtonとAppBreadcrumbsをcomponentsへ移動。AppHeaderViewはURLとプ�
 複数画面から使う取得・候補表示・到達観測をfeatures/feedbackへ移した。学習側はFeedbackBindingsで取得フック・候補表示・観測部品を受け取り、appのLearningPageCompositionが実体を接続する。learningからfeedbackの内部やappをimportしない。API・候補のID・保存キー・観測イベント・ポーリング条件は変更していない。候補SSRと選択・到達観測、概念マップ、概念定義、BFS単元接続、応答表示、型、Lint、buildが成功。
 
 M07の残存: HomeUnitGrid/UnitOverviewのコース部品参照はM08のカタログ整理と同時に解消する。フィードバックの取得・表示・観測は独立機能内に移した段階で、ファイル内の更なる分割はM09の整理で扱う。実アカウントの切り替え・音の実機再生・候補の認証後到達は未実施。
+## M08: 通常ページ（進行中）
+
+### A: 学習カタログ
+
+コース一覧・カード・フィルター・サムネイル・進捗の重ね合わせ・ホーム単元グリッドをfeatures/learning/catalogへ集約。コース＝単元というUI正本と、学習進捗への依存に合わせ、独立したcourses featureには分断しない。コースの共有型はtypes/courseへ、カテゴリ・難易度・状態の表示はcomponents/uiへ移した。APIからapp/courses/typeへの逆参照も解消した。
+
+コースのpageはヘッダーとフィードバック到達部品を渡す構成にし、取得・キャッシュ・絞り込み・推奨／再開カードはCoursesScreenが担当する。寸法・並び・絞り込み・リクエスト制御は維持した。全featuresからappへのimportがなくなった。型、ホーム配置、応答表示、パンくず、BFS単元、マスコット、Lint、buildが成功。実アカウントの検索・絞り込み操作は未実施。

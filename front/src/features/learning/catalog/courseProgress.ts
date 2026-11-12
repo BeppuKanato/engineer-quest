@@ -1,7 +1,7 @@
 import { getLearningProgress } from "@/api/learning.api";
 import { findLearningUnit } from "@/features/learning/app/unitRegistry";
 
-import type { Course } from "./type";
+import type { Course } from "@/types/course";
 
 /**
  * コース一覧へ新フローの学習進捗（状態と進捗率）を重ねる。

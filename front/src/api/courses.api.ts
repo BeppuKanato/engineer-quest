@@ -1,5 +1,5 @@
 import { fetcher } from "@/lib/fetcher";
-import type { Course } from "@/app/courses/type";
+import type { Course } from "@/types/course";
 import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export const getCourses = async (token: string): Promise<Course[]> => {

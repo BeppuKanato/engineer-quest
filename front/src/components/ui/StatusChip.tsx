@@ -3,7 +3,7 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Chip } from "@mui/material";
 import React from "react";
-import { ProgressStatus } from "../courses/type";
+import { ProgressStatus } from "@/types/course";
 
 type StatusChipProps = {
   status: ProgressStatus;

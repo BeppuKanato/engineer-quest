@@ -33,7 +33,7 @@ import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
-import type { Course } from "@/app/courses/type";
+import type { Course } from "@/types/course";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/lib/session/userSession";
 

@@ -1,7 +1,7 @@
 import { Button, Paper, Stack, Typography } from "@mui/material";
-import { DifficultyLabel } from "../../component/difficultyLabel";
-import { getCategoryLabel } from "../../component/categoryChip";
-import { CourseCategory, CourseFilterState, Difficulty, ProgressStatus } from "../type";
+import { DifficultyLabel } from "@/components/ui/DifficultyLabel";
+import { getCategoryLabel } from "@/components/ui/CategoryChip";
+import { CourseCategory, CourseFilterState, Difficulty, ProgressStatus } from "@/types/course";
 
 type CourseFilterProps = {
   value: CourseFilterState;

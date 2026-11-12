@@ -6,17 +6,17 @@ const srcRoot = path.resolve(__dirname, '../src');
 const read = (relative) => fs.readFileSync(path.join(srcRoot, relative), 'utf8');
 
 // 1. Progress overlay is shared: one implementation used by both the courses page and the home grid.
-const overlay = read('app/courses/courseProgress.ts');
+const overlay = read('features/learning/catalog/courseProgress.ts');
 assert(overlay.includes('export async function withLearningProgress'), 'withLearningProgress must be exported from courseProgress');
-const coursesPage = read('app/courses/page.tsx');
+const coursesPage = read('features/learning/catalog/CoursesScreen.tsx');
 assert(coursesPage.includes('withLearningProgress'), 'courses page must use the shared overlay');
 assert(!coursesPage.includes('saved.phases.filter'), 'courses page must not keep an inline copy of the overlay');
-const homeGrid = read('features/learning/app/HomeUnitGrid.tsx');
+const homeGrid = read('features/learning/catalog/HomeUnitGrid.tsx');
 assert(homeGrid.includes('withLearningProgress'), 'home unit grid must use the shared overlay');
 assert(homeGrid.includes('getCourses'), 'home unit grid must list courses from the same source as the catalog');
 
 // 2. Course thumbnails: every current course has a signature figure, and CourseCard falls back to the category visual.
-const thumbnail = read('app/courses/component/courseThumbnail.tsx');
+const thumbnail = read('features/learning/catalog/components/CourseThumbnail.tsx');
 for (const courseId of [
   'course-algorithm-bubble-sort-v2',
   'course-algorithm-binary-search-v1',
@@ -28,7 +28,7 @@ for (const courseId of [
 ]) {
   assert(thumbnail.includes(courseId), `thumbnail figure missing for ${courseId}`);
 }
-const courseCard = read('app/courses/component/courseCard.tsx');
+const courseCard = read('features/learning/catalog/components/CourseCard.tsx');
 assert(courseCard.includes('CourseThumbnail'), 'CourseCard must render the course thumbnail');
 // 完了表示は StatusChip の「クリア済み」に一本化し、同じ意味のチップを重ねない（#176）。
 assert(!courseCard.includes('コースクリア'), 'CourseCard must not duplicate the completed badge');

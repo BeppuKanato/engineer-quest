@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const appRoot = path.resolve(__dirname, "../src/app");
-const read = (relative) => fs.readFileSync(path.join(appRoot, relative), "utf8");
+const read = (relative) => fs.readFileSync(relative === "courses/page.tsx" ? path.resolve(appRoot, "../features/learning/catalog/CoursesScreen.tsx") : path.join(appRoot, relative), "utf8");
 const ROW = 'maxWidth: 1440, pt: { xs: 3, md: 4 }';
 
 // 独立行に分離した画面：パンくず行（1440 / pt {3,4}）があり、内容コンテナの幅が元のまま残っていること。

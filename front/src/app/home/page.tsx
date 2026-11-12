@@ -22,7 +22,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
-import { HomeUnitGrid } from "@/features/learning/app/HomeUnitGrid";
+import { HomeUnitGrid } from "@/features/learning/catalog/HomeUnitGrid";
 import { BigGoalBanner } from "@/features/learning/app/bigGoal/BigGoalBanner";
 
 import { getHome, type HomeResponse } from "@/api/home.api";

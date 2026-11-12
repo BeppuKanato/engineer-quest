@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { getAchievements, type AchievementItem } from "@/api/achievements.api";
 import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
-import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
+import { CourseThumbnail } from "@/features/learning/catalog/components/CourseThumbnail";
 import { useUserSession } from "@/lib/session/userSession";
 import { startLearningUnit } from "@/api/learning.api";
 import { appLearningTokens as tokens } from "./appLearning.tokens";

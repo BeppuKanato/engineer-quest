@@ -16,11 +16,11 @@ import {
 import type React from "react";
 import Link from "next/link";
 
-import { CategoryChip } from "../../component/categoryChip";
-import { DifficultyLabel } from "../../component/difficultyLabel";
-import { StatusChip } from "../../component/statusChip";
-import type { Course, CourseCategory } from "../type";
-import { CourseThumbnail, hasCourseThumbnail } from "./courseThumbnail";
+import { CategoryChip } from "@/components/ui/CategoryChip";
+import { DifficultyLabel } from "@/components/ui/DifficultyLabel";
+import { StatusChip } from "@/components/ui/StatusChip";
+import type { Course, CourseCategory } from "@/types/course";
+import { CourseThumbnail, hasCourseThumbnail } from "@/features/learning/catalog/components/CourseThumbnail";
 
 type CourseCardProps = Course & {
   onCourseClick?: (courseId: string) => void;

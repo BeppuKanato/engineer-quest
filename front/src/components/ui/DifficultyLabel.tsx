@@ -1,7 +1,7 @@
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Stack, Typography } from "@mui/material";
-import { Difficulty } from "../courses/type";
+import { Difficulty } from "@/types/course";
 
 type DifficultyLabelProps = {
   difficulty: Difficulty;

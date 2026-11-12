@@ -16,7 +16,7 @@ assert(!header.includes('PageTransitionOverlay'), 'appHeader must not render Pag
 assert(!header.includes('isNavigating'), 'appHeader must not track a blocking navigation state');
 
 // 2. Home / courses keep previous data and use the shared session token (#138 N1, N2).
-for (const page of ['app/home/page.tsx', 'app/courses/page.tsx', 'app/collection/page.tsx', 'app/history/page.tsx', 'app/knowledge-cards/page.tsx', 'app/achievements/page.tsx', 'app/profile/page.tsx', 'app/quest-board/page.tsx', 'app/quest-board/new/page.tsx', 'app/quest-board/[postId]/page.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
+for (const page of ['app/home/page.tsx', 'features/learning/catalog/CoursesScreen.tsx', 'app/collection/page.tsx', 'app/history/page.tsx', 'app/knowledge-cards/page.tsx', 'app/achievements/page.tsx', 'app/profile/page.tsx', 'app/quest-board/page.tsx', 'app/quest-board/new/page.tsx', 'app/quest-board/[postId]/page.tsx', 'app/create/page.tsx', 'app/create/quests/[questId]/page.tsx', 'app/my-works/page.tsx']) {
   const source = read(page);
   assert(source.includes('useUserSession'), `${page} must use the session token`);
   assert(!source.includes('onAuthStateChanged'), `${page} must not subscribe to auth state itself`);
@@ -36,7 +36,7 @@ assert(createWork.includes('invalidateClientQueries([queryTags.works])'), 'creat
 const boardNew = read('app/quest-board/new/page.tsx');
 assert(boardNew.includes('peekClientQueryData<QuestBoardListResponse>("quest-board")'), 'new post page must seed from the shared board cache');
 
-const courses = read('app/courses/page.tsx');
+const courses = read('features/learning/catalog/CoursesScreen.tsx');
 assert(!courses.includes('setCourses([])'), 'courses page must not blank the list while refetching');
 
 // 3. Cache lifetimes: home / courses are long-lived because mutations invalidate by tag (#138 N3, N5).

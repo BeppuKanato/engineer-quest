@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
 import { useUserSession } from "@/lib/session/userSession";
-import { CourseCard } from "@/app/courses/component/courseCard";
-import { withLearningProgress } from "@/app/courses/courseProgress";
-import type { Course, ProgressStatus } from "@/app/courses/type";
+import { CourseCard } from "@/features/learning/catalog/components/CourseCard";
+import { withLearningProgress } from "@/features/learning/catalog/courseProgress";
+import type { Course, ProgressStatus } from "@/types/course";
 import { peekClientQueryData } from "@/lib/clientQueryCache";
 
 /** ホームに出す単元の上限。全件表示と絞り込みはコース一覧ページの領分にする（Issue #137）。 */
