@@ -78,9 +78,12 @@ assert.match(screenSource, /<BubbleSortUnitPreview \{\.\.\.unitPreviewProps\} \/
 assert.match(screenSource, /<BfsUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "BFS container receives the same connection props");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const container = read(`${root}/bubble-sort/unit/BubbleSortUnitPreview.tsx`);
+const adapter = read(`${root}/bubble-sort/unit/BubbleSortUnitPreview.tsx`);
+assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
+const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["BubbleSortMotivationPreview", "BubbleSortExecutionPreview", "BubbleSortCheckPreview", "BubbleSortCodeMappingPreview", "BubbleSortCodeCheckPreview", "BubbleSortConsolidationPreview", "BubbleSortImplementationPreview"]) {
-  assert.ok(container.includes(`<${component} embedded`), `container renders ${component} embedded`);
+  assert.ok(adapter.includes(`: ${component}`), `unit registers ${component}`);
+  assert.match(container, /<View embedded/, "shared controller embeds every registered view");
 }
 // 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
 assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
@@ -90,7 +93,7 @@ assert.match(container, /"phase_bridge_view"/, "bridge views are logged with the
 assert.match(container, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
 assert.match(container, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
 assert.match(container, /renderUnitFeedback/, "The final result carries the unit feedback slot");
-assert.match(container, /<UnitResultScreen phase=\{bubbleSortUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
+assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている。
 for (const file of ["motivation/BubbleSortMotivationPreview", "execution/BubbleSortExecutionPreview", "check/BubbleSortCheckPreview", "code-mapping/BubbleSortCodeMappingPreview", "code-check/BubbleSortCodeCheckPreview", "consolidation/BubbleSortConsolidationPreview", "implementation/BubbleSortImplementationPreview"]) {
@@ -110,7 +113,7 @@ assert.match(figureSource, /bubbleSortMainValues/, "The figure uses the main tea
 assert.match(figureSource, /fixedFrom: 0/, "The figure shows the fully fixed (completed) array");
 
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
-const resultScreensSource = read(`${root}/bubble-sort/unit/UnitResultScreens.tsx`);
+const resultScreensSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
 // フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
@@ -131,15 +134,17 @@ assert.equal(bubbleSortUnitText.backToCourses, "コース一覧に戻る", "fina
 const phaseResultSource = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("function summaryLine"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
-assert.match(phaseResultSource, /<BubbleSortResultFigure/, "Phase results render the reached figure");
+assert.match(adapter, /resultFigure: <BubbleSortResultFigure/, "The unit supplies its reached figure");
+assert.match(phaseResultSource, /\{figure\}/, "Shared result screens render the supplied figure");
 assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
 
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（完成した並び）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
-const { UnitResultScreen } = load(`${root}/bubble-sort/unit/UnitResultScreens.tsx`);
+const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
+const { BubbleSortResultFigure } = load(`${root}/bubble-sort/unit/BubbleSortResultFigure.tsx`);
 for (const phase of bubbleSortUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
-    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
+    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BubbleSortResultFigure), onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading));
     assert.ok(html.includes("data-result-figure"), "Phase results show the unit's completed figure");
     assert.equal((html.match(/data-array-bar=/g) ?? []).length, 5, "The figure is the completed 5-value array");
