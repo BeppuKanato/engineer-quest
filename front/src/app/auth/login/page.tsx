@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ensureUser } from "@/api/auth.api";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 export default function Login() {
   const [email, setEmail] = useState("");

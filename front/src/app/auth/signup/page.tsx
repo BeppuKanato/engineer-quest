@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { ensureUser } from "@/api/auth.api";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 export default function Signup() {
   const [displayName, setDisplayName] = useState("");

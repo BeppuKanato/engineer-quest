@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { playerTokens } from "../player/player.tokens";
 import { activeQuestion, type AssessmentContent, type AssessmentState } from "./assessment";
 import { newAnswerFeedback, type AnswerFeedback } from "./answerFeedbackState";

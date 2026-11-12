@@ -10,7 +10,7 @@ import { getAchievements, type AchievementItem } from "@/api/achievements.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { startLearningUnit } from "@/api/learning.api";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
 import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";

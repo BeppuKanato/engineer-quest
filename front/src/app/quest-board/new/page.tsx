@@ -32,10 +32,10 @@ import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
-import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import type { Course } from "@/app/courses/type";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const defaultCategories: QuestBoardOption[] = [
   { value: "QUESTION", label: "質問" },

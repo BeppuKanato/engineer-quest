@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 
-import { useSoundEffect } from "../../../app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { playerTokens } from "../player/player.tokens";
 
 /**

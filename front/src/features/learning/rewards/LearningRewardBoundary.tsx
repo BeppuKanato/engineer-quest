@@ -5,7 +5,7 @@ import { Box, Button, Dialog, DialogContent, DialogTitle, Typography } from "@mu
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AwardedCard } from "../../../api/learning.api";
-import { useSoundEffect } from "../../../app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import type { LearningObserver } from "../../../lib/learningEvents";
 import { appLearningTokens as colors } from "../app/appLearning.tokens";
 import { useLearningRewards } from "../app/LearningRewardsContext";

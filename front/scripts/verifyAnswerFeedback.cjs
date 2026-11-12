@@ -99,7 +99,7 @@ const hookModule = createLoader({ react: { ...React,
   useContext: () => ({ present: presenter, clear: id => clearedMessages.push(id), messages: {} }),
   useRef: value => previousRef ??= { current: value },
   useEffect: callback => effects.push(callback),
-}, "@/app/component/soundFeedback": { useSoundEffect: () => ({ play() {} }) } })(file("assessment/AnswerFeedback.tsx"));
+}, "@/lib/audio/soundFeedback": { useSoundEffect: () => ({ play() {} }) } })(file("assessment/AnswerFeedback.tsx"));
 function renderHook(state, active = true) {
   effects.length = 0;
   hookModule.useAssessmentFeedback(concept, state, active);
@@ -129,7 +129,7 @@ const uiModule = createLoader({ react: { ...React,
     return [states[index], value => { states[index] = typeof value === "function" ? value(states[index]) : value; }];
   },
   useEffect: callback => { const cleanup = callback(); if (cleanup) cleanups.push(cleanup); },
-}, "@/app/component/soundFeedback": { useSoundEffect: () => ({ play: name => played.push(name) }) },
+}, "@/lib/audio/soundFeedback": { useSoundEffect: () => ({ play: name => played.push(name) }) },
 "framer-motion": { ...require("framer-motion"), useReducedMotion: () => reduced },
 }, { setTimeout: (callback, ms) => { const id = ++timerId; timers.set(id, { callback, ms }); return id; }, clearTimeout: id => cleared.push(id) })(file("assessment/AnswerFeedback.tsx"));
 function renderProvider() {

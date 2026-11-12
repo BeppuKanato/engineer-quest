@@ -45,14 +45,14 @@ import { AppSnackbar } from "@/app/component/appSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
 import { isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
 import { MascotFigure } from "@/app/component/mascotFigure";
-import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import {
   useAchievementNotificationMode,
   type AchievementNotificationMode,
 } from "@/hooks/useAchievementNotificationMode";
 import { auth } from "@/lib/firebase";
 import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { HexadRadarChart } from "@/features/hexad/hexadRadarChart";
 
 const historyMeta: Record<

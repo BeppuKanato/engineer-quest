@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { CourseCard } from "@/app/courses/component/courseCard";
 import { withLearningProgress } from "@/app/courses/courseProgress";
 import type { Course, ProgressStatus } from "@/app/courses/type";

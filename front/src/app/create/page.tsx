@@ -15,7 +15,7 @@ import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateThumbnail } from "@/app/create/_components/createThumbnail";
 import { createQuestProblemLabel } from "@/app/create/_components/createQuestPresentation";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const QuestCard = ({ quest }: { quest: CreateQuest }) => {
   const progress = quest.attempt ? Math.round((quest.attempt.bestScore / quest.maxScore) * 100) : 0;

@@ -29,7 +29,7 @@ import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
 import { isMascotId, type MascotId } from "@/app/component/mascot";
 import { MascotFigure } from "@/app/component/mascotFigure";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { peekClientQueryData } from "@/lib/clientQueryCache";
 
 const weekDays = ["日", "月", "火", "水", "木", "金", "土"];

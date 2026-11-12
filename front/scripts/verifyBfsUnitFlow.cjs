@@ -11,8 +11,8 @@ function load(filename) {
     fileName: filename, compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText, { exports, require: name => {
     if (name === "framer-motion") return { ...require(name), useReducedMotion: () => reducedMotion };
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename }); return exports;
 }
@@ -79,7 +79,9 @@ bfsUnitPhases.forEach((phase, index) => {
 assert.match(read(`${root}/player/LearningPlayer.tsx`), /endAction/, "player endAction");
 assert.match(read(`${root}/bfs/motivation/BfsMotivationCanvas.tsx`), /onExit/, "motivation canvas onExit");
 for (const file of ["motivation/BfsMotivationPreview", "execution/BfsExecutionPreview", "check/BfsCheckPreview", "code-mapping/BfsCodeMappingPreview", "code-check/BfsCodeCheckPreview", "consolidation/BfsConsolidationPreview", "implementation/BfsImplementationPreview"]) {
-  const source = read(`${root}/bfs/${file}.tsx`);
+  const adapter = read(`${root}/bfs/${file}.tsx`);
+  if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
+  const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
@@ -238,7 +240,7 @@ const fbDedicatedSource = read(path.resolve(__dirname, "../src/features/learning
 assert.match(fbDedicatedSource, /FeedbackObservation/, "The dedicated screen keeps the uptake observation");
 assert.match(fbDedicatedSource, /onUnavailable/, "The dedicated screen never strands a learner without feedback");
 assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
-const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
+const soundSource = read(path.resolve(__dirname, "../src/lib/audio/soundFeedback.tsx"));
 assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
 assert.match(soundSource, /resultCheerLarge: \{ src: "\/audio\/se\/cheer-large\.ogg"/, "The large cheer is registered in the sound config");
 const resultSource = read(`${root}/components/results/UnitResultScreens.tsx`);

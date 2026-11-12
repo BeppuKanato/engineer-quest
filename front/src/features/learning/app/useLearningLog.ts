@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect } from "react";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { auth } from "@/lib/firebase";
 import { LearningEventQueue, learningSessionId, attachLearningEventQueue, type LearningObservation } from "@/lib/learningEvents";
 

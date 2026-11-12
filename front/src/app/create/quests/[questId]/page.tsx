@@ -17,7 +17,7 @@ import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateThumbnail } from "@/app/create/_components/createThumbnail";
 import { createQuestMethodMessage, createQuestProblemLabel } from "@/app/create/_components/createQuestPresentation";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const kindLabel = { BASIC: "基本要件", OPTIONAL: "追加要件" } as const;
 

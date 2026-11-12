@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserSession } from "./userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 export const mascotOptions = [
   {

@@ -28,7 +28,7 @@ import { AppHeader } from "@/app/component/appHeader";
 import { CreateBreadcrumbs } from "@/app/create/_components/createBreadcrumbs";
 import { CreateQuestPreview } from "@/app/create/_components/createQuestPreview";
 import { invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { disposePyodideRunner, preparePyodide, runCreateQuestTests } from "@/lib/pyodideRunner";
 
 const categoryLabel = { FUNCTIONAL: "機能", QUALITY: "品質", PERFORMANCE: "性能", IMPLEMENTATION: "実装" } as const;

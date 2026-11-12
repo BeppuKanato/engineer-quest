@@ -11,7 +11,7 @@ import { getCollection, type CollectionResponse } from "@/api/collection.api";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 export default function CollectionPage() {
   const router = useRouter();

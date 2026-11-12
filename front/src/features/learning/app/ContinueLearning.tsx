@@ -3,7 +3,7 @@ import { Alert, Box, Button, Card, CardContent, LinearProgress, Stack, Typograph
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { getLearningProgress, type LearningProgress } from "@/api/learning.api";
 import { ApiError } from "@/lib/fetcher";
 import { learningUnits, resumePhaseIndex, unitUrl, type LearningUnit } from "./unitRegistry";

@@ -356,3 +356,10 @@ verify:implementation-workspaceでは実行器とエディタを置き換え、�
 二分探索、貪欲法、壁伸ばし法、穴掘り法を順に接続し、各単元のimplementation検証と型チェックを通した。7単元が同じworkspaceを利用し、単元側は教材・実行器・表示部品を渡す薄い構成になった。配置は既存の入力レベル・下書き処理と同じlearning/implementationに統一した（計画のcomponents/implementation案からの具体化）。
 
 まとめの検証は19件すべて成功: 7単元のimplementation、7単元のtrace、BFS自由実行、共有workspace、共有unitフロー、Lint、build。トレース・採点の検証にはCPython参照実行を含む。実ブラウザー入力の未確認事項は上記の通り残す。M06のコード移行と自動検証は完了し、認証後・実機・Monaco/Pyodideの全通し確認は残存確認として管理する。
+M06の追補: セッション移行時に7単元のunit検証も実行したところ、BFS等のソース検査に実装Preview内のembedded/onComplete記述を直接求める箇所が残っていた。薄いアダプターによるprops転送と共有workspaceの受け口を両方確認する形へ更新し、7単元のunit検証すべて成功した。
+
+## M07: app配下の共通基盤（進行中）
+
+### A: セッションと音
+
+userSessionをlib/sessionへ、soundFeedbackをlib/audioへ移した。処理本体は変更せず、全参照元と検証の解決先を更新。認証ロード、利用者別クエリキャッシュ、古い非同期結果の破棄、音量・有効設定の保存キー、provider順序を維持する。型、回答演出、7単元unit、共有実装workspace、Lint、buildが成功。実アカウントでのログイン・ログアウト・利用者切り替えは未実施。

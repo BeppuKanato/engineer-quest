@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { submitHexadResponse } from "@/api/hexad.api";
 import { ActionButton } from "@/app/component/actionButton";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import {
   HEXAD_QUESTIONS,
   LIKERT_OPTIONS,

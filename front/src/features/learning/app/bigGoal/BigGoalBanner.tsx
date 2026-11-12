@@ -17,7 +17,7 @@ import {
   getCurrentBigGoal,
   type BigGoal,
 } from "@/api/bigGoal.api";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { bigGoalProgressFact, bigGoalStatusLabel } from "./bigGoalPresentation";
 
 const cardSx = {

@@ -11,8 +11,8 @@ function load(filename) {
     fileName: filename, compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText, { exports, require: name => {
     if (name === "framer-motion") return { ...require(name), useReducedMotion: () => reducedMotion };
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename }); return exports;
 }
@@ -107,7 +107,9 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/BinarySearchMotivationPreview", "execution/BinarySearchExecutionPreview", "check/BinarySearchCheckPreview", "code-mapping/BinarySearchCodeMappingPreview", "code-check/BinarySearchCodeCheckPreview", "consolidation/BinarySearchConsolidationPreview", "implementation/BinarySearchImplementationPreview"]) {
-  const source = read(`${root}/binary-search/${file}.tsx`);
+  const adapter = read(`${root}/binary-search/${file}.tsx`);
+  if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
+  const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }

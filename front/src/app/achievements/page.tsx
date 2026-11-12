@@ -35,11 +35,11 @@ import {
   updateTargetAchievement,
 } from "@/api/achievements.api";
 import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
-import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { auth } from "@/lib/firebase";
 
 type AchievementSeries = {

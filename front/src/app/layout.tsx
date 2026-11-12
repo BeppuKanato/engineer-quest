@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SoundProvider } from "./component/soundFeedback";
+import { SoundProvider } from "@/lib/audio/soundFeedback";
 import { HexadRouteGuard } from "./component/hexadRouteGuard";
-import { UserSessionProvider } from "./component/userSession";
+import { UserSessionProvider } from "@/lib/session/userSession";
 import { AnswerFeedbackProvider } from "@/features/learning/assessment/AnswerFeedback";
 import "./globals.css";
 

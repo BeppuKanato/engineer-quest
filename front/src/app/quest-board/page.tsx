@@ -43,7 +43,7 @@ import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import type { Course } from "@/app/courses/type";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 
 const categoryColor: Record<QuestPostCategory, "primary" | "secondary" | "success" | "warning" | "info" | "default"> = {

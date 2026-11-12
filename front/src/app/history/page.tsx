@@ -31,7 +31,7 @@ import { getHistory, type HistoryEvent, type HistoryEventType, type HistoryRespo
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const eventMeta: Record<
   HistoryEventType,

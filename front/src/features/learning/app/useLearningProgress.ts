@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 import { getLearningProgress, type LearningProgress } from "@/api/learning.api";
 import { ApiError } from "@/lib/fetcher";
 

@@ -51,9 +51,9 @@ import { ActionButton } from "@/app/component/actionButton";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
-import { useSoundEffect } from "@/app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { fetchClientQuery, peekClientQueryData, queryTags, setClientQueryData } from "@/lib/clientQueryCache";
-import { useUserSession } from "@/app/component/userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const reactionMeta: Record<QuestReactionType, { label: string; icon: ReactNode }> = {
   LIKE: { label: "いいね", icon: <FavoriteBorderIcon /> },

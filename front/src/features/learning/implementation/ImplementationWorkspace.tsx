@@ -7,7 +7,7 @@ import { LEARNING_EDITOR_THEME, learningEditorTextCursor, setupLearningEditor } 
 import { disposePyodideRunner, preparePyodide } from "../../../lib/pyodideRunner";
 import type { PythonTraceResult } from "../../../lib/pythonTrace.types";
 import type { LearningInstrumentation } from "../instrumentation/useLearningVisit";
-import { useSoundEffect } from "../../../app/component/soundFeedback";
+import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { useErrorLineDecoration } from "../../../hooks/useErrorLineDecoration";
 import { DrawnCheck } from "../app/DrawnCheck";
 import { ResultConfetti } from "../app/ResultConfetti";

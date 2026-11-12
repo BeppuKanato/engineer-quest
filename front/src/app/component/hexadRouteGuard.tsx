@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { useUserSession } from "./userSession";
+import { useUserSession } from "@/lib/session/userSession";
 
 const isGuardExempt = (pathname: string) =>
   pathname === "/" ||
