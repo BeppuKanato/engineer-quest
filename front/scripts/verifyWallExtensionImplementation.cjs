@@ -283,7 +283,7 @@ assert(!runtimeFreeHtml.includes(editorText.syntaxNote), "the nothing-runs note 
 const lineSummaryHtml = renderToStaticMarkup(createElement(ImplementationResults, { outcomes: [{ id: "D1", passed: false, error: "runtime", errorLine: 7 }] }));
 assert(lineSummaryHtml.includes(content.display.messages.runtime + "（7行目付近）"), "test summary names the learner line");
 assert(lineSummaryHtml.includes('data-error-line="7"'), "test summary exposes the error line");
-const errorLinePreviewSource = fs.readFileSync(`${root}/wall-extension/implementation/WallExtensionImplementationPreview.tsx`, "utf8");
+const errorLinePreviewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
 assert.match(errorLinePreviewSource, /useErrorLineDecoration/, "preview highlights the error line in the editor (#325)");
 assert.match(errorLinePreviewSource, /setErrorLine\(undefined\)/, "changing code or rerunning clears the error line");
 assert(fs.readFileSync(path.resolve(root, "../../app/globals.css"), "utf8").includes(".eq-error-line-highlight"), "the error line highlight has a global style");
@@ -399,7 +399,9 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
   const impl = (file) => fs.readFileSync(`${root}/wall-extension/implementation/${file}`, "utf8");
-  const previewSource = impl("WallExtensionImplementationPreview.tsx");
+  const adapterSource = impl("WallExtensionImplementationPreview.tsx");
+  assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
+  const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
   assert.match(previewSource, /theme={LEARNING_EDITOR_THEME}/, "editor uses the shared learning theme");
   assert.match(previewSource, /beforeMount={setupLearningEditor}/, "editor setup is shared");
   assert.match(previewSource, /learningEditorTextCursor/, "editor text cursor is the shared dark I-beam");
@@ -434,7 +436,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");
-  assert(previewSource.includes("WallExtensionTraceDialog"), "visual debugging is wired in issue #213");
-  assert(previewSource.includes("traceWallExtensionCode"), "the preview acquires the learner trace");
+  assert(adapterSource.includes("WallExtensionTraceDialog"), "visual debugging is wired in issue #213");
+  assert(adapterSource.includes("traceWallExtensionCode"), "the preview acquires the learner trace");
   console.log("Wall-extension implementation: five cases verified against an independent generator and CPython reference, perfect-maze properties, typical-mistake mutations (pillar step, up-delta sign, four directions below the first row), canonical skeleton and Parsons reuse, hint gating, grid difference display, free-execution board rendering, hidden-case redaction, all-pass gate and runner progress/error/cancellation checks passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });
