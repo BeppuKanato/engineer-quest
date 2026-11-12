@@ -1,7 +1,8 @@
 "use client";
 
-import CloseIcon from "@mui/icons-material/Close";
-import { Box, Dialog, IconButton, Typography } from "@mui/material";
+import { LearningDialogFrame } from "../../components/dialogs/LearningDialogFrame";
+
+import { Box, Typography } from "@mui/material";
 
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 
@@ -13,11 +14,7 @@ import type { BubbleSortTracePlayback } from "./trace.types";
 
 /** モーダルの構成だけを持つ。描画と再生制御は既存部品へ渡す。 */
 export function BubbleSortTraceDialog({ playback, onClose, onLearningEvent, active = true }: LearningInstrumentation & { playback: BubbleSortTracePlayback; onClose: () => void }) {
-  return <Dialog open onClose={onClose} maxWidth={false} aria-label={text.dialog}
-    slotProps={{ paper: { "aria-label": text.dialog, sx: { width: "84vw", height: "84dvh", maxHeight: "calc(100dvh - 16px)", m: 1, borderRadius: 0, boxShadow: "none", bgcolor: playerTokens.surface, color: playerTokens.text } } }}>
-    <Box sx={{ display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
-      <IconButton aria-label={text.close} onClick={onClose} sx={{ color: playerTokens.control }}><CloseIcon /></IconButton>
-    </Box>
+  return <LearningDialogFrame label={text.dialog} closeLabel={text.close} onClose={onClose} dialogLabel={text.dialog} paperSx={{ color: playerTokens.text }}>
     {playback.notice && <Typography component="p" role="status" sx={{ textAlign: "center", px: 1 }}>{playback.notice}</Typography>}
     <LearningPlayer onLearningEvent={onLearningEvent} active={active} content={playback.content} renderCanvas={canvas => <Box data-trace-mode={playback.mode} sx={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0 }}>
       <Box sx={{ flex: 1, minHeight: 220 }}><BubbleSortExecutionCanvas canvas={canvas} /></Box>
@@ -31,5 +28,5 @@ export function BubbleSortTraceDialog({ playback, onClose, onLearningEvent, acti
         </Box>)}
       </Box>
     </Box>} />
-  </Dialog>;
+  </LearningDialogFrame>;
 }

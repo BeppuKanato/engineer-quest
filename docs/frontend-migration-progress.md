@@ -335,3 +335,7 @@ M03完了時点ではM04以降が未着手だった。以降の進捗は下記�
 | maze-digging | 1366×768 | 495.44 | 620.00 | define-function → initialize-grid |
 | maze-digging | 2560×1440 | 1101.56 | 1016.81 | define-function → initialize-grid |
 | maze-digging | 799×640 | 480.00 | 620.00 | define-function → initialize-grid |
+
+### B: 復習・トレースの外枠
+
+LearningDialogFrameへ幅84vw・高さ84dvh・最大高・閉じる操作を抽出し、共通の復習ダイアログと7単元のトレースへ接続。各トレースの図、変数一覧、最終値、途中停止やfallbackの説明・再生内容は変更していない。7単元のtrace verify、型・Lint・buildが成功。ブラウザーでも1366×768と799×640で復習を開き、84vw/84dvhの寸法、閉じる操作、元の設問への復帰を確認した。Pyodideでの入力コードからトレース取得まではM06の確認対象として残す。
