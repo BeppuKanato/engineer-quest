@@ -39,7 +39,7 @@ import {
   type QuestPostSummary,
 } from "@/api/questBoard.api";
 import { AppHeader } from "@/app/component/appHeader";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
 import type { Course } from "@/app/courses/type";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";

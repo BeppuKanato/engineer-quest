@@ -39,8 +39,8 @@ import {
   type ProfileResponse,
   updateProfileMascot,
 } from "@/api/profile.api";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
-import { ActionButton } from "@/app/component/actionButton";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { AppHeader } from "@/app/component/appHeader";
 import { isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";

@@ -47,9 +47,9 @@ import {
   type QuestPostStatus,
   type QuestReactionType,
 } from "@/api/questBoard.api";
-import { ActionButton } from "@/app/component/actionButton";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { AppHeader } from "@/app/component/appHeader";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";
 import { fetchClientQuery, peekClientQueryData, queryTags, setClientQueryData } from "@/lib/clientQueryCache";

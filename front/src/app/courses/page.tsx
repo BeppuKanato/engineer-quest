@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
 import { withLearningProgress } from "./courseProgress";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { useUserSession } from "@/lib/session/userSession";
 import { peekClientQueryData } from "@/lib/clientQueryCache";
 import { ApiError } from "@/lib/fetcher";

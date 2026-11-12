@@ -5,7 +5,6 @@ import { Alert, Box, Button, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AppHeader } from "@/app/component/appHeader";
 import { useUserSession } from "@/lib/session/userSession";
 import { ApiError, fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type AchievedBigGoal, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
@@ -38,11 +37,11 @@ import { BigGoalNextProposal } from "./bigGoal/BigGoalNextProposal";
 import { bigGoalProgressFact } from "./bigGoal/bigGoalPresentation";
 import { FeedbackScreen, type FeedbackGoalSummary } from "./feedback/FeedbackScreen";
 
-export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
+export function LearningScreen({ courseId, reviewPhaseKey, header }: { courseId: string; reviewPhaseKey?: string; header: ReactNode }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
-    <Box sx={{ flexShrink: 0 }}><AppHeader /></Box>
+    <Box sx={{ flexShrink: 0 }}>{header}</Box>
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <ProgressLoadingSkeleton variant="screen" /> :

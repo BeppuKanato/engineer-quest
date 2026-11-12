@@ -363,3 +363,6 @@ M06の追補: セッション移行時に7単元のunit検証も実行したと�
 ### A: セッションと音
 
 userSessionをlib/sessionへ、soundFeedbackをlib/audioへ移した。処理本体は変更せず、全参照元と検証の解決先を更新。認証ロード、利用者別クエリキャッシュ、古い非同期結果の破棄、音量・有効設定の保存キー、provider順序を維持する。型、回答演出、7単元unit、共有実装workspace、Lint、buildが成功。実アカウントでのログイン・ログアウト・利用者切り替えは未実施。
+### B: 共通UIとヘッダーの構成
+
+ActionButtonとAppBreadcrumbsをcomponentsへ移動。AppHeaderViewはURLとプロフィールの表示要素を受け取り、利用者・マスコットの取得はapp/component/appHeaderに残した。学習画面と単元概要はapp側からheaderを受け取り、app内部のヘッダーをimportしない。ナビゲーション、寸法、待機中表示を維持した。型、マスコット表示、応答表示、パンくず、Lint、buildが成功。

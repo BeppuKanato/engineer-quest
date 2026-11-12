@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { getCollection, type CollectionKnowledgeTip, type CollectionResponse } from "@/api/collection.api";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { sortKnowledgeCards } from "@/features/collection/knowledgeCards";
 import { UnknownKnowledgeCard } from "@/features/collection/UnknownKnowledgeCard";

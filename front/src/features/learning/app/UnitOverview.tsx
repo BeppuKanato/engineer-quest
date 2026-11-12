@@ -5,10 +5,9 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getAchievements, type AchievementItem } from "@/api/achievements.api";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
-import { AppHeader } from "@/app/component/appHeader";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
 import { useUserSession } from "@/lib/session/userSession";
 import { startLearningUnit } from "@/api/learning.api";
@@ -23,7 +22,7 @@ import { useLearningLog } from "./useLearningLog";
 
 // 波形の形状は unitPathGeometry に共通化（最終リザルトのミニマップと共有）。
 
-export function UnitOverview({ courseId }: { courseId: string }) {
+export function UnitOverview({ courseId, header }: { courseId: string; header: ReactNode }) {
   const unit = findLearningUnit(courseId), router = useRouter();
   const { firebaseUser } = useUserSession();
   const { progress, loading, error, reload, authenticated } = useLearningProgress(unit?.courseId);
@@ -42,7 +41,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
     } catch (error) { setStartError(learningErrorMessage(error)); setStarting(false); }
   };
   return <Box sx={{ minHeight: "100dvh", bgcolor: tokens.background, color: tokens.text }}>
-    <AppHeader />
+    {header}
     <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
       <AppBreadcrumbs items={[{ label: "コース", href: "/courses" }, { label: unit?.title ?? "単元" }]} />
     </Container>

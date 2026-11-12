@@ -36,7 +36,7 @@ import {
 } from "@/api/achievements.api";
 import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/lib/session/userSession";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { useSoundEffect } from "@/lib/audio/soundFeedback";

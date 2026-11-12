@@ -28,7 +28,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { getHistory, type HistoryEvent, type HistoryEventType, type HistoryResponse } from "@/api/history.api";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/lib/session/userSession";

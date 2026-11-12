@@ -11,7 +11,7 @@ const staleTimeOf = (source) => {
 };
 
 // 1. Header navigation must not block the screen with a full-screen overlay (#138 N4).
-const header = read('app/component/appHeader.tsx');
+const header = read('app/component/appHeader.tsx') + read('components/layouts/AppHeaderView.tsx');
 assert(!header.includes('PageTransitionOverlay'), 'appHeader must not render PageTransitionOverlay');
 assert(!header.includes('isNavigating'), 'appHeader must not track a blocking navigation state');
 

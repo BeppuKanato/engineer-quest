@@ -27,8 +27,8 @@ import {
   type QuestBoardOption,
   type QuestPostCategory,
 } from "@/api/questBoard.api";
-import { ActionButton } from "@/app/component/actionButton";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";

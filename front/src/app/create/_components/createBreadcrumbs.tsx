@@ -1,4 +1,4 @@
-import { AppBreadcrumbs, type BreadcrumbItem } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs, type BreadcrumbItem } from "@/components/layouts/AppBreadcrumbs";
 
 export type CreateBreadcrumbItem = BreadcrumbItem;
 

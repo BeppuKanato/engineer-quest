@@ -8,7 +8,7 @@ import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getCollection, type CollectionResponse } from "@/api/collection.api";
-import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
+import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/lib/session/userSession";

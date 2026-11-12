@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { submitHexadResponse } from "@/api/hexad.api";
-import { ActionButton } from "@/app/component/actionButton";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { useUserSession } from "@/lib/session/userSession";
 import {
   HEXAD_QUESTIONS,
