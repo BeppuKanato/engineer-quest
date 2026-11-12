@@ -43,7 +43,7 @@ function load(filename) {
 
 const root = path.resolve(__dirname, "../src/features/learning");
 const { LearningUnitPreview } = load(root + "/unit/LearningUnitPreview.tsx");
-const { DfsUnitPreview } = load(root + "/dfs/unit/DfsUnitPreview.tsx");
+const { DfsUnitPreview } = load(root + "/units/dfs/unit/DfsUnitPreview.tsx");
 const { BfsUnitPreview } = load(root + "/units/bfs/unit/BfsUnitPreview.tsx");
 const { PhaseBridgeScreen } = load(root + "/components/results/PhaseBridgeScreen.tsx");
 const { UnitResultScreen, UnitFinalResult } = load(root + "/components/results/UnitResultScreens.tsx");

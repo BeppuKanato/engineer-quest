@@ -5,7 +5,7 @@ import { bubbleSortUnitIntro, bubbleSortUnitPhases, bubbleSortUnitTitle } from "
 import { mazeDiggingUnitIntro, mazeDiggingUnitPhases, mazeDiggingUnitTitle } from "../maze-digging/unit/unit.content";
 import { binarySearchUnitIntro, binarySearchUnitPhases, binarySearchUnitTitle } from "../binary-search/unit/unit.content";
 import { greedyCoinsUnitIntro, greedyCoinsUnitPhases, greedyCoinsUnitTitle } from "../greedy-coins/unit/unit.content";
-import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../dfs/unit/unit.content";
+import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../units/dfs/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";
 
 export const learningUnits = [

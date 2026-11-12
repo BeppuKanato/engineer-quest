@@ -18,17 +18,17 @@ function load(filename) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   vm.runInNewContext(source, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 
 const root = path.resolve(__dirname, "../src/features/learning");
-const { dfsCodeCheckContent: content } = load(`${root}/dfs/code-check/codeCheck.content.ts`);
-const { dfsCode, dfsCodeSource, dfsCodeLineNumber } = load(`${root}/dfs/code-mapping/dfsCode.ts`);
-const { dfsCodeMappingContent: mapping } = load(`${root}/dfs/code-mapping/codeMapping.content.ts`);
+const { dfsCodeCheckContent: content } = load(`${root}/units/dfs/code-check/codeCheck.content.ts`);
+const { dfsCode, dfsCodeSource, dfsCodeLineNumber } = load(`${root}/units/dfs/code-mapping/dfsCode.ts`);
+const { dfsCodeMappingContent: mapping } = load(`${root}/units/dfs/code-mapping/codeMapping.content.ts`);
 const { CodeDisplay } = load(`${root}/code/CodeDisplay.tsx`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete } = load(`${root}/assessment/assessment.ts`);

@@ -16,17 +16,17 @@ function load(filename) {
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename, "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([base + ".ts", base + ".tsx"].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 
 const root = path.resolve(__dirname, "../src/features/learning");
-const { dfsConsolidationContent: content } = load(root + "/dfs/consolidation/consolidation.content.ts");
-const { dfsCode, dfsCodeSource } = load(root + "/dfs/code-mapping/dfsCode.ts");
-const { dfsCodeMappingContent: mapping } = load(root + "/dfs/code-mapping/codeMapping.content.ts");
+const { dfsConsolidationContent: content } = load(root + "/units/dfs/consolidation/consolidation.content.ts");
+const { dfsCode, dfsCodeSource } = load(root + "/units/dfs/code-mapping/dfsCode.ts");
+const { dfsCodeMappingContent: mapping } = load(root + "/units/dfs/code-mapping/codeMapping.content.ts");
 const { searchGraph } = load(root + "/graphs/searchGraph.ts");
 const { createAssessmentState, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment } = load(root + "/assessment/assessment.ts");
 const { selectReviewContent } = load(root + "/review/reviewContent.ts");

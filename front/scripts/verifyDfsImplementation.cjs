@@ -17,23 +17,23 @@ function load(filename) {
     fileName: filename,
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([base + ".ts", base + ".tsx"].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 
 const root = path.resolve(__dirname, "../src/features/learning");
-const { dfsImplementationContent: content, freeDisplayCase } = load(root + "/dfs/implementation/implementation.content.ts");
-const { dfsCode, dfsCodeSource } = load(root + "/dfs/code-mapping/dfsCode.ts");
-const { transferGraph } = load(root + "/dfs/consolidation/consolidation.content.ts");
+const { dfsImplementationContent: content, freeDisplayCase } = load(root + "/units/dfs/implementation/implementation.content.ts");
+const { dfsCode, dfsCodeSource } = load(root + "/units/dfs/code-mapping/dfsCode.ts");
+const { transferGraph } = load(root + "/units/dfs/consolidation/consolidation.content.ts");
 const { searchGraph, searchGraphAdjacency } = load(root + "/graphs/searchGraph.ts");
 const { runImplementationTests, allTestsPassed } = load(root + "/units/bfs/implementation/implementation.ts");
 const { runFreeDisplayCase } = load(root + "/implementation/freeExecution.ts");
 const { countImplementationPlaceholders } = load(root + "/implementation/inputLevel.ts");
 const { ParsonsBoard } = load(root + "/components/assessment/ParsonsBoard.tsx");
-const { DfsImplementationResults, VisitOrderOutput } = load(root + "/dfs/implementation/ImplementationResults.tsx");
+const { DfsImplementationResults, VisitOrderOutput } = load(root + "/units/dfs/implementation/ImplementationResults.tsx");
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const render = (Component, props) => renderToStaticMarkup(createElement(Component, props));

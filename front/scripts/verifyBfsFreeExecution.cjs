@@ -16,8 +16,8 @@ function load(filename) {
   const exports={};cache.set(filename,exports);
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{fileName:filename,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,
     {exports,Worker:FakeWorker,window:{setTimeout:(callback,ms)=>{const id=++timerId;timers.set(id,{callback,ms});return id;},clearTimeout:id=>timers.delete(id)},require:name=>{
-      if(!name.startsWith('.'))return require(name);
-      const base=path.resolve(path.dirname(filename),name);return load([base+'.ts',base+'.tsx'].find(fs.existsSync));
+      if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);return load([base+'.ts',base+'.tsx'].find(fs.existsSync));
     }},{filename});return exports;
 }
 const root=path.resolve(__dirname,'../src'),plain=value=>JSON.parse(JSON.stringify(value));

@@ -18,20 +18,20 @@ function load(filename) {
     fileName: filename,
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([base + ".ts", base + ".tsx"].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 
 const root = path.resolve(__dirname, "../src/features/learning");
-const { dfsCodeSource: code } = load(root + "/dfs/code-mapping/dfsCode.ts");
-const { dfsExecutionContent } = load(root + "/dfs/execution/execution.content.ts");
-const { DfsExecutionCanvas } = load(root + "/dfs/execution/DfsExecutionCanvas.tsx");
-const { freeDisplayCase: d1 } = load(root + "/dfs/implementation/implementation.content.ts");
-const { convertDfsTrace } = load(root + "/dfs/trace/convertTrace.ts");
-const { traceDfsCode, dfsTraceEventLimit } = load(root + "/dfs/trace/acquireTrace.ts");
+const { dfsCodeSource: code } = load(root + "/units/dfs/code-mapping/dfsCode.ts");
+const { dfsExecutionContent } = load(root + "/units/dfs/execution/execution.content.ts");
+const { DfsExecutionCanvas } = load(root + "/units/dfs/execution/DfsExecutionCanvas.tsx");
+const { freeDisplayCase: d1 } = load(root + "/units/dfs/implementation/implementation.content.ts");
+const { convertDfsTrace } = load(root + "/units/dfs/trace/convertTrace.ts");
+const { traceDfsCode, dfsTraceEventLimit } = load(root + "/units/dfs/trace/acquireTrace.ts");
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const projected = canvas => ({ ...canvas.state, operation: canvas.operation ?? canvas.state.operation, highlights: canvas.highlights });
@@ -120,7 +120,7 @@ const states = playback => plain(playback.content.steps.map(step => projected(st
   runner.preparePyodide = async () => {};
   await assert.rejects(traceDfsCode(code, () => false), /cancelled/);
   assert.equal(callCount, 1);
-  const workspace = fs.readFileSync(root + "/dfs/implementation/DfsImplementationPreview.tsx", "utf8");
+  const workspace = fs.readFileSync(root + "/units/dfs/implementation/DfsImplementationPreview.tsx", "utf8");
   assert.match(workspace, /visualDebug: \{ acquire: traceDfsCode, convert: convertDfsTrace, Dialog: DfsTraceDialog \}/);
   console.log("DFS trace verified: 17 exact lesson snapshots, actual reordered visits, renamed variables, safe fallbacks, shared canvas and isolated D1 acquisition.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

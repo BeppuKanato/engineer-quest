@@ -11,14 +11,14 @@ function load(filename) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   vm.runInNewContext(source, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/dfs/motivation`;
+const feature = `${root}/units/dfs/motivation`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { dfsMotivationContent: content, dfsMotivationWalk } = load(`${feature}/motivation.content.ts`);
 const { validateDfsMotivationCanvas: validate } = load(`${feature}/motivation.types.ts`);
@@ -106,7 +106,7 @@ assert(firstHtml.includes('aria-label="導入"') && firstHtml.includes(steps[0].
 const canvasSource = fs.readFileSync(`${feature}/DfsMotivationCanvas.tsx`, "utf8");
 const sharedSource = fs.readFileSync(`${root}/player/MotivationDrawing.tsx`, "utf8");
 const bfsCanvasSource = fs.readFileSync(`${root}/units/bfs/motivation/BfsMotivationCanvas.tsx`, "utf8");
-for (const source of [canvasSource, bfsCanvasSource]) assert(source.includes('from "../../player/MotivationDrawing"'));
+for (const source of [canvasSource, bfsCanvasSource]) assert(source.includes('from "../../../player/MotivationDrawing"'));
 assert(canvasSource.includes("GraphNodes") && canvasSource.includes("GraphEdges") && canvasSource.includes("GraphViewport"));
 assert(canvasSource.includes("useReducedMotion") && sharedSource.includes("graphGeometry"));
 const previewSource = fs.readFileSync(`${feature}/DfsMotivationPreview.tsx`, "utf8");

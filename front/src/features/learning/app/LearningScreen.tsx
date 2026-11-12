@@ -14,7 +14,7 @@ import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../units/bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
 import type { UnitPhaseSummary } from "../types/unit.types";
-import { DfsUnitPreview } from "../dfs/unit/DfsUnitPreview";
+import { DfsUnitPreview } from "../units/dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
 import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";

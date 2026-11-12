@@ -13,8 +13,8 @@ function createLoader(overrides = {}) {
     }).outputText;
     vm.runInNewContext(source, { exports, require: name => {
       if (Object.hasOwn(overrides, name)) return overrides[name];
-      if (!name.startsWith(".")) return require(name);
-      const base = path.resolve(path.dirname(filename), name);
+      if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
       return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
     } }, { filename });
     return exports;
@@ -25,8 +25,8 @@ const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const node = nodeId => ({ kind: "node", nodeId });
-const { dfsCheckContent: content } = load(file("dfs/check/check.content.ts"));
-const { dfsExecutionContent: execution } = load(file("dfs/execution/execution.content.ts"));
+const { dfsCheckContent: content } = load(file("units/dfs/check/check.content.ts"));
+const { dfsExecutionContent: execution } = load(file("units/dfs/execution/execution.content.ts"));
 const { searchGraph: graph } = load(file("graphs/searchGraph.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
@@ -101,8 +101,8 @@ const invalid = plain(content); invalid.questions[1].requires.answer.nodeId = "A
 assert.throws(() => validateAssessment(invalid));
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
-const { DfsCheckCanvas } = load(file("dfs/check/DfsCheckCanvas.tsx"));
-const { DfsExecutionCanvas } = load(file("dfs/execution/DfsExecutionCanvas.tsx"));
+const { DfsCheckCanvas } = load(file("units/dfs/check/DfsCheckCanvas.tsx"));
+const { DfsExecutionCanvas } = load(file("units/dfs/execution/DfsExecutionCanvas.tsx"));
 for (const q of content.questions) {
   const canvas = get(execution, q.stepId).canvas, saved = JSON.stringify(canvas);
   const html = renderToStaticMarkup(React.createElement(DfsCheckCanvas, { canvas, questionId: q.id, nodeIds: q.nodeIds, onAnswer() {} }));
@@ -129,9 +129,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect(effect) { effect(); },
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { DfsCheckPreview } = ui(file("dfs/check/DfsCheckPreview.tsx"));
-const Canvas = ui(file("dfs/check/DfsCheckCanvas.tsx")).DfsCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { DfsCheckPreview } = ui(file("units/dfs/check/DfsCheckPreview.tsx"));
+const Canvas = ui(file("units/dfs/check/DfsCheckCanvas.tsx")).DfsCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -183,9 +183,9 @@ assert.deepEqual(JSON.parse(JSON.stringify(summaries[0].assessmentEvidence.recor
 
 const overlay = fs.readFileSync(file("assessment/NodeAnswerOverlay.tsx"), "utf8");
 assert.match(overlay, /prefers-reduced-motion: reduce/u); assert.match(overlay, /answer-cue 700ms ease-in-out 2/u);
-const preview = fs.readFileSync(file("dfs/check/DfsCheckPreview.tsx"), "utf8");
+const preview = fs.readFileSync(file("units/dfs/check/DfsCheckPreview.tsx"), "utf8");
 assert.match(preview, /useAssessmentFeedback\(dfsCheckContent, session, active && !reviewOpen\)/u);
 assert.match(preview, /AnswerFeedbackNotice assessmentId=\{dfsCheckContent.id\}/u);
 assert(!/fetch\(|localStorage|sessionStorage/u.test(preview), "The preview does not persist progress");
-for (const relative of ["units/bfs/check/BfsCheckCanvas.tsx", "dfs/check/DfsCheckCanvas.tsx"]) assert.match(fs.readFileSync(file(relative), "utf8"), /<NodeAnswerOverlay/u);
+for (const relative of ["units/bfs/check/BfsCheckCanvas.tsx", "units/dfs/check/DfsCheckCanvas.tsx"]) assert.match(fs.readFileSync(file(relative), "utf8"), /<NodeAnswerOverlay/u);
 console.log("DFS check verified: F/E linked questions, original DFS snapshots/review, soft gate and retries, immutable first results, callback locking, shared answer controls, feedback wiring and standalone scope.");

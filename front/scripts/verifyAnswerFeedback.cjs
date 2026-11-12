@@ -17,8 +17,8 @@ function createLoader(overrides = {}, globals = {}) {
     }).outputText;
     vm.runInNewContext(source, { ...globals, exports, require: name => {
       if (Object.hasOwn(overrides, name)) return overrides[name];
-      if (!name.startsWith(".")) return require(name);
-      const base = path.resolve(path.dirname(file), name);
+      if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(file), name);
       return load([`${base}.ts`, `${base}.tsx`].find(candidate => fs.existsSync(candidate)));
     } }, { filename: file });
     return exports;

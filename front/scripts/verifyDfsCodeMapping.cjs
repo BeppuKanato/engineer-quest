@@ -12,21 +12,21 @@ function load(filename) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   vm.runInNewContext(source, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "dfs/code-mapping";
+const feature = "units/dfs/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { dfsCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { dfsCode, dfsCodeSource, dfsCodeLineNumber } = load(file(`${feature}/dfsCode.ts`));
 const { validateDfsCodeMappingCanvas: validate, defineDfsCodeMappingContent } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeExecutionView, codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { dfsExecutionContent: execution } = load(file("dfs/execution/execution.content.ts"));
+const { dfsExecutionContent: execution } = load(file("units/dfs/execution/execution.content.ts"));
 const { searchGraphAdjacency: graph } = load(file("graphs/searchGraph.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { DfsCodeMappingCanvas } = load(file(`${feature}/DfsCodeMappingCanvas.tsx`));

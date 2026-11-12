@@ -12,20 +12,20 @@ function load(filename) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   vm.runInNewContext(source, { exports, require: name => {
-    if (!name.startsWith(".")) return require(name);
-    const base = path.resolve(path.dirname(filename), name);
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const base = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(filename), name);
     return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
   } }, { filename });
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/dfs/execution`;
+const feature = `${root}/units/dfs/execution`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { dfsExecutionContent: content } = load(`${feature}/execution.content.ts`);
 const { validateDfsExecutionCanvas: validate } = load(`${feature}/execution.types.ts`);
 const { searchGraph: graph, searchGraphAdjacency: adjacency, searchGraphNodes, searchGraphEdges } = load(`${root}/graphs/searchGraph.ts`);
 const { bfsExecutionContent: bfs } = load(`${root}/units/bfs/execution/execution.content.ts`);
-const { dfsMotivationContent: motivation } = load(`${root}/dfs/motivation/motivation.content.ts`);
+const { dfsMotivationContent: motivation } = load(`${root}/units/dfs/motivation/motivation.content.ts`);
 const { DfsExecutionCanvas } = load(`${feature}/DfsExecutionCanvas.tsx`);
 const { DfsExecutionPreview } = load(`${feature}/DfsExecutionPreview.tsx`);
 assert.equal(content.id, "dfs-execution"); assert.equal(content.phase, 2); assert.equal(content.stageName, "動きの説明");

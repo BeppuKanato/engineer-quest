@@ -13,7 +13,8 @@ function load(file) {
   if(cache.has(file)) return cache.get(file);
   const exports = {}; cache.set(file,exports);
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{
-    exports,require(name){if(!name.startsWith("."))return require(name);const target=path.resolve(path.dirname(file),name);return load([target+".ts",target+".tsx"].find(candidate=>fs.existsSync(candidate)));}
+    exports,require(name){if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const target = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(file), name);return load([target+".ts",target+".tsx"].find(candidate=>fs.existsSync(candidate)));}
   },{filename:file});return exports;
 }
 const units = [["bfs","bfs"],["dfs","dfs"],["bubble-sort","bubbleSort"],["binary-search","binarySearch"],["greedy-coins","greedyCoins"],["wall-extension","wallExtension"],["maze-digging","mazeDigging"]];

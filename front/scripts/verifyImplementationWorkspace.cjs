@@ -31,8 +31,8 @@ function load(file) {
     if(name.endsWith("/useImplementationInputLevel"))return input;
     if(name.endsWith("/soundFeedback"))return {useSoundEffect:()=>({play:name=>sounds.push(name)})};
     if(name.endsWith("/useErrorLineDecoration"))return {useErrorLineDecoration(){}};
-    if(!name.startsWith("."))return require(name);
-    const target=path.resolve(path.dirname(file),name);return load([target+".ts",target+".tsx"].find(candidate=>fs.existsSync(candidate)));
+    if (!name.startsWith(".") && !name.startsWith("@/")) return require(name);
+    const target = name.startsWith("@/") ? path.resolve(__dirname, "../src", name.slice(2)) : path.resolve(path.dirname(file), name);return load([target+".ts",target+".tsx"].find(candidate=>fs.existsSync(candidate)));
   }},{filename:file});return exports;
 }
 const root=path.resolve(__dirname,"../src/features/learning");
