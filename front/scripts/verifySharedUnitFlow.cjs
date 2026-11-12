@@ -55,6 +55,7 @@ const cases = [
   ["binary-search", "BinarySearch", "binarySearch"],
   ["greedy-coins", "GreedyCoins", "greedyCoins"],
   ["wall-extension", "WallExtension", "wallExtension"],
+  ["maze-digging", "MazeDigging", "mazeDigging"],
 ];
 let tree;
 function draw(entry) {
