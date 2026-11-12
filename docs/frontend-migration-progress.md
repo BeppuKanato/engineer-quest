@@ -403,3 +403,10 @@ HistoryScreenへ日付・種別フィルター、集計、カレンダー、取�
 verify:page-layout:browserで8種類×4サイズ（799×640、1366×768、1536×864、2560×1440）の32条件を比較し、旧Containerと幅・中央寄せ・各辺の余白が一致した。型、パンくず、応答表示、Lint、buildも成功。これは枠の比較であり、認証後の画面全体やフォーム操作の検証とは区別する。
 
 M08の対象ページのコード分割・共通枠適用は完了。実認証、送信、Pythonブラウザー実行、実機ディスプレイ確認は別の残存確認として扱う。
+## M09: 依存検査と残存整理（進行中）
+
+### A: 依存方向の検査
+
+APIの完了保存型をapi/types/learningへ置き、assessmentEvidenceの戻り値と単元サマリを同じ型へ接続した。入力レベルは共通型、学習演出とコレクションで使うカード配色はconfigへ配置。Home/Coursesも共有PageIntegrationへそろえた。実装を変えず、API→BFS、learning→collectionの残り2件を解消した。
+
+ESLintにimport-boundariesを追加。共有領域→features/app、feature→app、独立feature間の内部参照、学習共通部品→特定単元を検出する。別名・相対指定、再export、動的import、型参照、requireをテストし、許可するappの組み立てと同一feature内の参照も確認した。対象ソースに境界違反0、抑制コメント・全体無効化なし。型、回答完了、共有単元フロー、報酬、フィードバック、BFS単元、Lint、buildが成功。

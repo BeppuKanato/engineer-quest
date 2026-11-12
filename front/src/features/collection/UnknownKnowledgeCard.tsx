@@ -1,6 +1,6 @@
 import StyleIcon from "@mui/icons-material/Style";
 import { Box, Typography } from "@mui/material";
-import { uncollectedTone as tone } from "./knowledgeCard.tokens";
+import { uncollectedTone as tone } from "@/config/knowledgeCards";
 
 /** 未所持分は操作要素にせず、内容・レア度を示さない共通の影にする。 */
 export function UnknownKnowledgeCard() {

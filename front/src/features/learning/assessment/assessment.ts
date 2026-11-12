@@ -1,3 +1,5 @@
+import type { AssessmentEvidence } from "@/api/types/learning";
+
 /** 実装済みの入力形式だけを扱う。ノード・選択肢・コード穴埋め・Parsons。 */
 export type NodeAnswer = { readonly kind: "node"; readonly nodeId: string } | { readonly kind: "none" };
 export type ChoiceAnswer = { readonly kind: "choice"; readonly choiceId: string };
@@ -220,7 +222,7 @@ function newEvidenceSession() {
   return { id: globalThis.crypto?.randomUUID?.() ?? `assessment-${lastSessionTime}-${Math.random().toString(36).slice(2)}`, startedAt: lastSessionTime };
 }
 /** 完了保存の根拠。非同期の観測キューとは独立して同じ回答状態から取り出す。 */
-export function assessmentEvidence(content: AssessmentContent, state: AssessmentState) {
+export function assessmentEvidence(content: AssessmentContent, state: AssessmentState): AssessmentEvidence {
   if (!state.evidenceSession) throw new Error("Missing assessment session");
   return { version: 1 as const, assessmentId: content.id, sessionId: state.evidenceSession.id,
     startedAt: state.evidenceSession.startedAt,

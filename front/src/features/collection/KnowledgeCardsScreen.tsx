@@ -17,7 +17,7 @@ import { getCollection, type CollectionKnowledgeTip, type CollectionResponse } f
 import { AppBreadcrumbs } from "@/components/layouts/AppBreadcrumbs";
 import { sortKnowledgeCards } from "@/features/collection/knowledgeCards";
 import { UnknownKnowledgeCard } from "@/features/collection/UnknownKnowledgeCard";
-import { knowledgeCardTones as rarityStyle } from "@/features/collection/knowledgeCard.tokens";
+import { knowledgeCardTones as rarityStyle } from "@/config/knowledgeCards";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/lib/session/userSession";
 

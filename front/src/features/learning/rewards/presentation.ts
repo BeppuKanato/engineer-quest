@@ -1,5 +1,5 @@
 import type { UnlockedAchievement } from "../../../api/learning.api";
-import { knowledgeCardTones } from "../../collection/knowledgeCard.tokens";
+import { knowledgeCardTones } from "@/config/knowledgeCards";
 
 export type RewardStage = "anticipation" | "appearance" | "praise";
 export const rewardStages: readonly RewardStage[] = ["anticipation", "appearance", "praise"];

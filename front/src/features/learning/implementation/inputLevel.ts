@@ -3,7 +3,8 @@
  * 書く前に3段階から選び、初期テンプレートだけが変わる。テストと完了条件はレベルによらず同一。
  * 下書きはレベルごとに分け、「全部書く」だけは従来の下書きキー（baseKey）をそのまま使って既存の下書きを引き継ぐ。
  */
-export type ImplementationInputLevel = "full" | "skeleton" | "fill-in";
+import type { ImplementationInputLevel } from "@/types/implementation";
+export type { ImplementationInputLevel } from "@/types/implementation";
 
 export const implementationInputLevels: readonly ImplementationInputLevel[] = ["full", "skeleton", "fill-in"];
 export const defaultImplementationInputLevel: ImplementationInputLevel = "full";

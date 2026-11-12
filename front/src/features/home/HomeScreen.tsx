@@ -1,5 +1,7 @@
 "use client";
 
+import type { PageIntegration } from "@/types/pageIntegration";
+
 import { PageLayout } from "@/components/layouts/PageLayout";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -19,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 
 import { getHome, type HomeResponse } from "@/api/home.api";
@@ -47,7 +49,7 @@ const buildCurrentWeek = (calendar: HomeResponse["calendar"]) => {
   });
 };
 
-export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, FeedbackDestination }: { header: ReactNode; continueLearning: ReactNode; bigGoal: ReactNode; unitGrid: ReactNode; FeedbackDestination: ComponentType<{ ready: boolean; failed?: boolean }> }) {
+export function HomeScreen({ header, continueLearning, bigGoal, unitGrid, FeedbackDestination }: PageIntegration & { continueLearning: ReactNode; bigGoal: ReactNode; unitGrid: ReactNode }) {
   const { status, token } = useUserSession();
   const [cachedHome] = useState(() => peekClientQueryData<HomeResponse>("home"));
   const [homeData, setHomeData] = useState<HomeResponse | null>(cachedHome ?? null);

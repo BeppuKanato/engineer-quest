@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'../src'),cache=new Map();
 let cleanup, state, effect;
 const hookReact={useRef:value=>({current:value}),useState:value=>[value,next=>state=next],useCallback:callback=>callback,useEffect:callback=>{effect=callback;}};
-function load(file){if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{fileName:file,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:name=>{if(name==='react'&&file.endsWith('/useRewardBoundary.ts'))return hookReact;if(!name.startsWith('.'))return require(name);const base=path.resolve(path.dirname(file),name);return load([base+'.ts',base+'.tsx'].find(fs.existsSync));}},{filename:file});return exports;}
+function load(file){if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{fileName:file,compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:name=>{if(name==='react'&&file.endsWith('/useRewardBoundary.ts'))return hookReact;if(!name.startsWith('.')&&!name.startsWith('@/'))return require(name);const base=name.startsWith('@/')?path.resolve(root,name.slice(2)):path.resolve(path.dirname(file),name);return load([base+'.ts',base+'.tsx'].find(fs.existsSync));}},{filename:file});return exports;}
 const plain=value=>JSON.parse(JSON.stringify(value));
 (async()=>{
  const {presentationFor,rewardStages,phaseResultAchievements}=load(root+'/features/learning/rewards/presentation.ts');

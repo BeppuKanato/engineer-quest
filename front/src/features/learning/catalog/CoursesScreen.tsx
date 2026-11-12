@@ -1,12 +1,14 @@
 "use client";
 
+import type { PageIntegration } from "@/types/pageIntegration";
+
 import { PageLayout } from "@/components/layouts/PageLayout";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import StarIcon from "@mui/icons-material/Star";
 import { Box, Stack, Typography } from "@mui/material";
-import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
 import { withLearningProgress } from "@/features/learning/catalog/courseProgress";
@@ -26,7 +28,7 @@ const initialFilter: CourseFilterState = {
   difficulty: "all",
 };
 
-export function CoursesScreen({ header, FeedbackDestination }: { header: ReactNode; FeedbackDestination: ComponentType<{ failed?: boolean; ready: boolean }> }) {
+export function CoursesScreen({ header, FeedbackDestination }: PageIntegration) {
   const { status, token } = useUserSession();
   const [cachedCourses] = useState(() => peekClientQueryData<Course[]>("courses"));
   const [filter, setFilter] = useState<CourseFilterState>(initialFilter);
