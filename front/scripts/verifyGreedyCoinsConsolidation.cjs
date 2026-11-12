@@ -263,7 +263,7 @@ rejects(broken => broken.questions[3].tags = []);
 // プレビューの契約: 3段組・主ボタンで進み・入力ロック・復習はフェーズ4。
 const previewSource = fs.readFileSync(file("greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
-assert.match(previewSource, /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
+assert.match(fs.readFileSync(file("components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");
 assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(current => advanceAssessment/);
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
