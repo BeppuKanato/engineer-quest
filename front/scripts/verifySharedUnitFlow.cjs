@@ -52,6 +52,7 @@ const elements = value => Array.isArray(value) ? value.flatMap(elements)
 const cases = [
   ["bfs", "Bfs", "bfs"], ["dfs", "Dfs", "dfs"],
   ["bubble-sort", "BubbleSort", "bubbleSort"],
+  ["binary-search", "BinarySearch", "binarySearch"],
 ];
 let tree;
 function draw(entry) {

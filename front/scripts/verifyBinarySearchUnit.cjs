@@ -88,9 +88,12 @@ assert.match(screenSource, /renderPhaseFeedback/, "phase feedback slot is shared
 assert.match(screenSource, /renderUnitFeedback/, "unit feedback slot is shared");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const container = read(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`);
+const adapter = read(`${root}/binary-search/unit/BinarySearchUnitPreview.tsx`);
+assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
+const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["BinarySearchMotivationPreview", "BinarySearchExecutionPreview", "BinarySearchCheckPreview", "BinarySearchCodeMappingPreview", "BinarySearchCodeCheckPreview", "BinarySearchConsolidationPreview", "BinarySearchImplementationPreview"]) {
-  assert.ok(container.includes(`<${component} embedded`), `container renders ${component} embedded`);
+  assert.ok(adapter.includes(`: ${component}`), `unit registers ${component}`);
+  assert.match(container, /<View embedded/, "shared controller embeds every registered view");
 }
 // 上部フロー表示はチップ間を矢印でつなぎ、流れとして読めるようにする（#140）。
 assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by arrows");
@@ -100,7 +103,7 @@ assert.match(container, /"phase_bridge_view"/, "bridge views are logged with the
 assert.match(container, /isCheckPhase/, "Feedback mounts only on check-phase results and the final result");
 assert.match(container, /onCheckPhaseCompleted/, "Check-phase completion requests feedback generation early");
 assert.match(container, /renderUnitFeedback/, "The final result carries the unit feedback slot");
-assert.match(container, /<UnitResultScreen phase=\{binarySearchUnitPhases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
+assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} summary=\{summaries\[screen\.index\]\}/);
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/BinarySearchMotivationPreview", "execution/BinarySearchExecutionPreview", "check/BinarySearchCheckPreview", "code-mapping/BinarySearchCodeMappingPreview", "code-check/BinarySearchCodeCheckPreview", "consolidation/BinarySearchConsolidationPreview", "implementation/BinarySearchImplementationPreview"]) {
@@ -120,7 +123,7 @@ assert.match(figureSource, /runBinarySearch/, "The figure derives the found inde
 assert.match(figureSource, /validateBinarySearchExecutionCanvas/, "The figure validates with the unit-side board validator");
 
 // 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
-const resultScreensSource = read(`${root}/binary-search/unit/UnitResultScreens.tsx`);
+const resultScreensSource = read(`${root}/components/results/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
 // フェーズリザルトとブリッジも専用スクロールを持たず、単元コンテナのラッパーが唯一のスクロール領域になる（#298）。
@@ -141,15 +144,17 @@ assert.equal(binarySearchUnitText.backToCourses, "コース一覧に戻る", "fi
 const phaseResultSource = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("function summaryLine"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");
-assert.match(phaseResultSource, /<BinarySearchResultFigure/, "Phase results render the reached figure");
+assert.match(adapter, /resultFigure: <BinarySearchResultFigure/, "The unit supplies its reached figure");
+assert.match(phaseResultSource, /\{figure\}/, "Shared result screens render the supplied figure");
 assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the score dots");
 
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（25 が見つかった盤面）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
-const { UnitResultScreen } = load(`${root}/binary-search/unit/UnitResultScreens.tsx`);
+const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
+const { BinarySearchResultFigure } = load(`${root}/binary-search/unit/BinarySearchResultFigure.tsx`);
 for (const phase of binarySearchUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
-    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, onNext: () => {} }));
+    const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BinarySearchResultFigure), onNext: () => {} }));
     assert.ok(html.includes(phase.result.heading));
     assert.ok(html.includes("data-result-figure"), "Phase results show the unit's completed figure");
     assert.equal((html.match(/data-array-bar=/g) ?? []).length, 7, "The figure is the 7-value main array");
