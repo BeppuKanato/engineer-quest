@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "verify:learning-layout:browser": "node scripts/verifyLearningLayout.browser.cjs",
+    "verify:assessment-completion": "node scripts/verifyAssessmentCompletion.cjs",
     "verify:shared-unit-flow": "node scripts/verifySharedUnitFlow.cjs",
     "verify:learning-player": "node scripts/verifyLearningPlayer.cjs",
     "verify:bfs-motivation": "node scripts/verifyBfsMotivation.cjs",

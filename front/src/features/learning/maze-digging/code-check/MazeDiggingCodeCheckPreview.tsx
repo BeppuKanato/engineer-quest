@@ -1,4 +1,6 @@
 "use client";
+import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -22,7 +24,7 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
   const [session, setSession] = useState(() => createAssessmentState(mazeDiggingCodeCheckContent));
   const [reviewOpen, setReviewOpen] = useState(false);
   const captionRef = useRef<HTMLParagraphElement>(null);
-  const completedRef = useRef(false);
+
   const codeRef = useRef<HTMLDivElement>(null);
   const question = activeQuestion(mazeDiggingCodeCheckContent, session);
   const complete = assessmentComplete(mazeDiggingCodeCheckContent, session);
@@ -33,16 +35,7 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
   const attempt = record?.attempts.at(-1);
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
   // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
-  useEffect(() => {
-    if (complete && !completedRef.current) {
-      completedRef.current = true;
-      onComplete?.({ assessmentEvidence: assessmentEvidence(mazeDiggingCodeCheckContent, session),
-        firstAttemptCorrect: session.records.filter(entry => entry.attempts[0]?.correct).length,
-        totalQuestions: mazeDiggingCodeCheckContent.questions.length,
-      });
-    }
-    if (!complete) completedRef.current = false;
-  }, [complete, onComplete, session]);
+  useAssessmentCompletion(complete, session.records.filter(entry => entry.attempts[0]?.correct).length, mazeDiggingCodeCheckContent.questions.length, onComplete, assessmentEvidence(mazeDiggingCodeCheckContent, session));
   useEffect(() => {
     const host = codeRef.current;
     if (!host) return;
@@ -64,9 +57,8 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
     return () => observer.disconnect();
   }, [question?.id]);
 
-  return <Box component={embedded ? "div" : "main"} sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label={complete ? "コードの確認問題の結果" : "穴掘り法のコードの確認問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minHeight: 0, p: 1, display: "flex", flexDirection: "column" }}>
+  return <LearningContentLayout embedded={embedded} frame="code-check" label={complete ? "コードの確認問題の結果" : "穴掘り法のコードの確認問題"} overlay={<>{reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={mazeDiggingCodeMappingContent} stepIds={question.reviewStepIds}
+      renderCanvas={canvas => <MazeDiggingCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}</>}>
       {/* 3段組（#298）: 中央はスクロール領域。問題文とコード窓はここに置き、
           コード窓の高さは 320px の固定（#321 の残り高さ方式から変更）。窓の内側スクロールと空欄への寄せは維持する。 */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}>
@@ -105,8 +97,5 @@ export function MazeDiggingCodeCheckPreview({ embedded = false, onLearningEvent,
             sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 44 }}>もう一度解く</Button>}
         </Box>
       </Box>
-    </Box>
-    {reviewOpen && question && <LearningReviewDialog onLearningEvent={onLearningEvent} active={active} content={mazeDiggingCodeMappingContent} stepIds={question.reviewStepIds}
-      renderCanvas={canvas => <MazeDiggingCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
-  </Box>;
+    </LearningContentLayout>;
 }

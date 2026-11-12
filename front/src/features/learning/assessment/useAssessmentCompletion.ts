@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
 import type { UnitPhaseSummary } from "../types/unit.types";
 
+export type AssessmentCompletionSummary = UnitPhaseSummary & { firstAttemptCorrect: number; totalQuestions: number };
+
 /** 解き直しを始めるまで、同じ回答結果の完了通知は一度だけ行う。 */
 export function useAssessmentCompletion(complete: boolean, firstAttemptCorrect: number, totalQuestions: number,
-  onComplete?: (summary: UnitPhaseSummary) => void, evidence?: UnitPhaseSummary["assessmentEvidence"]) {
+  onComplete?: (summary: AssessmentCompletionSummary) => void, evidence?: UnitPhaseSummary["assessmentEvidence"]) {
   const reported = useRef(false);
   useEffect(() => {
     if (complete && !reported.current) {

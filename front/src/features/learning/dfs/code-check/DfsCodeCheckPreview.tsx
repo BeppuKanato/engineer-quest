@@ -1,4 +1,5 @@
 "use client";
+import { LearningContentLayout } from "../../components/layouts/LearningContentLayout";
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
@@ -62,10 +63,8 @@ export function DfsCodeCheckPreview({ embedded = false, active = true, onLearnin
     });
   }
 
-  return <Box component={embedded ? "div" : "main"} aria-label={content.stageName}
-    sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, minWidth: 0, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
-    <Box component="section" aria-label={complete ? "コードの確認問題の結果" : "DFSのコードの確認問題"}
-      sx={{ width: embedded ? "100%" : "84vw", minWidth: 0, minHeight: embedded ? 0 : "84dvh", p: 1, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+  return <LearningContentLayout embedded={embedded} frame="code-check-flow" label={complete ? "コードの確認問題の結果" : "DFSのコードの確認問題"} rootLabel={content.stageName} overlay={<>{active && reviewOpen && question && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
+      renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}</>}>
       <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
         sx={{ fontWeight: 700, textAlign: "center", fontSize: "clamp(18px, 1.5vw, 30px)", mb: 2, outline: "none" }}>
         {complete ? `初回の正解は${content.questions.length}問中${firstCorrect}問でした。` : question?.prompt}
@@ -102,8 +101,5 @@ export function DfsCodeCheckPreview({ embedded = false, active = true, onLearnin
         {complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>}
       </Box>}
-    </Box>
-    {active && reviewOpen && question && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={question.reviewStepIds} onLearningEvent={onLearningEvent}
-      renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReviewOpen(false)} />}
-  </Box>;
+    </LearningContentLayout>;
 }
