@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'), fs=require('node:fs'), path=require('node:path'), vm=require('node:vm');
 const ts=require('typescript'), React=require('react'), {renderToStaticMarkup}=require('react-dom/server');
-const source=fs.readFileSync(path.resolve(__dirname,'../src/app/component/feedbackV1.tsx'),'utf8');
+const source=fs.readFileSync(path.resolve(__dirname,'../src/features/feedback/FeedbackV1.tsx'),'utf8');
 const records=[], effects=[], listeners=new Map(), storage=new Map();
 const candidates=[{candidateId:'candidate-1',nextStep:'図で追う',reason:'順序を確かめるため',actionLabel:'図を見る',actionHref:'/learn?phase=one'},
   {candidateId:'candidate-2',nextStep:'別の図で追う',reason:'違いを確かめるため',actionLabel:'別の図を見る',actionHref:'/learn?phase=two'},

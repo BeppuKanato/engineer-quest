@@ -9,7 +9,7 @@ import { useUserSession } from "@/lib/session/userSession";
 import { ApiError, fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type AchievedBigGoal, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
 import { getCurrentBigGoal, type BigGoal } from "@/api/bigGoal.api";
-import { FeedbackDestination } from "@/app/component/feedbackV1";
+import type { FeedbackBindings } from "./feedback/FeedbackBindings";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
 import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
@@ -37,7 +37,7 @@ import { BigGoalNextProposal } from "./bigGoal/BigGoalNextProposal";
 import { bigGoalProgressFact } from "./bigGoal/bigGoalPresentation";
 import { FeedbackScreen, type FeedbackGoalSummary } from "./feedback/FeedbackScreen";
 
-export function LearningScreen({ courseId, reviewPhaseKey, header }: { courseId: string; reviewPhaseKey?: string; header: ReactNode }) {
+export function LearningScreen({ courseId, reviewPhaseKey, header, feedback }: { courseId: string; reviewPhaseKey?: string; header: ReactNode; feedback: FeedbackBindings }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -45,11 +45,12 @@ export function LearningScreen({ courseId, reviewPhaseKey, header }: { courseId:
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <ProgressLoadingSkeleton variant="screen" /> :
-          <LearningRun key={`${firebaseUser.uid}:${courseId}`} unit={unit} progress={progress} reviewPhaseKey={reviewPhaseKey} />}
+          <LearningRun key={`${firebaseUser.uid}:${courseId}`} unit={unit} progress={progress} reviewPhaseKey={reviewPhaseKey} feedback={feedback} />}
     </Box>
   </Box>;
 }
-function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; progress: LearningProgress; reviewPhaseKey?: string }) {
+function LearningRun({ unit, progress, reviewPhaseKey, feedback }: { unit: LearningUnit; progress: LearningProgress; reviewPhaseKey?: string; feedback: FeedbackBindings }) {
+  const { Destination: FeedbackDestination } = feedback;
   const { firebaseUser } = useUserSession();
   const uid = firebaseUser!.uid, courseId = unit.courseId;
   const rawLog = useLearningLog(courseId);
@@ -162,7 +163,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const renderPhaseFeedbackScreen = useCallback((phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => {
     const phase = unit.phases.find(item => item.id === phaseKey);
     const achieved = phaseAchievedGoals[phaseKey] ?? [];
-    return <FeedbackScreen kind="phase" eventId={phaseFeedbackEventId(phaseKey, nextPhaseKey)}
+    return <FeedbackScreen feedback={feedback} kind="phase" eventId={phaseFeedbackEventId(phaseKey, nextPhaseKey)}
       heading={phase ? `${phase.formalName}のフィードバック` : "フィードバック"}
       figure={nav.figure} goalSummary={achieved.length ? null : goalSummary}
       onAction={href => {
@@ -176,15 +177,15 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
       onUnavailable={() => { setFeedbackAvailability("unavailable"); nav.goNext(); }}>
       {achieved.length ? <BigGoalNextProposal achievedGoal={achieved[0]} getToken={getToken} /> : null}
     </FeedbackScreen>;
-  }, [phaseFeedbackEventId, goalSummary, phaseAchievedGoals, getToken, unit]);
+  }, [phaseFeedbackEventId, goalSummary, phaseAchievedGoals, getToken, unit, feedback]);
   const renderUnitFeedbackScreen = useCallback((nav: { goBack: () => void; figure: ReactNode }) => (
-    <FeedbackScreen kind="unit" eventId={courseId} heading="単元のフィードバック"
+    <FeedbackScreen feedback={feedback} kind="unit" eventId={courseId} heading="単元のフィードバック"
       figure={nav.figure} goalSummary={unitAchievedGoals.length ? null : goalSummary}
       onProceed={nav.goBack} proceedLabel="結果に戻る"
       onUnavailable={() => { setFeedbackAvailability("unavailable"); nav.goBack(); }}>
       {unitAchievedGoals.length ? <BigGoalNextProposal achievedGoal={unitAchievedGoals[0]} getToken={getToken} /> : null}
     </FeedbackScreen>
-  ), [courseId, goalSummary, unitAchievedGoals, getToken]);
+  ), [courseId, goalSummary, unitAchievedGoals, getToken, feedback]);
   const onFinalResult = useCallback(() => setFinalShown(true), []);
   useEffect(() => {
     if (!finalShown || unitSaved || completedUnitRequest.current) return;

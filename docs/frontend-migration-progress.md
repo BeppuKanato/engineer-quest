@@ -366,3 +366,8 @@ userSessionをlib/sessionへ、soundFeedbackをlib/audioへ移した。処理本
 ### B: 共通UIとヘッダーの構成
 
 ActionButtonとAppBreadcrumbsをcomponentsへ移動。AppHeaderViewはURLとプロフィールの表示要素を受け取り、利用者・マスコットの取得はapp/component/appHeaderに残した。学習画面と単元概要はapp側からheaderを受け取り、app内部のヘッダーをimportしない。ナビゲーション、寸法、待機中表示を維持した。型、マスコット表示、応答表示、パンくず、Lint、buildが成功。
+### C: フィードバックの境界
+
+複数画面から使う取得・候補表示・到達観測をfeatures/feedbackへ移した。学習側はFeedbackBindingsで取得フック・候補表示・観測部品を受け取り、appのLearningPageCompositionが実体を接続する。learningからfeedbackの内部やappをimportしない。API・候補のID・保存キー・観測イベント・ポーリング条件は変更していない。候補SSRと選択・到達観測、概念マップ、概念定義、BFS単元接続、応答表示、型、Lint、buildが成功。
+
+M07の残存: HomeUnitGrid/UnitOverviewのコース部品参照はM08のカタログ整理と同時に解消する。フィードバックの取得・表示・観測は独立機能内に移した段階で、ファイル内の更なる分割はM09の整理で扱う。実アカウントの切り替え・音の実機再生・候補の認証後到達は未実施。

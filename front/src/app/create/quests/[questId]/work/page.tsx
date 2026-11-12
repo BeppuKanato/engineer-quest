@@ -1,7 +1,7 @@
 "use client";
 
-import { FeedbackDestination } from "@/app/component/feedbackV1";
-import { FeedbackObservation } from "@/app/component/feedbackV1";
+import { FeedbackDestination } from "@/features/feedback/FeedbackV1";
+import { FeedbackObservation } from "@/features/feedback/FeedbackV1";
 import Editor from "@monaco-editor/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ForumIcon from "@mui/icons-material/Forum";

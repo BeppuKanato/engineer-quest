@@ -3,12 +3,7 @@
 import { Alert, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import {
-  FeedbackObservation,
-  FeedbackCandidates,
-  useFeedbackV1,
-  type FeedbackV1Kind,
-} from "@/app/component/feedbackV1";
+import type { FeedbackBindings } from "./FeedbackBindings";
 import { feedbackCandidates } from "@/api/feedbackV1.api";
 import { ConceptMap } from "./ConceptMap";
 import { playerTokens } from "../../player/player.tokens";
@@ -43,8 +38,9 @@ const primaryButtonSx = {
  * フィードバックが適用されない学習者（割り当てなし等）では、
  * 画面に留めず onUnavailable で本来の導線へ自動で進める。
  */
-export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, onAction, onProceed, proceedLabel, onUnavailable, children }: {
-  kind: Extract<FeedbackV1Kind, "phase" | "unit">;
+export function FeedbackScreen({ feedback, kind, eventId, heading, figure, goalSummary, onAction, onProceed, proceedLabel, onUnavailable, children }: {
+  feedback: FeedbackBindings;
+  kind: "phase" | "unit";
   eventId: string;
   heading: string;
   /** 現在位置の図。学習状態を持つ単元コンテナが組み立てて渡す。 */
@@ -59,7 +55,8 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
   /** 達成した大目標への次の目標の提案など、画面後段への差し込み。 */
   children?: ReactNode;
 }) {
-  const { result, error, unavailable } = useFeedbackV1(kind, eventId);
+  const { useFeedback, Observation: FeedbackObservation, Candidates: FeedbackCandidates } = feedback;
+  const { result, error, unavailable } = useFeedback(kind, eventId);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
   const proceededRef = useRef(false);

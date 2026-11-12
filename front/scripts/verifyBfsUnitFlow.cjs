@@ -231,7 +231,7 @@ assert.match(fbScreenSource, /kind="phase"/, "Phase results mount phase feedback
 assert.match(fbScreenSource, /kind="unit"/, "The final result mounts unit feedback");
 assert.match(fbScreenSource, /startFeedback/, "Generation starts at completion time, before the result is read");
 assert.match(fbScreenSource, /feedbackAvailability/, "Learners without feedback keep the conventional route");
-const fbComponentSource = read(path.resolve(__dirname, "../src/app/component/feedbackV1.tsx"));
+const fbComponentSource = read(path.resolve(__dirname, "../src/features/feedback/FeedbackV1.tsx"));
 assert.match(fbComponentSource, /useFeedbackV1/, "Feedback fetching and polling live in one hook");
 assert.match(fbComponentSource, /status === 409/, "Users without an experiment assignment see no feedback");
 assert.match(fbComponentSource, /status === 404/, "Missing completion events resolve to no feedback after a retry");

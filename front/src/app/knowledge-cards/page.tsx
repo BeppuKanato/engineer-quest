@@ -1,6 +1,6 @@
 "use client";
 
-import { FeedbackDestination } from "@/app/component/feedbackV1";
+import { FeedbackDestination } from "@/features/feedback/FeedbackV1";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";

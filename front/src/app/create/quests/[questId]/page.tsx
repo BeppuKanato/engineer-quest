@@ -1,6 +1,6 @@
 "use client";
 
-import { FeedbackDestination } from "@/app/component/feedbackV1";
+import { FeedbackDestination } from "@/features/feedback/FeedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";

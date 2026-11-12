@@ -1,6 +1,6 @@
 "use client";
 
-import { FeedbackDestination } from "@/app/component/feedbackV1";
+import { FeedbackDestination } from "@/features/feedback/FeedbackV1";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,

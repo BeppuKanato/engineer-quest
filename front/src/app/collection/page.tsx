@@ -1,6 +1,6 @@
 "use client";
 
-import { FeedbackDestination } from "@/app/component/feedbackV1";
+import { FeedbackDestination } from "@/features/feedback/FeedbackV1";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
