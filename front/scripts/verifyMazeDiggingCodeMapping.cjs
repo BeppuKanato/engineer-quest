@@ -20,14 +20,14 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "maze-digging/code-mapping";
+const feature = "units/maze-digging/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { mazeDiggingCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { mazeDiggingCode, mazeDiggingCodeSource, mazeDiggingCodeLineNumber } = load(file(`${feature}/mazeDiggingCode.ts`));
 const { validateMazeDiggingCodeMappingCanvas: validate, defineMazeDiggingCodeMappingContent } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { mazeDiggingExecutionContent: execution } = load(file("maze-digging/execution/execution.content.ts"));
-const maze = load(file("maze-digging/mazeDiggingMaze.ts"));
+const { mazeDiggingExecutionContent: execution } = load(file("units/maze-digging/execution/execution.content.ts"));
+const maze = load(file("units/maze-digging/mazeDiggingMaze.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { MazeDiggingCodeMappingCanvas } = load(file(`${feature}/MazeDiggingCodeMappingCanvas.tsx`));
 const { MazeDiggingCodeMappingPreview } = load(file(`${feature}/MazeDiggingCodeMappingPreview.tsx`));

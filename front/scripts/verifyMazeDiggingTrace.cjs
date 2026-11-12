@@ -17,12 +17,12 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { mazeDiggingCodeLineNumber, mazeDiggingCodeSource } = load(`${root}/maze-digging/code-mapping/mazeDiggingCode.ts`);
-const { mazeDiggingImplementationContent } = load(`${root}/maze-digging/implementation/implementation.content.ts`);
-const { mazeDiggingExecutionContent } = load(`${root}/maze-digging/execution/execution.content.ts`);
+const { mazeDiggingCodeLineNumber, mazeDiggingCodeSource } = load(`${root}/units/maze-digging/code-mapping/mazeDiggingCode.ts`);
+const { mazeDiggingImplementationContent } = load(`${root}/units/maze-digging/implementation/implementation.content.ts`);
+const { mazeDiggingExecutionContent } = load(`${root}/units/maze-digging/execution/execution.content.ts`);
 const { codeMappedSteps } = load(`${root}/player/content.types.ts`);
-const { convertMazeDiggingTrace } = load(`${root}/maze-digging/trace/convertTrace.ts`);
-const { traceMazeDiggingCode, mazeDiggingTraceEventLimit } = load(`${root}/maze-digging/trace/acquireTrace.ts`);
+const { convertMazeDiggingTrace } = load(`${root}/units/maze-digging/trace/convertTrace.ts`);
+const { traceMazeDiggingCode, mazeDiggingTraceEventLimit } = load(`${root}/units/maze-digging/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = mazeDiggingCodeSource;
@@ -112,7 +112,7 @@ const expectedWallSequence = dedupe(plain(codeMappedSteps(mazeDiggingExecutionCo
   assert.equal(limited.mode, "replay"); assert(limited.content.steps.at(-1).caption.includes("途中まで"));
   // 実描画: 最終ステップの盤面が全マス分のセルで描ける。
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { MazeDiggingExecutionCanvas } = load(`${root}/maze-digging/execution/MazeDiggingExecutionCanvas.tsx`);
+  const { MazeDiggingExecutionCanvas } = load(`${root}/units/maze-digging/execution/MazeDiggingExecutionCanvas.tsx`);
   const html = renderToStaticMarkup(createElement(MazeDiggingExecutionCanvas, { canvas: playback.content.steps.at(-1).canvas }));
   assert.equal((html.match(/data-maze-cell=/g) || []).length, 81);
   assert.equal((html.match(/data-maze-wall=/g) || []).length, expectedWallSequence.at(-1).length);
@@ -129,9 +129,9 @@ const expectedWallSequence = dedupe(plain(codeMappedSteps(mazeDiggingExecutionCo
   await assert.rejects(() => traceMazeDiggingCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
   // 画面接続のピン: フェーズ7画面がダイアログと取得・変換を使う。
-  const preview = fs.readFileSync(`${root}/maze-digging/implementation/MazeDiggingImplementationPreview.tsx`, "utf8");
+  const preview = fs.readFileSync(`${root}/units/maze-digging/implementation/MazeDiggingImplementationPreview.tsx`, "utf8");
   assert(preview.includes("MazeDiggingTraceDialog")); assert(preview.includes("traceMazeDiggingCode")); assert(preview.includes("convertMazeDiggingTrace"));
-  const traceText = fs.readFileSync(`${root}/maze-digging/trace/trace.content.ts`, "utf8");
+  const traceText = fs.readFileSync(`${root}/units/maze-digging/trace/trace.content.ts`, "utf8");
   assert(traceText.includes("盤面で掘る様子を見る"));
   console.log("Maze-digging trace: CPython harness grid detection, canonical phase-2 frame sequence (digs and backtracks), renamed grid, wrong-maze fidelity, midway error/stop line, helper-built final-only fallback, syntax error, ambiguity, invalid tail partial replay, truncation, real rendering and isolated D1-only acquisition passed.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

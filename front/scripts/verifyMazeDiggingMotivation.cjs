@@ -18,13 +18,13 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/maze-digging/motivation`;
+const feature = `${root}/units/maze-digging/motivation`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { mazeDiggingMotivationContent: content } = load(`${feature}/motivation.content.ts`);
 const { validateMazeDiggingMotivationCanvas: validate } = load(`${feature}/motivation.types.ts`);
 const { validateMazeGridCanvas } = load(`${root}/player/mazeGrid.types.ts`);
-const { validateMazeDiggingCanvas } = load(`${root}/maze-digging/mazeDiggingCanvas.ts`);
-const maze = load(`${root}/maze-digging/mazeDiggingMaze.ts`);
+const { validateMazeDiggingCanvas } = load(`${root}/units/maze-digging/mazeDiggingCanvas.ts`);
+const maze = load(`${root}/units/maze-digging/mazeDiggingMaze.ts`);
 const { MazeDiggingMotivationCanvas } = load(`${feature}/MazeDiggingMotivationCanvas.tsx`);
 const { MazeDiggingMotivationPreview } = load(`${feature}/MazeDiggingMotivationPreview.tsx`);
 const { steps } = content;

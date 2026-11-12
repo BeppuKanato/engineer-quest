@@ -25,11 +25,11 @@ const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const cell = nodeId => ({ kind: "node", nodeId });
-const { mazeDiggingCheckContent: content, getMazeDiggingCheckScene } = load(file("maze-digging/check/check.content.ts"));
-const { mazeDiggingExecutionContent: execution } = load(file("maze-digging/execution/execution.content.ts"));
-const maze = load(file("maze-digging/mazeDiggingMaze.ts"));
+const { mazeDiggingCheckContent: content, getMazeDiggingCheckScene } = load(file("units/maze-digging/check/check.content.ts"));
+const { mazeDiggingExecutionContent: execution } = load(file("units/maze-digging/execution/execution.content.ts"));
+const maze = load(file("units/maze-digging/mazeDiggingMaze.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
-const { validateMazeDiggingCanvas } = load(file("maze-digging/mazeDiggingCanvas.ts"));
+const { validateMazeDiggingCanvas } = load(file("units/maze-digging/mazeDiggingCanvas.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
 const { newAnswerFeedback } = load(file("assessment/answerFeedbackState.ts"));
 const [q1, q2] = content.questions;
@@ -171,7 +171,7 @@ assert.throws(() => validateAssessment(invalid));
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
 // 実描画: 場面の壁数と、回答ボタン（候補ごとに1つ、aria-label 付き）が一致する。
-const { MazeDiggingCheckCanvas } = load(file("maze-digging/check/MazeDiggingCheckCanvas.tsx"));
+const { MazeDiggingCheckCanvas } = load(file("units/maze-digging/check/MazeDiggingCheckCanvas.tsx"));
 const ariaLabel = key => { const [x, y] = key.split(",").map(Number); return `${x + 1}列目、${y + 1}行目のマスを選ぶ`; };
 for (const q of content.questions) {
   const saved = JSON.stringify(scene);
@@ -195,9 +195,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect() {},
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { MazeDiggingCheckPreview } = ui(file("maze-digging/check/MazeDiggingCheckPreview.tsx"));
-const Canvas = ui(file("maze-digging/check/MazeDiggingCheckCanvas.tsx")).MazeDiggingCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { MazeDiggingCheckPreview } = ui(file("units/maze-digging/check/MazeDiggingCheckPreview.tsx"));
+const Canvas = ui(file("units/maze-digging/check/MazeDiggingCheckCanvas.tsx")).MazeDiggingCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -236,7 +236,7 @@ button("結果を見る").onClick(); render();
 assert(tree.some(element => element.props?.children === content.completion.caption), "Completion shows the completion caption");
 assert.equal(canvasProps().questionId, undefined);
 
-const previewSource = fs.readFileSync(file("maze-digging/check/MazeDiggingCheckPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/maze-digging/check/MazeDiggingCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

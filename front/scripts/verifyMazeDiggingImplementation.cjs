@@ -21,19 +21,19 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { mazeDiggingImplementationContent: content } = load(`${root}/maze-digging/implementation/implementation.content.ts`);
-const { mazeDiggingCode, mazeDiggingCodeSource } = load(`${root}/maze-digging/code-mapping/mazeDiggingCode.ts`);
-const { mazeDiggingConsolidationContent } = load(`${root}/maze-digging/consolidation/consolidation.content.ts`);
-const { mazeDiggingExecutionContent } = load(`${root}/maze-digging/execution/execution.content.ts`);
-const { ImplementationResults } = load(`${root}/maze-digging/implementation/ImplementationResults.tsx`);
-const { ImplementationHints } = load(`${root}/maze-digging/implementation/ImplementationHints.tsx`);
-const { FreeExecutionConsole } = load(`${root}/maze-digging/implementation/FreeExecutionConsole.tsx`);
+const { mazeDiggingImplementationContent: content } = load(`${root}/units/maze-digging/implementation/implementation.content.ts`);
+const { mazeDiggingCode, mazeDiggingCodeSource } = load(`${root}/units/maze-digging/code-mapping/mazeDiggingCode.ts`);
+const { mazeDiggingConsolidationContent } = load(`${root}/units/maze-digging/consolidation/consolidation.content.ts`);
+const { mazeDiggingExecutionContent } = load(`${root}/units/maze-digging/execution/execution.content.ts`);
+const { ImplementationResults } = load(`${root}/units/maze-digging/implementation/ImplementationResults.tsx`);
+const { ImplementationHints } = load(`${root}/units/maze-digging/implementation/ImplementationHints.tsx`);
+const { FreeExecutionConsole } = load(`${root}/units/maze-digging/implementation/FreeExecutionConsole.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isMazeGridValue, mazeGridCanvas, gridDifferences,
-} = load(`${root}/maze-digging/implementation/implementation.ts`);
-const { freeDisplayCase, runMazeDiggingFreeCode } = load(`${root}/maze-digging/implementation/freeExecution.ts`);
+} = load(`${root}/units/maze-digging/implementation/implementation.ts`);
+const { freeDisplayCase, runMazeDiggingFreeCode } = load(`${root}/units/maze-digging/implementation/freeExecution.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -56,8 +56,8 @@ assert.deepEqual(plain(content.hints.flow), [
 ]);
 assert.equal(new Set(content.hints.tokens).size, content.hints.tokens.length);
 assert.equal(content.hints.parsonsQuestion, mazeDiggingConsolidationContent.questions.find(question => question.kind === "parsons"));
-for (const file of fs.readdirSync(`${root}/maze-digging/implementation`).filter(file => /\.tsx?$/u.test(file))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/maze-digging/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
+for (const file of fs.readdirSync(`${root}/units/maze-digging/implementation`).filter(file => /\.tsx?$/u.test(file))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/units/maze-digging/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
 
 // ---- テストの入力は基準データの確定値 ----
@@ -284,7 +284,7 @@ assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: 
 assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
 assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
 assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
-const { mazeDiggingEditorText: editorText } = load(`${root}/maze-digging/implementation/editor.content.ts`);
+const { mazeDiggingEditorText: editorText } = load(`${root}/units/maze-digging/implementation/editor.content.ts`);
 const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -415,7 +415,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.deepEqual(plain(free.actual), d1Expected);
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
-  const impl = (file) => fs.readFileSync(`${root}/maze-digging/implementation/${file}`, "utf8");
+  const impl = (file) => fs.readFileSync(`${root}/units/maze-digging/implementation/${file}`, "utf8");
   const adapterSource = impl("MazeDiggingImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -451,7 +451,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitAdapter = fs.readFileSync(`${root}/maze-digging/unit/MazeDiggingUnitPreview.tsx`, "utf8");
+  const unitAdapter = fs.readFileSync(`${root}/units/maze-digging/unit/MazeDiggingUnitPreview.tsx`, "utf8");
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");

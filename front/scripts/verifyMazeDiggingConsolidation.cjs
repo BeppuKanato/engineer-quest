@@ -24,13 +24,13 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
-const { mazeDiggingConsolidationContent: content, validateMazeDiggingConsolidation } = load(file("maze-digging/consolidation/consolidation.content.ts"));
-const maze = load(file("maze-digging/mazeDiggingMaze.ts"));
-const { mazeDiggingExecutionContent: execution } = load(file("maze-digging/execution/execution.content.ts"));
-const { mazeDiggingCodeMappingContent: mapping } = load(file("maze-digging/code-mapping/codeMapping.content.ts"));
-const { mazeDiggingCode: code } = load(file("maze-digging/code-mapping/mazeDiggingCode.ts"));
+const { mazeDiggingConsolidationContent: content, validateMazeDiggingConsolidation } = load(file("units/maze-digging/consolidation/consolidation.content.ts"));
+const maze = load(file("units/maze-digging/mazeDiggingMaze.ts"));
+const { mazeDiggingExecutionContent: execution } = load(file("units/maze-digging/execution/execution.content.ts"));
+const { mazeDiggingCodeMappingContent: mapping } = load(file("units/maze-digging/code-mapping/codeMapping.content.ts"));
+const { mazeDiggingCode: code } = load(file("units/maze-digging/code-mapping/mazeDiggingCode.ts"));
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
-const { validateMazeDiggingCanvas } = load(file("maze-digging/mazeDiggingCanvas.ts"));
+const { validateMazeDiggingCanvas } = load(file("units/maze-digging/mazeDiggingCanvas.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
 const [q1, q2, q3, q4] = content.questions;
 
@@ -200,7 +200,7 @@ const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&lt;/g, "<").re
 for (const line of code.lines) assert(parsonsText.includes(line.text), "Preserve original indentation and every line");
 
 // 実描画: Q1は候補マスごとに回答ボタン1つ、選択問題の場面は表示のみ。正解後は全ボタンが固定される。
-const { MazeDiggingCheckCanvas } = load(file("maze-digging/check/MazeDiggingCheckCanvas.tsx"));
+const { MazeDiggingCheckCanvas } = load(file("units/maze-digging/check/MazeDiggingCheckCanvas.tsx"));
 const ariaLabel = key => { const [x, y] = key.split(",").map(Number); return `${x + 1}列目、${y + 1}行目のマスを選ぶ`; };
 const sceneBeforeRender = JSON.stringify(q1.scene);
 const q1Html = renderToStaticMarkup(React.createElement(MazeDiggingCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, onAnswer() {} }));
@@ -287,7 +287,7 @@ rejects(broken => broken.questions[2].tags = []);
 rejects(broken => broken.questions[3].interchangeableLineGroups = [["dig-between", "dig-room"]]);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
-const previewSource = fs.readFileSync(file("maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
 assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");

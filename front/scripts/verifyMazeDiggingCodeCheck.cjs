@@ -21,12 +21,12 @@ return load([`${base}.ts`, `${base}.tsx`].find(file => fs.existsSync(file)));
 return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { mazeDiggingCodeCheckContent: content, validateMazeDiggingCodeCheck, fillCodeBlank} = load(`${root}/maze-digging/code-check/codeCheck.content.ts`);
-const { mazeDiggingCode, mazeDiggingCodeLineNumber, mazeDiggingCodeSource} = load(`${root}/maze-digging/code-mapping/mazeDiggingCode.ts`);
-const { mazeDiggingCodeMappingContent: mapping} = load(`${root}/maze-digging/code-mapping/codeMapping.content.ts`);
+const { mazeDiggingCodeCheckContent: content, validateMazeDiggingCodeCheck, fillCodeBlank} = load(`${root}/units/maze-digging/code-check/codeCheck.content.ts`);
+const { mazeDiggingCode, mazeDiggingCodeLineNumber, mazeDiggingCodeSource} = load(`${root}/units/maze-digging/code-mapping/mazeDiggingCode.ts`);
+const { mazeDiggingCodeMappingContent: mapping} = load(`${root}/units/maze-digging/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment} = load(`${root}/assessment/assessment.ts`);
 const { newAnswerFeedback} = load(`${root}/assessment/answerFeedbackState.ts`);
-const { mazeDiggingCheckContent: nodeContent} = load(`${root}/maze-digging/check/check.content.ts`);
+const { mazeDiggingCheckContent: nodeContent} = load(`${root}/units/maze-digging/check/check.content.ts`);
 const { selectReviewContent} = load(`${root}/review/reviewContent.ts`);
 const { CodeDisplay} = load(`${root}/code/CodeDisplay.tsx`);
 const { renderToStaticMarkup} = require("react-dom/server");
@@ -156,7 +156,7 @@ skipped = advanceAssessment(content, skipped, q2.id);
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false &&!record.solved && record.attemptCount === 1));
 
-const codeCheckPreviewSource = fs.readFileSync(`${root}/maze-digging/code-check/MazeDiggingCodeCheckPreview.tsx`, "utf8");
+const codeCheckPreviewSource = fs.readFileSync(`${root}/units/maze-digging/code-check/MazeDiggingCodeCheckPreview.tsx`, "utf8");
 
 // レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
 assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");

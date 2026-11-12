@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { mazeDiggingUnitPhases, mazeDiggingUnitTitle, mazeDiggingUnitText, nextPhaseLabel } = load(`${root}/maze-digging/unit/unit.content.ts`);
+const { mazeDiggingUnitPhases, mazeDiggingUnitTitle, mazeDiggingUnitText, nextPhaseLabel } = load(`${root}/units/maze-digging/unit/unit.content.ts`);
 
 // 単元は穴掘り法で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(mazeDiggingUnitTitle, "穴掘り法");
@@ -80,7 +80,7 @@ assert.match(screenSource, /<WallExtensionUnitPreview \{\.\.\.unitPreviewProps\}
 assert.match(screenSource, /<BfsUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "BFS container receives the same connection props");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const adapter = read(`${root}/maze-digging/unit/MazeDiggingUnitPreview.tsx`);
+const adapter = read(`${root}/units/maze-digging/unit/MazeDiggingUnitPreview.tsx`);
 assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["MazeDiggingMotivationPreview", "MazeDiggingExecutionPreview", "MazeDiggingCheckPreview", "MazeDiggingCodeMappingPreview", "MazeDiggingCodeCheckPreview", "MazeDiggingConsolidationPreview", "MazeDiggingImplementationPreview"]) {
@@ -99,18 +99,18 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/MazeDiggingMotivationPreview", "execution/MazeDiggingExecutionPreview", "check/MazeDiggingCheckPreview", "code-mapping/MazeDiggingCodeMappingPreview", "code-check/MazeDiggingCodeCheckPreview", "consolidation/MazeDiggingConsolidationPreview", "implementation/MazeDiggingImplementationPreview"]) {
-  const adapter = read(`${root}/maze-digging/${file}.tsx`);
+  const adapter = read(`${root}/units/maze-digging/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 到達図の壁は正本の choices から参照手続きで導出し、教材の迷路と一致する（9×9: 全81マス − 通路31マス ＝ 壁50）。
-const { runMazeDigging, mazeDiggingWalls, mazeDiggingMainChoices, mazeDiggingMainSize } = load(`${root}/maze-digging/mazeDiggingMaze.ts`);
+const { runMazeDigging, mazeDiggingWalls, mazeDiggingMainChoices, mazeDiggingMainSize } = load(`${root}/units/maze-digging/mazeDiggingMaze.ts`);
 assert.equal(mazeDiggingWalls(runMazeDigging(mazeDiggingMainSize, mazeDiggingMainChoices).grid).length, 50, "Result figure walls derive from the canonical choices");
-const figureSource = read(`${root}/maze-digging/unit/MazeDiggingResultFigure.tsx`);
+const figureSource = read(`${root}/units/maze-digging/unit/MazeDiggingResultFigure.tsx`);
 assert.match(figureSource, /runMazeDigging/, "The figure derives walls from the canonical maze data");
 assert.match(figureSource, /solveMazeDiggingPath/, "The figure reuses the phase-1 route for the start-to-goal path");
 assert.match(figureSource, /validateMazeDiggingCanvas/, "The figure validates with the unit-side validator");
@@ -144,7 +144,7 @@ assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the sc
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（完成した迷路）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { MazeDiggingResultFigure } = load(`${root}/maze-digging/unit/MazeDiggingResultFigure.tsx`);
+const { MazeDiggingResultFigure } = load(`${root}/units/maze-digging/unit/MazeDiggingResultFigure.tsx`);
 for (const phase of mazeDiggingUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(MazeDiggingResultFigure), onNext: () => {} }));
