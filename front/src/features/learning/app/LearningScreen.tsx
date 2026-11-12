@@ -18,7 +18,7 @@ import { DfsUnitPreview } from "../units/dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
 import { BinarySearchUnitPreview } from "../units/binary-search/unit/BinarySearchUnitPreview";
-import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
+import { GreedyCoinsUnitPreview } from "../units/greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
 import { AchievementBand, NewAchievementZone } from "../rewards/AchievementPresentation";

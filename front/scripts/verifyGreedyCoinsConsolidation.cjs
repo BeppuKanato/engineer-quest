@@ -22,15 +22,15 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = relative => `${root}/${relative}`;
-const { greedyCoinsConsolidationContent: content, validateGreedyCoinsConsolidation } = load(file("greedy-coins/consolidation/consolidation.content.ts"));
-const { greedyCoinsCode, greedyCoinsCodeSource } = load(file("greedy-coins/code-mapping/greedyCoinsCode.ts"));
-const { greedyCoinsCodeMappingContent: mapping } = load(file("greedy-coins/code-mapping/codeMapping.content.ts"));
-const greedy = load(file("greedy-coins/greedyCoins.ts"));
+const { greedyCoinsConsolidationContent: content, validateGreedyCoinsConsolidation } = load(file("units/greedy-coins/consolidation/consolidation.content.ts"));
+const { greedyCoinsCode, greedyCoinsCodeSource } = load(file("units/greedy-coins/code-mapping/greedyCoinsCode.ts"));
+const { greedyCoinsCodeMappingContent: mapping } = load(file("units/greedy-coins/code-mapping/codeMapping.content.ts"));
+const greedy = load(file("units/greedy-coins/greedyCoins.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
 const { selectReviewContent } = load(file("review/reviewContent.ts"));
-const { validateGreedyCoinsExecutionCanvas } = load(file("greedy-coins/execution/execution.types.ts"));
+const { validateGreedyCoinsExecutionCanvas } = load(file("units/greedy-coins/execution/execution.types.ts"));
 const { ParsonsBoard } = load(file("components/assessment/ParsonsBoard.tsx"));
-const { GreedyCoinsCheckCanvas } = load(file("greedy-coins/check/GreedyCoinsCheckCanvas.tsx"));
+const { GreedyCoinsCheckCanvas } = load(file("units/greedy-coins/check/GreedyCoinsCheckCanvas.tsx"));
 const { renderToStaticMarkup } = require("react-dom/server");
 const { createElement } = require("react");
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -261,7 +261,7 @@ rejects(broken => broken.questions[2].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[3].tags = []);
 
 // プレビューの契約: 3段組・主ボタンで進み・入力ロック・復習はフェーズ4。
-const previewSource = fs.readFileSync(file("greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(fs.readFileSync(file("components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");
 assert.match(previewSource, /borderTop: `1px solid/, "advance actions live in the fixed bottom zone (#298)");

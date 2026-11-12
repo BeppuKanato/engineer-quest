@@ -26,11 +26,11 @@ const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const cell = nodeId => ({ kind: "node", nodeId });
 const choice = choiceId => ({ kind: "choice", choiceId });
-const { greedyCoinsCheckContent: content, getGreedyCoinsCheckScene } = load(file("greedy-coins/check/check.content.ts"));
-const { greedyCoinsExecutionContent: execution } = load(file("greedy-coins/execution/execution.content.ts"));
-const coinsModule = load(file("greedy-coins/greedyCoins.ts"));
+const { greedyCoinsCheckContent: content, getGreedyCoinsCheckScene } = load(file("units/greedy-coins/check/check.content.ts"));
+const { greedyCoinsExecutionContent: execution } = load(file("units/greedy-coins/execution/execution.content.ts"));
+const coinsModule = load(file("units/greedy-coins/greedyCoins.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
-const { validateGreedyCoinsExecutionCanvas } = load(file("greedy-coins/execution/execution.types.ts"));
+const { validateGreedyCoinsExecutionCanvas } = load(file("units/greedy-coins/execution/execution.types.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
 const { newAnswerFeedback } = load(file("assessment/answerFeedbackState.ts"));
 const [q1, q2] = content.questions;
@@ -151,7 +151,7 @@ assert.throws(() => validateAssessment(invalidKind), "Choice questions are not a
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
 // 実描画: Q1 の場面では額面ごとに回答ボタンが1つ、Q2 の場面と完了盤面ではボタンなし。
-const { GreedyCoinsCheckCanvas } = load(file("greedy-coins/check/GreedyCoinsCheckCanvas.tsx"));
+const { GreedyCoinsCheckCanvas } = load(file("units/greedy-coins/check/GreedyCoinsCheckCanvas.tsx"));
 {
   const saved = JSON.stringify(scene1);
   const html = renderToStaticMarkup(React.createElement(GreedyCoinsCheckCanvas, { canvas: scene1, questionId: q1.id, cellIds: q1.nodeIds, onAnswer() {} }));
@@ -177,9 +177,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect() {},
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { GreedyCoinsCheckPreview } = ui(file("greedy-coins/check/GreedyCoinsCheckPreview.tsx"));
-const Canvas = ui(file("greedy-coins/check/GreedyCoinsCheckCanvas.tsx")).GreedyCoinsCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { GreedyCoinsCheckPreview } = ui(file("units/greedy-coins/check/GreedyCoinsCheckPreview.tsx"));
+const Canvas = ui(file("units/greedy-coins/check/GreedyCoinsCheckCanvas.tsx")).GreedyCoinsCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -219,7 +219,7 @@ button("結果を見る").onClick(); render();
 assert(tree.some(element => element.props?.children === content.completion.caption), "Completion shows the completion caption");
 assert.equal(canvasProps().questionId, undefined);
 
-const previewSource = fs.readFileSync(file("greedy-coins/check/GreedyCoinsCheckPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/greedy-coins/check/GreedyCoinsCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

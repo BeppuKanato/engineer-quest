@@ -23,21 +23,21 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = relative => `${root}/${relative}`;
-const { greedyCoinsImplementationContent: content } = load(file("greedy-coins/implementation/implementation.content.ts"));
-const { greedyCoinsCode, greedyCoinsCodeSource } = load(file("greedy-coins/code-mapping/greedyCoinsCode.ts"));
-const { greedyCoinsConsolidationContent } = load(file("greedy-coins/consolidation/consolidation.content.ts"));
-const greedy = load(file("greedy-coins/greedyCoins.ts"));
+const { greedyCoinsImplementationContent: content } = load(file("units/greedy-coins/implementation/implementation.content.ts"));
+const { greedyCoinsCode, greedyCoinsCodeSource } = load(file("units/greedy-coins/code-mapping/greedyCoinsCode.ts"));
+const { greedyCoinsConsolidationContent } = load(file("units/greedy-coins/consolidation/consolidation.content.ts"));
+const greedy = load(file("units/greedy-coins/greedyCoins.ts"));
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isCoinListValue, coinListDifferences, coinTrayCanvas,
-} = load(file("greedy-coins/implementation/implementation.ts"));
-const { validateGreedyCoinsBoard } = load(file("greedy-coins/figure/greedyCoins.types.ts"));
-const { ImplementationResults } = load(file("greedy-coins/implementation/ImplementationResults.tsx"));
-const { ImplementationHints } = load(file("greedy-coins/implementation/ImplementationHints.tsx"));
-const { FreeExecutionConsole } = load(file("greedy-coins/implementation/FreeExecutionConsole.tsx"));
-const { CoinListOutput } = load(file("greedy-coins/implementation/CoinListOutput.tsx"));
+} = load(file("units/greedy-coins/implementation/implementation.ts"));
+const { validateGreedyCoinsBoard } = load(file("units/greedy-coins/figure/greedyCoins.types.ts"));
+const { ImplementationResults } = load(file("units/greedy-coins/implementation/ImplementationResults.tsx"));
+const { ImplementationHints } = load(file("units/greedy-coins/implementation/ImplementationHints.tsx"));
+const { FreeExecutionConsole } = load(file("units/greedy-coins/implementation/FreeExecutionConsole.tsx"));
+const { CoinListOutput } = load(file("units/greedy-coins/implementation/CoinListOutput.tsx"));
 const { ParsonsBoard } = load(file("components/assessment/ParsonsBoard.tsx"));
-const { freeDisplayCase, runGreedyCoinsFreeCode } = load(file("greedy-coins/implementation/freeExecution.ts"));
+const { freeDisplayCase, runGreedyCoinsFreeCode } = load(file("units/greedy-coins/implementation/freeExecution.ts"));
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -56,8 +56,8 @@ assert.deepEqual(plain(content.hints.flow), [
   "最後に結果のリストを返す",
 ]);
 assert.equal(new Set(content.hints.tokens).size, content.hints.tokens.length);
-for (const f of fs.readdirSync(file("greedy-coins/implementation")).filter(name => /\.tsx?$/.test(name))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(file(`greedy-coins/implementation/${f}`), "utf8")), "No diff hint dependency remains in the feature");
+for (const f of fs.readdirSync(file("units/greedy-coins/implementation")).filter(name => /\.tsx?$/.test(name))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(file(`units/greedy-coins/implementation/${f}`), "utf8")), "No diff hint dependency remains in the feature");
 }
 
 // ---- テスト: D1表示用、J1〜J4判定用。期待値は実行記録と基準データの確定値 ----
@@ -300,7 +300,7 @@ const syntaxTrace = ["Traceback (most recent call last):", '  File "<exec>", lin
 runner.runCourseMissionTests = async () => { throw new Error(syntaxTrace); };
 const freeError = await runGreedyCoinsFreeCode("learner code");
 assert.equal(freeError.returned, false); assert.equal(freeError.error, "syntax"); assert.equal(freeError.errorLine, 2, "free execution carries the learner line (#325)");
-const { greedyCoinsEditorText: editorText } = load(file("greedy-coins/implementation/editor.content.ts"));
+const { greedyCoinsEditorText: editorText } = load(file("units/greedy-coins/implementation/editor.content.ts"));
 const freeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -319,7 +319,7 @@ assert(!resultsHtml.includes("[25, 10, 5, 1]"), "Judgement case J3 inputs/expect
 assert(resultsHtml.includes('data-error-kind="mismatch"'), "Diagnostics classify a plain failure as mismatch");
 
 // ---- 画面契約: ライトテーマ、トレース接続（#388） ----
-const impl = name => fs.readFileSync(file(`greedy-coins/implementation/${name}`), "utf8");
+const impl = name => fs.readFileSync(file(`units/greedy-coins/implementation/${name}`), "utf8");
 const adapterSource = impl("GreedyCoinsImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -328,7 +328,7 @@ assert.match(previewSource, /beforeMount=\{setupLearningEditor\}/, "editor setup
 assert(!previewSource.includes("vs-dark"), "editor is light themed");
 assert(adapterSource.includes("GreedyCoinsTraceDialog"), "Visual debugging is connected to the trace dialog (#388)");
 assert(adapterSource.includes("traceGreedyCoinsCode"), "Visual debugging acquires the trace (#388)");
-assert(load(file("greedy-coins/trace/trace.content.ts")).greedyCoinsTraceText.button === "硬貨が選ばれる様子を見る" && adapterSource.includes("traceText: greedyCoinsTraceText"), "The unit trace button label is injected (#388)");
+assert(load(file("units/greedy-coins/trace/trace.content.ts")).greedyCoinsTraceText.button === "硬貨が選ばれる様子を見る" && adapterSource.includes("traceText: greedyCoinsTraceText"), "The unit trace button label is injected (#388)");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "greedy-coins-implementation"'), "Standalone preview is registered");
 console.log("Greedy-coins implementation verified: five cases (D1 display, J1-J4 judgement including the counterexample J4 that an optimal solver fails), byte-exact baseline skeleton/fill-in templates with 0/3/2 placeholders and untouched-template failures, canonical Parsons reuse as an unfaded hint-4 board, hint gating, coin-tray output, free-execution and hidden-case redaction.");

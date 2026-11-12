@@ -21,12 +21,12 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { greedyCoinsCodeCheckContent: content, validateGreedyCoinsCodeCheck, fillCodeBlank } = load(`${root}/greedy-coins/code-check/codeCheck.content.ts`);
-const { greedyCoinsCode, greedyCoinsCodeLineNumber, greedyCoinsCodeSource } = load(`${root}/greedy-coins/code-mapping/greedyCoinsCode.ts`);
-const { greedyCoinsCodeMappingContent: mapping } = load(`${root}/greedy-coins/code-mapping/codeMapping.content.ts`);
+const { greedyCoinsCodeCheckContent: content, validateGreedyCoinsCodeCheck, fillCodeBlank } = load(`${root}/units/greedy-coins/code-check/codeCheck.content.ts`);
+const { greedyCoinsCode, greedyCoinsCodeLineNumber, greedyCoinsCodeSource } = load(`${root}/units/greedy-coins/code-mapping/greedyCoinsCode.ts`);
+const { greedyCoinsCodeMappingContent: mapping } = load(`${root}/units/greedy-coins/code-mapping/codeMapping.content.ts`);
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, validateAssessment } = load(`${root}/assessment/assessment.ts`);
 const { newAnswerFeedback } = load(`${root}/assessment/answerFeedbackState.ts`);
-const { greedyCoinsCheckContent: nodeContent } = load(`${root}/greedy-coins/check/check.content.ts`);
+const { greedyCoinsCheckContent: nodeContent } = load(`${root}/units/greedy-coins/check/check.content.ts`);
 const { selectReviewContent } = load(`${root}/review/reviewContent.ts`);
 const { CodeDisplay } = load(`${root}/code/CodeDisplay.tsx`);
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -178,7 +178,7 @@ skipped = advanceAssessment(content, skipped, q2.id);
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
-const codeCheckPreviewSource = fs.readFileSync(`${root}/greedy-coins/code-check/GreedyCoinsCodeCheckPreview.tsx`, "utf8");
+const codeCheckPreviewSource = fs.readFileSync(`${root}/units/greedy-coins/code-check/GreedyCoinsCodeCheckPreview.tsx`, "utf8");
 // レイアウト契約（#298）: 3段組。コード窓は固定高320px（窓の内側スクロールは維持）、選択肢は下部の固定ゾーン。
 assert.match(codeCheckPreviewSource, /height: 320, flexShrink: 0, overflow: "auto"/, "code window has a fixed height (#298)");
 assert.doesNotMatch(codeCheckPreviewSource, /flex: 1, minHeight: 0, overflow: "auto"/, "code window no longer takes the leftover height (#298)");

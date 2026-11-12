@@ -50,14 +50,14 @@ import { BinarySearchCodeCheckPreview } from "@/features/learning/units/binary-s
 import { BinarySearchConsolidationPreview } from "@/features/learning/units/binary-search/consolidation/BinarySearchConsolidationPreview";
 import { BinarySearchImplementationPreview } from "@/features/learning/units/binary-search/implementation/BinarySearchImplementationPreview";
 import { BinarySearchUnitPreview } from "@/features/learning/units/binary-search/unit/BinarySearchUnitPreview";
-import { GreedyCoinsMotivationPreview } from "@/features/learning/greedy-coins/motivation/GreedyCoinsMotivationPreview";
-import { GreedyCoinsExecutionPreview } from "@/features/learning/greedy-coins/execution/GreedyCoinsExecutionPreview";
-import { GreedyCoinsCheckPreview } from "@/features/learning/greedy-coins/check/GreedyCoinsCheckPreview";
-import { GreedyCoinsCodeMappingPreview } from "@/features/learning/greedy-coins/code-mapping/GreedyCoinsCodeMappingPreview";
-import { GreedyCoinsCodeCheckPreview } from "@/features/learning/greedy-coins/code-check/GreedyCoinsCodeCheckPreview";
-import { GreedyCoinsConsolidationPreview } from "@/features/learning/greedy-coins/consolidation/GreedyCoinsConsolidationPreview";
-import { GreedyCoinsImplementationPreview } from "@/features/learning/greedy-coins/implementation/GreedyCoinsImplementationPreview";
-import { GreedyCoinsUnitPreview } from "@/features/learning/greedy-coins/unit/GreedyCoinsUnitPreview";
+import { GreedyCoinsMotivationPreview } from "@/features/learning/units/greedy-coins/motivation/GreedyCoinsMotivationPreview";
+import { GreedyCoinsExecutionPreview } from "@/features/learning/units/greedy-coins/execution/GreedyCoinsExecutionPreview";
+import { GreedyCoinsCheckPreview } from "@/features/learning/units/greedy-coins/check/GreedyCoinsCheckPreview";
+import { GreedyCoinsCodeMappingPreview } from "@/features/learning/units/greedy-coins/code-mapping/GreedyCoinsCodeMappingPreview";
+import { GreedyCoinsCodeCheckPreview } from "@/features/learning/units/greedy-coins/code-check/GreedyCoinsCodeCheckPreview";
+import { GreedyCoinsConsolidationPreview } from "@/features/learning/units/greedy-coins/consolidation/GreedyCoinsConsolidationPreview";
+import { GreedyCoinsImplementationPreview } from "@/features/learning/units/greedy-coins/implementation/GreedyCoinsImplementationPreview";
+import { GreedyCoinsUnitPreview } from "@/features/learning/units/greedy-coins/unit/GreedyCoinsUnitPreview";
 
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",

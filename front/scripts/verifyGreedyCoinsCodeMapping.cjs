@@ -20,14 +20,14 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "greedy-coins/code-mapping";
+const feature = "units/greedy-coins/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { greedyCoinsCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { greedyCoinsCode, greedyCoinsCodeSource, greedyCoinsCodeLineNumber } = load(file(`${feature}/greedyCoinsCode.ts`));
 const { validateGreedyCoinsCodeMappingCanvas: validate, defineGreedyCoinsCodeMappingContent, checkpointStepIds } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { greedyCoinsExecutionContent: execution } = load(file("greedy-coins/execution/execution.content.ts"));
-const coinsModule = load(file("greedy-coins/greedyCoins.ts"));
+const { greedyCoinsExecutionContent: execution } = load(file("units/greedy-coins/execution/execution.content.ts"));
+const coinsModule = load(file("units/greedy-coins/greedyCoins.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { GreedyCoinsCodeMappingCanvas } = load(file(`${feature}/GreedyCoinsCodeMappingCanvas.tsx`));
 const { GreedyCoinsCodeMappingPreview } = load(file(`${feature}/GreedyCoinsCodeMappingPreview.tsx`));

@@ -18,7 +18,7 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const unit = `${root}/greedy-coins`;
+const unit = `${root}/units/greedy-coins`;
 const feature = `${unit}/motivation`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { greedyCoinsMotivationContent: content } = load(`${feature}/motivation.content.ts`);

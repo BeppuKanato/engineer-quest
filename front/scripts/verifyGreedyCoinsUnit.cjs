@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { greedyCoinsUnitPhases, greedyCoinsUnitTitle, greedyCoinsUnitText, nextPhaseLabel } = load(`${root}/greedy-coins/unit/unit.content.ts`);
+const { greedyCoinsUnitPhases, greedyCoinsUnitTitle, greedyCoinsUnitText, nextPhaseLabel } = load(`${root}/units/greedy-coins/unit/unit.content.ts`);
 
 // 単元は貪欲法（硬貨問題）で、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(greedyCoinsUnitTitle, "貪欲法（硬貨問題）");
@@ -89,7 +89,7 @@ assert.match(screenSource, /renderPhaseFeedback/, "phase feedback slot is shared
 assert.match(screenSource, /renderUnitFeedback/, "unit feedback slot is shared");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const adapter = read(`${root}/greedy-coins/unit/GreedyCoinsUnitPreview.tsx`);
+const adapter = read(`${root}/units/greedy-coins/unit/GreedyCoinsUnitPreview.tsx`);
 assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["GreedyCoinsMotivationPreview", "GreedyCoinsExecutionPreview", "GreedyCoinsCheckPreview", "GreedyCoinsCodeMappingPreview", "GreedyCoinsCodeCheckPreview", "GreedyCoinsConsolidationPreview", "GreedyCoinsImplementationPreview"]) {
@@ -108,19 +108,19 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている（フェーズ1・2・4のポートは各フェーズ実装時に用意済み）。
 for (const file of ["motivation/GreedyCoinsMotivationPreview", "execution/GreedyCoinsExecutionPreview", "check/GreedyCoinsCheckPreview", "code-mapping/GreedyCoinsCodeMappingPreview", "code-check/GreedyCoinsCodeCheckPreview", "consolidation/GreedyCoinsConsolidationPreview", "implementation/GreedyCoinsImplementationPreview"]) {
-  const adapter = read(`${root}/greedy-coins/${file}.tsx`);
+  const adapter = read(`${root}/units/greedy-coins/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 到達図は正本の実行記録から導出し、主教材786円を9枚で払った盤面（基準データ §4）と一致する。
-const { greedyCoinsDenominations, greedyCoinsMainAmount, runGreedyCoins } = load(`${root}/greedy-coins/greedyCoins.ts`);
+const { greedyCoinsDenominations, greedyCoinsMainAmount, runGreedyCoins } = load(`${root}/units/greedy-coins/greedyCoins.ts`);
 assert.deepEqual(plain(runGreedyCoins(greedyCoinsMainAmount, greedyCoinsDenominations)), [500, 100, 100, 50, 10, 10, 10, 5, 1], "Result figure tray is the canonical 9-coin payment");
 assert.equal(greedyCoinsMainAmount, 786, "Result figure amount is the main example");
-const figureSource = read(`${root}/greedy-coins/unit/GreedyCoinsResultFigure.tsx`);
+const figureSource = read(`${root}/units/greedy-coins/unit/GreedyCoinsResultFigure.tsx`);
 assert.match(figureSource, /runGreedyCoins/, "The figure derives the tray from the canonical run record");
 assert.match(figureSource, /validateGreedyCoinsExecutionCanvas/, "The figure validates with the unit-side board validator");
 
@@ -153,7 +153,7 @@ assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the sc
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（786円・9枚の盤面）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { GreedyCoinsResultFigure } = load(`${root}/greedy-coins/unit/GreedyCoinsResultFigure.tsx`);
+const { GreedyCoinsResultFigure } = load(`${root}/units/greedy-coins/unit/GreedyCoinsResultFigure.tsx`);
 for (const phase of greedyCoinsUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(GreedyCoinsResultFigure), onNext: () => {} }));

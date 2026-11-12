@@ -17,11 +17,11 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { greedyCoinsCodeSource } = load(`${root}/greedy-coins/code-mapping/greedyCoinsCode.ts`);
-const { greedyCoinsImplementationContent } = load(`${root}/greedy-coins/implementation/implementation.content.ts`);
-const { greedyCoinsExecutionContent } = load(`${root}/greedy-coins/execution/execution.content.ts`);
-const { convertGreedyCoinsTrace } = load(`${root}/greedy-coins/trace/convertTrace.ts`);
-const { traceGreedyCoinsCode, greedyCoinsTraceEventLimit } = load(`${root}/greedy-coins/trace/acquireTrace.ts`);
+const { greedyCoinsCodeSource } = load(`${root}/units/greedy-coins/code-mapping/greedyCoinsCode.ts`);
+const { greedyCoinsImplementationContent } = load(`${root}/units/greedy-coins/implementation/implementation.content.ts`);
+const { greedyCoinsExecutionContent } = load(`${root}/units/greedy-coins/execution/execution.content.ts`);
+const { convertGreedyCoinsTrace } = load(`${root}/units/greedy-coins/trace/convertTrace.ts`);
+const { traceGreedyCoinsCode, greedyCoinsTraceEventLimit } = load(`${root}/units/greedy-coins/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = greedyCoinsCodeSource;
@@ -158,7 +158,7 @@ const projected = canvas => ({
   assert.deepEqual(plain(renamedView.content.steps[0].canvas.state.tray), plain(d1.expected), "The final state shows the returned tray");
   // ---- 盤面描画: 額面チップ・残額・トレイが図に出る ----
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { GreedyCoinsExecutionCanvas } = load(`${root}/greedy-coins/execution/GreedyCoinsExecutionCanvas.tsx`);
+  const { GreedyCoinsExecutionCanvas } = load(`${root}/units/greedy-coins/execution/GreedyCoinsExecutionCanvas.tsx`);
   const firstHtml = renderToStaticMarkup(createElement(GreedyCoinsExecutionCanvas, { canvas: playback.content.steps[1].canvas }));
   assert.equal((firstHtml.match(/data-coin-chip=/g) || []).length, 6, "The figure shows the 6 denominations");
   assert.equal((firstHtml.match(/data-tray-coin=/g) || []).length, 1, "The tray shows the first selected coin");
@@ -180,7 +180,7 @@ const projected = canvas => ({
   await assert.rejects(() => traceGreedyCoinsCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
   // ---- ソースpin: 変換は教材の正準データを流用して状態を作らない ----
-  const convertSource = fs.readFileSync(`${root}/greedy-coins/trace/convertTrace.ts`, "utf8");
+  const convertSource = fs.readFileSync(`${root}/units/greedy-coins/trace/convertTrace.ts`, "utf8");
   assert(!convertSource.includes("greedyCoinsExecutionContent"), "converter must not substitute canonical phase-2 data");
   assert(!convertSource.includes("greedyCoinsSelections"), "converter must not re-run the reference procedure");
   console.log("Greedy-coins trace: harness passthrough addition with no leakage into existing units, canonical phase-2 board/caption equality, copied snapshots, wrong-selection replay, midway error stop line, undrawable-board partial notice, truncation, syntax fallback, ambiguous final-only mode, renamed-variable final-only, canvas rendering and isolated D1-only acquisition passed.");
