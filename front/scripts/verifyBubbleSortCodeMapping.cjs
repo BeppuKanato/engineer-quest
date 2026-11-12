@@ -20,14 +20,14 @@ function load(filename) {
 }
 const root = path.resolve(__dirname, "../src/features/learning");
 const file = name => `${root}/${name}`;
-const feature = "bubble-sort/code-mapping";
+const feature = "units/bubble-sort/code-mapping";
 const plain = value => JSON.parse(JSON.stringify(value));
 const { bubbleSortCodeMappingContent: content } = load(file(`${feature}/codeMapping.content.ts`));
 const { bubbleSortCode, bubbleSortCodeSource, bubbleSortCodeLineNumber } = load(file(`${feature}/bubbleSortCode.ts`));
 const { validateBubbleSortCodeMappingCanvas: validate, defineBubbleSortCodeMappingContent } = load(file(`${feature}/codeMapping.types.ts`));
 const { codeVariableRows } = load(file(`${feature}/codeMapping.presentation.ts`));
-const { bubbleSortExecutionContent: execution } = load(file("bubble-sort/execution/execution.content.ts"));
-const sort = load(file("bubble-sort/bubbleSort.ts"));
+const { bubbleSortExecutionContent: execution } = load(file("units/bubble-sort/execution/execution.content.ts"));
+const sort = load(file("units/bubble-sort/bubbleSort.ts"));
 const { CodeDisplay } = load(file("code/CodeDisplay.tsx"));
 const { BubbleSortCodeMappingCanvas } = load(file(`${feature}/BubbleSortCodeMappingCanvas.tsx`));
 const { BubbleSortCodeMappingPreview } = load(file(`${feature}/BubbleSortCodeMappingPreview.tsx`));

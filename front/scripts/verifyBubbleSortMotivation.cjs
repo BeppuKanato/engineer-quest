@@ -18,12 +18,12 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/bubble-sort/motivation`;
+const feature = `${root}/units/bubble-sort/motivation`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { bubbleSortMotivationContent: content } = load(`${feature}/motivation.content.ts`);
 const { validateBubbleSortMotivationCanvas: validate } = load(`${feature}/motivation.types.ts`);
 const { validateArrayBarsCanvas } = load(`${root}/player/arrayBars.types.ts`);
-const sortModule = load(`${root}/bubble-sort/bubbleSort.ts`);
+const sortModule = load(`${root}/units/bubble-sort/bubbleSort.ts`);
 const { BubbleSortMotivationCanvas } = load(`${feature}/BubbleSortMotivationCanvas.tsx`);
 const { BubbleSortMotivationPreview } = load(`${feature}/BubbleSortMotivationPreview.tsx`);
 const { steps } = content;

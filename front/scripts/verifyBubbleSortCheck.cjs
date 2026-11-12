@@ -25,9 +25,9 @@ const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
 const cell = nodeId => ({ kind: "node", nodeId });
-const { bubbleSortCheckContent: content, getBubbleSortCheckScene } = load(file("bubble-sort/check/check.content.ts"));
-const { bubbleSortExecutionContent: execution } = load(file("bubble-sort/execution/execution.content.ts"));
-const sort = load(file("bubble-sort/bubbleSort.ts"));
+const { bubbleSortCheckContent: content, getBubbleSortCheckScene } = load(file("units/bubble-sort/check/check.content.ts"));
+const { bubbleSortExecutionContent: execution } = load(file("units/bubble-sort/execution/execution.content.ts"));
+const sort = load(file("units/bubble-sort/bubbleSort.ts"));
 const { getLearningStep: get, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateArrayBarsCanvas } = load(file("player/arrayBars.types.ts"));
 const { validateAssessment, createAssessmentState, answerQuestion, advanceAssessment, activeQuestion, assessmentComplete } = load(file("assessment/assessment.ts"));
@@ -130,7 +130,7 @@ assert.throws(() => validateAssessment(invalid));
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 
 // 実描画: 場面の棒の本数と、回答ボタン（候補ごとに1つ、aria-label 付き）が一致する。
-const { BubbleSortCheckCanvas } = load(file("bubble-sort/check/BubbleSortCheckCanvas.tsx"));
+const { BubbleSortCheckCanvas } = load(file("units/bubble-sort/check/BubbleSortCheckCanvas.tsx"));
 const scenes = { [q1.id]: scene1, [q2.id]: scene2 };
 const ariaLabel = (scene, id) => `左から${Number(id) + 1}番目のマス（値 ${scene.state.values[Number(id)]}）を選ぶ`;
 for (const q of content.questions) {
@@ -155,9 +155,9 @@ const hooks = { ...React,
   useRef(initial) { const index = cursor++; return slots[index] ||= { current: initial }; },
   useEffect() {},
 };
-const ui = createLoader({ react: hooks, "../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
-const { BubbleSortCheckPreview } = ui(file("bubble-sort/check/BubbleSortCheckPreview.tsx"));
-const Canvas = ui(file("bubble-sort/check/BubbleSortCheckCanvas.tsx")).BubbleSortCheckCanvas;
+const ui = createLoader({ react: hooks, "../../../assessment/AnswerFeedback": { AnswerFeedbackNotice: () => null, useAssessmentFeedback() {} } });
+const { BubbleSortCheckPreview } = ui(file("units/bubble-sort/check/BubbleSortCheckPreview.tsx"));
+const Canvas = ui(file("units/bubble-sort/check/BubbleSortCheckCanvas.tsx")).BubbleSortCheckCanvas;
 const ReviewButton = ui(file("review/AssessmentReviewButton.tsx")).AssessmentReviewButton;
 const ReviewDialog = ui(file("review/LearningReviewDialog.tsx")).LearningReviewDialog;
 const SharedLayout = ui(file("components/layouts/LearningContentLayout.tsx")).LearningContentLayout;
@@ -195,7 +195,7 @@ button("結果を見る").onClick(); render();
 assert(tree.some(element => element.props?.children === content.completion.caption), "Completion shows the completion caption");
 assert.equal(canvasProps().questionId, undefined);
 
-const previewSource = fs.readFileSync(file("bubble-sort/check/BubbleSortCheckPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/bubble-sort/check/BubbleSortCheckPreview.tsx"), "utf8");
 // レイアウト契約（#298）: 3段組。図は固定高の枠の中で表示し、進行操作は下部の固定ゾーンに置く。
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "check canvas sits in a fixed-height frame (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");

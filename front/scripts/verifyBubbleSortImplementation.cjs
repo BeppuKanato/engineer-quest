@@ -21,20 +21,20 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bubbleSortImplementationContent: content } = load(`${root}/bubble-sort/implementation/implementation.content.ts`);
-const { bubbleSortCode, bubbleSortCodeSource } = load(`${root}/bubble-sort/code-mapping/bubbleSortCode.ts`);
-const { bubbleSortConsolidationContent } = load(`${root}/bubble-sort/consolidation/consolidation.content.ts`);
-const { bubbleSortExecutionContent } = load(`${root}/bubble-sort/execution/execution.content.ts`);
-const { ImplementationResults } = load(`${root}/bubble-sort/implementation/ImplementationResults.tsx`);
-const { ImplementationHints } = load(`${root}/bubble-sort/implementation/ImplementationHints.tsx`);
-const { FreeExecutionConsole } = load(`${root}/bubble-sort/implementation/FreeExecutionConsole.tsx`);
+const { bubbleSortImplementationContent: content } = load(`${root}/units/bubble-sort/implementation/implementation.content.ts`);
+const { bubbleSortCode, bubbleSortCodeSource } = load(`${root}/units/bubble-sort/code-mapping/bubbleSortCode.ts`);
+const { bubbleSortConsolidationContent } = load(`${root}/units/bubble-sort/consolidation/consolidation.content.ts`);
+const { bubbleSortExecutionContent } = load(`${root}/units/bubble-sort/execution/execution.content.ts`);
+const { ImplementationResults } = load(`${root}/units/bubble-sort/implementation/ImplementationResults.tsx`);
+const { ImplementationHints } = load(`${root}/units/bubble-sort/implementation/ImplementationHints.tsx`);
+const { FreeExecutionConsole } = load(`${root}/units/bubble-sort/implementation/FreeExecutionConsole.tsx`);
 const { ParsonsBoard } = load(`${root}/components/assessment/ParsonsBoard.tsx`);
 const {
   recordHintUsage, resultKinds, classifyExecutionError, runningMessage, allTestsPassed, runImplementationTests,
   isNumberListValue, isDrawableArrayValue, arrayBarsCanvas, arrayDifferences,
-} = load(`${root}/bubble-sort/implementation/implementation.ts`);
+} = load(`${root}/units/bubble-sort/implementation/implementation.ts`);
 const { validateArrayBarsCanvas } = load(`${root}/player/arrayBars.types.ts`);
-const { freeDisplayCase, runBubbleSortFreeCode } = load(`${root}/bubble-sort/implementation/freeExecution.ts`);
+const { freeDisplayCase, runBubbleSortFreeCode } = load(`${root}/units/bubble-sort/implementation/freeExecution.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
@@ -51,8 +51,8 @@ assert.equal(content.hints.labels.length, 4);
 assert.deepEqual(plain(content.hints.flow), ["左端から右端まで、隣同士を比べていく", "左が大きければ入れ替える", "右端が決まったら、範囲を1つ狭めてくり返す"]);
 assert.equal(new Set(content.hints.tokens).size, content.hints.tokens.length);
 assert.equal(content.hints.parsonsQuestion, bubbleSortConsolidationContent.questions.find(question => question.kind === "parsons"));
-for (const file of fs.readdirSync(`${root}/bubble-sort/implementation`).filter(file => /\.tsx?$/.test(file))) {
-  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/bubble-sort/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
+for (const file of fs.readdirSync(`${root}/units/bubble-sort/implementation`).filter(file => /\.tsx?$/.test(file))) {
+  assert(!/codeDiff|diffLines|from ["']diff["']|diffTitle|referenceCode/u.test(fs.readFileSync(`${root}/units/bubble-sort/implementation/${file}`, "utf8")), "No diff hint dependency remains in the feature");
 }
 
 // ---- テストの入力は基準データの確定値、期待値は独立に数値ソートで確認 ----
@@ -241,7 +241,7 @@ assert.deepEqual(plain(analyzeExecutionError(new Error(runtimeTrace))), { kind: 
 assert.deepEqual(plain(analyzeExecutionError(new Error('Traceback (most recent call last):\n  File "<exec>", line 8, in <module>\nNameError: HIDDEN'))), { kind: "runtime" }, "harness-only frames give no learner line");
 assert.deepEqual(plain(analyzeExecutionError(new Error(timeoutMessage))), { kind: "timeout" }, "timeouts carry no line");
 assert.equal(extractExecutionErrorLine("SyntaxError: no traceback"), undefined);
-const { bubbleSortEditorText: editorText } = load(`${root}/bubble-sort/implementation/editor.content.ts`);
+const { bubbleSortEditorText: editorText } = load(`${root}/units/bubble-sort/implementation/editor.content.ts`);
 const syntaxFreeHtml = renderToStaticMarkup(createElement(FreeExecutionConsole, {
   result: { stdout: "", outputTruncated: false, returned: false, error: "syntax", errorLine: 2 }, busy: false,
 }));
@@ -375,7 +375,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.deepEqual(plain(free.actual), d1Expected);
 
   // 画面契約（#149）: エディタはライトテーマ＋枠と見出しで分離し、ダーク基調を持たない。ヒント2はフロー表示、結果の状態はアニメーションで現れる。
-  const impl = (file) => fs.readFileSync(`${root}/bubble-sort/implementation/${file}`, "utf8");
+  const impl = (file) => fs.readFileSync(`${root}/units/bubble-sort/implementation/${file}`, "utf8");
   const adapterSource = impl("BubbleSortImplementationPreview.tsx");
   assert.match(adapterSource, /<ImplementationWorkspace/, "the unit uses the shared editor workspace");
   const previewSource = fs.readFileSync(`${root}/implementation/ImplementationWorkspace.tsx`, "utf8");
@@ -409,7 +409,7 @@ assert(freeMismatchHtml.includes('data-free-error-kind="mismatch"'));
   assert.match(previewSource, /ImplementationLevelSelector/, "phase 7 renders the shared level selector (#328)");
   assert.match(previewSource, /implementation_level_select/, "level changes are recorded in the learning log (#328)");
   assert.match(previewSource, /inputLevel: level/, "the completion summary carries the level in effect (#328)");
-  const unitAdapter = fs.readFileSync(`${root}/bubble-sort/unit/BubbleSortUnitPreview.tsx`, "utf8");
+  const unitAdapter = fs.readFileSync(`${root}/units/bubble-sort/unit/BubbleSortUnitPreview.tsx`, "utf8");
   assert.match(unitAdapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "the adapter forwards the draft and connection props");
   const unitSource = fs.readFileSync(`${root}/unit/LearningUnitPreview.tsx`, "utf8");
   assert.match(unitSource, /codeDraftBaseKey=\{codeDraftBaseKey\}/, "the unit flow hands the per-level draft base key to phase 7 (#328)");

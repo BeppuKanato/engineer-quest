@@ -17,11 +17,11 @@ function load(filename) {
   } }, { filename }); return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const { bubbleSortCodeSource } = load(`${root}/bubble-sort/code-mapping/bubbleSortCode.ts`);
-const { bubbleSortImplementationContent } = load(`${root}/bubble-sort/implementation/implementation.content.ts`);
-const { bubbleSortExecutionContent } = load(`${root}/bubble-sort/execution/execution.content.ts`);
-const { convertBubbleSortTrace } = load(`${root}/bubble-sort/trace/convertTrace.ts`);
-const { traceBubbleSortCode, bubbleSortTraceEventLimit } = load(`${root}/bubble-sort/trace/acquireTrace.ts`);
+const { bubbleSortCodeSource } = load(`${root}/units/bubble-sort/code-mapping/bubbleSortCode.ts`);
+const { bubbleSortImplementationContent } = load(`${root}/units/bubble-sort/implementation/implementation.content.ts`);
+const { bubbleSortExecutionContent } = load(`${root}/units/bubble-sort/execution/execution.content.ts`);
+const { convertBubbleSortTrace } = load(`${root}/units/bubble-sort/trace/convertTrace.ts`);
+const { traceBubbleSortCode, bubbleSortTraceEventLimit } = load(`${root}/units/bubble-sort/trace/acquireTrace.ts`);
 const runner = load(path.resolve(root, "../../lib/pyodideRunner.ts"));
 const plain = value => JSON.parse(JSON.stringify(value));
 const code = bubbleSortCodeSource;
@@ -112,7 +112,7 @@ const projected = canvas => ({ values: canvas.state.values, comparing: canvas.st
   assert.deepEqual(plain(builtin.content.steps.at(-1).canvas.state.values), plain(d1.expected), "Terminal frame shows the returned list, not the untouched input");
   // ---- キャンバス描画: バーの本数と値が図に出る ----
   const { renderToStaticMarkup } = require("react-dom/server"), { createElement } = require("react");
-  const { BubbleSortExecutionCanvas } = load(`${root}/bubble-sort/execution/BubbleSortExecutionCanvas.tsx`);
+  const { BubbleSortExecutionCanvas } = load(`${root}/units/bubble-sort/execution/BubbleSortExecutionCanvas.tsx`);
   const html = renderToStaticMarkup(createElement(BubbleSortExecutionCanvas, { canvas: playback.content.steps[1].canvas }));
   assert.equal((html.match(/data-array-bar=/g) || []).length, 5);
   assert.equal((html.match(/data-array-comparing/g) || []).length, 2, "The compared pair is marked on the bars");
@@ -129,7 +129,7 @@ const projected = canvas => ({ values: canvas.state.values, comparing: canvas.st
   await assert.rejects(() => traceBubbleSortCode("cancelled", () => false), /cancelled/);
   assert.equal(calls, 1, "An unmounted owner cannot start a later trace request");
   // ---- ソースpin: 変換は教材の正準データを流用して状態を作らない ----
-  const convertSource = fs.readFileSync(`${root}/bubble-sort/trace/convertTrace.ts`, "utf8");
+  const convertSource = fs.readFileSync(`${root}/units/bubble-sort/trace/convertTrace.ts`, "utf8");
   assert(!convertSource.includes("bubbleSortExecutionContent"), "converter must not substitute canonical phase-2 data");
   assert(!convertSource.includes("bubbleSortComparisons"), "converter must not re-run the reference procedure");
   console.log("Bubble-sort trace: real CPython harness, canonical phase-2 state sequence, copied snapshots, in-place detection, wrong-comparison replay, midway error stop line, undrawable tail partial notice, truncation, syntax fallback, ambiguous final-only mode, returned-list terminal frame, canvas rendering and isolated D1-only acquisition passed.");

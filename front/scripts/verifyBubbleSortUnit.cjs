@@ -20,7 +20,7 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const plain = value => JSON.parse(JSON.stringify(value));
 const read = filename => fs.readFileSync(filename, "utf8");
 
-const { bubbleSortUnitPhases, bubbleSortUnitTitle, bubbleSortUnitText, nextPhaseLabel } = load(`${root}/bubble-sort/unit/unit.content.ts`);
+const { bubbleSortUnitPhases, bubbleSortUnitTitle, bubbleSortUnitText, nextPhaseLabel } = load(`${root}/units/bubble-sort/unit/unit.content.ts`);
 
 // 単元はバブルソートで、フェーズ1〜7が順番どおりに並ぶ。
 assert.equal(bubbleSortUnitTitle, "バブルソート");
@@ -78,7 +78,7 @@ assert.match(screenSource, /<BubbleSortUnitPreview \{\.\.\.unitPreviewProps\} \/
 assert.match(screenSource, /<BfsUnitPreview \{\.\.\.unitPreviewProps\} \/>/, "BFS container receives the same connection props");
 
 // 単元コンテナが7フェーズすべてを埋め込んでいる。
-const adapter = read(`${root}/bubble-sort/unit/BubbleSortUnitPreview.tsx`);
+const adapter = read(`${root}/units/bubble-sort/unit/BubbleSortUnitPreview.tsx`);
 assert.match(adapter, /<LearningUnitPreview \{\.\.\.props\} unit=/, "The unit uses the common controller");
 const container = read(`${root}/unit/LearningUnitPreview.tsx`);
 for (const component of ["BubbleSortMotivationPreview", "BubbleSortExecutionPreview", "BubbleSortCheckPreview", "BubbleSortCodeMappingPreview", "BubbleSortCodeCheckPreview", "BubbleSortConsolidationPreview", "BubbleSortImplementationPreview"]) {
@@ -97,19 +97,19 @@ assert.match(container, /<UnitResultScreen phase=\{phases\[screen\.index\]\} sum
 
 // 接続の前提となる各フェーズプレビューの受け口がそろっている。
 for (const file of ["motivation/BubbleSortMotivationPreview", "execution/BubbleSortExecutionPreview", "check/BubbleSortCheckPreview", "code-mapping/BubbleSortCodeMappingPreview", "code-check/BubbleSortCodeCheckPreview", "consolidation/BubbleSortConsolidationPreview", "implementation/BubbleSortImplementationPreview"]) {
-  const adapter = read(`${root}/bubble-sort/${file}.tsx`);
+  const adapter = read(`${root}/units/bubble-sort/${file}.tsx`);
   if (file.startsWith("implementation/")) assert.match(adapter, /<ImplementationWorkspace \{\.\.\.props\}/, "implementation forwards its props");
   const source = file.startsWith("implementation/") ? read(`${root}/implementation/ImplementationWorkspace.tsx`) : adapter;
   assert.match(source, /embedded/, `${file} embedded prop`);
   assert.match(source, /onComplete/, `${file} onComplete prop`);
 }
-assert.match(read(`${root}/bubble-sort/consolidation/BubbleSortConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
+assert.match(read(`${root}/units/bubble-sort/consolidation/BubbleSortConsolidationPreview.tsx`), /onNext/, "consolidation onNext");
 
 // 到達図の並びは正本の手順から導出し、教材の結果と一致する（主教材 [4,2,5,1,3] → [1,2,3,4,5]）。
-const { bubbleSortMainValues, runBubbleSort } = load(`${root}/bubble-sort/bubbleSort.ts`);
+const { bubbleSortMainValues, runBubbleSort } = load(`${root}/units/bubble-sort/bubbleSort.ts`);
 assert.deepEqual(plain(bubbleSortMainValues), [4, 2, 5, 1, 3], "Main teaching values stay canonical");
 assert.deepEqual(plain(runBubbleSort(bubbleSortMainValues)), [1, 2, 3, 4, 5], "Result figure values derive from the canonical procedure");
-const figureSource = read(`${root}/bubble-sort/unit/BubbleSortResultFigure.tsx`);
+const figureSource = read(`${root}/units/bubble-sort/unit/BubbleSortResultFigure.tsx`);
 assert.match(figureSource, /runBubbleSort/, "The figure derives the sorted values from the canonical procedure");
 assert.match(figureSource, /bubbleSortMainValues/, "The figure uses the main teaching values");
 assert.match(figureSource, /fixedFrom: 0/, "The figure shows the fully fixed (completed) array");
@@ -143,7 +143,7 @@ assert.match(phaseResultSource, /<ResultScoreDots/, "Phase results render the sc
 // フェーズリザルトを実際に描く：見出し・スコアのドット・到達図（完成した並び）が出る。
 const { createElement } = require("react"), { renderToStaticMarkup } = require("react-dom/server");
 const { UnitResultScreen } = load(`${root}/components/results/UnitResultScreens.tsx`);
-const { BubbleSortResultFigure } = load(`${root}/bubble-sort/unit/BubbleSortResultFigure.tsx`);
+const { BubbleSortResultFigure } = load(`${root}/units/bubble-sort/unit/BubbleSortResultFigure.tsx`);
 for (const phase of bubbleSortUnitPhases.filter(phase => phase.transitionOut === "result")) {
   for (const summary of [undefined, { totalQuestions: 2, firstAttemptCorrect: 2 }, { totalQuestions: 2, firstAttemptCorrect: 1 }]) {
     const html = renderToStaticMarkup(createElement(UnitResultScreen, { phase, summary, figure: createElement(BubbleSortResultFigure), onNext: () => {} }));

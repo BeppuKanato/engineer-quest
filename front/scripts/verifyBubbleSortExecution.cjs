@@ -18,11 +18,11 @@ function load(filename) {
   return exports;
 }
 const root = path.resolve(__dirname, "../src/features/learning");
-const feature = `${root}/bubble-sort/execution`;
+const feature = `${root}/units/bubble-sort/execution`;
 const plain = value => JSON.parse(JSON.stringify(value));
 const { bubbleSortExecutionContent: content } = load(`${feature}/execution.content.ts`);
 const { validateBubbleSortExecutionCanvas: validate } = load(`${feature}/execution.types.ts`);
-const sortModule = load(`${root}/bubble-sort/bubbleSort.ts`);
+const sortModule = load(`${root}/units/bubble-sort/bubbleSort.ts`);
 const { BubbleSortExecutionCanvas } = load(`${feature}/BubbleSortExecutionCanvas.tsx`);
 const { BubbleSortExecutionPreview } = load(`${feature}/BubbleSortExecutionPreview.tsx`);
 const { steps } = content;

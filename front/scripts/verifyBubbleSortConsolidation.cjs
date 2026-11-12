@@ -24,11 +24,11 @@ const root = path.resolve(__dirname, "../src/features/learning");
 const file = relative => `${root}/${relative}`;
 const load = createLoader();
 const plain = value => JSON.parse(JSON.stringify(value));
-const { bubbleSortConsolidationContent: content, validateBubbleSortConsolidation } = load(file("bubble-sort/consolidation/consolidation.content.ts"));
-const bubbleSort = load(file("bubble-sort/bubbleSort.ts"));
-const { bubbleSortExecutionContent: execution } = load(file("bubble-sort/execution/execution.content.ts"));
-const { bubbleSortCodeMappingContent: mapping } = load(file("bubble-sort/code-mapping/codeMapping.content.ts"));
-const { bubbleSortCode: code } = load(file("bubble-sort/code-mapping/bubbleSortCode.ts"));
+const { bubbleSortConsolidationContent: content, validateBubbleSortConsolidation } = load(file("units/bubble-sort/consolidation/consolidation.content.ts"));
+const bubbleSort = load(file("units/bubble-sort/bubbleSort.ts"));
+const { bubbleSortExecutionContent: execution } = load(file("units/bubble-sort/execution/execution.content.ts"));
+const { bubbleSortCodeMappingContent: mapping } = load(file("units/bubble-sort/code-mapping/codeMapping.content.ts"));
+const { bubbleSortCode: code } = load(file("units/bubble-sort/code-mapping/bubbleSortCode.ts"));
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateArrayBarsCanvas } = load(file("player/arrayBars.types.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
@@ -164,7 +164,7 @@ const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&gt;/g, ">").re
 for (const line of code.lines) assert(parsonsText.includes(line.text), "Preserve original indentation and every line");
 
 // 実描画: Q1は候補マスごとに回答ボタン1つ、選択問題の場面は表示のみ。正解後は全ボタンが固定される。
-const { BubbleSortCheckCanvas } = load(file("bubble-sort/check/BubbleSortCheckCanvas.tsx"));
+const { BubbleSortCheckCanvas } = load(file("units/bubble-sort/check/BubbleSortCheckCanvas.tsx"));
 const sceneBeforeRender = JSON.stringify(q1.scene);
 const q1Html = renderToStaticMarkup(React.createElement(BubbleSortCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, onAnswer() {} }));
 assert.equal((q1Html.match(/<button\b/g) || []).length, q1.nodeIds.length, "One answer button per candidate cell");
@@ -251,7 +251,7 @@ rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[2].tags = []);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
-const previewSource = fs.readFileSync(file("bubble-sort/consolidation/BubbleSortConsolidationPreview.tsx"), "utf8");
+const previewSource = fs.readFileSync(file("units/bubble-sort/consolidation/BubbleSortConsolidationPreview.tsx"), "utf8");
 assert.match(previewSource, /height: "min\(54dvh, 600px\)", flexShrink: 0/, "figure height is fixed by the question and viewport only (#298)");
 assert.match(previewSource, /<AssessmentLayout/, "preview uses the shared scroll layout");
 assert.match(fs.readFileSync(path.resolve(__dirname, "../src/features/learning/components/layouts/AssessmentLayout.tsx"), "utf8"), /flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column"/, "question body flows in the middle scroll region (#298)");

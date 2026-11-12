@@ -45,8 +45,8 @@ const projected = canvas => ({
   assert.equal(normal.ambiguous, false);
   assert(normal.events.some(event => event.locals.lo === 0 && event.locals.hi === 6 && event.locals.mid === 3 && event.locals.target === 25 && Array.isArray(event.locals.array)),
     "harness records the range, the centre, the target and the working list");
-  const { bubbleSortCodeSource } = load(`${root}/bubble-sort/code-mapping/bubbleSortCode.ts`);
-  const bubbleArgs = load(`${root}/bubble-sort/implementation/implementation.content.ts`).bubbleSortImplementationContent.tests.find(test => test.id === "D1").args;
+  const { bubbleSortCodeSource } = load(`${root}/units/bubble-sort/code-mapping/bubbleSortCode.ts`);
+  const bubbleArgs = load(`${root}/units/bubble-sort/implementation/implementation.content.ts`).bubbleSortImplementationContent.tests.find(test => test.id === "D1").args;
   const bubble = trace(bubbleSortCodeSource, "bubble_sort", bubbleArgs);
   assert.equal(bubble.status, "returned");
   assert(bubble.events.every(event => !("lo" in event.locals) && !("hi" in event.locals) && !("mid" in event.locals) && !("target" in event.locals)),

@@ -12,7 +12,7 @@ import { getCurrentBigGoal, type BigGoal } from "@/api/bigGoal.api";
 import type { FeedbackBindings } from "./feedback/FeedbackBindings";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../units/bfs/unit/BfsUnitPreview";
-import { BubbleSortUnitPreview } from "../bubble-sort/unit/BubbleSortUnitPreview";
+import { BubbleSortUnitPreview } from "../units/bubble-sort/unit/BubbleSortUnitPreview";
 import type { UnitPhaseSummary } from "../types/unit.types";
 import { DfsUnitPreview } from "../units/dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
