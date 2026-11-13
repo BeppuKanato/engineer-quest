@@ -146,7 +146,7 @@ function evaluateUnitCompletion(
     unit: "フェーズ",
   }];
   const statusOf = (check: boolean | null): GoalRequirement["status"] =>
-    check === null ? "unobserved" : check ? "met" : "not_met";
+    check === null ? "unobserved" : check ? (unitComplete ? "met" : "ongoing") : "not_met";
   if (challenge?.inputLevel) requirements.push({
     id: "inputLevel",
     label: "フェーズ7で" + (challenge.inputLevel === "full" ? "全部書く" : challenge.inputLevel === "skeleton" ? "骨格から書く" : "穴埋め") + "方式を使用する",
