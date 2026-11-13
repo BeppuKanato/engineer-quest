@@ -156,7 +156,12 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     startFeedback("phase", phaseFeedbackEventId(phaseKey, nextPhaseKey));
   }, [startFeedback, phaseFeedbackEventId]);
   const goalSummary: FeedbackGoalSummary | null = useMemo(() => currentGoal
-    ? { displayText: currentGoal.displayText, progress: currentGoal.progress, fact: bigGoalProgressFact(currentGoal) }
+    ? {
+      displayText: currentGoal.displayText,
+      progress: currentGoal.progress,
+      fact: bigGoalProgressFact(currentGoal),
+      requirements: currentGoal.evaluation?.requirements ?? [],
+    }
     : null, [currentGoal]);
   const renderPhaseFeedbackScreen = useCallback((phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => {
     const phase = unit.phases.find(item => item.id === phaseKey);
