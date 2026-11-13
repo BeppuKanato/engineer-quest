@@ -2,6 +2,7 @@ import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import {
   analysisPrompt,
+  analysisGenerationSchema,
   analysisSchema,
   selectionPrompt,
   openAiCall,
@@ -102,7 +103,7 @@ async function main(): Promise<void> {
   );
 
   try {
-    const result = await openAiCall(stage, prompt, personalized);
+    const result = await openAiCall(stage, prompt, personalized, stage === "analysis" ? analysisGenerationSchema(input) : undefined);
 
     console.log(
       JSON.stringify(
