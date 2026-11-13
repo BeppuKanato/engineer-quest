@@ -143,21 +143,40 @@ export function generateBigGoalCandidates(input: {
     if (!unit || unit.status === "COMPLETED") return [];
     if (state.coveredCourseIds.includes(unit.courseId)) return [];
     const list = [...unitCompletionCandidates(unit, room)];
+    // 初回でも、システムで達成判定できる挑戦を提案可能にする。
+    // 採用するかは学習状態を踏まえLLMが判断し、学習者が選択する。
+    if (unit.completedPhaseCount === 0) {
+      for (const [suffix, challenge] of [
+        ["no-hint", { noHint: true }],
+        ["full-code", { inputLevel: "full" as const }],
+      ] as const) {
+        if (suffix === "full-code" && room) continue;
+        const params = { courseId: unit.courseId, challenge };
+        list.push({
+          candidateKey: "unit-completion-" + suffix + ":" + unit.courseId,
+          type: "UNIT_COMPLETION",
+          params,
+          displayText: buildBigGoalDisplayText("UNIT_COMPLETION", params, { courseTitle: unit.title }),
+        });
+      }
+    }
     const achievement = achievementCandidate(state, unit);
     if (achievement) list.push(achievement);
     return dedupe(list).slice(0, MAX_BIG_GOAL_CANDIDATES);
   }
 
   // タイミングB：到達型は未完了の全単元、他型は前提を満たす全単元。
-  const others: BigGoalCandidate[] = [];
+  const achievements: BigGoalCandidate[] = [];
+  const createQuests: BigGoalCandidate[] = [];
   for (const unit of state.units) {
     const achievement = achievementCandidate(state, unit);
-    if (achievement) others.push(achievement);
+    if (achievement) achievements.push(achievement);
   }
   for (const unit of state.units) {
-    if ((state.openCreateQuestCountByCourse[unit.courseId] ?? 0) > 0) {
+    // 応用型は対象単元を修了し、作る課題が残っている場合だけ許可する。
+    if (unit.status === "COMPLETED" && (state.openCreateQuestCountByCourse[unit.courseId] ?? 0) > 0) {
       const params = { algorithmCourseId: unit.courseId, count: 1 };
-      others.push({
+      createQuests.push({
         candidateKey: `create-quest:${unit.courseId}:1`,
         type: "CREATE_QUEST",
         params,
@@ -176,8 +195,16 @@ export function generateBigGoalCandidates(input: {
   for (const unit of orderedUnits) {
     completions.push(...unitCompletionCandidates(unit, room));
   }
-  // 型の多様性を優先する：到達型以外を先に置き、残りを到達型で埋める。
-  let combined = dedupe([...others, ...completions]);
+  // 特定型の候補が大量にあると応用型が隠れる問題を回避する。
+  // まず型別に最低限の枠を確保し、残りを他の候補で埋める。
+  let combined = dedupe([
+    ...achievements.slice(0, 2),
+    ...createQuests.slice(0, 2),
+    ...completions.slice(0, 2),
+    ...achievements.slice(2),
+    ...createQuests.slice(2),
+    ...completions.slice(2),
+  ]);
   if (combined.length === 0 && orderedUnits[0]) {
     // 未完了単元がある限り標準形の到達型は常に出せるため、候補集合は空にしない。
     combined = unitCompletionCandidates(orderedUnits[0], false);

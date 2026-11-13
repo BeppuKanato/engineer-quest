@@ -38,11 +38,22 @@ export type BigGoalOutcome =
   | "ONGOING"
   | "NOT_INSTRUMENTED";
 
+export type GoalRequirement = {
+  id: string;
+  label: string;
+  status: "met" | "ongoing" | "unobserved" | "not_met" | "unavailable";
+  current?: number;
+  target?: number;
+  unit?: string;
+};
+
 export type BigGoalEvaluation = {
   outcome: BigGoalOutcome;
   /** 部分充足の割合（0〜1）。定義できない型は null */
   fraction: number | null;
   detail: Record<string, unknown>;
+  /** 目標の達成条件ごとの事実。割合だけでは表せない挑戦も含む。 */
+  requirements: GoalRequirement[];
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
@@ -60,7 +71,7 @@ export type UnitSummary = {
     inputLevel: string | null;
     hintUsage: number[] | null;
     /** フェーズ7のサマリがない、または hintUsage がすべて0なら true（実績評価の既存解釈に揃える） */
-    noHint: boolean;
+    noHint: boolean | null;
   };
 };
 
@@ -69,7 +80,7 @@ export function summarizeUnit(phases: PhaseFact[]): UnitSummary {
   const completed = phases.filter((p) => p.status === "COMPLETED");
   let correct = 0;
   let total = 0;
-  let phase7: UnitSummary["phase7"] = { inputLevel: null, hintUsage: null, noHint: true };
+  let phase7: UnitSummary["phase7"] = { inputLevel: null, hintUsage: null, noHint: null };
   for (const phase of completed) {
     const summary = asRecord(phase.summary);
     if (!summary) continue;
@@ -87,7 +98,7 @@ export function summarizeUnit(phases: PhaseFact[]): UnitSummary {
       phase7 = {
         inputLevel: typeof summary.inputLevel === "string" ? summary.inputLevel : null,
         hintUsage: usage,
-        noHint: !usage || usage.every((count) => count === 0),
+        noHint: usage === null ? null : usage.every((count) => count === 0),
       };
     }
   }
@@ -108,17 +119,15 @@ function evaluateUnitCompletion(
 ): BigGoalEvaluation {
   const unit = summarizeUnit(facts.phases ?? []);
   const challenge = params.challenge;
+  const unitComplete = facts.unitStatus === "COMPLETED";
   const checks = {
-    inputLevel:
-      challenge?.inputLevel === undefined
-        ? null
-        : unit.phase7.inputLevel === challenge.inputLevel,
+    inputLevel: challenge?.inputLevel === undefined ? null
+      : unit.phase7.inputLevel === null ? null
+      : unit.phase7.inputLevel === challenge.inputLevel,
     noHint: challenge?.noHint ? unit.phase7.noHint : null,
-    firstAttemptRate:
-      challenge?.minFirstAttemptRate === undefined
-        ? null
-        : unit.firstAttempt.rate !== null &&
-          unit.firstAttempt.rate >= challenge.minFirstAttemptRate,
+    firstAttemptRate: challenge?.minFirstAttemptRate === undefined ? null
+      : unit.firstAttempt.rate === null ? null
+      : unit.firstAttempt.rate >= challenge.minFirstAttemptRate,
   };
   const detail: Record<string, unknown> = {
     unitStatus: facts.unitStatus ?? "NOT_STARTED",
@@ -128,12 +137,56 @@ function evaluateUnitCompletion(
     phase7: unit.phase7,
     challengeChecks: checks,
   };
-  const fraction = Math.min(unit.completedPhaseCount / UNIT_PHASE_COUNT, 1);
-  if (facts.unitStatus !== "COMPLETED") return { outcome: "ONGOING", fraction, detail };
-  if (!challenge) return { outcome: "ACHIEVED", fraction: 1, detail };
-  // 対象単元が完了した時点で挑戦条件が満たされていなければ、未達成で閉じる（仕様5.1）。
-  const satisfied = Object.values(checks).every((v) => v !== false);
-  return { outcome: satisfied ? "ACHIEVED" : "UNMET_CLOSED", fraction, detail };
+  const requirements: GoalRequirement[] = [{
+    id: "unit",
+    label: "単元の7フェーズを完了する",
+    status: unitComplete ? "met" : "ongoing",
+    current: unit.completedPhaseCount,
+    target: UNIT_PHASE_COUNT,
+    unit: "フェーズ",
+  }];
+  const statusOf = (check: boolean | null): GoalRequirement["status"] =>
+    check === null ? "unobserved" : check ? (unitComplete ? "met" : "ongoing") : "not_met";
+  if (challenge?.inputLevel) requirements.push({
+    id: "inputLevel",
+    label: "フェーズ7で" + (challenge.inputLevel === "full" ? "全部書く" : challenge.inputLevel === "skeleton" ? "骨格から書く" : "穴埋め") + "方式を使用する",
+    status: statusOf(checks.inputLevel),
+  });
+  if (challenge?.noHint) requirements.push({
+    id: "noHint",
+    label: "フェーズ7をヒントなしで完了する",
+    status: statusOf(checks.noHint),
+  });
+  if (challenge?.minFirstAttemptRate !== undefined) requirements.push({
+    id: "firstAttemptRate",
+    label: "確認・応用問題の初回正答率" + Math.round(challenge.minFirstAttemptRate * 100) + "%以上",
+    status: unitComplete ? statusOf(checks.firstAttemptRate)
+      : checks.firstAttemptRate === null ? "unobserved" : "ongoing",
+  });
+
+  if (!unitComplete) {
+    return {
+      outcome: "ONGOING",
+      // 挑戦条件つきの目標では単元7/7を「大目標100%」と誤表示しない。
+      fraction: challenge ? null : Math.min(unit.completedPhaseCount / UNIT_PHASE_COUNT, 1),
+      detail, requirements,
+    };
+  }
+  if (!challenge) return { outcome: "ACHIEVED", fraction: 1, detail, requirements };
+  const selectedChecks: Array<boolean | null> = [];
+  if (challenge.inputLevel !== undefined) selectedChecks.push(checks.inputLevel);
+  if (challenge.noHint) selectedChecks.push(checks.noHint);
+  if (challenge.minFirstAttemptRate !== undefined) selectedChecks.push(checks.firstAttemptRate);
+  // 記録不足を達成とも失敗とも推定しない。
+  if (selectedChecks.includes(null)) {
+    return { outcome: "NOT_INSTRUMENTED", fraction: null, detail, requirements };
+  }
+  const achieved = selectedChecks.every(value => value === true);
+  return {
+    outcome: achieved ? "ACHIEVED" : "UNMET_CLOSED",
+    fraction: achieved ? 1 : null,
+    detail, requirements,
+  };
 }
 
 export function evaluateBigGoal(
@@ -150,6 +203,11 @@ export function evaluateBigGoal(
         outcome: acquired ? "ACHIEVED" : "ONGOING",
         fraction: acquired ? 1 : 0,
         detail: { achievementAcquired: acquired },
+        requirements: [{
+          id: "achievement", label: "指定の実績を獲得する",
+          status: acquired ? "met" : "ongoing",
+          current: acquired ? 1 : 0, target: 1, unit: "件",
+        }],
       };
     }
     case "CREATE_QUEST": {
@@ -159,6 +217,11 @@ export function evaluateBigGoal(
         outcome: done >= p.count ? "ACHIEVED" : "ONGOING",
         fraction: p.count > 0 ? Math.min(done / p.count, 1) : 1,
         detail: { completedCount: done, requiredCount: p.count },
+        requirements: [{
+          id: "createQuest", label: "対象アルゴリズムの作る課題を完了する",
+          status: done >= p.count ? "met" : "ongoing",
+          current: done, target: p.count, unit: "件",
+        }],
       };
     }
     case "INTEGRATION":
@@ -169,6 +232,10 @@ export function evaluateBigGoal(
         outcome: "NOT_INSTRUMENTED",
         fraction: null,
         detail: { reason: "not_instrumented" },
+        requirements: [{
+          id: "notInstrumented", label: "達成条件の計測",
+          status: "unavailable",
+        }],
       };
   }
   throw new Error("UNKNOWN_BIG_GOAL_TYPE");

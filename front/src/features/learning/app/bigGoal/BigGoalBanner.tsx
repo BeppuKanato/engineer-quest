@@ -19,6 +19,7 @@ import {
 } from "@/api/bigGoal.api";
 import { useUserSession } from "@/app/component/userSession";
 import { bigGoalProgressFact, bigGoalStatusLabel } from "./bigGoalPresentation";
+import { BigGoalRequirements } from "./BigGoalRequirements";
 
 const cardSx = {
   borderRadius: 3,
@@ -112,6 +113,7 @@ export function BigGoalBanner() {
                   {fact}
                 </Typography>
               )}
+              <BigGoalRequirements requirements={current.evaluation?.requirements} />
             </Stack>
           </CardContent>
         </Card>

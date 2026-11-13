@@ -165,7 +165,14 @@ export async function processFeedbackV1Task(
 function response(row: { id: string; status: string; createdAt: Date; generatedAt: Date | null; result: Prisma.JsonValue | null; input?: Prisma.JsonValue }) {
   const result = row.result as unknown as Awaited<ReturnType<typeof generate>> | null;
   const learning = (row.input as unknown as { learning?: { conceptSnapshot?: unknown } } | undefined)?.learning;
-  return { conceptSnapshot: learning?.conceptSnapshot ?? null, id: row.id, status: row.status, source: "GENERATED", requestedAt: row.createdAt.toISOString(), completedAt: row.generatedAt?.toISOString() ?? null,
+  const goal = (row.input as unknown as Input | null)?.bigGoal;
+  const goalSnapshot = goal ? {
+    displayText: goal.displayText,
+    status: goal.status,
+    progress: goal.progress.fraction,
+    requirements: goal.progress.requirements ?? [],
+  } : null;
+  return { conceptSnapshot: learning?.conceptSnapshot ?? null, goalSnapshot, id: row.id, status: row.status, source: "GENERATED", requestedAt: row.createdAt.toISOString(), completedAt: row.generatedAt?.toISOString() ?? null,
     feedback: result ? { currentState: result.analysis.currentState, nextGoal: result.selection.nextGoal, nextStep: result.selection.nextStep, reason: result.selection.reason, actionType: "V1_ACTION", actionLabel: result.selection.actionLabel, actionHref: result.validation.actionHref, recommendations: (result.selection.candidates ?? [result.selection]).map((candidate, index) => ({
       candidateId: result.validation.candidates?.[index]?.candidateId ?? `candidate-${index+1}`,
       nextStep: candidate.nextStep, reason: candidate.reason, actionLabel: candidate.actionLabel,

@@ -16,9 +16,9 @@ import {
   type BigGoalCandidate,
 } from "./bigGoal.candidates";
 import {
-  scoreBigGoalCandidates,
-  type BigGoalScoringOutput,
-} from "./bigGoal.scoring";
+  generateBigGoalProposals,
+  type GoalGenerationOutput,
+} from "./bigGoal.generate";
 import { loadLearnerGoalState, summarizeLearnerStateForScoring } from "./bigGoal.state";
 import { evaluateBigGoalRow } from "./bigGoal.service";
 
@@ -38,7 +38,7 @@ export type BigGoalProposalRequest = {
 
 type StoredProposalResult = {
   candidates: BigGoalCandidate[];
-  scores: BigGoalScoringOutput["scores"];
+  scores: GoalGenerationOutput["scores"];
   recommendedCandidateKey: string;
   llmRecommendedCandidateKey: string;
   scoring: { model: string; promptVersion: string };
@@ -145,13 +145,13 @@ async function generateProposal(id: string, userId: string, input: BigGoalPropos
       }),
     },
   });
-  const scoring = await scoreBigGoalCandidates(
+  const generated = await generateBigGoalProposals(
     {
       timing: input.timing,
       startCourseId: input.startCourseId ?? null,
-      candidates,
+      eligible: candidates,
       learnerState: summarizeLearnerStateForScoring(state),
-      // 初回申告の保存先は現行スキーマに存在しないため、当面は null で採点する。
+      // 初回申告の保存先ができるまではnull（両条件共通）。
       declaredInfo: null,
       condition,
       hexadScores,
@@ -165,11 +165,11 @@ async function generateProposal(id: string, userId: string, input: BigGoalPropos
     }
   );
   const result: StoredProposalResult = {
-    candidates,
-    scores: scoring.scores,
-    recommendedCandidateKey: scoring.recommendedCandidateKey,
-    llmRecommendedCandidateKey: scoring.llmRecommendedCandidateKey,
-    scoring: { model: scoring.model, promptVersion: scoring.promptVersion },
+    candidates: generated.candidates,
+    scores: generated.scores,
+    recommendedCandidateKey: generated.recommendedCandidateKey,
+    llmRecommendedCandidateKey: generated.llmRecommendedCandidateKey,
+    scoring: { model: generated.model, promptVersion: generated.promptVersion },
   };
   await prisma.bigGoalProposal.update({
     where: { id, status: "GENERATING" },

@@ -43,10 +43,20 @@ export type BigGoalProposal = {
   generatedAt: string | null;
 };
 
+export type BigGoalRequirement = {
+  id: string;
+  label: string;
+  status: "met" | "ongoing" | "unobserved" | "not_met" | "unavailable";
+  current?: number;
+  target?: number;
+  unit?: string;
+};
+
 export type BigGoalEvaluation = {
   outcome: "ACHIEVED" | "UNMET_CLOSED" | "ONGOING" | "NOT_INSTRUMENTED";
   fraction: number | null;
   detail: Record<string, unknown>;
+  requirements?: BigGoalRequirement[];
 };
 
 export type BigGoal = {

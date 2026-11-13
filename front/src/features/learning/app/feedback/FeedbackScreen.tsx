@@ -11,6 +11,8 @@ import {
 } from "@/app/component/feedbackV1";
 import { feedbackCandidates } from "@/api/feedbackV1.api";
 import { ConceptMap } from "./ConceptMap";
+import { BigGoalRequirements } from "../bigGoal/BigGoalRequirements";
+import type { BigGoalRequirement } from "@/api/bigGoal.api";
 import { playerTokens } from "../../player/player.tokens";
 
 /** 専用画面に出す大目標の進捗。数値は API のコード計算の結果をそのまま使う。 */
@@ -19,6 +21,7 @@ export type FeedbackGoalSummary = {
   /** 達成条件の部分充足（0〜1）。定義できない型は null */
   progress: number | null;
   fact: string | null;
+  requirements?: BigGoalRequirement[];
 };
 
 const headingSx = {
@@ -70,22 +73,32 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
     }
   }, [unavailable, onUnavailable]);
   const f = result?.feedback;
+  // 生成時に保存された大目標の状態を優先。単元完了後にACTIVEが消えても表示できる。
+  const shownGoal: FeedbackGoalSummary | null = result?.goalSnapshot
+    ? {
+      displayText: result.goalSnapshot.displayText,
+      progress: result.goalSnapshot.progress,
+      fact: result.goalSnapshot.status === "ACHIEVED" ? "大目標を達成しました" : result.goalSnapshot.status === "CLOSED_UNMET" ? "この大目標は未達成で終了しました" : null,
+      requirements: result.goalSnapshot.requirements ?? [],
+    }
+    : goalSummary ?? null;
   const failed = error || result?.status === "FAILED";
   return <Box component="section" data-feedback-scope aria-label={heading}
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2, width: "100%" }}>
     <Typography ref={headingRef} component="h2" tabIndex={-1} sx={headingSx}>{heading}</Typography>
     <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, pb: 2 }}>
     <Box sx={{ width: "100%", maxWidth: 360 }}>{figure}</Box>
-    {goalSummary && <Box sx={{ width: "100%", maxWidth: 640 }}>
+    {shownGoal && <Box sx={{ width: "100%", maxWidth: 640 }}>
       <Typography sx={{ fontSize: 13, fontWeight: 800, color: playerTokens.control }}>大目標</Typography>
-      <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{goalSummary.displayText}</Typography>
-      {goalSummary.progress !== null && <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 0.75 }}>
-        <LinearProgress variant="determinate" value={Math.round(goalSummary.progress * 100)}
+      <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{shownGoal.displayText}</Typography>
+      {shownGoal.progress !== null && <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 0.75 }}>
+        <LinearProgress variant="determinate" value={Math.round(shownGoal.progress * 100)}
           aria-label="大目標の進み具合"
           sx={{ flex: 1, height: 8, borderRadius: 999, bgcolor: "#e2e8f0", "& .MuiLinearProgress-bar": { bgcolor: playerTokens.focus, borderRadius: 999 } }} />
-        <Typography sx={{ fontWeight: 800, fontSize: 15 }}>{Math.round(goalSummary.progress * 100)}%</Typography>
+        <Typography sx={{ fontWeight: 800, fontSize: 15 }}>{Math.round(shownGoal.progress * 100)}%</Typography>
       </Box>}
-      {goalSummary.fact && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{goalSummary.fact}</Typography>}
+      {shownGoal.fact && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{shownGoal.fact}</Typography>}
+      <BigGoalRequirements requirements={shownGoal.requirements} />
     </Box>}
     {result?.conceptSnapshot && <Box sx={{ width: "100%", maxWidth: 1040 }}><ConceptMap snapshot={result.conceptSnapshot} /></Box>}
     {unavailable ? <Typography role="status" color="text.secondary">フィードバックはありません。次へ進みます。</Typography>

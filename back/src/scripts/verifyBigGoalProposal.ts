@@ -39,7 +39,12 @@ async function main() {
     startCourseId: "bfs",
     state: baseState({}),
   });
-  assert.deepEqual(keys(exampleA), ["unit-completion:bfs", "achievement:a-bfs-1"]);
+  assert.deepEqual(keys(exampleA), [
+    "unit-completion:bfs",
+    "unit-completion-no-hint:bfs",
+    "unit-completion-full-code:bfs",
+    "achievement:a-bfs-1",
+  ]);
   assert.equal(exampleA[0].displayText, "幅優先探索の単元を完了する");
 
   // 確定中の大目標が対象に含む単元では、タイミングAの新規設定をしない
@@ -68,6 +73,7 @@ async function main() {
   assert.deepEqual(keys(roomy), [
     "unit-completion:dfs",
     "unit-completion-challenge:dfs",
+    "unit-completion-no-hint:dfs",
     "achievement:a-dfs-1",
   ]);
   assert.equal(roomy[1].displayText, "深さ優先探索の単元を完了する（フェーズ7は全部書く書き方）");
@@ -117,13 +123,14 @@ async function main() {
   });
   const capped = generateBigGoalCandidates({ timing: "ON_ACHIEVEMENT", state: manyUnits });
   assert.equal(capped.length, MAX_BIG_GOAL_CANDIDATES);
-  assert.ok(capped.slice(0, 8).every((c) => c.type === "ACHIEVEMENT"));
+  assert.ok(capped.slice(0, 2).every((c) => c.type === "ACHIEVEMENT"));
+  assert.ok(capped.some((c) => c.type === "UNIT_COMPLETION"));
 
   // ---- 適合度採点：スタブしたモデル呼び出しで検証する ----
   const scoringInput: BigGoalScoringInput = {
     timing: "UNIT_START",
     startCourseId: "bfs",
-    candidates: exampleA,
+    candidates: exampleA.filter(c => c.candidateKey === "unit-completion:bfs" || c.type === "ACHIEVEMENT"),
     learnerState: { units: [] },
     declaredInfo: null,
     condition: "STANDARD",
@@ -152,7 +159,7 @@ async function main() {
   assert.equal(logs.length, 1);
   assert.equal((logs[0].validation as { consistent: boolean }).consistent, false);
   // 採点は候補の並び順に整列して返る
-  assert.deepEqual(scored.scores.map((s) => s.candidateKey), keys(exampleA));
+  assert.deepEqual(scored.scores.map((s) => s.candidateKey), keys(scoringInput.candidates));
 
   // PERSONALIZED ではコードブックと HEXAD スコアがプロンプトに入り、STANDARD では入らない
   let personalizedSystem = "";

@@ -24,6 +24,8 @@ async function main() {
   for (const name of ["createQuest","knowledgeCard","achievement","questPost","feedbackV1","createQuestFeedback"]) db[name]={findMany:async()=>[]};
   (achievements as {getAchievementsByUser:unknown}).getAchievementsByUser=async()=>[];
   (goals as {getActiveBigGoal:unknown}).getActiveBigGoal=async()=>null;
+  // 直近で達成した大目標の照会もDBを使わないfixtureに差し替える。
+  db.bigGoal={findFirst:async()=>null};
   const standard=await buildFeedbackV1Context("uid","phase",`${courseId}:bfs-check:bfs-code-mapping`);
   condition="PERSONALIZED";
   const personalized=await buildFeedbackV1Context("uid","phase",`${courseId}:bfs-check:bfs-code-mapping`);

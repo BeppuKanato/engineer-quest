@@ -16,8 +16,21 @@ import type { Action, BigGoalInput, Input, Target } from "./feedbackV1.engine";
  * 進捗は生成時点の実態データからコード側で計算し直す（部分充足の内訳）。
  * 大目標が無い学習者では null とし、従来どおり目標ブロックなしで生成する。
  */
-async function buildBigGoalInput(userId: string): Promise<BigGoalInput | null> {
-  const goal = await getActiveBigGoal(userId);
+async function buildBigGoalInput(userId: string, completedAt: Date | null): Promise<BigGoalInput | null> {
+  // 目標の達成処理はフィードバックより先に実行される。
+  // そのため現在のACTIVEが消えていても、同じ完了イベントで閉じた目標を参照する。
+  const recentlyClosed = completedAt ? await prisma.bigGoal.findFirst({
+    where: {
+      userId,
+      status: { in: ["ACHIEVED", "CLOSED_UNMET"] },
+      closedAt: {
+        gte: new Date(completedAt.getTime() - 60_000),
+        lte: new Date(completedAt.getTime() + 60_000),
+      },
+    },
+    orderBy: { closedAt: "desc" },
+  }) : null;
+  const goal = recentlyClosed ?? await getActiveBigGoal(userId);
   if (!goal) return null;
   const params = (goal.params ?? {}) as BigGoalParams;
   const facts = await loadBigGoalFacts(userId, goal.type, params);
@@ -30,6 +43,7 @@ async function buildBigGoalInput(userId: string): Promise<BigGoalInput | null> {
       outcome: evaluation.outcome,
       fraction: evaluation.fraction,
       detail: evaluation.detail,
+      requirements: evaluation.requirements,
     },
     status: goal.status,
     confirmedAt: goal.confirmedAt?.toISOString() ?? null,
@@ -81,6 +95,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   const cutoff = new Date();
   let learning: unknown;
   let stageGoals: Input["stageGoals"] = null;
+  let completionAt: Date | null = null;
   // Set for the new-flow kinds; the phase event may name the next phase so the
   // "proceed" action (id 23) can be offered with a concrete target.
   let phaseEvent: { courseId: string; phaseKey: string; nextPhaseKey: string | null } | null = null;
@@ -101,12 +116,14 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
     if (kind === "unit") {
       if (!unitRow || unitRow.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+      completionAt = unitRow.completedAt;
       stageGoals = { current: { phaseKey: null, goal: "単元で確認できた内容を振り返り、次の学習方法を選ぶ" }, next: null };
       learning = { id: `unit-event:${courseId}`, unit: { id: course.id, title: course.title, status: unitRow.status }, conceptSnapshot, sequence: phaseSequence, phases };
     } else {
       const [, phaseKey, nextPhaseKey] = eventId.split(":");
       const current = phaseRows.find(p => p.phaseKey === phaseKey);
       if (!current || current.status !== "COMPLETED") throw new AppError(404, "EVENT_NOT_FOUND", "Completion event not found");
+      completionAt = current.completedAt;
       const unitDefinition = conceptDefinitions.find(u=>u.courseId===courseId);
       const phaseIndex = unitDefinition?.phases.findIndex(p=>p.id===phaseKey) ?? -1;
       const allowedNext = phaseIndex >= 0 ? unitDefinition?.phases[phaseIndex+1]?.id ?? null : null;
@@ -134,7 +151,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     prisma.feedbackV1.findMany({ where: { userId: user.id, createdAt: { gte: assignment.assignedAt, lte: cutoff } }, orderBy: { createdAt: "asc" }, select: { id: true, result: true, interactions: true, status: true } }),
     prisma.unitLearningProgress.findMany({ where: { userId: user.id } }),
     prisma.phaseLearningProgress.findMany({ where: { userId: user.id } }),
-    buildBigGoalInput(user.id),
+    buildBigGoalInput(user.id, completionAt),
   ]);
   const legacyWhere = { createdAt: { gte: assignment.assignedAt, lte: cutoff } };
   const legacyCreateHistory = await prisma.createQuestFeedback.findMany({ where: { ...legacyWhere, submission: { attempt: { userId: user.id } } }, select: { id: true, actionType: true, status: true, generatedAt: true } });
