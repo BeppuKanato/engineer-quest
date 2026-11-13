@@ -77,7 +77,16 @@ export type BigGoalInput = {
   type: string;
   /** 達成条件そのもの（型のパラメータを含む構造化した条件） */
   condition: Record<string, unknown>;
-  progress: { outcome: string; fraction: number | null; detail: Record<string, unknown> };
+  progress: {
+    outcome: string;
+    fraction: number | null;
+    detail: Record<string, unknown>;
+    requirements?: Array<{
+      id: string; label: string;
+      status: "met" | "ongoing" | "unobserved" | "not_met" | "unavailable";
+      current?: number; target?: number; unit?: string;
+    }>;
+  };
   status: string;
   confirmedAt: string | null;
   daysSinceConfirmed: number | null;
