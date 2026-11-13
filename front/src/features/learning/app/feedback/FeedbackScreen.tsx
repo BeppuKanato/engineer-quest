@@ -11,6 +11,8 @@ import {
 } from "@/app/component/feedbackV1";
 import { feedbackCandidates } from "@/api/feedbackV1.api";
 import { ConceptMap } from "./ConceptMap";
+import { BigGoalRequirements } from "../bigGoal/BigGoalRequirements";
+import type { BigGoalRequirement } from "@/api/bigGoal.api";
 import { playerTokens } from "../../player/player.tokens";
 
 /** 専用画面に出す大目標の進捗。数値は API のコード計算の結果をそのまま使う。 */
@@ -19,6 +21,7 @@ export type FeedbackGoalSummary = {
   /** 達成条件の部分充足（0〜1）。定義できない型は null */
   progress: number | null;
   fact: string | null;
+  requirements?: BigGoalRequirement[];
 };
 
 const headingSx = {
@@ -86,6 +89,7 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
         <Typography sx={{ fontWeight: 800, fontSize: 15 }}>{Math.round(goalSummary.progress * 100)}%</Typography>
       </Box>}
       {goalSummary.fact && <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{goalSummary.fact}</Typography>}
+      <BigGoalRequirements requirements={goalSummary.requirements} />
     </Box>}
     {result?.conceptSnapshot && <Box sx={{ width: "100%", maxWidth: 1040 }}><ConceptMap snapshot={result.conceptSnapshot} /></Box>}
     {unavailable ? <Typography role="status" color="text.secondary">フィードバックはありません。次へ進みます。</Typography>
