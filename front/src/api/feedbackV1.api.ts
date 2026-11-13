@@ -13,7 +13,18 @@ export type ConceptSnapshot = {
   }[];
 };
 export type FeedbackCandidate = { candidateId: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null };
+export type FeedbackGoalSnapshot = {
+  displayText: string;
+  status: string;
+  progress: number | null;
+  requirements?: Array<{
+    id: string; label: string;
+    status: "met" | "ongoing" | "unobserved" | "not_met" | "unavailable";
+    current?: number; target?: number; unit?: string;
+  }>;
+};
 export type FeedbackV1Result = { id: string; status: string; conceptSnapshot?: ConceptSnapshot | null;
+  goalSnapshot?: FeedbackGoalSnapshot | null;
   feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
 export const getFeedbackV1 = (token: string, kind: string, eventId: string, method: string) =>
   fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { token, method });
