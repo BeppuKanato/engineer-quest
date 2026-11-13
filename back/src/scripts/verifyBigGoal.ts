@@ -53,6 +53,9 @@ function main() {
     completedFacts
   );
   assert.equal(challengeLevel.outcome, "UNMET_CLOSED");
+  assert.equal(challengeLevel.fraction, null);
+  assert.equal(challengeLevel.requirements[0].current, 7);
+  assert.equal(challengeLevel.requirements[1].status, "not_met");
 
   // 到達型（挑戦＝ヒントなし・初回正答率0.8以上）：ヒント使用があるため未達成で閉じる
   const challengeHint = evaluateBigGoal(
@@ -72,7 +75,10 @@ function main() {
     { unitStatus: "IN_PROGRESS", phases: bfsPhases.slice(0, 3) }
   );
   assert.equal(ongoing.outcome, "ONGOING");
-  assert.equal(ongoing.fraction, 3 / 7);
+  assert.equal(ongoing.fraction, null);
+  assert.equal(ongoing.requirements[0].current, 3);
+  assert.equal(ongoing.requirements[0].target, 7);
+  assert.equal(ongoing.requirements[1].status, "unobserved");
 
   // 挑戦を満たす到達（全部書く・ヒントなし・初回全問正解）
   const perfectPhases: PhaseFact[] = [
@@ -88,6 +94,18 @@ function main() {
     { unitStatus: "COMPLETED", phases: perfectPhases }
   );
   assert.equal(perfect.outcome, "ACHIEVED");
+  assert.equal(perfect.requirements.length, 4);
+  assert.ok(perfect.requirements.every(requirement => requirement.status === "met"));
+
+  // 終了した単元でも、ヒント記録が無い場合は達成を推測しない。
+  const missingHints = evaluateBigGoal(
+    "UNIT_COMPLETION",
+    { courseId: "bfs", challenge: { noHint: true } },
+    { unitStatus: "COMPLETED", phases: bfsPhases.slice(0, 6) }
+  );
+  assert.equal(missingHints.outcome, "NOT_INSTRUMENTED");
+  assert.equal(missingHints.fraction, null);
+  assert.equal(missingHints.requirements[1].status, "unobserved");
 
   // 実績型：獲得記録の有無だけを見る
   assert.equal(
