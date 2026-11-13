@@ -1,0 +1,136 @@
+{
+  "repository": "https://github.com/alan2207/bulletproof-react",
+  "commit": "9506629ed003a561c6627735480cce4994244bb4",
+  "retrievedAt": "2026-11-12",
+  "scope": "Root README and LICENSE, all docs Markdown files and their assets; application source examples are not imported.",
+  "files": [
+    {
+      "upstreamPath": "LICENSE",
+      "localPath": "upstream/LICENSE",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/LICENSE",
+      "gitBlobSha1": "29d25a31f2429d0fc201408722bd6869026d50da",
+      "sha256": "5e8e5036383ac3d764a03e785cc7127ee8c10718edf61a6ff0ca28854d66f370",
+      "bytes": 1071
+    },
+    {
+      "upstreamPath": "README.md",
+      "localPath": "upstream/README.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/README.md",
+      "gitBlobSha1": "c4228721c2718bdcc725d898cb44103fd6136bf9",
+      "sha256": "a471baa55ada446cc8727b0017caf7b03b3b5acbded3e41e5ef9a64e923fa281",
+      "bytes": 4579
+    },
+    {
+      "upstreamPath": "docs/additional-resources.md",
+      "localPath": "upstream/docs/additional-resources.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/additional-resources.md",
+      "gitBlobSha1": "59e05949f0990365d58d6508c7762c94b560b722",
+      "sha256": "1751634213e2cb5984f8603e462d0d1a259387224350d7df4505706e4d283947",
+      "bytes": 1055
+    },
+    {
+      "upstreamPath": "docs/api-layer.md",
+      "localPath": "upstream/docs/api-layer.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/api-layer.md",
+      "gitBlobSha1": "4c99d7f519d1d0b8ec1065c187bb56f56f0b648a",
+      "sha256": "417207ad44993d1d40963a1ae453da6638ba766e96a5a3301b660a7c1c1be071",
+      "bytes": 1885
+    },
+    {
+      "upstreamPath": "docs/application-overview.md",
+      "localPath": "upstream/docs/application-overview.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/application-overview.md",
+      "gitBlobSha1": "9d58a2dec351b844ca1dbad5c9348746216b6168",
+      "sha256": "bd057161db8252da4123e08e1ac6d45cb1fdbcd00f9c4f3232b47ad2fdb7909f",
+      "bytes": 1152
+    },
+    {
+      "upstreamPath": "docs/assets/logo.svg",
+      "localPath": "upstream/docs/assets/logo.svg",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/assets/logo.svg",
+      "gitBlobSha1": "782367a96daf92379e8672cb87aa29c8cb170da5",
+      "sha256": "d59c6972971709180e08c7666059f6dc801f82c722cfbd0bab784c6d59b7b7cc",
+      "bytes": 5099
+    },
+    {
+      "upstreamPath": "docs/components-and-styling.md",
+      "localPath": "upstream/docs/components-and-styling.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/components-and-styling.md",
+      "gitBlobSha1": "359fc5fb75c45fc119acf45571eaddb2e6004173",
+      "sha256": "9e709cd7d8e33ee20f67cdace2723ed2672c8c69303fc4109bd6cfe167f9a94d",
+      "bytes": 5451
+    },
+    {
+      "upstreamPath": "docs/deployment.md",
+      "localPath": "upstream/docs/deployment.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/deployment.md",
+      "gitBlobSha1": "f2955880ed2345fdc32cee40d2f69091d8cf0035",
+      "sha256": "44a46d8bef0cf78379ba1bb4a4bde2555845057b372ff1ecf6306061f1214427",
+      "bytes": 307
+    },
+    {
+      "upstreamPath": "docs/error-handling.md",
+      "localPath": "upstream/docs/error-handling.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/error-handling.md",
+      "gitBlobSha1": "ef2c7a6756c34bb22a03cd88f6aab4d046a8c2fe",
+      "sha256": "ea971fe3e40954889ed1bbd3fa15c093ab3436fd121cd3646bb5b300667ce059",
+      "bytes": 1306
+    },
+    {
+      "upstreamPath": "docs/performance.md",
+      "localPath": "upstream/docs/performance.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/performance.md",
+      "gitBlobSha1": "723b84c21f4bbac147511e8a63db8405baf2ab7e",
+      "sha256": "72b77b6a7cfe2041a297549d628cdd55bc10512eb928f28b39f7421d52b3a51a",
+      "bytes": 5611
+    },
+    {
+      "upstreamPath": "docs/project-standards.md",
+      "localPath": "upstream/docs/project-standards.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/project-standards.md",
+      "gitBlobSha1": "0a4d43fdf51c5fb86c626e580999ab896f9b0e73",
+      "sha256": "23ecaf538bdc2fac1b947d2293fb415535ad9eabdb4e22c7671f5d9faa728b5c",
+      "bytes": 4684
+    },
+    {
+      "upstreamPath": "docs/project-structure.md",
+      "localPath": "upstream/docs/project-structure.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/project-structure.md",
+      "gitBlobSha1": "0af1c3206d59d7817929512a7d267a5af337265c",
+      "sha256": "4457a40bab2bace057cf48f17f50922378e423a41e21c2d1bb5391d4c1be8452",
+      "bytes": 5903
+    },
+    {
+      "upstreamPath": "docs/security.md",
+      "localPath": "upstream/docs/security.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/security.md",
+      "gitBlobSha1": "28362f4c24b7b07563f596dbe333fbdb432b5d45",
+      "sha256": "9ca44fe0ef5b91fcddf32712afb632e9dde0f8e215fdb2b66d47b79916ad873e",
+      "bytes": 4804
+    },
+    {
+      "upstreamPath": "docs/state-management.md",
+      "localPath": "upstream/docs/state-management.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/state-management.md",
+      "gitBlobSha1": "b2691f1e617b5aa02afe463a5af4ba74eb482b64",
+      "sha256": "f372a6706c4eaec5e8e8e5e8dc568cfdcf90abee35ca58e6399d03ad860c8c9c",
+      "bytes": 5080
+    },
+    {
+      "upstreamPath": "docs/testing.md",
+      "localPath": "upstream/docs/testing.md",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/testing.md",
+      "gitBlobSha1": "32b24144f4402dd4a1f838fb41d4d7d9dd6e37e3",
+      "sha256": "ff6c96ab03ff64f7c375d83941d5aeeb007217ebdda6ffbe3be7e27cddadcaff",
+      "bytes": 4585
+    },
+    {
+      "upstreamPath": "docs/assets/unidirectional-codebase.png",
+      "localPath": "upstream/docs/assets/unidirectional-codebase.png",
+      "sourceUrl": "https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/assets/unidirectional-codebase.png",
+      "gitBlobSha1": "70d6d1aa118f216f330deda234fc6e6e1bd8a698",
+      "sha256": "623e3bada5c16bf354b0c8420725ba35a7100e12f52ca274dfe4ec29db2e2cf8",
+      "bytes": 207946
+    }
+  ]
+}

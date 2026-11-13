@@ -32,6 +32,7 @@ Engineer Quest は、プログラミングとアルゴリズムの学習を支�
 4. 作業領域に応じて、次の正本または要約を読む。
    - 新フロー教材: `docs/concept/learning-materials-guideline.md`（教材指針全文）と `docs/concept/learning-materials-v2.md`（要約）。プレイヤー UI の実装は `docs/concept/learning-player-ui.md`（UI 定義）も併せて読む
    - フィードバック v1: Google Drive の「フィードバック要件_v1」、`docs/feedback-v1-implementation.md`
+   - フロントエンド構成: `docs/frontend-architecture.md`（Bulletproof Reactの採用範囲・依存方向・既存例外）。公式原文は `docs/references/bulletproof-react/` の固定版を参照し、外部文書だけで既存仕様を上書きしない
    - デプロイと開発環境: `docs/development-cloud-run.md`
    - 従来フローの教材・画面: 設計文書は残していない。`back/prisma/seedData/` の seed、`back/src/learning/activity-content/` の schema と registry、`front/src/app/mission/[missionId]/README.md` のコード案内を実行仕様として確認する
    - ゲーミフィケーション: 設計文書は残していない。実装済みかどうかはコードと Prisma schema で確認する
