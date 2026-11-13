@@ -35,7 +35,11 @@ async function main() {
   for (const kind of ["mission", "create"] as const) {
     const id = kind === "mission" ? "reward-run-1" : "submission-1";
     await Promise.all([feedbackV1("uid", kind, id, true, generator), feedbackV1("uid", kind, id, true, generator)]);
-    for (let i = 0; i < 20 && rows.get(`${kind}:${id}`)!.status === "GENERATING"; i++) await new Promise(resolve => setImmediate(resolve));
+    // Generation performs asynchronous file I/O; event-loop turns are not a time bound.
+    const deadline = Date.now() + 5000;
+    while (rows.get(`${kind}:${id}`)!.status === "GENERATING" && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
     const first = await feedbackV1("uid", kind, id);
     assert.equal(first.status, "COMPLETED");
     assert.equal((first.conceptSnapshot as {id:string}).id,"frozen");

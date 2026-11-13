@@ -1,3 +1,4 @@
+import { prepareEvidenceInput } from "./feedbackV1.evidence";
 import { aggregateConcepts, conceptDefinitions } from "./feedbackConcepts";
 import { deriveLevel } from "./profile.service";
 import { summarizeReaction } from "./feedbackV1.observation";
@@ -36,6 +37,7 @@ async function buildBigGoalInput(userId: string, completedAt: Date | null): Prom
   const facts = await loadBigGoalFacts(userId, goal.type, params);
   const evaluation = evaluateBigGoal(goal.type, params, facts);
   return {
+    sourceId: `goal:${goal.id}`,
     displayText: goal.displayText,
     type: goal.type,
     condition: params as Record<string, unknown>,
@@ -218,6 +220,6 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
     posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
-  const input: Input = { learning, targets, actions, hexad, state, bigGoal, stageGoals };
+  const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals });
   return { input, userId: user.id, condition: assignment.condition };
 }

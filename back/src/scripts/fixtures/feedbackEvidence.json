@@ -1,0 +1,1239 @@
+[
+  {
+    "case": "binary-search-check",
+    "input": {
+      "learning": {
+        "id": "phase-event:course-algorithm-binary-search-v1:binary-search-check",
+        "unit": {
+          "id": "course-algorithm-binary-search-v1",
+          "title": "二分探索",
+          "status": "IN_PROGRESS"
+        },
+        "phases": [
+          {
+            "id": "binary-search-motivation",
+            "status": "COMPLETED",
+            "summary": null
+          },
+          {
+            "id": "binary-search-execution",
+            "status": "COMPLETED",
+            "summary": null
+          },
+          {
+            "id": "binary-search-check",
+            "status": "COMPLETED",
+            "summary": {
+              "totalQuestions": 2,
+              "assessmentEvidence": {
+                "records": [
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "next-center"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "range-after-compare"
+                  }
+                ],
+                "version": 1,
+                "sessionId": "fixture-session",
+                "startedAt": 1794552129825,
+                "assessmentId": "binary-search-check"
+              },
+              "firstAttemptCorrect": 2
+            }
+          }
+        ],
+        "sequence": [
+          {
+            "id": "binary-search-motivation",
+            "type": "phase",
+            "order": 1
+          },
+          {
+            "id": "binary-search-execution",
+            "type": "phase",
+            "order": 2
+          },
+          {
+            "id": "binary-search-check",
+            "type": "phase",
+            "order": 3
+          }
+        ],
+        "currentPhase": {
+          "id": "binary-search-check",
+          "summary": {
+            "totalQuestions": 2,
+            "assessmentEvidence": {
+              "records": [
+                {
+                  "attempts": [
+                    {
+                      "number": 1,
+                      "correct": true
+                    }
+                  ],
+                  "questionId": "next-center"
+                },
+                {
+                  "attempts": [
+                    {
+                      "number": 1,
+                      "correct": true
+                    }
+                  ],
+                  "questionId": "range-after-compare"
+                }
+              ],
+              "version": 1,
+              "sessionId": "fixture-session",
+              "startedAt": 1794552129825,
+              "assessmentId": "binary-search-check"
+            },
+            "firstAttemptCorrect": 2
+          },
+          "nextStage": "動きとコードの対応",
+          "stageGoal": "動きの確認問題",
+          "stageNumber": 3
+        },
+        "conceptSnapshot": {
+          "id": "caa4c640-38b9-4557-9866-97514297e9b7",
+          "title": "二分探索",
+          "version": 1,
+          "concepts": [
+            {
+              "kind": "assessment",
+              "label": "中央位置の決定",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "next-center"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-check",
+                  "sessions": 1,
+                  "questionId": "next-center",
+                  "stageLabel": "動きの確認問題",
+                  "assessmentId": "binary-search-check",
+                  "questionLabel": "左側を捨てました。次に調べる真ん中のマスはどれか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  }
+                },
+                {
+                  "tags": [
+                    "mid-formula"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-code-check",
+                  "sessions": 0,
+                  "questionId": "mid-formula",
+                  "stageLabel": "コードの確認問題",
+                  "assessmentId": "binary-search-code-check",
+                  "questionLabel": "範囲の真ん中の位置を求めるために、5行目の空欄に入る正しいコードを選んでください。",
+                  "latestSessionFirst": null
+                },
+                {
+                  "tags": [
+                    "新しいリストでの真ん中の位置"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 0,
+                  "questionId": "first-center-transfer",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "新しいリスト [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] で 23 を探すとき、最初に調べる真ん中のマスはどれか",
+                  "latestSessionFirst": null
+                }
+              ],
+              "conceptId": "binary-search:center",
+              "implementation": null,
+              "totalQuestions": 3,
+              "attemptedQuestions": 1
+            },
+            {
+              "kind": "assessment",
+              "label": "探索範囲の更新",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "drop-side"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-check",
+                  "sessions": 1,
+                  "questionId": "range-after-compare",
+                  "stageLabel": "動きの確認問題",
+                  "assessmentId": "binary-search-check",
+                  "questionLabel": "31 と 25 を比べた後、次に残る範囲はどうなるか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  }
+                },
+                {
+                  "tags": [
+                    "skip-mid"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-code-check",
+                  "sessions": 0,
+                  "questionId": "skip-mid",
+                  "stageLabel": "コードの確認問題",
+                  "assessmentId": "binary-search-code-check",
+                  "questionLabel": "真ん中の値より大きい側だけを残すために、9行目の空欄に入る正しいコードを選んでください。",
+                  "latestSessionFirst": null
+                }
+              ],
+              "conceptId": "binary-search:range",
+              "implementation": null,
+              "totalQuestions": 2,
+              "attemptedQuestions": 1
+            },
+            {
+              "kind": "assessment",
+              "label": "見つからない場合の終了",
+              "state": "unobserved",
+              "evidence": [
+                {
+                  "tags": [
+                    "探す値が無いときの終わり方"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 0,
+                  "questionId": "absent-target",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "主教材のリスト [3, 7, 12, 19, 25, 31, 42] で 20 を探すと、どうなりますか",
+                  "latestSessionFirst": null
+                }
+              ],
+              "conceptId": "binary-search:absent",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 0
+            },
+            {
+              "kind": "assessment",
+              "label": "整列済みという前提",
+              "state": "unobserved",
+              "evidence": [
+                {
+                  "tags": [
+                    "並んでいることが前提の理由"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 0,
+                  "questionId": "why-sorted-matters",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "並んでいないリスト [25, 3, 42, 7, 19] で、同じやり方で探すとうまくいかないのはなぜですか",
+                  "latestSessionFirst": null
+                }
+              ],
+              "conceptId": "binary-search:sorted",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 0
+            },
+            {
+              "kind": "assessment",
+              "label": "コード全体の流れ",
+              "state": "unobserved",
+              "evidence": [
+                {
+                  "tags": [
+                    "コード全体の流れ"
+                  ],
+                  "first": null,
+                  "latest": null,
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 0,
+                  "questionId": "whole-code-order",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "二分探索のコードを、実行の流れに合う順序に並べてください。",
+                  "latestSessionFirst": null
+                }
+              ],
+              "conceptId": "binary-search:flow",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 0
+            },
+            {
+              "kind": "implementation",
+              "label": "実装と動作確認",
+              "state": "unobserved",
+              "evidence": [],
+              "conceptId": "binary-search:implementation",
+              "implementation": {
+                "lastTest": null,
+                "testRuns": "unknown",
+                "completed": "unknown",
+                "hintUsage": "unknown",
+                "sourceIds": [],
+                "inputLevel": "unknown",
+                "testsPassed": "unknown",
+                "observedHints": []
+              },
+              "totalQuestions": 0,
+              "attemptedQuestions": 0
+            }
+          ],
+          "courseId": "course-algorithm-binary-search-v1",
+          "relation": "unit-components",
+          "missingCompletionEvidence": []
+        }
+      },
+      "bigGoal": {
+        "type": "UNIT_COMPLETION",
+        "status": "ACTIVE",
+        "progress": {
+          "detail": {
+            "phase7": {
+              "noHint": null,
+              "hintUsage": null,
+              "inputLevel": null
+            },
+            "unitStatus": "IN_PROGRESS",
+            "firstAttempt": {
+              "rate": 1,
+              "total": 2,
+              "correct": 2
+            },
+            "challengeChecks": {
+              "noHint": null,
+              "inputLevel": null,
+              "firstAttemptRate": null
+            },
+            "totalPhaseCount": 7,
+            "completedPhaseCount": 3
+          },
+          "outcome": "ONGOING",
+          "fraction": 0.4285714285714285,
+          "requirements": [
+            {
+              "id": "unit",
+              "unit": "フェーズ",
+              "label": "単元の7フェーズを完了する",
+              "status": "ongoing",
+              "target": 7,
+              "current": 3
+            }
+          ]
+        },
+        "condition": {
+          "courseId": "course-algorithm-binary-search-v1"
+        },
+        "confirmedAt": null,
+        "displayText": "二分探索の単元を完了する",
+        "daysSinceConfirmed": 0
+      }
+    },
+    "analysis": {
+      "evidence": [
+        {
+          "fact": "「中央位置の決定」と「探索範囲の更新」の確認問題は、いずれも初回正解として記録されています。",
+          "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+          "inference": false
+        },
+        {
+          "fact": "単元完了の目標はACTIVE。7フェーズ中3フェーズ完了で、進捗は3/7、状態はONGOINGです。",
+          "sourceId": "bigGoal",
+          "inference": false
+        }
+      ],
+      "uncertain": [
+        "コード確認問題と応用問題、および実装・動作確認の回答や実施状況は観測されていません。"
+      ],
+      "understood": [
+        "確認問題2問に初回正解しています。"
+      ],
+      "currentState": "二分探索の動きの確認問題は完了しています。単元は7フェーズ中3フェーズ完了で、進捗は3/7（約42.9%）、状態は進行中です。",
+      "conceptClaims": [
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:center",
+          "sourceIds": [
+            "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f"
+          ],
+          "observation": "「左側を捨てた後に調べる真ん中のマス」の確認問題に初回正解。"
+        },
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:range",
+          "sourceIds": [
+            "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f"
+          ],
+          "observation": "比較後に残る探索範囲の確認問題に初回正解。"
+        }
+      ],
+      "needsImprovement": [
+        "次段階では、確認した探索の動きをコードの中央位置の計算や探索範囲の更新に対応づけて確かめます。"
+      ]
+    }
+  },
+  {
+    "case": "UNIT_COMPLETE",
+    "input": {
+      "learning": {
+        "id": "unit-event:course-algorithm-binary-search-v1",
+        "unit": {
+          "id": "course-algorithm-binary-search-v1",
+          "title": "二分探索",
+          "status": "COMPLETED"
+        },
+        "phases": [
+          {
+            "id": "binary-search-motivation",
+            "status": "COMPLETED",
+            "summary": null
+          },
+          {
+            "id": "binary-search-execution",
+            "status": "COMPLETED",
+            "summary": null
+          },
+          {
+            "id": "binary-search-check",
+            "status": "COMPLETED",
+            "summary": {
+              "totalQuestions": 2,
+              "assessmentEvidence": {
+                "records": [
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "next-center"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "range-after-compare"
+                  }
+                ],
+                "version": 1,
+                "sessionId": "fixture-session",
+                "startedAt": 1794552129825,
+                "assessmentId": "binary-search-check"
+              },
+              "firstAttemptCorrect": 2
+            }
+          },
+          {
+            "id": "binary-search-code-mapping",
+            "status": "COMPLETED",
+            "summary": null
+          },
+          {
+            "id": "binary-search-code-check",
+            "status": "COMPLETED",
+            "summary": {
+              "totalQuestions": 2,
+              "assessmentEvidence": {
+                "records": [
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "mid-formula"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "skip-mid"
+                  }
+                ],
+                "version": 1,
+                "sessionId": "fixture-session",
+                "startedAt": 1794552211042,
+                "assessmentId": "binary-search-code-check"
+              },
+              "firstAttemptCorrect": 2
+            }
+          },
+          {
+            "id": "binary-search-consolidation",
+            "status": "COMPLETED",
+            "summary": {
+              "totalQuestions": 4,
+              "assessmentEvidence": {
+                "records": [
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "first-center-transfer"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "absent-target"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "whole-code-order"
+                  },
+                  {
+                    "attempts": [
+                      {
+                        "number": 1,
+                        "correct": true
+                      }
+                    ],
+                    "questionId": "why-sorted-matters"
+                  }
+                ],
+                "version": 1,
+                "sessionId": "fixture-session",
+                "startedAt": 1794552248658,
+                "assessmentId": "binary-search-consolidation"
+              },
+              "firstAttemptCorrect": 4
+            }
+          },
+          {
+            "id": "binary-search-implementation",
+            "status": "COMPLETED",
+            "summary": {
+              "testRuns": 2,
+              "hintUsage": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "inputLevel": "full"
+            }
+          }
+        ],
+        "sequence": [
+          {
+            "id": "binary-search-motivation",
+            "type": "phase",
+            "order": 1
+          },
+          {
+            "id": "binary-search-execution",
+            "type": "phase",
+            "order": 2
+          },
+          {
+            "id": "binary-search-check",
+            "type": "phase",
+            "order": 3
+          },
+          {
+            "id": "binary-search-code-mapping",
+            "type": "phase",
+            "order": 4
+          },
+          {
+            "id": "binary-search-code-check",
+            "type": "phase",
+            "order": 5
+          },
+          {
+            "id": "binary-search-consolidation",
+            "type": "phase",
+            "order": 6
+          },
+          {
+            "id": "binary-search-implementation",
+            "type": "phase",
+            "order": 7
+          }
+        ],
+        "conceptSnapshot": {
+          "id": "7e195ec5-1389-46ae-a8ae-b720482a30da",
+          "title": "二分探索",
+          "version": 1,
+          "concepts": [
+            {
+              "kind": "assessment",
+              "label": "中央位置の決定",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "next-center"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-check",
+                  "sessions": 1,
+                  "questionId": "next-center",
+                  "stageLabel": "動きの確認問題",
+                  "assessmentId": "binary-search-check",
+                  "questionLabel": "左側を捨てました。次に調べる真ん中のマスはどれか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  }
+                },
+                {
+                  "tags": [
+                    "mid-formula"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552215624,
+                    "recordedAt": 1794552218867
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552215624,
+                    "recordedAt": 1794552218867
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-code-check",
+                  "sessions": 1,
+                  "questionId": "mid-formula",
+                  "stageLabel": "コードの確認問題",
+                  "assessmentId": "binary-search-code-check",
+                  "questionLabel": "範囲の真ん中の位置を求めるために、5行目の空欄に入る正しいコードを選んでください。",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552215624,
+                    "recordedAt": 1794552218867
+                  }
+                },
+                {
+                  "tags": [
+                    "新しいリストでの真ん中の位置"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 1,
+                  "questionId": "first-center-transfer",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "新しいリスト [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] で 23 を探すとき、最初に調べる真ん中のマスはどれか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  }
+                }
+              ],
+              "conceptId": "binary-search:center",
+              "implementation": null,
+              "totalQuestions": 3,
+              "attemptedQuestions": 3
+            },
+            {
+              "kind": "assessment",
+              "label": "探索範囲の更新",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "drop-side"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-check",
+                  "sessions": 1,
+                  "questionId": "range-after-compare",
+                  "stageLabel": "動きの確認問題",
+                  "assessmentId": "binary-search-check",
+                  "questionLabel": "31 と 25 を比べた後、次に残る範囲はどうなるか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552129825,
+                    "observedAt": 1794552150694,
+                    "recordedAt": 1794552151569
+                  }
+                },
+                {
+                  "tags": [
+                    "skip-mid"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552218867,
+                    "recordedAt": 1794552218867
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552218867,
+                    "recordedAt": 1794552218867
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-code-check",
+                  "sessions": 1,
+                  "questionId": "skip-mid",
+                  "stageLabel": "コードの確認問題",
+                  "assessmentId": "binary-search-code-check",
+                  "questionLabel": "真ん中の値より大きい側だけを残すために、9行目の空欄に入る正しいコードを選んでください。",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552211042,
+                    "observedAt": 1794552218867,
+                    "recordedAt": 1794552218867
+                  }
+                }
+              ],
+              "conceptId": "binary-search:range",
+              "implementation": null,
+              "totalQuestions": 2,
+              "attemptedQuestions": 2
+            },
+            {
+              "kind": "assessment",
+              "label": "見つからない場合の終了",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "探す値が無いときの終わり方"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 1,
+                  "questionId": "absent-target",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "主教材のリスト [3, 7, 12, 19, 25, 31, 42] で 20 を探すと、どうなりますか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552255618,
+                    "recordedAt": 1794552271544
+                  }
+                }
+              ],
+              "conceptId": "binary-search:absent",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 1
+            },
+            {
+              "kind": "assessment",
+              "label": "整列済みという前提",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "並んでいることが前提の理由"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 1,
+                  "questionId": "why-sorted-matters",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "並んでいないリスト [25, 3, 42, 7, 19] で、同じやり方で探すとうまくいかないのはなぜですか",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  }
+                }
+              ],
+              "conceptId": "binary-search:sorted",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 1
+            },
+            {
+              "kind": "assessment",
+              "label": "コード全体の流れ",
+              "state": "confirmed",
+              "evidence": [
+                {
+                  "tags": [
+                    "コード全体の流れ"
+                  ],
+                  "first": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  },
+                  "latest": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  },
+                  "retried": false,
+                  "phaseKey": "binary-search-consolidation",
+                  "sessions": 1,
+                  "questionId": "whole-code-order",
+                  "stageLabel": "応用問題",
+                  "assessmentId": "binary-search-consolidation",
+                  "questionLabel": "二分探索のコードを、実行の流れに合う順序に並べてください。",
+                  "latestSessionFirst": {
+                    "number": 1,
+                    "correct": true,
+                    "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                    "confirmed": true,
+                    "sessionId": "fixture-session",
+                    "startedAt": 1794552248658,
+                    "observedAt": 1794552270702,
+                    "recordedAt": 1794552271544
+                  }
+                }
+              ],
+              "conceptId": "binary-search:flow",
+              "implementation": null,
+              "totalQuestions": 1,
+              "attemptedQuestions": 1
+            },
+            {
+              "kind": "implementation",
+              "label": "実装と動作確認",
+              "state": "unobserved",
+              "evidence": [],
+              "conceptId": "binary-search:implementation",
+              "implementation": {
+                "lastTest": {
+                  "results": [
+                    {
+                      "passed": true,
+                      "testId": "D1"
+                    },
+                    {
+                      "passed": true,
+                      "testId": "J1"
+                    },
+                    {
+                      "passed": true,
+                      "testId": "J2"
+                    },
+                    {
+                      "passed": true,
+                      "testId": "J3"
+                    }
+                  ],
+                  "sourceId": "cmwem8for008coucne8xnhgqx"
+                },
+                "testRuns": 2,
+                "completed": true,
+                "hintUsage": [
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "sourceIds": [
+                  "cmwem5uih0072oucncxzt34nq",
+                  "cmwem8for008coucne8xnhgqx",
+                  "cmwem8for008doucnpt7olzn5"
+                ],
+                "inputLevel": "full",
+                "testsPassed": true,
+                "observedHints": []
+              },
+              "totalQuestions": 0,
+              "attemptedQuestions": 0
+            }
+          ],
+          "courseId": "course-algorithm-binary-search-v1",
+          "relation": "unit-components",
+          "missingCompletionEvidence": []
+        }
+      },
+      "bigGoal": {
+        "type": "UNIT_COMPLETION",
+        "status": "ACHIEVED",
+        "progress": {
+          "detail": {
+            "phase7": {
+              "noHint": true,
+              "hintUsage": [
+                0,
+                0,
+                0,
+                0
+              ],
+              "inputLevel": "full"
+            },
+            "unitStatus": "COMPLETED",
+            "firstAttempt": {
+              "rate": 1,
+              "total": 8,
+              "correct": 8
+            },
+            "challengeChecks": {
+              "noHint": null,
+              "inputLevel": null,
+              "firstAttemptRate": null
+            },
+            "totalPhaseCount": 7,
+            "completedPhaseCount": 7
+          },
+          "outcome": "ACHIEVED",
+          "fraction": 1,
+          "requirements": [
+            {
+              "id": "unit",
+              "unit": "フェーズ",
+              "label": "単元の7フェーズを完了する",
+              "status": "met",
+              "target": 7,
+              "current": 7
+            }
+          ]
+        },
+        "condition": {
+          "courseId": "course-algorithm-binary-search-v1"
+        },
+        "confirmedAt": null,
+        "displayText": "二分探索の単元を完了する",
+        "daysSinceConfirmed": 0
+      }
+    },
+    "analysis": {
+      "evidence": [
+        {
+          "fact": "動きの確認問題2問の初回回答がいずれも正解です。",
+          "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+          "inference": false
+        },
+        {
+          "fact": "コードの確認問題2問の初回回答がいずれも正解です。",
+          "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+          "inference": false
+        },
+        {
+          "fact": "応用問題4問の初回回答がいずれも正解です。",
+          "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+          "inference": false
+        },
+        {
+          "fact": "最後のテスト実行でD1、J1、J2、J3が通過しています。",
+          "sourceId": "cmwem8for008coucne8xnhgqx",
+          "inference": false
+        },
+        {
+          "fact": "実装フェーズの記録ではテスト実行が2回、ヒント使用なし、入力レベルはfullです。",
+          "sourceId": "cmwem5uih0072oucncxzt34nq",
+          "inference": false
+        }
+      ],
+      "uncertain": [
+        "実装・動作確認の概念状態はスナップショット上でunobservedです。テスト結果は記録されていますが、提出の有無はこのデータから確認できません。"
+      ],
+      "understood": [
+        "確認問題と応用問題で、中央位置、探索範囲の更新、見つからない場合、整列済みの前提、コードの流れに関する正解が記録されています。"
+      ],
+      "currentState": "二分探索の単元は完了し、単元完了の目標は達成済みです。7フェーズすべてが完了し、確認問題では初回正解8/8でした。実装はテスト実行2回で、最後の実行では記録された4テストがすべて通過しています。",
+      "conceptClaims": [
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:center",
+          "sourceIds": [
+            "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+            "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+            "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921"
+          ],
+          "observation": "中央位置の決定に関する確認問題で、記録された初回回答はいずれも正解です。"
+        },
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:range",
+          "sourceIds": [
+            "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+            "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72"
+          ],
+          "observation": "探索範囲の更新に関する確認問題で、記録された初回回答はいずれも正解です。"
+        },
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:absent",
+          "sourceIds": [
+            "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921"
+          ],
+          "observation": "探す値がない場合の終了に関する応用問題で、初回回答は正解です。"
+        },
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:sorted",
+          "sourceIds": [
+            "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921"
+          ],
+          "observation": "整列済みという前提に関する応用問題で、初回回答は正解です。"
+        },
+        {
+          "state": "confirmed",
+          "conceptId": "binary-search:flow",
+          "sourceIds": [
+            "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921"
+          ],
+          "observation": "コード全体の流れに関する応用問題で、初回回答は正解です。"
+        }
+      ],
+      "needsImprovement": []
+    }
+  }
+]

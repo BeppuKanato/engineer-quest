@@ -187,7 +187,7 @@
 | [bfs-parsons-single-list-97.md](bfs-parsons-single-list-97.md) | 記録 | Issue #97 の Parsons 盤面の1リスト直接並び替え化（2リスト方式からの再設計、実行確認は #76 と合わせて判断） |
 | [bfs-code-mapping-72.md](bfs-code-mapping-72.md) | 記録 | Issue #72 のコード契約・62フレーム、Pythonトレース検証、PR #93 の可読性・変数差分表示と確認画像 |
 | [graph-unify-91.md](graph-unify-91.md) | 記録 | Issue #91 の共通描画・迷路配置、検証結果と同じ画面幅でのフェーズ1・2・3比較 |
-| [learning-feedback-402.md](learning-feedback-402.md) | 実装・自動検証（dev実機未検証） | #403〜#407の7単元58設問・44概念、回答証拠保存、共通スナップショット、1〜3候補、専用画面統合。レビュー修正1〜12に対応（文字数上限・候補重複判定はユーザー指示で撤廃）、完了再送の二重保存・二重生成を防止。#408は対象外 |
+| [learning-feedback-402.md](learning-feedback-402.md) | 実装・自動検証（dev実機未検証） | #403〜#407の7単元58設問・44概念、回答証拠保存、共通スナップショット、1〜3候補、専用画面統合。レビュー修正1〜12に対応（文字数上限・候補重複判定はユーザー指示で撤廃）、完了再送の二重保存・二重生成を防止。#408は対象外 2026-11-13: 根拠ID一覧の共通契約・旧保存入力互換・保存失敗2件の回帰検証を追記。 |
 | [feedback-v1-implementation.md](feedback-v1-implementation.md) | 記録（現行実装の説明を含む） | フィードバック v1 の基準コミット、参照正本、生成・検証・表示の実装内容。仕様の正本は Google Drive のフィードバック要件 v1 |
 | [phase3-situation-captions-297.md](phase3-situation-captions-297.md) | 記録 | Issue #297のフェーズ3状況キャプション追加（バブルソート・棒倒し法）、青い処理中色の時制をトレース由来の文言で固定、他単元への適用判定 |
 | [code-mapping-scroll-grey-band-301-303.md](code-mapping-scroll-grey-band-301-303.md) | 記録 | Issue #301のフェーズ4コード見切れ修正（コード専用の横スクロールを全6単元へ）と、Issue #303の画面下グレー帯の特定（body背景のはみ出し）と単元プレビューの内側スクロール化（全5単元） |
