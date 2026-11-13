@@ -20,8 +20,8 @@ import { BIG_GOAL_TYPE_CATALOG } from "./bigGoal.types";
 
 export const BIG_GOAL_SCORING_PROMPT_VERSION = "big-goal-scoring-v1-2026-11-10";
 /** モデルは固定する（仕様3.2）。フィードバック生成の OPENAI_MODEL とは連動させない。 */
-export const BIG_GOAL_SCORING_MODEL = "gpt-6-1-luna";
-const REASONING_EFFORT = "medium";
+export const BIG_GOAL_SCORING_MODEL = "gpt-6-luna";
+const REASONING_EFFORT = "low";
 
 const HEXAD_SCORE_KEYS = [
   "Philanthropist",

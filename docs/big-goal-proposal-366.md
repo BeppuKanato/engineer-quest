@@ -16,7 +16,7 @@
 
 ### 適合度採点（`back/src/service/bigGoal.scoring.ts`）
 
-- モデルは `gpt-6-1-luna` 固定、PROMPT_VERSION は `big-goal-scoring-v1-2026-11-10`。入力は候補集合・学習状態の要約・申告情報（現時点は null、下記の判断参照）。PERSONALIZED のときだけ HEXAD 6スコアとコードブック（HEXAD の型の説明＋目標型カタログの定義）を追加し、解釈を根拠に含めさせる。
+- モデルは `gpt-6-luna` 固定、PROMPT_VERSION は `big-goal-scoring-v1-2026-11-10`。入力は候補集合・学習状態の要約・申告情報（現時点は null、下記の判断参照）。PERSONALIZED のときだけ HEXAD 6スコアとコードブック（HEXAD の型の説明＋目標型カタログの定義）を追加し、解釈を根拠に含めさせる。
 - 出力は候補ごとのスコア（0〜100）と根拠、本命の指定。根拠は表示する候補すべてに付く。
 - 機械検証：全候補がちょうど1回ずつ採点されていること、スコアの範囲、本命が候補集合内にあること。不正な応答はエラーにする。本命はコード側の argmax（同点は候補順で先）を正とし、LLM の指定と食い違う場合は不一致を検証ログに残す。
 - 呼び出しログは `BigGoalProposalCall` に FeedbackV1Call と同じ粒度（stage、promptVersion、settings、prompt、result、validation、durationMs、error）で残す。

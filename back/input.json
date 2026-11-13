@@ -1,35 +1,528 @@
 {
   "hexad": null,
   "state": {
-    "unit": {
-      "id": "course-algorithm-bubble-sort-v2",
-      "title": "バブルソート",
-      "phases": [
-        {
-          "id": "bubble-sort-check",
-          "status": "COMPLETED"
-        },
-        {
-          "id": "bubble-sort-motivation",
-          "status": "COMPLETED"
-        },
-        {
-          "id": "bubble-sort-execution",
-          "status": "COMPLETED"
-        }
-      ],
-      "status": "IN_PROGRESS"
-    },
     "cards": [
       {
-        "id": "knowledge-card-greedy-coins-greedy-choice",
-        "title": "貪欲な選択",
-        "acquired": true
+        "id": "knowledge-card-binary-search-compare-middle",
+        "label": "比較",
+        "title": "中央の値と比べる",
+        "rarity": "COMMON",
+        "viewed": "not_observed",
+        "useCase": "数当てゲームで真ん中の数を聞くのが最も効率がよいことと同じ発想で、絞り込み探索の中心になる操作。",
+        "acquired": true,
+        "courseId": "course-algorithm-binary-search-v1",
+        "sortOrder": 14,
+        "connection": "二分探索では、範囲の両端 lo と hi から真ん中の位置 (lo + hi) // 2 を計算し、その値と目的の値を比べる。一致すれば、その位置が答えになる。",
+        "description": "探す範囲のちょうど真ん中にある値を取り出し、目的の値と比べる操作。比べた結果によって、次に探すのが左側か右側かが決まる。",
+        "isPublished": true,
+        "catalogNumber": 2,
+        "searchKeywords": [
+          "中央",
+          "真ん中",
+          "比較",
+          "mid"
+        ]
+      },
+      {
+        "id": "knowledge-card-binary-search-logarithmic-time",
+        "label": "計算量",
+        "title": "対数時間",
+        "rarity": "EPIC",
+        "viewed": "not_observed",
+        "useCase": "大量のデータから検索するときに、端から順に見る方法（線形探索）との差が大きくなる場面で効いてくる。",
+        "acquired": true,
+        "courseId": "course-algorithm-binary-search-v1",
+        "sortOrder": 15,
+        "connection": "二分探索は1回の比較で範囲を半分にするため、n 個のデータでも約 log₂n 回の比較で済む。100個でも7回程度、100万個でも20回程度になる。",
+        "description": "データの量が2倍になっても、必要な手間が一定量しか増えない処理の速さの目安。手間はデータ量の対数に比例して増える。",
+        "isPublished": true,
+        "catalogNumber": 3,
+        "searchKeywords": [
+          "対数時間",
+          "計算量",
+          "log",
+          "二分探索"
+        ]
+      },
+      {
+        "id": "knowledge-card-binary-search-halving-range",
+        "label": "絞り込み",
+        "title": "探索範囲を半分にする",
+        "rarity": "RARE",
+        "viewed": "not_observed",
+        "useCase": "辞書で単語を引くときや、並んだ名簿から名前を探すときに、端から1つずつ見るよりずっと少ない回数で見つけられる。",
+        "acquired": true,
+        "courseId": "course-algorithm-binary-search-v1",
+        "sortOrder": 13,
+        "connection": "二分探索は、中央の値より小さいか大きいかを見て、目的の値がないと分かる側を丸ごと捨てる。これを繰り返すたびに、残りの範囲は半分ずつ狭まっていく。",
+        "description": "並んだデータから目的の値を探すとき、真ん中の値と比べることで、まだ調べていない範囲を一度に半分にできる考え方。",
+        "isPublished": true,
+        "catalogNumber": 1,
+        "searchKeywords": [
+          "二分探索",
+          "Binary Search",
+          "探索範囲",
+          "半分"
+        ]
+      }
+    ],
+    "level": 1,
+    "posts": [],
+    "units": [
+      {
+        "id": "course-algorithm-bubble-sort-v2",
+        "title": "バブルソート",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-binary-search-v1",
+        "title": "二分探索",
+        "phases": [
+          {
+            "id": "binary-search-motivation",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-execution",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-check",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-code-mapping",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-code-check",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-consolidation",
+            "status": "COMPLETED"
+          },
+          {
+            "id": "binary-search-implementation",
+            "status": "COMPLETED"
+          }
+        ],
+        "status": "COMPLETED"
+      },
+      {
+        "id": "course-algorithm-kmp-v1",
+        "title": "KMP法",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-selection-sort-v1",
+        "title": "選択ソート",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-breadth-first-search-v1",
+        "title": "幅優先探索（BFS）",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-depth-first-search-v1",
+        "title": "深さ優先探索（DFS）",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-wall-extension-v1",
+        "title": "棒倒し法",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-maze-digging-v1",
+        "title": "穴掘り法",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-merge-sort-v1",
+        "title": "マージソート",
+        "phases": [],
+        "status": "NOT_STARTED"
+      },
+      {
+        "id": "course-algorithm-greedy-coins-v1",
+        "title": "貪欲法（硬貨問題）",
+        "phases": [],
+        "status": "NOT_STARTED"
+      }
+    ],
+    "quests": [
+      {
+        "id": "create-quest-turn-order-v1",
+        "title": "RPGの行動順を作ろう",
+        "attempts": [],
+        "scenario": "あなたはRPGの戦闘機能を担当しています。画面とキャラクターデータは用意済みです。decide_turn_order関数を実装し、行動順を返してください。",
+        "description": "キャラクターを素早さの高い順に並べ、戦闘で使える行動順を完成させます。まず正しく動かし、安定性や入力非破壊、大量データへの対応で得点を伸ばせます。",
+        "requirements": [
+          {
+            "id": "turn-order-non-mutating",
+            "kind": "OPTIONAL",
+            "title": "元のパーティーデータを変更しない",
+            "description": "返り値を作る際に、入力されたリストの並びを変更しません。"
+          },
+          {
+            "id": "turn-order-custom-sort",
+            "kind": "OPTIONAL",
+            "title": "並べ替え処理を自分で実装する",
+            "description": "sorted()とリストの.sort()を呼ばずに並べ替えます。"
+          },
+          {
+            "id": "turn-order-efficient",
+            "kind": "OPTIONAL",
+            "title": "128人を比較回数1,000回以内で並べる",
+            "description": "データが増えても、すべての組み合わせを調べない方法で処理します。"
+          },
+          {
+            "id": "turn-order-stable",
+            "kind": "OPTIONAL",
+            "title": "同じ素早さなら登録順を維持する",
+            "description": "speedが同じキャラクターは、入力に登場した順番を保ちます。"
+          },
+          {
+            "id": "turn-order-descending",
+            "kind": "BASIC",
+            "title": "素早さが高い順に並べる",
+            "description": "通常のパーティーをspeedの降順で返します。"
+          },
+          {
+            "id": "turn-order-boundaries",
+            "kind": "BASIC",
+            "title": "空と1人のパーティーも扱う",
+            "description": "キャラクターが0人または1人でもエラーにしません。"
+          },
+          {
+            "id": "turn-order-all-members",
+            "kind": "BASIC",
+            "title": "全員を一度ずつ行動順に含める",
+            "description": "人数を増やしても、欠けたり重複したりせず全員を返します。"
+          }
+        ],
+        "relatedCourses": [
+          {
+            "order": 1,
+            "reason": "小さいリストを自分で並べ替える処理から始められます。",
+            "questId": "create-quest-turn-order-v1",
+            "courseId": "course-algorithm-selection-sort-v1"
+          },
+          {
+            "order": 2,
+            "reason": "大量データ、安定性、自作実装の要件を同時に狙いやすくなります。",
+            "questId": "create-quest-turn-order-v1",
+            "courseId": "course-algorithm-merge-sort-v1"
+          }
+        ]
+      },
+      {
+        "id": "create-quest-product-search-v1",
+        "title": "ショップの商品検索を作ろう",
+        "attempts": [],
+        "scenario": "あなたはショップの在庫検索を担当しています。idの小さい順に並んだproductsと商品番号target_idを受け取り、該当する商品辞書を返すfind_product関数を実装してください。",
+        "description": "商品番号順に並んだ在庫から商品を探します。基本機能は順番に探しても作れますが、大量商品を少ない比較回数で探すと高得点になります。",
+        "requirements": [
+          {
+            "id": "product-found",
+            "kind": "BASIC",
+            "title": "商品番号から商品を返す",
+            "description": "該当するidを持つ商品辞書をそのまま返します。"
+          },
+          {
+            "id": "product-boundaries",
+            "kind": "OPTIONAL",
+            "title": "先頭と末尾の商品を見つける",
+            "description": "一覧の端にある商品番号も正しく検索します。"
+          },
+          {
+            "id": "product-input",
+            "kind": "OPTIONAL",
+            "title": "元の商品一覧を変更しない",
+            "description": "検索の前後でproductsの内容と順番を変えません。"
+          },
+          {
+            "id": "product-efficient",
+            "kind": "OPTIONAL",
+            "title": "256商品を20回以内の比較で探す",
+            "description": "大量の商品を先頭からすべて確認せず、比較範囲を絞り込みます。"
+          },
+          {
+            "id": "product-missing",
+            "kind": "BASIC",
+            "title": "未登録の商品を扱う",
+            "description": "商品番号が一覧にない場合はNoneを返します。"
+          },
+          {
+            "id": "product-empty",
+            "kind": "BASIC",
+            "title": "商品が0件でも検索できる",
+            "description": "空の商品一覧を受け取ってもエラーにせずNoneを返します。"
+          },
+          {
+            "id": "product-duplicate",
+            "kind": "OPTIONAL",
+            "title": "同じ番号なら最初の商品を返す",
+            "description": "同じidの商品が複数ある場合、一覧で最初に現れる商品を返します。"
+          }
+        ],
+        "relatedCourses": [
+          {
+            "order": 1,
+            "reason": "中央の商品番号と比較して、探す範囲を半分ずつ狭められます。",
+            "questId": "create-quest-product-search-v1",
+            "courseId": "course-algorithm-binary-search-v1"
+          }
+        ]
+      },
+      {
+        "id": "create-quest-chat-keyword-v1",
+        "title": "チャットの禁止ワード検出を作ろう",
+        "attempts": [],
+        "scenario": "あなたはチャットの安全機能を担当しています。本文textから禁止ワードkeywordが最初に現れる位置を返すfind_keyword関数を実装してください。見つからない場合は-1を返します。",
+        "description": "チャット本文から指定された語句を探します。短い文では標準機能も使えますが、繰り返しの多い長文を少ない比較回数で探すと高得点になります。",
+        "requirements": [
+          {
+            "id": "keyword-found",
+            "kind": "BASIC",
+            "title": "禁止ワードの開始位置を返す",
+            "description": "本文の途中にあるkeywordの最初の位置を返します。"
+          },
+          {
+            "id": "keyword-edges",
+            "kind": "BASIC",
+            "title": "文頭と文末でも見つける",
+            "description": "keywordが本文の先頭または末尾にある場合も正しい位置を返します。"
+          },
+          {
+            "id": "keyword-overlap",
+            "kind": "OPTIONAL",
+            "title": "重なりの多い文字列を正しく探す",
+            "description": "同じ文字が続き、途中まで一致してから不一致になる場合も最初の一致を返します。"
+          },
+          {
+            "id": "keyword-empty",
+            "kind": "OPTIONAL",
+            "title": "空のキーワードを扱う",
+            "description": "keywordが空文字なら、本文の先頭で一致したものとして0を返します。"
+          },
+          {
+            "id": "keyword-unicode",
+            "kind": "OPTIONAL",
+            "title": "日本語や記号を含む文章を探す",
+            "description": "日本語や記号を1文字として扱い、正しい位置を返します。"
+          },
+          {
+            "id": "keyword-efficient",
+            "kind": "OPTIONAL",
+            "title": "長文を2,000回以内の比較で探す",
+            "description": "同じ文字が長く続く本文でも、最初から比較し直す回数を抑えます。"
+          },
+          {
+            "id": "keyword-missing",
+            "kind": "BASIC",
+            "title": "見つからない場合を扱う",
+            "description": "最後まで一致しない場合は-1を返します。"
+          }
+        ],
+        "relatedCourses": [
+          {
+            "order": 1,
+            "reason": "一致済みの文字を比較し直さず、長い文章から語句を効率よく探せます。",
+            "questId": "create-quest-chat-keyword-v1",
+            "courseId": "course-algorithm-kmp-v1"
+          }
+        ]
+      },
+      {
+        "id": "create-quest-skill-tree-v1",
+        "title": "ゲームのスキルツリーを調べよう",
+        "attempts": [],
+        "scenario": "あなたはRPGのスキル画面を担当しています。スキルごとの派生先skill_treeと開始スキルstartを受け取り、startから到達できる派生スキルを重複なく返すfind_unlockable_skills関数を実装してください。start自身は結果に含めません。",
+        "description": "選んだスキルから先に習得できるスキルをすべて集めます。分岐、循環、深いツリーへ対応しながら探索機能を完成させます。",
+        "requirements": [
+          {
+            "id": "skills-cycle",
+            "kind": "OPTIONAL",
+            "title": "循環する派生でも一度ずつ返す",
+            "description": "派生先から元のスキルへ戻れる場合も、無限に繰り返さず重複を除きます。"
+          },
+          {
+            "id": "skills-disconnected",
+            "kind": "OPTIONAL",
+            "title": "つながっていないスキルを除外する",
+            "description": "skill_treeに登録されていても、startからたどれないスキルは結果に含めません。"
+          },
+          {
+            "id": "skills-deep",
+            "kind": "OPTIONAL",
+            "title": "深い派生を最後まで調べる",
+            "description": "10段階先まで続くスキルも漏らさず返します。"
+          },
+          {
+            "id": "skills-reachable",
+            "kind": "BASIC",
+            "title": "派生スキルをすべて返す",
+            "description": "startからたどれる派生スキルを、漏れや重複なく返します。返す順番は自由です。"
+          },
+          {
+            "id": "skills-leaf",
+            "kind": "BASIC",
+            "title": "派生先がないスキルを扱う",
+            "description": "startに派生先がない場合は空のリストを返します。"
+          },
+          {
+            "id": "skills-start-excluded",
+            "kind": "BASIC",
+            "title": "開始スキルを結果に含めない",
+            "description": "結果にはstartより後に習得できるスキルだけを含めます。"
+          },
+          {
+            "id": "skills-input",
+            "kind": "OPTIONAL",
+            "title": "元のスキルツリーを変更しない",
+            "description": "探索の前後でskill_treeの派生関係を変更しません。"
+          }
+        ],
+        "relatedCourses": [
+          {
+            "order": 1,
+            "reason": "ひとつの派生を奥までたどり、戻りながら別の分岐を調べる方法が使えます。",
+            "questId": "create-quest-skill-tree-v1",
+            "courseId": "course-algorithm-depth-first-search-v1"
+          }
+        ]
+      },
+      {
+        "id": "create-quest-dungeon-route-v1",
+        "title": "ダンジョンの最短脱出ルートを作ろう",
+        "attempts": [],
+        "scenario": "あなたはダンジョンゲームの案内機能を担当しています。部屋ごとの移動先を受け取り、入口から出口までに通る部屋を順番に返すfind_escape_route関数を実装してください。",
+        "description": "部屋のつながりから出口までの道を探します。まず脱出できる経路を返し、最短経路や循環する通路、大きなダンジョンへ対応して得点を伸ばせます。",
+        "requirements": [
+          {
+            "id": "dungeon-route-found",
+            "kind": "BASIC",
+            "title": "出口までの経路を返す",
+            "description": "入口と出口を含め、実際につながっている部屋だけで経路を返します。"
+          },
+          {
+            "id": "dungeon-no-route",
+            "kind": "BASIC",
+            "title": "脱出できない場合を扱う",
+            "description": "出口へつながる道がない場合は空のリストを返します。"
+          },
+          {
+            "id": "dungeon-same-room",
+            "kind": "BASIC",
+            "title": "入口が出口の場合を扱う",
+            "description": "startとgoalが同じなら、その部屋だけを含む経路を返します。"
+          },
+          {
+            "id": "dungeon-shortest",
+            "kind": "OPTIONAL",
+            "title": "最短の脱出経路を返す",
+            "description": "複数の脱出経路がある場合、通る部屋数が最も少ない経路を返します。"
+          },
+          {
+            "id": "dungeon-efficient",
+            "kind": "OPTIONAL",
+            "title": "不要な遠回りをせず出口を見つける",
+            "description": "短い出口がある大きなマップを、通路の参照6回以内で解きます。"
+          },
+          {
+            "id": "dungeon-cycle",
+            "kind": "OPTIONAL",
+            "title": "循環する通路でも止まる",
+            "description": "同じ部屋へ戻れる通路があっても、無限に探索を続けません。"
+          },
+          {
+            "id": "dungeon-input",
+            "kind": "OPTIONAL",
+            "title": "元のマップを変更しない",
+            "description": "経路を探しても、受け取ったpassagesの内容を変更しません。"
+          }
+        ],
+        "relatedCourses": [
+          {
+            "order": 1,
+            "reason": "入口に近い部屋から調べることで、最短の脱出経路を見つけられます。",
+            "questId": "create-quest-dungeon-route-v1",
+            "courseId": "course-algorithm-breadth-first-search-v1"
+          },
+          {
+            "order": 2,
+            "reason": "経路が存在するかを、ひとつの道を奥まで進みながら調べる方法として活用できます。",
+            "questId": "create-quest-dungeon-route-v1",
+            "courseId": "course-algorithm-depth-first-search-v1"
+          }
+        ]
+      }
+    ],
+    "courses": [
+      {
+        "id": "course-algorithm-bubble-sort-v2",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-binary-search-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-kmp-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-selection-sort-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-breadth-first-search-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-depth-first-search-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-wall-extension-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-maze-digging-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-merge-sort-v1",
+        "status": "not_started",
+        "missions": []
+      },
+      {
+        "id": "course-algorithm-greedy-coins-v1",
+        "status": "not_started",
+        "missions": []
       }
     ],
     "history": [
       {
-        "id": "cmwboee0t003gjkqzh5oy7wb8",
+        "id": "cmwem0r090036oucnrg4zs5br",
         "status": "FAILED",
         "observation": {
           "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
@@ -43,198 +536,3387 @@
         "recommendations": []
       },
       {
-        "id": "cmwby0iqz005d77x7jcmczepu",
-        "status": "FAILED",
+        "id": "cmwem27fg005doucni4la40um",
+        "status": "COMPLETED",
         "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
+          "reason": "FIRST_SELECTION_AND_RENDERED_DESTINATION",
+          "choiceId": "46dc6a8d-d0f0-4ffa-958e-1d19bce0f777",
+          "judgement": "MATCH",
+          "presented": true,
+          "candidates": [
+            {
+              "order": 1,
+              "candidateId": "candidate-1",
+              "firstSelected": true,
+              "viewportObserved": true,
+              "explicitlyNotSelected": false
+            },
+            {
+              "order": 2,
+              "candidateId": "candidate-2",
+              "firstSelected": false,
+              "viewportObserved": true,
+              "explicitlyNotSelected": true
+            }
+          ],
           "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
+          "viewportObserved": true
         },
-        "interactions": [],
-        "recommendations": []
+        "interactions": [
+          {
+            "id": "a7a92af2-aaab-4a2e-8fdf-389e895f9d36",
+            "data": {
+              "durationMs": 0,
+              "occurredAt": "2026-11-13T06:44:04.644Z"
+            },
+            "type": "VISIBLE_DURATION",
+            "createdAt": "2026-11-13T06:44:05.322Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "e29ebe5b-29c3-494a-8558-d6aae48d345a",
+            "data": {
+              "href": null,
+              "order": 2,
+              "occurredAt": "2026-11-13T06:44:04.644Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:05.401Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "24c071ce-451a-4181-8c2b-80024b63c8d1",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "order": 1,
+              "occurredAt": "2026-11-13T06:44:04.644Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:05.404Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "b7a8ff78-4a47-49cb-b60f-3d99117d5a2f",
+            "data": {
+              "href": null,
+              "order": 2,
+              "occurredAt": "2026-11-13T06:44:04.644Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:05.405Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "27cd73ab-b455-42bd-ac6e-d8dd5191614e",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "order": 1,
+              "occurredAt": "2026-11-13T06:44:04.644Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:05.501Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "829ebf55-1e3d-46db-82b6-4b8211634248",
+            "data": {
+              "definition": "viewport_intersection_not_read_confirmation",
+              "occurredAt": "2026-11-13T06:44:04.645Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "VIEWED",
+            "createdAt": "2026-11-13T06:44:05.507Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "3e02b149-d4ee-4ab4-abb1-979117afc19a",
+            "data": {
+              "definition": "viewport_intersection_not_read_confirmation",
+              "occurredAt": "2026-11-13T06:44:04.645Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "VIEWED",
+            "createdAt": "2026-11-13T06:44:06.618Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "c18f6f1a-6945-4408-bdac-1c2d381e00f4",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "skipped": false,
+              "choiceId": "46dc6a8d-d0f0-4ffa-958e-1d19bce0f777",
+              "expected": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "occurredAt": "2026-11-13T06:44:07.559Z",
+              "selectedAt": "2026-11-13T06:44:07.559Z",
+              "candidateId": "candidate-1",
+              "isRecommendation": true,
+              "notSelectedCandidateIds": [
+                "candidate-2"
+              ]
+            },
+            "type": "CLICKED",
+            "createdAt": "2026-11-13T06:44:08.127Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "8da9dcc7-d46a-4a67-89cc-2cac5fec2347",
+            "data": {
+              "durationMs": 2939.700000001118,
+              "occurredAt": "2026-11-13T06:44:07.584Z"
+            },
+            "type": "VISIBLE_DURATION",
+            "createdAt": "2026-11-13T06:44:08.258Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          },
+          {
+            "id": "0b94b0ac-985f-4ce7-bd29-e87b3bdb0e67",
+            "data": {
+              "id": "cmwem27fg005doucni4la40um",
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "actual": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "matches": true,
+              "choiceId": "46dc6a8d-d0f0-4ffa-958e-1d19bce0f777",
+              "expected": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation",
+              "targetId": "binary-search-consolidation",
+              "occurredAt": "2026-11-13T06:44:08.709Z",
+              "selectedAt": "2026-11-13T06:44:07.559Z",
+              "candidateId": "candidate-1",
+              "ruleVersion": "first-selection-v1"
+            },
+            "type": "ARRIVED",
+            "createdAt": "2026-11-13T06:44:09.277Z",
+            "feedbackId": "cmwem27fg005doucni4la40um"
+          }
+        ],
+        "recommendations": [
+          {
+            "reason": "次のフェーズが応用問題であり、新しいリストへの適用や終了条件はまだ確認されていません。",
+            "purpose": "未実施の応用問題に取り組む",
+            "actionId": 23,
+            "targetId": "binary-search-consolidation",
+            "candidateId": "candidate-1"
+          },
+          {
+            "reason": "中央位置と範囲更新は確認済みなので、応用問題に向けて終了条件まで含めて手順をつなげます。",
+            "purpose": "応用問題に必要な手順を事前に整理する",
+            "actionId": null,
+            "targetId": null,
+            "candidateId": "candidate-2"
+          }
+        ]
       },
       {
-        "id": "cmwby8uoi006j77x70tg6ypxr",
-        "status": "FAILED",
+        "id": "cmwem3bfy006koucnis0n5wam",
+        "status": "COMPLETED",
         "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
+          "reason": "FIRST_SELECTION_AND_RENDERED_DESTINATION",
+          "choiceId": "24d20194-28f1-475f-91f5-006ab6e7b2de",
+          "judgement": "MATCH",
+          "presented": true,
+          "candidates": [
+            {
+              "order": 1,
+              "candidateId": "candidate-1",
+              "firstSelected": true,
+              "viewportObserved": true,
+              "explicitlyNotSelected": false
+            },
+            {
+              "order": 2,
+              "candidateId": "candidate-2",
+              "firstSelected": false,
+              "viewportObserved": true,
+              "explicitlyNotSelected": true
+            }
+          ],
           "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
+          "viewportObserved": true
         },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcuetcf000qldmftq09c0ng",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcupzd3001wldmfwkofwa7l",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcuq8ht002mldmf0vbhdlvz",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcvf7yf000u7q9e5zx5149j",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcvs4pj003qldmfa996cnxr",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcwotj5008kldmfy8uirk5t",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcyn2np000u1400obbitlv8",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwcyvj6m000uh9yysl0z33nq",
-        "status": "FAILED",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
-      },
-      {
-        "id": "cmwd0sf5k000v2j9s6udlaxol",
-        "status": "GENERATING",
-        "observation": {
-          "reason": "NO_IDENTIFIABLE_FIRST_SELECTION",
-          "judgement": "PENDING",
-          "presented": false,
-          "candidates": [],
-          "ruleVersion": "first-selection-v1",
-          "viewportObserved": false
-        },
-        "interactions": [],
-        "recommendations": []
+        "interactions": [
+          {
+            "id": "5faec090-757a-4ad7-be7f-e41c7803f8c0",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "order": 1,
+              "occurredAt": "2026-11-13T06:44:56.845Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:57.417Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "417e61da-e992-4e06-8eb3-08281cfdcf46",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "order": 1,
+              "occurredAt": "2026-11-13T06:44:56.846Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:57.613Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "6c55b99e-afcc-4fd1-8318-965f693bc956",
+            "data": {
+              "durationMs": 0.1000000014901161,
+              "occurredAt": "2026-11-13T06:44:56.846Z"
+            },
+            "type": "VISIBLE_DURATION",
+            "createdAt": "2026-11-13T06:44:57.610Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "570abd98-526c-4d63-b128-2d372baff61f",
+            "data": {
+              "definition": "viewport_intersection_not_read_confirmation",
+              "occurredAt": "2026-11-13T06:44:56.849Z",
+              "candidateId": "candidate-1"
+            },
+            "type": "VIEWED",
+            "createdAt": "2026-11-13T06:44:57.618Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "b5227d08-55cf-4c03-b36d-d5dc5a359dfc",
+            "data": {
+              "href": null,
+              "order": 2,
+              "occurredAt": "2026-11-13T06:44:56.846Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:57.671Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "f93782a7-d8ff-4c59-808a-8e15720fdadd",
+            "data": {
+              "href": null,
+              "order": 2,
+              "occurredAt": "2026-11-13T06:44:56.845Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "PRESENTED",
+            "createdAt": "2026-11-13T06:44:57.605Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "7c7810f2-942b-41c4-a1a1-752e50bbcfad",
+            "data": {
+              "definition": "viewport_intersection_not_read_confirmation",
+              "occurredAt": "2026-11-13T06:44:58.803Z",
+              "candidateId": "candidate-2"
+            },
+            "type": "VIEWED",
+            "createdAt": "2026-11-13T06:44:59.470Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "4b92118f-d470-4041-9b87-9faa1dbd5d35",
+            "data": {
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "skipped": false,
+              "choiceId": "24d20194-28f1-475f-91f5-006ab6e7b2de",
+              "expected": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "occurredAt": "2026-11-13T06:45:08.341Z",
+              "selectedAt": "2026-11-13T06:45:08.341Z",
+              "candidateId": "candidate-1",
+              "isRecommendation": true,
+              "notSelectedCandidateIds": [
+                "candidate-2"
+              ]
+            },
+            "type": "CLICKED",
+            "createdAt": "2026-11-13T06:45:09.098Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "c4ce855c-2c0c-46c3-a85f-b496615099ee",
+            "data": {
+              "durationMs": 11526.29999999888,
+              "occurredAt": "2026-11-13T06:45:08.372Z"
+            },
+            "type": "VISIBLE_DURATION",
+            "createdAt": "2026-11-13T06:45:09.150Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          },
+          {
+            "id": "9ecebe6b-2e53-4d6c-b123-1f51032d9b4b",
+            "data": {
+              "id": "cmwem3bfy006koucnis0n5wam",
+              "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "actual": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "matches": true,
+              "choiceId": "24d20194-28f1-475f-91f5-006ab6e7b2de",
+              "expected": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation",
+              "targetId": "binary-search-implementation",
+              "occurredAt": "2026-11-13T06:45:10.502Z",
+              "selectedAt": "2026-11-13T06:45:08.341Z",
+              "candidateId": "candidate-1",
+              "ruleVersion": "first-selection-v1"
+            },
+            "type": "ARRIVED",
+            "createdAt": "2026-11-13T06:45:11.337Z",
+            "feedbackId": "cmwem3bfy006koucnis0n5wam"
+          }
+        ],
+        "recommendations": [
+          {
+            "reason": "確認問題と応用問題は完了しているため、次は学んだ手順をコードにする段階です。実装や動作確認の状態はまだ未観測です。",
+            "purpose": "二分探索を自分で実装する",
+            "actionId": 23,
+            "targetId": "binary-search-implementation",
+            "candidateId": "candidate-1"
+          },
+          {
+            "reason": "中央位置・範囲更新・値がない場合の終了は確認済みですが、コードにする前に手順をつなげて確認できます。",
+            "purpose": "実装に使う二分探索の手順を整理する",
+            "actionId": null,
+            "targetId": null,
+            "candidateId": "candidate-2"
+          }
+        ]
       }
-    ]
+    ],
+    "experience": 0,
+    "achievements": [
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-advanced",
+        "title": "ゲームのスキルツリーを調べよう・発展達成",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.370Z",
+        "sortOrder": 308,
+        "updatedAt": "2026-11-11T05:18:44.094Z",
+        "description": "ゲームのスキルツリーを調べようで75点以上を獲得し、追加要件にも対応した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-skill-tree-v1",
+        "conditionValue": 75
+      },
+      {
+        "id": "ach-create-create-quest-skill-tree-v1-perfect",
+        "title": "ゲームのスキルツリーを調べよう・完全達成",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.464Z",
+        "sortOrder": 309,
+        "updatedAt": "2026-11-11T05:18:44.188Z",
+        "description": "ゲームのスキルツリーを調べようの全要件を満たし、100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-skill-tree-v1",
+        "conditionValue": 100
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "wall-extension-implementation",
+        "createdAt": "2026-11-07T12:04:59.927Z",
+        "sortOrder": 321,
+        "updatedAt": "2026-11-11T05:18:45.498Z",
+        "description": "棒倒し法を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-wall-extension-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "wall-extension-check,wall-extension-code-check",
+        "createdAt": "2026-11-07T12:05:00.018Z",
+        "sortOrder": 331,
+        "updatedAt": "2026-11-11T05:18:45.605Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-wall-extension-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "wall-extension-consolidation",
+        "createdAt": "2026-11-07T12:05:00.109Z",
+        "sortOrder": 341,
+        "updatedAt": "2026-11-11T05:18:45.698Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-wall-extension-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "wall-extension-implementation",
+        "createdAt": "2026-11-07T12:05:00.199Z",
+        "sortOrder": 351,
+        "updatedAt": "2026-11-11T05:18:45.792Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-unit-bubble-sort-complete",
+        "title": "バブルソートを修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:05:00.379Z",
+        "sortOrder": 112,
+        "updatedAt": "2026-11-11T05:18:45.977Z",
+        "description": "バブルソートの単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bubble-sort-implementation",
+        "createdAt": "2026-11-07T12:05:00.469Z",
+        "sortOrder": 322,
+        "updatedAt": "2026-11-11T05:18:46.070Z",
+        "description": "バブルソートを自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-maze-digging-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "maze-digging-consolidation",
+        "createdAt": "2026-11-07T12:05:01.199Z",
+        "sortOrder": 343,
+        "updatedAt": "2026-11-11T05:18:46.812Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "maze-digging-implementation",
+        "createdAt": "2026-11-07T12:05:01.288Z",
+        "sortOrder": 353,
+        "updatedAt": "2026-11-11T05:18:46.911Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-maze-digging-card-complete",
+        "title": "穴掘り法カードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:05:01.379Z",
+        "sortOrder": 413,
+        "updatedAt": "2026-11-11T05:18:47.007Z",
+        "description": "穴掘り法の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": true,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "binary-search-implementation",
+        "createdAt": "2026-11-09T05:33:22.280Z",
+        "sortOrder": 324,
+        "updatedAt": "2026-11-11T05:18:47.194Z",
+        "description": "二分探索を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-binary-search-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": true,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "binary-search-check,binary-search-code-check",
+        "createdAt": "2026-11-09T05:33:22.372Z",
+        "sortOrder": 334,
+        "updatedAt": "2026-11-11T05:18:47.287Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-binary-search-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": true,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "binary-search-consolidation",
+        "createdAt": "2026-11-09T05:33:22.467Z",
+        "sortOrder": 344,
+        "updatedAt": "2026-11-11T05:18:47.380Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-binary-search-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": true,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "binary-search-implementation",
+        "createdAt": "2026-11-09T05:33:22.560Z",
+        "sortOrder": 354,
+        "updatedAt": "2026-11-11T05:18:47.471Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-binary-search-card-complete",
+        "title": "二分探索カードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": true,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-09T05:33:22.655Z",
+        "sortOrder": 414,
+        "updatedAt": "2026-11-11T05:18:47.564Z",
+        "description": "二分探索の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-unit-dfs-complete",
+        "title": "深さ優先探索を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-10T08:35:04.379Z",
+        "sortOrder": 115,
+        "updatedAt": "2026-11-11T05:18:47.658Z",
+        "description": "深さ優先探索（DFS）の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-dfs-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "dfs-implementation",
+        "createdAt": "2026-11-10T08:35:04.474Z",
+        "sortOrder": 325,
+        "updatedAt": "2026-11-11T05:18:47.752Z",
+        "description": "深さ優先探索を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-dfs-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "dfs-check,dfs-code-check",
+        "createdAt": "2026-11-10T08:35:04.568Z",
+        "sortOrder": 335,
+        "updatedAt": "2026-11-11T05:18:47.847Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-dfs-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "dfs-consolidation",
+        "createdAt": "2026-11-10T08:35:04.662Z",
+        "sortOrder": 345,
+        "updatedAt": "2026-11-11T05:18:47.945Z",
+        "description": "応用問題で、初回の回答が満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-unit-greedy-coins-complete",
+        "title": "貪欲法を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-11T05:18:48.227Z",
+        "sortOrder": 116,
+        "updatedAt": "2026-11-11T05:18:48.227Z",
+        "description": "貪欲法（硬貨問題）の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "greedy-coins-implementation",
+        "createdAt": "2026-11-11T05:18:48.324Z",
+        "sortOrder": 326,
+        "updatedAt": "2026-11-11T05:18:48.324Z",
+        "description": "貪欲法を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-greedy-coins-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "greedy-coins-check,greedy-coins-code-check",
+        "createdAt": "2026-11-11T05:18:48.418Z",
+        "sortOrder": 336,
+        "updatedAt": "2026-11-11T05:18:48.418Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-greedy-coins-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "greedy-coins-consolidation",
+        "createdAt": "2026-11-11T05:18:48.514Z",
+        "sortOrder": 346,
+        "updatedAt": "2026-11-11T05:18:48.514Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-greedy-coins-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "greedy-coins-implementation",
+        "createdAt": "2026-11-11T05:18:48.610Z",
+        "sortOrder": 356,
+        "updatedAt": "2026-11-11T05:18:48.610Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-create-complete-lv1",
+        "title": "機能ビルダー Lv.1",
+        "rarity": "COMMON",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:16.673Z",
+        "sortOrder": 200,
+        "updatedAt": "2026-11-11T05:18:42.305Z",
+        "description": "1種類の作る課題で基本要件を達成した証です。",
+        "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 1
+      },
+      {
+        "id": "ach-create-complete-lv2",
+        "title": "機能ビルダー Lv.2",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:16.766Z",
+        "sortOrder": 201,
+        "updatedAt": "2026-11-11T05:18:42.504Z",
+        "description": "3種類の作る課題で基本要件を達成した証です。",
+        "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-create-complete-lv3",
+        "title": "機能ビルダー Lv.3",
+        "rarity": "EPIC",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:16.859Z",
+        "sortOrder": 202,
+        "updatedAt": "2026-11-11T05:18:42.603Z",
+        "description": "5種類の作る課題で基本要件を達成した証です。",
+        "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 5
+      },
+      {
+        "id": "ach-unit-count-lv2",
+        "title": "単元探求者 Lv.2",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-06T01:20:10.342Z",
+        "sortOrder": 61,
+        "updatedAt": "2026-11-11T05:18:44.373Z",
+        "description": "3個の単元を完了した証です。",
+        "conditionType": "UNIT_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-unit-count-lv3",
+        "title": "単元探求者 Lv.3",
+        "rarity": "EPIC",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-06T01:20:10.435Z",
+        "sortOrder": 62,
+        "updatedAt": "2026-11-11T05:18:44.467Z",
+        "description": "7個の単元を完了した証です。",
+        "conditionType": "UNIT_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 7
+      },
+      {
+        "id": "ach-unit-bfs-complete",
+        "title": "幅優先探索を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-06T01:20:10.527Z",
+        "sortOrder": 110,
+        "updatedAt": "2026-11-11T05:18:44.563Z",
+        "description": "幅優先探索（BFS）の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bfs-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bfs-implementation",
+        "createdAt": "2026-11-06T01:20:10.712Z",
+        "sortOrder": 320,
+        "updatedAt": "2026-11-11T05:18:44.746Z",
+        "description": "幅優先探索を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bfs-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bfs-check,bfs-code-check",
+        "createdAt": "2026-11-06T01:20:10.895Z",
+        "sortOrder": 330,
+        "updatedAt": "2026-11-11T05:18:44.935Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bfs-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bfs-consolidation",
+        "createdAt": "2026-11-06T01:20:10.989Z",
+        "sortOrder": 340,
+        "updatedAt": "2026-11-11T05:18:45.027Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bfs-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bfs-implementation",
+        "createdAt": "2026-11-06T01:20:11.082Z",
+        "sortOrder": 350,
+        "updatedAt": "2026-11-11T05:18:45.120Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-bfs-card-complete",
+        "title": "BFSカードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-breadth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-06T01:20:11.175Z",
+        "sortOrder": 410,
+        "updatedAt": "2026-11-11T05:18:45.211Z",
+        "description": "幅優先探索の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-unit-wall-extension-complete",
+        "title": "棒倒し法を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:04:59.836Z",
+        "sortOrder": 111,
+        "updatedAt": "2026-11-11T05:18:45.396Z",
+        "description": "棒倒し法の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-wall-extension-card-complete",
+        "title": "棒倒し法カードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-wall-extension-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:05:00.289Z",
+        "sortOrder": 411,
+        "updatedAt": "2026-11-11T05:18:45.886Z",
+        "description": "棒倒し法の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-create-optional-lv1",
+        "title": "追加要件ハンター Lv.1",
+        "rarity": "COMMON",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:16.953Z",
+        "sortOrder": 220,
+        "updatedAt": "2026-11-11T05:18:42.698Z",
+        "description": "異なる追加要件を5件達成した証です。",
+        "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 5
+      },
+      {
+        "id": "ach-create-optional-lv2",
+        "title": "追加要件ハンター Lv.2",
+        "rarity": "RARE",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.048Z",
+        "sortOrder": 221,
+        "updatedAt": "2026-11-11T05:18:42.793Z",
+        "description": "異なる追加要件を10件達成した証です。",
+        "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 10
+      },
+      {
+        "id": "ach-create-optional-lv3",
+        "title": "追加要件ハンター Lv.3",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.142Z",
+        "sortOrder": 222,
+        "updatedAt": "2026-11-11T05:18:42.887Z",
+        "description": "異なる追加要件を20件達成した証です。",
+        "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 20
+      },
+      {
+        "id": "ach-create-perfect-lv1",
+        "title": "パーフェクトビルダー Lv.1",
+        "rarity": "COMMON",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.237Z",
+        "sortOrder": 240,
+        "updatedAt": "2026-11-11T05:18:42.980Z",
+        "description": "1種類の作る課題で100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 1
+      },
+      {
+        "id": "ach-create-perfect-lv2",
+        "title": "パーフェクトビルダー Lv.2",
+        "rarity": "RARE",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.332Z",
+        "sortOrder": 241,
+        "updatedAt": "2026-11-11T05:18:43.073Z",
+        "description": "3種類の作る課題で100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-create-perfect-lv3",
+        "title": "パーフェクトビルダー Lv.3",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.426Z",
+        "sortOrder": 242,
+        "updatedAt": "2026-11-11T05:18:43.166Z",
+        "description": "5種類の作る課題で100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+        "createQuestId": null,
+        "conditionValue": 5
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-advanced",
+        "title": "RPGの行動順を作ろう・発展達成",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.521Z",
+        "sortOrder": 300,
+        "updatedAt": "2026-11-11T05:18:43.258Z",
+        "description": "RPGの行動順を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-turn-order-v1",
+        "conditionValue": 75
+      },
+      {
+        "id": "ach-create-create-quest-turn-order-v1-perfect",
+        "title": "RPGの行動順を作ろう・完全達成",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.706Z",
+        "sortOrder": 301,
+        "updatedAt": "2026-11-11T05:18:43.442Z",
+        "description": "RPGの行動順を作ろうの全要件を満たし、100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-turn-order-v1",
+        "conditionValue": 100
+      },
+      {
+        "id": "ach-unit-count-lv1",
+        "title": "単元探求者 Lv.1",
+        "rarity": "COMMON",
+        "iconKey": "course",
+        "acquired": true,
+        "category": "COURSE_COMPLETE",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-06T01:20:10.241Z",
+        "sortOrder": 60,
+        "updatedAt": "2026-11-11T05:18:44.280Z",
+        "description": "1個の単元を完了した証です。",
+        "conditionType": "UNIT_COMPLETED_COUNT",
+        "createQuestId": null,
+        "conditionValue": 1
+      },
+      {
+        "id": "ach-phase-bubble-sort-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bubble-sort-check,bubble-sort-code-check",
+        "createdAt": "2026-11-07T12:05:00.559Z",
+        "sortOrder": 332,
+        "updatedAt": "2026-11-11T05:18:46.163Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bubble-sort-consolidation-perfect",
+        "title": "応用問題 初回満点",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bubble-sort-consolidation",
+        "createdAt": "2026-11-07T12:05:00.654Z",
+        "sortOrder": 342,
+        "updatedAt": "2026-11-11T05:18:46.255Z",
+        "description": "応用問題を、初回の回答で満点だった証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-bubble-sort-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "bubble-sort-implementation",
+        "createdAt": "2026-11-07T12:05:00.745Z",
+        "sortOrder": 352,
+        "updatedAt": "2026-11-11T05:18:46.347Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-bubble-sort-card-complete",
+        "title": "バブルソートカードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-bubble-sort-v2",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:05:00.834Z",
+        "sortOrder": 412,
+        "updatedAt": "2026-11-11T05:18:46.439Z",
+        "description": "バブルソートの知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-unit-maze-digging-complete",
+        "title": "穴掘り法を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": false,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-07T12:05:00.923Z",
+        "sortOrder": 113,
+        "updatedAt": "2026-11-11T05:18:46.530Z",
+        "description": "穴掘り法の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-maze-digging-implementation-clear",
+        "title": "自分で実装クリア",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "maze-digging-implementation",
+        "createdAt": "2026-11-07T12:05:01.013Z",
+        "sortOrder": 323,
+        "updatedAt": "2026-11-11T05:18:46.624Z",
+        "description": "穴掘り法を自分のコードで実装し、すべてのテストを通過した証です。",
+        "conditionType": "PHASE_COMPLETED",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-maze-digging-check-perfect",
+        "title": "確認問題 初回全問正解",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-maze-digging-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "maze-digging-check,maze-digging-code-check",
+        "createdAt": "2026-11-07T12:05:01.110Z",
+        "sortOrder": 333,
+        "updatedAt": "2026-11-11T05:18:46.717Z",
+        "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+        "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-advanced",
+        "title": "ダンジョンの最短脱出ルートを作ろう・発展達成",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.801Z",
+        "sortOrder": 302,
+        "updatedAt": "2026-11-11T05:18:43.536Z",
+        "description": "ダンジョンの最短脱出ルートを作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-dungeon-route-v1",
+        "conditionValue": 75
+      },
+      {
+        "id": "ach-create-create-quest-dungeon-route-v1-perfect",
+        "title": "ダンジョンの最短脱出ルートを作ろう・完全達成",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.897Z",
+        "sortOrder": 303,
+        "updatedAt": "2026-11-11T05:18:43.632Z",
+        "description": "ダンジョンの最短脱出ルートを作ろうの全要件を満たし、100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-dungeon-route-v1",
+        "conditionValue": 100
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-advanced",
+        "title": "チャットの禁止ワード検出を作ろう・発展達成",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:17.991Z",
+        "sortOrder": 304,
+        "updatedAt": "2026-11-11T05:18:43.726Z",
+        "description": "チャットの禁止ワード検出を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-chat-keyword-v1",
+        "conditionValue": 75
+      },
+      {
+        "id": "ach-create-create-quest-chat-keyword-v1-perfect",
+        "title": "チャットの禁止ワード検出を作ろう・完全達成",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.086Z",
+        "sortOrder": 305,
+        "updatedAt": "2026-11-11T05:18:43.819Z",
+        "description": "チャットの禁止ワード検出を作ろうの全要件を満たし、100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-chat-keyword-v1",
+        "conditionValue": 100
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-advanced",
+        "title": "ショップの商品検索を作ろう・発展達成",
+        "rarity": "RARE",
+        "iconKey": "build",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.182Z",
+        "sortOrder": 306,
+        "updatedAt": "2026-11-11T05:18:43.911Z",
+        "description": "ショップの商品検索を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-product-search-v1",
+        "conditionValue": 75
+      },
+      {
+        "id": "ach-create-create-quest-product-search-v1-perfect",
+        "title": "ショップの商品検索を作ろう・完全達成",
+        "rarity": "EPIC",
+        "iconKey": "perfect",
+        "acquired": false,
+        "category": "CREATE_QUEST",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.275Z",
+        "sortOrder": 307,
+        "updatedAt": "2026-11-11T05:18:44.003Z",
+        "description": "ショップの商品検索を作ろうの全要件を満たし、100点を獲得した証です。",
+        "conditionType": "CREATE_QUEST_SCORE",
+        "createQuestId": "create-quest-product-search-v1",
+        "conditionValue": 100
+      },
+      {
+        "id": "ach-unit-binary-search-complete",
+        "title": "二分探索を修得した",
+        "rarity": "RARE",
+        "iconKey": "course",
+        "acquired": true,
+        "category": "COURSE_COMPLETE",
+        "courseId": "course-algorithm-binary-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-09T05:33:22.186Z",
+        "sortOrder": 114,
+        "updatedAt": "2026-11-11T05:18:47.100Z",
+        "description": "二分探索の単元を最後まで完了した証です。",
+        "conditionType": "UNIT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-phase-dfs-implementation-nohint",
+        "title": "ノーヒントクリア",
+        "rarity": "EPIC",
+        "iconKey": "challenge",
+        "acquired": false,
+        "category": "LEARNING_ACTION",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": "dfs-implementation",
+        "createdAt": "2026-11-10T08:35:04.761Z",
+        "sortOrder": 355,
+        "updatedAt": "2026-11-11T05:18:48.039Z",
+        "description": "「自分で実装」をヒントなしでクリアした証です。",
+        "conditionType": "PHASE_NO_HINT_COMPLETE",
+        "createQuestId": null,
+        "conditionValue": null
+      },
+      {
+        "id": "ach-dfs-card-complete",
+        "title": "深さ優先探索カードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-depth-first-search-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-10T08:35:04.857Z",
+        "sortOrder": 415,
+        "updatedAt": "2026-11-11T05:18:48.133Z",
+        "description": "深さ優先探索の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-greedy-coins-card-complete",
+        "title": "貪欲法カードコンプリート",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": "course-algorithm-greedy-coins-v1",
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-11-11T05:18:48.703Z",
+        "sortOrder": 416,
+        "updatedAt": "2026-11-11T05:18:48.703Z",
+        "description": "貪欲法の知識カードをすべて集めた証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 3
+      },
+      {
+        "id": "ach-knowledge-lv1",
+        "title": "知識の発見者 Lv.1",
+        "rarity": "COMMON",
+        "iconKey": "knowledge",
+        "acquired": true,
+        "category": "COLLECTION",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.557Z",
+        "sortOrder": 400,
+        "updatedAt": "2026-11-11T05:18:48.796Z",
+        "description": "知識カードを1枚発見した証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 1
+      },
+      {
+        "id": "ach-knowledge-lv2",
+        "title": "知識の発見者 Lv.2",
+        "rarity": "RARE",
+        "iconKey": "knowledge",
+        "acquired": false,
+        "category": "COLLECTION",
+        "courseId": null,
+        "isSecret": false,
+        "isTarget": false,
+        "phaseKey": null,
+        "createdAt": "2026-09-30T03:54:18.650Z",
+        "sortOrder": 401,
+        "updatedAt": "2026-11-11T05:18:48.889Z",
+        "description": "知識カードを15枚発見した証です。",
+        "conditionType": "KNOWLEDGE_CARD_COUNT",
+        "createQuestId": null,
+        "conditionValue": 15
+      }
+    ],
+    "achievementProgress": {
+      "groups": [
+        {
+          "label": "学習行動",
+          "category": "LEARNING_ACTION",
+          "achievements": [
+            {
+              "id": "ach-phase-bfs-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-breadth-first-search-v1:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "幅優先探索を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-wall-extension-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-wall-extension-v1:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "棒倒し法を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bubble-sort-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-bubble-sort-v2:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "バブルソートを自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-maze-digging-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-maze-digging-v1:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "穴掘り法を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-binary-search-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "achieved",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 1,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-binary-search-v1:all:all:自分で実装クリア",
+              "achievedAt": "2026-11-13T06:48:37.500Z",
+              "actionLabel": "対象コースを見る",
+              "description": "二分探索を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-dfs-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-depth-first-search-v1:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "深さ優先探索を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-greedy-coins-implementation-clear",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "自分で実装クリア",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_COMPLETED:course-algorithm-greedy-coins-v1:all:all:自分で実装クリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "貪欲法を自分のコードで実装し、すべてのテストを通過した証です。",
+              "seriesTitle": "自分で実装クリア",
+              "conditionType": "PHASE_COMPLETED",
+              "conditionLabel": "指定されたフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bfs-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-breadth-first-search-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-wall-extension-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-wall-extension-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bubble-sort-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-bubble-sort-v2:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-maze-digging-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-maze-digging-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-binary-search-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "achieved",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 1,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-binary-search-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": "2026-11-13T06:43:40.820Z",
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-dfs-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-depth-first-search-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-greedy-coins-check-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "確認問題 初回全問正解",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-greedy-coins-v1:all:all:確認問題 初回全問正解",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "動きの確認問題とコードの確認問題の両方を、初回の回答で全問正解した証です。",
+              "seriesTitle": "確認問題 初回全問正解",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bfs-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-breadth-first-search-v1:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-wall-extension-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-wall-extension-v1:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bubble-sort-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-bubble-sort-v2:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-maze-digging-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-maze-digging-v1:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-binary-search-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "achieved",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 1,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-binary-search-v1:all:all:応用問題 初回満点",
+              "achievedAt": "2026-11-13T06:44:32.683Z",
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-dfs-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-depth-first-search-v1:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題で、初回の回答が満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-greedy-coins-consolidation-perfect",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "応用問題 初回満点",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_FIRST_ATTEMPT_PERFECT:course-algorithm-greedy-coins-v1:all:all:応用問題 初回満点",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "応用問題を、初回の回答で満点だった証です。",
+              "seriesTitle": "応用問題 初回満点",
+              "conditionType": "PHASE_FIRST_ATTEMPT_PERFECT",
+              "conditionLabel": "確認問題を初回で全問正解",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bfs-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-breadth-first-search-v1:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-wall-extension-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-wall-extension-v1:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-bubble-sort-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-bubble-sort-v2:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-maze-digging-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-maze-digging-v1:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-binary-search-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "achieved",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 1,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-binary-search-v1:all:all:ノーヒントクリア",
+              "achievedAt": "2026-11-13T06:48:38.400Z",
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-dfs-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-depth-first-search-v1:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-phase-greedy-coins-implementation-nohint",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "ノーヒントクリア",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "LEARNING_ACTION",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "LEARNING_ACTION:PHASE_NO_HINT_COMPLETE:course-algorithm-greedy-coins-v1:all:all:ノーヒントクリア",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "「自分で実装」をヒントなしでクリアした証です。",
+              "seriesTitle": "ノーヒントクリア",
+              "conditionType": "PHASE_NO_HINT_COMPLETE",
+              "conditionLabel": "ヒントを使わずにフェーズを完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            }
+          ]
+        },
+        {
+          "label": "Course完了",
+          "category": "COURSE_COMPLETE",
+          "achievements": [
+            {
+              "id": "ach-unit-count-lv1",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "単元探求者 Lv.1",
+              "rarity": "COMMON",
+              "status": "achieved",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": null,
+              "progress": 1,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETED_COUNT:all:all:all:単元探求者",
+              "achievedAt": "2026-11-13T06:48:39.193Z",
+              "actionLabel": "学習を続ける",
+              "description": "1個の単元を完了した証です。",
+              "seriesTitle": "単元探求者",
+              "conditionType": "UNIT_COMPLETED_COUNT",
+              "conditionLabel": "単元を1個完了",
+              "conditionValue": 1,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-count-lv2",
+              "goal": 3,
+              "href": "/courses",
+              "level": 2,
+              "title": "単元探求者 Lv.2",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": null,
+              "progress": 1,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETED_COUNT:all:all:all:単元探求者",
+              "achievedAt": null,
+              "actionLabel": "学習を続ける",
+              "description": "3個の単元を完了した証です。",
+              "seriesTitle": "単元探求者",
+              "conditionType": "UNIT_COMPLETED_COUNT",
+              "conditionLabel": "単元を3個完了",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-count-lv3",
+              "goal": 7,
+              "href": "/courses",
+              "level": 3,
+              "title": "単元探求者 Lv.3",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": null,
+              "progress": 1,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETED_COUNT:all:all:all:単元探求者",
+              "achievedAt": null,
+              "actionLabel": "学習を続ける",
+              "description": "7個の単元を完了した証です。",
+              "seriesTitle": "単元探求者",
+              "conditionType": "UNIT_COMPLETED_COUNT",
+              "conditionLabel": "単元を7個完了",
+              "conditionValue": 7,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-bfs-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "幅優先探索を修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-breadth-first-search-v1:all:all:幅優先探索を修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "幅優先探索（BFS）の単元を最後まで完了した証です。",
+              "seriesTitle": "幅優先探索を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-wall-extension-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "棒倒し法を修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-wall-extension-v1:all:all:棒倒し法を修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "棒倒し法の単元を最後まで完了した証です。",
+              "seriesTitle": "棒倒し法を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-bubble-sort-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "バブルソートを修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-bubble-sort-v2:all:all:バブルソートを修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "バブルソートの単元を最後まで完了した証です。",
+              "seriesTitle": "バブルソートを修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-maze-digging-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "穴掘り法を修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-maze-digging-v1:all:all:穴掘り法を修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "穴掘り法の単元を最後まで完了した証です。",
+              "seriesTitle": "穴掘り法を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-binary-search-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "二分探索を修得した",
+              "rarity": "RARE",
+              "status": "achieved",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 1,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-binary-search-v1:all:all:二分探索を修得した",
+              "achievedAt": "2026-11-13T06:48:40.117Z",
+              "actionLabel": "対象コースを見る",
+              "description": "二分探索の単元を最後まで完了した証です。",
+              "seriesTitle": "二分探索を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-dfs-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "深さ優先探索を修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-depth-first-search-v1:all:all:深さ優先探索を修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "深さ優先探索（DFS）の単元を最後まで完了した証です。",
+              "seriesTitle": "深さ優先探索を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-unit-greedy-coins-complete",
+              "goal": 1,
+              "href": "/courses",
+              "level": 1,
+              "title": "貪欲法を修得した",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "course",
+              "category": "COURSE_COMPLETE",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "COURSE_COMPLETE:UNIT_COMPLETE:course-algorithm-greedy-coins-v1:all:all:貪欲法を修得した",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "貪欲法（硬貨問題）の単元を最後まで完了した証です。",
+              "seriesTitle": "貪欲法を修得した",
+              "conditionType": "UNIT_COMPLETE",
+              "conditionLabel": "指定された単元を完了",
+              "conditionValue": null,
+              "isProfileSelected": false
+            }
+          ]
+        },
+        {
+          "label": "作る課題",
+          "category": "CREATE_QUEST",
+          "achievements": [
+            {
+              "id": "ach-create-complete-lv1",
+              "goal": 1,
+              "href": "/create",
+              "level": 1,
+              "title": "機能ビルダー Lv.1",
+              "rarity": "COMMON",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_COMPLETED_COUNT:all:all:all:機能ビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "1種類の作る課題で基本要件を達成した証です。",
+              "seriesTitle": "機能ビルダー",
+              "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+              "conditionLabel": "作る課題を1個クリア",
+              "conditionValue": 1,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-complete-lv2",
+              "goal": 3,
+              "href": "/create",
+              "level": 2,
+              "title": "機能ビルダー Lv.2",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_COMPLETED_COUNT:all:all:all:機能ビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "3種類の作る課題で基本要件を達成した証です。",
+              "seriesTitle": "機能ビルダー",
+              "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+              "conditionLabel": "作る課題を3個クリア",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-complete-lv3",
+              "goal": 5,
+              "href": "/create",
+              "level": 3,
+              "title": "機能ビルダー Lv.3",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_COMPLETED_COUNT:all:all:all:機能ビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "5種類の作る課題で基本要件を達成した証です。",
+              "seriesTitle": "機能ビルダー",
+              "conditionType": "CREATE_QUEST_COMPLETED_COUNT",
+              "conditionLabel": "作る課題を5個クリア",
+              "conditionValue": 5,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-optional-lv1",
+              "goal": 5,
+              "href": "/create",
+              "level": 1,
+              "title": "追加要件ハンター Lv.1",
+              "rarity": "COMMON",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:all:all:all:追加要件ハンター",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "異なる追加要件を5件達成した証です。",
+              "seriesTitle": "追加要件ハンター",
+              "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+              "conditionLabel": "追加要件を累計5種類クリア",
+              "conditionValue": 5,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-optional-lv2",
+              "goal": 10,
+              "href": "/create",
+              "level": 2,
+              "title": "追加要件ハンター Lv.2",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:all:all:all:追加要件ハンター",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "異なる追加要件を10件達成した証です。",
+              "seriesTitle": "追加要件ハンター",
+              "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+              "conditionLabel": "追加要件を累計10種類クリア",
+              "conditionValue": 10,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-optional-lv3",
+              "goal": 20,
+              "href": "/create",
+              "level": 3,
+              "title": "追加要件ハンター Lv.3",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "challenge",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:all:all:all:追加要件ハンター",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "異なる追加要件を20件達成した証です。",
+              "seriesTitle": "追加要件ハンター",
+              "conditionType": "CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT",
+              "conditionLabel": "追加要件を累計20種類クリア",
+              "conditionValue": 20,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-perfect-lv1",
+              "goal": 1,
+              "href": "/create",
+              "level": 1,
+              "title": "パーフェクトビルダー Lv.1",
+              "rarity": "COMMON",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_PERFECT_COUNT:all:all:all:パーフェクトビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "1種類の作る課題で100点を獲得した証です。",
+              "seriesTitle": "パーフェクトビルダー",
+              "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+              "conditionLabel": "作る課題で1回100点を獲得",
+              "conditionValue": 1,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-perfect-lv2",
+              "goal": 3,
+              "href": "/create",
+              "level": 2,
+              "title": "パーフェクトビルダー Lv.2",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_PERFECT_COUNT:all:all:all:パーフェクトビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "3種類の作る課題で100点を獲得した証です。",
+              "seriesTitle": "パーフェクトビルダー",
+              "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+              "conditionLabel": "作る課題で3回100点を獲得",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-perfect-lv3",
+              "goal": 5,
+              "href": "/create",
+              "level": 3,
+              "title": "パーフェクトビルダー Lv.3",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_PERFECT_COUNT:all:all:all:パーフェクトビルダー",
+              "achievedAt": null,
+              "actionLabel": "作る課題に挑戦する",
+              "description": "5種類の作る課題で100点を獲得した証です。",
+              "seriesTitle": "パーフェクトビルダー",
+              "conditionType": "CREATE_QUEST_PERFECT_COUNT",
+              "conditionLabel": "作る課題で5回100点を獲得",
+              "conditionValue": 5,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-turn-order-v1-advanced",
+              "goal": 75,
+              "href": "/create/quests/create-quest-turn-order-v1",
+              "level": 1,
+              "title": "RPGの行動順を作ろう・発展達成",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-turn-order-v1:RPGの行動順を作ろう・発展達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "RPGの行動順を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+              "seriesTitle": "RPGの行動順を作ろう・発展達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で75点以上を獲得",
+              "conditionValue": 75,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-turn-order-v1-perfect",
+              "goal": 100,
+              "href": "/create/quests/create-quest-turn-order-v1",
+              "level": 1,
+              "title": "RPGの行動順を作ろう・完全達成",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-turn-order-v1:RPGの行動順を作ろう・完全達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "RPGの行動順を作ろうの全要件を満たし、100点を獲得した証です。",
+              "seriesTitle": "RPGの行動順を作ろう・完全達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で100点以上を獲得",
+              "conditionValue": 100,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-dungeon-route-v1-advanced",
+              "goal": 75,
+              "href": "/create/quests/create-quest-dungeon-route-v1",
+              "level": 1,
+              "title": "ダンジョンの最短脱出ルートを作ろう・発展達成",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-dungeon-route-v1:ダンジョンの最短脱出ルートを作ろう・発展達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ダンジョンの最短脱出ルートを作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+              "seriesTitle": "ダンジョンの最短脱出ルートを作ろう・発展達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で75点以上を獲得",
+              "conditionValue": 75,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-dungeon-route-v1-perfect",
+              "goal": 100,
+              "href": "/create/quests/create-quest-dungeon-route-v1",
+              "level": 1,
+              "title": "ダンジョンの最短脱出ルートを作ろう・完全達成",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-dungeon-route-v1:ダンジョンの最短脱出ルートを作ろう・完全達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ダンジョンの最短脱出ルートを作ろうの全要件を満たし、100点を獲得した証です。",
+              "seriesTitle": "ダンジョンの最短脱出ルートを作ろう・完全達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で100点以上を獲得",
+              "conditionValue": 100,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-chat-keyword-v1-advanced",
+              "goal": 75,
+              "href": "/create/quests/create-quest-chat-keyword-v1",
+              "level": 1,
+              "title": "チャットの禁止ワード検出を作ろう・発展達成",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-chat-keyword-v1:チャットの禁止ワード検出を作ろう・発展達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "チャットの禁止ワード検出を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+              "seriesTitle": "チャットの禁止ワード検出を作ろう・発展達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で75点以上を獲得",
+              "conditionValue": 75,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-chat-keyword-v1-perfect",
+              "goal": 100,
+              "href": "/create/quests/create-quest-chat-keyword-v1",
+              "level": 1,
+              "title": "チャットの禁止ワード検出を作ろう・完全達成",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-chat-keyword-v1:チャットの禁止ワード検出を作ろう・完全達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "チャットの禁止ワード検出を作ろうの全要件を満たし、100点を獲得した証です。",
+              "seriesTitle": "チャットの禁止ワード検出を作ろう・完全達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で100点以上を獲得",
+              "conditionValue": 100,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-product-search-v1-advanced",
+              "goal": 75,
+              "href": "/create/quests/create-quest-product-search-v1",
+              "level": 1,
+              "title": "ショップの商品検索を作ろう・発展達成",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-product-search-v1:ショップの商品検索を作ろう・発展達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ショップの商品検索を作ろうで75点以上を獲得し、追加要件にも対応した証です。",
+              "seriesTitle": "ショップの商品検索を作ろう・発展達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で75点以上を獲得",
+              "conditionValue": 75,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-product-search-v1-perfect",
+              "goal": 100,
+              "href": "/create/quests/create-quest-product-search-v1",
+              "level": 1,
+              "title": "ショップの商品検索を作ろう・完全達成",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-product-search-v1:ショップの商品検索を作ろう・完全達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ショップの商品検索を作ろうの全要件を満たし、100点を獲得した証です。",
+              "seriesTitle": "ショップの商品検索を作ろう・完全達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で100点以上を獲得",
+              "conditionValue": 100,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-skill-tree-v1-advanced",
+              "goal": 75,
+              "href": "/create/quests/create-quest-skill-tree-v1",
+              "level": 1,
+              "title": "ゲームのスキルツリーを調べよう・発展達成",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "build",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-skill-tree-v1:ゲームのスキルツリーを調べよう・発展達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ゲームのスキルツリーを調べようで75点以上を獲得し、追加要件にも対応した証です。",
+              "seriesTitle": "ゲームのスキルツリーを調べよう・発展達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で75点以上を獲得",
+              "conditionValue": 75,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-create-create-quest-skill-tree-v1-perfect",
+              "goal": 100,
+              "href": "/create/quests/create-quest-skill-tree-v1",
+              "level": 1,
+              "title": "ゲームのスキルツリーを調べよう・完全達成",
+              "rarity": "EPIC",
+              "status": "visible_locked",
+              "iconKey": "perfect",
+              "category": "CREATE_QUEST",
+              "courseId": null,
+              "progress": 0,
+              "seriesKey": "CREATE_QUEST:CREATE_QUEST_SCORE:all:all:create-quest-skill-tree-v1:ゲームのスキルツリーを調べよう・完全達成",
+              "achievedAt": null,
+              "actionLabel": "対象の作る課題を見る",
+              "description": "ゲームのスキルツリーを調べようの全要件を満たし、100点を獲得した証です。",
+              "seriesTitle": "ゲームのスキルツリーを調べよう・完全達成",
+              "conditionType": "CREATE_QUEST_SCORE",
+              "conditionLabel": "指定された作る課題で100点以上を獲得",
+              "conditionValue": 100,
+              "isProfileSelected": false
+            }
+          ]
+        },
+        {
+          "label": "コレクション",
+          "category": "COLLECTION",
+          "achievements": [
+            {
+              "id": "ach-knowledge-lv1",
+              "goal": 1,
+              "href": "/collection",
+              "level": 1,
+              "title": "知識の発見者 Lv.1",
+              "rarity": "COMMON",
+              "status": "achieved",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": null,
+              "progress": 3,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:all:all:all:知識の発見者",
+              "achievedAt": "2026-11-13T06:42:03.745Z",
+              "actionLabel": "コレクションを見る",
+              "description": "知識カードを1枚発見した証です。",
+              "seriesTitle": "知識の発見者",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを1枚発見",
+              "conditionValue": 1,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-knowledge-lv2",
+              "goal": 15,
+              "href": "/collection",
+              "level": 2,
+              "title": "知識の発見者 Lv.2",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": null,
+              "progress": 3,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:all:all:all:知識の発見者",
+              "achievedAt": null,
+              "actionLabel": "コレクションを見る",
+              "description": "知識カードを15枚発見した証です。",
+              "seriesTitle": "知識の発見者",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを15枚発見",
+              "conditionValue": 15,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-bfs-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "BFSカードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-breadth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-breadth-first-search-v1:all:all:BFSカードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "幅優先探索の知識カードをすべて集めた証です。",
+              "seriesTitle": "BFSカードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-wall-extension-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "棒倒し法カードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-wall-extension-v1",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-wall-extension-v1:all:all:棒倒し法カードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "棒倒し法の知識カードをすべて集めた証です。",
+              "seriesTitle": "棒倒し法カードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-bubble-sort-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "バブルソートカードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-bubble-sort-v2",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-bubble-sort-v2:all:all:バブルソートカードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "バブルソートの知識カードをすべて集めた証です。",
+              "seriesTitle": "バブルソートカードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-maze-digging-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "穴掘り法カードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-maze-digging-v1",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-maze-digging-v1:all:all:穴掘り法カードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "穴掘り法の知識カードをすべて集めた証です。",
+              "seriesTitle": "穴掘り法カードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-binary-search-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "二分探索カードコンプリート",
+              "rarity": "RARE",
+              "status": "achieved",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-binary-search-v1",
+              "progress": 3,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-binary-search-v1:all:all:二分探索カードコンプリート",
+              "achievedAt": "2026-11-13T06:48:38.943Z",
+              "actionLabel": "対象コースを見る",
+              "description": "二分探索の知識カードをすべて集めた証です。",
+              "seriesTitle": "二分探索カードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-dfs-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "深さ優先探索カードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-depth-first-search-v1",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-depth-first-search-v1:all:all:深さ優先探索カードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "深さ優先探索の知識カードをすべて集めた証です。",
+              "seriesTitle": "深さ優先探索カードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            },
+            {
+              "id": "ach-greedy-coins-card-complete",
+              "goal": 3,
+              "href": "/courses",
+              "level": 1,
+              "title": "貪欲法カードコンプリート",
+              "rarity": "RARE",
+              "status": "visible_locked",
+              "iconKey": "knowledge",
+              "category": "COLLECTION",
+              "courseId": "course-algorithm-greedy-coins-v1",
+              "progress": 0,
+              "seriesKey": "COLLECTION:KNOWLEDGE_CARD_COUNT:course-algorithm-greedy-coins-v1:all:all:貪欲法カードコンプリート",
+              "achievedAt": null,
+              "actionLabel": "対象コースを見る",
+              "description": "貪欲法の知識カードをすべて集めた証です。",
+              "seriesTitle": "貪欲法カードコンプリート",
+              "conditionType": "KNOWLEDGE_CARD_COUNT",
+              "conditionLabel": "知識カードを3枚発見",
+              "conditionValue": 3,
+              "isProfileSelected": false
+            }
+          ]
+        }
+      ],
+      "targetAchievementId": null,
+      "profileAchievementId": null
+    },
+    "legacyRecommendations": []
   },
   "actions": [
+    {
+      "id": 1,
+      "label": "新しい単元を始める",
+      "purpose": "新しい知識・技能の習得",
+      "condition": "未着手の公開単元がある",
+      "targetIds": [
+        "course-algorithm-bubble-sort-v2",
+        "course-algorithm-kmp-v1",
+        "course-algorithm-selection-sort-v1",
+        "course-algorithm-breadth-first-search-v1",
+        "course-algorithm-depth-first-search-v1",
+        "course-algorithm-wall-extension-v1",
+        "course-algorithm-maze-digging-v1",
+        "course-algorithm-merge-sort-v1",
+        "course-algorithm-greedy-coins-v1"
+      ]
+    },
+    {
+      "id": 3,
+      "label": "完了済み単元を復習する",
+      "purpose": "知識の再整理・定着",
+      "condition": "完了済みの単元がある",
+      "targetIds": [
+        "course-algorithm-binary-search-v1"
+      ]
+    },
     {
       "id": 4,
       "label": "単元のフェーズを復習する",
       "purpose": "理解が不確かな点の補強",
       "condition": "完了済みフェーズが閲覧可能",
       "targetIds": [
-        "bubble-sort-check",
-        "bubble-sort-motivation",
-        "bubble-sort-execution"
+        "course-algorithm-binary-search-v1:binary-search-motivation",
+        "course-algorithm-binary-search-v1:binary-search-execution",
+        "course-algorithm-binary-search-v1:binary-search-check",
+        "course-algorithm-binary-search-v1:binary-search-code-mapping",
+        "course-algorithm-binary-search-v1:binary-search-code-check",
+        "course-algorithm-binary-search-v1:binary-search-consolidation",
+        "course-algorithm-binary-search-v1:binary-search-implementation"
       ]
     },
     {
-      "id": 23,
-      "label": "次のフェーズへ進む",
-      "purpose": "学習の継続",
-      "condition": "現在のフェーズの次のフェーズがある",
+      "id": 6,
+      "label": "新しい作る課題を始める",
+      "purpose": "学んだ知識の応用",
+      "condition": "未着手の公開課題",
       "targetIds": [
-        "bubble-sort-code-mapping"
+        "create-quest-turn-order-v1",
+        "create-quest-product-search-v1",
+        "create-quest-chat-keyword-v1",
+        "create-quest-skill-tree-v1",
+        "create-quest-dungeon-route-v1"
+      ]
+    },
+    {
+      "id": 9,
+      "label": "関連する知識カードで復習する",
+      "purpose": "関連知識の確認・整理",
+      "condition": "獲得済みで内容閲覧可能",
+      "targetIds": [
+        "knowledge-card-binary-search-compare-middle",
+        "knowledge-card-binary-search-logarithmic-time",
+        "knowledge-card-binary-search-halving-range"
+      ]
+    },
+    {
+      "id": 10,
+      "label": "知識カードで関連知識や用途を知る",
+      "purpose": "学習範囲の拡張・興味の探索",
+      "condition": "獲得済みで内容閲覧可能。閲覧済みも可",
+      "targetIds": [
+        "knowledge-card-binary-search-compare-middle",
+        "knowledge-card-binary-search-logarithmic-time",
+        "knowledge-card-binary-search-halving-range"
+      ]
+    },
+    {
+      "id": 11,
+      "label": "カードの収集状況を確認する",
+      "purpose": "収集の楽しさ・達成の実感",
+      "condition": "1枚以上獲得済み",
+      "targetIds": [
+        "collection"
+      ]
+    },
+    {
+      "id": 12,
+      "label": "学習履歴を振り返る",
+      "purpose": "取り組みの振り返り・進捗の実感",
+      "condition": "表示できる完了・提出・獲得履歴がある",
+      "targetIds": [
+        "history"
+      ]
+    },
+    {
+      "id": 13,
+      "label": "実績・進捗を確認する",
+      "purpose": "達成の意味の確認・次の見通しの形成",
+      "condition": "獲得済みまたは非秘密の条件公開実績がある",
+      "targetIds": [
+        "ach-create-create-quest-skill-tree-v1-advanced",
+        "ach-create-create-quest-skill-tree-v1-perfect",
+        "ach-phase-wall-extension-implementation-clear",
+        "ach-phase-wall-extension-check-perfect",
+        "ach-phase-wall-extension-consolidation-perfect",
+        "ach-phase-wall-extension-implementation-nohint",
+        "ach-unit-bubble-sort-complete",
+        "ach-phase-bubble-sort-implementation-clear",
+        "ach-phase-maze-digging-consolidation-perfect",
+        "ach-phase-maze-digging-implementation-nohint",
+        "ach-maze-digging-card-complete",
+        "ach-phase-binary-search-implementation-clear",
+        "ach-phase-binary-search-check-perfect",
+        "ach-phase-binary-search-consolidation-perfect",
+        "ach-phase-binary-search-implementation-nohint",
+        "ach-binary-search-card-complete",
+        "ach-unit-dfs-complete",
+        "ach-phase-dfs-implementation-clear",
+        "ach-phase-dfs-check-perfect",
+        "ach-phase-dfs-consolidation-perfect",
+        "ach-unit-greedy-coins-complete",
+        "ach-phase-greedy-coins-implementation-clear",
+        "ach-phase-greedy-coins-check-perfect",
+        "ach-phase-greedy-coins-consolidation-perfect",
+        "ach-phase-greedy-coins-implementation-nohint",
+        "ach-create-complete-lv1",
+        "ach-create-complete-lv2",
+        "ach-create-complete-lv3",
+        "ach-unit-count-lv2",
+        "ach-unit-count-lv3",
+        "ach-unit-bfs-complete",
+        "ach-phase-bfs-implementation-clear",
+        "ach-phase-bfs-check-perfect",
+        "ach-phase-bfs-consolidation-perfect",
+        "ach-phase-bfs-implementation-nohint",
+        "ach-bfs-card-complete",
+        "ach-unit-wall-extension-complete",
+        "ach-wall-extension-card-complete",
+        "ach-create-optional-lv1",
+        "ach-create-optional-lv2",
+        "ach-create-optional-lv3",
+        "ach-create-perfect-lv1",
+        "ach-create-perfect-lv2",
+        "ach-create-perfect-lv3",
+        "ach-create-create-quest-turn-order-v1-advanced",
+        "ach-create-create-quest-turn-order-v1-perfect",
+        "ach-unit-count-lv1",
+        "ach-phase-bubble-sort-check-perfect",
+        "ach-phase-bubble-sort-consolidation-perfect",
+        "ach-phase-bubble-sort-implementation-nohint",
+        "ach-bubble-sort-card-complete",
+        "ach-unit-maze-digging-complete",
+        "ach-phase-maze-digging-implementation-clear",
+        "ach-phase-maze-digging-check-perfect",
+        "ach-create-create-quest-dungeon-route-v1-advanced",
+        "ach-create-create-quest-dungeon-route-v1-perfect",
+        "ach-create-create-quest-chat-keyword-v1-advanced",
+        "ach-create-create-quest-chat-keyword-v1-perfect",
+        "ach-create-create-quest-product-search-v1-advanced",
+        "ach-create-create-quest-product-search-v1-perfect",
+        "ach-unit-binary-search-complete",
+        "ach-phase-dfs-implementation-nohint",
+        "ach-dfs-card-complete",
+        "ach-greedy-coins-card-complete",
+        "ach-knowledge-lv1",
+        "ach-knowledge-lv2"
+      ]
+    },
+    {
+      "id": 14,
+      "label": "目標実績を設定する",
+      "purpose": "自分で目標を選ぶ・取り組みの方向付け",
+      "condition": "未獲得・非秘密で現在の目標と異なる",
+      "targetIds": [
+        "ach-create-create-quest-skill-tree-v1-advanced",
+        "ach-create-create-quest-skill-tree-v1-perfect",
+        "ach-phase-wall-extension-implementation-clear",
+        "ach-phase-wall-extension-check-perfect",
+        "ach-phase-wall-extension-consolidation-perfect",
+        "ach-phase-wall-extension-implementation-nohint",
+        "ach-unit-bubble-sort-complete",
+        "ach-phase-bubble-sort-implementation-clear",
+        "ach-phase-maze-digging-consolidation-perfect",
+        "ach-phase-maze-digging-implementation-nohint",
+        "ach-maze-digging-card-complete",
+        "ach-unit-dfs-complete",
+        "ach-phase-dfs-implementation-clear",
+        "ach-phase-dfs-check-perfect",
+        "ach-phase-dfs-consolidation-perfect",
+        "ach-unit-greedy-coins-complete",
+        "ach-phase-greedy-coins-implementation-clear",
+        "ach-phase-greedy-coins-check-perfect",
+        "ach-phase-greedy-coins-consolidation-perfect",
+        "ach-phase-greedy-coins-implementation-nohint",
+        "ach-create-complete-lv1",
+        "ach-create-complete-lv2",
+        "ach-create-complete-lv3",
+        "ach-unit-count-lv2",
+        "ach-unit-count-lv3",
+        "ach-unit-bfs-complete",
+        "ach-phase-bfs-implementation-clear",
+        "ach-phase-bfs-check-perfect",
+        "ach-phase-bfs-consolidation-perfect",
+        "ach-phase-bfs-implementation-nohint",
+        "ach-bfs-card-complete",
+        "ach-unit-wall-extension-complete",
+        "ach-wall-extension-card-complete",
+        "ach-create-optional-lv1",
+        "ach-create-optional-lv2",
+        "ach-create-optional-lv3",
+        "ach-create-perfect-lv1",
+        "ach-create-perfect-lv2",
+        "ach-create-perfect-lv3",
+        "ach-create-create-quest-turn-order-v1-advanced",
+        "ach-create-create-quest-turn-order-v1-perfect",
+        "ach-phase-bubble-sort-check-perfect",
+        "ach-phase-bubble-sort-consolidation-perfect",
+        "ach-phase-bubble-sort-implementation-nohint",
+        "ach-bubble-sort-card-complete",
+        "ach-unit-maze-digging-complete",
+        "ach-phase-maze-digging-implementation-clear",
+        "ach-phase-maze-digging-check-perfect",
+        "ach-create-create-quest-dungeon-route-v1-advanced",
+        "ach-create-create-quest-dungeon-route-v1-perfect",
+        "ach-create-create-quest-chat-keyword-v1-advanced",
+        "ach-create-create-quest-chat-keyword-v1-perfect",
+        "ach-create-create-quest-product-search-v1-advanced",
+        "ach-create-create-quest-product-search-v1-perfect",
+        "ach-phase-dfs-implementation-nohint",
+        "ach-dfs-card-complete",
+        "ach-greedy-coins-card-complete",
+        "ach-knowledge-lv2"
+      ]
+    },
+    {
+      "id": 15,
+      "label": "XP・レベルを確認する",
+      "purpose": "学習に伴う進展の可視化・達成の実感",
+      "condition": "本人のXPを表示可能",
+      "targetIds": [
+        "profile"
+      ]
+    },
+    {
+      "id": 18,
+      "label": "掲示板に質問する",
+      "purpose": "疑問の明確化・援助の要請",
+      "condition": "質問フォームが利用可能。具体的疑問がある場合に推薦",
+      "targetIds": [
+        "QUESTION"
+      ]
+    },
+    {
+      "id": 19,
+      "label": "エラーについて相談する",
+      "purpose": "問題の切り分け・解決に向けた援助の要請",
+      "condition": "エラー相談フォームが利用可能",
+      "targetIds": [
+        "ERROR_HELP"
+      ]
+    },
+    {
+      "id": 20,
+      "label": "学習メモを掲示板に投稿する",
+      "purpose": "学習内容の言語化・整理と共有",
+      "condition": "公開メモフォームが利用可能",
+      "targetIds": [
+        "MEMO"
       ]
     }
   ],
   "bigGoal": {
     "type": "UNIT_COMPLETION",
-    "status": "ACTIVE",
+    "status": "ACHIEVED",
     "progress": {
       "detail": {
         "phase7": {
           "noHint": true,
-          "hintUsage": null,
-          "inputLevel": null
+          "hintUsage": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "inputLevel": "full"
         },
-        "unitStatus": "IN_PROGRESS",
+        "unitStatus": "COMPLETED",
         "firstAttempt": {
           "rate": 1,
-          "total": 2,
-          "correct": 2
+          "total": 8,
+          "correct": 8
         },
         "challengeChecks": {
           "noHint": null,
@@ -242,34 +3924,102 @@
           "firstAttemptRate": null
         },
         "totalPhaseCount": 7,
-        "completedPhaseCount": 3
+        "completedPhaseCount": 7
       },
-      "outcome": "ONGOING",
-      "fraction": 0.4285714285714285
+      "outcome": "ACHIEVED",
+      "fraction": 1,
+      "requirements": [
+        {
+          "id": "unit",
+          "unit": "フェーズ",
+          "label": "単元の7フェーズを完了する",
+          "status": "met",
+          "target": 7,
+          "current": 7
+        }
+      ]
     },
     "condition": {
-      "courseId": "course-algorithm-bubble-sort-v2"
+      "courseId": "course-algorithm-binary-search-v1"
     },
-    "confirmedAt": "2026-11-12T02:04:54.342Z",
-    "displayText": "バブルソートの単元を完了する",
+    "confirmedAt": "2026-11-13T06:41:47.994Z",
+    "displayText": "二分探索の単元を完了する — 二分探索の学びを、完了まで進めていきましょう。",
     "daysSinceConfirmed": 0
   },
   "targets": {
-    "1": [],
+    "1": [
+      {
+        "id": "course-algorithm-bubble-sort-v2",
+        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2"
+      },
+      {
+        "id": "course-algorithm-kmp-v1",
+        "href": "/courses/roadmap/course-algorithm-kmp-v1"
+      },
+      {
+        "id": "course-algorithm-selection-sort-v1",
+        "href": "/courses/roadmap/course-algorithm-selection-sort-v1"
+      },
+      {
+        "id": "course-algorithm-breadth-first-search-v1",
+        "href": "/courses/roadmap/course-algorithm-breadth-first-search-v1"
+      },
+      {
+        "id": "course-algorithm-depth-first-search-v1",
+        "href": "/courses/roadmap/course-algorithm-depth-first-search-v1"
+      },
+      {
+        "id": "course-algorithm-wall-extension-v1",
+        "href": "/courses/roadmap/course-algorithm-wall-extension-v1"
+      },
+      {
+        "id": "course-algorithm-maze-digging-v1",
+        "href": "/courses/roadmap/course-algorithm-maze-digging-v1"
+      },
+      {
+        "id": "course-algorithm-merge-sort-v1",
+        "href": "/courses/roadmap/course-algorithm-merge-sort-v1"
+      },
+      {
+        "id": "course-algorithm-greedy-coins-v1",
+        "href": "/courses/roadmap/course-algorithm-greedy-coins-v1"
+      }
+    ],
     "2": [],
-    "3": [],
+    "3": [
+      {
+        "id": "course-algorithm-binary-search-v1",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1"
+      }
+    ],
     "4": [
       {
-        "id": "bubble-sort-check",
-        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-check"
+        "id": "course-algorithm-binary-search-v1:binary-search-motivation",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-motivation"
       },
       {
-        "id": "bubble-sort-motivation",
-        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-motivation"
+        "id": "course-algorithm-binary-search-v1:binary-search-execution",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-execution"
       },
       {
-        "id": "bubble-sort-execution",
-        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-execution"
+        "id": "course-algorithm-binary-search-v1:binary-search-check",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-check"
+      },
+      {
+        "id": "course-algorithm-binary-search-v1:binary-search-code-mapping",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-code-mapping"
+      },
+      {
+        "id": "course-algorithm-binary-search-v1:binary-search-code-check",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-code-check"
+      },
+      {
+        "id": "course-algorithm-binary-search-v1:binary-search-consolidation",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-consolidation"
+      },
+      {
+        "id": "course-algorithm-binary-search-v1:binary-search-implementation",
+        "href": "/courses/roadmap/course-algorithm-binary-search-v1/learn?phase=binary-search-implementation"
       }
     ],
     "5": [],
@@ -297,8 +4047,34 @@
     ],
     "7": [],
     "8": [],
-    "9": [],
-    "10": [],
+    "9": [
+      {
+        "id": "knowledge-card-binary-search-compare-middle",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-compare-middle"
+      },
+      {
+        "id": "knowledge-card-binary-search-logarithmic-time",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-logarithmic-time"
+      },
+      {
+        "id": "knowledge-card-binary-search-halving-range",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-halving-range"
+      }
+    ],
+    "10": [
+      {
+        "id": "knowledge-card-binary-search-compare-middle",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-compare-middle"
+      },
+      {
+        "id": "knowledge-card-binary-search-logarithmic-time",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-logarithmic-time"
+      },
+      {
+        "id": "knowledge-card-binary-search-halving-range",
+        "href": "/knowledge-cards?cardId=knowledge-card-binary-search-halving-range"
+      }
+    ],
     "11": [
       {
         "id": "collection",
@@ -623,26 +4399,6 @@
         "href": "/achievements?focus=ach-maze-digging-card-complete"
       },
       {
-        "id": "ach-phase-binary-search-implementation-clear",
-        "href": "/achievements?focus=ach-phase-binary-search-implementation-clear"
-      },
-      {
-        "id": "ach-phase-binary-search-check-perfect",
-        "href": "/achievements?focus=ach-phase-binary-search-check-perfect"
-      },
-      {
-        "id": "ach-phase-binary-search-consolidation-perfect",
-        "href": "/achievements?focus=ach-phase-binary-search-consolidation-perfect"
-      },
-      {
-        "id": "ach-phase-binary-search-implementation-nohint",
-        "href": "/achievements?focus=ach-phase-binary-search-implementation-nohint"
-      },
-      {
-        "id": "ach-binary-search-card-complete",
-        "href": "/achievements?focus=ach-binary-search-card-complete"
-      },
-      {
         "id": "ach-unit-dfs-complete",
         "href": "/achievements?focus=ach-unit-dfs-complete"
       },
@@ -669,6 +4425,10 @@
       {
         "id": "ach-phase-greedy-coins-check-perfect",
         "href": "/achievements?focus=ach-phase-greedy-coins-check-perfect"
+      },
+      {
+        "id": "ach-phase-greedy-coins-consolidation-perfect",
+        "href": "/achievements?focus=ach-phase-greedy-coins-consolidation-perfect"
       },
       {
         "id": "ach-phase-greedy-coins-implementation-nohint",
@@ -759,10 +4519,6 @@
         "href": "/achievements?focus=ach-create-create-quest-turn-order-v1-perfect"
       },
       {
-        "id": "ach-unit-count-lv1",
-        "href": "/achievements?focus=ach-unit-count-lv1"
-      },
-      {
         "id": "ach-phase-bubble-sort-check-perfect",
         "href": "/achievements?focus=ach-phase-bubble-sort-check-perfect"
       },
@@ -815,10 +4571,6 @@
         "href": "/achievements?focus=ach-create-create-quest-product-search-v1-perfect"
       },
       {
-        "id": "ach-unit-binary-search-complete",
-        "href": "/achievements?focus=ach-unit-binary-search-complete"
-      },
-      {
         "id": "ach-phase-dfs-implementation-nohint",
         "href": "/achievements?focus=ach-phase-dfs-implementation-nohint"
       },
@@ -863,33 +4615,28 @@
     ],
     "21": [],
     "22": [],
-    "23": [
-      {
-        "id": "bubble-sort-code-mapping",
-        "href": "/courses/roadmap/course-algorithm-bubble-sort-v2/learn?phase=bubble-sort-code-mapping"
-      }
-    ]
+    "23": []
   },
   "learning": {
-    "id": "phase-event:course-algorithm-bubble-sort-v2:bubble-sort-check",
+    "id": "unit-event:course-algorithm-binary-search-v1",
     "unit": {
-      "id": "course-algorithm-bubble-sort-v2",
-      "title": "バブルソート",
-      "status": "IN_PROGRESS"
+      "id": "course-algorithm-binary-search-v1",
+      "title": "二分探索",
+      "status": "COMPLETED"
     },
     "phases": [
       {
-        "id": "bubble-sort-motivation",
+        "id": "binary-search-motivation",
         "status": "COMPLETED",
         "summary": null
       },
       {
-        "id": "bubble-sort-execution",
+        "id": "binary-search-execution",
         "status": "COMPLETED",
         "summary": null
       },
       {
-        "id": "bubble-sort-check",
+        "id": "binary-search-check",
         "status": "COMPLETED",
         "summary": {
           "totalQuestions": 2,
@@ -902,7 +4649,7 @@
                     "correct": true
                   }
                 ],
-                "questionId": "next-pair"
+                "questionId": "next-center"
               },
               {
                 "attempts": [
@@ -911,338 +4658,615 @@
                     "correct": true
                   }
                 ],
-                "questionId": "larger-destination"
+                "questionId": "range-after-compare"
               }
             ],
             "version": 1,
-            "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-            "startedAt": 1794459859948,
-            "assessmentId": "bubble-sort-check"
+            "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+            "startedAt": 1794552129825,
+            "assessmentId": "binary-search-check"
           },
           "firstAttemptCorrect": 2
+        }
+      },
+      {
+        "id": "binary-search-code-mapping",
+        "status": "COMPLETED",
+        "summary": null
+      },
+      {
+        "id": "binary-search-code-check",
+        "status": "COMPLETED",
+        "summary": {
+          "totalQuestions": 2,
+          "assessmentEvidence": {
+            "records": [
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "mid-formula"
+              },
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "skip-mid"
+              }
+            ],
+            "version": 1,
+            "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+            "startedAt": 1794552211042,
+            "assessmentId": "binary-search-code-check"
+          },
+          "firstAttemptCorrect": 2
+        }
+      },
+      {
+        "id": "binary-search-consolidation",
+        "status": "COMPLETED",
+        "summary": {
+          "totalQuestions": 4,
+          "assessmentEvidence": {
+            "records": [
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "first-center-transfer"
+              },
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "absent-target"
+              },
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "whole-code-order"
+              },
+              {
+                "attempts": [
+                  {
+                    "number": 1,
+                    "correct": true
+                  }
+                ],
+                "questionId": "why-sorted-matters"
+              }
+            ],
+            "version": 1,
+            "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+            "startedAt": 1794552248658,
+            "assessmentId": "binary-search-consolidation"
+          },
+          "firstAttemptCorrect": 4
+        }
+      },
+      {
+        "id": "binary-search-implementation",
+        "status": "COMPLETED",
+        "summary": {
+          "testRuns": 2,
+          "hintUsage": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "inputLevel": "full"
         }
       }
     ],
     "sequence": [
       {
-        "id": "bubble-sort-motivation",
+        "id": "binary-search-motivation",
         "type": "phase",
         "order": 1
       },
       {
-        "id": "bubble-sort-execution",
+        "id": "binary-search-execution",
         "type": "phase",
         "order": 2
       },
       {
-        "id": "bubble-sort-check",
+        "id": "binary-search-check",
         "type": "phase",
         "order": 3
+      },
+      {
+        "id": "binary-search-code-mapping",
+        "type": "phase",
+        "order": 4
+      },
+      {
+        "id": "binary-search-code-check",
+        "type": "phase",
+        "order": 5
+      },
+      {
+        "id": "binary-search-consolidation",
+        "type": "phase",
+        "order": 6
+      },
+      {
+        "id": "binary-search-implementation",
+        "type": "phase",
+        "order": 7
       }
     ],
-    "currentPhase": {
-      "id": "bubble-sort-check",
-      "summary": {
-        "totalQuestions": 2,
-        "assessmentEvidence": {
-          "records": [
-            {
-              "attempts": [
-                {
-                  "number": 1,
-                  "correct": true
-                }
-              ],
-              "questionId": "next-pair"
-            },
-            {
-              "attempts": [
-                {
-                  "number": 1,
-                  "correct": true
-                }
-              ],
-              "questionId": "larger-destination"
-            }
-          ],
-          "version": 1,
-          "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-          "startedAt": 1794459859948,
-          "assessmentId": "bubble-sort-check"
-        },
-        "firstAttemptCorrect": 2
-      },
-      "nextStage": "動きとコードの対応",
-      "stageGoal": "動きの確認問題",
-      "stageNumber": 3
-    },
     "conceptSnapshot": {
-      "id": "cdb48f98-dac5-4b9a-a6de-f4409ff6e753",
-      "title": "バブルソート",
+      "id": "7e195ec5-1389-46ae-a8ae-b720482a30da",
+      "title": "二分探索",
       "version": 1,
       "concepts": [
         {
           "kind": "assessment",
-          "label": "比較の順序",
+          "label": "中央位置の決定",
           "state": "confirmed",
           "evidence": [
             {
               "tags": [
-                "compare-order"
+                "next-center"
               ],
               "first": {
                 "number": 1,
                 "correct": true,
-                "sourceId": "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
                 "confirmed": true,
-                "sessionId": "af7c7a00-bc66-4aa3-8236-741667b768f1",
-                "startedAt": 1794449119428,
-                "observedAt": 1794449130195,
-                "recordedAt": 1794449140541
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
               },
               "latest": {
                 "number": 1,
                 "correct": true,
-                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
                 "confirmed": true,
-                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-                "startedAt": 1794459859948,
-                "observedAt": 1794459863933,
-                "recordedAt": 1794459866178
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
               },
               "retried": false,
-              "phaseKey": "bubble-sort-check",
-              "sessions": 5,
-              "questionId": "next-pair",
+              "phaseKey": "binary-search-check",
+              "sessions": 1,
+              "questionId": "next-center",
               "stageLabel": "動きの確認問題",
-              "assessmentId": "bubble-sort-check",
-              "questionLabel": "次に比べるペアの左側のマスはどれか",
+              "assessmentId": "binary-search-check",
+              "questionLabel": "左側を捨てました。次に調べる真ん中のマスはどれか",
               "latestSessionFirst": {
                 "number": 1,
                 "correct": true,
-                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
                 "confirmed": true,
-                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-                "startedAt": 1794459859948,
-                "observedAt": 1794459863933,
-                "recordedAt": 1794459866178
-              }
-            }
-          ],
-          "conceptId": "bubble-sort:order",
-          "implementation": null,
-          "totalQuestions": 1,
-          "attemptedQuestions": 1
-        },
-        {
-          "kind": "assessment",
-          "label": "隣接要素の比較と交換",
-          "state": "confirmed",
-          "evidence": [
-            {
-              "tags": [
-                "swap-destination"
-              ],
-              "first": {
-                "number": 1,
-                "correct": true,
-                "sourceId": "assessment-snapshot-cb1f31e37ce196e47687b4821c1289c2e638591fe49e5fcd2eb175f1b20dc9f5",
-                "confirmed": true,
-                "sessionId": "af7c7a00-bc66-4aa3-8236-741667b768f1",
-                "startedAt": 1794449119428,
-                "observedAt": 1794449130195,
-                "recordedAt": 1794449140541
-              },
-              "latest": {
-                "number": 1,
-                "correct": true,
-                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
-                "confirmed": true,
-                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-                "startedAt": 1794459859948,
-                "observedAt": 1794459864685,
-                "recordedAt": 1794459866178
-              },
-              "retried": false,
-              "phaseKey": "bubble-sort-check",
-              "sessions": 5,
-              "questionId": "larger-destination",
-              "stageLabel": "動きの確認問題",
-              "assessmentId": "bubble-sort-check",
-              "questionLabel": "比べた後、大きい方の 5 はどのマスへ行くか",
-              "latestSessionFirst": {
-                "number": 1,
-                "correct": true,
-                "sourceId": "assessment-snapshot-a5a653021cf8a2f2ba704ad7b745e0da14f8ab52dc91e6b3b3d7c45d8f0a9bb2",
-                "confirmed": true,
-                "sessionId": "937939a2-3cef-4f5e-a05d-256936f46324",
-                "startedAt": 1794459859948,
-                "observedAt": 1794459864685,
-                "recordedAt": 1794459866178
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
               }
             },
             {
               "tags": [
-                "right-neighbor"
+                "mid-formula"
               ],
-              "first": null,
-              "latest": null,
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552215624,
+                "recordedAt": 1794552218867
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552215624,
+                "recordedAt": 1794552218867
+              },
               "retried": false,
-              "phaseKey": "bubble-sort-code-check",
-              "sessions": 0,
-              "questionId": "swap-condition",
+              "phaseKey": "binary-search-code-check",
+              "sessions": 1,
+              "questionId": "mid-formula",
               "stageLabel": "コードの確認問題",
-              "assessmentId": "bubble-sort-code-check",
-              "questionLabel": "左の要素と比べる相手を決めるために、6行目の空欄に入る正しいコードを選んでください。",
-              "latestSessionFirst": null
+              "assessmentId": "binary-search-code-check",
+              "questionLabel": "範囲の真ん中の位置を求めるために、5行目の空欄に入る正しいコードを選んでください。",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552215624,
+                "recordedAt": 1794552218867
+              }
             },
             {
               "tags": [
-                "交換が起きるペアの追跡"
+                "新しいリストでの真ん中の位置"
               ],
-              "first": null,
-              "latest": null,
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              },
               "retried": false,
-              "phaseKey": "bubble-sort-consolidation",
-              "sessions": 0,
-              "questionId": "next-swap-pair",
+              "phaseKey": "binary-search-consolidation",
+              "sessions": 1,
+              "questionId": "first-center-transfer",
               "stageLabel": "応用問題",
-              "assessmentId": "bubble-sort-consolidation",
-              "questionLabel": "この後、入れ替えが起きるペアの左側はどれか",
-              "latestSessionFirst": null
+              "assessmentId": "binary-search-consolidation",
+              "questionLabel": "新しいリスト [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] で 23 を探すとき、最初に調べる真ん中のマスはどれか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              }
             }
           ],
-          "conceptId": "bubble-sort:swap",
+          "conceptId": "binary-search:center",
           "implementation": null,
           "totalQuestions": 3,
+          "attemptedQuestions": 3
+        },
+        {
+          "kind": "assessment",
+          "label": "探索範囲の更新",
+          "state": "confirmed",
+          "evidence": [
+            {
+              "tags": [
+                "drop-side"
+              ],
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                "confirmed": true,
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                "confirmed": true,
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
+              },
+              "retried": false,
+              "phaseKey": "binary-search-check",
+              "sessions": 1,
+              "questionId": "range-after-compare",
+              "stageLabel": "動きの確認問題",
+              "assessmentId": "binary-search-check",
+              "questionLabel": "31 と 25 を比べた後、次に残る範囲はどうなるか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-3cdeae4939143df090ce02361051a3bac238b04e1dc630df9f1fd6a5e928630f",
+                "confirmed": true,
+                "sessionId": "f23c6f6b-c6e2-4bf1-affa-afcce836c7ec",
+                "startedAt": 1794552129825,
+                "observedAt": 1794552150694,
+                "recordedAt": 1794552151569
+              }
+            },
+            {
+              "tags": [
+                "skip-mid"
+              ],
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552218867,
+                "recordedAt": 1794552218867
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552218867,
+                "recordedAt": 1794552218867
+              },
+              "retried": false,
+              "phaseKey": "binary-search-code-check",
+              "sessions": 1,
+              "questionId": "skip-mid",
+              "stageLabel": "コードの確認問題",
+              "assessmentId": "binary-search-code-check",
+              "questionLabel": "真ん中の値より大きい側だけを残すために、9行目の空欄に入る正しいコードを選んでください。",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-73c3590bedef98d52413189de3624fac47390ff555995ebd73254f27453f5b72",
+                "confirmed": true,
+                "sessionId": "48825827-9677-41e1-93b6-61aab84b30b6",
+                "startedAt": 1794552211042,
+                "observedAt": 1794552218867,
+                "recordedAt": 1794552218867
+              }
+            }
+          ],
+          "conceptId": "binary-search:range",
+          "implementation": null,
+          "totalQuestions": 2,
+          "attemptedQuestions": 2
+        },
+        {
+          "kind": "assessment",
+          "label": "見つからない場合の終了",
+          "state": "confirmed",
+          "evidence": [
+            {
+              "tags": [
+                "探す値が無いときの終わり方"
+              ],
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              },
+              "retried": false,
+              "phaseKey": "binary-search-consolidation",
+              "sessions": 1,
+              "questionId": "absent-target",
+              "stageLabel": "応用問題",
+              "assessmentId": "binary-search-consolidation",
+              "questionLabel": "主教材のリスト [3, 7, 12, 19, 25, 31, 42] で 20 を探すと、どうなりますか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552255618,
+                "recordedAt": 1794552271544
+              }
+            }
+          ],
+          "conceptId": "binary-search:absent",
+          "implementation": null,
+          "totalQuestions": 1,
           "attemptedQuestions": 1
         },
         {
           "kind": "assessment",
-          "label": "確定範囲と比較範囲",
-          "state": "unobserved",
+          "label": "整列済みという前提",
+          "state": "confirmed",
           "evidence": [
             {
               "tags": [
-                "range-shrink"
+                "並んでいることが前提の理由"
               ],
-              "first": null,
-              "latest": null,
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              },
               "retried": false,
-              "phaseKey": "bubble-sort-code-check",
-              "sessions": 0,
-              "questionId": "inner-loop-range",
-              "stageLabel": "コードの確認問題",
-              "assessmentId": "bubble-sort-code-check",
-              "questionLabel": "周が進むにつれて比べる範囲を狭めるために、5行目の空欄に入る正しいコードを選んでください。",
-              "latestSessionFirst": null
-            },
-            {
-              "tags": [
-                "右端が決まる理由"
-              ],
-              "first": null,
-              "latest": null,
-              "retried": false,
-              "phaseKey": "bubble-sort-consolidation",
-              "sessions": 0,
-              "questionId": "why-right-end-fixed",
+              "phaseKey": "binary-search-consolidation",
+              "sessions": 1,
+              "questionId": "why-sorted-matters",
               "stageLabel": "応用問題",
-              "assessmentId": "bubble-sort-consolidation",
-              "questionLabel": "並び替えで、右端から順に値が決まっていくのはなぜですか",
-              "latestSessionFirst": null
+              "assessmentId": "binary-search-consolidation",
+              "questionLabel": "並んでいないリスト [25, 3, 42, 7, 19] で、同じやり方で探すとうまくいかないのはなぜですか",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              }
             }
           ],
-          "conceptId": "bubble-sort:range",
-          "implementation": null,
-          "totalQuestions": 2,
-          "attemptedQuestions": 0
-        },
-        {
-          "kind": "assessment",
-          "label": "整列済み配列の扱い",
-          "state": "unobserved",
-          "evidence": [
-            {
-              "tags": [
-                "並び済みの配列の扱い"
-              ],
-              "first": null,
-              "latest": null,
-              "retried": false,
-              "phaseKey": "bubble-sort-consolidation",
-              "sessions": 0,
-              "questionId": "sorted-array-behavior",
-              "stageLabel": "応用問題",
-              "assessmentId": "bubble-sort-consolidation",
-              "questionLabel": "最初から並んでいる配列 [1, 2, 3, 4] では、どうなりますか",
-              "latestSessionFirst": null
-            }
-          ],
-          "conceptId": "bubble-sort:sorted",
+          "conceptId": "binary-search:sorted",
           "implementation": null,
           "totalQuestions": 1,
-          "attemptedQuestions": 0
+          "attemptedQuestions": 1
         },
         {
           "kind": "assessment",
           "label": "コード全体の流れ",
-          "state": "unobserved",
+          "state": "confirmed",
           "evidence": [
             {
               "tags": [
                 "コード全体の流れ"
               ],
-              "first": null,
-              "latest": null,
+              "first": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              },
+              "latest": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              },
               "retried": false,
-              "phaseKey": "bubble-sort-consolidation",
-              "sessions": 0,
+              "phaseKey": "binary-search-consolidation",
+              "sessions": 1,
               "questionId": "whole-code-order",
               "stageLabel": "応用問題",
-              "assessmentId": "bubble-sort-consolidation",
-              "questionLabel": "バブルソートのコードを、実行の流れに合う順序に並べてください。",
-              "latestSessionFirst": null
+              "assessmentId": "binary-search-consolidation",
+              "questionLabel": "二分探索のコードを、実行の流れに合う順序に並べてください。",
+              "latestSessionFirst": {
+                "number": 1,
+                "correct": true,
+                "sourceId": "assessment-snapshot-f651dddee136c3a4f483d36d83aa23d24668b9fa07d2fdc5a0e020524ddec921",
+                "confirmed": true,
+                "sessionId": "dbe67ba1-d5d0-4c12-9190-d7af7491f40c",
+                "startedAt": 1794552248658,
+                "observedAt": 1794552270702,
+                "recordedAt": 1794552271544
+              }
             }
           ],
-          "conceptId": "bubble-sort:flow",
+          "conceptId": "binary-search:flow",
           "implementation": null,
           "totalQuestions": 1,
-          "attemptedQuestions": 0
+          "attemptedQuestions": 1
         },
         {
           "kind": "implementation",
           "label": "実装と動作確認",
           "state": "unobserved",
           "evidence": [],
-          "conceptId": "bubble-sort:implementation",
+          "conceptId": "binary-search:implementation",
           "implementation": {
-            "lastTest": null,
-            "testRuns": "unknown",
-            "completed": "unknown",
-            "hintUsage": "unknown",
-            "sourceIds": [],
-            "inputLevel": "unknown",
-            "testsPassed": "unknown",
+            "lastTest": {
+              "results": [
+                {
+                  "passed": true,
+                  "testId": "D1"
+                },
+                {
+                  "passed": true,
+                  "testId": "J1"
+                },
+                {
+                  "passed": true,
+                  "testId": "J2"
+                },
+                {
+                  "passed": true,
+                  "testId": "J3"
+                }
+              ],
+              "sourceId": "cmwem8for008coucne8xnhgqx"
+            },
+            "testRuns": 2,
+            "completed": true,
+            "hintUsage": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "sourceIds": [
+              "cmwem5uih0072oucncxzt34nq",
+              "cmwem8for008coucne8xnhgqx",
+              "cmwem8for008doucnpt7olzn5"
+            ],
+            "inputLevel": "full",
+            "testsPassed": true,
             "observedHints": []
           },
           "totalQuestions": 0,
           "attemptedQuestions": 0
         }
       ],
-      "courseId": "course-algorithm-bubble-sort-v2",
+      "courseId": "course-algorithm-binary-search-v1",
       "relation": "unit-components",
       "missingCompletionEvidence": []
     }
   },
   "stageGoals": {
-    "next": {
-      "goal": "動きとコードの対応",
-      "phaseKey": "bubble-sort-code-mapping"
-    },
+    "next": null,
     "current": {
-      "goal": "動きの確認問題",
-      "phaseKey": "bubble-sort-check"
+      "goal": "単元で確認できた内容を振り返り、次の学習方法を選ぶ",
+      "phaseKey": null
     }
   }
 }

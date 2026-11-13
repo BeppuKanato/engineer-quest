@@ -5,7 +5,7 @@ import type { AutoParseableTextFormat } from "openai/lib/parser";
 import type { ZodTypeAny } from "zod";
 import { writeFile } from "node:fs/promises";
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
-const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-6-1-luna";
+const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-6-luna";
 const REASONING_EFFORT = "low";
 
 const text = z.string().trim().min(1);
