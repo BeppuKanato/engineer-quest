@@ -111,7 +111,7 @@ export async function loadLearnerGoalState(userId: string): Promise<LearnerGoalS
     latestCompletedUnit = {
       courseId: completedUnits[0].courseId,
       firstAttemptRate: summary.firstAttempt.rate,
-      phase7NoHint: summary.phase7.noHint,
+      phase7NoHint: summary.phase7.noHint === true,
     };
   }
 
