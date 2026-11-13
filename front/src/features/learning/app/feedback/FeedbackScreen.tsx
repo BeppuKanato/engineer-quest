@@ -81,7 +81,7 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
       fact: result.goalSnapshot.status === "ACHIEVED" ? "大目標を達成しました" : result.goalSnapshot.status === "CLOSED_UNMET" ? "この大目標は未達成で終了しました" : null,
       requirements: result.goalSnapshot.requirements ?? [],
     }
-    : goalSummary;
+    : goalSummary ?? null;
   const failed = error || result?.status === "FAILED";
   return <Box component="section" data-feedback-scope aria-label={heading}
     sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, p: 2, width: "100%" }}>
