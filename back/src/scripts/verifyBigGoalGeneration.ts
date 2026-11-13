@@ -71,7 +71,7 @@ async function main() {
         goals: [makeGoal("UNIT_COMPLETION", "nonexistent", null, "NONE", 80), ...response.goals.slice(1)],
       }),
     }),
-  }), /BIG_GOAL_GENERATION_FAILED/);
+  }), /GOAL_NOT_FEASIBLE/);
 
   // 単元が未完了のときは作る課題の目標を許可しない。
   assert.ok(eligible.every(candidate => candidate.type !== "CREATE_QUEST"));
