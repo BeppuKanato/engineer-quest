@@ -30,6 +30,7 @@ async function buildBigGoalInput(userId: string): Promise<BigGoalInput | null> {
       outcome: evaluation.outcome,
       fraction: evaluation.fraction,
       detail: evaluation.detail,
+      requirements: evaluation.requirements,
     },
     status: goal.status,
     confirmedAt: goal.confirmedAt?.toISOString() ?? null,
