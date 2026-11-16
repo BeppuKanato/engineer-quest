@@ -96,6 +96,7 @@ model ExperimentAssignment {
   userId        String
   experimentKey String
   condition     FeedbackCondition
+  top1Type      String?
   assignedAt    DateTime          @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -519,7 +520,10 @@ enum CourseDifficulty {
 
 enum FeedbackCondition {
   STANDARD
-  PERSONALIZED
+  PERSONALIZED // legacy two-arm assignments; do not silently reinterpret
+  TOP_1
+  ROULETTE
+  MULTI
 }
 
 enum CourseExamFeedbackStatus {
