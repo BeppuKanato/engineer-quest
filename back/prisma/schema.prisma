@@ -657,6 +657,7 @@ model FeedbackV1 {
  runToken String?
  runExpiresAt DateTime?
  runAttempts Int @default(0)
+ retryCount Int @default(0) // explicit user-initiated generations, not automatic Cloud Tasks retries
  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  id String @id @default(cuid())
  userId String
