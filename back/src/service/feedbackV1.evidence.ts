@@ -35,10 +35,14 @@ export function buildEvidenceSources(input: Pick<Input, "learning" | "bigGoal">)
     if (concept.kind === "assessment") {
       array(concept.evidence).forEach((value, j) => {
         const evidence = object(value);
-        // Bind a source to the full question evidence including all attempts.
-        // One confirmed snapshot source ID may cover multiple trials.
-        for (const row of array(evidence.attempts)) add(object(row).sourceId, "assessment", `${path}.evidence[${j}]`);
-        for (const key of ["first", "latest"]) add(object(evidence[key]).sourceId, "assessment", `${path}.evidence[${j}]`);
+        if (Array.isArray(evidence.attempts)) {
+          // v2: resolve a source against the entire question's frozen trial
+          // history; old persisted snapshots retain their original paths.
+          for (const row of evidence.attempts) add(object(row).sourceId, "assessment", `${path}.evidence[${j}]`);
+          for (const key of ["first", "latest"]) add(object(evidence[key]).sourceId, "assessment", `${path}.evidence[${j}]`);
+        } else {
+          for (const key of ["first", "latest"]) add(object(evidence[key]).sourceId, "assessment", `${path}.evidence[${j}].${key}`);
+        }
       });
     } else if (concept.kind === "implementation") {
       const implementation = object(concept.implementation);
