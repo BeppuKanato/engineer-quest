@@ -28,5 +28,8 @@ export type FeedbackV1Result = { id: string; status: string; conceptSnapshot?: C
   feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
 export const getFeedbackV1 = (token: string, kind: string, eventId: string, method: string) =>
   fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { token, method });
+/** Explicit failed-run retry; ordinary POST never restarts a failed run. */
+export const retryFeedbackV1 = (token: string, kind: string, eventId: string) =>
+  fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}/retry`, { token, method: "POST" });
 export const feedbackCandidates = (f: NonNullable<FeedbackV1Result["feedback"]>): FeedbackCandidate[] =>
   f.recommendations ?? [{ candidateId: "candidate-1", nextStep: f.nextStep, reason: f.reason, actionLabel: f.actionLabel, actionHref: f.actionHref }];
