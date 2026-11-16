@@ -141,14 +141,14 @@ export function computeAnalysis(
     classifiedModels:modelIds,generatedSuccesses:rows.length,completeTriads:triads.length,
     missingJudgments,perType,top1Target,multiMetrics,agreement};
 }
-function toCsv(rows:Array<Record<string,unknown>>):string {
+function toCsv(rows:object[]):string {
   if(!rows.length)return "";
   const columns=Object.keys(rows[0]);
   const escape=(value:unknown):string=>{
     const s=value===undefined||value===null?"":String(value);
     return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
   };
-  return [columns.join(","),...rows.map(row=>columns.map(k=>escape(row[k])).join(","))].join("\n")+"\n";
+  return [columns.join(","),...rows.map(row=>columns.map(k=>escape((row as Record<string,unknown>)[k])).join(","))].join("\n")+"\n";
 }
 async function jsonl<T>(path:string):Promise<T[]>{
   const raw=await readFile(path,"utf8");
