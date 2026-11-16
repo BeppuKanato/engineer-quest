@@ -47,8 +47,6 @@ const safeName = /^[a-zA-Z0-9._-]+$/;
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
-const isHexadType = (value: unknown): value is HexadType =>
-  typeof value === "string" && (HEXAD_TYPES as readonly string[]).includes(value);
 
 function ensureUnique(values: string[], label: string) {
   if (new Set(values).size !== values.length) throw new Error("DUPLICATE_" + label);
@@ -65,8 +63,10 @@ export function parseCases(input: unknown): Case[] {
     }
     // The experiment always supplies the condition. Strip any old per-user
     // HEXAD, assignment, and source registry before the fixed Stage1 call.
-    const { hexad: _hexad, experimentV2: _experimentV2,
-      evidenceSources: _evidenceSources, ...base } = source;
+    const base = { ...source };
+    delete base.hexad;
+    delete base.experimentV2;
+    delete base.evidenceSources;
     return { caseId: item.caseId, input: { ...base, hexad: null } as Input };
   });
   ensureUnique(cases.map(item => item.caseId), "CASE_ID");
