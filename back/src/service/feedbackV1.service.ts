@@ -51,7 +51,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
         where: { id: row.id, userId: user.id, status: "FAILED" },
         data: {
           status: "GENERATING",
-          failureCode: null, result: Prisma.DbNull, generatedAt: null,
+          failureCode: null, generatedAt: null,
           createdAt: new Date(), retryCount: { increment: 1 }, runAttempts: 0,
           runToken: null, runExpiresAt: null,
         },
