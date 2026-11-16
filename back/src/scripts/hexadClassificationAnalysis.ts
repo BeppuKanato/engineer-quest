@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { HEXAD_TYPES, type HexadType } from "../service/feedbackHexadConditions";
 import { classificationFingerprint, hash, parseBlindSamples, parseClassifierConfig,
-  parseJudgment, type BlindSample, type ClassificationResult,
+  parseJudgment, type ClassificationResult,
   type ClassifierModel, type HexadLabels } from "./hexadClassifierBatch";
 import type { ResultRecord as GenerationRecord } from "./feedbackGenerationBatch";
 
