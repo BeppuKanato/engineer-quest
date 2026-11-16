@@ -12,9 +12,10 @@ const generateForExperiment = (input: Input, generator: typeof generate, log: (e
     : generator(input, undefined, log);
 function validateGeneratedSelection(input: Input, result: Awaited<ReturnType<typeof generateForExperiment>>) {
   const validation = validateSelection(input, result.selection);
-  if ("composedFeedback" in result) {
+  const composed = (result as { composedFeedback?: { recommendations: { candidateId: string }[] } }).composedFeedback;
+  if (composed) {
     // Keep short, code-issued candidate IDs in the UI even after refreshing URL availability.
-    result.composedFeedback.recommendations.forEach((candidate, i) => {
+    composed.recommendations.forEach((candidate, i) => {
       if (validation.candidates[i]) validation.candidates[i].candidateId = candidate.candidateId;
     });
   }
