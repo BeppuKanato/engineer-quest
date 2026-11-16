@@ -133,7 +133,11 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
         sessions.sort((a,b)=>a.at(-1)!.recordedAt-b.at(-1)!.recordedAt || a[0].sessionId.localeCompare(b[0].sessionId));
         const attempts=sessions.flat(), currentSession=sessions.at(-1) ?? [], latest=currentSession.at(-1) ?? null;
         const firstSession=[...sessions].sort((a,b)=>Math.min(...a.map(x=>x.observedAt))-Math.min(...b.map(x=>x.observedAt)) || a[0].sessionId.localeCompare(b[0].sessionId))[0];
-        return { ...q, first: firstSession?.find(a=>a.number===1) ?? null, latest, retried: attempts.some(a=>a.number>1), latestSessionFirst: currentSession.find(a=>a.number===1) ?? null, sessions: sessions.length };
+        return { ...q, first: firstSession?.find(a=>a.number===1) ?? null, latest,
+          // Keep ALL frozen trials and their actual answers, not only first/latest.
+          attempts: attempts.map(a => ({ ...a })),
+          retried: attempts.some(a=>a.number>1),
+          latestSessionFirst: currentSession.find(a=>a.number===1) ?? null, sessions: sessions.length };
       });
       const answered = evidence.filter(q=>q.latest);
       const implementationPhase = phases.find(p => p.phaseKey === c.phaseKey);
