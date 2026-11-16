@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { getAchievementsByUser } from "./achievement.service";
 import { HEXAD_FEEDBACK_EXPERIMENT_KEY } from "./experimentAssignment.service";
+import { selectTop1, resolveHexadCondition, type HexadType, type HexadScores } from "./feedbackHexadConditions";
 import { evaluateBigGoal } from "./bigGoal.evaluate";
 import { getActiveBigGoal, loadBigGoalFacts } from "./bigGoal.service";
 import type { BigGoalParams } from "./bigGoal.types";
@@ -93,7 +94,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   const assignment = user.experimentAssignments[0];
   if (!assignment) throw new AppError(409, "EXPERIMENT_ASSIGNMENT_REQUIRED", "Experiment assignment required");
-  if (assignment.condition === "PERSONALIZED" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
+  if (assignment.condition !== "STANDARD" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
   const cutoff = new Date();
   let learning: unknown;
   let stageGoals: Input["stageGoals"] = null;
@@ -203,7 +204,33 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   // review a completed phase of this unit, or review with an acquired card.
   const actions = kind === "phase" ? allActions.filter(a => [23, 4, 9].includes(a.id)) : allActions;
   const h = user.hexadResponse;
-  const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores: { Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore, FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore, Disruptor: h.disruptorScore, Player: h.playerScore } } : null;
+  const scores: HexadScores | null = h ? {
+    Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore,
+    FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore,
+    Disruptor: h.disruptorScore, Player: h.playerScore,
+  } : null;
+  // Preserve legacy PERSONALIZED inputs for already assigned / persisted rows.
+  const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h && scores
+    ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores } : null;
+  let experimentV2: Input["experimentV2"];
+  if (assignment.condition === "STANDARD") {
+    experimentV2 = resolveHexadCondition("STANDARD", null);
+  } else if (assignment.condition === "TOP_1" || assignment.condition === "ROULETTE" || assignment.condition === "MULTI") {
+    if (!scores) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
+    let fixedTop1 = assignment.top1Type as HexadType | null;
+    if (assignment.condition === "TOP_1" && !fixedTop1) {
+      const proposed = selectTop1(scores);
+      // Concurrent first generation requests must share the SAME persisted tie resolution.
+      await prisma.experimentAssignment.updateMany({
+        where: { id: assignment.id, top1Type: null },
+        data: { top1Type: proposed.type },
+      });
+      const stored = await prisma.experimentAssignment.findUnique({ where: { id: assignment.id }, select: { top1Type: true } });
+      fixedTop1 = stored?.top1Type as HexadType | null ?? null;
+      if (!fixedTop1) throw new Error("TOP1_CHOICE_NOT_STORED");
+    }
+    experimentV2 = resolveHexadCondition(assignment.condition, scores, fixedTop1);
+  }
   const historyView = history.map(h => {
     const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string; candidates?: { actionId: number | null; targetId: string | null; capabilityId?: string | null; purpose: string; reason: string }[] }; validation?: { actionHref: string | null } } | null;
     const s = result?.selection;
@@ -220,6 +247,6 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
     posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
-  const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals });
+  const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals, experimentV2 });
   return { input, userId: user.id, condition: assignment.condition };
 }
