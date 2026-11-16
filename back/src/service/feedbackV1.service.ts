@@ -3,13 +3,40 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { buildFeedbackV1Context } from "./feedbackV1.context";
 import { generate, validateSelection, type Input } from "./feedbackV1.engine";
-import { generateFeedbackV2, type FeedbackV2Input } from "./feedbackV2.engine";
+import { generateFeedbackV2, supportPlanSchema, FEEDBACK_V2_PROMPT_VERSION, type FeedbackV2Input, type SupportPlanResult } from "./feedbackV2.engine";
 import { enqueueFeedbackTask, tasksEnabled, type FeedbackTaskPayload } from "./feedbackV1.tasks";
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v));
-const generateForExperiment = (input: Input, generator: typeof generate, log: (entry: unknown) => Promise<void>) =>
-  generator === generate && input.experimentV2
-    ? generateFeedbackV2(input as FeedbackV2Input, undefined, log)
-    : generator(input, undefined, log);
+/** Only a fully validated plan from this same feedback event and prompt version
+ * may be reused. The saved input remains frozen across attempts.
+ */
+async function reusableStage1(feedbackId: string): Promise<SupportPlanResult | undefined> {
+  const record = await prisma.feedbackV1Call.findFirst({
+    where: {
+      feedbackId,
+      data: { path: ["stage"], equals: "support-plan-validated" },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { data: true },
+  });
+  const entry = record?.data;
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+  const audit = entry as Record<string, unknown>;
+  if (audit.promptVersion !== FEEDBACK_V2_PROMPT_VERSION) return undefined;
+  const parsed = supportPlanSchema.safeParse(audit.plan);
+  return parsed.success ? parsed.data : undefined;
+}
+const generateForExperiment = async (
+  input: Input,
+  generator: typeof generate,
+  log: (entry: unknown) => Promise<void>,
+  feedbackId?: string,
+) => {
+  if (generator === generate && input.experimentV2) {
+    const previous = feedbackId ? await reusableStage1(feedbackId) : undefined;
+    return generateFeedbackV2(input as FeedbackV2Input, undefined, log, previous);
+  }
+  return generator(input, undefined, log);
+};
 function validateGeneratedSelection(input: Input, result: Awaited<ReturnType<typeof generateForExperiment>>) {
   const validation = validateSelection(input, result.selection);
   const composed = (result as { composedFeedback?: { recommendations: { candidateId: string }[] } }).composedFeedback;
@@ -106,7 +133,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
       try {
         const result = await generateForExperiment(context.input, generator, async data => {
           await prisma.feedbackV1Call.create({ data: { feedbackId: id, data: json(data) } });
-        });
+        }, id);
         // Recheck access and execution constraints after generation; never trust a model URL.
         const fresh = await buildFeedbackV1Context(firebaseUid, kind, eventId, context.input.experimentV2);
         result.validation = validateGeneratedSelection({ ...fresh.input, hexad: context.input.hexad }, result);
@@ -173,7 +200,7 @@ export async function processFeedbackV1Task(
     const savedInput = row.input as unknown as Input;
     const result = await generateForExperiment(savedInput, generator, async data => {
       await prisma.feedbackV1Call.create({ data: { feedbackId: row.id, data: json(data) } });
-    });
+    }, row.id);
     const fresh = await buildFeedbackV1Context(row.user.firebaseUid, payload.kind, payload.eventId, savedInput.experimentV2);
     result.validation = validateGeneratedSelection({ ...fresh.input, hexad: savedInput.hexad }, result);
     const updated = await prisma.feedbackV1.updateMany({
