@@ -1,6 +1,8 @@
 import { fetcher } from "@/lib/fetcher";
 
-type AnswerEvidence = { sourceId: string; sessionId: string; number: number; correct: boolean };
+type AnswerEvidence = { sourceId: string; sessionId: string; number: number; correct: boolean;
+  answer?: {kind:"node";nodeId:string} | {kind:"none"} | {kind:"choice";choiceId:string} | {kind:"order";lineIds:string[]};
+};
 export type ConceptSnapshot = {
   id: string; version: 1; courseId: string; title: string; relation: "unit-components";
   missingCompletionEvidence?: {sourceId:string;phaseKey:string|null}[];
