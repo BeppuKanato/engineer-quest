@@ -206,12 +206,12 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (!a.isSecret && !a.userAchievements.length && user.selectedTargetAchievementId !== a.id) add(14, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`);
   }
   add(15, "profile", "/profile");
+  const unitPosts = kind === "unit" ? posts.filter(p => p.courseId === eventId) : posts;
   for (const p of unitPosts) {
     add(17, p.id, `/quest-board/${encodeURIComponent(p.id)}`);
     if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`);
   }
   for (const [id, category] of [[18, "QUESTION"], [19, "ERROR_HELP"], [20, "MEMO"]] as const) add(id, category, `/quest-board/new?category=${category}`);
-  const unitPosts = kind === "unit" ? posts.filter(p => p.courseId === eventId) : posts;
   const allActions: Action[] = definitions.map(([label, purpose, condition], i) => ({ id: i + 1, label, purpose, condition, targetIds: targets[i + 1].map(t => t.id) })).filter(a => a.targetIds.length);
   // Phase-result feedback recommends only inside the learning flow: proceed,
   // review a completed phase of this unit, or review with an acquired card.
