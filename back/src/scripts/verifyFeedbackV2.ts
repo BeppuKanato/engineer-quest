@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { resolveHexadCondition, type HexadScores } from "../service/feedbackHexadConditions";
 import {
   availableFeedbackCandidates, stage1Prompt, stage2Input, stage2Prompt,
-  validateStage1, validateStage2, generateFeedbackV2,
+  validateStage1, validateStage2, generateFeedbackV2, supportPlanSchema,
   type FeedbackV2Input, type SupportPlanResult, type ComposedFeedbackResult,
 } from "../service/feedbackV2.engine";
 
@@ -92,7 +92,25 @@ assert.deepEqual(calls,["support","compose"]);
 assert.equal(result.selection.nextGoal,composed.nextGoalText);
 assert.equal(result.validation.actionHref,"/courses/roadmap/u/learn?phase=phase-2");
 assert.deepEqual(result.hexadAudit?.appliedTypes,["Achiever"]);
-assert.equal(logs.length,4); // two stages, source ID repair, final validation
+assert.equal(logs.length,5); // two stages, validated support plan, source ID repair, final validation
+const validatedLog = logs.find(x => (x as {stage?:string}).stage === "support-plan-validated") as { plan: unknown } | undefined;
+assert(validatedLog, "only validated stage-1 output should be frozen");
+const frozen = supportPlanSchema.parse(validatedLog.plan);
+const retryStages: string[] = [];
+const retried = await generateFeedbackV2(base, async (stage) => {
+  retryStages.push(stage);
+  if (stage !== "compose") throw new Error("Stage1 must never be regenerated after a validated plan");
+  return { output: composed, responseId: "reused", model: "fixture", usage: null };
+}, async () => {}, frozen);
+assert.deepEqual(retryStages, ["compose"]);
+assert.equal(retried.selection.nextGoal, composed.nextGoalText);
+assert.equal(retried.supportPlan.supportPlan.educationalGoal, frozen.supportPlan.educationalGoal);
+// Invalid historical data cannot override the current support/candidate schemas.
+await assert.rejects(
+  () => generateFeedbackV2(base, async () => { throw new Error("model must not be called"); },
+    async () => {}, { ...frozen, approvedCandidates: [{ ...frozen.approvedCandidates[0], candidateId: "C999" }] }),
+  /V2_CANDIDATE_NOT_AVAILABLE/,
+);
 
 const standard: FeedbackV2Input={...base,experimentV2:resolveHexadCondition("STANDARD",null)};
 const standardFacts=stage2Input(standard,validateStage1(standard,plan,candidates),candidates);
