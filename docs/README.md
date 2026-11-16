@@ -18,6 +18,7 @@
 | [frontend-migration-plan.md](frontend-migration-plan.md) | 計画（未着手） | 共通化・移行の10作業。対象ファイル、依存順、PR分割、完了条件、既存verifyと実画面の確認、切り戻し方針 |
 | [references/bulletproof-react/README.md](references/bulletproof-react/README.md) | 外部参考（固定版） | 公式GitHubの原文12文書・README・LICENSE・画像。取得コミットとハッシュを記録。プロジェクト方針は上記採用方針を優先 |
 | [development-cloud-run.md](development-cloud-run.md) | 現行 | develop 用 Cloud Run の構成、デプロイ、確認手順 |
+| [hexad-feedback-implementation-spec-2026-11-16.md](hexad-feedback-implementation-spec-2026-11-16.md) | 正本（実装予定） | 4条件・二段階LLM・根拠/候補契約・生成失敗時の手動再生成・研究計測範囲・受入試験とPR分割 |
 
 ## 学習設計
 
