@@ -206,11 +206,12 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (!a.isSecret && !a.userAchievements.length && user.selectedTargetAchievementId !== a.id) add(14, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`);
   }
   add(15, "profile", "/profile");
-  for (const p of posts) {
+  for (const p of unitPosts) {
     add(17, p.id, `/quest-board/${encodeURIComponent(p.id)}`);
     if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`);
   }
   for (const [id, category] of [[18, "QUESTION"], [19, "ERROR_HELP"], [20, "MEMO"]] as const) add(id, category, `/quest-board/new?category=${category}`);
+  const unitPosts = kind === "unit" ? posts.filter(p => p.courseId === eventId) : posts;
   const allActions: Action[] = definitions.map(([label, purpose, condition], i) => ({ id: i + 1, label, purpose, condition, targetIds: targets[i + 1].map(t => t.id) })).filter(a => a.targetIds.length);
   // Phase-result feedback recommends only inside the learning flow: proceed,
   // review a completed phase of this unit, or review with an acquired card.
@@ -260,7 +261,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   } : {
     courses, units, quests: quests.map(({ attempts, id, title, description, scenario, requirements, relatedCourses }) => ({ id, title, description, scenario, requirements, relatedCourses, attempts: attempts.map(({ code, ...a }) => ({ ...a, hasSavedCode: Boolean(code) })) })), cards: cards.map(c => ({ ...withoutFields(c, ["createdAt", "updatedAt"]), acquired: true, viewed: history.some(h => h.interactions.some(i => i.type === "ARRIVED" && (i.data as Record<string, unknown>).targetId === c.id)) ? "observed_arrival" : "not_observed" })),
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
-    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
+    posts: unitPosts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
   const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals, experimentV2 });
   return { input, userId: user.id, condition: assignment.condition };
