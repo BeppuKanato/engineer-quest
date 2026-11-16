@@ -89,7 +89,7 @@ const definitions = [
   ["他の人の投稿へ返信する", "他者への支援・説明を通じた理解の整理", "他者の公開・返信可能投稿がある"],
   ["次のフェーズへ進む", "学習の継続", "現在のフェーズの次のフェーズがある"],
 ];
-export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create" | "phase" | "unit", eventId: string) {
+export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create" | "phase" | "unit", eventId: string, frozenExperiment?: Input["experimentV2"]) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, include: { hexadResponse: true, experimentAssignments: { where: { experimentKey: HEXAD_FEEDBACK_EXPERIMENT_KEY } } } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   const assignment = user.experimentAssignments[0];
@@ -213,7 +213,10 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h && scores
     ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores } : null;
   let experimentV2: Input["experimentV2"];
-  if (assignment.condition === "STANDARD") {
+  if (frozenExperiment) {
+    if (frozenExperiment.condition !== assignment.condition) throw new Error("EXPERIMENT_CONDITION_CHANGED");
+    experimentV2 = frozenExperiment;
+  } else if (assignment.condition === "STANDARD") {
     experimentV2 = resolveHexadCondition("STANDARD", null);
   } else if (assignment.condition === "TOP_1" || assignment.condition === "ROULETTE" || assignment.condition === "MULTI") {
     if (!scores) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
