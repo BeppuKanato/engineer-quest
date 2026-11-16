@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { GoogleAuth, OAuth2Client } from "google-auth-library";
 import { AppError } from "../error/appError";
 
-export type FeedbackTaskPayload = { feedbackId: string; kind: "mission" | "create" | "phase" | "unit"; eventId: string };
+export type FeedbackTaskPayload = { feedbackId: string; kind: "mission" | "create" | "phase" | "unit"; eventId: string; retryCount?: number };
 
 const auth = new GoogleAuth({ scopes: ["https://www.googleapis.com/auth/cloud-platform"] });
 const oidcVerifier = new OAuth2Client();
@@ -27,7 +27,7 @@ function config() {
 
 export async function enqueueFeedbackTask(payload: FeedbackTaskPayload, recoveryAttempt?: number, scheduleAt?: Date): Promise<void> {
   const settings = config();
-  const digest = createHash("sha256").update(payload.feedbackId).digest("hex").slice(0, 32);
+  const digest = createHash("sha256").update(payload.feedbackId + ":" + (payload.retryCount ?? 0)).digest("hex").slice(0, 32);
   const suffix = recoveryAttempt === undefined ? "" : "-recovery-" + recoveryAttempt;
   const parent = "projects/" + settings.project + "/locations/" + settings.region + "/queues/" + settings.queue;
   const task = {
