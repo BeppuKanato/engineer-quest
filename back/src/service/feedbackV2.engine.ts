@@ -173,7 +173,7 @@ export function validateStage1(input: FeedbackV2Input, output: SupportPlanResult
 const obj = (x: unknown): Record<string, unknown> => x && typeof x === "object" && !Array.isArray(x) ? x as Record<string, unknown> : {};
 function readObservedValue(root: Record<string, unknown>, path: string): unknown {
   const parts = path.match(/[A-Za-z_$][\w$]*|\[\d+\]/g) ?? [];
-  if (!parts.length || !["learning", "bigGoal"].includes(parts[0])) return null;
+  if (!parts.length || !["learning", "bigGoal"].includes(parts[0] ?? "")) return null;
   let value: unknown = root;
   for (const part of parts) {
     if (part.startsWith("[")) {
@@ -290,7 +290,7 @@ export async function generateFeedbackV2(
   call: V2LlmCall = v2OpenAiCall,
   log: (entry: unknown) => Promise<void> = async () => {},
 ) {
-  const input = prepareEvidenceInput(savedInput);
+  const input = prepareEvidenceInput(savedInput) as FeedbackV2Input;
   if (!input.experimentV2) throw new Error("V2_EXPERIMENT_CONTEXT_REQUIRED");
   const candidates = availableFeedbackCandidates(input);
   const run = async (stage: V2LlmStage, prompt: string, schema: ZodTypeAny) => {
