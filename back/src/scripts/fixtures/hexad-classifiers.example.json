@@ -1,0 +1,22 @@
+{
+  "models": [
+    {
+      "id": "qwen3-30b",
+      "model": "qwen3:30b",
+      "baseURL": "http://127.0.0.1:11434/v1",
+      "timeoutMs": 600000
+    },
+    {
+      "id": "mistral-small-3.2",
+      "model": "mistral-small3.2",
+      "baseURL": "http://127.0.0.1:11434/v1",
+      "timeoutMs": 600000
+    },
+    {
+      "id": "phi-4",
+      "model": "phi4",
+      "baseURL": "http://127.0.0.1:11434/v1",
+      "timeoutMs": 600000
+    }
+  ]
+}
