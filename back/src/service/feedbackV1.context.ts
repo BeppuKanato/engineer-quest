@@ -167,18 +167,30 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     return { id: c.id, title: c.title, status: unitRow?.status ?? "NOT_STARTED", phases: allPhaseRows.filter(p => p.courseId === c.id).map(p => ({ id: p.phaseKey, status: p.status })) };
   });
   const targets: Record<number, Target[]> = Object.fromEntries(definitions.map((_, i) => [i + 1, []]));
-  const add = (id: number, targetId: string, href: string) => targets[id].push({ id: targetId, href });
+  // Human-readable, code-grounded target metadata is used by Stage1. URLs and
+  // IDs remain authoritative; the model cannot invent destinations.
+  const add = (id: number, targetId: string, href: string, name?: string, learningContent?: string) =>
+    targets[id].push({ id: targetId, href, name, learningContent });
   if (kind === "unit") {
     for (const u of units) {
-      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
-      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`);
-      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
+      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "この単元の学習を開始する");
+      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`, u.title, "途中から学習を再開する");
+      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "完了した単元を復習する");
     }
-    for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
+    for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
+      add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "完了した段階を復習する");
+    }
   }
   if (kind === "phase" && phaseEvent) {
-    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
-    if (phaseEvent.nextPhaseKey) add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`);
+    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
+      add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "同一単元の完了済み段階を復習する");
+    }
+    if (phaseEvent.nextPhaseKey) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === phaseEvent.courseId)?.phases.find(x => x.id === phaseEvent.nextPhaseKey)?.formalName;
+      add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`, phaseLabel, "現在の単元で次の段階へ進む");
+    }
   }
   for (const q of quests) {
     const a = q.attempts[0];
@@ -186,7 +198,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (a) add(16, q.id, `/create/quests/${encodeURIComponent(q.id)}`);
     if (a?.code) add(21, q.id, `/quest-board/new?category=WORK_SHARE&targetId=${encodeURIComponent(q.id)}&title=${encodeURIComponent(q.title)}`);
   }
-  for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`);
+  for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`, card.title, card.description);
   if (cards.length) add(11, "collection", "/knowledge-cards");
   add(12, "history", "/history"); // The authorized completion/submission itself is a history item.
   for (const a of achievements) {
