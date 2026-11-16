@@ -1,11 +1,19 @@
 import { Router } from "express";
 import { z } from "zod";
 import { verifyFirebaseToken } from "../middleware/authMiddleware";
-import { feedbackV1 } from "../service/feedbackV1.service";
+import { feedbackV1, retryFailedFeedbackV1 } from "../service/feedbackV1.service";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 const router = Router();
 router.use(verifyFirebaseToken);
+router.post("/:kind/:eventId/retry", async (req, res, next) => {
+  try {
+    const kind = z.enum(["mission", "create", "phase", "unit"]).parse(req.params.kind);
+    const uid = req.authUser?.firebaseUid;
+    if (!uid) throw new AppError(401, "UNAUTHORIZED", "Unauthorized");
+    res.json(await retryFailedFeedbackV1(uid, kind, req.params.eventId));
+  } catch (error) { next(error); }
+});
 router.all("/:kind/:eventId", async (req, res, next) => {
   try {
     const kind = z.enum(["mission", "create", "phase", "unit"]).parse(req.params.kind);
