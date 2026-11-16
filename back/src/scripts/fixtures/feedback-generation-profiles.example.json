@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "example-profiles-v1",
+  "notice": "The three pairs are illustrative, NOT approved final research-profile choices.",
+  "multi": [
+    {
+      "id": "single-achiever",
+      "scores": {
+        "Achiever": 24,
+        "Philanthropist": 12,
+        "Socialiser": 12,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "single-philanthropist",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 24,
+        "Socialiser": 12,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "single-socialiser",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 12,
+        "Socialiser": 24,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "single-freespirit",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 12,
+        "Socialiser": 12,
+        "FreeSpirit": 24,
+        "Player": 12,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "single-player",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 12,
+        "Socialiser": 12,
+        "FreeSpirit": 12,
+        "Player": 24,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "single-disruptor",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 12,
+        "Socialiser": 12,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 24
+      }
+    },
+    {
+      "id": "pair-achiever-socialiser",
+      "scores": {
+        "Achiever": 24,
+        "Philanthropist": 12,
+        "Socialiser": 24,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "pair-free-spirit-player",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 12,
+        "Socialiser": 12,
+        "FreeSpirit": 24,
+        "Player": 24,
+        "Disruptor": 12
+      }
+    },
+    {
+      "id": "pair-philanthropist-disruptor",
+      "scores": {
+        "Achiever": 12,
+        "Philanthropist": 24,
+        "Socialiser": 12,
+        "FreeSpirit": 12,
+        "Player": 12,
+        "Disruptor": 24
+      }
+    },
+    {
+      "id": "all-neutral-16",
+      "scores": {
+        "Achiever": 16,
+        "Philanthropist": 16,
+        "Socialiser": 16,
+        "FreeSpirit": 16,
+        "Player": 16,
+        "Disruptor": 16
+      }
+    }
+  ]
+}

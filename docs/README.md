@@ -20,6 +20,7 @@
 | [development-cloud-run.md](development-cloud-run.md) | 現行 | develop 用 Cloud Run の構成、デプロイ、確認手順 |
 | [hexad-feedback-implementation-spec-2026-11-16.md](hexad-feedback-implementation-spec-2026-11-16.md) | 正本（実装予定） | 4条件・二段階LLM・根拠/候補契約・生成失敗時の手動再生成・研究計測範囲・受入試験とPR分割 |
 | [feedback-v2-rollout.md](feedback-v2-rollout.md) | 検証手順（未デプロイ） | 4条件の手動設定、DB移行、dev実機での生成・再試行確認、未決事項と安全上の注意 |
+| [feedback-generation-cli.md](feedback-generation-cli.md) | 現行（オフライン実験） | 3条件の生成テストCLI、入力ケース・人工HEXADプロフィール、実行コマンド、再開手順、分類器用エクスポート |
 
 ## 学習設計
 

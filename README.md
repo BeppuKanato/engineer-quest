@@ -82,6 +82,7 @@ npm run dev
 | `npm run build` | front / back | ビルド |
 | `npm run validate:learning-seed` | back | 教材 seed の静的検証 |
 | `npm run verify:static` | back | DB 不要の検証一式（seed、各コース、フィードバック v1 等） |
+| `npm run feedback:generate -- --help` | back | HEXAD生成実験CLIの使い方（標準はプレビュー、API呼び出しなし） |
 | `npm run seed:preserve` | back | 学習進捗を保持する seed 適用 |
 
 注意: seed の適用先 DB は必ず確認すること。デプロイ（CD）は migration と seed を自動実行しないため、seed の変更はマージ・デプロイだけでは画面に反映されない。
@@ -99,3 +100,4 @@ npm run dev
 - 新学習フロー: [docs/concept/learning-materials-v2.md](docs/concept/learning-materials-v2.md)
 - develop 用デプロイ: [docs/development-cloud-run.md](docs/development-cloud-run.md)
 - フィードバック v1 実装報告: [docs/feedback-v1-implementation.md](docs/feedback-v1-implementation.md)
+- **HEXAD生成テストCLI（3条件）:** [docs/feedback-generation-cli.md](docs/feedback-generation-cli.md)

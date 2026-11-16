@@ -1,0 +1,116 @@
+[
+  {
+    "caseId": "sample-binary-search-p3",
+    "input": {
+      "learning": {
+        "id": "phase-event:sample-binary-search:phase-3",
+        "unit": {
+          "id": "sample-binary-search",
+          "title": "二分探索（架空デモ）",
+          "status": "IN_PROGRESS"
+        },
+        "currentPhase": {
+          "id": "phase-3",
+          "stageNumber": 3,
+          "stageGoal": "比較結果と探索範囲の更新を確認する",
+          "summary": "2問の確認問題を解いた"
+        },
+        "conceptSnapshot": {
+          "id": "demo-concept-snapshot",
+          "concepts": [
+            {
+              "kind": "assessment",
+              "conceptId": "sample-binary-search:range",
+              "label": "比較結果と探索範囲",
+              "evidence": [
+                {
+                  "assessmentId": "compare-range",
+                  "questionId": "q2",
+                  "questionLabel": "残すべき探索範囲",
+                  "phaseKey": "phase-3",
+                  "attempts": [
+                    {
+                      "sourceId": "demo-assessment-snapshot",
+                      "number": 1,
+                      "correct": false,
+                      "answer": {
+                        "kind": "choice",
+                        "choiceId": "drop-left"
+                      },
+                      "sessionId": "session-a",
+                      "confirmed": true
+                    },
+                    {
+                      "sourceId": "demo-assessment-snapshot",
+                      "number": 2,
+                      "correct": true,
+                      "answer": {
+                        "kind": "choice",
+                        "choiceId": "drop-right"
+                      },
+                      "sessionId": "session-a",
+                      "confirmed": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "state": {
+        "history": []
+      },
+      "actions": [
+        {
+          "id": 4,
+          "label": "単元のフェーズを復習する",
+          "purpose": "比較結果と残す範囲を照合する",
+          "condition": "同じ単元で完了済みの段階がある",
+          "targetIds": [
+            "phase-2"
+          ]
+        },
+        {
+          "id": 23,
+          "label": "次のフェーズへ進む",
+          "purpose": "動きとコードの対応を確認する",
+          "condition": "次のフェーズがある",
+          "targetIds": [
+            "phase-4"
+          ]
+        }
+      ],
+      "targets": {
+        "4": [
+          {
+            "id": "phase-2",
+            "href": "/courses/roadmap/sample-binary-search/learn?phase=phase-2",
+            "name": "動きの説明",
+            "learningContent": "比較結果に応じた探索範囲の更新"
+          }
+        ],
+        "23": [
+          {
+            "id": "phase-4",
+            "href": "/courses/roadmap/sample-binary-search/learn?phase=phase-4",
+            "name": "コードとの対応",
+            "learningContent": "探索範囲更新のコードを追う"
+          }
+        ]
+      },
+      "hexad": null,
+      "bigGoal": null,
+      "stageGoals": {
+        "current": {
+          "phaseKey": "phase-3",
+          "goal": "探索範囲の更新を確認する"
+        },
+        "next": {
+          "phaseKey": "phase-4",
+          "goal": "コードと動きの対応を確認する"
+        }
+      }
+    }
+  }
+]

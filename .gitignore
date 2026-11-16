@@ -140,3 +140,6 @@ back/src/firebase-admin/serviceAccountKey.local.json
 
 # Prisma generate が Windows で残す一時ファイル（Issue #278）
 back/src/generated/prisma/*.tmp*
+# Local offline HEXAD generation experiments: learner input and model results
+/back/.feedback-generation-input/
+/back/.feedback-generation-results/
