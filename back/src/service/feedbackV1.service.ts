@@ -41,7 +41,7 @@ async function resolveEventKey(userId: string, kind: FeedbackV1Kind, eventId: st
   return `${kind}:${eventId}`;
 }
 
-export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string, start = false, generator: typeof generate = generate) {
+export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string, start = false, generator: typeof generate = generate, retryFailed = false) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, select: { id: true } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   // Previously generated results remain immutable; v1 applies to new events.
@@ -56,6 +56,25 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   if (row?.status === "GENERATING" && Date.now() - row.createdAt.getTime() > (tasksEnabled() ? 35 : 10) * 60_000) {
     await prisma.feedbackV1.updateMany({ where: { id: row.id, status: "GENERATING" }, data: { status: "FAILED", failureCode: "GENERATION_INTERRUPTED_OR_TIMEOUT" } });
     row = await prisma.feedbackV1.findUniqueOrThrow({ where: { eventKey: key } });
+  }
+  if (retryFailed) {
+    if (!row) throw new AppError(404, "FEEDBACK_NOT_FOUND", "Feedback not found");
+    if (row.status === "FAILED") {
+      const restarted = await prisma.feedbackV1.updateMany({
+        where: { id: row.id, userId: user.id, status: "FAILED" },
+        data: { status: "GENERATING", failureCode: null, generatedAt: null,
+          createdAt: new Date(), retryCount: { increment: 1 }, runAttempts: 0,
+          runToken: null, runExpiresAt: null },
+      });
+      if (restarted.count === 1) {
+        created = true;
+        await prisma.feedbackV1Call.create({ data: { feedbackId: row.id, data: json({
+          stage: "manual_retry", attemptedAt: new Date().toISOString(),
+          previousFailureCode: row.failureCode, previousRetryCount: row.retryCount,
+        }) } });
+      }
+      row = await prisma.feedbackV1.findUniqueOrThrow({ where: { eventKey: key } });
+    }
   }
   if (row?.status === "COMPLETED" && start) {
     await prisma.feedbackV1Interaction.create({ data: { id: crypto.randomUUID(), feedbackId: row.id, type: "REUSED", data: { occurredAt: new Date().toISOString() } } });
@@ -75,7 +94,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
     // Repeated POST is safe: deterministic Cloud Tasks names deduplicate dispatch.
     // If enqueueing fails the row remains retryable on the next POST.
     try {
-      await enqueueFeedbackTask({ feedbackId: row.id, kind, eventId });
+      await enqueueFeedbackTask({ feedbackId: row.id, kind, eventId, retryCount: row.retryCount });
     } catch (error) {
       console.error("feedback_v1_enqueue_failed", { id: row.id, error });
       throw new AppError(503, "FEEDBACK_QUEUE_UNAVAILABLE", "Unable to enqueue feedback");
@@ -101,6 +120,11 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   return response(row);
 }
 
+/** Manually retry a FAILED feedback using its original saved input. */
+export function retryFailedFeedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string) {
+  return feedbackV1(firebaseUid, kind, eventId, true, generate, true);
+}
+
 // Cloud Tasks runs this in a dedicated authenticated HTTP request. The database
 // claim is atomic across Cloud Run instances, unlike the former fire-and-forget promise.
 export async function processFeedbackV1Task(
@@ -111,7 +135,7 @@ export async function processFeedbackV1Task(
     where: { id: payload.feedbackId },
     include: { user: { select: { firebaseUid: true } } },
   });
-  if (!row || row.status !== "GENERATING") return "done";
+  if (!row || row.status !== "GENERATING" || (payload.retryCount ?? 0) !== row.retryCount) return "done";
   if (Date.now() - row.createdAt.getTime() > 35 * 60_000) {
     await prisma.feedbackV1.updateMany({ where: { id: row.id, status: "GENERATING" }, data: { status: "FAILED", failureCode: "GENERATION_EXPIRED" } });
     return "done";
