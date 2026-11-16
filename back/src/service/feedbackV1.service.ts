@@ -3,8 +3,51 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { buildFeedbackV1Context } from "./feedbackV1.context";
 import { generate, validateSelection, type Input } from "./feedbackV1.engine";
+import { generateFeedbackV2, supportPlanSchema, FEEDBACK_V2_PROMPT_VERSION, type FeedbackV2Input, type SupportPlanResult } from "./feedbackV2.engine";
 import { enqueueFeedbackTask, tasksEnabled, type FeedbackTaskPayload } from "./feedbackV1.tasks";
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v));
+/** Only a fully validated plan from this same feedback event and prompt version
+ * may be reused. The saved input remains frozen across attempts.
+ */
+async function reusableStage1(feedbackId: string): Promise<SupportPlanResult | undefined> {
+  const record = await prisma.feedbackV1Call.findFirst({
+    where: {
+      feedbackId,
+      data: { path: ["stage"], equals: "support-plan-validated" },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { data: true },
+  });
+  const entry = record?.data;
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+  const audit = entry as Record<string, unknown>;
+  if (audit.promptVersion !== FEEDBACK_V2_PROMPT_VERSION) return undefined;
+  const parsed = supportPlanSchema.safeParse(audit.plan);
+  return parsed.success ? parsed.data : undefined;
+}
+const generateForExperiment = async (
+  input: Input,
+  generator: typeof generate,
+  log: (entry: unknown) => Promise<void>,
+  feedbackId?: string,
+) => {
+  if (generator === generate && input.experimentV2) {
+    const previous = feedbackId ? await reusableStage1(feedbackId) : undefined;
+    return generateFeedbackV2(input as FeedbackV2Input, undefined, log, previous);
+  }
+  return generator(input, undefined, log);
+};
+function validateGeneratedSelection(input: Input, result: Awaited<ReturnType<typeof generateForExperiment>>) {
+  const validation = validateSelection(input, result.selection);
+  const composed = (result as { composedFeedback?: { recommendations: { candidateId: string }[] } }).composedFeedback;
+  if (composed) {
+    // Keep short, code-issued candidate IDs in the UI even after refreshing URL availability.
+    composed.recommendations.forEach((candidate, i) => {
+      if (validation.candidates[i]) validation.candidates[i].candidateId = candidate.candidateId;
+    });
+  }
+  return validation;
+}
 
 export type FeedbackV1Kind = "mission" | "create" | "phase" | "unit";
 
@@ -25,7 +68,7 @@ async function resolveEventKey(userId: string, kind: FeedbackV1Kind, eventId: st
   return `${kind}:${eventId}`;
 }
 
-export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string, start = false, generator: typeof generate = generate) {
+export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string, start = false, generator: typeof generate = generate, retryFailed = false) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, select: { id: true } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   // Previously generated results remain immutable; v1 applies to new events.
@@ -40,6 +83,25 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   if (row?.status === "GENERATING" && Date.now() - row.createdAt.getTime() > (tasksEnabled() ? 35 : 10) * 60_000) {
     await prisma.feedbackV1.updateMany({ where: { id: row.id, status: "GENERATING" }, data: { status: "FAILED", failureCode: "GENERATION_INTERRUPTED_OR_TIMEOUT" } });
     row = await prisma.feedbackV1.findUniqueOrThrow({ where: { eventKey: key } });
+  }
+  if (retryFailed) {
+    if (!row) throw new AppError(404, "FEEDBACK_NOT_FOUND", "Feedback not found");
+    if (row.status === "FAILED") {
+      const restarted = await prisma.feedbackV1.updateMany({
+        where: { id: row.id, userId: user.id, status: "FAILED" },
+        data: { status: "GENERATING", failureCode: null, generatedAt: null,
+          createdAt: new Date(), retryCount: { increment: 1 }, runAttempts: 0,
+          runToken: null, runExpiresAt: null },
+      });
+      if (restarted.count === 1) {
+        created = true;
+        await prisma.feedbackV1Call.create({ data: { feedbackId: row.id, data: json({
+          stage: "manual_retry", attemptedAt: new Date().toISOString(),
+          previousFailureCode: row.failureCode, previousRetryCount: row.retryCount,
+        }) } });
+      }
+      row = await prisma.feedbackV1.findUniqueOrThrow({ where: { eventKey: key } });
+    }
   }
   if (row?.status === "COMPLETED" && start) {
     await prisma.feedbackV1Interaction.create({ data: { id: crypto.randomUUID(), feedbackId: row.id, type: "REUSED", data: { occurredAt: new Date().toISOString() } } });
@@ -59,7 +121,7 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
     // Repeated POST is safe: deterministic Cloud Tasks names deduplicate dispatch.
     // If enqueueing fails the row remains retryable on the next POST.
     try {
-      await enqueueFeedbackTask({ feedbackId: row.id, kind, eventId });
+      await enqueueFeedbackTask({ feedbackId: row.id, kind, eventId, retryCount: row.retryCount });
     } catch (error) {
       console.error("feedback_v1_enqueue_failed", { id: row.id, error });
       throw new AppError(503, "FEEDBACK_QUEUE_UNAVAILABLE", "Unable to enqueue feedback");
@@ -69,12 +131,12 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
     const context = { input: row.input as unknown as Input };
     void (async () => {
       try {
-        const result = await generator(context.input, undefined, async data => {
+        const result = await generateForExperiment(context.input, generator, async data => {
           await prisma.feedbackV1Call.create({ data: { feedbackId: id, data: json(data) } });
-        });
+        }, id);
         // Recheck access and execution constraints after generation; never trust a model URL.
-        const fresh = await buildFeedbackV1Context(firebaseUid, kind, eventId);
-        result.validation = validateSelection({ ...fresh.input, hexad: context.input.hexad }, result.selection);
+        const fresh = await buildFeedbackV1Context(firebaseUid, kind, eventId, context.input.experimentV2);
+        result.validation = validateGeneratedSelection({ ...fresh.input, hexad: context.input.hexad }, result);
         await prisma.feedbackV1.update({ where: { id, status: "GENERATING" }, data: { status: "COMPLETED", result: json(result), generatedAt: new Date() } });
       } catch (error) {
         await prisma.feedbackV1.update({ where: { id }, data: { status: "FAILED", failureCode: error instanceof Error ? error.message : "GENERATION_FAILED" } });
@@ -83,6 +145,11 @@ export async function feedbackV1(firebaseUid: string, kind: FeedbackV1Kind, even
   }
   if (!row) throw new AppError(404, "FEEDBACK_NOT_FOUND", "Feedback not found");
   return response(row);
+}
+
+/** Manually retry a FAILED feedback using its original saved input. */
+export function retryFailedFeedbackV1(firebaseUid: string, kind: FeedbackV1Kind, eventId: string) {
+  return feedbackV1(firebaseUid, kind, eventId, true, generate, true);
 }
 
 // Cloud Tasks runs this in a dedicated authenticated HTTP request. The database
@@ -95,7 +162,7 @@ export async function processFeedbackV1Task(
     where: { id: payload.feedbackId },
     include: { user: { select: { firebaseUid: true } } },
   });
-  if (!row || row.status !== "GENERATING") return "done";
+  if (!row || row.status !== "GENERATING" || (payload.retryCount ?? 0) !== row.retryCount) return "done";
   if (Date.now() - row.createdAt.getTime() > 35 * 60_000) {
     await prisma.feedbackV1.updateMany({ where: { id: row.id, status: "GENERATING" }, data: { status: "FAILED", failureCode: "GENERATION_EXPIRED" } });
     return "done";
@@ -131,11 +198,11 @@ export async function processFeedbackV1Task(
       throw new Error("COMPLETION_CHANGED");
     }
     const savedInput = row.input as unknown as Input;
-    const result = await generator(savedInput, undefined, async data => {
+    const result = await generateForExperiment(savedInput, generator, async data => {
       await prisma.feedbackV1Call.create({ data: { feedbackId: row.id, data: json(data) } });
-    });
-    const fresh = await buildFeedbackV1Context(row.user.firebaseUid, payload.kind, payload.eventId);
-    result.validation = validateSelection({ ...fresh.input, hexad: savedInput.hexad }, result.selection);
+    }, row.id);
+    const fresh = await buildFeedbackV1Context(row.user.firebaseUid, payload.kind, payload.eventId, savedInput.experimentV2);
+    result.validation = validateGeneratedSelection({ ...fresh.input, hexad: savedInput.hexad }, result);
     const updated = await prisma.feedbackV1.updateMany({
       where: owned,
       data: { status: "COMPLETED", result: json(result), generatedAt: new Date(), runToken: null, runExpiresAt: null, failureCode: null },
@@ -163,7 +230,7 @@ export async function processFeedbackV1Task(
 }
 
 function response(row: { id: string; status: string; createdAt: Date; generatedAt: Date | null; result: Prisma.JsonValue | null; input?: Prisma.JsonValue }) {
-  const result = row.result as unknown as Awaited<ReturnType<typeof generate>> | null;
+  const result = row.result as unknown as (Awaited<ReturnType<typeof generate>> & { feedbackText?: string }) | null;
   const learning = (row.input as unknown as { learning?: { conceptSnapshot?: unknown } } | undefined)?.learning;
   const goal = (row.input as unknown as Input | null)?.bigGoal;
   const goalSnapshot = goal ? {
@@ -173,7 +240,7 @@ function response(row: { id: string; status: string; createdAt: Date; generatedA
     requirements: goal.progress.requirements ?? [],
   } : null;
   return { conceptSnapshot: learning?.conceptSnapshot ?? null, goalSnapshot, id: row.id, status: row.status, source: "GENERATED", requestedAt: row.createdAt.toISOString(), completedAt: row.generatedAt?.toISOString() ?? null,
-    feedback: result ? { currentState: result.analysis.currentState, nextGoal: result.selection.nextGoal, nextStep: result.selection.nextStep, reason: result.selection.reason, actionType: "V1_ACTION", actionLabel: result.selection.actionLabel, actionHref: result.validation.actionHref, recommendations: (result.selection.candidates ?? [result.selection]).map((candidate, index) => ({
+    feedback: result ? { currentState: result.analysis.currentState, explanation: result.feedbackText ?? null, nextGoal: result.selection.nextGoal, nextStep: result.selection.nextStep, reason: result.selection.reason, actionType: "V1_ACTION", actionLabel: result.selection.actionLabel, actionHref: result.validation.actionHref, recommendations: (result.selection.candidates ?? [result.selection]).map((candidate, index) => ({
       candidateId: result.validation.candidates?.[index]?.candidateId ?? `candidate-${index+1}`,
       nextStep: candidate.nextStep, reason: candidate.reason, actionLabel: candidate.actionLabel,
       actionHref: result.validation.candidates?.[index]?.actionHref ?? (index === 0 ? result.validation.actionHref : null),

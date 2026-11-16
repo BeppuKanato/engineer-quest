@@ -1,6 +1,8 @@
 import { fetcher } from "@/lib/fetcher";
 
-type AnswerEvidence = { sourceId: string; sessionId: string; number: number; correct: boolean };
+type AnswerEvidence = { sourceId: string; sessionId: string; number: number; correct: boolean;
+  answer?: {kind:"node";nodeId:string} | {kind:"none"} | {kind:"choice";choiceId:string} | {kind:"order";lineIds:string[]};
+};
 export type ConceptSnapshot = {
   id: string; version: 1; courseId: string; title: string; relation: "unit-components";
   missingCompletionEvidence?: {sourceId:string;phaseKey:string|null}[];
@@ -8,7 +10,7 @@ export type ConceptSnapshot = {
     conceptId: string; label: string; kind: string; state: "unobserved" | "confirmed" | "needs_check";
     attemptedQuestions: number; totalQuestions: number;
     evidence: { phaseKey: string; assessmentId: string; questionId: string; tags: string[]; stageLabel?: string; questionLabel?: string;
-      first: AnswerEvidence | null; latest: AnswerEvidence | null; retried: boolean; sessions: number }[];
+      first: AnswerEvidence | null; latest: AnswerEvidence | null; attempts?: AnswerEvidence[]; retried: boolean; sessions: number }[];
     implementation: null | { completed: true | "unknown"; testsPassed: boolean | "unknown"; testRuns: number | "unknown"; hintUsage: unknown; inputLevel: string };
   }[];
 };
@@ -25,8 +27,11 @@ export type FeedbackGoalSnapshot = {
 };
 export type FeedbackV1Result = { id: string; status: string; conceptSnapshot?: ConceptSnapshot | null;
   goalSnapshot?: FeedbackGoalSnapshot | null;
-  feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
+  feedback: null | { currentState: string; explanation?: string | null; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
 export const getFeedbackV1 = (token: string, kind: string, eventId: string, method: string) =>
   fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { token, method });
+/** Rebuild the same failed feedback; normal POST never restarts a FAILED result. */
+export const retryFeedbackV1 = (token: string, kind: string, eventId: string) =>
+  fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}/retry`, { token, method: "POST" });
 export const feedbackCandidates = (f: NonNullable<FeedbackV1Result["feedback"]>): FeedbackCandidate[] =>
   f.recommendations ?? [{ candidateId: "candidate-1", nextStep: f.nextStep, reason: f.reason, actionLabel: f.actionLabel, actionHref: f.actionHref }];

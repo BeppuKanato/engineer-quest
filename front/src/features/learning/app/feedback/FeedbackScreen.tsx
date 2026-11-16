@@ -62,7 +62,7 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
   /** 達成した大目標への次の目標の提案など、画面後段への差し込み。 */
   children?: ReactNode;
 }) {
-  const { result, error, unavailable } = useFeedbackV1(kind, eventId);
+  const { result, error, unavailable, retry, retrying } = useFeedbackV1(kind, eventId);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus(); }, []);
   const proceededRef = useRef(false);
@@ -102,11 +102,14 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
     </Box>}
     {result?.conceptSnapshot && <Box sx={{ width: "100%", maxWidth: 1040 }}><ConceptMap snapshot={result.conceptSnapshot} /></Box>}
     {unavailable ? <Typography role="status" color="text.secondary">フィードバックはありません。次へ進みます。</Typography>
-      : failed ? <Alert severity="warning" sx={{ width: "100%", maxWidth: 640 }}>フィードバックを生成できませんでした。学習は続けられます。</Alert>
+      : failed && !retrying ? <Stack spacing={1.5} sx={{ width: "100%", maxWidth: 640 }}>
+          <Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert>
+          <Button variant="outlined" onClick={retry} disabled={retrying} sx={{ alignSelf: "center", minHeight: 44 }}>再生成</Button>
+        </Stack>
       : !f ? <Alert severity="info" sx={{ width: "100%", maxWidth: 640 }}>フィードバックを準備しています。</Alert>
       : <Stack spacing={2} sx={{ width: "100%", maxWidth: 640 }}>
           <FeedbackObservation id={result.id} href={f.actionHref} candidates={feedbackCandidates(f)} />
-          {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
+          {([["現在の状態", f.currentState], ...(f.explanation ? [["フィードバック", f.explanation] as const] : []), ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
             <div key={label}>
               <Typography fontWeight={900}>{label}</Typography>
               <Typography sx={{ fontSize: 16, overflowWrap: "anywhere" }}>{body}</Typography>

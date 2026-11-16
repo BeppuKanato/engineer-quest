@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../error/appError";
 import { getAchievementsByUser } from "./achievement.service";
 import { HEXAD_FEEDBACK_EXPERIMENT_KEY } from "./experimentAssignment.service";
+import { selectTop1, resolveHexadCondition, type HexadType, type HexadScores } from "./feedbackHexadConditions";
 import { evaluateBigGoal } from "./bigGoal.evaluate";
 import { getActiveBigGoal, loadBigGoalFacts } from "./bigGoal.service";
 import type { BigGoalParams } from "./bigGoal.types";
@@ -88,12 +89,12 @@ const definitions = [
   ["他の人の投稿へ返信する", "他者への支援・説明を通じた理解の整理", "他者の公開・返信可能投稿がある"],
   ["次のフェーズへ進む", "学習の継続", "現在のフェーズの次のフェーズがある"],
 ];
-export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create" | "phase" | "unit", eventId: string) {
+export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission" | "create" | "phase" | "unit", eventId: string, frozenExperiment?: Input["experimentV2"]) {
   const user = await prisma.user.findUnique({ where: { firebaseUid }, include: { hexadResponse: true, experimentAssignments: { where: { experimentKey: HEXAD_FEEDBACK_EXPERIMENT_KEY } } } });
   if (!user) throw new AppError(404, "USER_NOT_FOUND", "User not found");
   const assignment = user.experimentAssignments[0];
   if (!assignment) throw new AppError(409, "EXPERIMENT_ASSIGNMENT_REQUIRED", "Experiment assignment required");
-  if (assignment.condition === "PERSONALIZED" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
+  if (assignment.condition !== "STANDARD" && !user.hexadResponse) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
   const cutoff = new Date();
   let learning: unknown;
   let stageGoals: Input["stageGoals"] = null;
@@ -166,18 +167,30 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     return { id: c.id, title: c.title, status: unitRow?.status ?? "NOT_STARTED", phases: allPhaseRows.filter(p => p.courseId === c.id).map(p => ({ id: p.phaseKey, status: p.status })) };
   });
   const targets: Record<number, Target[]> = Object.fromEntries(definitions.map((_, i) => [i + 1, []]));
-  const add = (id: number, targetId: string, href: string) => targets[id].push({ id: targetId, href });
+  // Human-readable, code-grounded target metadata is used by Stage1. URLs and
+  // IDs remain authoritative; the model cannot invent destinations.
+  const add = (id: number, targetId: string, href: string, name?: string, learningContent?: string) =>
+    targets[id].push({ id: targetId, href, name, learningContent });
   if (kind === "unit") {
     for (const u of units) {
-      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
-      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`);
-      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`);
+      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "この単元の学習を開始する");
+      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`, u.title, "途中から学習を再開する");
+      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "完了した単元を復習する");
     }
-    for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
+    for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
+      add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "完了した段階を復習する");
+    }
   }
   if (kind === "phase" && phaseEvent) {
-    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`);
-    if (phaseEvent.nextPhaseKey) add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`);
+    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
+      add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "同一単元の完了済み段階を復習する");
+    }
+    if (phaseEvent.nextPhaseKey) {
+      const phaseLabel = conceptDefinitions.find(unit => unit.courseId === phaseEvent.courseId)?.phases.find(x => x.id === phaseEvent.nextPhaseKey)?.formalName;
+      add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`, phaseLabel, "現在の単元で次の段階へ進む");
+    }
   }
   for (const q of quests) {
     const a = q.attempts[0];
@@ -185,7 +198,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (a) add(16, q.id, `/create/quests/${encodeURIComponent(q.id)}`);
     if (a?.code) add(21, q.id, `/quest-board/new?category=WORK_SHARE&targetId=${encodeURIComponent(q.id)}&title=${encodeURIComponent(q.title)}`);
   }
-  for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`);
+  for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`, card.title, card.description);
   if (cards.length) add(11, "collection", "/knowledge-cards");
   add(12, "history", "/history"); // The authorized completion/submission itself is a history item.
   for (const a of achievements) {
@@ -193,7 +206,8 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     if (!a.isSecret && !a.userAchievements.length && user.selectedTargetAchievementId !== a.id) add(14, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`);
   }
   add(15, "profile", "/profile");
-  for (const p of posts) {
+  const unitPosts = kind === "unit" ? posts.filter(p => p.courseId === eventId) : posts;
+  for (const p of unitPosts) {
     add(17, p.id, `/quest-board/${encodeURIComponent(p.id)}`);
     if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`);
   }
@@ -203,7 +217,36 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   // review a completed phase of this unit, or review with an acquired card.
   const actions = kind === "phase" ? allActions.filter(a => [23, 4, 9].includes(a.id)) : allActions;
   const h = user.hexadResponse;
-  const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores: { Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore, FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore, Disruptor: h.disruptorScore, Player: h.playerScore } } : null;
+  const scores: HexadScores | null = h ? {
+    Philanthropist: h.philanthropistScore, Socialiser: h.socialiserScore,
+    FreeSpirit: h.freeSpiritScore, Achiever: h.achieverScore,
+    Disruptor: h.disruptorScore, Player: h.playerScore,
+  } : null;
+  // Preserve legacy PERSONALIZED inputs for already assigned / persisted rows.
+  const hexad: Input["hexad"] = assignment.condition === "PERSONALIZED" && h && scores
+    ? { questionnaireVersion: h.questionnaireVersion, scoreRange: [4, 28], scores } : null;
+  let experimentV2: Input["experimentV2"];
+  if (frozenExperiment) {
+    if (frozenExperiment.condition !== assignment.condition) throw new Error("EXPERIMENT_CONDITION_CHANGED");
+    experimentV2 = frozenExperiment;
+  } else if (assignment.condition === "STANDARD") {
+    experimentV2 = resolveHexadCondition("STANDARD", null);
+  } else if (assignment.condition === "TOP_1" || assignment.condition === "ROULETTE" || assignment.condition === "MULTI") {
+    if (!scores) throw new AppError(409, "HEXAD_RESPONSE_REQUIRED", "HEXAD required");
+    let fixedTop1 = assignment.top1Type as HexadType | null;
+    if (assignment.condition === "TOP_1" && !fixedTop1) {
+      const proposed = selectTop1(scores);
+      // Concurrent first generation requests must share the SAME persisted tie resolution.
+      await prisma.experimentAssignment.updateMany({
+        where: { id: assignment.id, top1Type: null },
+        data: { top1Type: proposed.type },
+      });
+      const stored = await prisma.experimentAssignment.findUnique({ where: { id: assignment.id }, select: { top1Type: true } });
+      fixedTop1 = stored?.top1Type as HexadType | null ?? null;
+      if (!fixedTop1) throw new Error("TOP1_CHOICE_NOT_STORED");
+    }
+    experimentV2 = resolveHexadCondition(assignment.condition, scores, fixedTop1);
+  }
   const historyView = history.map(h => {
     const result = h.result as unknown as { selection?: { actionId: number; targetId: string | null; purpose: string; reason: string; candidates?: { actionId: number | null; targetId: string | null; capabilityId?: string | null; purpose: string; reason: string }[] }; validation?: { actionHref: string | null } } | null;
     const s = result?.selection;
@@ -218,8 +261,8 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   } : {
     courses, units, quests: quests.map(({ attempts, id, title, description, scenario, requirements, relatedCourses }) => ({ id, title, description, scenario, requirements, relatedCourses, attempts: attempts.map(({ code, ...a }) => ({ ...a, hasSavedCode: Boolean(code) })) })), cards: cards.map(c => ({ ...withoutFields(c, ["createdAt", "updatedAt"]), acquired: true, viewed: history.some(h => h.interactions.some(i => i.type === "ARRIVED" && (i.data as Record<string, unknown>).targetId === c.id)) ? "observed_arrival" : "not_observed" })),
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
-    posts: posts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
+    posts: unitPosts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
-  const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals });
+  const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals, experimentV2 });
   return { input, userId: user.id, condition: assignment.condition };
 }

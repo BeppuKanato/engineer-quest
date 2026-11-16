@@ -4,7 +4,7 @@ import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getFeedbackV1, feedbackCandidates, type FeedbackCandidate, type FeedbackV1Result } from "@/api/feedbackV1.api";
+import { getFeedbackV1, retryFeedbackV1, feedbackCandidates, type FeedbackCandidate, type FeedbackV1Result } from "@/api/feedbackV1.api";
 export type { FeedbackV1Result } from "@/api/feedbackV1.api";
 import { ApiError, fetcher } from "@/lib/fetcher";
 
@@ -32,6 +32,16 @@ export type FeedbackV1Kind = "mission" | "create" | "phase" | "unit";
 export function useFeedbackV1(kind: FeedbackV1Kind, eventId: string) {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [retryRequest, setRetryRequest] = useState<{ target: string; attempt: number; mode: "RETRY" | "POST" } | null>(null);
+  const target = `${kind}:${eventId}`;
+  const retry = () => {
+    if (retrying || unavailable || result?.status === "GENERATING" || result?.status === "COMPLETED") return;
+    setRetrying(true);
+    setError(false);
+    const mode = result?.status === "FAILED" ? "RETRY" : "POST";
+    setRetryRequest(current => ({ target, attempt: (current?.attempt ?? 0) + 1, mode }));
+  };
   // No experiment assignment (409) or no such completion event (404): feedback
   // simply does not apply to this user/event.
   const [unavailable, setUnavailable] = useState(false);
@@ -40,18 +50,24 @@ export function useFeedbackV1(kind: FeedbackV1Kind, eventId: string) {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
     let notFoundRetries = 0;
+    const initialMethod = retryRequest?.target === `${kind}:${eventId}` ? retryRequest.mode : "POST";
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (!user) return;
       const token = await user.getIdToken();
       const load = async (method: string) => {
         try {
-          const data = await getFeedbackV1(token, kind, eventId, method);
+          const data = method === "RETRY"
+            ? await retryFeedbackV1(token, kind, eventId)
+            : await getFeedbackV1(token, kind, eventId, method);
           if (stopped) return;
           notFoundRetries = 0;
           setResult(data);
+          setRetrying(false);
+          setError(false);
           if (data.status === "GENERATING") timer = setTimeout(() => void load("GET"), 1500);
         } catch (e) {
           if (stopped) return;
+          setRetrying(false);
           if (e instanceof ApiError && e.status === 409) { setUnavailable(true); return; }
           if (e instanceof ApiError && e.status === 404) {
             if (method === "POST" && notFoundRetries < 2) { notFoundRetries += 1; timer = setTimeout(() => void load("POST"), 1500); return; }
@@ -60,11 +76,11 @@ export function useFeedbackV1(kind: FeedbackV1Kind, eventId: string) {
           setError(true);
         }
       };
-      void load("POST");
+      void load(initialMethod);
     });
     return () => { stopped = true; clearTimeout(timer); unsubscribe(); };
-  }, [eventId, kind]);
-  return { result, error, unavailable };
+  }, [eventId, kind, retryRequest]);
+  return { result, error, unavailable, retry, retrying };
 }
 
 export function FeedbackV1({ kind, eventId, onAction }: {
@@ -74,13 +90,16 @@ export function FeedbackV1({ kind, eventId, onAction }: {
   // navigation in-app (e.g. moving between phases) instead of following the link.
   onAction?: (href: string | null) => boolean;
 }) {
-  const { result, error, unavailable } = useFeedbackV1(kind, eventId);
+  const { result, error, unavailable, retry, retrying } = useFeedbackV1(kind, eventId);
   const f = result?.feedback;
   if (unavailable) return null;
   return <Paper data-feedback-scope variant="outlined" sx={{ p: 3, my: 2 }}>
-    {error || result?.status === "FAILED" ? <Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert> : !f ? <Alert severity="info">フィードバックを準備しています。</Alert> : <Stack spacing={2}>
+    {(error || result?.status === "FAILED") && !retrying
+      ? <Stack spacing={1}><Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert>
+          <Button onClick={retry} disabled={retrying} variant="outlined">再生成</Button>
+        </Stack> : !f ? <Alert severity="info">フィードバックを準備しています。</Alert> : <Stack spacing={2}>
       <FeedbackObservation id={result.id} href={f.actionHref} candidates={feedbackCandidates(f)} />
-      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
+      {([["現在の状態", f.currentState], ...(f.explanation ? [["フィードバック", f.explanation] as const] : []), ["次の目標", f.nextGoal]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
       <FeedbackCandidates candidates={feedbackCandidates(f)} onAction={onAction} />
     </Stack>}
   </Paper>;

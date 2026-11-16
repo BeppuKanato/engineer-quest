@@ -85,4 +85,28 @@ for(const mutation of ["empty-assessment","wrong-kind","missing-implementation-p
   if(mutation==="duplicate-question")changed[0].concepts[0].questions.push(changed[0].concepts[0].questions[0]);
   assert.throws(()=>validateConceptDefinitions(changed),mutation);
 }
+// v2 completion evidence records actual answer content; legacy v1 is still readable.
+const v2Evidence = {version:2, assessmentId:phaseKey, sessionId:"confirmed-v2", startedAt:1,
+  records:[
+    {questionId:"take-next",attempts:[
+      {number:1,correct:false,answer:{kind:"node",nodeId:"incorrect-node"}},
+      {number:2,correct:true,answer:{kind:"node",nodeId:"correct-node"}},
+    ]},
+    {questionId:"after-c",attempts:[
+      {number:1,correct:true,answer:{kind:"choice",choiceId:"keep-right"}},
+    ]},
+  ],
+};
+assert.equal(validateEvidence(unit.courseId,phaseKey,v2Evidence,true).version,2);
+const v2Snapshot=snapshot([event("v2",v2Evidence)]);
+const v2Attempts=v2Snapshot.concepts[0].evidence[0].attempts;
+assert.equal(v2Attempts.length,2);
+assert.deepEqual(v2Attempts.map(a=>a.answer),[
+  {kind:"node",nodeId:"incorrect-node"},
+  {kind:"node",nodeId:"correct-node"},
+]);
+assert.deepEqual(v2Snapshot, snapshot([event("v2",v2Evidence),event("v2",v2Evidence)]));
+assert.throws(()=>validateEvidence(unit.courseId,phaseKey,{
+  ...v2Evidence,records:[{...v2Evidence.records[0], attempts:[{number:1,correct:true}]},v2Evidence.records[1]],
+},true)); // v2 requires an answer on each attempt
 console.log("PASS: deterministic concepts, first/latest, retry, partial, relearn, reordered/duplicate events, P7 separate evidence");
