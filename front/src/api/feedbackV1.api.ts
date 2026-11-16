@@ -25,7 +25,7 @@ export type FeedbackGoalSnapshot = {
 };
 export type FeedbackV1Result = { id: string; status: string; conceptSnapshot?: ConceptSnapshot | null;
   goalSnapshot?: FeedbackGoalSnapshot | null;
-  feedback: null | { currentState: string; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
+  feedback: null | { currentState: string; explanation?: string | null; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
 export const getFeedbackV1 = (token: string, kind: string, eventId: string, method: string) =>
   fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { token, method });
 export const feedbackCandidates = (f: NonNullable<FeedbackV1Result["feedback"]>): FeedbackCandidate[] =>
