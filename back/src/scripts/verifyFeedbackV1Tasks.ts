@@ -2,7 +2,7 @@
 // Does not contact Cloud Tasks, OpenAI, or a live database.
 import assert from "node:assert/strict";
 import { prisma } from "../lib/prisma";
-import { feedbackV1, processFeedbackV1Task } from "../service/feedbackV1.service";
+import { feedbackV1, retryFailedFeedbackV1, processFeedbackV1Task } from "../service/feedbackV1.service";
 import type { Input } from "../service/feedbackV1.engine";
 import type { generate } from "../service/feedbackV1.engine";
 import * as contextModule from "../service/feedbackV1.context";
@@ -11,8 +11,8 @@ import * as taskModule from "../service/feedbackV1.tasks";
 async function main() {
   process.env.FEEDBACK_TASKS_ENABLED = "true";
   const db = prisma as unknown as Record<string, Record<string, unknown>>;
-  const enqueued: {feedbackId:string;kind:string;eventId:string;recoveryAttempt?:number}[] = [];
-  (taskModule as {enqueueFeedbackTask:unknown}).enqueueFeedbackTask = async (payload: {feedbackId:string;kind:string;eventId:string}, recoveryAttempt?:number) => { enqueued.push({...payload,recoveryAttempt}); };
+  const enqueued: {feedbackId:string;kind:string;eventId:string;retryCount?:number;recoveryAttempt?:number}[] = [];
+  (taskModule as {enqueueFeedbackTask:unknown}).enqueueFeedbackTask = async (payload: {feedbackId:string;kind:string;eventId:string;retryCount?:number}, recoveryAttempt?:number) => { enqueued.push({...payload,recoveryAttempt}); };
   const input: Input = {
     learning: { id: "answer-1" }, state: {},
     actions: [{ id: 15, label: "XPを見る", purpose: "振り返り", condition: "表示可能", targetIds: ["profile"] }],
@@ -22,7 +22,7 @@ async function main() {
   (contextModule as {buildFeedbackV1Context:unknown}).buildFeedbackV1Context = async () => ({ userId: "user-1", condition: "STANDARD", input });
   type Row = {
     id:string;userId:string;eventKey:string;condition:string;status:string;input:Input;result:unknown;
-    createdAt:Date;generatedAt:Date|null;runToken:string|null;runExpiresAt:Date|null;runAttempts:number;failureCode:string|null;
+    createdAt:Date;generatedAt:Date|null;runToken:string|null;runExpiresAt:Date|null;runAttempts:number;retryCount:number;failureCode:string|null;
     user:{firebaseUid:string};
   };
   const rows = new Map<string,Row>();
@@ -35,17 +35,20 @@ async function main() {
     const row:Row = {
       id: "f-" + rows.size, userId:"user-1", eventKey:data.eventKey, condition:"STANDARD",
       status:"GENERATING", input:data.input!, result:null, createdAt:new Date(), generatedAt:null,
-      runToken:null, runExpiresAt:null, runAttempts:0, failureCode:null, user:{firebaseUid:"uid"},
+      runToken:null, runExpiresAt:null, runAttempts:0, retryCount:0, failureCode:null, user:{firebaseUid:"uid"},
     };
     rows.set(row.id,row);
     return row;
   };
-  db.feedbackV1.updateMany = async ({where,data}:{where:{id:string;status?:string;runToken?:string;OR?:unknown};data:Partial<Omit<Row,"runAttempts">> & {runAttempts?:{increment:number}}}) => {
+  db.feedbackV1.updateMany = async ({where,data}:{where:{id:string;status?:string;runToken?:string;OR?:unknown};data:Partial<Omit<Row,"runAttempts"|"retryCount">> & {runAttempts?:{increment:number}|number;retryCount?:{increment:number}|number}}) => {
     const row=rows.get(where.id);
     if(!row || (where.status && row.status!==where.status) || (where.runToken && row.runToken!==where.runToken)) return {count:0};
     if(where.OR && row.runExpiresAt && row.runExpiresAt.getTime()>Date.now()) return {count:0};
     if(typeof data.runAttempts==="object") row.runAttempts+=data.runAttempts.increment;
-    Object.assign(row,{...data,runAttempts:row.runAttempts});
+    else if (typeof data.runAttempts === "number") row.runAttempts = data.runAttempts;
+    if(typeof data.retryCount==="object") row.retryCount+=data.retryCount.increment;
+    else if (typeof data.retryCount === "number") row.retryCount = data.retryCount;
+    Object.assign(row,{...data,runAttempts:row.runAttempts,retryCount:row.retryCount});
     return {count:1};
   };
   db.feedbackV1Interaction.create = async () => ({});
@@ -91,6 +94,18 @@ async function main() {
   assert.equal(rows.get("f-2")?.status,"FAILED");
   assert.equal(rows.get("f-2")?.runAttempts,1,"validation failures must not trigger paid API retries");
   assert.equal(logs.length,2);
-  console.log("PASS: Cloud Tasks enqueue-only request, duplicate delivery, transient retry and terminal validation errors");
+  // A failed generation can be retried any number of times by the user.
+  const restarted = await retryFailedFeedbackV1("uid", "mission", "event-3");
+  assert.equal(restarted.status, "GENERATING");
+  assert.equal(rows.get("f-2")?.retryCount,1);
+  assert.equal(rows.get("f-2")?.runAttempts,0);
+  assert.equal(enqueued.at(-1)?.retryCount,1);
+  assert.equal(await processFeedbackV1Task({ ...permanent, retryCount: 0 }, good),"done");
+  assert.equal(rows.get("f-2")?.status,"GENERATING","stale task must not execute the new generation");
+  assert.equal(await processFeedbackV1Task({ ...permanent, retryCount: 1 },good),"done");
+  assert.equal(rows.get("f-2")?.status,"COMPLETED");
+  assert.equal((await retryFailedFeedbackV1("uid", "mission", "event-3")).status,"COMPLETED","successful feedback remains immutable");
+  assert.equal(logs.length,4); // prior 2 + manual_retry audit + new generation
+  console.log("PASS: Cloud Tasks generation keys, old task rejection, user-triggered retry and preserved completed results");
 }
 void main().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>prisma.$disconnect());
