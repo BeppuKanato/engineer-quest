@@ -329,6 +329,7 @@ export async function generateFeedbackV2(
   savedInput: FeedbackV2Input,
   call: V2LlmCall = v2OpenAiCall,
   log: (entry: unknown) => Promise<void> = async () => {},
+  validatedStage1?: SupportPlanResult,
 ) {
   const input = prepareEvidenceInput(savedInput) as FeedbackV2Input;
   if (!input.experimentV2) throw new Error("V2_EXPERIMENT_CONTEXT_REQUIRED");
@@ -350,8 +351,26 @@ export async function generateFeedbackV2(
       throw error;
     }
   };
-  const rawPlan = supportPlanSchema.parse(await run("support", stage1Prompt(input, candidates), supportPlanSchema));
+  // A validated support plan is immutable for the same feedback event. Preserve
+  // it across a failed compose call and manual/automatic retries: otherwise the
+  // pedagogical judgement could drift while the HEXAD condition is unchanged.
+  const rawPlan = validatedStage1
+    ? supportPlanSchema.parse(validatedStage1)
+    : supportPlanSchema.parse(await run("support", stage1Prompt(input, candidates), supportPlanSchema));
   const supported = validateStage1(input, rawPlan, candidates);
+  if (validatedStage1) {
+    await log({ stage: "support-plan-reused", promptVersion: FEEDBACK_V2_PROMPT_VERSION });
+  } else {
+    // Persist only AFTER source/candidate validation succeeded; an invalid
+    // raw model response must never become the frozen Stage1 reference.
+    const { schemaVersion, supportPlan, approvedCandidates } = supported;
+    await log({
+      stage: "support-plan-validated",
+      promptVersion: FEEDBACK_V2_PROMPT_VERSION,
+      plan: { schemaVersion, supportPlan, approvedCandidates },
+      discardedEvidenceIds: supported.discardedEvidenceIds,
+    });
+  }
   if (supported.discardedEvidenceIds) await log({ stage: "source-id-validation",
     discardedCount: supported.discardedEvidenceIds });
   const compositionInput = stage2Input(input, supported, candidates);
