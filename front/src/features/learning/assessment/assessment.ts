@@ -222,8 +222,13 @@ function newEvidenceSession() {
 /** 完了保存の根拠。非同期の観測キューとは独立して同じ回答状態から取り出す。 */
 export function assessmentEvidence(content: AssessmentContent, state: AssessmentState) {
   if (!state.evidenceSession) throw new Error("Missing assessment session");
-  return { version: 1 as const, assessmentId: content.id, sessionId: state.evidenceSession.id,
+  return { version: 2 as const, assessmentId: content.id, sessionId: state.evidenceSession.id,
     startedAt: state.evidenceSession.startedAt,
     records: state.records.map(record => ({ questionId: record.questionId,
-      attempts: record.attempts.map(attempt => ({ number: attempt.number, correct: attempt.correct })) })) };
+      attempts: record.attempts.map(attempt => ({
+        number: attempt.number, correct: attempt.correct,
+        answer: attempt.answer.kind === "order"
+          ? { ...attempt.answer, lineIds: [...attempt.answer.lineIds] }
+          : { ...attempt.answer },
+      })) })) };
 }
