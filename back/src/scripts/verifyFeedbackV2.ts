@@ -41,6 +41,32 @@ const checked = validateStage1(base, plan, candidates);
 assert.equal(checked.discardedEvidenceIds, 1);
 const input = stage2Input(base, checked, candidates);
 assert.equal(input.hexadContext?.kind, "single");
+// The same assessment event may contain multiple questions. Stage2 must
+// receive each question's full attempt history even if only one source ID was
+// selected in the support plan.
+const withQuestionHistory: FeedbackV2Input = {
+  ...base,
+  learning: {
+    ...base.learning as object,
+    currentPhase: { id: "phase-3" },
+    conceptSnapshot: {
+      concepts: [{ kind: "assessment", conceptId: "binary-search:range", label: "探索範囲",
+        evidence: [
+          { phaseKey: "phase-3", assessmentId: "check", questionId: "q1",
+            questionLabel: "比較結果", attempts: [{number:1,correct:true,answer:{kind:"choice",choiceId:"correct"},sessionId:"S"}] },
+          { phaseKey: "phase-3", assessmentId: "check", questionId: "q2",
+            questionLabel: "残す範囲", attempts: [
+              {number:1,correct:false,answer:{kind:"choice",choiceId:"drop-left"},sessionId:"S"},
+              {number:2,correct:true,answer:{kind:"choice",choiceId:"drop-right"},sessionId:"S"},
+            ] },
+        ] }],
+    },
+  },
+};
+const hydrated = stage2Input(withQuestionHistory, validateStage1(withQuestionHistory, plan, availableFeedbackCandidates(withQuestionHistory)), availableFeedbackCandidates(withQuestionHistory));
+assert.equal(hydrated.contextFacts.filter(x=>x.sourceId.startsWith("question-history-")).length, 2);
+assert(hydrated.contextFacts.some(x=>x.statement.includes("drop-left") && x.statement.includes("drop-right")));
+
 assert(stage2Prompt(input).includes("Achiever"));
 assert(!stage2Prompt(input).includes("Socialiser\",\"definition"));
 const composed: ComposedFeedbackResult = {
