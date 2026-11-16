@@ -196,6 +196,46 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
     sourceId: s.sourceId,
     statement: JSON.stringify(readObservedValue(root, s.path)),
   }));
+  // A completion event source ID can cover multiple assessment questions.
+  // Source-ID lookups alone may resolve only the first question. Hydrate the
+  // individual questions and EVERY confirmed trial directly from the same
+  // frozen, owner-scoped concept snapshot so Stage2 can discuss the actual
+  // choices (including revisions), not merely an overall correctness ratio.
+  const learning = obj(input.learning);
+  const conceptSnapshot = obj(learning.conceptSnapshot);
+  const currentPhase = obj(learning.currentPhase).id;
+  let questionIndex = 0;
+  for (const value of Array.isArray(conceptSnapshot.concepts) ? conceptSnapshot.concepts : []) {
+    const concept = obj(value);
+    if (concept.kind !== "assessment") continue;
+    const questions = Array.isArray(concept.evidence) ? concept.evidence : [];
+    for (const value of questions) {
+      const q = obj(value);
+      if (currentPhase && q.phaseKey !== currentPhase) continue;
+      const attempts = Array.isArray(q.attempts) ? q.attempts : [];
+      if (!attempts.length) continue;
+      questionIndex++;
+      const trials = attempts.map(value => {
+        const a = obj(value);
+        return {
+          number: a.number ?? null,
+          correct: a.correct ?? null,
+          answer: a.answer ?? null, // null means not recorded in legacy v1
+          sessionId: a.sessionId ?? null,
+          confirmed: a.confirmed === true,
+        };
+      });
+      contextFacts.push({
+        sourceId: `question-history-${questionIndex}`,
+        statement: JSON.stringify({
+          phaseKey: q.phaseKey, assessmentId: q.assessmentId,
+          questionId: q.questionId, questionLabel: q.questionLabel,
+          conceptId: concept.conceptId, conceptLabel: concept.label,
+          attempts: trials,
+        }),
+      });
+    }
+  }
   return {
     schemaVersion: "feedback-compose-v1" as const,
     snapshotId: obj(input.learning).id ?? null,
