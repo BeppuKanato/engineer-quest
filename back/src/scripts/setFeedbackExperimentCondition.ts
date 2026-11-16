@@ -4,8 +4,8 @@
  * Safe default is dry-run; never rewrite assignments with feedback history.
  *
  * Usage from back/:
- * npx ts-node src/scripts/setFeedbackExperimentCondition.ts --user-id <internal-user-id> --condition TOP_1
- * npx ts-node src/scripts/setFeedbackExperimentCondition.ts --user-id <internal-user-id> --condition TOP_1 --apply
+ * npx ts-node src/scripts/setFeedbackExperimentCondition.ts --user-id=<internal-user-id> --condition=TOP_1
+ * npx ts-node src/scripts/setFeedbackExperimentCondition.ts --user-id=<internal-user-id> --condition=TOP_1 --apply
  */
 import { FeedbackCondition, Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
