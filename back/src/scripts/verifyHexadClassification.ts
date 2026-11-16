@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { HEXAD_TYPES, type HexadType } from "../service/feedbackHexadConditions";
 import type { ResultRecord as GeneratorRecord } from "./feedbackGenerationBatch";
 import {
-  classifyPrompt, classificationFingerprint, hash, parseBlindSamples,
+  classifyPrompt, classificationFingerprint, parseBlindSamples,
   parseClassifierConfig, parseJudgment, runClassificationBatch,
   type Bit, type ClassifierModel, type HexadLabels, type HexadReasons,
 } from "./hexadClassifierBatch";
