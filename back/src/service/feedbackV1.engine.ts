@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import type { AutoParseableTextFormat } from "openai/lib/parser";
 import type { ZodTypeAny } from "zod";
-import { writeFile } from "node:fs/promises";
+
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
 const getFeedbackModel = () => process.env.OPENAI_MODEL?.trim() || "gpt-6-luna";
 const REASONING_EFFORT = "low";
@@ -205,11 +205,6 @@ export const openAiCall: Call = async (stage, prompt, personalized, generationSc
 
 export async function generate(savedInput: Input, call: Call = openAiCall, log: (entry: unknown) => Promise<void> = async () => {}) {
   const input = prepareEvidenceInput(savedInput);
-  await writeFile(
-    "input.json",
-    JSON.stringify(input, null, 2),
-    "utf8",
-  );
   const run = async (stage: "analysis" | "selection", prompt: string) => {
     const started = Date.now();
     try {
