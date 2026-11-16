@@ -80,7 +80,7 @@ export function FeedbackV1({ kind, eventId, onAction }: {
   return <Paper data-feedback-scope variant="outlined" sx={{ p: 3, my: 2 }}>
     {error || result?.status === "FAILED" ? <Alert severity="warning">フィードバックを生成できませんでした。学習は続けられます。</Alert> : !f ? <Alert severity="info">フィードバックを準備しています。</Alert> : <Stack spacing={2}>
       <FeedbackObservation id={result.id} href={f.actionHref} candidates={feedbackCandidates(f)} />
-      {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
+      {([["現在の状態", f.currentState], ...(f.explanation ? [["フィードバック", f.explanation] as const] : []), ["次の目標", f.nextGoal]] as const).map(([label, body]) => <div key={label}><Typography fontWeight={900}>{label}</Typography><Typography>{body}</Typography></div>)}
       <FeedbackCandidates candidates={feedbackCandidates(f)} onAction={onAction} />
     </Stack>}
   </Paper>;
