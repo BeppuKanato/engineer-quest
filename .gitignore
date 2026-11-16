@@ -143,3 +143,6 @@ back/src/generated/prisma/*.tmp*
 # Local offline HEXAD generation experiments: learner input and model results
 /back/.feedback-generation-input/
 /back/.feedback-generation-results/
+
+# Classification labels and analysis of potentially private learning text
+/back/.feedback-classification-results/
