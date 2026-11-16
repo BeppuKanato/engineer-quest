@@ -106,7 +106,7 @@ export function FeedbackScreen({ kind, eventId, heading, figure, goalSummary, on
       : !f ? <Alert severity="info" sx={{ width: "100%", maxWidth: 640 }}>フィードバックを準備しています。</Alert>
       : <Stack spacing={2} sx={{ width: "100%", maxWidth: 640 }}>
           <FeedbackObservation id={result.id} href={f.actionHref} candidates={feedbackCandidates(f)} />
-          {([["現在の状態", f.currentState], ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
+          {([["現在の状態", f.currentState], ...(f.explanation ? [["フィードバック", f.explanation] as const] : []), ["次の目標", f.nextGoal]] as const).map(([label, body]) => (
             <div key={label}>
               <Typography fontWeight={900}>{label}</Typography>
               <Typography sx={{ fontSize: 16, overflowWrap: "anywhere" }}>{body}</Typography>
