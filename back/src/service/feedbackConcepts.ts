@@ -29,13 +29,29 @@ export function validateConceptDefinitions(value:unknown) {
 }
 const definitions=validateConceptDefinitions(definitionData);
 export { definitions as conceptDefinitions };
-export const evidenceSchema = z.object({
-  version: z.literal(1), assessmentId: z.string().min(1), sessionId: z.string().min(1).max(160),
+export const assessmentAnswerSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("node"), nodeId: z.string().min(1).max(160) }),
+  z.object({ kind: z.literal("none") }),
+  z.object({ kind: z.literal("choice"), choiceId: z.string().min(1).max(160) }),
+  z.object({ kind: z.literal("order"), lineIds: z.array(z.string().min(1).max(160)).max(120) }),
+]);
+const attemptV1 = z.object({ number: z.number().int().positive(), correct: z.boolean() });
+const evidenceBase = {
+  assessmentId: z.string().min(1), sessionId: z.string().min(1).max(160),
   startedAt: z.number().int().positive(),
-  records: z.array(z.object({ questionId: z.string().min(1),
-    attempts: z.array(z.object({ number: z.number().int().positive(), correct: z.boolean() })).max(1000),
-  })).max(100),
-});
+};
+export const evidenceSchema = z.discriminatedUnion("version", [
+  z.object({ ...evidenceBase, version: z.literal(1),
+    records: z.array(z.object({ questionId: z.string().min(1),
+      attempts: z.array(attemptV1).max(1000),
+    })).max(100),
+  }),
+  z.object({ ...evidenceBase, version: z.literal(2),
+    records: z.array(z.object({ questionId: z.string().min(1),
+      attempts: z.array(attemptV1.extend({ answer: assessmentAnswerSchema })).max(1000),
+    })).max(100),
+  }),
+]);
 export type AssessmentEvidence = z.infer<typeof evidenceSchema>;
 export const questionKey = (q: { phaseKey: string; assessmentId: string; questionId: string }) => `${q.phaseKey}/${q.assessmentId}/${q.questionId}`;
 export function validateEvidence(courseId: string, phaseKey: string, value: unknown, complete = false) {
@@ -48,7 +64,7 @@ export function validateEvidence(courseId: string, phaseKey: string, value: unkn
   return evidence;
 }
 type Event = { id: string; phaseKey: string | null; eventType: string; targetId: string | null; sessionId: string; payload: unknown; clientTimestamp: Date; serverTimestamp: Date };
-type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; confirmed: boolean; recordedAt: number; observedAt: number };
+type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; answer?: z.infer<typeof assessmentAnswerSchema>; confirmed: boolean; recordedAt: number; observedAt: number };
 const object = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 /** 完了証拠は最初の確定受信時刻、未完了回答は最新attemptの最初の受信時刻で比較する。 */
 export function aggregateConcepts(courseId: string, events: Event[], phases: { phaseKey: string; status: string; summary: unknown }[], snapshotId: string) {
@@ -85,7 +101,13 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
     if (event.eventType === "answer_attempt" && typeof payload.correct === "boolean" && Number.isInteger(payload.attempt) && Number(payload.attempt)>0) {
       const q=questions.find(q=>q.phaseKey===event.phaseKey && q.questionId===event.targetId && q.assessmentId===payload.assessmentId);
       if (!q || typeof payload.assessmentSessionId!=="string" || !payload.assessmentSessionId || typeof payload.assessmentStartedAt!=="number" || !Number.isSafeInteger(payload.assessmentStartedAt) || payload.assessmentStartedAt<=0) continue;
-      raw.push({key:questionKey(q),sessionKey:sessionKey(q.phaseKey,q.assessmentId,payload.assessmentSessionId),attempt:{sourceId:event.id,sessionId:payload.assessmentSessionId,startedAt:payload.assessmentStartedAt,number:Number(payload.attempt),correct:payload.correct,confirmed:false,recordedAt:receivedAt,observedAt:receivedAt}});
+      const parsedAnswer = assessmentAnswerSchema.safeParse(payload.answer);
+      raw.push({key:questionKey(q),sessionKey:sessionKey(q.phaseKey,q.assessmentId,payload.assessmentSessionId),attempt:{
+        sourceId:event.id,sessionId:payload.assessmentSessionId,startedAt:payload.assessmentStartedAt,
+        number:Number(payload.attempt),correct:payload.correct,
+        ...(parsedAnswer.success ? { answer: parsedAnswer.data } : {}),
+        confirmed:false,recordedAt:receivedAt,observedAt:receivedAt,
+      }});
     }
   }
   const firstReceipts=new Map<string,number>();
