@@ -23,8 +23,9 @@ function parseArgs(argv: string[]) {
       continue;
     }
     const match = /^--(user-id|condition)=([^\s]+)$/.exec(arg);
-    if (!match || fields.has(match[1])) throw new Error("Usage: --user-id=<id> --condition=STANDARD|TOP_1|ROULETTE|MULTI [--apply]");
-    fields.set(match[1], match[2]);
+    const name = match?.[1], value = match?.[2];
+    if (!name || !value || fields.has(name)) throw new Error("Usage: --user-id=<id> --condition=STANDARD|TOP_1|ROULETTE|MULTI [--apply]");
+    fields.set(name, value);
   }
   const userId = fields.get("user-id");
   const condition = fields.get("condition");
