@@ -6,6 +6,7 @@ import {
   type FeedbackV2Input, type SupportPlanResult, type ComposedFeedbackResult,
 } from "../service/feedbackV2.engine";
 
+async function main() {
 const scores: HexadScores = {
   Achiever: 24, Philanthropist: 12, Socialiser: 24,
   FreeSpirit: 12, Player: 12, Disruptor: 12,
@@ -77,3 +78,6 @@ const multiFacts=stage2Input(multi,validateStage1(multi,plan,candidates),candida
 assert.equal(multiFacts.hexadContext?.kind,"multi");
 assert.equal(validateStage2(multiFacts,{...composed,hexadAudit:{appliedTypes:["Achiever","Socialiser"],rationale:"双方を考慮"}}).hexadAudit?.appliedTypes.length,2);
 console.log("PASS: frozen Stage1 contract, HEXAD isolation, short candidate IDs, Stage2 audit and compatibility");
+
+}
+void main().catch(error => { console.error(error); process.exitCode = 1; });
