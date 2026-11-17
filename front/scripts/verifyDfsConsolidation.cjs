@@ -37,8 +37,16 @@ const plain = value => JSON.parse(JSON.stringify(value));
 
 assert.equal(content.stageName, "応用問題");
 assert.equal(content.code, dfsCode);
-assert.deepEqual(plain(content.questions.map(question => question.kind)), ["node", "choice", "choice", "choice", "parsons"]);
-const [q1, q2, q3, q4, q5] = content.questions;
+assert.deepEqual(plain(content.questions.map(question => question.kind)), ["node", "choice", "choice", "choice", "choice", "choice", "parsons"]);
+const [q1, q2, q3, q4, qMissing, qStartOnly, q5] = content.questions;
+assert.deepEqual(plain(qMissing.scene.graph.nodes.map(node => node.id)), ["A", "B"]);
+assert.deepEqual(plain(qMissing.scene.graph.edges.map(({ from, to }) => [from, to])), [["A", "B"]]);
+assert.deepEqual(plain(qStartOnly.scene.graph.nodes.map(node => node.id)), ["A"]);
+assert.deepEqual(plain(qStartOnly.scene.graph.edges), []);
+for (const question of [qMissing, qStartOnly]) {
+  const sceneHtml = renderToStaticMarkup(createElement(ConsolidationGraph, { ...question.scene, onSelect: () => {} }));
+  for (const node of question.scene.graph.nodes) assert(sceneHtml.includes(`aria-label="${node.id}を選ぶ"`), "Boundary scenes render their nodes");
+}
 const nodeQuestion = renderToStaticMarkup(createElement(ConsolidationGraph, { ...q1.scene, onSelect: () => {} }));
 assert.deepEqual([...nodeQuestion.matchAll(/aria-label="([A-F])を選ぶ"/g)].map(match => match[1]), ["A", "B", "C", "D", "E", "F"]);
 assert.equal(q1.scene.graph, searchGraph);
@@ -103,15 +111,22 @@ const syntax = spawnSync(process.env.PYTHON || "python3", ["-c", [
   "baseline = [run(data['code'], case) for case in data['cases']]",
   "for source in data['variants']:",
   "    assert [run(source, case) for case in data['cases']] == baseline",
-  "print(json.dumps(baseline))",
+  "boundary = [run(data['code'], case) for case in data['boundary']]",
+  "print(json.dumps(dict(baseline=baseline, boundary=boundary)))",
 ].join("\n")], {
   input: JSON.stringify({ code: dfsCodeSource, cases: [q1, q2, q3, q4].map(executionInput), variants: variants.map(sourceFor),
+    boundary: [{ adjacency: { A: ["B"] }, start: "A" }, { adjacency: { A: [] }, start: "A" }],
     while_line: canonical.indexOf("while-stack") + 1, if_line: canonical.indexOf("if-unvisited") + 1 }),
   encoding: "utf8",
 });
 assert.ifError(syntax.error);
 assert.equal(syntax.status, 0, syntax.stderr);
-const [f, tree, isolated, revisit] = JSON.parse(syntax.stdout);
+const { baseline: [f, tree, isolated, revisit], boundary: [missingAdjacency, startOnly] } = JSON.parse(syntax.stdout);
+// フェーズ7の判定用テストJ3・J2と同じ入力で、参照コードがエラーなく境界の結果を返す。
+assert.deepEqual(missingAdjacency.order, ["A", "B"]);
+assert.equal(qMissing.correctAnswer.choiceId, "treat-as-empty");
+assert.deepEqual(startOnly.order, ["A"]);
+assert.equal(qStartOnly.correctAnswer.choiceId, "only-start");
 assert.deepEqual(f.order, ["F", "D", "B", "A", "C", "E"]);
 assert.equal(q1.correctAnswer.nodeId, f.order.at(-1));
 assert.deepEqual(tree.order, ["G", "H", "J", "K", "I", "L"]);
@@ -159,8 +174,8 @@ assert.equal(state.records.at(-1).solved, false);
 state = advanceAssessment(content, state, q5.id);
 assert(assessmentComplete(content, state));
 const diagnosis = diagnoseAssessment(content, state);
-assert.equal(diagnosis.correct, 3);
-assert.equal(diagnosis.total, 5);
-assert.deepEqual(plain(diagnosis.tags.map(tag => tag.passed)), [false, true, true, true, false]);
+assert.equal(diagnosis.correct, 5);
+assert.equal(diagnosis.total, 7);
+assert.deepEqual(plain(diagnosis.tags.map(tag => tag.passed)), [false, true, true, true, true, true, false]);
 
-console.log("DFS consolidation verified: independent Python transfer and boundary cases, canonical fixed-row Parsons with all six initialization orders, phase-4 reviews, and first-attempt diagnosis.");
+console.log("DFS consolidation verified: independent Python transfer and boundary cases (including phase-7 J2/J3 shapes), canonical fixed-row Parsons with all six initialization orders, phase-4 reviews, and first-attempt diagnosis.");
