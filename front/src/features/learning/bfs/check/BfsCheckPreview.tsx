@@ -4,7 +4,7 @@ import { assessmentEvidence } from "../../assessment/assessment";
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type AssessmentAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
@@ -34,8 +34,14 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
   const attempt = record?.attempts.at(-1);
   const caption = complete ? bfsCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const step = getLearningStep(bfsExecutionContent, question?.stepId ?? bfsCheckContent.completion.stepId);
-  const submit = (answer: NodeAnswer) => {
-    if (question) setSession(current => answerQuestion(bfsCheckContent, current, question.id, answer));
+  // 距離の設問は歩数の選択肢ボタン、それ以外は図のノードタップで答える。
+  const choiceQuestion = question && "kind" in question ? question : null;
+  const nodeQuestion = question && !("kind" in question) ? question : null;
+  const submit = (answer: AssessmentAnswer) => {
+    if (!question) return;
+    // 正解済みの設問には、古い画面の連打でも試行を足さない（入力ロックと対にする）。
+    setSession(current => current.records.find(entry => entry.questionId === question.id)?.solved
+      ? current : answerQuestion(bfsCheckContent, current, question.id, answer));
   };
   useEffect(() => { captionRef.current?.focus(); }, [question?.id, complete, record?.attemptCount]);
   // 完了した瞬間だけ単元フローへ通知する（解き直して再完了した場合も再通知する）。
@@ -61,12 +67,19 @@ export function BfsCheckPreview({ embedded = false, onLearningEvent, active = tr
         }}>{caption}</Typography>
         {!embedded && <AnswerFeedbackNotice assessmentId={bfsCheckContent.id} />}
         {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
-          図の丸いボタン{question.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう
+          {choiceQuestion ? "当てはまるボタンをタップして答えよう" : <>図の丸いボタン{nodeQuestion?.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう</>}
         </Typography>}
         <Box sx={{ display: "flex", flexDirection: "column", height: "min(54dvh, 600px)", flexShrink: 0 }}>
-          <BfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
-            allowNone={question?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
+          <BfsCheckCanvas canvas={step.canvas} questionId={nodeQuestion?.id} nodeIds={nodeQuestion?.nodeIds}
+            allowNone={nodeQuestion?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
         </Box>
+        {choiceQuestion && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
+          {choiceQuestion.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+            disabled={attempt?.correct === true}
+            onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
+              color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
+              "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
+        </Box>}
       </Box>
       {/* 下部の固定ゾーン: 再回答の注記と進行操作は常時表示し、スクロールなしで押せる。 */}
       <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>

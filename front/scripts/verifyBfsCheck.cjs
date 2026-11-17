@@ -34,8 +34,8 @@ const none = { kind: "none" };
 function verifyData(candidate) {
   validateAssessment(candidate);
   assert.equal(candidate.phase, 3);
-  assert.equal(candidate.questions.length, 2);
-  const [take, after] = candidate.questions;
+  assert.equal(candidate.questions.length, 7);
+  const [take, after, distanceB, distanceF, enqueueNext, afterE, queueEmpty] = candidate.questions;
   assert.equal(take.prompt, "キューから次に取り出すのは、どれ？");
   assert.equal(after.prompt, "Cを取り出して調べたあと、キューに新しく入るのはどれ？");
   assert.equal(take.stepId, "complete-b");
@@ -56,6 +56,38 @@ function verifyData(candidate) {
   assert.equal(undiscovered.length, 0, "Every neighbor is already discovered");
   assert.deepEqual(after.correctAnswer, none, "No new queue entry is possible");
   assert.equal(processing.state.nodes.find(node => node.id === "E").status, "queued");
+  // 距離の選択問題: 正解の歩数は、場面ステップに記録された実際の距離と一致する。
+  for (const [question, nodeId, texts] of [[distanceB, "B", ["0", "1", "2"]], [distanceF, "F", ["2", "3", "4"]]]) {
+    assert.equal(question.kind, "choice");
+    assert.deepEqual(plain(question.choices.map(choice => choice.text)), texts);
+    const scene = getLearningStep(execution, question.stepId).canvas;
+    const correctText = question.choices.find(choice => choice.id === question.correctAnswer.choiceId).text;
+    assert.equal(Number(correctText), scene.state.nodes.find(node => node.id === nodeId).distance, `${question.id}: correct steps equal the recorded distance`);
+  }
+  // 問5: Dの次に末尾へ入るのは、Bの隣のうち場面時点でまだ見つかっていない唯一の場所。
+  const discoverD = getLearningStep(execution, enqueueNext.stepId).canvas;
+  assert.equal(discoverD.state.current, "B");
+  const bNeighbors = searchGraphEdges.flatMap(edge => edge.from === "B" ? [edge.to] : edge.to === "B" ? [edge.from] : []);
+  assert.deepEqual(plain(bNeighbors.filter(id => discoverD.state.nodes.find(node => node.id === id).status === "idle")), ["E"]);
+  assert.deepEqual(enqueueNext.correctAnswer, answer("E"));
+  assert.equal(enqueueNext.allowNone, false);
+  // 問6: Eの隣はすべて記録済みで、新しく入る場所はない。前提は問5の正解。
+  const dequeueE = getLearningStep(execution, afterE.stepId).canvas;
+  assert.equal(dequeueE.state.current, "E");
+  const eNeighbors = searchGraphEdges.flatMap(edge => edge.from === "E" ? [edge.to] : edge.to === "E" ? [edge.from] : []);
+  assert(eNeighbors.every(id => dequeueE.state.nodes.find(node => node.id === id).distance !== null), "Every neighbor of E is already recorded");
+  assert.deepEqual(afterE.correctAnswer, none);
+  assert.deepEqual(afterE.requires, { questionId: enqueueNext.id, answer: enqueueNext.correctAnswer });
+  const skipB = getLearningStep(execution, "skip-b-from-e").canvas;
+  assert.equal(skipB.state.operation.kind, "skip-discovered");
+  assert.equal(skipB.state.operation.from, "E");
+  assert.equal(skipB.state.operation.nodeId, "B");
+  assert.deepEqual(plain(skipB.state.queue), plain(dequeueE.state.queue));
+  // 問7: complete-e 時点でキューに残るのは F だけで、F を調べ終えると空になる。
+  const completeE = getLearningStep(execution, queueEmpty.stepId).canvas;
+  assert.deepEqual(plain(completeE.state.queue.map(item => item.nodeId)), ["F"]);
+  assert.deepEqual(queueEmpty.correctAnswer, answer("F"));
+  assert.equal(getLearningStep(execution, "complete-all").canvas.state.queue.length, 0);
   assert.equal(candidate.completion.stepId, "skip-e");
   assert.match(candidate.completion.caption, /取り出す順序と重ねて追加しない判断/u);
   assert.match(candidate.completion.caption, /次は、図の動きとコードの対応を確かめます/u);
@@ -64,12 +96,13 @@ function verifyData(candidate) {
     const step = getLearningStep(execution, question.stepId);
     assert.equal(step.canvas.data.graph.nodes, searchGraphNodes, "Use the canonical shared graph");
     assert.equal(step.canvas.data.graph.edges, searchGraphEdges);
-    assert.deepEqual(question.nodeIds, plain(searchGraphNodes.map(node => node.id)));
+    if (!("kind" in question)) assert.deepEqual(question.nodeIds, plain(searchGraphNodes.map(node => node.id)));
     const review = selectReviewContent(execution, question.reviewStepIds);
     review.steps.forEach((step, i) => assert.equal(step, getLearningStep(execution, question.reviewStepIds[i]), "Reuse exact original step objects"));
   }
   assert.equal(take.reviewStepIds.join(), "complete-b,dequeue-c");
   assert.equal(after.reviewStepIds.join(), "dequeue-c,skip-e");
+  assert.equal(afterE.reviewStepIds.join(), "dequeue-e,skip-b-from-e");
   const skip = getLearningStep(execution, "skip-e").canvas;
   assert.equal(skip.state.operation.kind, "skip-discovered");
   assert.equal(skip.state.operation.from, processing.state.current);
@@ -105,17 +138,24 @@ for (const id of q2.nodeIds) {
 }
 state = answerQuestion(content, state, q2.id, none);
 state = advanceAssessment(content, state, q2.id);
-assert(assessmentComplete(content, state));
-assert.equal(activeQuestion(content, state), null);
 assert.equal(state.records[1].firstCorrect, false);
 assert.equal(state.records[1].attemptCount, 7);
 assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1,2,3,4,5,6,7");
+assert(!assessmentComplete(content, state), "Two answered questions no longer complete phase 3");
+// 残りの設問（距離の選択・末尾追加・記録済みの回避・終了条件）も同じ進行規則で進む。
+for (const question of content.questions.slice(2)) {
+  assert.equal(activeQuestion(content, state).id, question.id);
+  state = answerQuestion(content, state, question.id, question.correctAnswer);
+  state = advanceAssessment(content, state, question.id);
+}
+assert(assessmentComplete(content, state));
+assert.equal(activeQuestion(content, state), null);
 assert.equal(answerQuestion(content, state, q2.id, none), state, "Complete session does not accept more answers");
 let firstTry = createAssessmentState(content);
-firstTry = answerQuestion(content, firstTry, q1.id, answer("C"));
-firstTry = advanceAssessment(content, firstTry, q1.id);
-firstTry = answerQuestion(content, firstTry, q2.id, none);
-firstTry = advanceAssessment(content, firstTry, q2.id);
+for (const question of content.questions) {
+  firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer);
+  firstTry = advanceAssessment(content, firstTry, question.id);
+}
 assert(assessmentComplete(content, firstTry));
 assert(firstTry.records.every(record => record.firstCorrect === true && record.attemptCount === 1));
 
@@ -127,6 +167,14 @@ skipped = advanceAssessment(content, skipped, q1.id);
 assert.equal(activeQuestion(content, skipped).id, q2.id, "Skipping question 1 still reaches the linked question 2");
 skipped = answerQuestion(content, skipped, q2.id, answer(q2.nodeIds[0]));
 skipped = advanceAssessment(content, skipped, q2.id);
+const wrongAnswer = question => "kind" in question
+  ? { kind: "choice", choiceId: question.choices.find(choice => choice.id !== question.correctAnswer.choiceId).id }
+  : question.correctAnswer.kind === "none" ? answer(question.nodeIds[0])
+    : answer(question.nodeIds.find(id => id !== question.correctAnswer.nodeId));
+for (const question of content.questions.slice(2)) {
+  skipped = answerQuestion(content, skipped, question.id, wrongAnswer(question));
+  skipped = advanceAssessment(content, skipped, question.id);
+}
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
@@ -139,6 +187,9 @@ assert.match(checkPreviewSource, /borderTop: `1px solid/, "advance actions live 
 
 assert.match(checkPreviewSource, /advanceAssessment\(bfsCheckContent, current, question\.id\)/);
 assert.match(checkPreviewSource, /"結果を見る" : "次の問題へ"/);
+// 距離の選択問題は図の下の選択肢ボタンで答え、案内文も形式に合わせて切り替える。
+assert.match(checkPreviewSource, /data-choice-id=\{choice\.id\}/, "choice questions render choice buttons");
+assert.match(checkPreviewSource, /当てはまるボタンをタップして答えよう/, "guidance switches for choice questions");
 
 function rejects(change) { const broken = plain(content); change(broken); assert.throws(() => verifyData(broken)); }
 rejects(broken => broken.questions[0].stepId = "missing");
@@ -148,16 +199,21 @@ rejects(broken => broken.questions[1].requires.questionId = "after-c");
 rejects(broken => broken.questions[1].requires.answer = answer("D"));
 rejects(broken => broken.questions[1].correctAnswer = answer("E"));
 rejects(broken => broken.questions[1].reviewStepIds = ["missing"]);
+rejects(broken => broken.questions[2].correctAnswer = { kind: "choice", choiceId: "two" });
+rejects(broken => broken.questions[3].correctAnswer = { kind: "choice", choiceId: "two" });
+rejects(broken => broken.questions[5].requires = null);
+rejects(broken => broken.questions[5].correctAnswer = answer("F"));
+rejects(broken => broken.questions[6].correctAnswer = answer("E"));
 assert.throws(() => selectReviewContent(execution, ["missing"]));
 assert.throws(() => selectReviewContent(execution, ["skip-e", "skip-e"]));
-console.log("BFS check verified: exact phase-2 references, shared graph identity, FIFO answer, no new neighbor, linked retry gate, first-attempt records and review identity.");
+console.log("BFS check verified: exact phase-2 references, shared graph identity, FIFO answer, no new neighbor, distance choices matched to recorded distances, recorded-skip and termination questions, linked retry gate, first-attempt records and review identity.");
 
 // 描画の回帰: 回答中だけ状態強調リングを抑え、ノードの状態色と通常再生の描画は保つ。
 const React = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const { BfsCheckCanvas } = load(path.join(root, "bfs/check/BfsCheckCanvas.tsx"));
 const { BfsExecutionCanvas } = load(path.join(root, "bfs/execution/BfsExecutionCanvas.tsx"));
-for (const question of content.questions) {
+for (const question of content.questions.filter(question => !("kind" in question))) {
   const canvas = getLearningStep(execution, question.stepId).canvas;
   const snapshot = JSON.stringify(canvas);
   const html = renderToStaticMarkup(React.createElement(BfsCheckCanvas, {
@@ -175,5 +231,11 @@ for (const question of content.questions) {
   const playback = renderToStaticMarkup(React.createElement(BfsExecutionCanvas, { canvas }));
   assert.equal((playback.match(/<circle\b/g) || []).length, question.nodeIds.length + 1, "Normal playback keeps its focus ring");
   assert.match(playback, /viewBox="0 0 600 450"/, "Normal playback keeps the original viewport");
+}
+// 選択問題の場面は、タップ領域を持たない素のキャンバスとして描く（回答はプレビュー側の選択肢ボタン）。
+for (const question of content.questions.filter(question => "kind" in question)) {
+  const canvas = getLearningStep(execution, question.stepId).canvas;
+  const html = renderToStaticMarkup(React.createElement(BfsCheckCanvas, { canvas, onAnswer() {} }));
+  assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes carry no node tap targets");
 }
 console.log("BFS check UI verified: one answer button per node, no double rings, processing colors, graph-adjacent alternative, immutable snapshots and unchanged playback defaults.");
