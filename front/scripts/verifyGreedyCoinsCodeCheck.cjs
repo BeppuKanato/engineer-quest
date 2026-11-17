@@ -35,7 +35,8 @@ const plain = value => JSON.parse(JSON.stringify(value));
 // Reactのサーバー描画はテキスト中の & < > " ' をエスケープする。コード行の照合はエスケープ後の形で行う。
 const escapeText = text => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 const choice = choiceId => ({ kind: "choice", choiceId });
-const [q1, q2] = content.questions;
+const qWhile = content.questions.find(question => question.id === "while-condition");
+const qSubtract = content.questions.find(question => question.id === "remaining-update");
 
 // 基準データ §2 の原文（フェーズ4の契約がこの原文と一致することの固定）。8行。
 const indent = depth => "    ".repeat(depth);
@@ -52,7 +53,10 @@ const baselineSource = [
 assert.equal(greedyCoinsCodeSource, baselineSource, "The phase-4 contract must keep the baseline source byte-exact");
 assert.equal(greedyCoinsCode.lines.length, 8, "The contract is eight lines");
 
-// 基準データ §3 フェーズ5の確定事項（独立2問、対象行と正解）。
+// 基準データ §3 フェーズ5の構成（8問）。当初の2問（while の条件の左辺・
+// 残額の更新）に、フェーズ6が前提とする対応づけ（初期化2行・for・条件の
+// 右辺・記録・返却）を判断する6問を足し、関数定義を除く全行を対象にした
+// （2026-11-17 の基準）。
 validateGreedyCoinsCodeCheck(content);
 assert.equal(content.id, "greedy-coins-code-check");
 assert.equal(content.phase, 5);
@@ -60,27 +64,51 @@ assert.equal(content.stageName, "コードの確認問題");
 assert.equal(content.code, greedyCoinsCode, "Share the phase-4 code contract, not a copy");
 assert.equal(content.code.id, "greedy-coins-v1");
 assert.equal(content.code.version, 1);
-assert.equal(content.questions.length, 2);
-assert.deepEqual(plain(content.questions.map(question => question.lineId)), ["while-remaining", "subtract-coin"]);
-assert.deepEqual(plain(content.questions.map(question => question.stepId)), ["while-remaining-1", "subtract-coin-1"]);
-assert.deepEqual(plain(content.questions.map(question => question.reviewStepIds)), [["for-coin-500", "while-remaining-1"], ["execution-select-1", "subtract-coin-1"]]);
-assert.deepEqual(plain(q1.choices.map(option => option.text)), ["amount", "remaining", "coin"]);
-assert.deepEqual(plain(q2.choices.map(option => option.text)), ["amount", "remaining", "coin"]);
-assert.equal(q1.correctAnswer.choiceId, "remaining");
-assert.equal(q2.correctAnswer.choiceId, "coin");
-assert.equal(q1.prompt, `残額と今の額面を比べるために、${greedyCoinsCodeLineNumber(q1.lineId)}行目の空欄に入る正しいコードを選んでください。`);
-assert.equal(q2.prompt, `使った硬貨の分だけ残額を減らすために、${greedyCoinsCodeLineNumber(q2.lineId)}行目の空欄に入る正しいコードを選んでください。`);
-assert.equal(greedyCoinsCodeLineNumber(q1.lineId), 5);
-assert.equal(greedyCoinsCodeLineNumber(q2.lineId), 7);
+assert.equal(content.questions.length, 8);
+assert.deepEqual(plain(content.questions.map(question => question.id)),
+  ["init-result", "init-remaining", "for-coin", "while-condition", "while-coin", "append-coin", "remaining-update", "return-result"]);
+assert.deepEqual(plain(content.questions.map(question => question.lineId)),
+  ["init-result", "init-remaining", "for-coin", "while-remaining", "while-remaining", "append-coin", "subtract-coin", "return-result"]);
+assert.deepEqual(plain(content.questions.map(question => question.stepId)),
+  ["init-result", "init-remaining", "for-coin-500", "while-remaining-1", "while-remaining-1", "execution-select-1", "subtract-coin-1", "return-result"]);
+assert.deepEqual(plain(content.questions.map(question => question.reviewStepIds)), [
+  ["define-function", "init-result"], ["init-result", "init-remaining"], ["init-remaining", "for-coin-500"],
+  ["for-coin-500", "while-remaining-1"], ["for-coin-500", "while-remaining-1"], ["while-remaining-1", "execution-select-1"],
+  ["execution-select-1", "subtract-coin-1"], ["for-coin-end", "return-result"],
+]);
+assert.deepEqual(plain(content.questions.map(question => question.correctAnswer.choiceId)),
+  ["result", "amount", "coins", "remaining", "coin", "coin", "coin", "result"]);
+for (const question of content.questions) {
+  assert.deepEqual(plain(question.choices.map(option => option.text)),
+    question.id === "init-result" || question.id === "return-result" ? ["result", "remaining", "amount"]
+      : question.id === "for-coin" ? ["coins", "amount", "result"]
+        : ["amount", "remaining", "coin"], `${question.id} choices`);
+  assert.equal(question.prompt,
+    `${questionPromptLead(question.id)}、${greedyCoinsCodeLineNumber(question.lineId)}行目の空欄に入る正しいコードを選んでください。`);
+}
+function questionPromptLead(id) {
+  return {
+    "init-result": "選んだ硬貨を入れるリストを用意するために",
+    "init-remaining": "残額の最初の値を、払う金額そのものにするために",
+    "for-coin": "額面を大きい順に1つずつ取り出すために",
+    "while-condition": "残額と今の額面を比べるために",
+    "while-coin": "残額と比べる相手を、今見ている額面にするために",
+    "append-coin": "選んだ硬貨を結果のリストに記録するために",
+    "remaining-update": "使った硬貨の分だけ残額を減らすために",
+    "return-result": "選んだ硬貨のリストを答えとして返すために",
+  }[id];
+}
+assert.equal(greedyCoinsCodeLineNumber(qWhile.lineId), 5);
+assert.equal(greedyCoinsCodeLineNumber(qSubtract.lineId), 7);
 assert.match(content.instruction, /空欄に入るものを選ぶ/u);
 assert.equal(content.reviewLabel, "💡 この処理の動きをもう一度見る");
 assert.match(content.completion.caption, /次は/u);
 assert(!/完璧|マスター/u.test(content.completion.caption));
 // 正誤フィードバックは「なぜその変数か」が一文で分かること（基準データ§3の要点）。
-assert.match(q1.correctFeedback, /remaining と今の額面 coin を比べ/u);
-assert.match(q1.incorrectFeedback, /remaining と今の額面 coin を比べ/u);
-assert.match(q2.correctFeedback, /使った硬貨 coin の分だけ残額を減らす/u);
-assert.match(q2.incorrectFeedback, /使った硬貨 coin の分だけ残額を減らす/u);
+assert.match(qWhile.correctFeedback, /remaining と今の額面 coin を比べ/u);
+assert.match(qWhile.incorrectFeedback, /remaining と今の額面 coin を比べ/u);
+assert.match(qSubtract.correctFeedback, /使った硬貨 coin の分だけ残額を減らす/u);
+assert.match(qSubtract.incorrectFeedback, /使った硬貨 coin の分だけ残額を減らす/u);
 for (const question of content.questions) {
   assert.equal((question.correctFeedback.match(/。/gu) || []).length, 1, "Correct feedback must explain in one sentence");
   assert(question.incorrectFeedback.startsWith("不正解。"));
@@ -93,7 +121,7 @@ for (const question of content.questions) {
   assert.equal((question.prompt.match(/[。？]/gu) || []).length, 1);
   const line = greedyCoinsCode.lines.find(line => line.id === question.lineId);
   const correct = question.choices.find(option => option.id === question.correctAnswer.choiceId);
-  // 空欄は対象のトークンだけ（Q1は条件の「remaining」、Q2は更新の「coin」）で、前後の文は元の行のまま。
+  // 空欄は対象のトークンだけ（正解の選択肢の文字列と一致する範囲）で、前後の文は元の行のまま。
   assert.equal(line.text.slice(question.blank.start, question.blank.start + question.blank.length), correct.text,
     "The blank must cover exactly the answer token");
   assert(Buffer.from(fillCodeBlank(question, correct.text)).equals(Buffer.from(line.text)), "Correct option must restore the exact bytes, including indentation");
@@ -116,7 +144,7 @@ for (const question of content.questions) {
 assert(programs.some(program => program === greedyCoinsCodeSource), "A correct fill must reproduce the contract source");
 const syntax = spawnSync(process.env.PYTHON || "python3", ["-c", "import ast,json,sys\nprograms=json.load(sys.stdin)\nfor code in programs: ast.parse(code)\nprint(len(programs))"], { input: JSON.stringify(programs), encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
-assert.equal(Number(syntax.stdout), 6, "All six alternatives must be parsed");
+assert.equal(Number(syntax.stdout), 24, "All twenty-four alternatives must be parsed");
 // 正解で埋めたプログラムは基準データのケース（主教材・転移・別額面・反例の貪欲結果）を満たす。
 const run = spawnSync(process.env.PYTHON || "python3", ["-c", [
   "import json,sys",
@@ -133,48 +161,44 @@ const run = spawnSync(process.env.PYTHON || "python3", ["-c", [
 assert.equal(run.status, 0, run.stderr);
 assert.equal(run.stdout.trim(), "cases-ok");
 
+// 共通エンジンの進行: 全問とも誤答2回→正解で進み、初回結果は保持される。
 let state = createAssessmentState(content);
-assert.equal(activeQuestion(content, state), q1);
+assert.equal(activeQuestion(content, state), content.questions[0]);
 assert(!assessmentComplete(content, state));
-assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state, "No early answer to later question");
-for (const answer of [choice("missing"), { kind: "node", nodeId: "remaining" }, { kind: "none" }]) assert.equal(answerQuestion(content, state, q1.id, answer), state);
-for (const option of q1.choices.filter(option => option.id !== q1.correctAnswer.choiceId)) {
-  const before = state;
-  state = answerQuestion(content, state, q1.id, choice(option.id));
-  const feedback = newAnswerFeedback(content, before, state);
-  assert.equal(feedback.correct, false);
-  assert.equal(feedback.message, q1.incorrectFeedback);
+assert.equal(answerQuestion(content, state, content.questions[1].id, content.questions[1].correctAnswer), state, "No early answer to later question");
+for (const answer of [choice("missing"), { kind: "node", nodeId: "remaining" }, { kind: "none" }]) assert.equal(answerQuestion(content, state, content.questions[0].id, answer), state);
+for (const question of content.questions) {
+  assert.equal(activeQuestion(content, state), question);
+  for (const option of question.choices.filter(option => option.id !== question.correctAnswer.choiceId)) {
+    const before = state;
+    state = answerQuestion(content, state, question.id, choice(option.id));
+    const feedback = newAnswerFeedback(content, before, state);
+    assert.equal(feedback.correct, false);
+    assert.equal(feedback.message, question.incorrectFeedback);
+  }
+  assert.equal(activeQuestion(content, state), question, "Wrong answers do not advance");
+  const previous = state;
+  state = answerQuestion(content, state, question.id, question.correctAnswer);
+  assert.equal(previous.records.find(record => record.questionId === question.id).solved, false, "Records are immutable");
+  const record = state.records.find(entry => entry.questionId === question.id);
+  assert.equal(record.firstCorrect, false);
+  assert.equal(record.attemptCount, 3);
+  assert.equal(newAnswerFeedback(content, previous, state).message, question.correctFeedback);
+  assert.equal(activeQuestion(content, state), question, "A correct answer does not advance on its own");
+  state = advanceAssessment(content, state, question.id);
 }
-assert.equal(activeQuestion(content, state), q1);
-assert.equal(state.records[0].attemptCount, 2);
-const previous = state;
-state = answerQuestion(content, state, q1.id, q1.correctAnswer);
-assert.equal(previous.records[0].solved, false, "Records are immutable");
-assert.equal(state.records[0].firstCorrect, false);
-assert.equal(state.records[0].attemptCount, 3);
-assert.equal(newAnswerFeedback(content, previous, state).message, q1.correctFeedback);
-assert.equal(activeQuestion(content, state), q1, "A correct answer does not advance on its own");
-state = advanceAssessment(content, state, q1.id);
-assert.equal(activeQuestion(content, state), q2);
-assert(!assessmentComplete(content, state), "One correct answer does not complete phase 5");
-assert.equal(answerQuestion(content, state, q1.id, q1.correctAnswer), state, "Stale answers do not spill into question 2");
-for (const option of q2.choices.filter(option => option.id !== q2.correctAnswer.choiceId)) state = answerQuestion(content, state, q2.id, choice(option.id));
-assert.equal(activeQuestion(content, state), q2);
-state = answerQuestion(content, state, q2.id, q2.correctAnswer);
-state = advanceAssessment(content, state, q2.id);
 assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert(state.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 3));
-assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1,2,3");
 
 // 「次の問題へ」で正解せず進める（ソフトゲート）。全問未正解でも完了し、結果は初回回答のまま。
 let skipped = createAssessmentState(content);
-assert.equal(advanceAssessment(content, skipped, q1.id), skipped, "Cannot advance before answering");
-skipped = answerQuestion(content, skipped, q1.id, choice(q1.choices.find(option => option.id !== q1.correctAnswer.choiceId).id));
-skipped = advanceAssessment(content, skipped, q1.id);
-assert.equal(activeQuestion(content, skipped), q2, "Skipping question 1 reaches question 2");
-skipped = answerQuestion(content, skipped, q2.id, choice(q2.choices.find(option => option.id !== q2.correctAnswer.choiceId).id));
-skipped = advanceAssessment(content, skipped, q2.id);
+assert.equal(advanceAssessment(content, skipped, content.questions[0].id), skipped, "Cannot advance before answering");
+for (const question of content.questions) {
+  assert.equal(activeQuestion(content, skipped), question, "Skipping reaches the next question");
+  skipped = answerQuestion(content, skipped, question.id, choice(question.choices.find(option => option.id !== question.correctAnswer.choiceId).id));
+  skipped = advanceAssessment(content, skipped, question.id);
+}
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
@@ -190,15 +214,15 @@ assert.match(codeCheckPreviewSource, /retry \? "もう一度、" : ""/, "re-answ
 assert.equal((codeCheckPreviewSource.match(/もう一度解く/g) || []).length, 1, "the restart button appears exactly once, inside the shared action row");
 const previewPageSource = fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8");
 assert.match(previewPageSource, /contentId === "greedy-coins-code-check"/, "Preview page must register greedy-coins-code-check");
-assert.equal(answerQuestion(content, state, q2.id, q2.correctAnswer), state);
+assert.equal(answerQuestion(content, state, qSubtract.id, qSubtract.correctAnswer), state);
 let firstTry = createAssessmentState(content);
 for (const question of content.questions) { firstTry = answerQuestion(content, firstTry, question.id, question.correctAnswer); firstTry = advanceAssessment(content, firstTry, question.id); }
 assert(assessmentComplete(content, firstTry));
 assert(firstTry.records.every(record => record.firstCorrect && record.attemptCount === 1));
-// 問2の正解判定は問1の値に依存せず、共通基盤上で単独でも成立する。
-const independent = { ...content, id: "standalone-question-2", questions: [q2] };
-const independentDone = answerQuestion(independent, createAssessmentState(independent), q2.id, q2.correctAnswer);
-assert(assessmentComplete(independent, advanceAssessment(independent, independentDone, q2.id)));
+// 残額の更新の設問の正解判定は他問の値に依存せず、共通基盤上で単独でも成立する。
+const independent = { ...content, id: "standalone-question-2", questions: [qSubtract] };
+const independentDone = answerQuestion(independent, createAssessmentState(independent), qSubtract.id, qSubtract.correctAnswer);
+assert(assessmentComplete(independent, advanceAssessment(independent, independentDone, qSubtract.id)));
 const nodeSession = createAssessmentState(nodeContent);
 assert.equal(answerQuestion(nodeContent, nodeSession, nodeContent.questions[0].id, choice("remaining")), nodeSession, "Choice answers cannot affect node questions");
 assert.throws(() => activeQuestion(content, nodeSession), /mismatch/);
@@ -219,4 +243,4 @@ rejects(broken => broken.questions[0].reviewLineId = "subtract-coin");
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[0].reviewStepIds = ["subtract-coin-1"]);
 assert.throws(() => validateAssessment({ ...content, kind: "node-tap-check" }));
-console.log("Greedy-coins code check: two independent questions (while remaining / subtract coin), byte-exact restoration, six Python syntax checks, baseline case execution (main, transfer, other denominations, counterexample), shared display/review identity, question-specific feedback, common retries/records and invalid-data rejection passed.");
+console.log("Greedy-coins code check: eight independent questions covering every line except the fixed definition (init result/remaining, for coins, while remaining/coin, append coin, subtract coin, return result), byte-exact restoration, twenty-four Python syntax checks, baseline case execution (main, transfer, other denominations, counterexample), shared display/review identity, question-specific feedback, common retries/records and invalid-data rejection passed.");
