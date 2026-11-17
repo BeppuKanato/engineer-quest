@@ -32,12 +32,12 @@ const { bubbleSortCode: code } = load(file("bubble-sort/code-mapping/bubbleSortC
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateArrayBarsCanvas } = load(file("player/arrayBars.types.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
-const [q1, q2, q3, q4] = content.questions;
+const [q1, q2, q3, qRev, qEq, q4] = content.questions;
 
-// 基準データ §3 フェーズ6の構成（転移タップ・並び済み配列の選択・理由の選択・Parsons の4問）。
+// 基準データ §3 フェーズ6の構成（転移タップ・選択4問・Parsons の6問）。
 validateBubbleSortConsolidation(content);
 assert.equal(content.id, "bubble-sort-consolidation"); assert.equal(content.phase, 6); assert.equal(content.stageName, "応用問題");
-assert.equal(content.questions.length, 4);
+assert.equal(content.questions.length, 6);
 assert.equal(content.code, code); assert.equal(code.id, "bubble-sort-v1"); assert.equal(code.version, 1);
 const stageBracket = name => `${String.fromCharCode(0x3010)}${name}${String.fromCharCode(0x3011)}`;
 assert.equal(content.completion, `理解の状況が確認できました。それでは${stageBracket("自分で実装")}に進み、自分の手でコードを完成させましょう！`);
@@ -45,6 +45,8 @@ assert.deepEqual(plain(content.questions.map(q => [q.id, q.kind, q.tags[0]])), [
   ["next-swap-pair", "node", "交換が起きるペアの追跡"],
   ["sorted-array-behavior", "choice", "並び済みの配列の扱い"],
   ["why-right-end-fixed", "choice", "右端が決まる理由"],
+  ["reverse-array-swaps", "choice", "逆順の配列の扱い"],
+  ["equal-values-behavior", "choice", "同じ値の扱い"],
   ["whole-code-order", "parsons", "コード全体の流れ"],
 ]);
 
@@ -64,7 +66,7 @@ function bubbleSortTrace(values) {
   return comparisons;
 }
 // 共有の組み立て（bubbleSort.ts）が独立トレースと一致することを先に固定する。
-for (const values of [[4, 2, 5, 1, 3], [3, 1, 4, 2], [1, 2, 3, 4]]) {
+for (const values of [[4, 2, 5, 1, 3], [3, 1, 4, 2], [1, 2, 3, 4], [4, 3, 2, 1], [2, 3, 3, 1]]) {
   assert.deepEqual(plain(bubbleSort.bubbleSortComparisons(values)), bubbleSortTrace(values), "Shared builder matches the independent trace");
 }
 
@@ -121,6 +123,26 @@ assert.equal(q3.correctAnswer.choiceId, "largest-moves-right");
 assert.equal(q3.choices.find(choice => choice.id === "largest-moves-right").text, "比べるたびに大きい方が右へ移るので、1周すると一番大きい値が右端に届くため");
 validateArrayBarsCanvas(q3.scene);
 
+// Q4（追加）: 逆順 [4, 3, 2, 1] の1周目は、独立トレースで全3組の比較すべてで交換が起きる。
+const reverseRun = bubbleSortTrace([4, 3, 2, 1]);
+const reversePassOne = reverseRun.filter(comparison => comparison.pass === 1);
+assert.equal(reversePassOne.length, 3);
+assert(reversePassOne.every(comparison => comparison.swapped), "Every pass-1 comparison swaps on a reversed array");
+assert.deepEqual(plain(qRev.scene.state.values), [4, 3, 2, 1]);
+assert.equal(qRev.scene.state.fixedFrom, 4);
+assert.equal(qRev.correctAnswer.choiceId, "three-swaps");
+assert.equal(qRev.choices.find(choice => choice.id === qRev.correctAnswer.choiceId).text, `${reversePassOne.length}回`);
+validateArrayBarsCanvas(qRev.scene);
+
+// Q5（追加）: 同じ値のペア (3, 3) は、独立トレースで交換が起きない（左が大きくないため）。
+const equalRun = bubbleSortTrace([2, 3, 3, 1]);
+const equalPair = equalRun.find(comparison => comparison.pass === 1 && comparison.j === 1);
+assert.deepEqual([equalPair.pair, equalPair.swapped], [[3, 3], false], "Equal neighbours never swap");
+assert.deepEqual(plain(qEq.scene.state.values), [2, 3, 3, 1]);
+assert.deepEqual(plain(qEq.scene.state.comparing), [1, 2], "The scene points at the equal pair");
+assert.equal(qEq.correctAnswer.choiceId, "no-swap-not-larger");
+validateArrayBarsCanvas(qEq.scene);
+
 // 復習はすべてフェーズ4の元フレームを参照のまま使う（新しい配列の答え合わせは作らない）。
 for (const question of content.questions) {
   const review = selectReviewContent(mapping, question.reviewStepIds);
@@ -175,7 +197,7 @@ for (const id of q1.nodeIds) {
 assert.equal(JSON.stringify(q1.scene), sceneBeforeRender, "Rendering must not mutate the scene");
 const lockedHtml = renderToStaticMarkup(React.createElement(BubbleSortCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, disabled: true, onAnswer() {} }));
 assert.equal((lockedHtml.match(/ disabled=""/g) || []).length, q1.nodeIds.length, "Correct responses lock every answer control");
-for (const question of [q2, q3]) {
+for (const question of [q2, q3, qRev, qEq]) {
   const html = renderToStaticMarkup(React.createElement(BubbleSortCheckCanvas, { canvas: question.scene, onAnswer() {} }));
   assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes are display-only");
 }
@@ -208,17 +230,17 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/4 can finish without correct answers");
-const retried = complete([false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/6 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false], true);
-complete([true, true, true, true], false);
+complete([true, false, true, false, true, false], true);
+complete([true, true, true, true, true, true], false);
 
 // Parsons の回答検証: 不完全・重複した並びは拒否し、提出した配列は複製して記録する。
 // 順序自由な行はないため、隣接するどの2行の入れ替えも不正解にする。
 let parsonsState = createAssessmentState(content);
-for (const question of content.questions.slice(0, 3)) {
+for (const question of content.questions.slice(0, 5)) {
   parsonsState = advanceAssessment(content, answerQuestion(content, parsonsState, question.id, question.correctAnswer), question.id);
 }
 assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: canonicalIds.slice(1) }), parsonsState);
@@ -226,23 +248,23 @@ assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineI
 const mutable = [...canonicalIds];
 const answered = answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: mutable });
 mutable.reverse();
-assert.deepEqual(plain(answered.records[3].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
-assert(sameAnswer(q4.correctAnswer, answered.records[3].attempts[0].answer));
+assert.deepEqual(plain(answered.records[5].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
+assert(sameAnswer(q4.correctAnswer, answered.records[5].attempts[0].answer));
 assert(!sameAnswer(q4.correctAnswer, wrong(q4)));
 for (let index = 0; index < canonicalIds.length - 1; index++) {
   const swapped = [...canonicalIds];
   [swapped[index], swapped[index + 1]] = [swapped[index + 1], swapped[index]];
-  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swapped }).records[3].firstCorrect,
+  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swapped }).records[5].firstCorrect,
     false, `Adjacent swap must be incorrect: ${canonicalIds[index]}/${canonicalIds[index + 1]}`);
 }
 
 // 検証の負系: 壊れたコンテンツは読み込み時の検証で落とす。
 assert.doesNotThrow(() => validateBubbleSortConsolidation({ ...content, questions: plain(content.questions) }), "A structural clone still validates");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateBubbleSortConsolidation(broken)); }
-rejects(broken => broken.questions[3].lineIds.pop());
-rejects(broken => broken.questions[3].lineIds[1] = broken.questions[3].lineIds[0]);
-rejects(broken => broken.questions[3].correctAnswer.lineIds.reverse());
-rejects(broken => broken.questions[3].interchangeableLineGroups = [["copy-values", "count-values"]]);
+rejects(broken => broken.questions[5].lineIds.pop());
+rejects(broken => broken.questions[5].lineIds[1] = broken.questions[5].lineIds[0]);
+rejects(broken => broken.questions[5].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[5].interchangeableLineGroups = [["copy-values", "count-values"]]);
 rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
 rejects(broken => broken.questions[0].correctAnswer.nodeId = "0");
 rejects(broken => broken.questions[0].scene.state.values = [1, 3, 4, 2]);
