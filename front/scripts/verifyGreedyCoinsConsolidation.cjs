@@ -34,14 +34,17 @@ const { GreedyCoinsCheckCanvas } = load(file("greedy-coins/check/GreedyCoinsChec
 const { renderToStaticMarkup } = require("react-dom/server");
 const { createElement } = require("react");
 const plain = value => JSON.parse(JSON.stringify(value));
-const [q1, q2, q3, q4] = content.questions;
+const [q1, q2, q3, q4, q5, q6] = content.questions;
 
-// 基準データ §3 フェーズ6の構成（転移タップ・反例トレース・反例の理解・Parsons の4問）。
+// 基準データ §3 フェーズ6の構成（6問）。当初の4問（転移タップ・反例
+// トレース・反例の理解・Parsons）に、フェーズ7が前提とする力
+// （転移の全体の追跡・別の額面への転移）を判断する2問を足した
+// （2026-11-17 の基準）。
 validateGreedyCoinsConsolidation(content);
 assert.equal(content.id, "greedy-coins-consolidation");
 assert.equal(content.phase, 6);
 assert.equal(content.stageName, "応用問題");
-assert.equal(content.questions.length, 4);
+assert.equal(content.questions.length, 6);
 assert.equal(content.code, greedyCoinsCode);
 assert.equal(greedyCoinsCode.id, "greedy-coins-v1");
 assert.equal(greedyCoinsCode.version, 1);
@@ -49,6 +52,8 @@ const stageBracket = name => `${String.fromCharCode(0x3010)}${name}${String.from
 assert.equal(content.completion, `理解の状況が確認できました。それでは${stageBracket("自分で実装")}に進み、自分の手でコードを完成させましょう！`);
 assert.deepEqual(plain(content.questions.map(q => [q.id, "kind" in q ? q.kind : "node", q.tags[0]])), [
   ["next-coin-transfer", "node", "新しい金額での次に選ぶ硬貨"],
+  ["transfer-full-result", "choice", "新しい金額での払い方全体"],
+  ["other-coins-result", "choice", "別の額面での払い方"],
   ["counterexample-greedy-result", "choice", "別の額面での貪欲な払い方"],
   ["counterexample-why-greedy-loses", "choice", "貪欲が最適にならない理由"],
   ["whole-code-order", "parsons", "コード全体の流れ"],
@@ -79,6 +84,8 @@ function optimal(amount, coins) {
 const MAIN_COINS = [500, 100, 50, 10, 5, 1];
 assert.deepEqual(greedyTrace(342, MAIN_COINS), [100, 100, 100, 10, 10, 10, 10, 1, 1], "Independent transfer trace");
 assert.deepEqual(plain(greedy.runGreedyCoins(342, MAIN_COINS)), greedyTrace(342, MAIN_COINS), "Shared runner matches the independent trace");
+assert.deepEqual(greedyTrace(41, [25, 10, 5, 1]), [25, 10, 5, 1], "Independent other-denominations trace");
+assert.deepEqual(plain(greedy.runGreedyCoins(41, [25, 10, 5, 1])), greedyTrace(41, [25, 10, 5, 1]), "Shared runner matches the other-denominations trace");
 assert.deepEqual(greedyTrace(6, [4, 3, 1]), [4, 1, 1], "Independent counterexample greedy result");
 assert.deepEqual(optimal(6, [4, 3, 1]), [3, 3], "Independent counterexample optimum is [3, 3] in 2 coins");
 assert.equal(optimal(6, [4, 3, 1]).length, 2);
@@ -93,6 +100,7 @@ const run = spawnSync(process.env.PYTHON || "python3", ["-c", [
   "exec(source, ns)",
   "f=ns['greedy_coins']",
   "assert f(342, [500,100,50,10,5,1]) == [100,100,100,10,10,10,10,1,1]",
+  "assert f(41, [25,10,5,1]) == [25,10,5,1]",
   "assert f(6, [4,3,1]) == [4,1,1]",
   "print('cases-ok')",
 ].join("\n")], { input: JSON.stringify(greedyCoinsCodeSource), encoding: "utf8" });
@@ -111,24 +119,45 @@ assert.deepEqual(plain(q1.nodeIds), MAIN_COINS.map(String));
 assert.equal(q1.correctAnswer.nodeId, "10");
 assert.equal(q1.allowNone, false);
 
-// Q2: 反例トレースの選択。場面は開始状態、正解は貪欲の [4, 1, 1]。
+// Q2: 転移の全体。場面は開始状態、正解は全体の並び [100, 100, 100, 10, 10, 10, 10, 1, 1] の9枚。
 assert.equal(q2.choices.length, 4);
-assert.equal(q2.correctAnswer.choiceId, "greedy-4-1-1");
-assert.equal(q2.choices.find(choice => choice.id === "greedy-4-1-1").text, "[4, 1, 1] の3枚になる");
-assert.deepEqual(plain(q2.scene.state.coins), [4, 3, 1]);
-assert.equal(q2.scene.state.amount, 6);
-assert.equal(q2.scene.state.remaining, 6);
+assert.equal(q2.correctAnswer.choiceId, "full-9");
+assert.equal(q2.choices.find(choice => choice.id === "full-9").text, "[100, 100, 100, 10, 10, 10, 10, 1, 1] の9枚になる");
+assert.deepEqual(plain(q2.scene.state.coins), MAIN_COINS);
+assert.equal(q2.scene.state.amount, 342);
+assert.equal(q2.scene.state.remaining, 342);
 assert.deepEqual(plain(q2.scene.state.tray), []);
+assert.equal(q2.scene.state.selectedCoin, null);
 validateGreedyCoinsExecutionCanvas(q2.scene);
 
-// Q3: 反例の理解。場面は貪欲で払い終えた状態、正解は最適 [3, 3] と敗因。
+// Q3: 別額面への転移。場面は開始状態、正解は [25, 10, 5, 1] の4枚（フェーズ7 J3 と同じケース）。
 assert.equal(q3.choices.length, 4);
-assert.equal(q3.correctAnswer.choiceId, "optimal-and-reason");
-assert.equal(q3.choices.find(choice => choice.id === "optimal-and-reason").text,
-  "一番少ないのは [3, 3] の2枚。最初に一番大きい4を選ぶと、残り2を1の硬貨で埋めるしかなくなるから");
-assert.deepEqual(plain(q3.scene.state.tray), [4, 1, 1]);
-assert.equal(q3.scene.state.remaining, 0);
+assert.equal(q3.correctAnswer.choiceId, "greedy-25-10-5-1");
+assert.equal(q3.choices.find(choice => choice.id === "greedy-25-10-5-1").text, "[25, 10, 5, 1] の4枚になる");
+assert.deepEqual(plain(q3.scene.state.coins), [25, 10, 5, 1]);
+assert.equal(q3.scene.state.amount, 41);
+assert.equal(q3.scene.state.remaining, 41);
+assert.deepEqual(plain(q3.scene.state.tray), []);
 validateGreedyCoinsExecutionCanvas(q3.scene);
+
+// Q4: 反例トレースの選択。場面は開始状態、正解は貪欲の [4, 1, 1]。
+assert.equal(q4.choices.length, 4);
+assert.equal(q4.correctAnswer.choiceId, "greedy-4-1-1");
+assert.equal(q4.choices.find(choice => choice.id === "greedy-4-1-1").text, "[4, 1, 1] の3枚になる");
+assert.deepEqual(plain(q4.scene.state.coins), [4, 3, 1]);
+assert.equal(q4.scene.state.amount, 6);
+assert.equal(q4.scene.state.remaining, 6);
+assert.deepEqual(plain(q4.scene.state.tray), []);
+validateGreedyCoinsExecutionCanvas(q4.scene);
+
+// Q5: 反例の理解。場面は貪欲で払い終えた状態、正解は最適 [3, 3] と敗因。
+assert.equal(q5.choices.length, 4);
+assert.equal(q5.correctAnswer.choiceId, "optimal-and-reason");
+assert.equal(q5.choices.find(choice => choice.id === "optimal-and-reason").text,
+  "一番少ないのは [3, 3] の2枚。最初に一番大きい4を選ぶと、残り2を1の硬貨で埋めるしかなくなるから");
+assert.deepEqual(plain(q5.scene.state.tray), [4, 1, 1]);
+assert.equal(q5.scene.state.remaining, 0);
+validateGreedyCoinsExecutionCanvas(q5.scene);
 
 // 復習はすべてフェーズ4の元フレームを参照のまま使う。
 for (const question of content.questions) {
@@ -137,39 +166,39 @@ for (const question of content.questions) {
   assert(question.instruction.trim()); assert(question.correctFeedback.trim()); assert(question.incorrectFeedback.trim());
   assert(!/完璧|完全に理解|マスター/u.test(question.correctFeedback), "No overpraise in correct feedback");
 }
-assert.equal(q4.reviewStepIds.length, mapping.steps.length, "Parsons review covers every phase-4 frame");
+assert.equal(q6.reviewStepIds.length, mapping.steps.length, "Parsons review covers every phase-4 frame");
 assert.equal(mapping.steps.length, 44, "Phase 4 has 44 frames");
 
-// Q4: フェード型 Parsons。固定2行・可動6行・1セグメント、互換グループは append / subtract。
+// Q6: フェード型 Parsons。固定2行・可動6行・1セグメント、互換グループは append / subtract。
 const canonicalIds = plain(greedyCoinsCode.lines.map(line => line.id));
 assert.deepEqual(canonicalIds, [
   "define-function", "init-result", "init-remaining", "for-coin",
   "while-remaining", "append-coin", "subtract-coin", "return-result",
 ]);
-assert.deepEqual([...q4.lineIds].sort(), [...canonicalIds].sort());
-assert.notDeepEqual(plain(q4.lineIds), canonicalIds, "Presentation order is shuffled");
-assert.deepEqual(plain(q4.correctAnswer.lineIds), canonicalIds, "Answer follows the canonical order");
-assert.deepEqual(plain(q4.fixedLineIds), ["define-function", "return-result"], "Faded split as designed");
-assert.deepEqual(plain(q4.interchangeableLineGroups), [["append-coin", "subtract-coin"]], "Append and subtract are interchangeable");
+assert.deepEqual([...q6.lineIds].sort(), [...canonicalIds].sort());
+assert.notDeepEqual(plain(q6.lineIds), canonicalIds, "Presentation order is shuffled");
+assert.deepEqual(plain(q6.correctAnswer.lineIds), canonicalIds, "Answer follows the canonical order");
+assert.deepEqual(plain(q6.fixedLineIds), ["define-function", "return-result"], "Faded split as designed");
+assert.deepEqual(plain(q6.interchangeableLineGroups), [["append-coin", "subtract-coin"]], "Append and subtract are interchangeable");
 {
   const { parsonsMovableSegments } = load(file("bfs/consolidation/parsonsOrderFeedback.ts"));
-  const segments = parsonsMovableSegments(q4.correctAnswer.lineIds, q4.fixedLineIds);
+  const segments = parsonsMovableSegments(q6.correctAnswer.lineIds, q6.fixedLineIds);
   assert.equal(segments.length, 1, "Movable lines form a single segment between the fixed lines");
   assert.deepEqual(plain(segments[0]), canonicalIds.slice(1, 7));
   for (const segment of segments) {
-    assert.deepEqual([...q4.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable within the segment");
+    assert.deepEqual([...q6.lineIds.filter(id => segment.includes(id))].sort(), [...segment].sort(), "Solution is reachable within the segment");
   }
 }
-const parsonsHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: q4, code: greedyCoinsCode, onAnswer: () => {} }));
+const parsonsHtml = renderToStaticMarkup(createElement(ParsonsBoard, { question: q6, code: greedyCoinsCode, onAnswer: () => {} }));
 {
-  const fixedSet = new Set(q4.fixedLineIds);
-  const movableInitial = q4.lineIds.filter(id => !fixedSet.has(id));
+  const fixedSet = new Set(q6.fixedLineIds);
+  const movableInitial = q6.lineIds.filter(id => !fixedSet.has(id));
   let cursor = 0;
-  const expectedOrder = q4.correctAnswer.lineIds.map(id => fixedSet.has(id) ? id : movableInitial[cursor++]);
+  const expectedOrder = q6.correctAnswer.lineIds.map(id => fixedSet.has(id) ? id : movableInitial[cursor++]);
   assert.deepEqual([...parsonsHtml.matchAll(/data-parsons-line-id="([^"]+)"/g)].map(match => match[1]), [...expectedOrder],
     "Fixed lines render pinned at their solution positions");
   const fixedRendered = [...parsonsHtml.matchAll(/<div[^>]*data-parsons-fixed="true"[^>]*>/g)].map(tag => /data-parsons-line-id="([^"]+)"/.exec(tag[0])[1]);
-  assert.deepEqual(fixedRendered, plain(q4.fixedLineIds), "Exactly the fixed lines render as non-operable");
+  assert.deepEqual(fixedRendered, plain(q6.fixedLineIds), "Exactly the fixed lines render as non-operable");
 }
 const parsonsText = parsonsHtml.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&");
 for (const line of greedyCoinsCode.lines) assert(parsonsText.includes(line.text), "Preserve original indentation and every line");
@@ -182,7 +211,7 @@ for (const id of q1.nodeIds) {
 }
 const lockedHtml = renderToStaticMarkup(createElement(GreedyCoinsCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, disabled: true, onAnswer() {} }));
 assert.equal((lockedHtml.match(/ disabled=""/g) || []).length, q1.nodeIds.length, "Correct responses lock every answer control");
-for (const question of [q2, q3]) {
+for (const question of [q2, q3, q4, q5]) {
   const html = renderToStaticMarkup(createElement(GreedyCoinsCheckCanvas, { canvas: question.scene, onAnswer() {} }));
   assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes are display-only");
 }
@@ -214,51 +243,51 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/4 can finish without correct answers");
-const retried = complete([false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/6 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false], true);
-complete([true, true, true, true], false);
+complete([true, false, true, false, true, false], true);
+complete([true, true, true, true, true, true], false);
 
 // Parsons の回答検証: 互換グループの2行の入れ替えは正解、それ以外の隣接入れ替えは不正解。
 let parsonsState = createAssessmentState(content);
-for (const question of content.questions.slice(0, 3)) {
+for (const question of content.questions.slice(0, 5)) {
   parsonsState = advanceAssessment(content, answerQuestion(content, parsonsState, question.id, question.correctAnswer), question.id);
 }
-assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: canonicalIds.slice(1) }), parsonsState);
-assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: canonicalIds.map(() => canonicalIds[0]) }), parsonsState);
+assert.equal(answerQuestion(content, parsonsState, q6.id, { kind: "order", lineIds: canonicalIds.slice(1) }), parsonsState);
+assert.equal(answerQuestion(content, parsonsState, q6.id, { kind: "order", lineIds: canonicalIds.map(() => canonicalIds[0]) }), parsonsState);
 const swappedGroup = [...canonicalIds];
 [swappedGroup[5], swappedGroup[6]] = [swappedGroup[6], swappedGroup[5]];
-const groupAnswered = answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swappedGroup });
-assert.equal(groupAnswered.records[3].firstCorrect, true, "Swapping append and subtract (interchangeable group) is correct");
-assert(sameAnswer(q4.correctAnswer, { kind: "order", lineIds: canonicalIds }));
+const groupAnswered = answerQuestion(content, parsonsState, q6.id, { kind: "order", lineIds: swappedGroup });
+assert.equal(groupAnswered.records[5].firstCorrect, true, "Swapping append and subtract (interchangeable group) is correct");
+assert(sameAnswer(q6.correctAnswer, { kind: "order", lineIds: canonicalIds }));
 for (let index = 0; index < canonicalIds.length - 1; index++) {
   if (index === 5) continue; // 互換グループの入れ替えは上の検証で正解とした。
   const swapped = [...canonicalIds];
   [swapped[index], swapped[index + 1]] = [swapped[index + 1], swapped[index]];
-  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swapped }).records[3].firstCorrect,
+  assert.equal(answerQuestion(content, parsonsState, q6.id, { kind: "order", lineIds: swapped }).records[5].firstCorrect,
     false, `Adjacent swap must be incorrect: ${canonicalIds[index]}/${canonicalIds[index + 1]}`);
 }
 // グループの行が離れた位置にある並びは互換として扱わない。
 const separated = [...canonicalIds];
 [separated[0], separated[5]] = [separated[5], separated[0]];
-assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: separated }).records[3].firstCorrect, false,
+assert.equal(answerQuestion(content, parsonsState, q6.id, { kind: "order", lineIds: separated }).records[5].firstCorrect, false,
   "Interchangeable lines separated by other lines are not normalized");
 
 // 検証の負系: 壊れたコンテンツは読み込み時の検証で落とす。
 assert.doesNotThrow(() => validateGreedyCoinsConsolidation({ ...content, questions: plain(content.questions) }), "A structural clone still validates");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateGreedyCoinsConsolidation(broken)); }
-rejects(broken => broken.questions[3].lineIds.pop());
-rejects(broken => broken.questions[3].correctAnswer.lineIds.reverse());
-rejects(broken => broken.questions[3].fixedLineIds = ["define-function"]);
-rejects(broken => broken.questions[3].interchangeableLineGroups = []);
-rejects(broken => broken.questions[3].interchangeableLineGroups = [["append-coin", "for-coin"]]);
+rejects(broken => broken.questions[5].lineIds.pop());
+rejects(broken => broken.questions[5].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[5].fixedLineIds = ["define-function"]);
+rejects(broken => broken.questions[5].interchangeableLineGroups = []);
+rejects(broken => broken.questions[5].interchangeableLineGroups = [["append-coin", "for-coin"]]);
 rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
 rejects(broken => broken.questions[0].correctAnswer.nodeId = "50");
 rejects(broken => broken.questions[0].scene.state.remaining = 41);
 rejects(broken => broken.questions[2].reviewStepIds = ["missing"]);
-rejects(broken => broken.questions[3].tags = []);
+rejects(broken => broken.questions[5].tags = []);
 
 // プレビューの契約: 3段組・主ボタンで進み・入力ロック・復習はフェーズ4。
 const previewSource = fs.readFileSync(file("greedy-coins/consolidation/GreedyCoinsConsolidationPreview.tsx"), "utf8");
@@ -269,8 +298,8 @@ assert.match(previewSource, /variant="contained" onClick=\{\(\) => setSession\(c
 assert.match(previewSource, /disabled=\{attempt\?\.correct === true\}/, "inputs lock after a correct answer");
 assert.match(previewSource, /content=\{greedyCoinsCodeMappingContent\}/, "review opens the phase-4 content");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups/, "parsons order feedback is wired with the interchangeable group");
-assert(q4.definitions?.includes("amount = 払う金額") && q4.definitions?.includes("remaining = 残額"), "Parsons question defines the variables on screen");
+assert(q6.definitions?.includes("amount = 払う金額") && q6.definitions?.includes("remaining = 残額"), "Parsons question defines the variables on screen");
 assert.match(previewSource, /question\.definitions/, "preview renders the definitions line");
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "greedy-coins-consolidation"'), "Standalone preview is registered");
-console.log("Greedy-coins consolidation verified: transfer tap from the independent 342 trace (100x3 then 10, remaining 42), counterexample greedy [4,1,1] vs optimal [3,3] refutations, faded 8-line Parsons (fixed def/return, one segment) with the append/subtract interchangeable group accepted only adjacently, soft-gate completion and first-attempt diagnosis.");
+console.log("Greedy-coins consolidation verified: transfer tap and full trace from the independent 342 trace (100x3 then 10, remaining 42, nine coins overall), transfer to other denominations [25,10,5,1] for 41, counterexample greedy [4,1,1] vs optimal [3,3] refutations, faded 8-line Parsons (fixed def/return, one segment) with the append/subtract interchangeable group accepted only adjacently, soft-gate completion and first-attempt diagnosis.");
