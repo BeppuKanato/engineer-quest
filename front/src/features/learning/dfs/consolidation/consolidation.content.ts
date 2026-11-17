@@ -37,6 +37,22 @@ const isolatedGraph: Graph = {
   nodes: [...searchGraph.nodes, { id: "Z", label: "Z", x: 530, y: 330 }],
 };
 
+/** フェーズ7の判定用テストJ3と同じ形（Bの隣の情報が未登録）。図はAとBの辺だけを描く。 */
+const missingAdjacencyGraph: Graph = {
+  kind: "graph",
+  nodes: searchGraph.nodes.filter(node => node.id === "A" || node.id === "B"),
+  edges: searchGraph.edges.filter(edge => edge.id === "ab"),
+  layers: [],
+};
+
+/** フェーズ7の判定用テストJ2と同じ形（出発点だけのグラフ）。 */
+const startOnlyGraph: Graph = {
+  kind: "graph",
+  nodes: searchGraph.nodes.filter(node => node.id === "A"),
+  edges: [],
+  layers: [],
+};
+
 const canonicalLineIds = dfsCode.lines.map(line => line.id);
 const [firstFrame, ...remainingFrames] = dfsCodeMappingContent.steps;
 
@@ -49,6 +65,12 @@ export const dfsConsolidationContent: Omit<DiagnosticAssessment, "questions"> & 
 } = {
   version: 1, kind: "diagnostic-check", id: "dfs-consolidation", phase: 6, stageName: "応用問題", code: dfsCode,
   reviewLabel: "基本例の動き・コードをもう一度見る",
+  // 7問。前提のカバーと「自力で流れからコードを組み立てる力があると判断するに足るか」で
+  // 問題数を決める基準（2026-11-17）に沿い、フェーズ7の判定用テストが前提とする境界2件
+  // （隣の情報が未登録の場所 J3、出発点だけのグラフ J2）を Parsons の前に追加した。
+  // 隣を逆順に見る効果は問1・問2の追跡の中で使われるが単独では聞いていない（△）。
+  // 行の内容を書く力と、Parsons 固定行（define-function / while-stack / return-order）を
+  // 自分で書くことは、フェーズ6の形式では確認せず判断事項として残す。
   questions: [
     {
       kind: "node", id: "last-from-f", prompt: "出発点をFに変えると、最後に訪れるのはどれ？",
@@ -96,6 +118,28 @@ export const dfsConsolidationContent: Omit<DiagnosticAssessment, "questions"> & 
       instruction: "出発点Aの扱いを1つ選ぶ",
       correctFeedback: "正解。Aは出発点として最初に発見済みに記録されているため、スタックにも訪問順にも、もう一度は追加されません。",
       incorrectFeedback: "不正解。すでに発見済みに記録された場所を、条件判定でどう扱うか確かめてみましょう。",
+    },
+    {
+      kind: "choice", id: "missing-adjacency-b", prompt: "Bの隣の情報が graph に登録されていないとします。Bがスタックから取り出されたとき、「for neighbor in reversed(graph.get(node, [])):」の行はどう動きますか？",
+      scene: { graph: missingAdjacencyGraph, start: "A" },
+      choices: [{ id: "error", text: "エラーになって止まる" }, { id: "treat-as-empty", text: "隣がないものとして扱い、そのまま次へ進む" }, { id: "removed", text: "Bが訪問順から消える" }],
+      correctAnswer: { kind: "choice", choiceId: "treat-as-empty" }, requires: null,
+      stepId: "for-b-e", reviewStepIds: ["execution-pop-b", "for-b-e"],
+      tags: ["隣の情報がない場所の扱い"],
+      instruction: "行の動きを1つ選ぶ",
+      correctFeedback: "正解。隣の情報が登録されていない場所では空のリストが返るため、エラーにならず、そのまま次へ進みます。",
+      incorrectFeedback: "不正解。隣の情報が登録されていない場所を、graph.get(node, []) がどう扱うか確かめてみましょう。",
+    },
+    {
+      kind: "choice", id: "start-only-result", prompt: "出発点Aだけで、隣が1つもないグラフでは、結果（訪問順）はどうなりますか？",
+      scene: { graph: startOnlyGraph, start: "A" },
+      choices: [{ id: "only-start", text: "Aだけが入る" }, { id: "empty", text: "空のリストになる" }, { id: "never-ends", text: "スタックが空にならず、終わらない" }],
+      correctAnswer: { kind: "choice", choiceId: "only-start" }, requires: null,
+      stepId: "return-order", reviewStepIds: ["initialize-visited", "execution-finish-all", "return-order"],
+      tags: ["出発点だけのグラフの扱い"],
+      instruction: "結果の扱いを1つ選ぶ",
+      correctFeedback: "正解。出発点Aだけが訪問順に入り、スタックが空になって処理が終わります。",
+      incorrectFeedback: "不正解。出発点は最初にスタックへ入ることと、スタックが空になったら終わることを確かめてみましょう。",
     },
     {
       kind: "parsons", id: "whole-code-order", prompt: "深さ優先探索のコードを、実行の流れに合う順序に並べてください。",
