@@ -44,6 +44,7 @@ export const bfsExecutionContent: BfsExecutionContent = defineLearningContent<Bf
     { id: "discover-f", caption: "Dの隣のFを、Aから3歩先の場所として末尾に追加します。", canvas: snapshot({ kind: "discover", from: "D", nodeId: "F", edgeId: "df" }, "D", ["E", "F"], ["A", "B", "C"], 2) },
     { id: "complete-d", caption: "Dの隣を調べ終えました。", canvas: snapshot({ kind: "complete", nodeId: "D" }, null, ["E", "F"], ["A", "B", "C", "D"], 2) },
     { id: "dequeue-e", caption: "3歩先のFより先に、まだ残っている2歩先のEを取り出します。", canvas: snapshot({ kind: "dequeue", nodeId: "E" }, "E", ["F"], ["A", "B", "C", "D"], 2) },
+    { id: "skip-b-from-e", caption: "Eの隣のBは、すでに距離が記録されているので、重ねて追加しません。", canvas: snapshot({ kind: "skip-discovered", from: "E", nodeId: "B", edgeId: "be" }, "E", ["F"], ["A", "B", "C", "D"], 2) },
     { id: "complete-e", caption: "Eの隣を調べ終えました。", canvas: snapshot({ kind: "complete", nodeId: "E" }, null, ["F"], ["A", "B", "C", "D", "E"], 2) },
     { id: "dequeue-f", caption: "最後に、3歩先のFを行列の先頭から取り出します。", canvas: snapshot({ kind: "dequeue", nodeId: "F" }, "F", [], ["A", "B", "C", "D", "E"], 3) },
     { id: "complete-all", caption: "Aから近い順に、すべての場所を調べ終えました。", canvas: snapshot({ kind: "complete", nodeId: "F" }, null, [], ["A", "B", "C", "D", "E", "F"], null) },

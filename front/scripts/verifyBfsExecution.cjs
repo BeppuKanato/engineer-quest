@@ -37,6 +37,7 @@ const captions = [
   "Dの隣のFを、Aから3歩先の場所として末尾に追加します。",
   "Dの隣を調べ終えました。",
   "3歩先のFより先に、まだ残っている2歩先のEを取り出します。",
+  "Eの隣のBは、すでに距離が記録されているので、重ねて追加しません。",
   "Eの隣を調べ終えました。",
   "最後に、3歩先のFを行列の先頭から取り出します。",
   "Aから近い順に、すべての場所を調べ終えました。",
@@ -66,8 +67,9 @@ function simulate(graph, start) {
         discovered.set(next, { distance: distance + 1, parent: current });
         queue.push(next);
         save({ kind: "discover", nodeId: next, from: current, edgeId: edge.id }, current, distance);
-      } else if (current === "C" && next === "E") {
-        // サンプルは重複追加しない確認をここだけ独立表示する。他の既発見点の確認は完了コマに含む。
+      } else if ((current === "C" && next === "E") || (current === "E" && next === "B")) {
+        // 重複追加しない確認は、行列にある場合（C→E）と記録済みの場合（E→B）の2場面だけ独立表示する。
+        // 他の既発見点の確認は完了コマに含む。
         save({ kind: "skip-discovered", nodeId: next, from: current, edgeId: edge.id }, current, distance);
       }
     }
@@ -80,15 +82,15 @@ function simulate(graph, start) {
 function verify(candidate) {
   assert.equal(candidate.phase, 2);
   assert(candidate.intervalMs >= 2500);
-  assert.equal(candidate.steps.length, 19, "Keep all 19 sample steps without splitting / combining");
+  assert.equal(candidate.steps.length, 20, "Keep all 20 sample steps without splitting / combining");
   assert.deepEqual(candidate.steps.map(step => step.caption), captions, "Exact reviewed captions");
-  assert.equal(new Set(candidate.steps.map(step => step.id)).size, 19);
+  assert.equal(new Set(candidate.steps.map(step => step.id)).size, 20);
   const { graph, start } = candidate.steps[0].canvas.data;
   assert.equal(start, "A");
   assert.equal(graph.nodes.map(node => node.id).join(), "A,B,C,D,E,F");
   assert.deepEqual(graph.edges.map(edge => `${edge.from}-${edge.to}`).sort(), ["A-B", "A-C", "B-D", "B-E", "C-E", "D-F", "E-F"]);
   const expected = simulate(graph, start);
-  assert.equal(expected.length, 19);
+  assert.equal(expected.length, 20);
   const expectedDistances = { A: 0, B: 1, C: 1, D: 2, E: 2, F: 3 };
   for (const layer of graph.layers) for (const id of layer.nodeIds) assert.equal(layer.distance, expectedDistances[id]);
   const point = id => graph.nodes.find(node => node.id === id);
@@ -101,7 +103,8 @@ function verify(candidate) {
     assert.equal(queueLabel, index === 0 ? "待ち行列（キュー）" : "キュー");
     assert.deepEqual(actual, expected[index], `Step ${index + 1}: FIFO / distances / visited / processing state`);
     const { operation } = actual;
-    const id = operation.kind === "initialize" ? "enqueue-start" : operation.kind === "skip-discovered" ? "skip-e" :
+    const id = operation.kind === "initialize" ? "enqueue-start" :
+      operation.kind === "skip-discovered" ? (operation.from === "E" ? "skip-b-from-e" : "skip-e") :
       operation.kind === "complete" && operation.nodeId === "F" ? "complete-all" : `${operation.kind}-${operation.nodeId.toLowerCase()}`;
     assert.equal(step.id, id, "Stable references for phases 3 / 4");
     const edges = step.canvas.highlights.filter(item => item.kind === "edge");
@@ -127,4 +130,4 @@ rejects(broken => broken.steps[10].canvas.highlights.find(item => item.kind === 
 rejects(broken => broken.steps[6].canvas.state.nodes.find(node => node.id === "D").parent = "C");
 rejects(broken => broken.steps[0].canvas.data.graph.edges.pop());
 rejects(broken => broken.steps[5].canvas.state.activeDistance = 2);
-console.log("BFS execution verified: exact 19 captions, reference graph, independent BFS snapshots, FIFO, distances, no re-enqueue, highlights and invalid-data rejection.");
+console.log("BFS execution verified: exact 20 captions, reference graph, independent BFS snapshots, FIFO, distances, no re-enqueue, highlights and invalid-data rejection.");
