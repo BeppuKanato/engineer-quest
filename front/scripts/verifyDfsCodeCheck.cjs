@@ -38,11 +38,22 @@ const choice = choiceId => ({ kind: "choice", choiceId });
 assert.equal(content.code, dfsCode);
 assert.equal(content.code.id, "dfs-order-stack");
 assert.equal(content.phase, 5);
-assert.equal(content.questions.length, 2);
+assert.equal(content.questions.length, 8);
 const [push, condition] = content.questions;
-assert.deepEqual(plain(content.questions.map(question => question.lineId)), ["append-stack", "if-unvisited"]);
-assert.deepEqual(plain(push.choices.map(option => option.text)), ["append", "pop", "remove"]);
-assert.deepEqual(plain(condition.choices.map(option => option.text)), ["not in", "in", "=="]);
+assert.deepEqual(plain(content.questions.map(question => question.lineId)), [
+  "append-stack", "if-unvisited", "mark-visited", "for-neighbor-reversed",
+  "while-stack", "initialize-visited", "initialize-order", "initialize-stack",
+]);
+assert.deepEqual(plain(content.questions.map(question => question.choices.map(option => option.text))), [
+  ["append", "pop", "remove"],
+  ["not in", "in", "=="],
+  ["add", "append", "remove"],
+  ["reversed(graph.get(node, []))", "graph.get(node, [])", "graph[node]"],
+  ["stack", "visited", "order"],
+  ["{start}", "[start]", "set()"],
+  ["[]", "[start]", "{}"],
+  ["[start]", "{start}", "[]"],
+]);
 
 const programs = [];
 for (const question of content.questions) {
@@ -76,7 +87,7 @@ const syntax = spawnSync(process.env.PYTHON || "python3", [
 ], { input: JSON.stringify(programs), encoding: "utf8" });
 assert.ifError(syntax.error);
 assert.equal(syntax.status, 0, syntax.stderr);
-assert.equal(programs.length, 6);
+assert.equal(programs.length, 24);
 
 let state = createAssessmentState(content);
 assert.equal(advanceAssessment(content, state, push.id), state);
@@ -88,20 +99,22 @@ assert.equal(state.records[0].attemptCount, 2);
 assert.equal(state.records[0].firstCorrect, false);
 assert.equal(state.records[0].solved, true);
 state = advanceAssessment(content, state, push.id);
-assert.equal(activeQuestion(content, state), condition);
-assert.equal(answerQuestion(content, state, push.id, push.correctAnswer), state);
-state = answerQuestion(content, state, condition.id, choice("in"));
-state = advanceAssessment(content, state, condition.id);
+for (const question of content.questions.slice(1)) {
+  assert.equal(activeQuestion(content, state), question);
+  assert.equal(answerQuestion(content, state, push.id, push.correctAnswer), state, "Stale callbacks cannot answer a later question");
+  state = answerQuestion(content, state, question.id, question.correctAnswer);
+  state = advanceAssessment(content, state, question.id);
+}
 assert(assessmentComplete(content, state));
-assert.deepEqual(plain(state.records.map(record => record.firstCorrect)), [false, false]);
+assert.deepEqual(plain(state.records.map(record => record.firstCorrect)), [false, true, true, true, true, true, true, true]);
 
 let skipped = createAssessmentState(content);
-skipped = answerQuestion(content, skipped, push.id, choice("remove"));
-skipped = advanceAssessment(content, skipped, push.id);
-assert.equal(activeQuestion(content, skipped), condition);
-skipped = answerQuestion(content, skipped, condition.id, condition.correctAnswer);
-skipped = advanceAssessment(content, skipped, condition.id);
+for (const question of content.questions) {
+  const wrong = question.choices.find(option => option.id !== question.correctAnswer.choiceId);
+  skipped = answerQuestion(content, skipped, question.id, choice(wrong.id));
+  skipped = advanceAssessment(content, skipped, question.id);
+}
 assert(assessmentComplete(content, skipped));
-assert.deepEqual(plain(skipped.records.map(record => record.firstCorrect)), [false, true]);
+assert(skipped.records.every(record => record.firstCorrect === false && !record.solved));
 
-console.log("DFS code check verified: independent blanks, exact code restoration, six Python syntax checks, original review frames, retries and first-attempt scoring.");
+console.log("DFS code check verified: eight independent blanks, exact code restoration, 24 Python syntax checks, original review frames, retries and first-attempt scoring.");
