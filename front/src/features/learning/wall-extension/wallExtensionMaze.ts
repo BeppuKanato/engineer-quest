@@ -20,6 +20,12 @@ export const wallExtensionSmallSize = 7;
 export const wallExtensionSmallChoices: readonly number[] = [1, 2, 2, 0];
 
 /**
+ * フェーズ6の未見盤面用の choices（7×7）。フェーズ2〜5に現れない方向の並びで、
+ * 1本目は一番上の段の柱 (2, 2) から上へ伸びる。完全迷路になることを検証済み。
+ */
+export const wallExtensionUnseenChoices: readonly number[] = [0, 1, 0, 2];
+
+/**
  * フェーズ2の説明専用ステップ「別の迷路」用の choices（9×9）。
  * 主教材と違う形の完全迷路になることを検証済み（壁の差分10マス）。
  */
