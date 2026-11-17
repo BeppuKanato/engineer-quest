@@ -53,7 +53,7 @@ const isolatedStage2 = stage2Input(withReactions, checked, candidates);
 assert(!isolatedStage1.includes(priorRecommendation));
 assert(!JSON.stringify(isolatedStage2).includes(priorRecommendation));
 assert(!stage2Prompt(isolatedStage2).includes(priorRecommendation));
-assert(!Object.hasOwn(isolatedStage2.appContext, "reactionSummary"));
+assert(!Object.prototype.hasOwnProperty.call(isolatedStage2.appContext, "reactionSummary"));
 
 // The same assessment event may contain multiple questions. Stage2 must
 // receive each question's full attempt history even if only one source ID was
