@@ -32,19 +32,23 @@ const { wallExtensionCode: code } = load(file("wall-extension/code-mapping/wallE
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateMazeGridCanvas } = load(file("player/mazeGrid.types.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
-const [q1, q2, q3, q4] = content.questions;
+const [q1, qFinal, qUnseen, q2, q3, qCount, q4] = content.questions;
 
-// 基準データ §3 フェーズ6の構成（転移タップ・性質の選択・理由の選択・Parsons の4問）。
+// 基準データ §3 フェーズ6の構成（2026-11-17 の判断基準で拡充した7問:
+// 転移タップ3問・性質の選択・理由の選択・大きな盤面の数値選択・Parsons）。
 validateWallExtensionConsolidation(content);
 assert.equal(content.id, "wall-extension-consolidation"); assert.equal(content.phase, 6); assert.equal(content.stageName, "応用問題");
-assert.equal(content.questions.length, 4);
+assert.equal(content.questions.length, 7);
 assert.equal(content.code, code); assert.equal(code.id, "wall-extension-v1"); assert.equal(code.version, 1);
 const stageBracket = name => `${String.fromCharCode(0x3010)}${name}${String.fromCharCode(0x3011)}`;
 assert.equal(content.completion, `理解の状況が確認できました。それでは${stageBracket("自分で実装")}に進み、自分の手でコードを完成させましょう！`);
 assert.deepEqual(plain(content.questions.map(q => [q.id, q.kind, q.tags[0]])), [
   ["transfer-wall-target", "node", "壁が伸びる先の追跡"],
+  ["transfer-wall-target-final", "node", "転移盤面の最後の伸長"],
+  ["unseen-first-extension", "node", "別の盤面での最初の伸長"],
   ["completed-maze-properties", "choice", "完成した迷路の性質"],
   ["no-upward-extension", "choice", "上に伸ばせない理由"],
+  ["pillar-count-larger-board", "choice", "大きな盤面の柱の数"],
   ["whole-code-order", "parsons", "コード全体の流れ"],
 ]);
 
@@ -94,6 +98,54 @@ assert.deepEqual(new Set(q1.nodeIds), new Set(["2,5", "1,4", "3,4"]));
 assert(!q1.nodeIds.includes("2,3"), "Already-walled neighbor is not a candidate");
 validateMazeGridCanvas(q1.scene);
 
+// 転移の続き: 同じ 7×7 の最後（4本目）。場面は3本目まで伸ばした状態。
+assert.equal(qFinal.prompt, "壁になるマスはどれですか");
+assert.equal(qFinal.scene.data.size, 7);
+assert.equal(qFinal.scene.state.processing, small.extensions[3].pillar);
+assert.equal(qFinal.direction, small.extensions[3].direction);
+assert.equal(qFinal.correctAnswer.nodeId, small.extensions[3].target);
+assert.equal(qFinal.scene.state.walls.length, 31, "Border 24 + pillars 4 + first three extensions");
+assert.deepEqual(new Set(qFinal.scene.state.walls), new Set(plain(maze.buildWallExtensionWalls(7, maze.wallExtensionSmallChoices, 3))), "Scene matches the shared builder");
+assert.deepEqual(new Set(qFinal.nodeIds), new Set(["4,3", "4,5", "5,4"]));
+assert(!qFinal.nodeIds.includes("3,4"), "The third extension target is already a wall");
+validateMazeGridCanvas(qFinal.scene);
+
+// 未見盤面: 別の choices の 7×7 で、1本目は一番上の段の柱から上へ伸びる。
+const unseen = generateMaze(7, [0, 1, 0, 2]);
+assert.deepEqual(unseen.extensions, [
+  { pillar: "2,2", direction: "up", target: "2,1" },
+  { pillar: "4,2", direction: "down", target: "4,3" },
+  { pillar: "2,4", direction: "down", target: "2,5" },
+  { pillar: "4,4", direction: "right", target: "5,4" },
+], "Independent unseen 7x7 trace");
+assert.equal(qUnseen.scene.state.processing, unseen.extensions[0].pillar);
+assert.equal(qUnseen.direction, "up");
+assert.equal(qUnseen.correctAnswer.nodeId, unseen.extensions[0].target);
+assert.equal(qUnseen.scene.state.walls.length, 28, "Border 24 + pillars 4, no extensions yet");
+assert.deepEqual(new Set(qUnseen.scene.state.walls), new Set(plain(maze.buildWallExtensionWalls(7, maze.wallExtensionUnseenChoices, 0))), "Scene matches the shared builder");
+assert.deepEqual(new Set(qUnseen.nodeIds), new Set(["2,1", "2,3", "1,2", "3,2"]), "All four neighbors of the top-row pillar are open");
+// 未見盤面も完全迷路になる（通路がすべてつながり、隣接数が通路数-1の木構造）。
+const unseenOpen = [];
+for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) if (unseen.grid[y][x] === 0) unseenOpen.push(`${x},${y}`);
+const unseenSeen = new Set([unseenOpen[0]]);
+const unseenQueue = [unseenOpen[0]];
+while (unseenQueue.length) {
+  const [x, y] = unseenQueue.shift().split(",").map(Number);
+  for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const key = `${x + dx},${y + dy}`;
+    if (unseenOpen.includes(key) && !unseenSeen.has(key)) { unseenSeen.add(key); unseenQueue.push(key); }
+  }
+}
+assert.equal(unseenSeen.size, unseenOpen.length, "Every passage of the unseen maze is reachable");
+let unseenAdjacency = 0;
+for (const key of unseenOpen) {
+  const [x, y] = key.split(",").map(Number);
+  if (unseenOpen.includes(`${x + 1},${y}`)) unseenAdjacency++;
+  if (unseenOpen.includes(`${x},${y + 1}`)) unseenAdjacency++;
+}
+assert.equal(unseenAdjacency, unseenOpen.length - 1, "Unseen maze passages form a tree");
+validateMazeGridCanvas(qUnseen.scene);
+
 // Q2: 場面はフェーズ2の完成盤面そのもの。独立実行した 9×9 が完全迷路であることから、
 // 正解（全通路がつながり輪がない）を裏づけ、誤答（孤立・輪・壁の数の超過）を反証する。
 assert.equal(q2.scene, getLearningStep(execution, "complete").canvas, "Q2 scene is the phase-2 completed board by reference");
@@ -139,6 +191,16 @@ assert.deepEqual(plain(q3.reviewStepIds), ["if-first-row-2-4", "else-branch-2-4"
 assert.equal(getLearningStep(mapping, q3.stepId).canvas.highlights[0].id, "if-first-row", "Step points at the y == 2 condition line");
 assert.match(getLearningStep(mapping, "else-branch-2-4").caption, /輪ができることがある/, "Phase 4 teaches the loop reason in the else frame");
 validateMazeGridCanvas(q3.scene);
+
+// 大きな盤面: 11×11 の柱の本数は、2マスおきの二重ループから独立に数えた16本。
+let pillarCount11 = 0;
+for (let y = 2; y < 11 - 1; y += 2) for (let x = 2; x < 11 - 1; x += 2) pillarCount11++;
+assert.equal(pillarCount11, 16, "Independent pillar count for 11x11");
+assert.equal(qCount.scene, getLearningStep(execution, "complete").canvas, "Count question reuses the completed board scene");
+assert.equal(qCount.choices.length, 4);
+assert.equal(qCount.correctAnswer.choiceId, "sixteen");
+assert.equal(qCount.choices.find(choice => choice.id === "sixteen").text, "16本");
+validateMazeGridCanvas(qCount.scene);
 
 // 復習はすべてフェーズ4の元フレームを参照のまま使う（新しい盤面の答え合わせは作らない）。
 for (const question of content.questions) {
@@ -193,7 +255,7 @@ for (const id of q1.nodeIds) assert.equal(q1Html.split(`aria-label="${ariaLabel(
 assert.equal(JSON.stringify(q1.scene), sceneBeforeRender, "Rendering must not mutate the scene");
 const lockedHtml = renderToStaticMarkup(React.createElement(WallExtensionCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, disabled: true, onAnswer() {} }));
 assert.equal((lockedHtml.match(/ disabled=""/g) || []).length, q1.nodeIds.length, "Correct responses lock every answer control");
-for (const question of [q2, q3]) {
+for (const question of [q2, q3, qCount]) {
   const html = renderToStaticMarkup(React.createElement(WallExtensionCheckCanvas, { canvas: question.scene, onAnswer() {} }));
   assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes are display-only");
   assert.equal((html.match(/data-maze-wall="true"/g) || []).length, question.scene.state.walls.length);
@@ -227,17 +289,17 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/4 can finish without correct answers");
-const retried = complete([false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/7 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false], true);
-complete([true, true, true, true], false);
+complete([true, false, true, false, true, false, true], true);
+complete([true, true, true, true, true, true, true], false);
 
 // Parsons の回答検証: 不完全・重複した並びは拒否し、提出した配列は複製して記録する。
 // 外周ブロック内の並べ替えだけを許し、他の隣接交換はすべて不正解にする。
 let parsonsState = createAssessmentState(content);
-for (const question of content.questions.slice(0, 3)) {
+for (const question of content.questions.slice(0, 6)) {
   parsonsState = advanceAssessment(content, answerQuestion(content, parsonsState, question.id, question.correctAnswer), question.id);
 }
 assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: canonicalIds.slice(1) }), parsonsState);
@@ -245,8 +307,8 @@ assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineI
 const mutable = [...canonicalIds];
 const answered = answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: mutable });
 mutable.reverse();
-assert.deepEqual(plain(answered.records[3].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
-assert(sameAnswer(q4.correctAnswer, answered.records[3].attempts[0].answer));
+assert.deepEqual(plain(answered.records[6].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
+assert(sameAnswer(q4.correctAnswer, answered.records[6].attempts[0].answer));
 assert(!sameAnswer(q4.correctAnswer, wrong(q4)));
 const swap = (ids, first, second) => {
   const result = [...ids], a = result.indexOf(first), b = result.indexOf(second);
@@ -256,30 +318,32 @@ const swap = (ids, first, second) => {
 const borderPositions = ["border-top", "border-bottom", "border-left", "border-right"].map(id => canonicalIds.indexOf(id));
 const borderReordered = [...canonicalIds];
 ["border-right", "border-left", "border-bottom", "border-top"].forEach((id, k) => { borderReordered[borderPositions[k]] = id; });
-assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: borderReordered }).records[3].firstCorrect,
+assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: borderReordered }).records[6].firstCorrect,
   true, "Independent border writes may be reordered among themselves");
-assert.deepEqual(plain(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: borderReordered }).records[3].attempts[0].answer.lineIds),
+assert.deepEqual(plain(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: borderReordered }).records[6].attempts[0].answer.lineIds),
   borderReordered, "Keep the actual submitted order in the attempt");
 for (const [first, second] of [["lookup-delta", "write-wall"], ["allowed-four", "else-branch"], ["initialize-grid", "for-border"], ["define-function", "initialize-grid"]]) {
-  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swap(canonicalIds, first, second) }).records[3].firstCorrect,
+  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swap(canonicalIds, first, second) }).records[6].firstCorrect,
     false, `Only the border block may be reordered: ${first}/${second}`);
 }
-assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swap(canonicalIds, "border-left", "initialize-pillars") }).records[3].firstCorrect,
+assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swap(canonicalIds, "border-left", "initialize-pillars") }).records[6].firstCorrect,
   false, "Moving a line into the border block is not allowed");
 
 // 検証の負系: 壊れたコンテンツは読み込み時の検証で落とす。
 assert.doesNotThrow(() => validateWallExtensionConsolidation({ ...content, questions: plain(content.questions) }), "A structural clone still validates");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateWallExtensionConsolidation(broken)); }
-rejects(broken => broken.questions[3].lineIds.pop());
-rejects(broken => broken.questions[3].lineIds[1] = broken.questions[3].lineIds[0]);
-rejects(broken => broken.questions[3].correctAnswer.lineIds.reverse());
-rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
+rejects(broken => broken.questions[6].lineIds.pop());
+rejects(broken => broken.questions[6].lineIds[1] = broken.questions[6].lineIds[0]);
+rejects(broken => broken.questions[6].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[3].choices[1].text = broken.questions[3].choices[0].text);
 rejects(broken => broken.questions[0].correctAnswer.nodeId = "1,4");
+rejects(broken => broken.questions[1].correctAnswer.nodeId = "4,3");
+rejects(broken => broken.questions[2].correctAnswer.nodeId = "2,3");
 rejects(broken => broken.questions[0].scene.state.processing = "2,2");
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
-rejects(broken => broken.questions[2].tags = []);
-rejects(broken => broken.questions[3].interchangeableLineGroups = [["border-top", "missing"]]);
-rejects(broken => broken.questions[3].interchangeableLineGroups = [["border-top", "initialize-pillars"]]);
+rejects(broken => broken.questions[4].tags = []);
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["border-top", "missing"]]);
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["border-top", "initialize-pillars"]]);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("wall-extension/consolidation/WallExtensionConsolidationPreview.tsx"), "utf8");
@@ -293,4 +357,4 @@ assert.match(previewSource, /content=\{wallExtensionCodeMappingContent\}/, "revi
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "wall-extension-consolidation"'), "Standalone preview is registered");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
-console.log("Wall-extension consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, y == 2 review route, 21-line Parsons with border-block-only reordering, soft-gate completion and first-attempt diagnosis.");
+console.log("Wall-extension consolidation verified: 7x7 transfer taps (third and final extensions) and an unseen board's first extension from independent traces, perfect-maze properties of the completed 9x9, y == 2 review route, 11x11 pillar count, 21-line Parsons with border-block-only reordering, soft-gate completion and first-attempt diagnosis.");
