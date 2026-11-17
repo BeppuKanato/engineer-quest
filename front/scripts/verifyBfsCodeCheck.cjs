@@ -38,15 +38,28 @@ assert.equal(content.phase, 5);
 assert.equal(content.code, bfsCode, "Share the phase-4 code contract, not a copy");
 assert.equal(content.code.id, "bfs-distances-deque");
 assert.equal(content.code.version, 1);
-assert.equal(content.questions.length, 2);
-assert.deepEqual(plain(content.questions.map(question => question.lineId)), ["enqueue-neighbor", "if-undiscovered"]);
+assert.equal(content.questions.length, 7);
+assert.deepEqual(plain(content.questions.map(question => question.lineId)), ["enqueue-neighbor", "if-undiscovered", "assign-distance", "while-queue", "initialize-distances", "initialize-queue", "for-neighbor"]);
 assert.deepEqual(plain(q1.choices.map(option => option.text)), ["append", "popleft", "remove"]);
 assert.deepEqual(plain(q2.choices.map(option => option.text)), ["not in", "in", "=="]);
 assert.equal(q1.prompt, `調べた隣の場所をキュー（待ち行列）の末尾に加えるために、${bfsCodeLineNumber(q1.lineId)}行目の空欄に入る正しいコードを選んでください。`);
 assert.equal(q2.prompt, `隣の場所の距離がまだ決まっていないことを確かめるために、${bfsCodeLineNumber(q2.lineId)}行目の空欄に入る正しいコードを選んでください。`);
+const expectedNew = [
+  ["distance-assignment", "新しく見つけた隣の場所の距離を求めて記録するために", ["distances[node] + 1", "distances[neighbor] + 1", "distances[start] + 1"]],
+  ["loop-condition", "キューに調べる場所が残っている間、処理を繰り返すために", ["queue", "distances", "graph"]],
+  ["initial-distance", "出発点の距離を、最初の値として記録するために", ["0", "1", "-1"]],
+  ["initial-queue", "出発点を、最初に調べる場所として待ち行列（キュー）に入れるために", ["deque", "list", "dict"]],
+  ["neighbor-iteration", "今調べている場所の隣を、1つずつ取り出して確認するために", ["node", "neighbor", "start"]],
+];
+for (const [index, [id, purpose, texts]] of expectedNew.entries()) {
+  const question = content.questions[index + 2];
+  assert.equal(question.id, id);
+  assert.equal(question.prompt, `${purpose}、${bfsCodeLineNumber(question.lineId)}行目の空欄に入る正しいコードを選んでください。`);
+  assert.deepEqual(plain(question.choices.map(option => option.text)), texts);
+}
 assert.match(content.instruction, /空欄に入るものを選ぶ/u);
 assert.equal(content.reviewLabel, "💡 この処理の動きをもう一度見る");
-assert.match(content.completion.caption, /次は【応用問題】（別パターンや例外ケースの3〜5問）/u);
+assert.match(content.completion.caption, /次は【応用問題】（別パターンや例外ケースの7問）/u);
 assert(!/完璧|マスター/u.test(content.completion.caption));
 const programs = [];
 for (const question of content.questions) {
@@ -74,7 +87,7 @@ for (const question of content.questions) {
 // 誤答も全文の中で構文として成立することを確認。誤答は実行しない。
 const syntax = spawnSync(process.env.PYTHON || "python3", ["-c", "import ast,json,sys\nprograms=json.load(sys.stdin)\nfor code in programs: ast.parse(code)\nprint(len(programs))"], { input: JSON.stringify(programs), encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
-assert.equal(Number(syntax.stdout), 6, "All six alternatives must be parsed");
+assert.equal(Number(syntax.stdout), 21, "All twenty-one alternatives must be parsed");
 
 let state = createAssessmentState(content);
 assert.equal(activeQuestion(content, state), q1);
@@ -98,6 +111,14 @@ for (const option of q2.choices.filter(option => option.id !== q2.correctAnswer.
 assert.equal(activeQuestion(content, state), q2);
 state = answerQuestion(content, state, q2.id, q2.correctAnswer);
 state = advanceAssessment(content, state, q2.id);
+assert(!assessmentComplete(content, state), "Two answered questions no longer complete phase 5");
+// 追加した5問も、誤答2回→正解の同じ進行規則で進む。
+for (const question of content.questions.slice(2)) {
+  assert.equal(activeQuestion(content, state), question);
+  for (const option of question.choices.filter(option => option.id !== question.correctAnswer.choiceId)) state = answerQuestion(content, state, question.id, choice(option.id));
+  state = answerQuestion(content, state, question.id, question.correctAnswer);
+  state = advanceAssessment(content, state, question.id);
+}
 assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert(state.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 3));
@@ -111,6 +132,10 @@ skipped = advanceAssessment(content, skipped, q1.id);
 assert.equal(activeQuestion(content, skipped), q2, "Skipping question 1 reaches question 2");
 skipped = answerQuestion(content, skipped, q2.id, choice(q2.choices.find(option => option.id !== q2.correctAnswer.choiceId).id));
 skipped = advanceAssessment(content, skipped, q2.id);
+for (const question of content.questions.slice(2)) {
+  skipped = answerQuestion(content, skipped, question.id, choice(question.choices.find(option => option.id !== question.correctAnswer.choiceId).id));
+  skipped = advanceAssessment(content, skipped, question.id);
+}
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
@@ -156,4 +181,4 @@ rejects(broken => broken.questions[0].reviewLineId = "if-undiscovered");
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[0].reviewStepIds = ["if-a-b"]);
 assert.throws(() => validateAssessment({ ...content, kind: "node-tap-check" }));
-console.log("BFS code check: two independent questions, byte-exact restoration, six Python syntax checks, shared display/review identity, common retries/records and invalid-data rejection passed.");
+console.log("BFS code check: seven independent questions, byte-exact restoration, twenty-one Python syntax checks, shared display/review identity, common retries/records and invalid-data rejection passed.");

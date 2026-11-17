@@ -58,13 +58,58 @@ export const bfsCodeCheckContent: BfsCodeCheckContent = {
       stepId: "if-a-b", reviewLineId: "if-undiscovered", reviewStepIds: ["for-a-b", "if-a-b"],
       tags: ["undiscovered-test"], correctFeedback: "正解！距離がまだ決まっていない場所を確かめる条件を選べました。",
     },
+    {
+      kind: "code-blank", id: "distance-assignment", lineId: "assign-distance",
+      prompt: `新しく見つけた隣の場所の距離を求めて記録するために、${bfsCodeLineNumber("assign-distance")}行目の空欄に入る正しいコードを選んでください。`,
+      blank: blankAt("assign-distance", "distances[node] + 1"),
+      choices: [{ id: "node-plus-one", text: "distances[node] + 1" }, { id: "neighbor-plus-one", text: "distances[neighbor] + 1" }, { id: "start-plus-one", text: "distances[start] + 1" }],
+      correctAnswer: { kind: "choice", choiceId: "node-plus-one" }, requires: null,
+      stepId: "assign-a-b", reviewLineId: "assign-distance", reviewStepIds: ["if-a-b", "assign-a-b"],
+      tags: ["assign-distance"], correctFeedback: "正解！新しく見つけた隣の距離を、今いる場所の距離に1を足して記録するコードを選べました。",
+    },
+    {
+      kind: "code-blank", id: "loop-condition", lineId: "while-queue",
+      prompt: `キューに調べる場所が残っている間、処理を繰り返すために、${bfsCodeLineNumber("while-queue")}行目の空欄に入る正しいコードを選んでください。`,
+      blank: blankAt("while-queue", "queue"),
+      choices: [{ id: "queue", text: "queue" }, { id: "distances", text: "distances" }, { id: "graph", text: "graph" }],
+      correctAnswer: { kind: "choice", choiceId: "queue" }, requires: null,
+      stepId: "while-a", reviewLineId: "while-queue", reviewStepIds: ["execution-enqueue-start", "while-a"],
+      tags: ["loop-condition"], correctFeedback: "正解！キューに場所が残っている間は処理を続ける条件を選べました。",
+    },
+    {
+      kind: "code-blank", id: "initial-distance", lineId: "initialize-distances",
+      prompt: `出発点の距離を、最初の値として記録するために、${bfsCodeLineNumber("initialize-distances")}行目の空欄に入る正しいコードを選んでください。`,
+      blank: blankAt("initialize-distances", "0"),
+      choices: [{ id: "zero", text: "0" }, { id: "one", text: "1" }, { id: "minus-one", text: "-1" }],
+      correctAnswer: { kind: "choice", choiceId: "zero" }, requires: null,
+      stepId: "initialize-distances", reviewLineId: "initialize-distances", reviewStepIds: ["define-function", "initialize-distances"],
+      tags: ["distance-initialization"], correctFeedback: "正解！出発点の距離を0として記録するコードを選べました。",
+    },
+    {
+      kind: "code-blank", id: "initial-queue", lineId: "initialize-queue",
+      prompt: `出発点を、最初に調べる場所として待ち行列（キュー）に入れるために、${bfsCodeLineNumber("initialize-queue")}行目の空欄に入る正しいコードを選んでください。`,
+      blank: blankAt("initialize-queue", "deque"),
+      choices: [{ id: "deque", text: "deque" }, { id: "list", text: "list" }, { id: "dict", text: "dict" }],
+      correctAnswer: { kind: "choice", choiceId: "deque" }, requires: null,
+      stepId: "execution-enqueue-start", reviewLineId: "initialize-queue", reviewStepIds: ["initialize-distances", "execution-enqueue-start"],
+      tags: ["queue-initialization"], correctFeedback: "正解！出発点を最初に入れたキューを用意するコードを選べました。",
+    },
+    {
+      kind: "code-blank", id: "neighbor-iteration", lineId: "for-neighbor",
+      prompt: `今調べている場所の隣を、1つずつ取り出して確認するために、${bfsCodeLineNumber("for-neighbor")}行目の空欄に入る正しいコードを選んでください。`,
+      blank: blankAt("for-neighbor", "node"),
+      choices: [{ id: "node", text: "node" }, { id: "neighbor", text: "neighbor" }, { id: "start", text: "start" }],
+      correctAnswer: { kind: "choice", choiceId: "node" }, requires: null,
+      stepId: "for-a-b", reviewLineId: "for-neighbor", reviewStepIds: ["execution-dequeue-a", "for-a-b"],
+      tags: ["neighbor-iteration"], correctFeedback: "正解！今いる場所の隣を1つずつ取り出すコードを選べました。",
+    },
   ],
-  completion: { caption: "基本コードの役割が確認できました！次は【応用問題】（別パターンや例外ケースの3〜5問）で、自分で実装に向けた最後の土台を固めます。" },
+  completion: { caption: "基本コードの役割が確認できました！次は【応用問題】（別パターンや例外ケースの7問）で、自分で実装に向けた最後の土台を固めます。" },
 };
 
 export function validateBfsCodeCheck(content: BfsCodeCheckContent): void {
   validateAssessment(content);
-  if (content.phase !== 5 || content.code !== bfsCode || content.questions.length !== 2) throw new Error("Use the phase-4 code contract and two questions");
+  if (content.phase !== 5 || content.code !== bfsCode || content.questions.length !== 7) throw new Error("Use the phase-4 code contract and seven questions");
   for (const question of content.questions) {
     const line = codeLine(question.lineId);
     const correct = question.choices.find(choice => choice.id === question.correctAnswer.choiceId)!;
