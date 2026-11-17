@@ -79,7 +79,7 @@ export function defineCodeMappingContent(content: CodeMappingContent): CodeMappi
   const checked = defineLearningContent(content, validateCodeMappingCanvas);
   const checkpoints = checked.steps.filter(step => step.canvas.state.frameKind === "execution");
   if (checkpoints.map(step => step.canvas.state.executionStepId).join() !== bfsExecutionContent.steps.map(step => step.id).join()) {
-    throw new Error("Keep all 19 execution checkpoints in order");
+    throw new Error("Keep all 20 execution checkpoints in order");
   }
   if (bfsCode.lines.some(line => !checked.steps.some(step => step.canvas.highlights[0].id === line.id))) throw new Error("Unvisited code line");
   return checked;
