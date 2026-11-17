@@ -51,6 +51,11 @@ before = after;
 after = answerQuestion(concept, before, concept.questions[1].id, { kind: "none" });
 assert.equal(newAnswerFeedback(concept, before, after).correct, true, "The final accepted answer still produces feedback");
 after = advanceAssessment(concept, after, concept.questions[1].id);
+// BFSフェーズ3は #431 で7問に拡充された。残りの問題も正解して完了まで進める（本スクリプトの対象は正誤提示であり、問題数には依存しない）。
+for (const question of concept.questions.slice(2)) {
+  after = answerQuestion(concept, after, question.id, question.correctAnswer);
+  after = advanceAssessment(concept, after, question.id);
+}
 assert(assessmentComplete(concept, after));
 assert.equal(after.records[0].firstCorrect, false, "Presentation does not rewrite first-attempt diagnosis");
 
