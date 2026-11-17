@@ -36,7 +36,7 @@ export function BinarySearchCheckPreview({ embedded = false, onLearningEvent, ac
   const caption = complete ? binarySearchCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const completionStep = getLearningStep(binarySearchExecutionContent, binarySearchCheckContent.completion.stepId);
   const scene = question ? getBinarySearchCheckScene(question) : completionStep.canvas;
-  // Q1 は配列セルのタップ、Q2 は文章の選択肢ボタンで答える（基準データ §3）。
+  // タップ設問は配列セル、選択肢設問は文章の選択肢ボタンで答える（基準データ §3）。
   const choiceQuestion = question && "kind" in question ? question : null;
   const nodeQuestion = question && !("kind" in question) ? question : null;
   const submit = (answer: AssessmentAnswer) => {

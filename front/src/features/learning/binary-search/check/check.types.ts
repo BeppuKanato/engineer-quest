@@ -2,13 +2,15 @@ import type { ChoiceQuestion, ConceptCheckAssessment, NodeTapQuestion } from "..
 
 /**
  * フェーズ3の設問は共通エンジンの concept-check 形式を使う。
- * Q1 は配列セルのタップ（回答対象は位置＝インデックスの文字列で、
- * エンジン側の NodeAnswer をそのまま流用する）、Q2 は基準データ §3 が
- * 定める文章4択で、タップだけでは「どちら側を捨てるか」を問えないため
- * 形式を分けている。どちらの設問にも、正誤の解説文を持たせる
+ * 配列セルのタップ（回答対象は位置＝インデックスの文字列で、
+ * エンジン側の NodeAnswer をそのまま流用する）と文章4択が混在する。
+ * タップだけでは「どちら側を捨てるか」「一致したらどう終わるか」を
+ * 問えないため形式を分けている。どの設問にも、正誤の解説文を持たせる
  * （answerFeedbackState が設問のフィールドを読む既存の仕組み）。
- * Q2 は ChoiceQuestion の契約で requires を持てないため、連動は
- * 前提（31 との比較）を明記した問題文と場面（probe-2-mid）で表す。
+ * 選択肢設問は ChoiceQuestion の契約で requires を持てないため、連動は
+ * 前提（どの値との比較か）を明記した問題文と場面で表す。
+ * 設問数と内訳は固定数ではなく、フェーズ4（動きとコードの対応）が
+ * 前提とする理解を一通り判断できるかで決める（2026-11-17 の基準）。
  */
 export type BinarySearchCheckNodeQuestion = NodeTapQuestion & {
   readonly correctFeedback: string;
@@ -25,7 +27,7 @@ export type BinarySearchCheckQuestion = BinarySearchCheckNodeQuestion | BinarySe
 export type BinarySearchCheckContent = Omit<ConceptCheckAssessment, "questions"> & {
   readonly phase: 3;
   readonly stageName: "動きの確認問題";
-  readonly questions: readonly [BinarySearchCheckNodeQuestion, BinarySearchCheckChoiceQuestion];
+  readonly questions: readonly [BinarySearchCheckQuestion, ...BinarySearchCheckQuestion[]];
   readonly completion: { readonly stepId: string; readonly caption: string };
 };
 
