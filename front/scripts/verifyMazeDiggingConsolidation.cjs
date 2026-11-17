@@ -32,19 +32,22 @@ const { mazeDiggingCode: code } = load(file("maze-digging/code-mapping/mazeDiggi
 const { getLearningStep, selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateMazeDiggingCanvas } = load(file("maze-digging/mazeDiggingCanvas.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
-const [q1, q2, q3, q4] = content.questions;
+const [q1, qFinal, q2, q3, qUnseen, qLarge, q4] = content.questions;
 
-// 基準データ §3 フェーズ6の構成（転移タップ・性質の選択・理由の選択・Parsons の4問）。
+// 基準データ §3 フェーズ6の構成（転移タップ2問・性質の選択・理由の選択・未見列の選択・大きな盤面の選択・Parsons の7問）。
 validateMazeDiggingConsolidation(content);
 assert.equal(content.id, "maze-digging-consolidation"); assert.equal(content.phase, 6); assert.equal(content.stageName, "応用問題");
-assert.equal(content.questions.length, 4);
+assert.equal(content.questions.length, 7);
 assert.equal(content.code, code); assert.equal(code.id, "maze-digging-v1"); assert.equal(code.version, 1);
 const stageBracket = name => `${String.fromCharCode(0x3010)}${name}${String.fromCharCode(0x3011)}`;
 assert.equal(content.completion, `理解の状況が確認できました。それでは${stageBracket("自分で実装")}に進み、自分の手でコードを完成させましょう！`);
 assert.deepEqual(plain(content.questions.map(q => [q.id, q.kind, q.tags[0]])), [
   ["transfer-dig-target", "node", "掘り進める先の追跡"],
+  ["transfer-final-dig", "choice", "戻った後の掘り直し"],
   ["completed-maze-properties", "choice", "完成した迷路の性質"],
   ["backtrack-reason", "choice", "バックトラックが必要な理由"],
+  ["unseen-choices-last-room", "choice", "別の番号列での追跡"],
+  ["large-board-dig-count", "choice", "大きな盤面への一般化"],
   ["whole-code-order", "parsons", "コード全体の流れ"],
 ]);
 
@@ -111,6 +114,26 @@ assert.deepEqual(plain(q1.nodeIds), expectedCandidates);
 assert(!q1.nodeIds.includes("3,3"), "Already-dug room above is not a candidate");
 validateMazeDiggingCanvas(q1.scene);
 
+// Q1b: 転移盤面を最後まで追う。7回目で行き止まり (1,3) に入り、(1,3)・(1,5) を戻して
+// (3,5) から右へ掘り直すのが8回目（最後）の掘削。場面は戻り終えた時点（壁は7回目直後のまま）。
+// 再開マスから掘れる候補は (5,5) の1つだけなので、タップ形式では候補がそのまま答えになる。
+// 選択形式にし、誤答は直前に掘った部屋（7回目・6回目）と再開マスそのものを表示座標で書く。
+assert.deepEqual([small.digs[6].from, small.digs[6].room], ["1,5", "1,3"], "7th dig enters the dead end");
+assert.deepEqual([small.digs[7].from, small.digs[7].room, small.digs[7].between], ["3,5", "5,5", "4,5"], "8th dig resumes right");
+assert.deepEqual(small.pops.slice(0, 2), ["1,3", "1,5"], "The dead-end rooms are popped before the final dig");
+assert.equal(qFinal.prompt, "行き止まりから (5, 3) まで戻ってきました。ここから右へ掘ります。掘られる部屋はどれですか");
+assert.equal(qFinal.scene.data.size, 7);
+assert.equal(qFinal.scene.state.processing, "3,5");
+assert.equal(qFinal.correctAnswer.choiceId, "coord-5-5");
+assert.equal(small.digs[6].walls.size, 34, "49 cells - start - 7 digs x 2");
+assert.deepEqual(new Set(qFinal.scene.state.walls), small.digs[6].walls, "Scene walls match the reference after 7 digs");
+assert.deepEqual(new Set(qFinal.scene.state.walls), new Set(plain(maze.runMazeDigging(7, maze.mazeDiggingSmallChoices).digs[6].wallsAfter)), "Scene matches the shared builder");
+const displayCoord = key => { const [x, y] = key.split(",").map(Number); return `(${y}, ${x})`; };
+assert.deepEqual(plain(qFinal.choices.map(c => c.text)), [displayCoord(small.digs[7].room), displayCoord(small.digs[6].room), displayCoord(small.digs[5].room), displayCoord(small.digs[7].from)],
+  "Choices are the final room, the two rooms dug just before, and the resume room itself");
+assert.deepEqual(plain(qFinal.reviewStepIds), ["choose-candidate-8", "dig-between-8", "dig-room-8", "execution-dig-8"]);
+validateMazeDiggingCanvas(qFinal.scene);
+
 // Q2: 場面はフェーズ2の完成盤面そのもの。独立実行した 9×9 が完全迷路であることから、
 // 正解（全部屋がつながり輪がない）を裏づけ、誤答（孤立・輪・掘削回数=部屋数）を反証する。
 assert.equal(q2.scene, getLearningStep(execution, "complete").canvas, "Q2 scene is the phase-2 completed board by reference");
@@ -158,6 +181,37 @@ assert.deepEqual(plain(q3.reviewStepIds), ["if-candidates-7", "else-branch-7", "
 assert.equal(getLearningStep(mapping, q3.stepId).canvas.highlights[0].id, "pop-stack", "Step points at the stack.pop() line");
 assert.match(getLearningStep(mapping, "execution-backtrack-1").caption, /戻ります/, "Phase 4 ties the checkpoint to the phase-2 backtrack");
 validateMazeDiggingCanvas(q3.scene);
+
+// Q5: 未見の番号列（フェーズ7 J2 と同じ [1,1,0,1,0,0,0,0]）を独立実行で追い、最後の掘削先を裏づける。
+// 誤答は途中の掘削先（4・5・7回目）を表示座標 (y, x) で書いたもの。
+const alt = referenceRun(7, [1, 1, 0, 1, 0, 0, 0, 0]);
+assert.equal(alt.digs.length, 8);
+const displayOf = key => { const [x, y] = key.split(",").map(Number); return `(${y}, ${x})`; };
+assert.equal(alt.digs[7].room, "3,3", "The unseen sequence ends at room 3,3");
+assert.equal(displayOf(alt.digs[7].room), "(3, 3)");
+assert.equal(qUnseen.correctAnswer.choiceId, "coord-3-3");
+assert.deepEqual(plain(qUnseen.choices.map(c => c.text)), ["(3, 3)", "(1, 3)", "(3, 5)", "(5, 5)"]);
+assert.deepEqual(plain(qUnseen.choices.map(c => c.text)), [displayOf(alt.digs[7].room), displayOf(alt.digs[6].room), displayOf(alt.digs[4].room), displayOf(alt.digs[3].room)],
+  "Distractors are the 7th, 5th and 4th digs of the same trace");
+assert.equal(qUnseen.scene.data.size, 7);
+assert.equal(qUnseen.scene.state.processing, null);
+assert.deepEqual(new Set(qUnseen.scene.state.walls), new Set(plain(maze.mazeDiggingWalls(maze.runMazeDigging(7, maze.mazeDiggingAltSmallChoices).grid))), "Scene is the completed J2 board");
+for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
+  assert.equal(qUnseen.scene.state.walls.includes(`${x},${y}`), alt.grid[y][x] === 1, `J2 cell ${x},${y} matches the independent maze`);
+}
+validateMazeDiggingCanvas(qUnseen.scene);
+
+// Q6: 大きな盤面（フェーズ7 J3 と同じ 11×11）でも掘削回数は部屋数 − 1（25 − 1 = 24）。
+const large = referenceRun(11, [...maze.mazeDiggingLargeChoices]);
+assert.equal(large.digs.length, 24, "Digs are rooms - 1 on the large board too");
+assert.equal(qLarge.correctAnswer.choiceId, "twenty-four");
+assert.deepEqual(plain(qLarge.choices.map(c => c.text)), ["24回", "25回", "48回", "49回"]);
+assert.equal(qLarge.scene.data.size, 11);
+assert.deepEqual(new Set(qLarge.scene.state.walls), new Set(plain(maze.mazeDiggingWalls(maze.runMazeDigging(maze.mazeDiggingLargeSize, maze.mazeDiggingLargeChoices).grid))), "Scene is the completed J3 board");
+for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) {
+  assert.equal(qLarge.scene.state.walls.includes(`${x},${y}`), large.grid[y][x] === 1, `J3 cell ${x},${y} matches the independent maze`);
+}
+validateMazeDiggingCanvas(qLarge.scene);
 
 // 復習はすべてフェーズ4の元フレームを参照のまま使う（新しい盤面の答え合わせは作らない）。
 for (const question of content.questions) {
@@ -211,7 +265,7 @@ for (const id of q1.nodeIds) assert.equal(q1Html.split(`aria-label="${ariaLabel(
 assert.equal(JSON.stringify(q1.scene), sceneBeforeRender, "Rendering must not mutate the scene");
 const lockedHtml = renderToStaticMarkup(React.createElement(MazeDiggingCheckCanvas, { canvas: q1.scene, questionId: q1.id, cellIds: q1.nodeIds, disabled: true, onAnswer() {} }));
 assert.equal((lockedHtml.match(/ disabled=""/g) || []).length, q1.nodeIds.length, "Correct responses lock every answer control");
-for (const question of [q2, q3]) {
+for (const question of [qFinal, q2, q3, qUnseen, qLarge]) {
   const html = renderToStaticMarkup(React.createElement(MazeDiggingCheckCanvas, { canvas: question.scene, onAnswer() {} }));
   assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes are display-only");
   assert.equal((html.match(/data-maze-wall="true"/g) || []).length, question.scene.state.walls.length);
@@ -245,17 +299,17 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/4 can finish without correct answers");
-const retried = complete([false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/7 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false], true);
-complete([true, true, true, true], false);
+complete([true, false, true, false, true, false, true], true);
+complete([true, true, true, true, true, true, true], false);
 
 // Parsons の回答検証: 不完全・重複した並びは拒否し、提出した配列は複製して記録する。
 // 順序自由な行がないため、正解順の隣接交換はすべて不正解にする。
 let parsonsState = createAssessmentState(content);
-for (const question of content.questions.slice(0, 3)) {
+for (const question of content.questions.slice(0, 6)) {
   parsonsState = advanceAssessment(content, answerQuestion(content, parsonsState, question.id, question.correctAnswer), question.id);
 }
 assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: canonicalIds.slice(1) }), parsonsState);
@@ -263,28 +317,29 @@ assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineI
 const mutable = [...canonicalIds];
 const answered = answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: mutable });
 mutable.reverse();
-assert.deepEqual(plain(answered.records[3].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
-assert(sameAnswer(q4.correctAnswer, answered.records[3].attempts[0].answer));
+assert.deepEqual(plain(answered.records[6].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
+assert(sameAnswer(q4.correctAnswer, answered.records[6].attempts[0].answer));
 assert(!sameAnswer(q4.correctAnswer, wrong(q4)));
 for (let index = 0; index + 1 < canonicalIds.length; index++) {
   const swapped = [...canonicalIds];
   [swapped[index], swapped[index + 1]] = [swapped[index + 1], swapped[index]];
-  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swapped }).records[3].firstCorrect,
+  assert.equal(answerQuestion(content, parsonsState, q4.id, { kind: "order", lineIds: swapped }).records[6].firstCorrect,
     false, `Every adjacent order matters: ${canonicalIds[index]}/${canonicalIds[index + 1]}`);
 }
 
 // 検証の負系: 壊れたコンテンツは読み込み時の検証で落とす。
 assert.doesNotThrow(() => validateMazeDiggingConsolidation({ ...content, questions: plain(content.questions) }), "A structural clone still validates");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateMazeDiggingConsolidation(broken)); }
-rejects(broken => broken.questions[3].lineIds.pop());
-rejects(broken => broken.questions[3].lineIds[1] = broken.questions[3].lineIds[0]);
-rejects(broken => broken.questions[3].correctAnswer.lineIds.reverse());
-rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
+rejects(broken => broken.questions[6].lineIds.pop());
+rejects(broken => broken.questions[6].lineIds[1] = broken.questions[6].lineIds[0]);
+rejects(broken => broken.questions[6].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[2].choices[1].text = broken.questions[2].choices[0].text);
 rejects(broken => broken.questions[0].correctAnswer.nodeId = "5,5");
+rejects(broken => broken.questions[1].correctAnswer.choiceId = "coord-5-3");
 rejects(broken => broken.questions[0].scene.state.processing = "1,1");
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
-rejects(broken => broken.questions[2].tags = []);
-rejects(broken => broken.questions[3].interchangeableLineGroups = [["dig-between", "dig-room"]]);
+rejects(broken => broken.questions[3].tags = []);
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["dig-between", "dig-room"]]);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("maze-digging/consolidation/MazeDiggingConsolidationPreview.tsx"), "utf8");
@@ -307,4 +362,4 @@ assert.match(parsonsBoardSource, /minHeight: 276/, "parsons scroll viewport keep
 assert.match(parsonsBoardSource, /\[compactViewport\]: \{ height: "auto", maxHeight: "none", flexShrink: 0, overflowY: "hidden" \}/, "the board flows in the shared scroll region on compact screens");
 assert.match(parsonsBoardSource, /parsonsDragCursor/, "parsons drag cursor is the shared dark SVG cursor");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
-console.log("Maze-digging consolidation verified: 7x7 transfer tap from the independent trace, perfect-maze properties of the completed 9x9, backtrack reason with the phase-4 pop route, 22-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");
+console.log("Maze-digging consolidation verified: 7x7 transfer questions through the final dig from the independent trace, perfect-maze properties of the completed 9x9, backtrack reason with the phase-4 pop route, unseen-choices tracing to the last room, dig count generalized to the 11x11 board, 22-line Parsons with no interchangeable lines, soft-gate completion and first-attempt diagnosis.");
