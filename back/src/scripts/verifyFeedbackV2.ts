@@ -41,6 +41,20 @@ const checked = validateStage1(base, plan, candidates);
 assert.equal(checked.discardedEvidenceIds, 1);
 const input = stage2Input(base, checked, candidates);
 assert.equal(input.hexadContext?.kind, "single");
+// Recommendation-reaction history is intentionally excluded from both
+// generation stages, while learning-answer history remains available.
+const priorRecommendation = "RECOMMENDATION_REACTION_PRIVATE_MARKER";
+const withReactions: FeedbackV2Input = {
+  ...base,
+  state: { history: [{ actionId: 4, interaction: "IGNORED", note: priorRecommendation }] },
+};
+const isolatedStage1 = stage1Prompt(withReactions, availableFeedbackCandidates(withReactions));
+const isolatedStage2 = stage2Input(withReactions, checked, candidates);
+assert(!isolatedStage1.includes(priorRecommendation));
+assert(!JSON.stringify(isolatedStage2).includes(priorRecommendation));
+assert(!stage2Prompt(isolatedStage2).includes(priorRecommendation));
+assert(!Object.hasOwn(isolatedStage2.appContext, "reactionSummary"));
+
 // The same assessment event may contain multiple questions. Stage2 must
 // receive each question's full attempt history even if only one source ID was
 // selected in the support plan.
