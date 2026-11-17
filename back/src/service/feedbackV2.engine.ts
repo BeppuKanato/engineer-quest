@@ -251,9 +251,6 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
     appContext: {
       stageGoals: input.stageGoals ?? null,
       bigGoal: input.bigGoal,
-      // These observations were code-provided in the frozen input, not derived
-      // by the LLM. Test compact/full variants before participant deployment.
-      reactionSummary: obj(input.state).history ?? null,
     },
     hexadContext: input.experimentV2.promptContext,
   };
