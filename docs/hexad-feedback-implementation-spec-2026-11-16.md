@@ -57,7 +57,7 @@
 - 現行の完了時 `assessment_snapshot` は試行の正誤中心で、実回答を確定保存していない。非同期`answer_attempt`に存在しても到着保証がない。**確定証拠に回答内容を加える改修が必須**（旧データは欠損を明示）。
 - `BigGoal` の達成条件と進捗はコードが確定した値を利用する。学習者の感情・理解度・目標達成をLLMが捏造しない。
 - 推薦候補には、行動種類だけでなく対象の名称、何を学習できるか、関連概念、実行可能なURL又は具体的な非遷移手順を含める。URL自体をLLMに生成させない。
-- 過去の推薦反応は、システム内で取得可能な事実のみ補助情報として用いる。「着手率」は研究評価指標として新たに必須化しない。既存ログにない結果を創作しない。
+- **過去の推薦に対する反応履歴（クリック・閲覧・着手など）は、Stage1・Stage2の生成プロンプトに渡さない。** 学習状態に基づく教育的支援とHEXADによる動機づけ適応を区別するためである。推薦反応の記録自体を削除するわけではない。
 
 ## 3. 2段階LLMと権限の境界
 
@@ -89,7 +89,7 @@
 
 ## 4. データ契約案 v0.1（TypeScript例・最終実装前にZod化）
 
-> この節は設計上の入出力例であり、**現行コードの実装済み型ではない**。最終的な必須/nullable・古いJSON互換は実装時に確定する。特に`bigGoalProgress`と`reactionSummary`の構造は実DB・既存型と照合して定義する。
+> この節は設計上の入出力例であり、**現行コードの実装済み型ではない**。最終的な必須/nullable・古いJSON互換は実装時に確定する。特に`bigGoalProgress`の構造は実DB・既存型と照合して定義する。
 
 ```typescript
 type HexadType =
@@ -150,7 +150,6 @@ type Stage2Input = {
     phaseKey: string | null;
     stageGoal: string | null;
     bigGoalProgress: unknown | null; // 既存 BigGoalInput 等から厳密化する
-    reactionSummary: unknown | null;  // 必要なら既存型と照合し厳密化する
   };
   hexadContext: HexadContext;
 };
