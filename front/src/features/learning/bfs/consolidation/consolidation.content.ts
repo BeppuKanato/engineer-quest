@@ -3,7 +3,7 @@ import { getLearningStep } from "../../review/reviewContent";
 import { searchGraph } from "../../graphs/searchGraph";
 import { bfsCode } from "../code-mapping/bfsCode";
 import { bfsCodeMappingContent } from "../code-mapping/codeMapping.content";
-import { isolatedGraph, transferGraph, type ConsolidationGraph } from "./consolidation.graphs";
+import { isolatedGraph, missingAdjacencyGraph, startOnlyGraph, transferGraph, type ConsolidationGraph } from "./consolidation.graphs";
 
 type Scene = { readonly graph: ConsolidationGraph; readonly start: string };
 type QuestionDetails = {
@@ -68,6 +68,26 @@ export const bfsConsolidationContent: ConsolidationContent = {
       incorrectFeedback: "不正解。distancesにすでに記録された場所を、条件判定でどう扱うか確かめてみましょう。",
     },
     {
+      kind: "choice", id: "missing-adjacency-b", prompt: "Bの隣の情報が graph に登録されていないとします。Bがキューから取り出されたとき、「for neighbor in graph.get(node, []):」の行はどう動きますか？",
+      scene: { graph: missingAdjacencyGraph, start: "A" },
+      choices: [{ id: "error", text: "エラーになって止まる" }, { id: "treat-as-empty", text: "隣がないものとして扱い、そのまま次へ進む" }, { id: "removed", text: "Bが distances から消える" }],
+      correctAnswer: { kind: "choice", choiceId: "treat-as-empty" }, requires: null,
+      stepId: "for-b-a", reviewStepIds: ["execution-dequeue-b", "for-b-a"], tags: ["隣の情報がない場所の扱い"],
+      instruction: "行の動きを1つ選ぶ",
+      correctFeedback: "正解。隣の情報が登録されていない場所では空のリストが返るため、エラーにならず、そのまま次へ進みます。",
+      incorrectFeedback: "不正解。隣の情報が登録されていない場所を、graph.get(node, []) がどう扱うか確かめてみましょう。",
+    },
+    {
+      kind: "choice", id: "start-only-result", prompt: "出発点Aだけで、隣が1つもないグラフでは、結果（distances）はどうなりますか？",
+      scene: { graph: startOnlyGraph, start: "A" },
+      choices: [{ id: "only-start", text: "{A: 0} だけが入る" }, { id: "empty", text: "空の辞書になる" }, { id: "never-ends", text: "キューが空にならず、終わらない" }],
+      correctAnswer: { kind: "choice", choiceId: "only-start" }, requires: null,
+      stepId: "return-distances", reviewStepIds: ["initialize-distances", "while-empty", "return-distances"], tags: ["出発点だけのグラフの扱い"],
+      instruction: "結果の扱いを1つ選ぶ",
+      correctFeedback: "正解。出発点Aの距離0だけが記録され、キューが空になって処理が終わります。",
+      incorrectFeedback: "不正解。出発点の距離は最初に記録されることと、キューが空になったら終わることを確かめてみましょう。",
+    },
+    {
       kind: "parsons", id: "whole-code-order", prompt: "幅優先探索のコードを、実行の流れに合う順序に並べてください。",
       lineIds: ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"],
       correctAnswer: { kind: "order", lineIds: bfsCode.lines.map(line => line.id) }, requires: null,
@@ -84,7 +104,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
 
 export function validateConsolidation(content: ConsolidationContent): void {
   validateAssessment(content);
-  if (content.phase !== 6 || content.questions.length !== 5 || content.code !== bfsCode) throw new Error("Use five questions and the canonical code");
+  if (content.phase !== 6 || content.questions.length !== 7 || content.code !== bfsCode) throw new Error("Use seven questions and the canonical code");
   for (const question of content.questions) {
     getLearningStep(bfsCodeMappingContent, question.stepId);
     question.reviewStepIds.forEach(id => getLearningStep(bfsCodeMappingContent, id));
