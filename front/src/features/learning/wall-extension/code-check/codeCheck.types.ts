@@ -17,7 +17,7 @@ export type WallExtensionCodeCheckContent = Omit<CodeBlankAssessment, "questions
   readonly phase: 5;
   readonly stageName: "コードの確認問題";
   readonly code: typeof wallExtensionCode;
-  readonly questions: readonly [WallExtensionCodeQuestion, WallExtensionCodeQuestion];
+  readonly questions: readonly [WallExtensionCodeQuestion, ...WallExtensionCodeQuestion[]];
   readonly instruction: string;
   readonly retryFeedback: string;
   readonly reviewLabel: string;
