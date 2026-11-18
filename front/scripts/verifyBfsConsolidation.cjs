@@ -30,13 +30,13 @@ const { ParsonsBoard } = load(`${root}/bfs/consolidation/ParsonsBoard.tsx`);
 const { createElement } = require("react");
 const { renderToStaticMarkup } = require("react-dom/server");
 const plain = value => JSON.parse(JSON.stringify(value));
-const [q1, q2, q3, q4, q5] = content.questions;
+const [q1, q2, q3, q4, qNew1, qNew2, q5] = content.questions;
 validateConsolidation(content);
 assert.equal(content.phase, 6);
-assert.equal(content.questions.length, 5);
+assert.equal(content.questions.length, 7);
 assert.equal(content.code, bfsCode);
 assert.equal(bfsCode.id, "bfs-distances-deque"); assert.equal(bfsCode.version, 1);
-assert.deepEqual(plain(content.questions.map(question => question.tags[0])), ["処理順序の追跡", "キューの状態の追跡", "たどり着けない場所の扱い", "距離が決まった場所の扱い", "コード全体の流れ"]);
+assert.deepEqual(plain(content.questions.map(question => question.tags[0])), ["処理順序の追跡", "キューの状態の追跡", "たどり着けない場所の扱い", "距離が決まった場所の扱い", "隣の情報がない場所の扱い", "出発点だけのグラフの扱い", "コード全体の流れ"]);
 // たどり着けない場所の復習先は、結果ではなく「発見の関門」のステップ列を指す（#182）。
 const unreachable = content.questions.find(question => question.id === "unreachable-z");
 assert.deepEqual(plain(unreachable.reviewStepIds), ["for-a-b", "if-a-b", "assign-a-b", "execution-discover-b"], "unreachable review must show how a found neighbor is recorded and enqueued");
@@ -90,6 +90,26 @@ for (const question of [q3, q4]) {
   assert.equal(backToA.before, 0); assert.equal(backToA.after, 0);
 }
 assert.equal(q3.correctAnswer.choiceId, "absent"); assert.equal(q4.correctAnswer.choiceId, "unchanged");
+// 境界の新問2問: 場面はフェーズ7の判定用テスト J3・J2 と同じ形。正解は参照コードの実行結果と一致させる。
+assert.deepEqual(plain(qNew1.scene.graph.nodes.map(node => node.id)), ["A", "B"]);
+assert.deepEqual(plain(qNew1.scene.graph.edges.map(edge => `${edge.from}-${edge.to}`)), ["A-B"]);
+assert.deepEqual(plain(qNew2.scene.graph.nodes.map(node => node.id)), ["A"]);
+assert.equal(qNew2.scene.graph.edges.length, 0);
+const { spawnSync } = require("node:child_process");
+const referenceRun = spawnSync(process.env.PYTHON || "python3", ["-c", `
+import json, sys
+namespace = {}
+exec(compile(sys.stdin.read(), '<bfs-consolidation-test>', 'exec'), namespace)
+print(json.dumps({
+  'j3': namespace['bfs_distances']({'A': ['B']}, 'A'),
+  'j2': namespace['bfs_distances']({'A': []}, 'A'),
+}))
+`], { input: bfsCode.lines.map(line => line.text).join("\n"), encoding: "utf8" });
+assert.equal(referenceRun.status, 0, referenceRun.stderr);
+assert.deepEqual(JSON.parse(referenceRun.stdout), { j3: { A: 0, B: 1 }, j2: { A: 0 } }, "Reference code runs both boundary inputs without error");
+assert.equal(qNew1.correctAnswer.choiceId, "treat-as-empty", "Missing adjacency is treated as no neighbors, not an error");
+assert.equal(qNew2.correctAnswer.choiceId, "only-start");
+assert.equal(qNew2.choices.find(choice => choice.id === qNew2.correctAnswer.choiceId).text, "{A: 0} だけが入る");
 const canonicalIds = plain(bfsCode.lines.map(line => line.id));
 assert.deepEqual([...q5.lineIds].sort(), [...canonicalIds].sort());
 assert.notDeepEqual(plain(q5.lineIds), canonicalIds);
@@ -105,7 +125,7 @@ for (const question of content.questions) {
     const html = renderToStaticMarkup(createElement(ConsolidationGraph, { ...question.scene, onSelect: question.kind === "node" ? () => {} : undefined }));
     assert.match(html, /viewBox="0 0 600 450"/); assert.match(html, /preserveAspectRatio="xMidYMid meet"/);
     assert.equal((html.match(/data-node-id=/g) || []).length, question.scene.graph.nodes.length);
-    assert.equal((html.match(/data-edge-id=/g) || []).length, 7);
+    assert.equal((html.match(/data-edge-id=/g) || []).length, question.scene.graph.edges.length);
     assert.equal((html.match(/r="30" stroke-width="2"/g) || []).length, question.scene.graph.nodes.length);
   }
 }
@@ -152,21 +172,21 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/5 can finish without correct answers");
-const retried = complete([false, false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/7 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false, false], true);
-complete([true, true, true, true, true], false);
+complete([true, false, true, false, true, false, true], true);
+complete([true, true, true, true, true, true, true], false);
 let state = createAssessmentState(content);
-for (const question of content.questions.slice(0, 4)) state = advanceAssessment(content, answerQuestion(content, state, question.id, question.correctAnswer), question.id);
+for (const question of content.questions.slice(0, 6)) state = advanceAssessment(content, answerQuestion(content, state, question.id, question.correctAnswer), question.id);
 assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: canonicalIds.slice(1) }), state);
 assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: canonicalIds.map(() => canonicalIds[0]) }), state);
 const mutable = [...canonicalIds];
 const answered = answerQuestion(content, state, q5.id, { kind: "order", lineIds: mutable });
 mutable.reverse();
-assert.deepEqual(plain(answered.records[4].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
-assert(sameAnswer(q5.correctAnswer, answered.records[4].attempts[0].answer));
+assert.deepEqual(plain(answered.records[6].attempts[0].answer.lineIds), canonicalIds, "Clone submitted order arrays");
+assert(sameAnswer(q5.correctAnswer, answered.records[6].attempts[0].answer));
 assert(!sameAnswer(q5.correctAnswer, wrong(q5)));
 const swap = (ids, first, second) => {
   const result = [...ids], a = result.indexOf(first), b = result.indexOf(second);
@@ -174,34 +194,34 @@ const swap = (ids, first, second) => {
   return result;
 };
 const swappedInitializers = swap(canonicalIds, "initialize-distances", "initialize-queue");
-const swappedRecord = answerQuestion(content, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[4];
+const swappedRecord = answerQuestion(content, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[6];
 assert.equal(swappedRecord.firstCorrect, true, "Independent initializers may be swapped");
 assert.deepEqual(plain(swappedRecord.attempts[0].answer.lineIds), swappedInitializers, "Keep the actual submitted order in the attempt");
-assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, "assign-distance", "enqueue-neighbor") }).records[4].firstCorrect,
+assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, "assign-distance", "enqueue-neighbor") }).records[6].firstCorrect,
   false, "Distance must be assigned before enqueueing");
-assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(swappedInitializers, "assign-distance", "enqueue-neighbor") }).records[4].firstCorrect, false);
+assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(swappedInitializers, "assign-distance", "enqueue-neighbor") }).records[6].firstCorrect, false);
 for (let index = 0; index < canonicalIds.length - 1; index++) {
   const first = canonicalIds[index], second = canonicalIds[index + 1];
-  assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, first, second) }).records[4].firstCorrect,
+  assert.equal(answerQuestion(content, state, q5.id, { kind: "order", lineIds: swap(canonicalIds, first, second) }).records[6].firstCorrect,
     first === "initialize-distances" && second === "initialize-queue", `Only the initializer pair may be swapped: ${first}/${second}`);
 }
 const strictContent = { ...content, questions: content.questions.map(question => question.kind === "parsons" ? { ...question, interchangeableLineGroups: undefined } : question) };
-assert.equal(answerQuestion(strictContent, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[4].firstCorrect, false, "Missing groups retain exact comparison");
+assert.equal(answerQuestion(strictContent, state, q5.id, { kind: "order", lineIds: swappedInitializers }).records[6].firstCorrect, false, "Missing groups retain exact comparison");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateConsolidation(broken)); }
-rejects(broken => broken.questions[4].lineIds.pop());
-rejects(broken => broken.questions[4].lineIds[1] = broken.questions[4].lineIds[0]);
-rejects(broken => broken.questions[4].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[6].lineIds.pop());
+rejects(broken => broken.questions[6].lineIds[1] = broken.questions[6].lineIds[0]);
+rejects(broken => broken.questions[6].correctAnswer.lineIds.reverse());
 rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
 rejects(broken => broken.questions[0].scene.graph.nodes[0].id = "F");
 rejects(broken => broken.questions[0].scene.start = "missing");
 rejects(broken => broken.questions[2].scene.graph.edges.push({ id: "bad", from: "Z", to: "missing" }));
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[0].tags = []);
-rejects(broken => broken.questions[4].interchangeableLineGroups = [["missing", "initialize-queue"]]);
-rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-queue", "initialize-queue"]]);
-rejects(broken => broken.questions[4].interchangeableLineGroups = [["initialize-distances", "while-queue"]]);
-rejects(broken => broken.questions[4].interchangeableLineGroups.push(["initialize-distances", "initialize-queue"]));
-console.log("BFS consolidation: independent BFS on all four graphs, corrected J timing, 11-line Parsons with interchangeable initializers only, shared rendering/review, 0/5 completion and immutable first-attempt diagnosis passed.");
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["missing", "initialize-queue"]]);
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["initialize-queue", "initialize-queue"]]);
+rejects(broken => broken.questions[6].interchangeableLineGroups = [["initialize-distances", "while-queue"]]);
+rejects(broken => broken.questions[6].interchangeableLineGroups.push(["initialize-distances", "initialize-queue"]));
+console.log("BFS consolidation: independent BFS on all six graphs, reference-code execution for the two new boundary questions, corrected J timing, 11-line Parsons with interchangeable initializers only, shared rendering/review, 0/7 completion and immutable first-attempt diagnosis passed.");
 
 // ボタンの優先順位と近さの契約（#148）: 主な操作は contained の主ボタン、図の高さは上限を設けて回答部を図の直下に寄せる。
 const previewSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/consolidation/BfsConsolidationPreview.tsx"), "utf8");
