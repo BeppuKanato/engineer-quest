@@ -17,7 +17,7 @@ export type BubbleSortCodeCheckContent = Omit<CodeBlankAssessment, "questions"> 
   readonly phase: 5;
   readonly stageName: "コードの確認問題";
   readonly code: typeof bubbleSortCode;
-  readonly questions: readonly [BubbleSortCodeQuestion, BubbleSortCodeQuestion];
+  readonly questions: readonly [BubbleSortCodeQuestion, ...BubbleSortCodeQuestion[]];
   readonly instruction: string;
   readonly retryFeedback: string;
   readonly reviewLabel: string;
