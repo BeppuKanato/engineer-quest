@@ -46,7 +46,7 @@ function frames(): [LearningStep<CodeMappingCanvasState>, ...LearningStep<CodeMa
       const current = executionStep(reference).canvas;
       const distance = current.state.nodes.find(value => value.id === neighbor)!.distance;
       if (distance !== null) {
-        // フェーズ2が独立表示するC→Eは、同じif行でそのsnapshotへ進む。
+        // フェーズ2が独立表示するskip（C→E、E→B）は、同じif行でそのsnapshotへ進む。
         const skip = bfsExecutionContent.steps.find(candidate => {
           const op = candidate.canvas.state.operation;
           return op.kind === "skip-discovered" && op.from === node && op.nodeId === neighbor;

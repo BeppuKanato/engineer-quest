@@ -26,7 +26,7 @@ const plain = value => JSON.parse(JSON.stringify(value));
 const checkpoints = content.steps.filter(step => step.canvas.state.frameKind === "execution");
 assert.equal(content.phase, 4);
 assert(content.intervalMs >= 2500);
-assert.equal(checkpoints.length, 19);
+assert.equal(checkpoints.length, 20);
 assert.deepEqual(plain(checkpoints.map(step => step.canvas.state.executionStepId)), plain(execution.steps.map(step => step.id)));
 assert.equal(content.steps.at(-1).canvas.highlights[0].id, "return-distances");
 assert.equal(content.steps.at(-2).canvas.highlights[0].id, "while-queue");
@@ -135,8 +135,8 @@ assert.throws(() => validateCodeMappingCanvas({ ...frame, state: { ...frame.stat
 assert.throws(() => validateCodeMappingCanvas({ ...frame, state: { ...frame.state, execution: plain(frame.state.execution) } }), /canonical/);
 assert.throws(() => validateCodeMappingCanvas({ ...frame, highlights: [{ kind: "code-line", id: "missing" }] }), /Unknown code line/);
 assert.throws(() => validateCodeMappingCanvas({ ...frame, state: { ...frame.state, locals: { ...frame.state.locals, pendingDistance: 99 } } }), /pending/);
-assert.throws(() => defineCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-dequeue-a") }), /19 execution/);
-console.log(`BFS code mapping: ${content.steps.length} frames, 19 snapshot identities, 11 stable source lines, complete Python trace and variables, reverse seek and invalid-data rejection passed.`);
+assert.throws(() => defineCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-dequeue-a") }), /20 execution/);
+console.log(`BFS code mapping: ${content.steps.length} frames, 20 snapshot identities, 11 stable source lines, complete Python trace and variables, reverse seek and invalid-data rejection passed.`);
 
 // 変化した変数は、コード行ハイライトと同じ背景ハイライト（focus 背景＋surface 文字）で示す（#145）。
 const canvasSource = fs.readFileSync(path.resolve(__dirname, "../src/features/learning/bfs/code-mapping/BfsCodeMappingCanvas.tsx"), "utf8");
