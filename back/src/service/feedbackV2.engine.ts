@@ -10,12 +10,15 @@ import type { Input, Analysis, Selection } from "./feedbackV1.engine";
 import { learningCapabilities, validateSelection } from "./feedbackV1.engine";
 import { prepareEvidenceInput } from "./feedbackV1.evidence";
 import { HEXAD_TYPES, type HexadDecision } from "./feedbackHexadConditions";
+import { COMMON_STAGE1_PERSONA, stage2Persona } from "./feedbackV2.persona";
 
 const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) => AutoParseableTextFormat<unknown>;
 const text = z.string().trim().min(1);
 const feedbackLevelSchema = z.enum(["FT", "FP", "FR"]);
 const hexadTypeSchema = z.enum(HEXAD_TYPES);
-export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-grounded-input-2026-11-18-v1";
+// Analyst changed: previous saved plans must not be reused under this version.
+export const FEEDBACK_V2_STAGE1_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-18-v5";
+export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-18-v5";
 
 export const supportPlanSchema = z.object({
   schemaVersion: z.literal("support-plan-v1"),
@@ -134,8 +137,7 @@ export function stage1Prompt(input: FeedbackV2Input, candidates: ResolvedCandida
   // Do not serialize experimentV2, selected type, or any HEXAD scores here.
   return [
     llmRules,
-    "第1段階。学習を診断し、学習上妥当な候補を1〜3件承認する。2回目のLLMが使う候補の集合をこの段階で決める。",
-    "教育目的・現在の観測・不確実性・根拠IDを記録し、教材の理解不足を断定しない。",
+    ...COMMON_STAGE1_PERSONA,
     "candidateIdはavailableCandidates内の短い識別子をそのまま選ぶ。作ってはいけない。",
     JSON.stringify({
       evidenceSources: snapshot.evidenceSources,
@@ -264,13 +266,16 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
   };
 }
 export function stage2Prompt(input: ReturnType<typeof stage2Input>) {
+  const personalized = input.condition !== "STANDARD";
   return [
+    ...stage2Persona(input.condition),
     llmRules,
-    "第2段階。第1段階の支援目的・許可候補集合を変更しない。",
-    "approvedCandidatesの候補だけを使い、nextGoalText、feedbackTextと1〜3件の具体的推薦を作成する。",
-    "HEXADがある場合、教育上妥当な候補内の推薦選択と表現調整にだけ使う。得点のない単一タイプ指定では与えられたタイプ以外を使わない。",
-    "MULTIは高得点タイプを考慮するが、必ず複数タイプを使用する必要はない。appliedTypesには自分が実際に文章・推薦に反映したタイプを記録する。",
-    "STANDARDのhexadAuditはnull。単一タイプ条件は指定された1タイプを記録。新たな候補ID、URL、教材の事実を作らない。",
+    "第2段階。approvedCandidatesの候補だけを使い、nextGoalText、feedbackTextと1〜3件の具体的推薦を作成する。指定されたJSON出力形式に従う。",
+    "新たな候補ID、URL、教材の事実や、新しい機能・報酬・他者の存在を作らない。",
+    ...(personalized ? [
+      "HEXADは教育上妥当な候補内の推薦選択と表現調整にだけ使う。得点のない単一タイプ指定では与えられたタイプ以外を使わない。学習者がその価値観を持つと断定しない。",
+      "MULTIは高得点タイプを考慮するが、必ず複数タイプを使用する必要はない。appliedTypesには自分が実際に文章・推薦に反映したタイプを記録する。単一タイプ条件は指定された1タイプを記録。",
+    ] : ["hexadAuditはnullとする。"]),
     JSON.stringify(input),
   ].join("\n");
 }

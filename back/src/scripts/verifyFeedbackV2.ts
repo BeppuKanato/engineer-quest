@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { resolveHexadCondition, type HexadScores } from "../service/feedbackHexadConditions";
 import {
   availableFeedbackCandidates, stage1Prompt, stage2Input, stage2Prompt,
-  validateStage1, validateStage2, generateFeedbackV2, supportPlanSchema,
+  validateStage1, validateStage2, generateFeedbackV2, supportPlanSchema, FEEDBACK_V2_PROMPT_VERSION,
   type FeedbackV2Input, type SupportPlanResult, type ComposedFeedbackResult,
 } from "../service/feedbackV2.engine";
 
@@ -24,6 +24,9 @@ assert.equal(candidates[0].candidateId, "C1");
 assert(candidates.some(x => x.action.kind === "self_action"));
 assert(!stage1Prompt(base, candidates).includes("Achiever"), "HEXAD must not reach Stage1");
 assert(!stage1Prompt(base, candidates).includes("HEXAD"));
+assert.equal(FEEDBACK_V2_PROMPT_VERSION, "feedback-four-arm-two-stage-2026-11-18-v5");
+assert(stage1Prompt(base, candidates).includes("【学習状況の分析】"));
+assert(stage1Prompt(base, candidates).includes("【チューターへの引き継ぎ】"));
 
 const plan: SupportPlanResult = {
   schemaVersion: "support-plan-v1",
@@ -82,6 +85,9 @@ assert.equal(hydrated.contextFacts.filter(x=>x.sourceId.startsWith("question-his
 assert(hydrated.contextFacts.some(x=>x.statement.includes("drop-left") && x.statement.includes("drop-right")));
 
 assert(stage2Prompt(input).includes("Achiever"));
+assert(stage2Prompt(input).includes("【学習者への伝え方】"));
+assert(stage2Prompt(input).includes("与えられたHEXAD特性に基づく動機づけの傾向"));
+assert(stage2Prompt(input).includes("新しい機能・報酬・他者の存在を作らない"));
 assert(!stage2Prompt(input).includes("Socialiser\",\"definition"));
 const composed: ComposedFeedbackResult = {
   schemaVersion:"feedback-result-v1",
@@ -129,6 +135,9 @@ await assert.rejects(
 const standard: FeedbackV2Input={...base,experimentV2:resolveHexadCondition("STANDARD",null)};
 const standardFacts=stage2Input(standard,validateStage1(standard,plan,candidates),candidates);
 assert.equal(standardFacts.hexadContext,null);
+assert(stage2Prompt(standardFacts).includes("【学習者への伝え方】"));
+assert(!stage2Prompt(standardFacts).includes("与えられたHEXAD特性に基づく動機づけの傾向"));
+assert(stage2Prompt(standardFacts).includes("hexadAuditはnullとする。"));
 assert.throws(()=>validateStage2(standardFacts,composed),/V2_STANDARD_HEXAD_LEAK/);
 
 const multi: FeedbackV2Input={...base,experimentV2:resolveHexadCondition("MULTI",scores)};
