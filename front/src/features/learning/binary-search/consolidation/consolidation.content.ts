@@ -14,7 +14,19 @@ validateBinarySearchExecutionCanvas, type BinarySearchCellStatus, type BinarySea
 import type { BinarySearchConsolidationContent} from "./consolidation.types";
 
 /**
-* 基準データ §3 フェーズ6（転移タップ・不在の選択・Parsons・前提の選択の4問）。
+* 基準データ §3 フェーズ6（転移タップ・転移の追跡・不在の選択・
+* 不在の戻り値・Parsons・前提の選択の6問）。
+* 設問数は固定数ではなく、フェーズ7（自分で実装）が前提とする
+* 「流れからコードを組み立てる力」を一通り判断できるかで決める
+* （2026-11-17 の基準）。当初の4問では、転移リストは最初の真ん中
+* しか聞いておらず全体の追跡が未確認で、不在ケースも振る舞いの
+* 選択だけでコードが返す -1 には触れていなかった。フェーズ7の
+* テスト（J2 転移・J3 不在）がそのまま要求する2点を足した。
+* Parsons の対象外行（初期化2行と else 側2行）の組み立ては、
+* フェーズ5の空欄（init-hi / drop-right）と転移の追跡で代替確認し、
+* Parsons 自体は対称な側を代表させる既存の設計判断を尊重して
+* 拡張しない。行の内容を書く力（タイピングの段差）は教材側の
+* 判断事項として残す。
 * 正解はすべて実行記録（binarySearch.ts の probes / runBinarySearch）から導く。
 * 場面は共通配列基盤の形で持つ（不在ケースと未整列リストは単元盤面型の
 * 検証を満たさないため）。Q1 の場面は単元盤面型の開始スナップショットを
@@ -106,6 +118,24 @@ correctFeedback: `正解。範囲は全体（左端が位置 ${transferFirst.lo}
 incorrectFeedback: `不正解。真ん中の位置は (左端 + 右端) // 2 で決まります。範囲全体なら (${transferFirst.lo} + ${transferFirst.hi}) // 2 = ${transferFirst.mid} で、割り算の切り捨てのため左寄りの位置になります。`,
 },
 {
+kind: "choice", id: "transfer-trace",
+prompt: `新しいリスト [${binarySearchTransferValues.join(", ")}] で ${binarySearchTransferTarget} を探すとき、調べる値の順番はどれか`,
+scene: transferScene,
+choices: [
+{ id: "trace-full", text: transferProbes.map((probe) => probe.value).join(" → ") },
+{ id: "trace-skip", text: `${transferFirst.value} → ${transferProbes[2].value}` },
+{ id: "trace-wrong-first", text: `${transferProbes[1].value} → ${transferFirst.value} → ${transferProbes[2].value}` },
+{ id: "trace-extra", text: `${transferFirst.value} → ${transferProbes[1].value} → ${binarySearchTransferValues[8]}` },
+],
+correctAnswer: { kind: "choice", choiceId: "trace-full" }, requires: null,
+stepId: "execution-probe-1-mid",
+reviewStepIds: ["execution-range-full", "execution-probe-1-mid", "execution-range-after-drop-left", "execution-probe-2-mid", "execution-probe-2-drop-right", "execution-range-single"],
+tags: ["新しいリストでの探索のたどり方"],
+instruction: "順番を1つ選ぶ",
+correctFeedback: `正解。最初は真ん中の ${transferFirst.value} を調べ、${transferProbes[1].value}、${transferProbes[2].value} の順に進んで、3回目で見つかります。小さい側と大きい側の両方を捨てる流れを、新しいリストでも最後までたどりました。`,
+incorrectFeedback: `不正解。真ん中と比べるたびに片側を捨て、残った範囲の真ん中を次に調べます。${transferProbes.map((probe) => probe.value).join(" → ")} の順に進むのが正しいたどり方です。`,
+},
+{
 kind: "choice", id: "absent-target",
 prompt: `主教材のリスト [${binarySearchMainValues.join(", ")}] で ${absentTarget} を探すと、どうなりますか`,
 scene: absentScene,
@@ -122,6 +152,24 @@ tags: ["探す値が無いときの終わり方"],
 instruction: "説明を1つ選ぶ",
 correctFeedback: `正解。比べる道は ${binarySearchMainTarget} を探したときとまったく同じで、${absentProbes.map((probe) => probe.value).join(" → ")} の順に進みます。最後の1個（${absentLast.value}）まで絞っても ${absentTarget} はないので、範囲が空になり、「無い」ことが分かって終わります。`,
 incorrectFeedback: `不正解。真ん中が探す値でなくても探索は続きます。${absentProbes.map((probe) => probe.value).join(" → ")} と範囲を絞っていき、最後の1個まで調べても無ければ、範囲が空になって終わります。`,
+},
+{
+kind: "choice", id: "absent-return",
+prompt: `主教材のリスト [${binarySearchMainValues.join(", ")}] で ${absentTarget} を探し、範囲が空になりました。binary_search が返す値はどれか`,
+scene: absentScene,
+choices: [
+{ id: "minus-one", text: "-1" },
+{ id: "zero", text: "0" },
+{ id: "last-position", text: `${absentLast.mid}（最後に調べた位置）` },
+{ id: "last-value", text: `${absentLast.value}（最後に調べた値）` },
+],
+correctAnswer: { kind: "choice", choiceId: "minus-one" }, requires: null,
+stepId: "execution-range-single",
+reviewStepIds: ["execution-probe-2-drop-right", "execution-range-single", "execution-probe-3-mid", "if-hit-3"],
+tags: ["無いときに返す値"],
+instruction: "当てはまるものを1つ選ぶ",
+correctFeedback: "正解。探す値が無いときは、見つけた位置ではなく「無い」ことを表す -1 を返します。範囲が空になるまで絞り切った結果が、そのまま答えになります。",
+incorrectFeedback: "不正解。最後に調べた位置や値を返すのではありません。範囲が空になって探す値が無いと分かったとき、関数は -1 を返します。",
 },
 {
 kind: "parsons", id: "whole-code-order",
@@ -163,8 +211,8 @@ incorrectFeedback: "不正解。真ん中の位置は個数だけで決まり、
 
 export function validateBinarySearchConsolidation(content: BinarySearchConsolidationContent): void {
 validateAssessment(content);
-if (content.phase!== 6 || content.stageName!== "応用問題" || content.questions.length!== 4 || content.code!== binarySearchCode) {
-throw new Error("Use four questions and the canonical code");
+if (content.phase!== 6 || content.stageName!== "応用問題" || content.questions.length!== 6 || content.code!== binarySearchCode) {
+throw new Error("Use six questions and the canonical code");
 }
 for (const question of content.questions) {
 getLearningStep(binarySearchCodeMappingContent, question.stepId);
@@ -190,11 +238,27 @@ if (tap.kind!== "node" || tap.scene.state.values.join(",")!== binarySearchTransf
 || tap.nodeIds.length!== transferIds.length || tap.nodeIds.some((id) =>!transferIds.includes(id))) {
 throw new Error("Transfer question must follow the verified transfer trace");
 }
+// 転移の追跡の正解は、転移用の実行記録の比較列そのものでなければならない。
+const traceQuestion = content.questions.find((question) => question.id=== "transfer-trace");
+if (traceQuestion?.kind!== "choice") throw new Error("Transfer trace question is required");
+const traceCorrect = traceQuestion.choices.find((choice) => choice.id=== traceQuestion.correctAnswer.choiceId);
+if (traceCorrect?.text!== transferProbes.map((probe) => probe.value).join(" → ")) {
+throw new Error("Transfer trace answer must follow the verified transfer trace");
 }
-// 基準データ §1・§3 の確定事項（転移の最初の真ん中は位置4の16、不在ケースの
-// 比較列は主教材と同じ 19 → 31 → 25 で -1、未整列リストでは右側に残った
-// 7 を捨ててしまい -1 になる）と教材がずれたら落とす。
+// 不在の戻り値の正解は、実行記録が返す「無い」の値でなければならない。
+const returnQuestion = content.questions.find((question) => question.id=== "absent-return");
+if (returnQuestion?.kind!== "choice") throw new Error("Absent return question is required");
+const returnCorrect = returnQuestion.choices.find((choice) => choice.id=== returnQuestion.correctAnswer.choiceId);
+if (returnCorrect?.text!== String(runBinarySearch(binarySearchMainValues, absentTarget))) {
+throw new Error("Absent return answer must be the verified not-found value");
+}
+}
+// 基準データ §1・§3 の確定事項（転移の最初の真ん中は位置4の16、転移の
+// 比較列は 16 → 56 → 23 で位置5、不在ケースの比較列は主教材と同じ
+// 19 → 31 → 25 で -1、未整列リストでは右側に残った 7 を捨ててしまい
+// -1 になる）と教材がずれたら落とす。
 if (transferProbes.length!== 3 || transferFirst.lo!== 0 || transferFirst.hi!== 9 || transferFirst.mid!== 4 || transferFirst.value!== 16
+|| transferProbes.map((probe) => probe.value).join(",")!== "16,56,23" || runBinarySearch(binarySearchTransferValues, binarySearchTransferTarget)!== 5
 || absentProbes.map((probe) => probe.value).join(",")!== "19,31,25" || runBinarySearch(binarySearchMainValues, absentTarget)!== -1
 || absentLast.lo!== 4 || absentLast.hi!== 4 || absentLast.mid!== 4
 ||!unsortedValues.includes(unsortedTarget) || runBinarySearch(unsortedValues, unsortedTarget)!== -1) {

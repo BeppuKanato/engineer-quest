@@ -32,18 +32,23 @@ const { toArrayBars } = load(file("binary-search/execution/BinarySearchExecution
 const { selectReviewContent } = load(file("review/reviewContent.ts"));
 const { validateArrayBarsCanvas } = load(file("player/arrayBars.types.ts"));
 const { createAssessmentState, activeQuestion, answerQuestion, advanceAssessment, assessmentComplete, diagnoseAssessment, sameAnswer } = load(file("assessment/assessment.ts"));
-const [q1, q2, q3, q4] = content.questions;
+const byId = id => content.questions.find(q => q.id === id);
+const q1 = byId("first-center-transfer"), qTrace = byId("transfer-trace"), q2 = byId("absent-target");
+const qRet = byId("absent-return"), q3 = byId("whole-code-order"), q4 = byId("why-sorted-matters");
 
-// 基準データ §3 フェーズ6の構成（転移タップ・不在の選択・Parsons・前提の選択の4問）。
+// 基準データ §3 フェーズ6の構成（転移タップ・転移の追跡・不在の選択・不在の戻り値・
+// Parsons・前提の選択の6問。2026-11-17 の基準で当初の4問から拡充）。
 validateBinarySearchConsolidation(content);
 assert.equal(content.id, "binary-search-consolidation"); assert.equal(content.phase, 6); assert.equal(content.stageName, "応用問題");
-assert.equal(content.questions.length, 4);
+assert.equal(content.questions.length, 6);
 assert.equal(content.code, code); assert.equal(code.id, "binary-search-v1"); assert.equal(code.version, 1);
 const stageBracket = name => `${String.fromCharCode(0x3010)}${name}${String.fromCharCode(0x3011)}`;
 assert.equal(content.completion, `理解の状況が確認できました。それでは${stageBracket("自分で実装")}に進み、自分の手でコードを完成させましょう！`);
 assert.deepEqual(plain(content.questions.map(q => [q.id, q.kind, q.tags[0]])), [
   ["first-center-transfer", "node", "新しいリストでの真ん中の位置"],
+  ["transfer-trace", "choice", "新しいリストでの探索のたどり方"],
   ["absent-target", "choice", "探す値が無いときの終わり方"],
+  ["absent-return", "choice", "無いときに返す値"],
   ["whole-code-order", "parsons", "コード全体の流れ"],
   ["why-sorted-matters", "choice", "並んでいることが前提の理由"],
 ]);
@@ -93,6 +98,14 @@ assert.deepEqual(plain(q1.scene), plain(toArrayBars({
   highlights: [],
 })), "Q1 scene equals the canonical conversion of the opening snapshot");
 
+// 転移の追跡: 独立トレースの比較列（16 → 56 → 23、両方向の捨て方を含む）が正解と一致する。
+assert.equal(qTrace.prompt, "新しいリスト [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] で 23 を探すとき、調べる値の順番はどれか");
+assert.equal(qTrace.correctAnswer.choiceId, "trace-full");
+assert.equal(qTrace.choices.find(choice => choice.id === "trace-full").text, transfer.probes.map(probe => probe.value).join(" → "));
+assert.equal(qTrace.choices.find(choice => choice.id === "trace-full").text, "16 → 56 → 23");
+assert.deepEqual(plain(qTrace.scene.state.values), TRANSFER, "Trace question reuses the transfer opening scene");
+validateArrayBarsCanvas(qTrace.scene);
+
 // Q2: 不在ケース。独立実行（比較列 19 → 31 → 25、結果 -1）から正解を裏づけ、誤答3件を反証する。
 const absent = binarySearchTrace(MAIN, 20);
 assert.deepEqual(absent.probes.map(probe => probe.value), [19, 31, 25], "Absent case follows the same probe path as the main target");
@@ -107,6 +120,14 @@ assert.deepEqual(plain(q2.scene.state.values), MAIN);
 assert.deepEqual(plain(q2.scene.state.cellStatuses), ["completed", "completed", "completed", "completed", "processing", "completed", "completed"],
   "Scene is the final probe: only the last candidate (25) is being looked at");
 validateArrayBarsCanvas(q2.scene);
+
+// 不在の戻り値: 独立実行の結果（-1）が正解と一致し、最後の位置・値ではないことを固定する。
+assert.equal(qRet.correctAnswer.choiceId, "minus-one");
+assert.equal(qRet.choices.find(choice => choice.id === "minus-one").text, String(absent.result));
+assert.equal(qRet.choices.find(choice => choice.id === "last-position").text, `${absent.probes.at(-1).mid}（最後に調べた位置）`);
+assert.equal(qRet.choices.find(choice => choice.id === "last-value").text, `${absent.probes.at(-1).value}（最後に調べた値）`);
+assert.deepEqual(plain(qRet.scene.state.values), MAIN, "Return question reuses the absent-case scene");
+validateArrayBarsCanvas(qRet.scene);
 
 // Q4: 未整列リストでは、真ん中と比べて捨てた側に探す値が残ることを独立実行で示す。
 const unsorted = binarySearchTrace(UNSORTED, 7);
@@ -183,7 +204,7 @@ for (const id of q1.nodeIds) {
 assert.equal(JSON.stringify(q1.scene), sceneBeforeRender, "Rendering must not mutate the scene");
 const lockedHtml = renderToStaticMarkup(React.createElement(BinarySearchConsolidationCanvas, { canvas: q1.scene, label: q1.prompt, questionId: q1.id, cellIds: q1.nodeIds, disabled: true, onAnswer() {} }));
 assert.equal((lockedHtml.match(/ disabled=""/g) || []).length, q1.nodeIds.length, "Correct responses lock every answer control");
-for (const question of [q2, q4]) {
+for (const question of [qTrace, q2, qRet, q4]) {
   const html = renderToStaticMarkup(React.createElement(BinarySearchConsolidationCanvas, { canvas: question.scene, label: question.prompt, onAnswer() {} }));
   assert.equal((html.match(/<button\b/g) || []).length, 0, "Choice scenes are display-only");
 }
@@ -216,46 +237,50 @@ function complete(mask, retry) {
   assert.deepEqual(plain(result.tags.map(tag => tag.passed)), mask);
   return state;
 }
-const failed = complete([false, false, false, false], false);
-assert(failed.records.every(record => !record.solved), "0/4 can finish without correct answers");
-const retried = complete([false, false, false, false], true);
+const failed = complete([false, false, false, false, false, false], false);
+assert(failed.records.every(record => !record.solved), "0/6 can finish without correct answers");
+const retried = complete([false, false, false, false, false, false], true);
 assert(retried.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 2));
-complete([true, false, true, false], true);
-complete([true, true, true, true], false);
+complete([true, false, true, false, true, false], true);
+complete([true, true, true, true, true, true], false);
 
 // Parsons の回答検証: 不完全・重複した並びは拒否し、提出した配列は複製して記録する。
 // 順序自由な行はないため、隣接するどの2行の入れ替えも不正解にする。
 let parsonsState = createAssessmentState(content);
-for (const question of content.questions.slice(0, 2)) {
+for (const question of content.questions.slice(0, 4)) {
   parsonsState = advanceAssessment(content, answerQuestion(content, parsonsState, question.id, question.correctAnswer), question.id);
 }
+const parsonsIndex = content.questions.indexOf(q3);
 assert.equal(answerQuestion(content, parsonsState, q3.id, { kind: "order", lineIds: selectedIds.slice(1) }), parsonsState);
 assert.equal(answerQuestion(content, parsonsState, q3.id, { kind: "order", lineIds: selectedIds.map(() => selectedIds[0]) }), parsonsState);
 const mutable = [...selectedIds];
 const answered = answerQuestion(content, parsonsState, q3.id, { kind: "order", lineIds: mutable });
 mutable.reverse();
-assert.deepEqual(plain(answered.records[2].attempts[0].answer.lineIds), selectedIds, "Clone submitted order arrays");
-assert(sameAnswer(q3.correctAnswer, answered.records[2].attempts[0].answer));
+assert.deepEqual(plain(answered.records[parsonsIndex].attempts[0].answer.lineIds), selectedIds, "Clone submitted order arrays");
+assert(sameAnswer(q3.correctAnswer, answered.records[parsonsIndex].attempts[0].answer));
 assert(!sameAnswer(q3.correctAnswer, wrong(q3)));
 for (let index = 0; index < selectedIds.length - 1; index++) {
   const swapped = [...selectedIds];
   [swapped[index], swapped[index + 1]] = [swapped[index + 1], swapped[index]];
-  assert.equal(answerQuestion(content, parsonsState, q3.id, { kind: "order", lineIds: swapped }).records[2].firstCorrect,
+  assert.equal(answerQuestion(content, parsonsState, q3.id, { kind: "order", lineIds: swapped }).records[parsonsIndex].firstCorrect,
     false, `Adjacent swap must be incorrect: ${selectedIds[index]}/${selectedIds[index + 1]}`);
 }
 
 // 検証の負系: 壊れたコンテンツは読み込み時の検証で落とす。
 assert.doesNotThrow(() => validateBinarySearchConsolidation({ ...content, questions: plain(content.questions) }), "A structural clone still validates");
 function rejects(change) { const broken = { ...content, questions: plain(content.questions) }; change(broken); assert.throws(() => validateBinarySearchConsolidation(broken)); }
-rejects(broken => broken.questions[2].lineIds.pop());
-rejects(broken => broken.questions[2].lineIds[1] = broken.questions[2].lineIds[0]);
-rejects(broken => broken.questions[2].correctAnswer.lineIds.reverse());
-rejects(broken => broken.questions[2].interchangeableLineGroups = [["define-function", "while-range"]]);
-rejects(broken => broken.questions[1].choices[1].text = broken.questions[1].choices[0].text);
+const indexOf = id => content.questions.findIndex(q => q.id === id);
+rejects(broken => broken.questions[indexOf("whole-code-order")].lineIds.pop());
+rejects(broken => broken.questions[indexOf("whole-code-order")].lineIds[1] = broken.questions[indexOf("whole-code-order")].lineIds[0]);
+rejects(broken => broken.questions[indexOf("whole-code-order")].correctAnswer.lineIds.reverse());
+rejects(broken => broken.questions[indexOf("whole-code-order")].interchangeableLineGroups = [["define-function", "while-range"]]);
+rejects(broken => broken.questions[indexOf("absent-target")].choices[1].text = broken.questions[indexOf("absent-target")].choices[0].text);
+rejects(broken => broken.questions[indexOf("transfer-trace")].correctAnswer.choiceId = "trace-skip");
+rejects(broken => broken.questions[indexOf("absent-return")].correctAnswer.choiceId = "zero");
 rejects(broken => broken.questions[0].correctAnswer.nodeId = "0");
 rejects(broken => broken.questions[0].scene.state.values = [2, 5, 8, 12, 16, 23, 38, 56, 91, 72]);
-rejects(broken => broken.questions[1].reviewStepIds = ["missing"]);
-rejects(broken => broken.questions[3].tags = []);
+rejects(broken => broken.questions[indexOf("absent-target")].reviewStepIds = ["missing"]);
+rejects(broken => broken.questions[indexOf("why-sorted-matters")].tags = []);
 
 // プレビューの契約: 主ボタンで進み、正解後は入力を固定し、復習はフェーズ4の内容で開く。
 const previewSource = fs.readFileSync(file("binary-search/consolidation/BinarySearchConsolidationPreview.tsx"), "utf8");
@@ -274,4 +299,4 @@ assert.match(previewSource, /question\.definitions/, "preview renders the defini
 assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[contentId]/page.tsx"), "utf8")
   .includes('contentId === "binary-search-consolidation"'), "Standalone preview is registered");
 assert.match(previewSource, /orderFeedback=\{\{ solutionLineIds: question\.correctAnswer\.lineIds, interchangeableLineGroups: question\.interchangeableLineGroups, active: \(record\?\.attemptCount \?\? 0\) > 0, submittedLineIds: attempt\?\.answer\.kind === "order" \? attempt\.answer\.lineIds : undefined \}\}/, "parsons order feedback is wired (#327, frozen at answer time #354)");
-console.log("Binary-search consolidation verified: transfer tap from the independent [2,5,8,12,16,23,38,56,72,91] trace, absent-case refutations on the shared 19-31-25 probe path, 8-line Parsons with no interchangeable lines, unsorted-list premise refutations, soft-gate completion and first-attempt diagnosis.");
+console.log("Binary-search consolidation verified: transfer tap and full transfer trace from the independent [2,5,8,12,16,23,38,56,72,91] trace, absent-case refutations on the shared 19-31-25 probe path, absent return value -1, 8-line Parsons with no interchangeable lines, unsorted-list premise refutations, soft-gate completion and first-attempt diagnosis.");
