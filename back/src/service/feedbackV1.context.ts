@@ -11,6 +11,7 @@ import { evaluateBigGoal } from "./bigGoal.evaluate";
 import { getActiveBigGoal, loadBigGoalFacts } from "./bigGoal.service";
 import type { BigGoalParams } from "./bigGoal.types";
 import type { Action, BigGoalInput, Input, Target } from "./feedbackV1.engine";
+import { currentMaterialUnit, enrichLearningMaterials, phaseLearningDescription,record, relatedCourseIds, selectRelatedEvidence } from "./feedbackMaterials";
 
 /**
  * 分析段へ渡す大目標ブロックを組み立てる（Issue #368、実装仕様6.1）。
@@ -109,11 +110,15 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     const courseId = kind === "unit" ? eventId : eventId.split(":")[0];
     const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } });
     if (!course) throw new AppError(404, "EVENT_NOT_FOUND", "Unit not found");
-    const [unitRow, phaseRows] = await Promise.all([
+    const [unitRow, allCurrentPhaseRows] = await Promise.all([
       prisma.unitLearningProgress.findUnique({ where: { userId_courseId: { userId: user.id, courseId } } }),
       prisma.phaseLearningProgress.findMany({ where: { userId: user.id, courseId }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] }),
     ]);
-    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot", "assessment_evidence_missing", "implementation_test_result", "hint_open", "implementation_level_select", "implementation_complete"] } } });
+    const unitStages=conceptDefinitions.find(u=>u.courseId===courseId)?.phases??[];
+    const currentIndex=unitStages.findIndex(p=>p.id===eventId.split(":")[1]);
+    const allowedPhaseKeys=kind==="unit"?unitStages.map(p=>p.id):unitStages.slice(0,currentIndex+1).map(p=>p.id);
+    const phaseRows=allCurrentPhaseRows.filter(p=>allowedPhaseKeys.includes(p.phaseKey));
+    const answerEvents = await prisma.learningEvent.findMany({ where: { userId: user.id, courseId, phaseKey:{in:allowedPhaseKeys},serverTimestamp: { lte: cutoff }, eventType: { in: ["answer_attempt", "assessment_snapshot", "assessment_evidence_missing", "implementation_test_result", "hint_open", "implementation_level_select", "implementation_complete"] } } });
     const conceptSnapshot = aggregateConcepts(courseId, answerEvents, phaseRows, crypto.randomUUID());
     const phases = phaseRows.map(p => ({ id: p.phaseKey, status: p.status, summary: p.summary ?? null }));
     const phaseSequence = sequence(phaseRows.filter(p => p.completedAt).map(p => ({ id: p.phaseKey, type: "phase", at: p.completedAt ?? undefined })));
@@ -150,7 +155,7 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     prisma.createQuest.findMany({ where: { isPublished: true }, include: { attempts: { where: { userId: user.id }, select: { status: true, bestScore: true, code: true } }, relatedCourses: true, requirements: { select: { id: true, title: true, description: true, kind: true } } } }),
     prisma.knowledgeCard.findMany({ where: { isPublished: true, userKnowledgeCards: { some: { userId: user.id } } } }),
     prisma.achievement.findMany({ where: { OR: [{ isSecret: false }, { userAchievements: { some: { userId: user.id } } }] }, include: { userAchievements: { where: { userId: user.id }, select: { id: true } } } }),
-    prisma.questPost.findMany({ where: { visibility: "PUBLIC" }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], include: { comments: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] } } }),
+    kind==="phase"?Promise.resolve([]):prisma.questPost.findMany({ where: { visibility: "PUBLIC",createdAt:{lte:cutoff},...(kind==="unit"?{courseId:eventId}:{}) }, orderBy: [{ createdAt: "asc" }, { id: "asc" }], include: { comments: {where:{createdAt:{lte:cutoff}}, orderBy: [{ createdAt: "asc" }, { id: "asc" }] } } }),
     prisma.feedbackV1.findMany({ where: { userId: user.id, createdAt: { gte: assignment.assignedAt, lte: cutoff } }, orderBy: { createdAt: "asc" }, select: { id: true, result: true, interactions: true, status: true } }),
     prisma.unitLearningProgress.findMany({ where: { userId: user.id } }),
     prisma.phaseLearningProgress.findMany({ where: { userId: user.id } }),
@@ -170,46 +175,51 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
   // Human-readable, code-grounded target metadata is used by Stage1. URLs and
   // IDs remain authoritative; the model cannot invent destinations.
   const add = (id: number, targetId: string, href: string, name?: string, learningContent?: string) =>
-    targets[id].push({ id: targetId, href, name, learningContent });
+    targets[id].push({ id: targetId, href, name:name??definitions[id-1][0], learningContent:learningContent??definitions[id-1][1] });
+  const describeUnit=(courseId:string)=>currentMaterialUnit(courseId)?.intro??"教材の説明は未登録。内容を推測して推薦しない。";
+  const describePhase=(courseId:string,phaseKey:string)=>phaseLearningDescription(courseId,phaseKey)??"段階の具体的な内容は未登録。";
   if (kind === "unit") {
     for (const u of units) {
-      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "この単元の学習を開始する");
-      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`, u.title, "途中から学習を再開する");
-      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, "完了した単元を復習する");
+      if (u.status === "NOT_STARTED") add(1, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, describeUnit(u.id));
+      if (u.status === "IN_PROGRESS") add(2, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}/learn`, u.title, describeUnit(u.id));
+      if (u.status === "COMPLETED") add(3, u.id, `/courses/roadmap/${encodeURIComponent(u.id)}`, u.title, describeUnit(u.id));
     }
     for (const p of allPhaseRows.filter(p => p.status === "COMPLETED")) {
       const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
-      add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "完了した段階を復習する");
+      add(4, `${p.courseId}:${p.phaseKey}`, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, describePhase(p.courseId,p.phaseKey));
     }
   }
   if (kind === "phase" && phaseEvent) {
-    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED")) {
+    const visiblePhaseIds=new Set((record(learning).phases as {id:string}[]).map(p=>p.id));
+    for (const p of allPhaseRows.filter(p => p.courseId === phaseEvent.courseId && p.status === "COMPLETED"&&visiblePhaseIds.has(p.phaseKey))) {
       const phaseLabel = conceptDefinitions.find(unit => unit.courseId === p.courseId)?.phases.find(x => x.id === p.phaseKey)?.formalName;
-      add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, "同一単元の完了済み段階を復習する");
+      add(4, p.phaseKey, `/courses/roadmap/${encodeURIComponent(p.courseId)}/learn?phase=${encodeURIComponent(p.phaseKey)}`, phaseLabel, describePhase(p.courseId,p.phaseKey));
     }
     if (phaseEvent.nextPhaseKey) {
       const phaseLabel = conceptDefinitions.find(unit => unit.courseId === phaseEvent.courseId)?.phases.find(x => x.id === phaseEvent.nextPhaseKey)?.formalName;
-      add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`, phaseLabel, "現在の単元で次の段階へ進む");
+      add(23, phaseEvent.nextPhaseKey, `/courses/roadmap/${encodeURIComponent(phaseEvent.courseId)}/learn?phase=${encodeURIComponent(phaseEvent.nextPhaseKey)}`, phaseLabel, describePhase(phaseEvent.courseId,phaseEvent.nextPhaseKey));
     }
   }
   for (const q of quests) {
     const a = q.attempts[0];
-    add(!a ? 6 : a.status === "COMPLETED" ? 8 : 7, q.id, `/create/quests/${encodeURIComponent(q.id)}/work`);
-    if (a) add(16, q.id, `/create/quests/${encodeURIComponent(q.id)}`);
-    if (a?.code) add(21, q.id, `/quest-board/new?category=WORK_SHARE&targetId=${encodeURIComponent(q.id)}&title=${encodeURIComponent(q.title)}`);
+    const description=[q.description,q.scenario,...q.requirements.map(r=>r.description??r.title)].filter(Boolean).join("\n");
+    add(!a ? 6 : a.status === "COMPLETED" ? 8 : 7, q.id, `/create/quests/${encodeURIComponent(q.id)}/work`,q.title,description);
+    if (a) add(16, q.id, `/create/quests/${encodeURIComponent(q.id)}`,q.title,description);
+    if (a?.code) add(21, q.id, `/quest-board/new?category=WORK_SHARE&targetId=${encodeURIComponent(q.id)}&title=${encodeURIComponent(q.title)}`,q.title,description);
   }
   for (const card of cards) for (const id of [9, 10]) if (kind !== "phase" || card.courseId === phaseEvent?.courseId) add(id, card.id, `/knowledge-cards?cardId=${encodeURIComponent(card.id)}`, card.title, card.description);
   if (cards.length) add(11, "collection", "/knowledge-cards");
   add(12, "history", "/history"); // The authorized completion/submission itself is a history item.
   for (const a of achievements) {
-    add(13, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`);
-    if (!a.isSecret && !a.userAchievements.length && user.selectedTargetAchievementId !== a.id) add(14, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`);
+    const details=`${a.description} (condition: ${a.conditionType}/${a.conditionValue})`;
+    add(13, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`,a.title,details);
+    if (!a.isSecret && !a.userAchievements.length && user.selectedTargetAchievementId !== a.id) add(14, a.id, `/achievements?focus=${encodeURIComponent(a.id)}`,a.title,details);
   }
   add(15, "profile", "/profile");
   const unitPosts = kind === "unit" ? posts.filter(p => p.courseId === eventId) : posts;
   for (const p of unitPosts) {
-    add(17, p.id, `/quest-board/${encodeURIComponent(p.id)}`);
-    if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`);
+    add(17, p.id, `/quest-board/${encodeURIComponent(p.id)}`,p.title,p.body);
+    if (p.userId !== user.id) add(22, p.id, `/quest-board/${encodeURIComponent(p.id)}#reply`,p.title,p.body);
   }
   for (const [id, category] of [[18, "QUESTION"], [19, "ERROR_HELP"], [20, "MEMO"]] as const) add(id, category, `/quest-board/new?category=${category}`);
   const allActions: Action[] = definitions.map(([label, purpose, condition], i) => ({ id: i + 1, label, purpose, condition, targetIds: targets[i + 1].map(t => t.id) })).filter(a => a.targetIds.length);
@@ -263,6 +273,22 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
     achievementProgress, achievements: achievements.map(({ userAchievements, ...a }) => ({ ...a, acquired: userAchievements.length > 0, isTarget: a.id === user.selectedTargetAchievementId })), experience: user.experience, level: deriveLevel(user.experience), legacyRecommendations: legacyCreateHistory.map(h => ({ ...h, targetId: "not_recorded", presentation: "not_observed", viewing: "not_observed", arrival: "not_observed" })),
     posts: unitPosts.map(p => ({ id: p.id, category: p.category, title: p.title, body: p.body, code: p.code, courseId: p.courseId, isSelf: p.userId === user.id, comments: p.comments.map(c => ({ id: c.id, body: c.body, isSelf: c.userId === user.id })) })), history: historyView,
   };
+  if(kind==="phase"||kind==="unit") {
+    learning=enrichLearningMaterials(learning);
+    const courseId=String(record(record(learning).unit).id);
+    const related=[];
+    for(const otherId of relatedCourseIds(courseId,conceptDefinitions)) {
+      const events=await prisma.learningEvent.findMany({where:{userId:user.id,courseId:otherId,serverTimestamp:{lte:cutoff},eventType:{in:["assessment_snapshot","answer_attempt","assessment_evidence_missing"]}}});
+      const phaseRows=allPhaseRows.filter(p=>p.courseId===otherId&&(!p.completedAt||p.completedAt<=cutoff));
+      const other=enrichLearningMaterials({unit:{id:otherId},conceptSnapshot:aggregateConcepts(otherId,events,phaseRows,`related:${otherId}`)});
+      related.push(...selectRelatedEvidence(learning,other));
+    }
+    learning={...record(learning),relatedConceptHistory:related,relatedHistoryStatus:related.length?"observed":"no-related-answer-evidence",
+      referencePosts:kind==="unit"?unitPosts.map(p=>({id:p.id,courseId:p.courseId,title:p.title,body:p.body,code:p.code,
+        comments:p.comments.map(c=>({body:c.body})),role:"参考資料。本人の理解の証拠ではない。"})):[],
+      referencePostsStatus:kind!=="unit"?"excluded-during-unit":unitPosts.length?"available":"no-public-posts",
+      capturedAt:cutoff.toISOString()};
+  }
   const input = prepareEvidenceInput({ learning, targets, actions, hexad, state, bigGoal, stageGoals, experimentV2 });
   return { input, userId: user.id, condition: assignment.condition };
 }

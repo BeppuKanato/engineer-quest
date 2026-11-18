@@ -6,6 +6,8 @@ import type { ImplementationInputLevel } from "../implementation/inputLevel";
  * 型だけの共有であり、実行時の依存は持たない。
  */
 export type UnitPhaseSummary = {
+  /** 完了した実装のコード。旧記録では欠損を補完しない。 */
+  code?: string;
   assessmentEvidence?: ReturnType<typeof import("../assessment/assessment").assessmentEvidence>;
   /** 初回解答で正解した問題数（フェーズ3・5・6） */
   firstAttemptCorrect?: number;

@@ -7,7 +7,7 @@
     "dev": "nodemon --watch src --ext ts --exec \"ts-node --files src/app.ts\"",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "verify:static": "npm run verify:hexad-classification && npm run verify:feedback-generation-batch && npm run verify:feedback-v2 && npm run verify:feedback-hexad && npm run verify:create-quests && npm run verify:collections && npm run verify:feedback-v1 && npm run verify:feedback-evidence-sources && npm run verify:feedback-analysis-contract && npm run verify:seed-preservation && npm run verify:dfs-learning && npm run verify:feedback-concepts && npm run verify:feedback-evidence-storage && npm run verify:feedback-candidates && npm run verify:feedback-v1-context && npm run verify:feedback-v1-storage && npm run verify:feedback-tasks && npm run verify:big-goal && npm run verify:big-goal-proposal && npm run verify:big-goal-generation",
+    "verify:static": "npm run verify:feedback-grounded-inputs && npm run verify:hexad-classification && npm run verify:feedback-generation-batch && npm run verify:feedback-v2 && npm run verify:feedback-hexad && npm run verify:create-quests && npm run verify:collections && npm run verify:feedback-v1 && npm run verify:feedback-evidence-sources && npm run verify:feedback-analysis-contract && npm run verify:seed-preservation && npm run verify:dfs-learning && npm run verify:feedback-concepts && npm run verify:feedback-evidence-storage && npm run verify:feedback-candidates && npm run verify:feedback-v1-context && npm run verify:feedback-v1-storage && npm run verify:feedback-tasks && npm run verify:big-goal && npm run verify:big-goal-proposal && npm run verify:big-goal-generation",
     "reset:learning-course": "ts-node src/scripts/resetCourseLearningState.ts",
     "test:e2e:learning": "ts-node src/scripts/e2eLearningFlow.ts",
     "verify:create-quests": "ts-node src/scripts/verifyCreateQuestReferenceSolutions.ts",
@@ -37,7 +37,9 @@
     "verify:feedback-concepts": "ts-node src/scripts/verifyFeedbackConcepts.ts",
     "verify:feedback-evidence-storage": "ts-node src/scripts/verifyFeedbackEvidenceStorage.ts",
     "verify:feedback-candidates": "ts-node src/scripts/verifyFeedbackCandidates.ts",
-    "verify:big-goal-generation": "ts-node src/scripts/verifyBigGoalGeneration.ts"
+    "verify:big-goal-generation": "ts-node src/scripts/verifyBigGoalGeneration.ts",
+    "verify:feedback-grounded-inputs": "ts-node src/scripts/verifyFeedbackGroundedInputs.ts",
+    "feedback:prepare-inputs": "ts-node src/scripts/prepareFeedbackInputs.ts"
   },
   "keywords": [],
   "author": "",

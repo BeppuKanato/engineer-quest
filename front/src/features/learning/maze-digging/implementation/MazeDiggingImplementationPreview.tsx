@@ -79,10 +79,10 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level });
+      onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level, code });
     }
     if (!complete) completedRef.current = false;
-  }, [complete, onComplete, runs, usage, level]);
+  }, [complete, onComplete, runs, usage, level, code]);
   // テストが新たに通過するたび、小さな確認音で採点の進みを伝える（#305 案A'）。
   // 全通過時の紙吹雪と歓声は ResultConfetti が担当し、演出の強弱を分ける。
   useEffect(() => {
@@ -120,8 +120,8 @@ export function MazeDiggingImplementationPreview({ embedded = false, onComplete,
       const result = await runImplementationTests(code, content.tests, next => { if (current === generation.current) { setOutcomes(next); setErrorLine(next.find(outcome => outcome.errorLine !== undefined)?.errorLine); } }, () => current === generation.current);
       if (current === generation.current) {
         setLastOutcomes(result);
-        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, level, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
-        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, level } });
+        onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, code, level, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
+        if (allTestsPassed(content.tests, result)) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, code, level } });
       }
     } finally {
       lock.current = false;

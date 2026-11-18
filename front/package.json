@@ -84,7 +84,9 @@
     "verify:app-breadcrumbs": "node scripts/verifyAppBreadcrumbs.cjs",
     "verify:feedback-concepts": "node scripts/verifyFeedbackConcepts.cjs",
     "verify:feedback-map": "node scripts/verifyFeedbackMap.cjs",
-    "verify:feedback-candidates": "node scripts/verifyFeedbackCandidates.cjs"
+    "verify:feedback-candidates": "node scripts/verifyFeedbackCandidates.cjs",
+    "sync:feedback-materials": "node scripts/syncFeedbackMaterials.cjs",
+    "verify:feedback-materials": "node scripts/syncFeedbackMaterials.cjs --check && node scripts/verifyFeedbackMaterialEvidence.cjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
