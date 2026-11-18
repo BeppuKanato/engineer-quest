@@ -37,7 +37,7 @@ const escapeText = text => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").rep
 const choice = choiceId => ({ kind: "choice", choiceId });
 const [q1, q2] = content.questions;
 
-// 基準データ §3 フェーズ5の確定事項（独立2問、対象行と正解）。
+// 基準データ §3 フェーズ5の構成（2026-11-17 の判断基準で拡充した独立8問、コードの流れ順）。
 validateWallExtensionCodeCheck(content);
 assert.equal(content.id, "wall-extension-code-check");
 assert.equal(content.phase, 5);
@@ -45,27 +45,49 @@ assert.equal(content.stageName, "コードの確認問題");
 assert.equal(content.code, wallExtensionCode, "Share the phase-4 code contract, not a copy");
 assert.equal(content.code.id, "wall-extension-v1");
 assert.equal(content.code.version, 1);
-assert.equal(content.questions.length, 2);
-assert.deepEqual(plain(content.questions.map(question => question.lineId)), ["for-pillar-column", "define-directions"]);
-assert.deepEqual(plain(content.questions.map(question => question.stepId)), ["for-pillar-column-2-2", "define-directions"]);
-assert.deepEqual(plain(content.questions.map(question => question.reviewStepIds)), [["for-pillar-row-2", "for-pillar-column-2-2"], ["for-pillar-row-exit", "define-directions"]]);
-assert.deepEqual(plain(q1.choices.map(option => option.text)), ["1", "2", "3"]);
-assert.deepEqual(plain(q2.choices.map(option => option.text)), ["-1", "0", "1"]);
-assert.equal(q1.correctAnswer.choiceId, "step-2");
-assert.equal(q2.correctAnswer.choiceId, "minus-one");
-assert.equal(q1.prompt, `柱を立てる位置の間隔を決めるために、${wallExtensionCodeLineNumber(q1.lineId)}行目の空欄に入る正しいコードを選んでください。`);
-assert.equal(q2.prompt, `方向の対応表で「上」への移動量を決めるために、${wallExtensionCodeLineNumber(q2.lineId)}行目の空欄に入る正しいコードを選んでください。`);
-assert.equal(wallExtensionCodeLineNumber(q1.lineId), 10);
-assert.equal(wallExtensionCodeLineNumber(q2.lineId), 13);
+assert.equal(content.questions.length, 8);
+assert.deepEqual(plain(content.questions.map(question => question.id)), [
+  "border-bottom-end", "pillar-range-end", "pillar-column-step", "pillar-append-order",
+  "up-delta", "first-row-condition", "delta-choice", "wall-row-delta",
+]);
+assert.deepEqual(plain(content.questions.map(question => question.lineId)), [
+  "border-bottom", "for-pillar-row", "for-pillar-column", "append-pillar",
+  "define-directions", "if-first-row", "lookup-delta", "write-wall",
+]);
+assert.deepEqual(plain(content.questions.map(question => question.stepId)), [
+  "border-bottom-0", "for-pillar-row-2", "for-pillar-column-2-2", "append-pillar-2-2",
+  "define-directions", "if-first-row-2-2", "lookup-delta-2-2", "execution-extend-2-2",
+]);
+assert.deepEqual(plain(content.questions.map(question => question.reviewStepIds)), [
+  ["for-border-0", "border-top-0", "border-bottom-0"], ["initialize-pillars", "for-pillar-row-2"],
+  ["for-pillar-row-2", "for-pillar-column-2-2"], ["execution-pillar-2-2", "append-pillar-2-2"],
+  ["for-pillar-row-exit", "define-directions"], ["for-extension-2-2", "if-first-row-2-2"],
+  ["allowed-four-2-2", "lookup-delta-2-2"], ["lookup-delta-2-2", "execution-extend-2-2"],
+]);
+assert.deepEqual(plain(q1.choices.map(option => option.text)), ["size - 1", "size", "1"]);
+assert.deepEqual(plain(q2.choices.map(option => option.text)), ["size - 1", "size", "size + 1"]);
+assert.equal(q1.correctAnswer.choiceId, "bottom-size-minus-1");
+assert.equal(q2.correctAnswer.choiceId, "range-size-minus-1");
+assert.equal(q1.prompt, `下の辺を壁にする行の位置を決めるために、${wallExtensionCodeLineNumber(q1.lineId)}行目の空欄に入る正しいコードを選んでください。`);
+assert.equal(q2.prompt, `柱を立てる段の終わりを決めるために、${wallExtensionCodeLineNumber(q2.lineId)}行目の空欄に入る正しいコードを選んでください。`);
+assert.equal(wallExtensionCodeLineNumber(q1.lineId), 5);
+assert.equal(wallExtensionCodeLineNumber(q2.lineId), 9);
+assert.deepEqual(plain(content.questions.map(question => wallExtensionCodeLineNumber(question.lineId))), [5, 9, 10, 12, 13, 15, 19, 20]);
 assert.match(content.instruction, /空欄に入るものを選ぶ/u);
 assert.equal(content.reviewLabel, "💡 この処理の動きをもう一度見る");
 assert.match(content.completion.caption, /次は【応用問題】/u);
+assert.match(content.completion.caption, /7問/u, "Completion announces the strengthened phase-6 count");
 assert(!/完璧|マスター/u.test(content.completion.caption));
 // 正誤フィードバックは「なぜその値か」が一文で分かること（基準データ§3の指定）。
-assert.match(q1.correctFeedback, /柱は2マスおきに立つため/u);
-assert.match(q1.incorrectFeedback, /柱は2マスおきに立つので/u);
-assert.match(q2.correctFeedback, /上は行が1つ減る方向なので/u);
-assert.match(q2.incorrectFeedback, /上は行が1つ減る方向なので/u);
+assert.match(q1.correctFeedback, /下の辺は一番下の行で/u);
+assert.match(q1.incorrectFeedback, /下の辺は一番下の行で/u);
+assert.match(q2.correctFeedback, /外側の壁の1マス内側まで立てるため/u);
+assert.match(q2.incorrectFeedback, /外側の壁の1マス内側まで立てるため/u);
+const byId = Object.fromEntries(content.questions.map(question => [question.id, question]));
+assert.match(byId["pillar-column-step"].correctFeedback, /柱は2マスおきに立つため/u);
+assert.match(byId["up-delta"].correctFeedback, /上は行が1つ減る方向なので/u);
+assert.match(byId["first-row-condition"].correctFeedback, /一番上の段は y が 2 の段なので/u);
+assert.match(byId["wall-row-delta"].correctFeedback, /柱の y に移動量 dy を足した場所です/u);
 for (const question of content.questions) {
   // 理由の説明は一文に収める（不正解文の「不正解。」は見出しとして数えない）。
   assert.equal((question.correctFeedback.match(/。/gu) || []).length, 1, "Correct feedback must explain in one sentence");
@@ -79,7 +101,7 @@ for (const question of content.questions) {
   assert.equal((question.prompt.match(/[。？]/gu) || []).length, 1);
   const line = wallExtensionCode.lines.find(line => line.id === question.lineId);
   const correct = question.choices.find(option => option.id === question.correctAnswer.choiceId);
-  // 空欄は数値部分だけ（Q1は最後の「2」、Q2は「-1」）で、前後の文は元の行のまま。
+  // 空欄は対象トークンだけ（文脈で一意化）で、前後の文は元の行のまま。
   assert.equal(line.text.slice(question.blank.start, question.blank.start + question.blank.length), correct.text,
     "The blank must cover exactly the answer token");
   assert(Buffer.from(fillCodeBlank(question, correct.text)).equals(Buffer.from(line.text)), "Correct option must restore the exact bytes, including indentation");
@@ -102,7 +124,7 @@ for (const question of content.questions) {
 assert(programs.some(program => program === wallExtensionCodeSource), "A correct fill must reproduce the contract source");
 const syntax = spawnSync(process.env.PYTHON || "python3", ["-c", "import ast,json,sys\nprograms=json.load(sys.stdin)\nfor code in programs: ast.parse(code)\nprint(len(programs))"], { input: JSON.stringify(programs), encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
-assert.equal(Number(syntax.stdout), 6, "All six alternatives must be parsed");
+assert.equal(Number(syntax.stdout), 24, "All 24 alternatives (8 questions x 3 choices) must be parsed");
 
 let state = createAssessmentState(content);
 assert.equal(activeQuestion(content, state), q1);
@@ -134,6 +156,13 @@ for (const option of q2.choices.filter(option => option.id !== q2.correctAnswer.
 assert.equal(activeQuestion(content, state), q2);
 state = answerQuestion(content, state, q2.id, q2.correctAnswer);
 state = advanceAssessment(content, state, q2.id);
+// 残りの設問も同じ進み方（誤答2回→正解）で最後まで進める。
+for (const question of content.questions.slice(2)) {
+  assert.equal(activeQuestion(content, state), question);
+  for (const option of question.choices.filter(option => option.id !== question.correctAnswer.choiceId)) state = answerQuestion(content, state, question.id, choice(option.id));
+  state = answerQuestion(content, state, question.id, question.correctAnswer);
+  state = advanceAssessment(content, state, question.id);
+}
 assert(assessmentComplete(content, state));
 assert.equal(activeQuestion(content, state), null);
 assert(state.records.every(record => record.solved && record.firstCorrect === false && record.attemptCount === 3));
@@ -142,11 +171,10 @@ assert.equal(state.records[1].attempts.map(attempt => attempt.number).join(), "1
 // 「次の問題へ」で正解せず進める（ソフトゲート）。全問未正解でも完了し、結果は初回回答のまま。
 let skipped = createAssessmentState(content);
 assert.equal(advanceAssessment(content, skipped, q1.id), skipped, "Cannot advance before answering");
-skipped = answerQuestion(content, skipped, q1.id, choice(q1.choices.find(option => option.id !== q1.correctAnswer.choiceId).id));
-skipped = advanceAssessment(content, skipped, q1.id);
-assert.equal(activeQuestion(content, skipped), q2, "Skipping question 1 reaches question 2");
-skipped = answerQuestion(content, skipped, q2.id, choice(q2.choices.find(option => option.id !== q2.correctAnswer.choiceId).id));
-skipped = advanceAssessment(content, skipped, q2.id);
+for (const question of content.questions) {
+  skipped = answerQuestion(content, skipped, question.id, choice(question.choices.find(option => option.id !== question.correctAnswer.choiceId).id));
+  skipped = advanceAssessment(content, skipped, question.id);
+}
 assert(assessmentComplete(content, skipped), "An all-wrong run still completes");
 assert(skipped.records.every(record => record.firstCorrect === false && !record.solved && record.attemptCount === 1));
 
@@ -182,8 +210,8 @@ function rejects(change) {
   assert.throws(() => validateWallExtensionCodeCheck(broken));
 }
 rejects(broken => broken.questions[0].choices[1].text = "1");
-rejects(broken => broken.questions[0].choices[1].id = "step-1");
-rejects(broken => broken.questions[0].correctAnswer = choice("step-1"));
+rejects(broken => broken.questions[0].choices[0].id = "missing");
+rejects(broken => broken.questions[0].correctAnswer = choice("bottom-size"));
 rejects(broken => broken.questions[0].blank.start++);
 rejects(broken => broken.questions[0].blank.length = 0);
 rejects(broken => broken.questions[0].blank.start = 1000);
@@ -192,4 +220,4 @@ rejects(broken => broken.questions[0].reviewLineId = "define-directions");
 rejects(broken => broken.questions[0].reviewStepIds = ["missing"]);
 rejects(broken => broken.questions[0].reviewStepIds = ["define-directions"]);
 assert.throws(() => validateAssessment({ ...content, kind: "node-tap-check" }));
-console.log("Wall-extension code check: two independent questions, byte-exact restoration, six Python syntax checks, shared display/review identity, question-specific feedback, common retries/records and invalid-data rejection passed.");
+console.log("Wall-extension code check: eight independent questions in code order, byte-exact restoration, 24 Python syntax checks, shared display/review identity, question-specific feedback, common retries/records and invalid-data rejection passed.");
