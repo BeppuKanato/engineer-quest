@@ -60,7 +60,7 @@ assert.deepEqual(snapshot(tied),snapshot([...tied].reverse()),"ties use stable s
 const evidenceFor=(id:string,phase:string,sessionId:string,received:number,questionId:string,answers:boolean[])=>({...event(id,{}),phaseKey:phase,serverTimestamp:new Date(received),payload:{version:1,assessmentId:phase,sessionId,startedAt:1,records:[{questionId,attempts:answers.map((correct,i)=>({number:i+1,correct}))}]}});
 const example=[evidenceFor("p3","bfs-check","p3",10,"after-c",[true]),evidenceFor("p5","bfs-code-check","p5",20,"undiscovered-condition",[false,true]),evidenceFor("p6","bfs-consolidation","p6",30,"start-already-discovered",[])];
 const discovered=snapshot(example).concepts.find(c=>c.conceptId==="bfs:discovered")!;
-assert.equal(discovered.state,"confirmed");assert.equal(discovered.attemptedQuestions,2);assert.equal(discovered.totalQuestions,3);
+assert.equal(discovered.state,"confirmed");assert.equal(discovered.attemptedQuestions,2);assert.equal(discovered.totalQuestions,5);
 const p5=discovered.evidence.find(q=>q.phaseKey==="bfs-code-check")!;
 assert.equal(p5.first?.correct,false);assert.equal(p5.latest?.correct,true);assert.equal(p5.retried,true);
 assert.equal(snapshot([...example,evidenceFor("p5-new","bfs-code-check","p5-new",40,"undiscovered-condition",[false])]).concepts.find(c=>c.conceptId==="bfs:discovered")!.state,"needs_check");
@@ -94,6 +94,21 @@ const v2Evidence = {version:2, assessmentId:phaseKey, sessionId:"confirmed-v2", 
     ]},
     {questionId:"after-c",attempts:[
       {number:1,correct:true,answer:{kind:"choice",choiceId:"keep-right"}},
+    ]},
+    {questionId:"distance-b",attempts:[
+      {number:1,correct:true,answer:{kind:"choice",choiceId:"one"}},
+    ]},
+    {questionId:"distance-f",attempts:[
+      {number:1,correct:true,answer:{kind:"choice",choiceId:"three"}},
+    ]},
+    {questionId:"enqueue-next",attempts:[
+      {number:1,correct:true,answer:{kind:"node",nodeId:"E"}},
+    ]},
+    {questionId:"after-e",attempts:[
+      {number:1,correct:true,answer:{kind:"none"}},
+    ]},
+    {questionId:"queue-empty",attempts:[
+      {number:1,correct:true,answer:{kind:"node",nodeId:"F"}},
     ]},
   ],
 };
