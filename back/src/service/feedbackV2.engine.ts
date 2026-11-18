@@ -18,7 +18,7 @@ const feedbackLevelSchema = z.enum(["FT", "FP", "FR"]);
 const hexadTypeSchema = z.enum(HEXAD_TYPES);
 // Analyst changed: previous saved plans must not be reused under this version.
 export const FEEDBACK_V2_STAGE1_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-18-v5";
-export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-18-v5";
+export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-18-v6";
 
 export const supportPlanSchema = z.object({
   schemaVersion: z.literal("support-plan-v1"),

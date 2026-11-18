@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  HEXAD_TYPES, HEXAD_DEFINITIONS, resolveHexadCondition,
+  HEXAD_TYPES, HEXAD_DEFINITIONS, HEXAD_FRAMING_BLOCKS, resolveHexadCondition,
   selectTop1, selectRoulette, type HexadScores,
 } from "../service/feedbackHexadConditions";
 
@@ -17,12 +17,12 @@ const standard = resolveHexadCondition("STANDARD", null);
 assert.equal(standard.promptContext, null);
 const top = resolveHexadCondition("TOP_1", ties, "Socialiser");
 assert.deepEqual(top.audit.top1Ties, ["Achiever", "Socialiser"]);
-assert.deepEqual(top.promptContext, { kind: "single", type: "Socialiser", definition: HEXAD_DEFINITIONS.Socialiser });
+assert.deepEqual(top.promptContext, { kind: "single", type: "Socialiser", definition: HEXAD_FRAMING_BLOCKS.Socialiser });
 assert(!JSON.stringify(top.promptContext).includes("24"), "single-type prompt cannot leak raw scores");
 assert.throws(() => resolveHexadCondition("TOP_1", normal, "Player"), /TOP1_FIXED_TYPE_MISMATCH/);
 
 const roulette = resolveHexadCondition("ROULETTE", ties, null, () => 0.9);
-assert.deepEqual(roulette.promptContext, { kind: "single", type: "Socialiser", definition: HEXAD_DEFINITIONS.Socialiser });
+assert.deepEqual(roulette.promptContext, { kind: "single", type: "Socialiser", definition: HEXAD_FRAMING_BLOCKS.Socialiser });
 assert.equal(roulette.audit.rouletteWeights?.Achiever, 8);
 assert.equal(roulette.audit.rouletteWeights?.Socialiser, 8);
 assert.equal(roulette.audit.rouletteWeights?.Player, 0);

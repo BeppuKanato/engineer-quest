@@ -56,9 +56,15 @@ export const COMMON_STAGE2_PERSONA = [
   "具体的かつ建設的に、学習者を尊重して伝えてください。過剰な称賛や曖昧な励ましを避けてください。"
 ] as const;
 
+/** Common framing instruction inserted for every non-STANDARD condition (v6).
+ * The per-type framing text itself travels in the single-type prompt context
+ * (HEXAD_FRAMING_BLOCKS in feedbackHexadConditions.ts).
+ * Source: https://docs.google.com/document/d/1___iyMG-1-QDucFOYZ6X5S0hbbfaHVNulzGBGC8Z-rs
+ * Design rationale: https://docs.google.com/document/d/1bExbe1GC5ZEavbKxgMTyxVh9gER49XbXwW-L_X9GCXs
+ */
 export const PERSONALIZED_STAGE2_PERSONA = [
-  "与えられたHEXAD特性に基づく動機づけの傾向も考慮し、学習者にとって取り組む価値が伝わるようにフィードバックを行います。",
-  "与えられたタイプ定義に基づき、強調する点、取り組む理由の示し方、表現を調整してください。特性の名称や数値を学習者向けの文章に含めないでください。特性によって、学習上の事実、正誤の判断、学習目標を変えてはいけません。"
+  "【特性に合わせた調整】",
+  "以下に示す特性情報は、この学習者の動機づけの傾向を表す。推薦する行動そのものは変えずに、主な推薦の理由の中に、その行動が学習者にとってどんな意味や価値を持つかを示す一文を、特性に合わせた切り口で必ず含めること。特性の名前や得点は、学習者向けの文章に出さない。特性の説明に使われている「有能感」「利他的」「報酬」「システムの境界」といった硬い言葉は、そのまま学習者向けの文章に使わず、学習者に語りかける自然な表現に噛み砕くこと。支援計画と、承認された推薦候補は変更しない。"
 ] as const;
 
 /** STANDARD never receives the personalization paragraphs. */
