@@ -17,7 +17,7 @@ export type GreedyCoinsCodeCheckContent = Omit<CodeBlankAssessment, "questions">
   readonly phase: 5;
   readonly stageName: "コードの確認問題";
   readonly code: typeof greedyCoinsCode;
-  readonly questions: readonly [GreedyCoinsCodeQuestion, GreedyCoinsCodeQuestion];
+  readonly questions: readonly [GreedyCoinsCodeQuestion, ...GreedyCoinsCodeQuestion[]];
   readonly instruction: string;
   readonly retryFeedback: string;
   readonly reviewLabel: string;
