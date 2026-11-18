@@ -43,6 +43,46 @@ retryFeedback: "不正解。もう一度、処理の目的に合うコードを�
 reviewLabel: "💡 この処理の動きをもう一度見る",
 questions: [
 {
+kind: "code-blank", id: "grid-size", lineId: "initialize-grid",
+prompt: `盤面のグリッドを用意するために、${mazeDiggingCodeLineNumber("initialize-grid")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("initialize-grid", "* size", "size"),
+choices: [{ id: "size", text: "size"}, { id: "size-minus-one", text: "size - 1"}, { id: "size-plus-one", text: "size + 1"}],
+correctAnswer: { kind: "choice", choiceId: "size"}, requires: null,
+stepId: "execution-all-walls", reviewLineId: "initialize-grid", reviewStepIds: ["define-function", "execution-all-walls"],
+tags: ["grid-size"], correctFeedback: "正解！グリッドは盤面の大きさsizeの正方形なので、1辺の長さはsizeです。",
+incorrectFeedback: "不正解。グリッドは盤面の大きさsizeの正方形なので、1辺の長さはsizeになります。",
+},
+{
+kind: "code-blank", id: "dig-start-cell", lineId: "dig-start",
+prompt: `掘り始める部屋を掘るために、${mazeDiggingCodeLineNumber("dig-start")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("dig-start", "[1] = 0", "1"),
+choices: [{ id: "one", text: "1"}, { id: "zero", text: "0"}, { id: "two", text: "2"}],
+correctAnswer: { kind: "choice", choiceId: "one"}, requires: null,
+stepId: "execution-dig-start", reviewLineId: "dig-start", reviewStepIds: ["define-directions", "execution-dig-start"],
+tags: ["dig-start-cell"], correctFeedback: "正解！スタートの部屋は両方の位置が1のマスなので、空欄には1が入ります。",
+incorrectFeedback: "不正解。スタートの部屋は両方の位置が1のマスなので、空欄には1が入ります。",
+},
+{
+kind: "code-blank", id: "initial-stack", lineId: "initialize-stack",
+prompt: `掘った部屋をためるstackの最初の状態を作るために、${mazeDiggingCodeLineNumber("initialize-stack")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("initialize-stack", "stack = [(1, 1)]", "(1, 1)"),
+choices: [{ id: "one-one", text: "(1, 1)"}, { id: "zero-zero", text: "(0, 0)"}, { id: "one-zero", text: "(1, 0)"}],
+correctAnswer: { kind: "choice", choiceId: "one-one"}, requires: null,
+stepId: "initialize-stack", reviewLineId: "initialize-stack", reviewStepIds: ["execution-dig-start", "initialize-stack"],
+tags: ["initial-stack"], correctFeedback: "正解！stackには最初にスタートの部屋 (1, 1) だけが入ります。",
+incorrectFeedback: "不正解。stackには最初にスタートの部屋 (1, 1) だけが入ります。",
+},
+{
+kind: "code-blank", id: "current-room-top", lineId: "current-room",
+prompt: `現在マスをstackの一番上から決めるために、${mazeDiggingCodeLineNumber("current-room")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("current-room", "stack[-1]", "-1"),
+choices: [{ id: "minus-one", text: "-1"}, { id: "zero", text: "0"}, { id: "one", text: "1"}],
+correctAnswer: { kind: "choice", choiceId: "minus-one"}, requires: null,
+stepId: "current-room-1", reviewLineId: "current-room", reviewStepIds: ["while-stack-1", "current-room-1"],
+tags: ["current-room"], correctFeedback: "正解！stackの一番上（最後に入れた部屋）は、添字-1で表します。",
+incorrectFeedback: "不正解。stackの一番上（最後に入れた部屋）は、添字-1で表します。",
+},
+{
 kind: "code-blank", id: "next-room-distance", lineId: "compute-next",
 prompt: `掘る部屋の座標（2マス先）を求めるために、${mazeDiggingCodeLineNumber("compute-next")}行目の空欄に入る正しいコードを選んでください。`,
 blank: blankWithin("compute-next", "x + 2 * dx", "2"),
@@ -62,14 +102,54 @@ stepId: "if-diggable-1-2", reviewLineId: "if-diggable", reviewStepIds: ["compute
 tags: ["undug-condition"], correctFeedback: "正解！グリッドの1は壁のままを表すので、まだ掘っていない部屋の条件になります。",
 incorrectFeedback: "不正解。グリッドの1は壁のままを表すので、まだ掘っていない部屋の条件になります。",
 },
+{
+kind: "code-blank", id: "append-candidate-order", lineId: "append-candidate",
+prompt: `掘れる部屋を候補に加えるために、${mazeDiggingCodeLineNumber("append-candidate")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("append-candidate", "candidates.append((nx, ny))", "(nx, ny)"),
+choices: [{ id: "nx-ny", text: "(nx, ny)"}, { id: "ny-nx", text: "(ny, nx)"}, { id: "x-y", text: "(x, y)"}],
+correctAnswer: { kind: "choice", choiceId: "nx-ny"}, requires: null,
+stepId: "append-candidate-1-2", reviewLineId: "append-candidate", reviewStepIds: ["compute-next-1-2", "append-candidate-1-2"],
+tags: ["append-candidate"], correctFeedback: "正解！候補に加えるのは、今求めた2マス先の部屋 (nx, ny) です。",
+incorrectFeedback: "不正解。候補に加えるのは、今求めた2マス先の部屋 (nx, ny) になります。",
+},
+{
+kind: "code-blank", id: "choose-by-step", lineId: "choose-candidate",
+prompt: `候補の中から掘る部屋を番号で選ぶために、${mazeDiggingCodeLineNumber("choose-candidate")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("choose-candidate", "choices[step]", "step"),
+choices: [{ id: "step", text: "step"}, { id: "step-plus-one", text: "step + 1"}, { id: "zero", text: "0"}],
+correctAnswer: { kind: "choice", choiceId: "step"}, requires: null,
+stepId: "choose-candidate-1", reviewLineId: "choose-candidate", reviewStepIds: ["if-candidates-1", "choose-candidate-1"],
+tags: ["choose-candidate"], correctFeedback: "正解！使う番号はchoicesのstep番目で、掘るたびにstepが1つ進みます。",
+incorrectFeedback: "不正解。使う番号はchoicesのstep番目で、掘るたびにstepが1つ進みます。",
+},
+{
+kind: "code-blank", id: "between-midpoint", lineId: "dig-between",
+prompt: `間の壁の位置を求めるために、${mazeDiggingCodeLineNumber("dig-between")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("dig-between", "(y + ny) // 2", "// 2"),
+choices: [{ id: "floor-two", text: "// 2"}, { id: "div-two", text: "/ 2"}, { id: "floor-three", text: "// 3"}],
+correctAnswer: { kind: "choice", choiceId: "floor-two"}, requires: null,
+stepId: "dig-between-1", reviewLineId: "dig-between", reviewStepIds: ["advance-step-1", "dig-between-1"],
+tags: ["between-midpoint"], correctFeedback: "正解！間の壁は2つの部屋の中間にあるので、座標の平均を// 2の切り捨て除算で求めます。",
+incorrectFeedback: "不正解。間の壁は2つの部屋の中間にあるので、座標の平均を// 2の切り捨て除算で求めます。",
+},
+{
+kind: "code-blank", id: "backtrack-pop", lineId: "pop-stack",
+prompt: `行き止まりから戻るために、${mazeDiggingCodeLineNumber("pop-stack")}行目の空欄に入る正しいコードを選んでください。`,
+blank: blankWithin("pop-stack", "stack.pop()", "pop"),
+choices: [{ id: "pop", text: "pop"}, { id: "append", text: "append"}, { id: "clear", text: "clear"}],
+correctAnswer: { kind: "choice", choiceId: "pop"}, requires: null,
+stepId: "execution-backtrack-1", reviewLineId: "pop-stack", reviewStepIds: ["if-candidates-7", "else-branch-7", "pop-stack-7", "execution-backtrack-1"],
+tags: ["backtrack-pop"], correctFeedback: "正解！候補がないときは、stackの一番上を取り除くpopで1マス戻ります。",
+incorrectFeedback: "不正解。候補がないときは、stackの一番上を取り除くpopで1マス戻ります。",
+},
 ],
-completion: { caption: "基本コードの役割が確認できました！次は（別の盤面や例外ケースの4問）で、自分で実装に向けた最後の土台を固めます。"},
+completion: { caption: "基本コードの役割が確認できました！次は（別の盤面や例外ケースの7問）で、自分で実装に向けた最後の土台を固めます。"},
 };
 
 export function validateMazeDiggingCodeCheck(content: MazeDiggingCodeCheckContent): void {
 validateAssessment(content);
-if (content.phase!== 5 || content.stageName!== "コードの確認問題" || content.code!== mazeDiggingCode || content.questions.length!== 2) {
-throw new Error("Use the phase-4 code contract and two questions");
+if (content.phase!== 5 || content.stageName!== "コードの確認問題" || content.code!== mazeDiggingCode || content.questions.length!== 10) {
+throw new Error("Use the phase-4 code contract and ten questions");
 }
 for (const question of content.questions) {
 const line = codeLine(question.lineId);

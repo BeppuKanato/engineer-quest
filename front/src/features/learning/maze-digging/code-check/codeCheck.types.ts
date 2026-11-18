@@ -17,7 +17,7 @@ export type MazeDiggingCodeCheckContent = Omit<CodeBlankAssessment, "questions">
   readonly phase: 5;
   readonly stageName: "コードの確認問題";
   readonly code: typeof mazeDiggingCode;
-  readonly questions: readonly [MazeDiggingCodeQuestion, MazeDiggingCodeQuestion];
+  readonly questions: readonly [MazeDiggingCodeQuestion, ...MazeDiggingCodeQuestion[]];
   readonly instruction: string;
   readonly retryFeedback: string;
   readonly reviewLabel: string;
