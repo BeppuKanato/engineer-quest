@@ -4,7 +4,7 @@ import { assessmentEvidence } from "../../assessment/assessment";
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type AssessmentAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
@@ -34,7 +34,10 @@ export function BubbleSortCheckPreview({ embedded = false, onLearningEvent, acti
   const caption = complete ? bubbleSortCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const completionStep = getLearningStep(bubbleSortExecutionContent, bubbleSortCheckContent.completion.stepId);
   const scene = question ? getBubbleSortCheckScene(question) : completionStep.canvas;
-  const submit = (answer: NodeAnswer) => {
+  // タップ設問は配列のマス、選択肢設問は文章・数値のボタンで答える（二分探索フェーズ3と同じ分け方）。
+  const choiceQuestion = question && "kind" in question ? question : null;
+  const nodeQuestion = question && !("kind" in question) ? question : null;
+  const submit = (answer: AssessmentAnswer) => {
     if (!question) return;
     // 正解済みの設問には、古い画面の連打でも試行を足さない（入力ロックと対にする）。
     setSession(current => current.records.find(entry => entry.questionId === question.id)?.solved
@@ -67,12 +70,19 @@ export function BubbleSortCheckPreview({ embedded = false, onLearningEvent, acti
         </Typography>}
         {!embedded && <AnswerFeedbackNotice assessmentId={bubbleSortCheckContent.id} />}
         {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
-          配列のマスをタップして答えよう
+          {choiceQuestion ? "当てはまるボタンをタップして答えよう" : "配列のマスをタップして答えよう"}
         </Typography>}
         <Box sx={{ display: "flex", flexDirection: "column", height: "min(54dvh, 600px)", flexShrink: 0 }}>
-          <BubbleSortCheckCanvas canvas={scene} questionId={question?.id} cellIds={question?.nodeIds}
+          <BubbleSortCheckCanvas canvas={scene} questionId={nodeQuestion?.id} cellIds={nodeQuestion?.nodeIds}
             onAnswer={submit} disabled={attempt?.correct === true} />
         </Box>
+        {choiceQuestion && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
+          {choiceQuestion.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+            disabled={attempt?.correct === true}
+            onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
+              color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
+              "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
+        </Box>}
       </Box>
       {/* 下部の固定ゾーン: 再回答の注記と進行操作は常時表示し、スクロールなしで押せる。 */}
       <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>
