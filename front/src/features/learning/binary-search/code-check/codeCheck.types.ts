@@ -5,6 +5,8 @@ import type { binarySearchCode, BinarySearchCodeLineId } from "../code-mapping/b
  * フェーズ5の設問は共通エンジンの code-blank 形式に、正誤の解説文を足し、
  * 対象行をフェーズ4の契約（binary-search-v1）の意味IDで型に縛る。
  * 解説は正解・不正解のどちらでも「なぜその式か」が一文で分かる文にする。
+ * 設問数と対象行は固定数ではなく、フェーズ6（応用問題）が前提とする
+ * 対応づけを一通り判断できるかで決める（2026-11-17 の基準）。
  */
 export type BinarySearchCodeQuestion = Omit<CodeBlankQuestion, "lineId"> & {
   readonly lineId: BinarySearchCodeLineId;
@@ -17,7 +19,7 @@ export type BinarySearchCodeCheckContent = Omit<CodeBlankAssessment, "questions"
   readonly phase: 5;
   readonly stageName: "コードの確認問題";
   readonly code: typeof binarySearchCode;
-  readonly questions: readonly [BinarySearchCodeQuestion, BinarySearchCodeQuestion];
+  readonly questions: readonly [BinarySearchCodeQuestion, ...BinarySearchCodeQuestion[]];
   readonly instruction: string;
   readonly retryFeedback: string;
   readonly reviewLabel: string;
