@@ -10,11 +10,21 @@ BubbleSortArrayTapQuestion, BubbleSortConsolidationContent,
 } from "./consolidation.types";
 
 /**
-* 基準データ §3 フェーズ6（転移タップ1問・選択2問・Parsons 1問）。
+* 基準データ §3 フェーズ6（転移タップ1問・選択4問・Parsons 1問）。
 * Q1の場面は転移用 [3, 1, 4, 2] の1周目を終えた状態を組み立てで作り、
 * 正解は実行記録の2周目で最初に入れ替えが起きる比較から導く。
 * Q3の場面はフェーズ2の盤面を参照する。復習先はすべてフェーズ4
 * （コードとの対応）のフレームで、新しい配列の答え合わせは作らない。
+* 設問数と内訳は固定数ではなく、フェーズ7が前提とする「自力で組み立てる
+* 力」を一通り判断できるかで決める（2026-11-17 の基準）。フェーズ7の
+* 判定テストのうち、逆順（J2）は毎回交換が起きる場合の追跡が、重複あり
+* （J1）は同じ値どうしで交換しない判断が、既存4問では未確認だったため、
+* 逆順の交換回数と、同じ値のペアの扱いの2問を足した。同じ値の扱いは
+* 「左が大きいときだけ入れ替える」という基本規則（フェーズ5の比較記号の
+* 設問で確認済み）の直接の適用であり、教材にない新しい内容ではない。
+* 入力を変えない契約（コピーして返す）はフェーズ5の設問で確認済みのため、
+* ここでは重ねない。行の内容を書く力は Parsons では測れず、フェーズ7との
+* 段差として教材側の判断事項に残す（基準データ §3 フェーズ6の注記）。
 */
 const transferComparisons = bubbleSortComparisons(bubbleSortTransferValues);
 const transferPassOne = transferComparisons.filter((comparison) => comparison.pass === 1);
@@ -37,6 +47,26 @@ const unfixedIds = transferAfterPassOne
 const sortedScene: ArrayBarsCanvasState = {
 data: { kind: "array-bars"},
 state: { values: [1, 2, 3, 4], comparing: null, fixedFrom: 4},
+highlights: [],
+};
+// 逆順の場面は開始状態（確定範囲なし）。1周目の交換回数は実行記録から導く。
+const reverseValues: readonly number[] = [4, 3, 2, 1];
+const reverseComparisons = bubbleSortComparisons(reverseValues);
+const reversePassOne = reverseComparisons.filter((comparison) => comparison.pass === 1);
+const reversePassOneSwaps = reversePassOne.filter((comparison) => comparison.swapped).length;
+const reverseScene: ArrayBarsCanvasState = {
+data: { kind: "array-bars"},
+state: { values: reverseValues, comparing: null, fixedFrom: reverseValues.length},
+highlights: [],
+};
+// 同じ値の場面は、同じ値のペア（3 と 3）を比べる位置を示した開始状態。
+// そのペアで交換が起きないことは実行記録から導く。
+const equalValues: readonly number[] = [2, 3, 3, 1];
+const equalComparisons = bubbleSortComparisons(equalValues);
+const equalPair = equalComparisons.find((comparison) => comparison.pass === 1 && comparison.j === 1)!;
+const equalScene: ArrayBarsCanvasState = {
+data: { kind: "array-bars"},
+state: { values: equalValues, comparing: [equalPair.j, equalPair.j + 1], fixedFrom: equalValues.length},
 highlights: [],
 };
 const passEndOneScene = getLearningStep(bubbleSortExecutionContent, "pass-end-1").canvas;
@@ -95,6 +125,38 @@ correctFeedback: "正解。大きい値は比べるたびに右へ運ばれる�
 incorrectFeedback: "不正解。比べるのは左端から順で、入れ替えでは大きい方が右へ移ります。",
 },
 {
+kind: "choice", id: "reverse-array-swaps", prompt: "逆向きに並んだ配列 [4, 3, 2, 1] では、1周目に交換は何回起きますか",
+scene: reverseScene,
+choices: [
+{ id: "no-swaps", text: "0回"},
+{ id: "two-swaps", text: "2回"},
+{ id: "three-swaps", text: "3回"},
+],
+correctAnswer: { kind: "choice", choiceId: "three-swaps"}, requires: null,
+stepId: "execution-compare-1-0",
+reviewStepIds: ["for-compare-1-0", "execution-compare-1-0", "execution-compare-1-2", "execution-pass-end-1"],
+tags: ["逆順の配列の扱い"],
+instruction: "説明を1つ選ぶ",
+correctFeedback: "正解。逆向きでは比べるたびに左が大きいので、1周目の3組すべてで交換が起きます。",
+incorrectFeedback: "不正解。逆向きでは比べるたびに左が大きいので、1周目の3組すべてで交換が起きます。",
+},
+{
+kind: "choice", id: "equal-values-behavior", prompt: "同じ値のペア（3 と 3）を比べたとき、どうなりますか",
+scene: equalScene,
+choices: [
+{ id: "no-swap-not-larger", text: "左が大きくないので、入れ替えない"},
+{ id: "swap-to-advance", text: "右へ進めるために、入れ替える"},
+{ id: "stops-at-equal", text: "同じ値があると、比べる作業が止まる"},
+],
+correctAnswer: { kind: "choice", choiceId: "no-swap-not-larger"}, requires: null,
+stepId: "execution-compare-1-1",
+reviewStepIds: ["for-compare-1-1", "execution-compare-1-1"],
+tags: ["同じ値の扱い"],
+instruction: "説明を1つ選ぶ",
+correctFeedback: "正解。入れ替えるのは左が右より大きいときだけなので、同じ値どうしでは入れ替えません。",
+incorrectFeedback: "不正解。入れ替えるのは左が右より大きいときだけなので、同じ値どうしでは入れ替えません。",
+},
+{
 kind: "parsons", id: "whole-code-order", prompt: "バブルソートのコードを、実行の流れに合う順序に並べてください。",
 lineIds: [
 "swap-values", "for-pass", "count-values", "define-function",
@@ -114,8 +176,8 @@ incorrectFeedback: "不正解。リストをコピーする、周のループ、
 
 export function validateBubbleSortConsolidation(content: BubbleSortConsolidationContent): void {
   validateAssessment(content);
-  if (content.phase !== 6 || content.stageName !== "応用問題" || content.questions.length !== 4 || content.code !== bubbleSortCode) {
-    throw new Error("Use four questions and the canonical code");
+  if (content.phase !== 6 || content.stageName !== "応用問題" || content.questions.length !== 6 || content.code !== bubbleSortCode) {
+    throw new Error("Use six questions and the canonical code");
   }
   for (const question of content.questions) {
     getLearningStep(bubbleSortCodeMappingContent, question.stepId);
@@ -142,5 +204,11 @@ export function validateBubbleSortConsolidation(content: BubbleSortConsolidation
 if (transferAfterPassOne.join(",") !== "1,3,2,4" || transferFirstSwap.j !== 1 ||
   transferFirstSwap.pair[0] !== 3 || transferFirstSwap.pair[1] !== 2) {
   throw new Error("Bubble-sort consolidation transfer must follow the verified trace");
+}
+// 追加した2問の正解も実行記録と一致しなければならない（逆順は1周目の全比較で交換、
+// 同じ値のペア (3, 3) では交換なし）。
+if (reversePassOne.length !== 3 || reversePassOneSwaps !== 3 ||
+  equalPair.pair[0] !== 3 || equalPair.pair[1] !== 3 || equalPair.swapped) {
+  throw new Error("Bubble-sort consolidation expansion answers must follow the verified trace");
 }
 validateBubbleSortConsolidation(bubbleSortConsolidationContent);
