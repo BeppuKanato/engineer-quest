@@ -3,7 +3,7 @@ import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type AssessmentAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
@@ -33,9 +33,12 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
   useAssessmentFeedback(dfsCheckContent, session, active && !reviewOpen);
   const firstCorrect = session.records.filter(record => record.firstCorrect === true).length;
   useAssessmentCompletion(complete, firstCorrect, dfsCheckContent.questions.length, onComplete, assessmentEvidence(dfsCheckContent, session));
-  const caption = complete ? `初回の正解は2問中${firstCorrect}問でした。` : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
+  const caption = complete ? `初回の正解は${dfsCheckContent.questions.length}問中${firstCorrect}問でした。` : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const step = getLearningStep(dfsExecutionContent, question?.stepId ?? dfsCheckContent.completion.stepId);
-  const submit = (answer: NodeAnswer) => {
+  // 訪問順の設問は数値の選択肢ボタン、それ以外は図のノードタップで答える。
+  const choiceQuestion = question && "kind" in question ? question : null;
+  const nodeQuestion = question && !("kind" in question) ? question : null;
+  const submit = (answer: AssessmentAnswer) => {
     if (!question) return;
     setSession(current => current.records.find(record => record.questionId === question.id)?.solved
       ? current : answerQuestion(dfsCheckContent, current, question.id, answer));
@@ -51,10 +54,17 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
           minHeight: "3em", flexShrink: 0, display: "grid", alignItems: "center", mb: 1, outline: "none" }}>{caption}</Typography>
       {!embedded && <AnswerFeedbackNotice assessmentId={dfsCheckContent.id} />}
       {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
-        図の丸いボタンをタップして答えよう
+        {choiceQuestion ? "当てはまるボタンをタップして答えよう" : <>図の丸いボタン{nodeQuestion?.allowNone ? "、または「どれも入らない」" : ""}をタップして答えよう</>}
       </Typography>}
-      <DfsCheckCanvas canvas={step.canvas} questionId={question?.id} nodeIds={question?.nodeIds}
-        onAnswer={submit} disabled={attempt?.correct === true} />
+      <DfsCheckCanvas canvas={step.canvas} questionId={nodeQuestion?.id} nodeIds={nodeQuestion?.nodeIds}
+        allowNone={nodeQuestion?.allowNone} onAnswer={submit} disabled={attempt?.correct === true} />
+      {choiceQuestion && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
+        {choiceQuestion.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+          disabled={attempt?.correct === true}
+          onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
+            color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
+            "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
+      </Box>}
       {retry && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>
         再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。
       </Typography>}
@@ -62,7 +72,7 @@ export function DfsCheckPreview({ embedded = false, active = true, onLearningEve
         {retry && <AssessmentReviewButton onClick={() => setReviewOpen(true)} label="該当ステップの動きを確認する" />}
         {attempt && question && <Button variant="contained" onClick={() => setSession(current => advanceAssessment(dfsCheckContent, current, question.id))}
           sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, bgcolor: playerTokens.focus, color: playerTokens.surface,
-            "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === 1 ? "結果を見る" : "次の問題へ"}</Button>}
+            "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>{session.position === dfsCheckContent.questions.length - 1 ? "結果を見る" : "次の問題へ"}</Button>}
         {complete && <Button variant="outlined" onClick={() => setSession(createAssessmentState(dfsCheckContent))}
           sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>}
       </Box>
