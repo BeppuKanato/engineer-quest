@@ -4,7 +4,7 @@ import { assessmentEvidence } from "../../assessment/assessment";
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type NodeAnswer } from "../../assessment/assessment";
+import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, createAssessmentState, type AssessmentAnswer } from "../../assessment/assessment";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
@@ -37,7 +37,10 @@ export function WallExtensionCheckPreview({ embedded = false, onLearningEvent, a
   const caption = complete ? wallExtensionCheckContent.completion.caption : `${retry ? "もう一度、" : ""}${question?.prompt ?? ""}`;
   const completionStep = getLearningStep(wallExtensionExecutionContent, wallExtensionCheckContent.completion.stepId);
   const scene = question ? getWallExtensionCheckScene(question) : completionStep.canvas;
-  const submit = (answer: NodeAnswer) => {
+  // タップ設問は盤面のマス、選択肢設問は文章の選択肢ボタンで答える（concept-check）。
+  const choiceQuestion = question && "kind" in question ? question : null;
+  const nodeQuestion = question && !("kind" in question) ? question : null;
+  const submit = (answer: AssessmentAnswer) => {
     if (!question) return;
     // 正解済みの設問には、古い画面の連打でも試行を足さない（入力ロックと対にする）。
     setSession(current => current.records.find(entry => entry.questionId === question.id)?.solved
@@ -70,15 +73,22 @@ export function WallExtensionCheckPreview({ embedded = false, onLearningEvent, a
         </Typography>}
         {!embedded && <AnswerFeedbackNotice assessmentId={wallExtensionCheckContent.id} />}
         {question && <Typography component="p" sx={{ textAlign: "center", fontSize: 15, flexShrink: 0, mb: 1 }}>
-          盤面のマスをタップして答えよう
+          {choiceQuestion ? "当てはまるボタンをタップして答えよう" : "盤面のマスをタップして答えよう"}
         </Typography>}
-        {question?.direction && <Typography component="p" sx={{ textAlign: "center", fontSize: 17, fontWeight: 700, flexShrink: 0, mb: 1 }}>
-          方向の指示：{directionLabels[question.direction]}
+        {nodeQuestion?.direction && <Typography component="p" sx={{ textAlign: "center", fontSize: 17, fontWeight: 700, flexShrink: 0, mb: 1 }}>
+          方向の指示：{directionLabels[nodeQuestion.direction]}
         </Typography>}
         <Box sx={{ display: "flex", flexDirection: "column", height: "min(54dvh, 600px)", flexShrink: 0 }}>
-          <WallExtensionCheckCanvas canvas={scene} questionId={question?.id} cellIds={question?.nodeIds}
+          <WallExtensionCheckCanvas canvas={scene} questionId={nodeQuestion?.id} cellIds={nodeQuestion?.nodeIds}
             onAnswer={submit} disabled={attempt?.correct === true} />
         </Box>
+        {choiceQuestion && <Box role="group" aria-label="解答の選択肢" sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
+          {choiceQuestion.choices.map(choice => <Button key={choice.id} type="button" disableRipple variant="outlined" data-choice-id={choice.id}
+            disabled={attempt?.correct === true}
+            onClick={() => submit({ kind: "choice", choiceId: choice.id })} sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999,
+              color: playerTokens.text, bgcolor: playerTokens.surface, fontSize: 16, fontWeight: 700, minHeight: 48, px: 2, textTransform: "none",
+              "&:hover": { bgcolor: playerTokens.layers.layer0, border: `2px solid ${playerTokens.focus}` } }}>{choice.text}</Button>)}
+        </Box>}
       </Box>
       {/* 下部の固定ゾーン: 再回答の注記と進行操作は常時表示し、スクロールなしで押せる。 */}
       <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1 }}>
