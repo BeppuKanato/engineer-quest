@@ -21,6 +21,12 @@ export const mazeDiggingMainChoices: readonly number[] = [0, 1, 0, 1, 0, 0, 0, 1
 export const mazeDiggingSmallSize = 7;
 export const mazeDiggingSmallChoices: readonly number[] = [0, 0, 0, 1, 0, 1, 0, 0];
 
+/** フェーズ7の判定用テスト J2（7×7・別の番号列）と J3（11×11・大きな盤面）の choices。
+ * フェーズ6の未見盤面の問題でも同じ盤面を使うため、ここを正本にする。 */
+export const mazeDiggingAltSmallChoices: readonly number[] = [1, 1, 0, 1, 0, 0, 0, 0];
+export const mazeDiggingLargeSize = 11;
+export const mazeDiggingLargeChoices: readonly number[] = [0, 1, 2, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0];
+
 /** グリッドの符号化は棒倒し法と共通（0 = 通路、1 = 壁）。 */
 export type MazeDiggingGrid = readonly (readonly number[])[];
 

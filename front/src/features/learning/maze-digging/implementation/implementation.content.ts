@@ -1,7 +1,8 @@
 import type { PythonTestCase } from "../../../../lib/pyodideRunner";
 import type { ImplementationInputLevel } from "../../implementation/inputLevel";
 import {
-  buildMazeDiggingGrid, mazeDiggingMainChoices, mazeDiggingMainSize,
+  buildMazeDiggingGrid, mazeDiggingAltSmallChoices, mazeDiggingLargeChoices, mazeDiggingLargeSize,
+  mazeDiggingMainChoices, mazeDiggingMainSize,
   mazeDiggingSmallChoices, mazeDiggingSmallSize,
 } from "../mazeDiggingMaze";
 import { mazeDiggingCode, type MazeDiggingCodeLineId } from "../code-mapping/mazeDiggingCode";
@@ -106,8 +107,8 @@ export const mazeDiggingImplementationContent = {
     { id: "D1", label: "基本（動きの説明の迷路）", visibility: "display", functionName: "dig_maze", args: [mazeDiggingMainSize, mazeDiggingMainChoices], expected: expectedGrid(mazeDiggingMainSize, mazeDiggingMainChoices) },
     { id: "D2", label: "転移（応用問題の迷路）", visibility: "display", functionName: "dig_maze", args: [mazeDiggingSmallSize, mazeDiggingSmallChoices], expected: expectedGrid(mazeDiggingSmallSize, mazeDiggingSmallChoices) },
     { id: "J1", label: "9×9（別の方向の番号）", visibility: "judgement", functionName: "dig_maze", args: [9, [1, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]], expected: expectedGrid(9, [1, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]) },
-    { id: "J2", label: "7×7（別の方向の番号）", visibility: "judgement", functionName: "dig_maze", args: [7, [1, 1, 0, 1, 0, 0, 0, 0]], expected: expectedGrid(7, [1, 1, 0, 1, 0, 0, 0, 0]) },
-    { id: "J3", label: "11×11（大きな盤面）", visibility: "judgement", functionName: "dig_maze", args: [11, [0, 1, 2, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0]], expected: expectedGrid(11, [0, 1, 2, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0]) },
+    { id: "J2", label: "7×7（別の方向の番号）", visibility: "judgement", functionName: "dig_maze", args: [7, [...mazeDiggingAltSmallChoices]], expected: expectedGrid(7, mazeDiggingAltSmallChoices) },
+    { id: "J3", label: "11×11（大きな盤面）", visibility: "judgement", functionName: "dig_maze", args: [mazeDiggingLargeSize, [...mazeDiggingLargeChoices]], expected: expectedGrid(mazeDiggingLargeSize, mazeDiggingLargeChoices) },
   ] satisfies ImplementationTest[],
   hints: {
     labels: ["ヒント1：使う部品を見る", "ヒント2：処理の流れを見る", "ヒント3：条件とループの骨格を見る", "ヒント4：並び替えで確認する"],
