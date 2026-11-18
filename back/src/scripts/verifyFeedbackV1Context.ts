@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { prisma } from "../lib/prisma";
 import { buildFeedbackV1Context } from "../service/feedbackV1.context";
+import { conceptDefinitions } from "../service/feedbackConcepts";
 import { analysisPrompt, selectionPrompt, validateAnalysis, type Analysis } from "../service/feedbackV1.engine";
 import * as achievements from "../service/achievement.service";
 import * as goals from "../service/bigGoal.service";
@@ -18,11 +19,22 @@ async function main() {
   db.unitLearningProgress={findUnique:async({where}:{where:{userId_courseId:{userId:string}}})=>{ assert.equal(where.userId_courseId.userId,"owner"); return {status:unitStatus,completedAt:new Date()}; },findMany:async()=>[]};
   db.phaseLearningProgress={findMany:async({where}:{where:{userId:string}})=>{assert.equal(where.userId,"owner");return phaseRows;}};
   db.learningEvent={findMany:async({where}:{where:{userId:string;courseId:string}})=>{
-    assert.equal(where.userId,"owner");assert.equal(where.courseId,courseId);
+    assert.equal(where.userId,"owner");
+    if(where.courseId!==courseId) {
+      assert.equal(where.courseId,"course-algorithm-depth-first-search-v1");
+      const q=conceptDefinitions[1].concepts.find(c=>c.conceptId==="dfs:discovered")!.questions[0];
+      return [{id:"related-answer",courseId:where.courseId,phaseKey:q.phaseKey,targetId:q.questionId,sessionId:"related-tab",eventType:"answer_attempt",clientTimestamp:new Date(500),serverTimestamp:new Date(500),
+        payload:{correct:false,attempt:1,assessmentId:q.assessmentId,assessmentSessionId:"related-session",assessmentStartedAt:1}}];
+    }
     return [{id:"answer",courseId,phaseKey:"bfs-check",targetId:"take-next",sessionId:"tab",eventType:"answer_attempt",clientTimestamp:new Date(1000),serverTimestamp:new Date(1000),
       payload:{correct:false,attempt:1,assessmentId:"bfs-check",assessmentSessionId:"s",assessmentStartedAt:1}}];
   }};
   for (const name of ["createQuest","knowledgeCard","achievement","questPost","feedbackV1","createQuestFeedback"]) db[name]={findMany:async()=>[]};
+  let postQueries=0;
+  db.questPost={findMany:async({where}:{where:{visibility:string;courseId:string;createdAt:{lte:Date}}})=>{
+    postQueries++;assert.equal(where.visibility,"PUBLIC");assert.equal(where.courseId,courseId);assert(where.createdAt.lte instanceof Date);
+    return [{id:"public-reference",courseId,userId:"peer",category:"MEMO",title:"図の見直し方",body:"REFERENCE_BODY",code:null,comments:[{body:"REFERENCE_COMMENT"}]}];
+  }};
   (achievements as {getAchievementsByUser:unknown}).getAchievementsByUser=async()=>[];
   (goals as {getActiveBigGoal:unknown}).getActiveBigGoal=async(userId:string)=>{
     assert.equal(userId,"owner");
@@ -38,6 +50,12 @@ async function main() {
     return recentlyClosed ? {id:"closed-goal",userId:where.userId,type:"UNIT_COMPLETION",params:{courseId},displayText:"単元を完了する",status:"ACHIEVED",confirmedAt:null} : null;
   }};
   const standard=await buildFeedbackV1Context("uid","phase",`${courseId}:bfs-check:bfs-code-mapping`);
+  const materialLearning=standard.input.learning as {materialContext:{phases:unknown[]};relatedConceptHistory:unknown[];referencePosts:unknown[]};
+  assert.equal(postQueries,0,"phase feedback must not fetch board posts");
+  assert.equal(materialLearning.materialContext.phases.length,7);
+  assert.equal(materialLearning.relatedConceptHistory.length,1);
+  assert.deepEqual(materialLearning.referencePosts,[]);
+  assert(standard.input.evidenceSources?.some(e=>e.sourceId==="related-answer"));
   condition="PERSONALIZED";
   const personalized=await buildFeedbackV1Context("uid","phase",`${courseId}:bfs-check:bfs-code-mapping`);
   assert.equal(standard.input.bigGoal?.sourceId,"goal:owned-goal");
@@ -45,7 +63,7 @@ async function main() {
   assert.ok(standard.input.evidenceSources?.some(e=>e.sourceId==="goal:owned-goal" && e.path==="bigGoal"));
   assert.equal(standard.input.hexad,null); assert.ok(personalized.input.hexad);
   // 要求ごとの不変スナップショットIDだけは異なる。内容と分析条件は同じ。
-  const normalize=(input:unknown)=>JSON.stringify(input).replace(/"id":"[a-f0-9-]{36}"/g,'"id":"snapshot"');
+  const normalize=(input:unknown)=>JSON.stringify(input).replace(/"id":"[a-f0-9-]{36}"/g,'"id":"snapshot"').replace(/"capturedAt":"[^"]+"/g,'"capturedAt":"capture-time"');
   assert.equal(normalize(standard.input.learning),normalize(personalized.input.learning));
   assert.equal(normalize(analysisPrompt(standard.input)),normalize(analysisPrompt({...standard.input,hexad:personalized.input.hexad})));
   assert.deepEqual(standard.input.actions,personalized.input.actions);
@@ -61,6 +79,9 @@ async function main() {
   await assert.rejects(buildFeedbackV1Context("uid","phase",`${courseId}:bfs-check:bfs-implementation`),/Invalid next phase/);
   unitStatus="COMPLETED";recentlyClosed=true;
   const completed=await buildFeedbackV1Context("uid","unit",courseId);
+  assert.equal(postQueries,1);
+  assert(JSON.stringify(completed.input.learning).includes("REFERENCE_BODY"));
+  assert(completed.input.evidenceSources?.some(e=>e.sourceId==="reference-post:public-reference"));
   assert.equal(completed.input.bigGoal?.sourceId,"goal:closed-goal");
   assert.equal(completed.input.bigGoal?.status,"ACHIEVED");
   assert.ok(!completed.input.evidenceSources?.some(e=>e.sourceId==="goal:owned-goal"));

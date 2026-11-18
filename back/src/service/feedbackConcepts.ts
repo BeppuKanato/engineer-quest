@@ -1,5 +1,6 @@
 import { z } from "zod";
 import definitionData from "../learning/feedback/concepts.json";
+import { materialQuestion, validateMaterialAnswer, materialUnit } from "./feedbackMaterials";
 
 const nonempty=z.string().trim().min(1);
 const questionDefinitionSchema=z.object({phaseKey:nonempty,assessmentId:nonempty,questionId:nonempty,tags:z.array(nonempty).min(1),stageLabel:nonempty,questionLabel:nonempty});
@@ -51,6 +52,9 @@ export const evidenceSchema = z.discriminatedUnion("version", [
       attempts: z.array(attemptV1.extend({ answer: assessmentAnswerSchema })).max(1000),
     })).max(100),
   }),
+  z.object({ ...evidenceBase, version:z.literal(3),materialVersion:z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    records:z.array(z.object({questionId:z.string().min(1),attempts:z.array(attemptV1.extend({answer:assessmentAnswerSchema})).max(1000)})).max(100),
+  }),
 ]);
 export type AssessmentEvidence = z.infer<typeof evidenceSchema>;
 export const questionKey = (q: { phaseKey: string; assessmentId: string; questionId: string }) => `${q.phaseKey}/${q.assessmentId}/${q.questionId}`;
@@ -61,10 +65,19 @@ export function validateEvidence(courseId: string, phaseKey: string, value: unkn
       new Set(evidence.records.map(r => r.questionId)).size !== evidence.records.length ||
       evidence.records.some(r => !questions.some(q => q.questionId === r.questionId) || r.attempts.some((a,i) => a.number !== i+1)) ||
       (complete && (evidence.records.length !== questions.length || evidence.records.some(r => !r.attempts.length)))) throw new Error("INVALID_ASSESSMENT_EVIDENCE");
+  if(evidence.version===3) {
+    const unit=materialUnit(evidence.materialVersion);
+    if(unit?.courseId!==courseId || !unit.assessments.some(a=>a.id===evidence.assessmentId&&a.phaseKey===phaseKey))throw new Error("INVALID_MATERIAL_VERSION");
+    for(const row of evidence.records) {
+      const question=materialQuestion(evidence.materialVersion,courseId,phaseKey,row.questionId);
+      if(!question)throw new Error("INVALID_MATERIAL_QUESTION");
+      row.attempts.forEach(a=>validateMaterialAnswer(question,a.answer,a.correct));
+    }
+  }
   return evidence;
 }
 type Event = { id: string; phaseKey: string | null; eventType: string; targetId: string | null; sessionId: string; payload: unknown; clientTimestamp: Date; serverTimestamp: Date };
-type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; answer?: z.infer<typeof assessmentAnswerSchema>; confirmed: boolean; recordedAt: number; observedAt: number };
+type Attempt = { sourceId: string; sessionId: string; startedAt: number; number: number; correct: boolean; answer?: z.infer<typeof assessmentAnswerSchema>; materialVersion?:string; confirmed: boolean; recordedAt: number; observedAt: number };
 const object = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 /** 完了証拠は最初の確定受信時刻、未完了回答は最新attemptの最初の受信時刻で比較する。 */
 export function aggregateConcepts(courseId: string, events: Event[], phases: { phaseKey: string; status: string; summary: unknown }[], snapshotId: string) {
@@ -120,7 +133,7 @@ export function aggregateConcepts(courseId: string, events: Event[], phases: { p
   for(const {event,evidence,key} of snapshots) for(const record of evidence.records) for(const a of record.attempts) {
     const qkey=questionKey({phaseKey:event.phaseKey!,assessmentId:evidence.assessmentId,questionId:record.questionId});
     const recordedAt=confirmedAt.get(key)!;
-    add(qkey,{sourceId:event.id,sessionId:evidence.sessionId,startedAt:evidence.startedAt,...a,confirmed:true,recordedAt,
+    add(qkey,{sourceId:event.id,sessionId:evidence.sessionId,startedAt:evidence.startedAt,...a,...(evidence.version===3?{materialVersion:evidence.materialVersion}:{}),confirmed:true,recordedAt,
       observedAt:Math.min(recordedAt,firstReceipts.get(receiptKey(qkey,{sessionId:evidence.sessionId,...a})) ?? Infinity)});
   }
   return { id: snapshotId, version: 1 as const, courseId, title: unit.title,
@@ -167,6 +180,7 @@ function implementationEvidence(phaseKey: string, status: string | undefined, su
   const lastLevel = ordered.filter(e=>typeof object(e.payload).level === "string").at(-1);
   const hints = ordered.filter(e=>e.eventType==="hint_open").map(e=>({sourceId:e.id,level:object(e.payload).level,count:object(e.payload).count}));
   return {
+    code:typeof summary.code==="string"?summary.code:typeof result.code==="string"?result.code:null,
     completed: status === "COMPLETED" ? true : "unknown" as const,
     testsPassed: status === "COMPLETED" ? true : results.some(r=>!r.passed) ? false : "unknown" as const,
     testRuns: typeof summary.testRuns === "number" ? summary.testRuns : typeof result.count === "number" ? result.count : "unknown" as const,

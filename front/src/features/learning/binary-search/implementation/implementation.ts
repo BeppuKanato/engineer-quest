@@ -10,6 +10,7 @@ export type TestOutcome = { readonly id: string; readonly passed: boolean; reado
 
 /** 単元フロー接続時（後続Issue）に渡す要約。集計はテスト実行とヒント利用から導く。 */
 export type BinarySearchImplementationSummary = {
+  readonly code?: string;
   readonly testRuns: number;
   readonly hintUsage: HintUsage;
   /** 完了時点の入力量レベル（Issue #328）。テストと完了条件はレベルによらず同一。 */

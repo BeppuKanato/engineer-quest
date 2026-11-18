@@ -52,6 +52,14 @@ export function buildEvidenceSources(input: Pick<Input, "learning" | "bigGoal">)
         add(object(row).sourceId, "implementation", `${path}.implementation.observedHints[${j}]`));
     }
   });
+  array(learning.relatedConceptHistory).forEach((value,i)=>{
+    const row=object(value), question=object(row.question);
+    array(question.attempts).forEach(attempt=>add(object(attempt).sourceId,"assessment",`learning.relatedConceptHistory[${i}]`));
+  });
+  array(learning.referencePosts).forEach((value,i)=>{
+    const post=object(value);
+    if(typeof post.id==="string")add(`reference-post:${post.id}`,"learning",`learning.referencePosts[${i}]`);
+  });
   // Old persisted snapshots have no goal row ID. Give that exact snapshot a local
   // reference, without querying a newer goal or inventing a historical database ID.
   if (input.bigGoal) add(input.bigGoal.sourceId ?? "feedback:big-goal", "big_goal", "bigGoal");

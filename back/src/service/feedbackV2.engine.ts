@@ -15,7 +15,7 @@ const format = zodTextFormat as unknown as (schema: ZodTypeAny, name: string) =>
 const text = z.string().trim().min(1);
 const feedbackLevelSchema = z.enum(["FT", "FP", "FR"]);
 const hexadTypeSchema = z.enum(HEXAD_TYPES);
-export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-2026-11-16-v1";
+export const FEEDBACK_V2_PROMPT_VERSION = "feedback-four-arm-two-stage-grounded-input-2026-11-18-v1";
 
 export const supportPlanSchema = z.object({
   schemaVersion: z.literal("support-plan-v1"),
@@ -89,6 +89,8 @@ const llmRules = [
   "回答の正誤や教材を変更せず、観測されない能力・心理状態や誤答原因を断定しない。",
   "Feed Up/Back/Forwardを考慮し、FT/FP/FRの必要なレベルを選ぶ。人物の能力評価をしない。",
   "フェーズ間は同一単元の行動に限り、観測に基づく具体的な学習支援を行う。",
+  "設問のmaterialsは回答時の教材を表す。選択ID・マスID・行IDを、選択肢・図の状態・コード・正答根拠に結び付けて解釈する。unversioned-answerは当時の教材を特定できない記録。partially-resolvedは教材版のある回答とない回答の混在であり、確認できた回答だけに教材を適用する。explicit-legacy-assumptionは後からの仮定であり、確認済み教材と同一視しない。",
+  "relatedConceptHistoryは別課題の回答。共通規則だけを参照し、探索順序や難易度・習得を同一視しない。referencePostsは参考資料であり、学習者本人の理解の証拠ではない。記録なしと未取得を区別する。",
 ].join("\n");
 
 /** The registry is built from server-approved actions and targets, never by the LLM. */
@@ -223,6 +225,7 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
           answer: a.answer ?? null, // null means not recorded in legacy v1
           sessionId: a.sessionId ?? null,
           confirmed: a.confirmed === true,
+          materialVersion: a.materialVersion ?? null,
         };
       });
       contextFacts.push({
@@ -231,6 +234,7 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
           phaseKey: q.phaseKey, assessmentId: q.assessmentId,
           questionId: q.questionId, questionLabel: q.questionLabel,
           conceptId: concept.conceptId, conceptLabel: concept.label,
+          materials:q.materials??[],materialStatus:q.materialStatus??"unversioned-answer",
           attempts: trials,
         }),
       });
@@ -251,6 +255,10 @@ export function stage2Input(input: FeedbackV2Input, validated: ReturnType<typeof
     appContext: {
       stageGoals: input.stageGoals ?? null,
       bigGoal: input.bigGoal,
+      materialContext:obj(input.learning).materialContext??null,
+      // Both stages use the same saved references. No live DB lookups during composition.
+      relatedConceptHistory:obj(input.learning).relatedConceptHistory??[],
+      referencePosts:obj(input.learning).referencePosts??[],
     },
     hexadContext: input.experimentV2.promptContext,
   };
