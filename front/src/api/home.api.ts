@@ -1,14 +1,10 @@
-import type { Mission, Status, TargetAchievement } from "@/app/home/type";
+import type { Mission, TargetAchievement } from "@/app/home/type";
 import { fetcher } from "@/lib/fetcher";
 import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export type HomeResponse = {
   user: {
     displayName: string | null;
-    rank: string;
-    level: number;
-    requireNextLevelExp: number;
-    exp: number;
     selectedMascotId: string;
     completedMissionNum: number;
     completedAchievementNum: number;
@@ -22,10 +18,6 @@ export type HomeResponse = {
     recommended: Mission | null;
     recommendedList: Mission[];
   };
-  nextRank: {
-    name: string;
-  } | null;
-  nextRankCondition: Record<string, { title: string; status: Status }[]>;
   targetAchievement: TargetAchievement | null;
   calendar: {
     year: number;

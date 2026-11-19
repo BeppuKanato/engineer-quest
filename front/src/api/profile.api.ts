@@ -4,7 +4,7 @@ import type { AchievementRarity } from "./achievements.api";
 export type ProfileHistoryType = "mission_completed" | "achievement_unlocked" | "activity_completed";
 export type ProfileHistoryItem = { id: string; type: ProfileHistoryType; title: string; description: string; occurredAt: string; href: string | null };
 export type ProfileResponse = {
-  user: { displayName: string | null; rank: string; level: number; exp: number; completedCourseCount: number; completedMissionCount: number; achievementCount: number; knowledgeCardCount: number; selectedMascotId: string };
+  user: { displayName: string | null; completedCourseCount: number; completedMissionCount: number; achievementCount: number; knowledgeCardCount: number; selectedMascotId: string };
   selectedAchievement: { id: string; title: string; description: string; rarity: AchievementRarity; iconKey: string } | null;
   hexadProfile: { questionnaireVersion: string; scores: { philanthropist: number; socialiser: number; freeSpirit: number; achiever: number; disruptor: number; player: number }; completedAt: string } | null;
   recentWorks: { id: string; title: string; description: string; createMissionTitle: string; isFavorite: boolean; updatedAt: string; href: string }[];

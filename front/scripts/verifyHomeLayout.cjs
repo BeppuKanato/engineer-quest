@@ -61,4 +61,13 @@ assert(cont.includes('次は「'), 'ContinueLearning must name the next stage');
 assert(cont.includes('formalName'), 'ContinueLearning must derive the next stage name from the unit definition');
 assert(!cont.includes('コース一覧から学びたい単元を選びましょう'), 'ContinueLearning must not degrade into a catalog link card');
 
+// Issue #473: EXP専用表示を取り除き、他の情報と目標の進捗を維持する。
+const profilePage = read('app/profile/page.tsx');
+for (const page of [homePage, profilePage]) {
+  assert(!/user(?:Data)?\.(?:level|exp|rank)|levelProgress|requiredExperienceForLevel|レベルアップ|次のランク|>EXP</.test(page));
+}
+assert(homePage.includes('userData.continuationDays') && homePage.includes('buildCurrentWeek'));
+assert(homePage.includes('value={factor.goal'), 'target achievement progress bar remains');
+for (const field of ['completedCourseCount', 'completedMissionCount', 'collectedCount', 'achievedCount']) assert(profilePage.includes(field), field);
+for (const label of ['プロフィール設定', '代表実績', '実績解除通知']) assert(profilePage.includes(label), label);
 console.log('verifyHomeLayout: all contracts hold');

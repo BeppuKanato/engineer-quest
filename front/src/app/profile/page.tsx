@@ -20,7 +20,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  LinearProgress,
   Paper,
   Radio,
   RadioGroup,
@@ -75,11 +74,6 @@ const historyMeta: Record<
     bgcolor: "#dcfce7",
     icon: <FlagIcon fontSize="small" />,
   },
-};
-
-const requiredExperienceForLevel = (level: number): number => {
-  if (level <= 0) return 0;
-  return Math.floor(100 * Math.pow(level, 1.5));
 };
 
 const formatDateTime = (value: string) =>
@@ -143,13 +137,6 @@ export default function ProfilePage() {
   const history = profile?.history ?? [];
   const user = profile?.user ?? null;
   const selectedMascot = mascotOptions.find((mascot) => mascot.id === selectedMascotId) ?? mascotOptions[0];
-  const nextLevelExp = user ? requiredExperienceForLevel(user.level + 1) : 0;
-  const currentLevelExp = user ? requiredExperienceForLevel(user.level) : 0;
-  const levelProgress =
-    user && nextLevelExp > currentLevelExp
-      ? Math.min(100, Math.round(((user.exp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100))
-      : 0;
-
   const summary = {
     missions: user?.completedMissionCount ?? 0,
     courses: user?.completedCourseCount ?? 0,
@@ -187,26 +174,11 @@ export default function ProfilePage() {
                 <Stack spacing={2.2}>
                   <Chip label="プロフィール" sx={{ alignSelf: "flex-start", fontWeight: 900, color: "#0052d9", bgcolor: "#eaf2ff" }} />
                   <Typography variant="h2" fontWeight={900} sx={{ fontSize: { xs: 42, md: 56 }, lineHeight: 1 }}>
-                    {user.displayName ?? "Engineer"}
+                    {user.displayName ?? "エンジニア"}
                   </Typography>
                   <Typography sx={{ maxWidth: 520, lineHeight: 1.8, fontSize: 17 }}>
-                    Web開発に関する知識とスキルを深めるための学習プラットフォームです。
+                    ウェブ開発に関する知識とスキルを深めるための学習プラットフォームです。
                   </Typography>
-
-                  <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
-                    <Chip label={`Lv.${user.level}`} sx={{ px: 1, py: 2.4, fontWeight: 900, color: "#fff", bgcolor: "#0052d9", fontSize: 16 }} />
-                    <Chip icon={<EmojiEventsIcon />} label={user.rank} sx={{ px: 1, py: 2.4, fontWeight: 900, bgcolor: "#f8fafc", fontSize: 16 }} />
-                  </Stack>
-
-                  <Box>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Typography fontWeight={900}>EXP</Typography>
-                      <LinearProgress variant="determinate" value={levelProgress} sx={{ flex: 1, height: 9, borderRadius: 999 }} />
-                      <Typography fontWeight={900} color="text.secondary">
-                        {user.exp.toLocaleString()} / {nextLevelExp.toLocaleString()}
-                      </Typography>
-                    </Stack>
-                  </Box>
                 </Stack>
 
                 <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 3, border: { lg: "0" }, borderLeft: { lg: "1px solid #e2e8f0" }, bgcolor: "transparent" }}>

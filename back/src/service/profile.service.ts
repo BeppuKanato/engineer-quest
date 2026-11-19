@@ -4,9 +4,8 @@ import { prisma } from "../lib/prisma";
 const mascotIds = ["red-panda", "penguin", "owl"] as const;
 export type MascotId = (typeof mascotIds)[number];
 export const isMascotId = (value: string): value is MascotId => mascotIds.includes(value as MascotId);
-const requiredExp = (level: number) => Math.floor(100 * Math.pow(level, 1.5));
-export const deriveLevel = (exp: number) => { let level = 1; while (exp >= requiredExp(level + 1)) level += 1; return level; };
-const deriveRank = (n: number) => n >= 24 ? "Master" : n >= 14 ? "Lead" : n >= 6 ? "Senior" : "Junior";
+// 凍結中のfeedbackV1.contextの互換用。プロフィールAPIではレベルを計算しない。
+export { deriveLevel } from "../lib/legacyUserLevel";
 
 // Course completion is redefined on the new-flow progress model in #78.
 const completedCourses = async (userId: string) => {
@@ -14,7 +13,7 @@ const completedCourses = async (userId: string) => {
   return 0;
 };
 
-export const getProfileByUser = async (user: { id: string; displayName: string | null; experience: number; selectedMascotId: string; selectedProfileAchievementId: string | null }) => {
+export const getProfileByUser = async (user: { id: string; displayName: string | null; selectedMascotId: string; selectedProfileAchievementId: string | null }) => {
   const [hexad, achievements, works, courseCount, missionCount, achievementCount, cardCount, selectedAchievement] = await Promise.all([
     prisma.hexadResponse.findUnique({ where: { userId: user.id } }),
     prisma.userAchievement.findMany({ where: { userId: user.id }, orderBy: { achievedAt: "desc" }, take: 30, include: { achievement: true } }),
@@ -27,7 +26,7 @@ export const getProfileByUser = async (user: { id: string; displayName: string |
     ...achievements.map((x) => ({ id: `achievement:${x.id}`, type: "achievement_unlocked", title: x.achievement.title, description: x.achievement.description, occurredAt: x.achievedAt.toISOString(), href: "/achievements" })),
   ].sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt)).slice(0, 50);
   return {
-    user: { displayName: user.displayName, rank: deriveRank(missionCount), level: deriveLevel(user.experience), exp: user.experience,
+    user: { displayName: user.displayName,
       completedCourseCount: courseCount, completedMissionCount: missionCount, achievementCount, knowledgeCardCount: cardCount,
       selectedMascotId: isMascotId(user.selectedMascotId) ? user.selectedMascotId : "red-panda" },
     selectedAchievement: selectedAchievement ? { id: selectedAchievement.achievement.id, title: selectedAchievement.achievement.title, description: selectedAchievement.achievement.description, rarity: selectedAchievement.achievement.rarity, iconKey: selectedAchievement.achievement.iconKey } : null,

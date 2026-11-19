@@ -14,8 +14,6 @@ export type Mission = {
   href: string;
 };
 
-export type Status = "complete" | "incomplete";
-
 export type TargetAchievement = {
   title: string;
   href?: string;
