@@ -54,6 +54,10 @@ jobs:
         working-directory: ./front
         run: npm run verify:feedback-materials && npm run verify:feedback-concepts && npm run verify:feedback-map && npm run verify:feedback-candidates
 
+      - name: Verify daily review and home layout
+        working-directory: ./front
+        run: npm run verify:static
+
       - name: Static verify back
         working-directory: ./back
         run: npm run verify:static

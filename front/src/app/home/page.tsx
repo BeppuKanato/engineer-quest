@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { DailyReviewCard } from "@/features/learning/daily-review/DailyReviewCard";
 import { ContinueLearning } from "@/features/learning/app/ContinueLearning";
 import { HomeUnitGrid } from "@/features/learning/app/HomeUnitGrid";
 import { BigGoalBanner } from "@/features/learning/app/bigGoal/BigGoalBanner";
@@ -128,6 +129,7 @@ export default function HomePage() {
       <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
         <ContinueLearning />
         <BigGoalBanner />
+        <DailyReviewCard />
         {errorMessage && (
           <Alert severity="warning" sx={{ mb: 3 }}>
             {errorMessage}
