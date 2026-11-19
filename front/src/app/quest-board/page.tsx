@@ -38,6 +38,7 @@ import {
   type QuestPostStatus,
   type QuestPostSummary,
 } from "@/api/questBoard.api";
+import { QuestBoardAuthor } from "./_components/QuestBoardAuthor";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
@@ -116,7 +117,7 @@ const PostCard = ({ post }: { post: QuestPostSummary }) => {
         </Box>
 
         <Stack direction="row" spacing={2} alignItems="center" color="text.secondary" flexWrap="wrap">
-          <Typography variant="body2">{post.authorName}</Typography>
+          <QuestBoardAuthor author={post} isDeleted={post.isDeleted} />
           <Typography variant="body2">{formatDate(post.createdAt)}</Typography>
           <Stack direction="row" spacing={0.5} alignItems="center">
             <ChatBubbleOutlineIcon fontSize="small" />
@@ -293,9 +294,9 @@ export default function QuestBoardPage() {
               </Stack>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                 <FormControl sx={{ minWidth: 220 }}>
-                  <InputLabel>Course</InputLabel>
+                  <InputLabel>コース</InputLabel>
                   <Select
-                    label="Course"
+                    label="コース"
                     value={courseId}
                     onChange={(event) => setCourseId(event.target.value)}
                   >
@@ -336,7 +337,7 @@ export default function QuestBoardPage() {
               </Stack>
               {selectedCourse && (
                 <Typography variant="body2" color="text.secondary">
-                  Course 絞り込み: {selectedCourse.title}
+                  コース 絞り込み: {selectedCourse.title}
                 </Typography>
               )}
             </Stack>

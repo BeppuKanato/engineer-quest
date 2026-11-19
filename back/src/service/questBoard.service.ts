@@ -168,9 +168,22 @@ const reactionCounts = (
   };
 };
 
+// 掲示板で公開する著者情報だけを取得する。
+const authorSelect = {
+  displayName: true,
+  selectedMascotId: true,
+  selectedProfileAchievement: { select: { title: true, rarity: true, iconKey: true } },
+} satisfies Prisma.UserSelect;
+type BoardAuthor = Prisma.UserGetPayload<{ select: typeof authorSelect }>;
+const authorInfo = (author: BoardAuthor, isDeleted = false) => ({
+  authorName: isDeleted ? "削除済み投稿" : author.displayName ?? "学習者",
+  authorMascotId: isDeleted ? null : author.selectedMascotId,
+  authorAchievement: isDeleted ? null : author.selectedProfileAchievement,
+});
+
 type QuestPostWithRelations = Prisma.QuestPostGetPayload<{
   include: {
-    user: { select: { displayName: true } };
+    user: { select: typeof authorSelect };
     course: { select: { title: true } };
     comments: { select: { id: true } };
     reactions: { select: { type: true; userId: true } };
@@ -190,7 +203,7 @@ const toPostSummary = (post: QuestPostWithRelations, userId: string) => {
     code: post.code,
     referenceUrl: post.referenceUrl,
     status: post.status,
-    authorName: isDeleted ? "削除済み投稿" : post.user.displayName ?? "Learner",
+    ...authorInfo(post.user, isDeleted),
     courseId: post.courseId,
     courseTitle: post.course?.title ?? null,
     commentCount: post.comments.length,
@@ -251,7 +264,7 @@ export const listQuestPostsByFirebaseUid = async ({
     orderBy: { createdAt: "desc" },
     take: 80,
     include: {
-      user: { select: { displayName: true } },
+      user: { select: authorSelect },
       course: { select: { title: true } },
       comments: { select: { id: true } },
       reactions: { select: { type: true, userId: true } },
@@ -312,12 +325,12 @@ export const getQuestPostByFirebaseUid = async ({
   const post = await prisma.questPost.findFirst({
     where: { id: postId, visibility: "PUBLIC" },
     include: {
-      user: { select: { displayName: true } },
+      user: { select: authorSelect },
       course: { select: { title: true } },
       comments: {
         orderBy: { createdAt: "asc" },
         include: {
-          user: { select: { displayName: true } },
+          user: { select: authorSelect },
         },
       },
       reactions: { select: { type: true, userId: true } },
@@ -340,7 +353,7 @@ export const getQuestPostByFirebaseUid = async ({
       comments: post.comments.map((comment) => ({
         id: comment.id,
         body: comment.body,
-        authorName: comment.user.displayName ?? "Learner",
+        ...authorInfo(comment.user),
         createdAt: comment.createdAt.toISOString(),
         updatedAt: comment.updatedAt.toISOString(),
       })),
@@ -388,14 +401,14 @@ export const addQuestCommentByFirebaseUid = async ({
       userId: user.id,
       body: normalizedBody,
     },
-    include: { user: { select: { displayName: true } } },
+    include: { user: { select: authorSelect } },
   });
 
   return {
     comment: {
       id: comment.id,
       body: comment.body,
-      authorName: comment.user.displayName ?? "Learner",
+      ...authorInfo(comment.user),
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
     },
