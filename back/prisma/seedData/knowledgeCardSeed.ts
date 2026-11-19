@@ -1,9 +1,10 @@
 /**
  * 知識カードの seed（Issue #108 で作り直し）。
  * カードは「学んだ概念そのもの」ではなく関連概念を扱う（UI/UX 方針 論点3）。
- * 出現はスケジュール表方式：ユーザーに割り当たったテーブル番号ごとに、
- * どのフェーズ完了で・どのカードが出るかが決まる（見た目はランダム）。
+ * 全員共通でフェーズ2・5・7の完了時に1枚ずつ取得する。
  */
+import { courseSeed } from "./courseSeed";
+import { FIXED_CARD_SCHEDULE } from "../../src/learning/knowledgeCardSchedule";
 import { KnowledgeCardRarity, type Prisma } from "@prisma/client";
 
 export const BFS_COURSE_ID = "course-algorithm-breadth-first-search-v1";
@@ -409,40 +410,15 @@ export const GREEDY_COINS_CARD_PHASE_SLOTS = [
   { phaseKey: "greedy-coins-implementation", knowledgeCardId: "knowledge-card-greedy-coins-not-always-optimal" },
 ] as const;
 
-/**
- * テーブルごとの出現スロット（A=1枚目, B=2枚目, C=3枚目。全単元で同じ表を使う）。
- * 1回の学習で出るのは平均して約6割。どのカードが出るかはテーブルで変わる。
- */
-const TABLE_SUBSETS: string[][] = [
-  ["A", "B", "C"], ["A", "B"], ["A", "C"], ["B", "C"], ["A"],
-  ["B"], ["C"], ["A", "B", "C"], ["A", "B"], ["B", "C"],
-  ["A", "C"], ["B"], ["A"], ["A", "B", "C"], ["C"],
-];
-const SLOT_INDEX_BY_LETTER: Record<string, number> = { A: 0, B: 1, C: 2 };
-
-export const KNOWLEDGE_CARD_TABLE_COUNT = TABLE_SUBSETS.length;
-
 type CardPhaseSlot = { phaseKey: string; knowledgeCardId: string };
-
-const buildCardPhaseSchedule = (
-  courseId: string,
-  idPrefix: string,
-  slots: readonly CardPhaseSlot[],
-): Array<Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput & { id: string }> =>
-  TABLE_SUBSETS.flatMap((subset, index) => {
-    const tableNumber = index + 1;
-    return subset.map((letter) => {
-      const slot = slots[SLOT_INDEX_BY_LETTER[letter]];
-      return {
-        id: `schedule-${idPrefix}-v1-t${tableNumber}-${slot.phaseKey}`,
-        courseId,
-        courseVersion: 1,
-        tableNumber,
-        phaseKey: slot.phaseKey,
-        knowledgeCardId: slot.knowledgeCardId,
-      };
-    });
-  });
+const buildCardPhaseSchedule = (courseId: string, idPrefix: string, slots: readonly CardPhaseSlot[]): Array<Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput & { id: string }> => {
+    const courseVersion = courseSeed.find(course => course.id === courseId)?.version;
+    if (courseVersion === undefined) throw new Error(`Unknown card course: ${courseId}`);
+    return slots.map(slot => ({
+      id: `schedule-${idPrefix}-v${courseVersion}-fixed-${slot.phaseKey}`,
+      courseId, courseVersion, tableNumber: FIXED_CARD_SCHEDULE, ...slot,
+    }));
+};
 
 export const knowledgeCardPhaseScheduleSeed: Array<
   Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput & { id: string }

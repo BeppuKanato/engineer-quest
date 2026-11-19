@@ -18,6 +18,7 @@ model User {
   firebaseUid                 String  @unique
   displayName                 String?
   experience                  Int     @default(0)
+  // 旧認証APIとの互換用。配布では使わず、新規ユーザーは既定値のみ。
   knowledgeCardTableNumber    Int     @default(1)
   selectedMascotId            String  @default("red-panda")
   selectedTargetAchievementId String?
@@ -767,7 +768,7 @@ model KnowledgeCardPhaseScheduleEntry {
   id              String @id @default(cuid())
   courseId        String
   courseVersion   Int
-  tableNumber     Int
+  tableNumber     Int // 0=全員共通。旧1〜15は保持seedの移行互換用。
   phaseKey        String
   knowledgeCardId String
 

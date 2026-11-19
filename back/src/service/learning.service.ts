@@ -15,9 +15,10 @@ import {
   evaluateBigGoalsForUser,
   type BigGoalTransition,
 } from "./bigGoal.service";
+import { FIXED_CARD_SCHEDULE } from "../learning/knowledgeCardSchedule";
 import { toKnowledgeCardSummary } from "./knowledgeCard.service";
 
-type AuthUser = { id: string; knowledgeCardTableNumber: number };
+type AuthUser = { id: string; knowledgeCardTableNumber?: number };
 
 const getPublishedCourse = async (courseId: string) => {
   const course = await prisma.course.findFirst({
@@ -103,7 +104,7 @@ export const startUnitByUser = async (
   return { courseId, unit: unitView(unit) };
 };
 
-/** フェーズ完了時に、ユーザーのテーブル（knowledgeCardTableNumber）がそのフェーズに割り当てたカードを付与する。 */
+/** ユーザーの旧番号に依存せず、全員共通の固定カードを付与する。 */
 const awardPhaseCard = async (
   tx: Prisma.TransactionClient,
   user: AuthUser,
@@ -115,7 +116,7 @@ const awardPhaseCard = async (
       courseId_courseVersion_tableNumber_phaseKey: {
         courseId: course.id,
         courseVersion: course.version,
-        tableNumber: user.knowledgeCardTableNumber,
+        tableNumber: FIXED_CARD_SCHEDULE,
         phaseKey,
       },
     },
@@ -123,20 +124,10 @@ const awardPhaseCard = async (
   });
   if (!entry) return null;
 
-  const owned = await tx.userKnowledgeCard.findUnique({
-    where: {
-      userId_knowledgeCardId: {
-        userId: user.id,
-        knowledgeCardId: entry.knowledgeCardId,
-      },
-    },
-    select: { id: true },
+  const granted = await tx.userKnowledgeCard.createMany({
+    data: [{ userId: user.id, knowledgeCardId: entry.knowledgeCardId }], skipDuplicates: true,
   });
-  if (owned) return null;
-
-  await tx.userKnowledgeCard.create({
-    data: { userId: user.id, knowledgeCardId: entry.knowledgeCardId },
-  });
+  if (granted.count === 0) return null;
   return toKnowledgeCardSummary(entry.knowledgeCard);
 };
 
