@@ -1,3 +1,4 @@
+import dailyReviewRouter from "./router/dailyReview.router";
 import bigGoalRouter from "./router/bigGoal.router";
 import feedbackV1Router from "./router/feedbackV1.router";
 import feedbackV1TaskRouter from "./router/feedbackV1Task.router";
@@ -46,6 +47,7 @@ app.get("/health", (req: Request, res: Response) => {
 //ユーザ認証
 app.use('/api/auth', authRouter);
 app.use('/api/home', homeRouter);
+app.use('/api/daily-review', dailyReviewRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/achievements', achievementRouter);

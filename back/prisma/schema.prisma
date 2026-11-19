@@ -37,6 +37,7 @@ model User {
   feedbackV1Records FeedbackV1[]
   unitProgresses    UnitLearningProgress[]
   phaseProgresses   PhaseLearningProgress[]
+  dailyReviews      DailyReview[]
   learningEvents    LearningEvent[]
   bigGoals          BigGoal[]
   bigGoalProposals  BigGoalProposal[]
@@ -864,4 +865,23 @@ model BigGoal {
 
   @@index([userId, status])
   @@index([userId, createdAt])
+}
+
+// 復習は実験用の学習進捗・評価証拠・概念到達判定から独立して保存する。
+model DailyReview {
+  id           String   @id @default(cuid())
+  userId       String
+  reviewDate   DateTime @db.Date
+  courseId     String
+  phaseKey     String
+  assessmentId String
+  questionId   String
+  selectedAt   DateTime @default(now())
+  answeredAt   DateTime?
+  correct      Boolean?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewDate])
+  @@index([userId, correct, answeredAt])
 }
