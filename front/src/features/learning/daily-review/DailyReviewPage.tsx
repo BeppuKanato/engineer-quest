@@ -45,7 +45,7 @@ export function DailyReviewQuestion({ review, material, token, onSaved, reload }
   return <Stack spacing={2}>
     <Typography variant="h5" component="h2" sx={{ fontSize: "clamp(20px, 2vw, 30px)", textAlign: "center" }}>{question.prompt}</Typography>
     <AnswerFeedbackNotice assessmentId={content.id} />
-    <Box sx={{ width: "100%", minWidth: 0, height: "clamp(320px, 54dvh, 740px)", display: "flex", justifyContent: "center", overflow: "auto", pointerEvents: attempt ? "none" : undefined }}>
+    <Box sx={{ width: "100%", minWidth: 0, height: "kind" in question && question.kind === "parsons" ? "auto" : "clamp(320px, 54dvh, 740px)", display: "flex", justifyContent: "center", overflow: "auto", pointerEvents: attempt ? "none" : undefined }}>
       {material.render({ onAnswer: submit, disabled: !!attempt })}
     </Box>
     {"choices" in question && <Stack direction="row" flexWrap="wrap" justifyContent="center" useFlexGap gap={1} role="group" aria-label="解答の選択肢">
