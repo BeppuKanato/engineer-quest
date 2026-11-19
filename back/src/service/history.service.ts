@@ -1,6 +1,9 @@
+import conceptDefinitions from "../learning/feedback/concepts.json";
 import { prisma } from "../lib/prisma";
 
 export type HistoryEventType =
+  | "phase_completed"
+  | "unit_completed"
   | "activity_completed"
   | "mission_completed"
   | "course_completed"
@@ -25,20 +28,34 @@ const compareHistoryDesc = (left: HistoryEvent, right: HistoryEvent) =>
 
 const toDateKey = (value: string) =>
   new Date(value).toLocaleDateString("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
 
 export const getHistoryByUserId = async (userId: string) => {
-  // Legacy mission/activity history sources were removed with the old flow;
-  // new-flow learning events join history in #78.
+  // 学習履歴はサーバーで確定した完了記録を参照する。
   const [
+    completedPhases,
+    completedUnits,
     userKnowledgeCards,
     userAchievements,
     createQuestSubmissions,
     createQuestFeedbacks,
   ] = await Promise.all([
+    prisma.phaseLearningProgress.findMany({
+      where: { userId, completedAt: { not: null } },
+      orderBy: { completedAt: "desc" },
+      take: 80,
+      select: { id: true, courseId: true, phaseKey: true, completedAt: true, course: { select: { title: true } } },
+    }),
+    prisma.unitLearningProgress.findMany({
+      where: { userId, completedAt: { not: null } },
+      orderBy: { completedAt: "desc" },
+      take: 80,
+      select: { id: true, courseId: true, completedAt: true, course: { select: { title: true } } },
+    }),
     prisma.userKnowledgeCard.findMany({
       where: { userId },
       orderBy: { collectedAt: "desc" },
@@ -66,6 +83,27 @@ export const getHistoryByUserId = async (userId: string) => {
   ]);
 
   const events: HistoryEvent[] = [
+    ...completedPhases.flatMap((phase) => {
+      if (!phase.completedAt) return [];
+      const stageName = conceptDefinitions.find((unit) => unit.courseId === phase.courseId)
+        ?.phases.find((stage) => stage.id === phase.phaseKey)?.formalName;
+      return [{
+        id: `phase:${phase.id}`,
+        type: "phase_completed" as const,
+        title: stageName ? `${phase.course.title}の「${stageName}」を完了` : `${phase.course.title}のフェーズを完了`,
+        description: "学習の段階を完了しました。",
+        occurredAt: phase.completedAt.toISOString(),
+        href: `/courses/roadmap/${encodeURIComponent(phase.courseId)}`,
+      }];
+    }),
+    ...completedUnits.flatMap((unit) => unit.completedAt ? [{
+      id: `unit:${unit.id}`,
+      type: "unit_completed" as const,
+      title: `${unit.course.title}を完了`,
+      description: "単元の学習を完了しました。",
+      occurredAt: unit.completedAt.toISOString(),
+      href: `/courses/roadmap/${encodeURIComponent(unit.courseId)}`,
+    }] : []),
     ...userKnowledgeCards.map((userCard) => ({
       id: `knowledge:${userCard.id}`,
       type: "knowledge_tip_acquired" as const,

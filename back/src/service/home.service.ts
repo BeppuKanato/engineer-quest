@@ -1,6 +1,6 @@
 /**
  * Home表示用の集約。旧フロー（Mission/Activity）の進捗源は削除済みで、
- * ランク・学習カレンダーの学習日は当面、残る学習行動である「作る」提出を源にする。
+ * 学習カレンダーは新フローの確定済み完了記録と「作る」提出を源にする。
  * 単元の進捗・再開表示は新フローの進捗モデル接続（#78）で置き換える。
  */
 import { Achievement, AchievementConditionType } from "@prisma/client";
@@ -187,40 +187,54 @@ const getTargetAchievement = async (
   };
 };
 
-const toDateKey = (date: Date) => date.toISOString().slice(0, 10);
+// Asia/Tokyo は UTC+9（夏時間なし）。実行環境のタイムゾーンに依存させない。
+const tokyoDate = (date: Date) => new Date(date.getTime() + 9 * 60 * 60 * 1000);
+const toDateKey = (date: Date) => tokyoDate(date).toISOString().slice(0, 10);
 
 const buildLearningCalendar = async (userId: string) => {
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 1);
+  const localToday = tokyoDate(today);
+  const year = localToday.getUTCFullYear();
+  const month = localToday.getUTCMonth();
+  const monthKey = toDateKey(today).slice(0, 7);
 
-  // 学習日の源は当面「作る」提出のみ。新フローの学習イベント（#78）で置き換える。
-  const submissions = await prisma.createQuestSubmission.findMany({
-    where: { attempt: { userId } },
-    select: { submittedAt: true },
-  });
-  const learnedDates = submissions.map((s) => s.submittedAt);
-
+  // 欠落し得るクライアントイベントではなく、サーバーで確定した completedAt を使う。
+  const [submissions, phases, units] = await Promise.all([
+    prisma.createQuestSubmission.findMany({
+      where: { attempt: { userId } },
+      select: { submittedAt: true },
+    }),
+    prisma.phaseLearningProgress.findMany({
+      where: { userId, completedAt: { not: null } },
+      select: { completedAt: true },
+    }),
+    prisma.unitLearningProgress.findMany({
+      where: { userId, completedAt: { not: null } },
+      select: { completedAt: true },
+    }),
+  ]);
+  const learnedDates = [
+    ...submissions.map((submission) => submission.submittedAt),
+    ...phases.map((phase) => phase.completedAt),
+    ...units.map((unit) => unit.completedAt),
+  ].filter((date): date is Date => date !== null);
   const learnedDateKeys = new Set(learnedDates.map(toDateKey));
-  const learnedDaysInMonth = learnedDates
-    .filter((date) => date >= monthStart && date < monthEnd)
-    .map((date) => date.getDate());
+  const learnedDaysInMonth = [...learnedDateKeys]
+    .filter((key) => key.startsWith(`${monthKey}-`))
+    .map((key) => Number(key.slice(8, 10)));
 
   let continuationDays = 0;
   const cursor = new Date(today);
-
   while (learnedDateKeys.has(toDateKey(cursor))) {
     continuationDays += 1;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
   }
 
   return {
     year,
     month,
-    date: today.getDate(),
-    learnedDays: [...new Set(learnedDaysInMonth)].sort((a, b) => a - b),
+    date: localToday.getUTCDate(),
+    learnedDays: learnedDaysInMonth.sort((a, b) => a - b),
     continuationDays,
     totalDays: learnedDateKeys.size,
     hasLearnedToday: learnedDateKeys.has(toDateKey(today)),

@@ -37,6 +37,18 @@ const eventMeta: Record<
   HistoryEventType,
   { label: string; color: string; bgcolor: string; icon: ReactNode }
 > = {
+  phase_completed: {
+    label: "段階完了",
+    color: "#16a34a",
+    bgcolor: "#dcfce7",
+    icon: <CheckCircleIcon fontSize="small" />,
+  },
+  unit_completed: {
+    label: "単元完了",
+    color: "#7e22ce",
+    bgcolor: "#f3e8ff",
+    icon: <EmojiEventsIcon fontSize="small" />,
+  },
   activity_completed: {
     label: "Activity",
     color: "#16a34a",
@@ -88,7 +100,7 @@ const eventMeta: Record<
 };
 
 const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-const learningTypes: HistoryEventType[] = ["activity_completed", "mission_completed"];
+const learningTypes: HistoryEventType[] = ["activity_completed", "mission_completed", "phase_completed", "unit_completed"];
 
 const isSameMonth = (date: Date, month: Date) =>
   date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
@@ -183,14 +195,14 @@ export default function HistoryPage() {
 
     const monthlyCounts = {
       activity: getLearningCount(currentMonthEvents),
-      missions: currentMonthEvents.filter((event) => event.type === "mission_completed").length,
+      missions: currentMonthEvents.filter((event) => event.type === "mission_completed" || event.type === "unit_completed").length,
       cards: currentMonthEvents.filter((event) => event.type === "knowledge_tip_acquired").length,
       exp: sumExp(currentMonthEvents),
     };
 
     const previousCounts = {
       activity: getLearningCount(previousMonthEvents),
-      missions: previousMonthEvents.filter((event) => event.type === "mission_completed").length,
+      missions: previousMonthEvents.filter((event) => event.type === "mission_completed" || event.type === "unit_completed").length,
       cards: previousMonthEvents.filter((event) => event.type === "knowledge_tip_acquired").length,
       exp: sumExp(previousMonthEvents),
     };
@@ -257,14 +269,14 @@ export default function HistoryPage() {
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" }, gap: 2.5 }}>
                 <SummaryCard
                   icon={<CheckCircleIcon />}
-                  label="今月の完了アクティビティ"
+                  label="今月の学習完了"
                   value={`${dashboard.monthlyCounts.activity}件`}
                   delta={dashboard.monthlyCounts.activity - dashboard.previousCounts.activity}
                   tone="#0b63e5"
                 />
                 <SummaryCard
                   icon={<TrackChangesIcon />}
-                  label="今月の完了ミッション"
+                  label="今月の完了単元"
                   value={`${dashboard.monthlyCounts.missions}件`}
                   delta={dashboard.monthlyCounts.missions - dashboard.previousCounts.missions}
                   tone="#16a34a"
@@ -287,7 +299,7 @@ export default function HistoryPage() {
               </Box>
 
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr 0.76fr" }, gap: 2.5 }}>
-                <BarChartCard title="直近7日間の完了アクティビティ数" unit="件" data={dashboard.dailyActivity} />
+                <BarChartCard title="直近7日間の学習完了数" unit="件" data={dashboard.dailyActivity} />
                 <LineChartCard title="直近7日間の獲得EXP推移" unit="EXP" data={dashboard.dailyExp} />
                 <CalendarCard month={selectedMonth} days={dashboard.calendarDays} />
               </Box>
