@@ -31,6 +31,7 @@ import { CreateQuestPreview } from "@/app/create/_components/createQuestPreview"
 import { invalidateClientQueries, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
 import { disposePyodideRunner, preparePyodide, runCreateQuestTests } from "@/lib/pyodideRunner";
+import { QuestKnowledgeCards } from "@/features/collection/QuestKnowledgeCards";
 
 const categoryLabel = { FUNCTIONAL: "機能", QUALITY: "品質", PERFORMANCE: "性能", IMPLEMENTATION: "実装" } as const;
 
@@ -197,6 +198,7 @@ export default function CreateQuestWorkPage() {
       </Paper>
 
       <Stack spacing={2}><CreateQuestPreview quest={quest} results={results} />
+        <QuestKnowledgeCards questId={quest.id} />
         <Paper elevation={0} sx={{ p: 2, border: "1px solid #dbe3ef", borderRadius: 2 }}><Stack direction="row" spacing={1}><InfoOutlinedIcon color="primary" /><Typography fontWeight={950}>{quest.previewData.guidanceTitle ?? "実装方法は自由です"}</Typography></Stack><Typography fontSize={13} color="text.secondary" sx={{ mt: 0.8, lineHeight: 1.7 }}>{quest.previewData.guidanceBody ?? "基本要件を満たす方法から始め、追加要件に合わせて実装を改善できます。"}</Typography></Paper>
         {submission && <Paper elevation={0} sx={{ p: 2, border: "2px solid #86efac", bgcolor: "#f0fdf4", borderRadius: 2 }}><Typography variant="h5" fontWeight={950}>提出完了 {submission.score} / {submission.maxScore}点</Typography>{unlockedAchievements.length > 0 && <Box sx={{ mt: 1 }}><AchievementBand key={submission.id} items={unlockedAchievements} placement="create-submission" /></Box>}{feedback?.status === "GENERATING" && <Alert severity="info" sx={{ mt: 1 }}>AIレビューを生成しています。</Alert>}{feedback?.status === "FAILED" && <Alert severity="error" sx={{ mt: 1 }}>AIレビューを生成できませんでした。</Alert>}{feedback?.id && feedback.feedback && <FeedbackObservation id={feedback.id} href={feedback.feedback.actionHref} />}{feedback?.feedback && <Stack spacing={1.2} sx={{ mt: 1.5 }}><Box><Typography fontWeight={950}>現在の状態</Typography><Typography fontSize={13}>{feedback.feedback.currentState}</Typography></Box><Box><Typography fontWeight={950}>次の目標</Typography><Typography fontSize={13}>{feedback.feedback.nextGoal}</Typography></Box><Box><Typography fontWeight={950}>次の一歩</Typography><Typography fontSize={13}>{feedback.feedback.nextStep}</Typography></Box>{feedback.feedback.actionType === "RETRY_CREATE_QUEST" ? <Button variant="contained" onClick={() => { setSubmission(null); setFeedback(null); setUnlockedAchievements([]); }} sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : feedbackActionHref ? <Button component={Link} href={feedbackActionHref} variant="contained" sx={{ fontWeight: 900 }}>{feedback.feedback.actionLabel}</Button> : null}</Stack>}<Button component={Link} href={shareHref} startIcon={<ForumIcon />} variant="outlined" sx={{ mt: 1.5, fontWeight: 900 }}>掲示板で共有する</Button></Paper>}
       </Stack>

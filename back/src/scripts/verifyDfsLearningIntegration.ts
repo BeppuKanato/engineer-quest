@@ -15,7 +15,7 @@ import { completePhaseByUser, completeUnitByUser, getUnitProgressByUser, ingestL
 const phases = ["motivation", "execution", "check", "code-mapping", "code-check", "consolidation", "implementation"].map(stage => `dfs-${stage}`);
 const dfsCards = knowledgeCardSeed.filter(card => card.courseId === DFS_COURSE_ID);
 assert.deepEqual(dfsCards.map(card => [card.title, card.rarity]), [
-  ["トポロジカルソート", "RARE"], ["リストで作るスタック", "COMMON"], ["バックトラッキング", "EPIC"],
+  ["トポロジカルソート", "RARE"], ["リストで作るスタック", "COMMON"], ["枝刈り", "EPIC"],
 ]);
 assert.deepEqual(DFS_CARD_PHASE_SLOTS.map(slot => slot.phaseKey), [phases[1], phases[4], phases[6]]);
 assert.equal(DFS_CARD_PHASE_SLOTS.every((slot, index) => slot.knowledgeCardId === dfsCards[index].id), true);

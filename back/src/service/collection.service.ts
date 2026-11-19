@@ -4,6 +4,7 @@ import { restoreCompletedPhaseCards } from "./knowledgeCardGrant.service";
 import { evaluateAchievementsForUser, achievementCategoryLabel } from "./achievement.service";
 
 import { unitGroupLabel } from "./achievementConditions";
+import { getPublishedCardQuests } from "./knowledgeCardReference.service";
 
 const conditionLabel = (achievement: Achievement) => {
   const { conditionType: type, conditionValue: value } = achievement;
@@ -34,6 +35,7 @@ export const getCollectionByUser = async (user: { id: string; selectedProfileAch
       include: { userAchievements: { where: { userId: user.id }, select: { achievedAt: true } } },
     }),
   ]);
+  const relatedQuests = await getPublishedCardQuests(cards.filter(card => card.userKnowledgeCards.length > 0));
   const knowledgeItems = cards.map((card) => {
     const collectedAt = card.userKnowledgeCards[0]?.collectedAt ?? null;
     const unlocked = Boolean(collectedAt);
@@ -44,6 +46,7 @@ export const getCollectionByUser = async (user: { id: string; selectedProfileAch
       connection: unlocked ? card.connection : null, useCase: unlocked ? card.useCase : null,
       searchKeywords: unlocked ? card.searchKeywords : [], rarity: card.rarity,
       isCollected: unlocked, collectedAt: collectedAt?.toISOString() ?? null,
+      relatedQuests: unlocked ? relatedQuests.filter(quest => card.relatedCreateQuestIds.includes(quest.id)) : [],
     };
   });
   const achievementItems = achievements.map((a) => {

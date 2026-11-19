@@ -1,0 +1,37 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {loader,root,React,renderToStaticMarkup}=require('./dailyReviewTestHarness.cjs');
+const load=loader({'@/app/component/userSession':{useUserSession:()=>({status:'authenticated',token:'fixture'})}});
+const render=(Component,props)=>renderToStaticMarkup(React.createElement(Component,props));
+const {QuestCardList}=load(path.join(root,'features/collection/QuestKnowledgeCards.tsx'));
+const {RelatedQuestLinks}=load(path.join(root,'features/collection/RelatedQuestLinks.tsx'));
+const {UnitCardKeywordLinks}=load(path.join(root,'features/learning/rewards/UnitCardKeywords.tsx'));
+const html=render(QuestCardList,{cards:[{id:'owned',rarity:'COMMON',isCollected:true,title:'所持タイトル',description:'所持説明',useCase:'使える状況'},{id:'hidden',rarity:'EPIC',isCollected:false,title:'秘密タイトル',description:'秘密説明',useCase:'秘密状況'}]});
+assert(html.includes('<details')&&html.includes('<summary'));
+for(const text of ['所持タイトル','所持説明','使える状況','コモン','エピック'])assert(html.includes(text));
+for(const text of ['秘密タイトル','秘密説明','秘密状況'])assert(!html.includes(text));
+assert(html.includes('data-uncollected-card'));assert(!html.includes('google.com'));
+assert.equal(render(RelatedQuestLinks,{quests:[]}), '');
+const links=render(RelatedQuestLinks,{quests:[{id:'quest/a',title:'取得した最新の課題名'}]});
+assert(links.includes('/create/quests/quest%2Fa')&&links.includes('取得した最新の課題名')&&links.includes('使える場所'));
+assert.equal(render(UnitCardKeywordLinks,{cards:[]}), '');
+const keywords=render(UnitCardKeywordLinks,{cards:[{id:'owned',title:'獲得済みカード',searchKeywords:['最短経路 & BFS']}]});
+assert(keywords.includes('https://www.google.com/search?q='+encodeURIComponent('最短経路 & BFS')));
+assert(keywords.includes('target="_blank"')&&keywords.includes('rel="noopener noreferrer"'));
+const work=fs.readFileSync(path.join(root,'app/create/quests/[questId]/work/page.tsx'),'utf8');
+assert(work.includes('<QuestKnowledgeCards questId={quest.id} />'));
+assert(work.includes('disabled={!basicPassed || submitting}'));
+assert(work.includes('disabled={runtime !== "ready" || running || !code.trim()}'));
+const detail=fs.readFileSync(path.join(root,'app/knowledge-cards/page.tsx'),'utf8');
+assert(detail.includes('<RelatedQuestLinks quests={card.relatedQuests ?? []} />'));
+assert(detail.includes('<Chip key={word} label={word} size="small" />'));
+assert(!detail.includes('google.com'));
+const screen=fs.readFileSync(path.join(root,'features/learning/app/LearningScreen.tsx'),'utf8');
+assert(screen.includes('renderRewards: (value: LearningRewards) => <><FinalLearningRewards'));
+assert.equal((screen.match(/<UnitCardKeywords /g)||[]).length,1);
+for(const unit of ['unit/LearningUnitPreview.tsx',...['binary-search','bubble-sort','maze-digging','wall-extension','greedy-coins'].map(name=>`${name}/unit/${{'binary-search':'BinarySearch','bubble-sort':'BubbleSort','maze-digging':'MazeDigging','wall-extension':'WallExtension','greedy-coins':'GreedyCoins'}[name]}UnitPreview.tsx`)]) {
+ const source=fs.readFileSync(path.join(root,'features/learning',unit),'utf8');assert(source.includes('<UnitFinalResult')&&source.includes('renderRewards={renderRewards}'));
+}
+const api=fs.readFileSync(path.join(root,'api/knowledgeCardReference.api.ts'),'utf8');
+assert(api.includes('encodeURIComponent(questId)')&&api.includes('encodeURIComponent(courseId)'));
+assert(!/POST|PUT|DELETE/.test(api));
+console.log('PASS: owned card expansion, hidden rarity only, data-driven optional quest links, safe final-only external keywords and all seven unit final-result connections.');
