@@ -26,7 +26,7 @@ const selectRows = (rows: ProgressRow[], where: { userId?: unknown; completedAt?
   return rows.filter(entry => entry.userId === userId && (!where?.completedAt || entry.completedAt !== null) && (!where?.status || entry.status === where.status));
 };
 Object.assign(prisma.user, { findUnique: async () => ({ id: userId }) });
-Object.assign(prisma.phaseLearningProgress, { findMany: async (args: Prisma.PhaseLearningProgressFindManyArgs) => selectRows(phases, args.where) });
+Object.assign(prisma.phaseLearningProgress, { findMany: async (args: Prisma.PhaseLearningProgressFindManyArgs) => selectRows(phases, args.where).map(row => ({ ...row, course: { version: 1 } })) });
 Object.assign(prisma.unitLearningProgress, { findMany: async (args: Prisma.UnitLearningProgressFindManyArgs) => selectRows(units, args.where) });
 Object.assign(prisma.createQuestSubmission, { findMany: async (args: Prisma.CreateQuestSubmissionFindManyArgs) => {
   assert.deepEqual(args.where, { attempt: { userId } }); return submissions.filter(entry => entry.userId === userId);
@@ -44,6 +44,7 @@ Object.assign(prisma.userAchievement, {
     owned.add(create.achievementId); return { achievement: definitions.find(entry => entry.id === create.achievementId), achievedAt: date };
   },
 });
+Object.assign(prisma.knowledgeCardPhaseScheduleEntry, { findMany: async () => [] });
 const progress = async (id: string) => (await getAchievementsByUser(user)).groups.flatMap(group => group.achievements).find(entry => entry.id === id)!;
 const now = (iso: string) => { mock.timers.reset(); mock.timers.enable({ apis: ["Date"], now: new Date(iso).getTime() }); };
 async function main() {

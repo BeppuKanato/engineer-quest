@@ -1,5 +1,4 @@
 import { prisma } from "../lib/prisma";
-import { randomInt } from "node:crypto";
 
 type EnsureUserInput = {
   firebaseUid: string;
@@ -20,7 +19,6 @@ export const ensureUserService = async ({
     create: {
       firebaseUid,
       displayName: displayName ?? null,
-      knowledgeCardTableNumber: randomInt(1, 16),
     },
     include: {
       hexadResponse: {

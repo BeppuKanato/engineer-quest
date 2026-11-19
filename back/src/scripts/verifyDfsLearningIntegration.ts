@@ -1,10 +1,11 @@
+import { FIXED_CARD_SCHEDULE } from "../learning/knowledgeCardSchedule";
 import { conceptDefinitions } from "../service/feedbackConcepts";
 import assert from "node:assert/strict";
 import { LearningProgressStatus, type Prisma } from "@prisma/client";
 import { achievementSeed } from "../../prisma/seedData/achievementSeed";
 import { courseSeed } from "../../prisma/seedData/courseSeed";
 import {
-  BFS_COURSE_ID, DFS_COURSE_ID, DFS_CARD_PHASE_SLOTS, KNOWLEDGE_CARD_TABLE_COUNT,
+  BFS_COURSE_ID, DFS_COURSE_ID, DFS_CARD_PHASE_SLOTS,
   knowledgeCardPhaseScheduleSeed, knowledgeCardSeed,
 } from "../../prisma/seedData/knowledgeCardSeed";
 import { prisma } from "../lib/prisma";
@@ -20,7 +21,7 @@ assert.deepEqual(DFS_CARD_PHASE_SLOTS.map(slot => slot.phaseKey), [phases[1], ph
 assert.equal(DFS_CARD_PHASE_SLOTS.every((slot, index) => slot.knowledgeCardId === dfsCards[index].id), true);
 const course = courseSeed.find(item => item.id === DFS_COURSE_ID);
 assert(course?.isPublished && course.version === 1 && course.description.includes("スタック"));
-for (let table = 1; table <= KNOWLEDGE_CARD_TABLE_COUNT; table++) {
+for (const table of [FIXED_CARD_SCHEDULE]) {
   const stagesFor = (courseId: string, prefix: string): string[] => knowledgeCardPhaseScheduleSeed
     .filter(entry => entry.courseId === courseId && entry.courseVersion === course.version && entry.tableNumber === table)
     .map(entry => entry.phaseKey.slice(prefix.length));
@@ -85,7 +86,11 @@ Object.assign(prisma.knowledgeCardPhaseScheduleEntry, { findUnique: async ({ whe
 Object.assign(prisma.userKnowledgeCard, {
   findUnique: async ({ where }: { where: { userId_knowledgeCardId: CardScope } }) =>
     cards.get(where.userId_knowledgeCardId.userId)?.has(where.userId_knowledgeCardId.knowledgeCardId) ? { id: "owned" } : null,
-  create: async ({ data }: { data: CardScope }) => addOwned(cards, data.userId, data.knowledgeCardId),
+  createMany: async ({ data, skipDuplicates }: { data: CardScope[]; skipDuplicates: boolean }) => {
+    assert.equal(skipDuplicates, true); let count = 0;
+    for (const row of data) if (!cards.get(row.userId)?.has(row.knowledgeCardId)) { addOwned(cards, row.userId, row.knowledgeCardId); count++; }
+    return { count };
+  },
   findMany: async ({ where }: { where: { userId: string } }) =>
     [...(cards.get(where.userId) ?? [])].map(id => {
       const card = cardById.get(id);
@@ -162,10 +167,10 @@ async function main() {
   assert.equal(logged[0].phaseKey, phases[2]);
 
   const other = { id: "dfs-with-hints", knowledgeCardTableNumber: 6 };
-  assert.equal((await completePhaseByUser(other, DFS_COURSE_ID, phases[1])).awardedCard, null);
+  assert.equal((await completePhaseByUser(other, DFS_COURSE_ID, phases[1])).awardedCard?.id, dfsCards[0].id);
   const assisted = await completePhaseByUser(other, DFS_COURSE_ID, phases[6], { hintUsage: [1, 0, 0, 0] });
   assert.deepEqual(assisted.unlockedAchievements.map(item => item.id), ["ach-phase-dfs-implementation-clear"]);
-  console.log("DFS app integration verified: existing course, 15 card schedules, service progress and events, repeat safety, scoped awards and achievement conditions.");
+  console.log("DFS app integration verified: existing course, fixed card schedules, service progress and events, repeat safety, scoped awards and achievement conditions.");
 }
 
 void main().catch(error => { console.error(error); process.exitCode = 1; });

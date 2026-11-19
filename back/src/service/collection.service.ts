@@ -1,6 +1,7 @@
 import { AchievementConditionType, type Achievement } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { achievementCategoryLabel } from "./achievement.service";
+import { restoreCompletedPhaseCards } from "./knowledgeCardGrant.service";
+import { evaluateAchievementsForUser, achievementCategoryLabel } from "./achievement.service";
 
 import { unitGroupLabel } from "./achievementConditions";
 
@@ -21,6 +22,7 @@ const conditionLabel = (achievement: Achievement) => {
 };
 
 export const getCollectionByUser = async (user: { id: string; selectedProfileAchievementId: string | null }) => {
+  if (await restoreCompletedPhaseCards(user.id) > 0) await evaluateAchievementsForUser(user.id);
   const [cards, achievements] = await Promise.all([
     prisma.knowledgeCard.findMany({
       where: { isPublished: true },

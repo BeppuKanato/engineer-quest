@@ -1,3 +1,4 @@
+import { FIXED_CARD_SCHEDULE } from "../learning/knowledgeCardSchedule";
 import assert from "node:assert/strict";
 import { AchievementConditionType as Condition, AchievementRarity as Rarity } from "@prisma/client";
 import { achievementSeed } from "../../prisma/seedData/achievementSeed";
@@ -14,7 +15,6 @@ import {
   DFS_COURSE_ID,
   GREEDY_COINS_CARD_PHASE_SLOTS,
   GREEDY_COINS_COURSE_ID,
-  KNOWLEDGE_CARD_TABLE_COUNT,
   MAZE_DIGGING_CARD_PHASE_SLOTS,
   MAZE_DIGGING_COURSE_ID,
   WALL_EXTENSION_CARD_PHASE_SLOTS,
@@ -164,7 +164,7 @@ for (const course of CARD_COURSES) {
   }
 }
 
-// スケジュール表: 単元ごとにテーブル 1..KNOWLEDGE_CARD_TABLE_COUNT が揃い、各行が正しいフェーズ→カード対応を指す
+// 単元ごとに全員共通の3行だけがあり、各行が正しいフェーズ→カード対応を指す
 for (const course of CARD_COURSES) {
   const tables = new Map<number, number>();
   for (const entry of knowledgeCardPhaseScheduleSeed.filter((e) => e.courseId === course.courseId)) {
@@ -174,10 +174,9 @@ for (const course of CARD_COURSES) {
     if (slot.knowledgeCardId !== entry.knowledgeCardId) fail(`schedule ${entry.id} maps ${entry.phaseKey} to ${entry.knowledgeCardId}, expected ${slot.knowledgeCardId}`);
     tables.set(entry.tableNumber, (tables.get(entry.tableNumber) ?? 0) + 1);
   }
-  for (let table = 1; table <= KNOWLEDGE_CARD_TABLE_COUNT; table += 1) {
-    const count = tables.get(table) ?? 0;
-    if (count < 1 || count > course.slots.length) fail(`schedule table ${table} for ${course.courseId} has ${count} entries (must be 1..${course.slots.length})`);
-  }
+  if (tables.size !== 1 || tables.get(FIXED_CARD_SCHEDULE) !== 3) fail(`Expected exactly three fixed schedules for ${course.courseId}`);
+  const version = courseSeed.find(entry => entry.id === course.courseId)?.version;
+  if (knowledgeCardPhaseScheduleSeed.some(entry => entry.courseId === course.courseId && entry.courseVersion !== version)) fail(`Course version mismatch: ${course.courseId}`);
 }
 const scheduledCourseIds = new Set(knowledgeCardPhaseScheduleSeed.map((entry) => entry.courseId));
 for (const courseId of scheduledCourseIds) {
@@ -196,4 +195,4 @@ for (const achievement of achievementSeed) {
     }
   }
 }
-console.log(`Collection master data verified: ${courseSeed.length} courses, ${achievementSeed.length} achievements, ${knowledgeCardSeed.length} knowledge cards, ${knowledgeCardPhaseScheduleSeed.length} schedule entries across ${KNOWLEDGE_CARD_TABLE_COUNT} tables per course.`);
+console.log(`Collection master data verified: ${courseSeed.length} courses, ${achievementSeed.length} achievements, ${knowledgeCardSeed.length} knowledge cards, ${knowledgeCardPhaseScheduleSeed.length} fixed schedule entries (3 per course).`);
