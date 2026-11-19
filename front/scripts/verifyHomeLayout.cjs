@@ -25,4 +25,15 @@ assert(!dashboard.includes('@/features/learning/'), 'Independent features are co
 for(const removed of ['<ContinueLearning','<HomeUnitGrid','目標の実績','エンジニア見習い'])assert(!page.includes(removed));
 for(const source of [page,dashboard,fs.readFileSync(path.join(root,'app/profile/page.tsx'),'utf8')])assert(!/user(?:Data)?\.(?:level|exp|rank)|レベルアップ|次のランク|>EXP</.test(source));
 const banner=fs.readFileSync(path.join(root,'features/learning/app/bigGoal/BigGoalBanner.tsx'),'utf8');assert(banner.includes('currentOnly ? Promise.resolve({ goals: [] })'));
+// ホームの旧グリッドは外しても、共通の単元一覧・サムネイルに対する既存の回帰検証は残す。
+const read=relative=>fs.readFileSync(path.join(root,relative),'utf8');
+assert(read('app/courses/courseProgress.ts').includes('export async function withLearningProgress'));
+const coursesPage=read('app/courses/page.tsx');assert(coursesPage.includes('withLearningProgress')&&!coursesPage.includes('saved.phases.filter'));
+const thumbnail=read('app/courses/component/courseThumbnail.tsx');
+for(const id of ['bubble-sort-v2','binary-search-v1','kmp-v1','selection-sort-v1','breadth-first-search-v1','depth-first-search-v1','merge-sort-v1'])assert(thumbnail.includes(`course-algorithm-${id}`));
+const courseCard=read('app/courses/component/courseCard.tsx');
+assert(courseCard.includes('CourseThumbnail')&&courseCard.includes('COURSE_VISUAL_STYLE')&&courseCard.includes('<StatusChip status={status} />')&&!courseCard.includes('コースクリア'));
+const profile=read('app/profile/page.tsx');
+for(const field of ['completedCourseCount','completedMissionCount','collectedCount','achievedCount'])assert(profile.includes(field));
+for(const label of ['プロフィール設定','代表実績','実績解除通知'])assert(profile.includes(label));
 console.log('verifyHomeLayout: six-section order, actual progress, phase resume, one-line feedback, empty sections hidden, conditional current goal, JST learning days and no EXP/rank passed.');
