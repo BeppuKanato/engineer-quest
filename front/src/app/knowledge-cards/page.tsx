@@ -107,9 +107,9 @@ export default function KnowledgeCardsPage() {
                   </Stack>
                   <Typography sx={{ mt: 1 }}>あと{Math.max(0, totalCount - collectedCount)}枚でコンプリート</Typography>
                 </Box>
-                <RarityCount label="Common" value={commonCount} color="#0f766e" bg="#e6fffb" />
-                <RarityCount label="Rare" value={rareCount} color="#1d4ed8" bg="#dbeafe" />
-                <RarityCount label="Epic" value={epicCount} color="#7e22ce" bg="#f3e8ff" />
+                <RarityCount label={rarityStyle.COMMON.label} value={commonCount} color="#0f766e" bg="#e6fffb" />
+                <RarityCount label={rarityStyle.RARE.label} value={rareCount} color="#1d4ed8" bg="#dbeafe" />
+                <RarityCount label={rarityStyle.EPIC.label} value={epicCount} color="#7e22ce" bg="#f3e8ff" />
               </Box>
             </Paper>
 
@@ -172,7 +172,7 @@ const RarityCount = ({ label, value, color, bg }: { label: string; value: number
 );
 
 const KnowledgeCardTile = ({ card, selected, onClick }: { card: CollectionKnowledgeTip; selected: boolean; onClick: () => void }) => {
-  if (!card.isCollected) return <UnknownKnowledgeCard />;
+  if (!card.isCollected) return <UnknownKnowledgeCard rarity={card.rarity} />;
   const style = rarityStyle[card.rarity];
   return (
     <Paper component="button" type="button" elevation={0} onClick={onClick} sx={{ appearance: "none", textAlign: "left", p: 1.5, minHeight: 112, borderRadius: 2, border: selected ? "2px solid #0052d9" : "1px solid #dbe3ef", bgcolor: card.isCollected ? "#fff" : "#f8fafc", opacity: card.isCollected ? 1 : 0.72, cursor: "pointer" }}>

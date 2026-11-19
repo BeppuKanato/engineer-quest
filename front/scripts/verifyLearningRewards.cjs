@@ -45,7 +45,15 @@ const plain=value=>JSON.parse(JSON.stringify(value));
  for(const sort of ['newest','rarity','course'])assert.deepEqual(plain(sortKnowledgeCards(cards,sort).map(x=>x.id)),['owned','hidden1','hidden2']);
  cards[0].rarity='COMMON';cards[2].rarity='EPIC';assert.deepEqual(plain(sortKnowledgeCards(cards,'rarity').map(x=>x.id)),['owned','hidden1','hidden2']);
  const {createElement}=require('react'),{renderToStaticMarkup}=require('react-dom/server');
- const {UnknownKnowledgeCard}=load(root+'/features/collection/UnknownKnowledgeCard.tsx');const hidden=renderToStaticMarkup(createElement(UnknownKnowledgeCard));assert(hidden.includes('？？？'));assert(hidden.includes('data-uncollected-card'));assert(!/<button|href=|title=/.test(hidden));
+ const {UnknownKnowledgeCard}=load(root+'/features/collection/UnknownKnowledgeCard.tsx');
+ const {knowledgeCardTones}=load(root+'/features/collection/knowledgeCard.tokens.ts');
+ for(const [rarity,label] of [['COMMON','コモン'],['RARE','レア'],['EPIC','エピック']]) {
+  const hidden=renderToStaticMarkup(createElement(UnknownKnowledgeCard,{rarity,title:'伏せた題名',description:'伏せた説明'}));
+  assert(hidden.includes('？？？'));assert(hidden.includes('data-uncollected-card'));assert(!/<button|href=|title=/.test(hidden));
+  assert(hidden.includes(label));assert(hidden.includes(knowledgeCardTones[rarity].color));assert(hidden.includes(knowledgeCardTones[rarity].bgcolor));
+  assert(!hidden.includes('伏せた題名')&&!hidden.includes('伏せた説明'),'Unowned cards expose rarity only');
+  assert.equal(presentationFor(rarity).tone.label,label,'Acquisition, achievement and final result share the Japanese label');
+ }
  const {FinalLearningRewards}=load(root+'/features/learning/rewards/FinalLearningRewards.tsx');const html=renderToStaticMarkup(createElement(FinalLearningRewards,{rewards:second}));assert(html.includes('この単元で獲得した実績'));assert(html.includes('data-achievement-id="phase"'));assert(html.includes('data-achievement-id="unit"'));assert(html.includes('/collection'));assert(html.includes('/achievements'));assert(html.includes('この単元で手に入れた知識カード'),'final result lists the earned cards');assert(html.includes('data-awarded-card="first"'));assert(html.includes('data-awarded-card="second"'));
  // #333: 結果画面のバンドは、そのフェーズで解除された分だけを見出し・題名・説明つきで出す。空なら何も出ない。
  const {AchievementBand,NewAchievementZone}=load(root+'/components/rewards/AchievementPresentation.tsx');
@@ -56,5 +64,11 @@ const plain=value=>JSON.parse(JSON.stringify(value));
  const zone=renderToStaticMarkup(createElement(NewAchievementZone,{items:[{...achievement,id:'unit',title:'単元を修了した'}]}));
  assert(zone.includes('data-new-achievements'));assert(zone.includes('新しい実績'));assert(zone.includes('data-achievement-id="unit"'));assert(!zone.includes('data-achievement-id="phase"'),'Final zone shows only the newly unlocked achievements');
  assert.equal(renderToStaticMarkup(createElement(NewAchievementZone,{items:[]})),'','Final zone renders nothing without new unlocks');
+ for(const [rarity,label] of [['COMMON','コモン'],['RARE','レア'],['EPIC','エピック']]) {
+  const japaneseBand=renderToStaticMarkup(createElement(AchievementBand,{items:[{...achievement,rarity}]}));
+  const japaneseFinal=renderToStaticMarkup(createElement(FinalLearningRewards,{rewards:{awardedCards:[{phaseKey:'execution',card:{id:'card',rarity,title:'カード'}}],unlockedAchievements:[{...achievement,rarity}]}}));
+  assert(japaneseBand.includes(label)&&japaneseFinal.includes(label));
+  assert(!/Common|Rare|Epic/.test(japaneseBand+japaneseFinal),'Shared reward labels must not show English');
+ }
  console.log('Learning rewards: bounded stages/rarity, card-only boundaries, result-screen achievement band, final new-achievement zone, final achievements, non-blocking boundary queue with unmount guard, click-to-reveal contract, neutral unknown cards and sorting passed.');
 })().catch(e=>{console.error(e);process.exitCode=1});
