@@ -237,7 +237,7 @@ const fbDedicatedSource = read(path.resolve(__dirname, "../src/features/learning
 assert.match(fbDedicatedSource, /FeedbackObservation/, "The dedicated screen keeps the uptake observation");
 assert.match(fbDedicatedSource, /onUnavailable/, "The dedicated screen never strands a learner without feedback");
 assert.match(confettiSource, /resultCheer/, "The phase preset plays the medium cheer");
-const soundSource = read(path.resolve(__dirname, "../src/app/component/soundFeedback.tsx"));
+const soundSource = read(path.resolve(__dirname, "../src/components/sound/SoundFeedback.tsx"));
 assert.match(soundSource, /resultCheer: \{ src: "\/audio\/se\/cheer-medium\.ogg"/, "The medium cheer is registered in the sound config");
 assert.match(soundSource, /resultCheerLarge: \{ src: "\/audio\/se\/cheer-large\.ogg"/, "The large cheer is registered in the sound config");
 const resultSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);

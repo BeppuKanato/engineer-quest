@@ -20,7 +20,7 @@ import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitP
 import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
-import { AchievementBand, NewAchievementZone } from "../rewards/AchievementPresentation";
+import { AchievementBand, NewAchievementZone } from "../../../components/rewards/AchievementPresentation";
 import { phaseResultAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";

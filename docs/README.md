@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [unlock-experience-460.md](unlock-experience-460.md) | 実装・自動検証（実DB E2E未実施） | 強化C2。実績解除の共通演出・解除音、知識カード獲得音の統一、共通依存の配置と2画面2サイズの表示証跡 |
 | [learning-day-source-459.md](learning-day-source-459.md) | 実装・サービス検証（実DB E2E未実施） | 強化A1。新フローの完了記録をホーム学習日と履歴へ接続、日本時間の日付境界と回帰検証、2サイズの履歴表示証跡 |
 | [dfs-motivation-121.md](dfs-motivation-121.md) | 記録 | Issue #121のDFS導入、共通描画の抽出、18場面と訪問順の検証、基準案の留保 |
 | [dfs-execution-122.md](dfs-execution-122.md) | 記録 | Issue #122のDFS動きの説明、BFS/DFS共有グラフの切り出し、17状態のPython実行照合と確認手順 |
