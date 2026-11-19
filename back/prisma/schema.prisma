@@ -235,6 +235,8 @@ model KnowledgeCard {
   description String
   connection  String
   useCase     String
+  // 作業状況の文言と分離した、関連する作るクエストの安定ID。対応なしは空配列。
+  relatedCreateQuestIds String[] @default([])
   searchKeywords String[] @default([])
   catalogNumber Int
   rarity      KnowledgeCardRarity @default(COMMON)
