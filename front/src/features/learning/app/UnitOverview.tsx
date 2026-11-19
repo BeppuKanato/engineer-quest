@@ -18,6 +18,7 @@ import { learningPhaseIcons } from "./learningPhaseIcons";
 import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
 import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
+import { ConceptProgressMap } from "./ConceptProgressMap";
 import { useLearningLog } from "./useLearningLog";
 
 
@@ -59,6 +60,7 @@ export function UnitOverview({ courseId }: { courseId: string }) {
           <LinearProgress aria-label="単元の進捗" variant="determinate" value={completed / unit.phases.length * 100} sx={{ my: 2, height: 8, borderRadius: 4 }} />
           {startError && <Alert severity="error" sx={{ my: 2 }}>{startError}</Alert>}
           <UnitPathMap unit={unit} next={next} completedIds={new Set(progress.phases.filter(phase => phase.status === "COMPLETED").map(phase => phase.phaseKey))} hasProgress={!!progress.unit} starting={starting} onStart={(index, isCurrent) => void start(isCurrent ? undefined : index)} />
+          <ConceptProgressMap courseId={courseId} />
           <UnitAchievements courseId={courseId} />
         </>}
     </Container>

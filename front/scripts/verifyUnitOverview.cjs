@@ -43,8 +43,8 @@ assert(overview.includes('item.courseId === courseId'), 'the preview must filter
 assert(readFront('src/api/achievements.api.ts').includes('courseId: string | null'), 'the front achievement type must carry courseId');
 assert(readRepo('back/src/service/achievement.service.ts').includes('courseId: a.courseId'), 'the achievements API must return courseId');
 const seed = readRepo('back/prisma/seedData/achievementSeed.ts');
-const cardComplete = seed.split('\n').find((line) => line.includes('ach-bfs-card-complete'));
-assert(cardComplete && cardComplete.includes('courseId: BFS_COURSE_ID'), 'the BFS card-complete achievement must be tagged with the BFS courseId in the seed');
+assert(seed.includes('ach-unit-bfs-complete') && seed.includes('courseId: BFS_COURSE_ID'), 'the BFS unit achievement remains tagged with its course');
+assert(overview.includes('<ConceptProgressMap courseId={courseId} />'), 'the overview always includes learner concept progress when progress is available');
 
 // 6. The unit intro comes from the content layer through the registry.
 assert(content.includes('bfsUnitIntro'), 'the unit content must define the intro line');

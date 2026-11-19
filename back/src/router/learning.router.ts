@@ -1,3 +1,4 @@
+import { getConceptProgressController } from "../controller/conceptProgress.controller";
 import { Router } from "express";
 
 import {
@@ -11,6 +12,7 @@ import { verifyFirebaseToken } from "../middleware/authMiddleware";
 
 const router = Router();
 
+router.get("/units/:courseId/concept-progress", verifyFirebaseToken, getConceptProgressController);
 router.get("/units/:courseId/progress", verifyFirebaseToken, getUnitProgressController);
 router.post("/units/:courseId/start", verifyFirebaseToken, startUnitController);
 router.post("/units/:courseId/complete", verifyFirebaseToken, completeUnitController);

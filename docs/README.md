@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [concept-progress-map-478.md](concept-progress-map-478.md) | 記録 | Issue #478の概念到達マップ、独立した参照用集計、初回正解率、概念名のレビュー候補と2サイズの画面証跡 |
 | [card-table-abolish-477.md](card-table-abolish-477.md) | 実装・自動検証（seed未適用） | 強化D2。全員共通21行の固定配布、コレクション取得時の救済、旧行共存と適用順序 |
 | [daily-review-front-476.md](daily-review-front-476.md) | 実装・自動検証・2サイズ撮影済み | 強化B3-b。ホームの復習カード、1問専用画面、4形式148問、対象外2問と実験記録への非接続 |
 | [daily-review-back-474.md](daily-review-back-474.md) | 実装・自動検証（migration未適用） | 強化B3-a。日次固定の復習選出、30日除外、独立した回答記録とAPI、学習記録への非干渉 |
