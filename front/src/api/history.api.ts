@@ -2,6 +2,8 @@ import { fetcher } from "@/lib/fetcher";
 import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
 export type HistoryEventType =
+  | "phase_completed"
+  | "unit_completed"
   | "activity_completed"
   | "mission_completed"
   | "course_completed"
