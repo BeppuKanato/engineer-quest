@@ -24,7 +24,13 @@ export type QuestBoardReactionSummary = {
   userReactedTypes: QuestReactionType[];
 };
 
-export type QuestPostSummary = {
+export type QuestBoardAuthorInfo = {
+  authorName: string;
+  authorMascotId: string | null;
+  authorAchievement: { title: string; rarity: "COMMON" | "RARE" | "EPIC" | "LEGENDARY"; iconKey: string } | null;
+};
+
+export type QuestPostSummary = QuestBoardAuthorInfo & {
   id: string;
   category: QuestPostCategory;
   categoryLabel: string;
@@ -34,7 +40,6 @@ export type QuestPostSummary = {
   code: string | null;
   referenceUrl: string | null;
   status: QuestPostStatus;
-  authorName: string;
   courseId: string | null;
   courseTitle: string | null;
   commentCount: number;
@@ -46,10 +51,9 @@ export type QuestPostSummary = {
   updatedAt: string;
 };
 
-export type QuestComment = {
+export type QuestComment = QuestBoardAuthorInfo & {
   id: string;
   body: string;
-  authorName: string;
   createdAt: string;
   updatedAt: string;
 };

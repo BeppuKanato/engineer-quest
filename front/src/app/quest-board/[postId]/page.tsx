@@ -47,6 +47,7 @@ import {
   type QuestPostStatus,
   type QuestReactionType,
 } from "@/api/questBoard.api";
+import { QuestBoardAuthor } from "../_components/QuestBoardAuthor";
 import { ActionButton } from "@/app/component/actionButton";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
@@ -301,9 +302,10 @@ export default function QuestPostDetailPage() {
                     <Typography variant="h4" fontWeight={900}>
                       {post.title}
                     </Typography>
-                    <Typography color="text.secondary" sx={{ mt: 1 }}>
-                      {post.authorName} / {formatDate(post.createdAt)}
-                    </Typography>
+                    <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1 }}>
+                      <QuestBoardAuthor author={post} isDeleted={post.isDeleted} />
+                      <Typography variant="body2" color="text.secondary">{formatDate(post.createdAt)}</Typography>
+                    </Stack>
                   </Box>
 
                   <Typography sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{post.body}</Typography>
@@ -407,9 +409,10 @@ export default function QuestPostDetailPage() {
                           <Typography sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                             {comment.body}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            {comment.authorName} / {formatDate(comment.createdAt)}
-                          </Typography>
+                          <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1 }}>
+                            <QuestBoardAuthor author={comment} />
+                            <Typography variant="body2" color="text.secondary">{formatDate(comment.createdAt)}</Typography>
+                          </Stack>
                         </Paper>
                       ))}
                     </Stack>
