@@ -2,7 +2,6 @@
 
 import { FeedbackDestination } from "@/app/component/feedbackV1";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import {
@@ -120,11 +119,7 @@ export default function HomePage() {
 
   const userData = homeData.user;
   const weekEntries = buildCurrentWeek(homeData.calendar);
-  const levelProgress =
-    userData.requireNextLevelExp === 0
-      ? 0
-      : Math.min(100, (userData.exp / userData.requireNextLevelExp) * 100);
-  const displayName = userData.displayName?.trim() || "Engineer";
+  const displayName = userData.displayName?.trim() || "エンジニア";
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fb" }}>
@@ -156,55 +151,6 @@ export default function HomePage() {
                     <Box>
                       <Chip label="エンジニア見習い" size="small" sx={{ mb: 1, fontWeight: 900, bgcolor: "#dbeafe", color: "#0b4ac8" }} />
                       <Typography sx={{ fontSize: 28, fontWeight: 950, lineHeight: 1.1 }}>{displayName}</Typography>
-                      <Chip label={`Lv. ${userData.level}`} sx={{ mt: 1.5, bgcolor: "#0057e7", color: "#fff", fontWeight: 900 }} />
-                    </Box>
-                  </Stack>
-
-                  <Box>
-                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-                      <Typography fontWeight={900}>EXP</Typography>
-                      <Typography color="text.secondary" fontWeight={800}>
-                        {userData.exp.toLocaleString()} / {userData.requireNextLevelExp.toLocaleString()}
-                      </Typography>
-                    </Stack>
-                    <LinearProgress
-                      variant="determinate"
-                      value={levelProgress}
-                      sx={{ height: 10, borderRadius: 999, bgcolor: "#e5e7eb", "& .MuiLinearProgress-bar": { borderRadius: 999, bgcolor: "#0057e7" } }}
-                    />
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            <Card sx={{ borderRadius: 3, border: "1px solid #e2e8f0", boxShadow: "0 12px 30px rgba(15,23,42,0.06)" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Stack spacing={2.5}>
-                  <Stack direction="row" spacing={1.25} alignItems="center">
-                    <EmojiEventsIcon sx={{ color: "#b45309" }} />
-                    <Typography variant="h6" fontWeight={950}>ランク</Typography>
-                  </Stack>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: 3,
-                        display: "grid",
-                        placeItems: "center",
-                        color: "#b45309",
-                        bgcolor: "#ffedd5",
-                      }}
-                    >
-                      <EmojiEventsIcon sx={{ fontSize: 42 }} />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontSize: 24, fontWeight: 950 }}>{userData.rank}</Typography>
-                      <Typography color="text.secondary">
-                        {homeData.nextRank
-                          ? `次のランクは「${homeData.nextRank.name}」`
-                          : "最高ランクに到達済み"}
-                      </Typography>
                     </Box>
                   </Stack>
                 </Stack>
@@ -254,7 +200,7 @@ export default function HomePage() {
                     <MascotFigure mascotId={mascotId} alt="応援する相棒" size="S" presentation="circle" />
                     <Box>
                       <Typography fontWeight={900}>いいペースだよ！</Typography>
-                      <Typography variant="body2" color="text.secondary">この調子でスキルをレベルアップしよう。</Typography>
+                      <Typography variant="body2" color="text.secondary">この調子で学習を続けよう。</Typography>
                     </Box>
                   </Box>
                 </Stack>
@@ -306,8 +252,7 @@ export default function HomePage() {
 const HomeSkeleton = () => (
   <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "360px minmax(0, 1fr)" }, gap: 3 }}>
     <Stack spacing={3}>
-      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
-      <Skeleton variant="rounded" height={190} sx={{ borderRadius: 3 }} />
+      <Skeleton variant="rounded" height={150} sx={{ borderRadius: 3 }} />
       <Skeleton variant="rounded" height={280} sx={{ borderRadius: 3 }} />
     </Stack>
     <Box>

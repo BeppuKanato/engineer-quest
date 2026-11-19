@@ -10,76 +10,6 @@ import { prisma } from "../lib/prisma";
 import { currentLearningStreak, getLearningDayKeys, learningDateKey as toDateKey, tokyoDate } from "./learningDays.service";
 import { unitGroupLabel, unitGroupProgress } from "./achievementConditions";
 
-const rankThresholds = [
-  { name: "Junior", requiredCompletedMissionCount: 0 },
-  { name: "Senior", requiredCompletedMissionCount: 6 },
-  { name: "Lead", requiredCompletedMissionCount: 14 },
-  { name: "Master", requiredCompletedMissionCount: 24 },
-];
-
-const requiredExperienceForLevel = (level: number): number => {
-  if (level <= 0) return 0;
-  return Math.floor(100 * Math.pow(level, 1.5));
-};
-
-const deriveLevelStatus = (experience: number) => {
-  let level = 1;
-
-  while (experience >= requiredExperienceForLevel(level + 1)) {
-    level += 1;
-  }
-
-  return {
-    level,
-    requireNextLevelExp: requiredExperienceForLevel(level + 1),
-  };
-};
-
-const buildRankStatus = (completedMissionCount: number) => {
-  const currentRank =
-    [...rankThresholds]
-      .reverse()
-      .find(
-        (rank) => completedMissionCount >= rank.requiredCompletedMissionCount
-      ) ?? rankThresholds[0];
-  const currentIndex = rankThresholds.findIndex(
-    (rank) => rank.name === currentRank.name
-  );
-  const nextRank = rankThresholds[currentIndex + 1] ?? null;
-
-  if (!nextRank) {
-    return {
-      rank: currentRank.name,
-      nextRank: null,
-      conditions: {
-        mission: [
-          {
-            title: `${currentRank.name}ランクに到達済み`,
-            status: "complete" as const,
-          },
-        ],
-      },
-    };
-  }
-
-  return {
-    rank: currentRank.name,
-    nextRank: { name: nextRank.name },
-    conditions: {
-      mission: Array.from(
-        { length: nextRank.requiredCompletedMissionCount },
-        (_, index) => ({
-          title: `Mission ${index + 1}個完了`,
-          status:
-            completedMissionCount >= index + 1
-              ? ("complete" as const)
-              : ("incomplete" as const),
-        })
-      ),
-    },
-  };
-};
-
 const calculateAchievementProgress = async (achievement: Achievement, userId: string) => {
   // 旧フローの条件は進捗源を失ったため 0 固定。新フロー条件は #78 で追加する。
   // 作る・カード系の条件も従来どおり Home では進捗を表示しない（実績画面が正本）。
@@ -228,16 +158,12 @@ const buildLearningCalendar = async (userId: string) => {
 export const getHomeByUser = async (user: {
   id: string;
   displayName: string | null;
-  experience: number;
   selectedMascotId: string;
   selectedTargetAchievementId: string | null;
 }) => {
   const completedAchievementCount = await prisma.userAchievement.count({
     where: { userId: user.id },
   });
-  const levelStatus = deriveLevelStatus(user.experience);
-  // ランクの基礎だった Mission 完了数は進捗源を失ったため 0 固定（#78 で単元進捗に再接続）。
-  const rankStatus = buildRankStatus(0);
   const [targetAchievement, calendar] = await Promise.all([
     getTargetAchievement(user.id, user.selectedTargetAchievementId),
     buildLearningCalendar(user.id),
@@ -246,10 +172,6 @@ export const getHomeByUser = async (user: {
   return {
     user: {
       displayName: user.displayName,
-      rank: rankStatus.rank,
-      level: levelStatus.level,
-      requireNextLevelExp: levelStatus.requireNextLevelExp,
-      exp: user.experience,
       selectedMascotId: user.selectedMascotId,
       completedMissionNum: 0,
       completedAchievementNum: completedAchievementCount,
@@ -263,8 +185,6 @@ export const getHomeByUser = async (user: {
       recommended: null,
       recommendedList: [],
     },
-    nextRank: rankStatus.nextRank,
-    nextRankCondition: rankStatus.conditions,
     targetAchievement,
     calendar,
   };
