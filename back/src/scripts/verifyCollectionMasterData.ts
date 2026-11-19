@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+import { AchievementConditionType as Condition, AchievementRarity as Rarity } from "@prisma/client";
 import { achievementSeed } from "../../prisma/seedData/achievementSeed";
 import { courseSeed } from "../../prisma/seedData/courseSeed";
 import { createQuestSeed } from "../../prisma/seedData/createQuestSeed";
@@ -107,6 +109,43 @@ const CARD_COURSES = [
   { courseId: BINARY_SEARCH_COURSE_ID, slots: BINARY_SEARCH_CARD_PHASE_SLOTS, phaseKeys: BINARY_SEARCH_PHASE_KEYS },
   { courseId: GREEDY_COINS_COURSE_ID, slots: GREEDY_COINS_CARD_PHASE_SLOTS, phaseKeys: GREEDY_COINS_PHASE_KEYS },
 ] as const;
+
+// Issue #471: 単元21件・横断10件・作る19件と、狙える目標の条件を検証する。
+assert.equal(achievementSeed.length, 50);
+for (const [rarity, count] of [[Rarity.COMMON, 12], [Rarity.RARE, 18], [Rarity.EPIC, 18], [Rarity.LEGENDARY, 2]] as const) {
+  assert.equal(achievementSeed.filter((achievement) => achievement.rarity === rarity).length, count, rarity);
+}
+assert.equal(achievementSeed.filter((achievement) => achievement.category === "CREATE_QUEST").length, 19);
+for (const course of CARD_COURSES) {
+  const achievements = achievementSeed.filter((achievement) => achievement.courseId === course.courseId);
+  assert.equal(achievements.length, 3, course.courseId);
+  for (const [condition, rarity] of [[Condition.UNIT_COMPLETE, Rarity.COMMON], [Condition.PHASE_COMPLETED, Rarity.RARE], [Condition.PHASE_NO_HINT_COMPLETE, Rarity.EPIC]] as const) {
+    const achievement = achievements.find((item) => item.conditionType === condition);
+    assert.ok(achievement, `${course.courseId}: ${condition}`);
+    assert.equal(achievement.rarity, rarity);
+    if (condition !== Condition.UNIT_COMPLETE) assert.equal(achievement.phaseKey, course.phaseKeys[6]);
+  }
+}
+assert.equal(achievementSeed.some((achievement) => achievement.conditionType === Condition.PHASE_FIRST_ATTEMPT_PERFECT), false);
+assert.equal(achievementSeed.some((achievement) => achievement.isSecret), false);
+const allUnits = achievementSeed.find((achievement) => achievement.id === "ach-unit-count-lv3");
+assert.ok(allUnits);
+assert.equal(allUnits.title, "全単元制覇");
+assert.equal(allUnits.conditionType, Condition.UNIT_COMPLETED_COUNT);
+assert.equal(allUnits.conditionValue, 7);
+assert.equal(allUnits.rarity, Rarity.LEGENDARY);
+const allCards = achievementSeed.find((achievement) => achievement.id === "ach-knowledge-all");
+assert.ok(allCards);
+assert.equal(allCards.conditionType, Condition.KNOWLEDGE_CARD_COUNT);
+assert.equal(allCards.conditionValue, 21);
+assert.equal(allCards.courseId, undefined);
+assert.equal(allCards.rarity, Rarity.LEGENDARY);
+const exploration = achievementSeed.find((achievement) => achievement.conditionType === Condition.UNIT_GROUP_COMPLETE);
+assert.ok(exploration);
+assert.deepEqual(exploration.conditionUnitIds, [BFS_COURSE_ID, DFS_COURSE_ID, BINARY_SEARCH_COURSE_ID, MAZE_DIGGING_COURSE_ID]);
+assert.equal(exploration.conditionGroupName, "探索系");
+assert.equal(exploration.rarity, Rarity.EPIC);
+assert.deepEqual(achievementSeed.filter((achievement) => achievement.conditionType === Condition.STREAK_DAYS).map((achievement) => [achievement.conditionValue, achievement.rarity]), [[3, Rarity.RARE], [7, Rarity.EPIC], [30, Rarity.EPIC]]);
 
 // 知識カード: カードを持つ単元ごとに3枚（Issue #108 の BFS に、Issue #215 で棒倒し法、Issue #236 でバブルソート、Issue #266 で穴掘り法、Issue #295 で二分探索、Issue #390 で貪欲法を追加）
 const expectedCardCount = CARD_COURSES.reduce((sum, course) => sum + course.slots.length, 0);

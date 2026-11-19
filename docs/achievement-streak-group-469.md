@@ -2,7 +2,7 @@
 
 - 目的: 新実績表の前提となる連続学習日数と、指定した単元集合の完了条件を評価できるようにする。
 - 適用範囲: バックエンドの評価器・ホーム目標実績・条件ラベル・Prismaの追加migration。seed差し替えと付与タイミング・フロント演出は対象外。
-- 状態: 実装・自動検証済み。migrationは未適用、実DB E2Eは未実施。
+- 状態: 実装・自動検証済み。migrationは #471 作業でdevへ適用済み。実DB E2Eは未実施。
 - 最終確認日: 2026-11-19。
 - 正本: [Issue #469](https://github.com/BeppuKanato/engineer-quest/issues/469)、学習日の定義は [Issue #459](https://github.com/BeppuKanato/engineer-quest/issues/459)、[開発ガイド](../AGENTS.md)。
 - 対象実装コミット: `ca57b88e`。
@@ -36,7 +36,7 @@ conditionUnitIds: [
 
 ## DB適用
 
-**DB適用が必要。実DBには未適用。** `20261119060000_achievement_unit_group` はenum値と2列を加えるだけで、既存実績や解除済み履歴を削除しない。既存行の単元配列は空、系名はnullとなる。
+**DB適用が必要。devには #471 作業で適用済み（[適用記録](achievement-table-rebuild-471.md)）。他環境の適用は未確認。** `20261119060000_achievement_unit_group` はenum値と2列を加えるだけで、既存実績や解除済み履歴を削除しない。既存行の単元配列は空、系名はnullとなる。
 
 対象を **local または dev** と明示し、利用する接続先を確認してから、`back` で次を実行する。接続文字列や資格情報は出力・共有しない。本番操作はこの作業には含まない。
 
