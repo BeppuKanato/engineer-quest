@@ -7,6 +7,9 @@ import { Achievement, AchievementConditionType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 
+import { currentLearningStreak, getLearningDayKeys, learningDateKey as toDateKey, tokyoDate } from "./learningDays.service";
+import { unitGroupLabel, unitGroupProgress } from "./achievementConditions";
+
 const rankThresholds = [
   { name: "Junior", requiredCompletedMissionCount: 0 },
   { name: "Senior", requiredCompletedMissionCount: 6 },
@@ -77,7 +80,7 @@ const buildRankStatus = (completedMissionCount: number) => {
   };
 };
 
-const calculateAchievementProgress = async (achievement: Achievement) => {
+const calculateAchievementProgress = async (achievement: Achievement, userId: string) => {
   // 旧フローの条件は進捗源を失ったため 0 固定。新フロー条件は #78 で追加する。
   // 作る・カード系の条件も従来どおり Home では進捗を表示しない（実績画面が正本）。
   switch (achievement.conditionType) {
@@ -104,10 +107,14 @@ const calculateAchievementProgress = async (achievement: Achievement) => {
       return { name: "Course終了試験Hardをクリア", goal: 1, progress: 0 };
     case AchievementConditionType.STREAK_DAYS:
       return {
-        name: `${achievement.conditionValue ?? 0}日連続で学習`,
-        goal: achievement.conditionValue ?? 0,
-        progress: 0,
+        name: `${achievement.conditionValue ?? 1}日連続で学習`,
+        goal: achievement.conditionValue ?? 1,
+        progress: currentLearningStreak(await getLearningDayKeys(userId)),
       };
+    case AchievementConditionType.UNIT_GROUP_COMPLETE: {
+      const units = await prisma.unitLearningProgress.findMany({ where: { userId, status: "COMPLETED" }, select: { courseId: true } });
+      return { name: unitGroupLabel(achievement), ...unitGroupProgress(achievement, new Set(units.map(unit => unit.courseId))) };
+    }
     case AchievementConditionType.CREATE_QUEST_SCORE:
     case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT:
     case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:
@@ -149,6 +156,7 @@ const buildAchievementTargetLink = (
       return { href: "/collection", actionLabel: "コレクションを見る" };
     case AchievementConditionType.UNIT_COMPLETE:
     case AchievementConditionType.UNIT_COMPLETED_COUNT:
+    case AchievementConditionType.UNIT_GROUP_COMPLETE:
     case AchievementConditionType.PHASE_COMPLETED:
     case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT:
     case AchievementConditionType.PHASE_NO_HINT_COMPLETE:
@@ -176,7 +184,7 @@ const getTargetAchievement = async (
 
   if (!achievement) return null;
 
-  const factor = await calculateAchievementProgress(achievement);
+  const factor = await calculateAchievementProgress(achievement, userId);
   const targetLink = buildAchievementTargetLink(achievement);
 
   return {
@@ -187,10 +195,6 @@ const getTargetAchievement = async (
   };
 };
 
-// Asia/Tokyo は UTC+9（夏時間なし）。実行環境のタイムゾーンに依存させない。
-const tokyoDate = (date: Date) => new Date(date.getTime() + 9 * 60 * 60 * 1000);
-const toDateKey = (date: Date) => tokyoDate(date).toISOString().slice(0, 10);
-
 const buildLearningCalendar = async (userId: string) => {
   const today = new Date();
   const localToday = tokyoDate(today);
@@ -198,27 +202,7 @@ const buildLearningCalendar = async (userId: string) => {
   const month = localToday.getUTCMonth();
   const monthKey = toDateKey(today).slice(0, 7);
 
-  // 欠落し得るクライアントイベントではなく、サーバーで確定した completedAt を使う。
-  const [submissions, phases, units] = await Promise.all([
-    prisma.createQuestSubmission.findMany({
-      where: { attempt: { userId } },
-      select: { submittedAt: true },
-    }),
-    prisma.phaseLearningProgress.findMany({
-      where: { userId, completedAt: { not: null } },
-      select: { completedAt: true },
-    }),
-    prisma.unitLearningProgress.findMany({
-      where: { userId, completedAt: { not: null } },
-      select: { completedAt: true },
-    }),
-  ]);
-  const learnedDates = [
-    ...submissions.map((submission) => submission.submittedAt),
-    ...phases.map((phase) => phase.completedAt),
-    ...units.map((unit) => unit.completedAt),
-  ].filter((date): date is Date => date !== null);
-  const learnedDateKeys = new Set(learnedDates.map(toDateKey));
+  const learnedDateKeys = await getLearningDayKeys(userId);
   const learnedDaysInMonth = [...learnedDateKeys]
     .filter((key) => key.startsWith(`${monthKey}-`))
     .map((key) => Number(key.slice(8, 10)));

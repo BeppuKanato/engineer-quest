@@ -4,6 +4,9 @@ import {
 import { AppError } from "../error/appError";
 import { prisma } from "../lib/prisma";
 
+import { currentLearningStreak, learningDayKeys } from "./learningDays.service";
+import { unitGroupLabel, unitGroupProgress } from "./achievementConditions";
+
 export type AchievementStatus = "achieved" | "visible_locked" | "secret_locked";
 
 export const achievementCategoryLabel: Record<AchievementCategory, string> = {
@@ -40,6 +43,7 @@ const conditionLabel = (a: Achievement) => {
     case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT: return "確認問題を初回で全問正解";
     case AchievementConditionType.PHASE_NO_HINT_COMPLETE: return "ヒントを使わずにフェーズを完了";
     case AchievementConditionType.STREAK_DAYS: return `${n}日連続で学習`;
+    case AchievementConditionType.UNIT_GROUP_COMPLETE: return unitGroupLabel(a);
   }
 };
 const stripLevel = (title: string) => title.replace(/\s*Lv\.\d+\s*$/, "").trim();
@@ -59,6 +63,7 @@ const targetLink = (a: Achievement) => {
 
 type PhaseStat = { status: string; summary: unknown };
 type Stats = {
+  streakDays: number;
   completedCourses: Set<string>;
   completedQuests: number; perfectQuests: number; optionalRequirements: number;
   cardCount: number; questScores: Map<string, number>;
@@ -72,10 +77,10 @@ const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> 
 const loadStats = async (userId: string): Promise<Stats> => {
   const [attempts, submissions, cards, unitProgress, phaseProgress] = await Promise.all([
     prisma.createQuestAttempt.findMany({ where: { userId }, select: { questId: true, status: true, bestScore: true } }),
-    prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true } }),
+    prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true, submittedAt: true } }),
     prisma.userKnowledgeCard.findMany({ where: { userId }, select: { knowledgeCard: { select: { courseId: true } } } }),
-    prisma.unitLearningProgress.findMany({ where: { userId }, select: { courseId: true, status: true } }),
-    prisma.phaseLearningProgress.findMany({ where: { userId }, select: { courseId: true, phaseKey: true, status: true, summary: true } }),
+    prisma.unitLearningProgress.findMany({ where: { userId }, select: { courseId: true, status: true, completedAt: true } }),
+    prisma.phaseLearningProgress.findMany({ where: { userId }, select: { courseId: true, phaseKey: true, status: true, summary: true, completedAt: true } }),
   ]);
   const optionalIds = new Set<string>();
   const cardsByCourse = new Map<string, number>();
@@ -86,6 +91,7 @@ const loadStats = async (userId: string): Promise<Stats> => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
   return {
+    streakDays: currentLearningStreak(learningDayKeys([...submissions.map(row => row.submittedAt), ...unitProgress.map(row => row.completedAt), ...phaseProgress.map(row => row.completedAt)])),
     // Course completion on the new flow means unit completion (#78 / #108).
     completedCourses: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
     completedUnits: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
@@ -136,7 +142,8 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
     case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT: return { goal, progress: s.optionalRequirements };
     case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT: return { goal, progress: s.perfectQuests };
     case AchievementConditionType.KNOWLEDGE_CARD_COUNT: return { goal, progress: a.courseId ? s.cardsByCourse.get(a.courseId) ?? 0 : s.cardCount };
-    case AchievementConditionType.STREAK_DAYS: return { goal, progress: 0 };
+    case AchievementConditionType.STREAK_DAYS: return { goal, progress: s.streakDays };
+    case AchievementConditionType.UNIT_GROUP_COMPLETE: return unitGroupProgress(a, s.completedUnits);
   }
 };
 

@@ -181,6 +181,8 @@ model Achievement {
 
   conditionType  AchievementConditionType
   conditionValue Int?
+  conditionUnitIds String[] @default([])
+  conditionGroupName String?
   courseId       String?
   createQuestId  String?
   phaseKey       String?
@@ -615,6 +617,7 @@ enum AchievementConditionType {
   COURSE_COMPLETED_COUNT
   UNIT_COMPLETE
   UNIT_COMPLETED_COUNT
+  UNIT_GROUP_COMPLETE
   PHASE_COMPLETED
   PHASE_FIRST_ATTEMPT_PERFECT
   PHASE_NO_HINT_COMPLETE
