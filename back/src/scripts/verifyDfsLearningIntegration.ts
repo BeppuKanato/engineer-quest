@@ -133,7 +133,7 @@ async function main() {
   await completed(0);
   assert.equal((await completed(1)).awardedCard?.id, dfsCards[0].id);
   assert.equal((await completed(1)).awardedCard, null, "A repeated completion cannot grant the same card");
-  assert.deepEqual((await completed(2, score)).unlockedAchievements, [], "Both check stages must be perfect");
+  assert.deepEqual((await completed(2, score)).unlockedAchievements, [], "Check-perfect achievements are retired");
   const interrupted = await getUnitProgressByUser(learner, DFS_COURSE_ID);
   assert.equal(interrupted.unit?.status, "IN_PROGRESS");
   assert.equal(interrupted.unit?.lastPhaseKey, phases[2]);
@@ -142,14 +142,12 @@ async function main() {
   await completed(3);
   const codeCheck = await completed(4, score);
   assert.equal(codeCheck.awardedCard?.id, dfsCards[1].id);
-  assert.deepEqual(codeCheck.unlockedAchievements.map(item => item.id), ["ach-phase-dfs-check-perfect"]);
-  assert.deepEqual((await completed(5, { firstAttemptCorrect: 5, totalQuestions: 5 })).unlockedAchievements.map(item => item.id), [
-    "ach-phase-dfs-consolidation-perfect",
-  ]);
+  assert.deepEqual(codeCheck.unlockedAchievements, []);
+  assert.deepEqual((await completed(5, { firstAttemptCorrect: 5, totalQuestions: 5 })).unlockedAchievements, []);
   const implementation = await completed(6, { testRuns: 2, hintUsage: [0, 0, 0, 0] });
   assert.equal(implementation.awardedCard?.id, dfsCards[2].id);
   assert.deepEqual(implementation.unlockedAchievements.map(item => item.id).sort(), [
-    "ach-dfs-card-complete", "ach-phase-dfs-implementation-clear", "ach-phase-dfs-implementation-nohint",
+    "ach-phase-dfs-implementation-clear", "ach-phase-dfs-implementation-nohint",
   ]);
   assert.deepEqual((await completeUnitByUser(learner, DFS_COURSE_ID)).unlockedAchievements.map(item => item.id), ["ach-unit-dfs-complete"]);
   assert.deepEqual((await completeUnitByUser(learner, DFS_COURSE_ID)).unlockedAchievements, []);
