@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [knowledge-card-use-context-480.md](knowledge-card-use-context-480.md) | 実装・静的検証（migration・seed未適用） | 強化D3-a。全21枚の作業状況、関連クエストID、重複2枚の差し替えと所持キー保持、D3-b向け参照契約 |
 | [concept-progress-map-478.md](concept-progress-map-478.md) | 記録 | Issue #478の概念到達マップ、独立した参照用集計、初回正解率、概念名のレビュー候補と2サイズの画面証跡 |
 | [card-table-abolish-477.md](card-table-abolish-477.md) | 実装・自動検証（seed未適用） | 強化D2。全員共通21行の固定配布、コレクション取得時の救済、旧行共存と適用順序 |
 | [daily-review-front-476.md](daily-review-front-476.md) | 実装・自動検証・2サイズ撮影済み | 強化B3-b。ホームの復習カード、1問専用画面、4形式148問、対象外2問と実験記録への非接続 |
