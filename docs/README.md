@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [daily-review-back-474.md](daily-review-back-474.md) | 実装・自動検証（migration未適用） | 強化B3-a。日次固定の復習選出、30日除外、独立した回答記録とAPI、学習記録への非干渉 |
 | [remove-exp-rank-display-473.md](remove-exp-rank-display-473.md) | 実装・自動検証・2画面2サイズ撮影済み | 判断2。EXP／レベル／ランクの表示・API項目削除、凍結フィードバックの互換性維持、DB適用不要 |
 | [achievement-table-rebuild-471.md](achievement-table-rebuild-471.md) | 実装・検証・dev保持seed適用済み（廃止分未削除） | 強化C1-b。実績50件の構成、解除履歴の保持、廃止21件の削除手順と影響 |
 | [achievement-streak-group-469.md](achievement-streak-group-469.md) | 実装・自動検証（dev migration適用済み） | 強化C1-a。日本時間の連続学習評価、指定単元集合の完了条件、ホーム／条件ラベル共通化とDB適用手順 |
