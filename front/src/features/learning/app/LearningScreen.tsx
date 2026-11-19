@@ -20,6 +20,7 @@ import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitP
 import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
+import { UnitCardKeywords } from "../rewards/UnitCardKeywords";
 import { AchievementBand, NewAchievementZone } from "../../../components/rewards/AchievementPresentation";
 import { phaseResultAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
@@ -231,7 +232,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     onFinalResult,
     onLearningEvent: log,
     rewards,
-    renderRewards: (value: LearningRewards) => <FinalLearningRewards rewards={value} onEvent={log} />,
+    renderRewards: (value: LearningRewards) => <><FinalLearningRewards rewards={value} onEvent={log} /><UnitCardKeywords courseId={courseId} /></>,
     renderPhaseAchievements: (phaseKey: string) => {
       const items = phaseUnlocks[phaseKey];
       return items?.length ? <AchievementBand items={items} phaseKey={phaseKey} onEvent={log} /> : null;

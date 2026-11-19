@@ -6,6 +6,7 @@ export type CollectionKnowledgeTip = {
   id: string; courseId: string; courseTitle: string; catalogNumber: number; label: string; title: string;
   description: string; connection: string | null; useCase: string | null; searchKeywords: string[];
   rarity: "COMMON" | "RARE" | "EPIC"; isCollected: boolean; collectedAt: string | null;
+  relatedQuests: { id: string; title: string }[];
 };
 export type CollectionAchievement = {
   id: string; category: string; categoryLabel: string; status: AchievementStatus; title: string;

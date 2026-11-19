@@ -15,6 +15,7 @@ import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { sortKnowledgeCards } from "@/features/collection/knowledgeCards";
 import { UnknownKnowledgeCard } from "@/features/collection/UnknownKnowledgeCard";
+import { RelatedQuestLinks } from "@/features/collection/RelatedQuestLinks";
 import { knowledgeCardTones as rarityStyle } from "@/features/collection/knowledgeCard.tokens";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
@@ -223,6 +224,7 @@ const KnowledgeDetailModal = ({ card, onClose }: { card: CollectionKnowledgeTip 
           <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2 }}><Typography fontWeight={900} color="#7e22ce" mb={1}>コースとのつながり</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{card.connection}</Typography></Box>
           <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2 }}><Typography fontWeight={900} color="#7e22ce" mb={1}>どこで使われる？</Typography><Typography color="text.secondary" sx={{ lineHeight: 1.8 }}>{card.useCase}</Typography></Box>
           <Box><Typography fontWeight={900} mb={1}>もっと調べるキーワード</Typography><Stack direction="row" gap={1} flexWrap="wrap">{card.searchKeywords.map((word) => <Chip key={word} label={word} size="small" />)}</Stack></Box>
+          <RelatedQuestLinks quests={card.relatedQuests ?? []} />
         </>}
         <DetailRow icon={<CalendarMonthIcon />} label="獲得日" value={card.collectedAt ? new Date(card.collectedAt).toLocaleString("ja-JP") : "未獲得"} />
         <DetailRow icon={<MenuBookIcon />} label="対象コース" value={card.courseTitle} />
