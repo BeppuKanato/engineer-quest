@@ -79,6 +79,8 @@
     "verify:response-feedback": "node scripts/verifyResponseFeedback.cjs",
     "verify:answer-feedback": "node scripts/verifyAnswerFeedback.cjs",
     "verify:parsons-order-feedback": "node scripts/verifyParsonsOrderFeedback.cjs",
+    "verify:static": "npm run verify:daily-review && npm run verify:home-layout",
+    "verify:daily-review": "node scripts/verifyDailyReview.cjs",
     "verify:home-layout": "node scripts/verifyHomeLayout.cjs",
     "verify:unit-overview": "node scripts/verifyUnitOverview.cjs",
     "verify:app-breadcrumbs": "node scripts/verifyAppBreadcrumbs.cjs",
