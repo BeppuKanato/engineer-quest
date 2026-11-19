@@ -2,7 +2,18 @@ import type { Mission, TargetAchievement } from "@/app/home/type";
 import { fetcher } from "@/lib/fetcher";
 import { fetchClientQuery, queryTags } from "@/lib/clientQueryCache";
 
+export type HomeUnit = {
+  id: string; title: string; group: string; status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+  completedPhases: number; totalPhases: number; collectedCards: number; totalCards: number;
+  href: string; resumeHref: string; nextPhase: string | null;
+};
 export type HomeResponse = {
+  overview: { completedUnits: number; totalUnits: number; collectedCards: number; totalCards: number; units: HomeUnit[] };
+  today: { recommended: HomeUnit | null; nearAchievements: { id: string; title: string; progress: number; goal: number; href: string }[]; nearCards: HomeUnit[] };
+  resume: (HomeUnit & { nextStep: string | null }) | null;
+  hasInProgressUnit: boolean;
+  week: { streakDays: number; days: { date: string; label: string; learned: boolean; isToday: boolean }[] };
+  questions: { id: string; title: string; createdAt: string; href: string }[];
   user: {
     displayName: string | null;
     selectedMascotId: string;

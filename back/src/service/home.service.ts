@@ -1,191 +1,89 @@
-/**
- * Home表示用の集約。旧フロー（Mission/Activity）の進捗源は削除済みで、
- * 学習カレンダーは新フローの確定済み完了記録と「作る」提出を源にする。
- * 単元の進捗・再開表示は新フローの進捗モデル接続（#78）で置き換える。
- */
-import { Achievement, AchievementConditionType } from "@prisma/client";
-
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import definitions from "../learning/feedback/concepts.json";
+import { getAchievementsByUser } from "./achievement.service";
+import { currentLearningStreak, getLearningDayKeys, learningDateKey, tokyoDate } from "./learningDays.service";
 
-import { currentLearningStreak, getLearningDayKeys, learningDateKey as toDateKey, tokyoDate } from "./learningDays.service";
-import { unitGroupLabel, unitGroupProgress } from "./achievementConditions";
+const object = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+const groupFor = (kind: string) => ["bfs", "dfs", "binary-search"].includes(kind) ? "探索" : ["wall-extension", "maze-digging"].includes(kind) ? "迷路生成" : kind === "bubble-sort" ? "並び替え" : "最適化";
 
-const calculateAchievementProgress = async (achievement: Achievement, userId: string) => {
-  // 旧フローの条件は進捗源を失ったため 0 固定。新フロー条件は #78 で追加する。
-  // 作る・カード系の条件も従来どおり Home では進捗を表示しない（実績画面が正本）。
-  switch (achievement.conditionType) {
-    case AchievementConditionType.MISSION_COUNT:
-      return {
-        name: `Missionを${achievement.conditionValue ?? 0}個完了`,
-        goal: achievement.conditionValue ?? 0,
-        progress: 0,
-      };
-    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
-      return { name: "指定Missionを完了", goal: 1, progress: 0 };
-    case AchievementConditionType.ACTIVITY_COUNT:
-      return {
-        name: `Activityを${achievement.conditionValue ?? 0}個完了`,
-        goal: achievement.conditionValue ?? 0,
-        progress: 0,
-      };
-    case AchievementConditionType.COURSE_COMPLETE:
-    case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
-      return { name: "Course内の必須Missionを完了", goal: 1, progress: 0 };
-    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
-      return { name: "Challengeを含めたMissionを完了", goal: 1, progress: 0 };
-    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
-      return { name: "Course終了試験Hardをクリア", goal: 1, progress: 0 };
-    case AchievementConditionType.STREAK_DAYS:
-      return {
-        name: `${achievement.conditionValue ?? 1}日連続で学習`,
-        goal: achievement.conditionValue ?? 1,
-        progress: currentLearningStreak(await getLearningDayKeys(userId)),
-      };
-    case AchievementConditionType.UNIT_GROUP_COMPLETE: {
-      const units = await prisma.unitLearningProgress.findMany({ where: { userId, status: "COMPLETED" }, select: { courseId: true } });
-      return { name: unitGroupLabel(achievement), ...unitGroupProgress(achievement, new Set(units.map(unit => unit.courseId))) };
-    }
-    case AchievementConditionType.CREATE_QUEST_SCORE:
-    case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT:
-    case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:
-    case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT:
-    case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
-    case AchievementConditionType.COURSE_COMPLETED_COUNT:
-    case AchievementConditionType.UNIT_COMPLETE:
-    case AchievementConditionType.UNIT_COMPLETED_COUNT:
-    case AchievementConditionType.PHASE_COMPLETED:
-    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT:
-    case AchievementConditionType.PHASE_NO_HINT_COMPLETE:
-      return { name: achievement.title, goal: achievement.conditionValue ?? 1, progress: 0 };
-  }
-};
-
-const buildAchievementTargetLink = (
-  achievement: Pick<Achievement, "conditionType" | "courseId">
-) => {
-  switch (achievement.conditionType) {
-    case AchievementConditionType.SPECIFIC_MISSION_CLEAR:
-    case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE:
-    case AchievementConditionType.COURSE_ALL_MISSION_COMPLETE:
-    case AchievementConditionType.COURSE_COMPLETE:
-    case AchievementConditionType.COURSE_EXAM_HARD_CLEAR:
-    case AchievementConditionType.COURSE_COMPLETED_COUNT:
-      return achievement.courseId
-        ? { href: "/courses", actionLabel: "対象コースを見る" }
-        : { href: "/courses", actionLabel: "コースを選ぶ" };
-    case AchievementConditionType.MISSION_COUNT:
-    case AchievementConditionType.ACTIVITY_COUNT:
-    case AchievementConditionType.STREAK_DAYS:
-      return { href: "/courses", actionLabel: "学習を続ける" };
-    case AchievementConditionType.CREATE_QUEST_SCORE:
-    case AchievementConditionType.CREATE_QUEST_COMPLETED_COUNT:
-    case AchievementConditionType.CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT:
-    case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT:
-      return { href: "/create", actionLabel: "作る課題に挑戦する" };
-    case AchievementConditionType.KNOWLEDGE_CARD_COUNT:
-      return { href: "/collection", actionLabel: "コレクションを見る" };
-    case AchievementConditionType.UNIT_COMPLETE:
-    case AchievementConditionType.UNIT_COMPLETED_COUNT:
-    case AchievementConditionType.UNIT_GROUP_COMPLETE:
-    case AchievementConditionType.PHASE_COMPLETED:
-    case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT:
-    case AchievementConditionType.PHASE_NO_HINT_COMPLETE:
-      return { href: "/courses", actionLabel: "学習を続ける" };
-  }
-};
-
-const getTargetAchievement = async (
-  userId: string,
-  selectedTargetAchievementId: string | null
-) => {
-  if (!selectedTargetAchievementId) return null;
-
-  const achievement = await prisma.achievement.findFirst({
-    where: {
-      id: selectedTargetAchievementId,
-      isSecret: false,
-      userAchievements: {
-        none: {
-          userId,
-        },
-      },
-    },
-  });
-
-  if (!achievement) return null;
-
-  const factor = await calculateAchievementProgress(achievement, userId);
-  const targetLink = buildAchievementTargetLink(achievement);
-
+/** #459の確定記録だけを使う。週は月境界でも日本時間の日付キーで判定する。 */
+export async function getHomeCalendar(userId: string, now = new Date()) {
+  const keys = await getLearningDayKeys(userId), today = tokyoDate(now), todayKey = learningDateKey(now);
+  const cursor = new Date(now); let continuationDays = 0;
+  while (keys.has(learningDateKey(cursor))) { continuationDays++; cursor.setUTCDate(cursor.getUTCDate() - 1); }
+  const weekStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay()));
   return {
-    title: achievement.title,
-    href: targetLink.href,
-    actionLabel: targetLink.actionLabel,
-    factor: [factor],
+    calendar: { year: today.getUTCFullYear(), month: today.getUTCMonth(), date: today.getUTCDate(),
+      learnedDays: [...keys].filter(key => key.startsWith(todayKey.slice(0, 7) + "-")).map(key => Number(key.slice(8))).sort((a, b) => a - b),
+      continuationDays, totalDays: keys.size, hasLearnedToday: keys.has(todayKey) },
+    week: { streakDays: currentLearningStreak(keys, now), days: Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(weekStart.getTime() + index * 86400000), key = date.toISOString().slice(0, 10);
+      return { date: key, label: ["日", "月", "火", "水", "木", "金", "土"][index], learned: keys.has(key), isToday: key === todayKey };
+    }) },
   };
-};
+}
 
-const buildLearningCalendar = async (userId: string) => {
-  const today = new Date();
-  const localToday = tokyoDate(today);
-  const year = localToday.getUTCFullYear();
-  const month = localToday.getUTCMonth();
-  const monthKey = toDateKey(today).slice(0, 7);
-
-  const learnedDateKeys = await getLearningDayKeys(userId);
-  const learnedDaysInMonth = [...learnedDateKeys]
-    .filter((key) => key.startsWith(`${monthKey}-`))
-    .map((key) => Number(key.slice(8, 10)));
-
-  let continuationDays = 0;
-  const cursor = new Date(today);
-  while (learnedDateKeys.has(toDateKey(cursor))) {
-    continuationDays += 1;
-    cursor.setUTCDate(cursor.getUTCDate() - 1);
-  }
-
-  return {
-    year,
-    month,
-    date: localToday.getUTCDate(),
-    learnedDays: learnedDaysInMonth.sort((a, b) => a - b),
-    continuationDays,
-    totalDays: learnedDateKeys.size,
-    hasLearnedToday: learnedDateKeys.has(toDateKey(today)),
-  };
-};
+/** 生成済みの次の一歩だけを読む。フィードバックの生成・再評価は行わない。 */
+export function homeFeedbackStep(result: Prisma.JsonValue | null) {
+  const selection = object(object(result).selection);
+  const first = Array.isArray(selection.candidates) ? object(selection.candidates[0]).nextStep : undefined;
+  const value = typeof first === "string" ? first : selection.nextStep;
+  return typeof value === "string" && value.trim() ? value.replace(/\s+/g, " ").trim() : null;
+}
 
 export const getHomeByUser = async (user: {
-  id: string;
-  displayName: string | null;
-  selectedMascotId: string;
-  selectedTargetAchievementId: string | null;
+  id: string; displayName: string | null; selectedMascotId: string; selectedTargetAchievementId: string | null;
 }) => {
-  const completedAchievementCount = await prisma.userAchievement.count({
-    where: { userId: user.id },
-  });
-  const [targetAchievement, calendar] = await Promise.all([
-    getTargetAchievement(user.id, user.selectedTargetAchievementId),
-    buildLearningCalendar(user.id),
+  const now = new Date(), courseIds = definitions.map(unit => unit.courseId);
+  const [courses, units, phases, cards, achievementData, dates, feedback, questions, completedAchievementCount] = await Promise.all([
+    prisma.course.findMany({ where: { id: { in: courseIds }, isPublished: true }, select: { id: true, title: true } }),
+    prisma.unitLearningProgress.findMany({ where: { userId: user.id }, select: { courseId: true, status: true, lastPhaseKey: true, updatedAt: true, startedAt: true } }),
+    prisma.phaseLearningProgress.findMany({ where: { userId: user.id }, select: { courseId: true, phaseKey: true, status: true, updatedAt: true } }),
+    prisma.knowledgeCard.findMany({ where: { isPublished: true, courseId: { in: courseIds }, course: { isPublished: true } }, select: { courseId: true, userKnowledgeCards: { where: { userId: user.id }, select: { id: true } } } }),
+    getAchievementsByUser(user), getHomeCalendar(user.id, now),
+    prisma.feedbackV1.findFirst({ where: { userId: user.id, status: "COMPLETED" }, orderBy: [{ generatedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }, { id: "desc" }], select: { result: true } }),
+    prisma.questPost.findMany({ where: { category: "QUESTION", status: "OPEN", visibility: "PUBLIC", createdAt: { gte: new Date(now.getTime() - 7 * 86400000), lte: now } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 3, select: { id: true, title: true, createdAt: true } }),
+    prisma.userAchievement.count({ where: { userId: user.id } }),
   ]);
-
+  const overviewUnits = definitions.flatMap(definition => {
+    const course = courses.find(row => row.id === definition.courseId); if (!course) return [];
+    const progress = units.find(row => row.courseId === course.id);
+    const completePhases = new Set(phases.filter(row => row.courseId === course.id && row.status === "COMPLETED").map(row => row.phaseKey));
+    const inProgressPhase = phases.filter(row => row.courseId === course.id && row.status === "IN_PROGRESS" && definition.phases.some(phase => phase.id === row.phaseKey)).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+    const last = definition.phases.find(phase => phase.id === (inProgressPhase?.phaseKey ?? progress?.lastPhaseKey) && !completePhases.has(phase.id));
+    const firstIncomplete = definition.phases.find(phase => !completePhases.has(phase.id));
+    const next = last && firstIncomplete && last.phase <= firstIncomplete.phase ? last : firstIncomplete;
+    const base = `/courses/roadmap/${encodeURIComponent(course.id)}`;
+    const held = cards.filter(card => card.courseId === course.id && card.userKnowledgeCards.length > 0).length;
+    return [{ id: course.id, title: course.title, group: groupFor(definition.kind), status: progress?.status ?? "NOT_STARTED",
+      completedPhases: definition.phases.filter(phase => completePhases.has(phase.id)).length, totalPhases: definition.phases.length,
+      collectedCards: held, totalCards: cards.filter(card => card.courseId === course.id).length,
+      href: base, resumeHref: next ? `${base}/learn?phase=${encodeURIComponent(next.id)}` : `${base}/learn`, nextPhase: next?.formalName ?? null,
+    }];
+  });
+  // 再開順は開始時刻ではなく、単元・フェーズの保存更新日時を使う。
+  const lastTouched = (courseId: string) => Math.max(0, ...units.filter(row => row.courseId === courseId).map(row => row.updatedAt.getTime()), ...phases.filter(row => row.courseId === courseId).map(row => row.updatedAt.getTime()));
+  const active = overviewUnits.filter(unit => unit.status === "IN_PROGRESS").sort((a, b) => lastTouched(b.id) - lastTouched(a.id) || a.id.localeCompare(b.id));
+  const resume = active[0] ?? null;
+  const recommended = resume ?? overviewUnits.find(unit => unit.status === "NOT_STARTED") ?? null;
+  const achievements = achievementData.groups.flatMap(group => group.achievements);
+  const nearAchievements = achievements.filter(item => item.status === "visible_locked" && item.progress > 0 && item.progress < item.goal)
+    .sort((a, b) => Math.min(1, b.progress / b.goal) - Math.min(1, a.progress / a.goal) || (a.id === user.selectedTargetAchievementId ? -1 : b.id === user.selectedTargetAchievementId ? 1 : a.id.localeCompare(b.id))).slice(0, 2);
+  const selected = achievements.find(item => item.id === user.selectedTargetAchievementId && item.status === "visible_locked");
   return {
-    user: {
-      displayName: user.displayName,
-      selectedMascotId: user.selectedMascotId,
-      completedMissionNum: 0,
-      completedAchievementNum: completedAchievementCount,
-      todayCompletedMissionCount: 0,
-      dailyMissionGoal: 5,
-      continuationDays: calendar.continuationDays,
-      totalDays: calendar.totalDays,
-    },
-    missions: {
-      resume: null,
-      recommended: null,
-      recommendedList: [],
-    },
-    targetAchievement,
-    calendar,
+    user: { displayName: user.displayName, selectedMascotId: user.selectedMascotId, completedMissionNum: 0, completedAchievementNum: completedAchievementCount,
+      todayCompletedMissionCount: 0, dailyMissionGoal: 5, continuationDays: dates.calendar.continuationDays, totalDays: dates.calendar.totalDays },
+    // 旧クライアント互換。現在のUIはoverview/today/resumeを使う。
+    missions: { resume: null, recommended: null, recommendedList: [] },
+    targetAchievement: selected ? { title: selected.title, href: selected.href, actionLabel: selected.actionLabel, factor: [{ name: selected.conditionLabel ?? selected.title, goal: selected.goal, progress: selected.progress }] } : null,
+    ...dates,
+    overview: { completedUnits: overviewUnits.filter(unit => unit.status === "COMPLETED").length, totalUnits: overviewUnits.length,
+      collectedCards: overviewUnits.reduce((sum, unit) => sum + unit.collectedCards, 0), totalCards: overviewUnits.reduce((sum, unit) => sum + unit.totalCards, 0), units: overviewUnits },
+    today: { recommended, nearAchievements: nearAchievements.map(({ id, title, progress, goal, href }) => ({ id, title, progress, goal, href })),
+      nearCards: overviewUnits.filter(unit => unit.collectedCards > 0 && unit.collectedCards === unit.totalCards - 1) },
+    resume: resume ? { ...resume, nextStep: feedback ? homeFeedbackStep(feedback.result) : null } : null,
+    hasInProgressUnit: active.length > 0,
+    questions: questions.map(question => ({ id: question.id, title: question.title, createdAt: question.createdAt.toISOString(), href: `/quest-board/${encodeURIComponent(question.id)}` })),
   };
 };

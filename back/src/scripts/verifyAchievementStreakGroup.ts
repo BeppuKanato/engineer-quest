@@ -34,6 +34,9 @@ Object.assign(prisma.createQuestSubmission, { findMany: async (args: Prisma.Crea
 Object.assign(prisma.createQuestAttempt, { findMany: async () => [{ questId: "q", status: "COMPLETED", bestScore: 100 }] });
 Object.assign(prisma.userKnowledgeCard, { findMany: async () => [{ knowledgeCard: { courseId: "a" } }, { knowledgeCard: { courseId: "a" } }] });
 Object.assign(prisma.knowledgeCard, { findMany: async () => [] });
+Object.assign(prisma.course, { findMany: async () => [] });
+Object.assign(prisma.feedbackV1, { findFirst: async () => null });
+Object.assign(prisma.questPost, { findMany: async () => [] });
 Object.assign(prisma.achievement, {
   findMany: async () => definitions.map(entry => ({ ...entry, userAchievements: owned.has(entry.id) ? [{ achievedAt: date }] : [] })),
   findFirst: async (args: Prisma.AchievementFindFirstArgs) => definitions.find(entry => entry.id === args.where?.id && !owned.has(entry.id)) ?? null,

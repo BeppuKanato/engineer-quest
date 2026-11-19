@@ -34,7 +34,7 @@ const cardSx = {
  * 目標の表示に所要日数・期限などの時間指定は付けない。
  * 取得に失敗した場合はホームを壊さず、何も出さない。
  */
-export function BigGoalBanner() {
+export function BigGoalBanner({ currentOnly = false }: { currentOnly?: boolean } = {}) {
   const { status, token } = useUserSession();
   const [current, setCurrent] = useState<BigGoal | null>(null);
   const [past, setPast] = useState<BigGoal[]>([]);
@@ -46,7 +46,7 @@ export function BigGoalBanner() {
       try {
         const [currentResult, historyResult] = await Promise.all([
           getCurrentBigGoal(token),
-          getBigGoalHistory(token),
+          currentOnly ? Promise.resolve({ goals: [] }) : getBigGoalHistory(token),
         ]);
         if (!isMounted) return;
         setCurrent(currentResult.goal);
@@ -62,7 +62,7 @@ export function BigGoalBanner() {
     return () => {
       isMounted = false;
     };
-  }, [status, token]);
+  }, [status, token, currentOnly]);
 
   if (!current && past.length === 0) return null;
 
