@@ -1,8 +1,12 @@
-import { AchievementConditionType } from "@prisma/client";
+import { AchievementConditionType, type Achievement } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { achievementCategoryLabel } from "./achievement.service";
 
-const conditionLabel = (type: AchievementConditionType, value: number | null) => {
+import { unitGroupLabel } from "./achievementConditions";
+
+const conditionLabel = (achievement: Achievement) => {
+  const { conditionType: type, conditionValue: value } = achievement;
+  if (type === AchievementConditionType.UNIT_GROUP_COMPLETE) return unitGroupLabel(achievement);
   const n = value ?? 0;
   const labels: Partial<Record<AchievementConditionType, string>> = {
     MISSION_COUNT: `Missionを${n}個完了`, SPECIFIC_MISSION_CLEAR: "指定Missionを完了",
@@ -47,7 +51,7 @@ export const getCollectionByUser = async (user: { id: string; selectedProfileAch
       id: a.id, category: a.category, categoryLabel: achievementCategoryLabel[a.category], rarity: a.rarity,
       iconKey: a.iconKey, status: achievedAt ? "achieved" : hidden ? "secret_locked" : "visible_locked",
       title: hidden ? "???" : a.title, description: hidden ? "条件を満たすと内容が表示されます。" : a.description,
-      conditionLabel: hidden ? null : conditionLabel(a.conditionType, a.conditionValue), achievedAt: achievedAt?.toISOString() ?? null,
+      conditionLabel: hidden ? null : conditionLabel(a), achievedAt: achievedAt?.toISOString() ?? null,
       isProfileSelected: Boolean(achievedAt && user.selectedProfileAchievementId === a.id),
     };
   });

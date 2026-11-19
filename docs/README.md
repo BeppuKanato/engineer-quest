@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [achievement-streak-group-469.md](achievement-streak-group-469.md) | 実装・自動検証（migration未適用） | 強化C1-a。日本時間の連続学習評価、指定単元集合の完了条件、ホーム／条件ラベル共通化とDB適用手順 |
 | [board-author-presence-468.md](board-author-presence-468.md) | 実装・自動検証（実DB E2E未実施） | 強化E1。掲示板の投稿・コメントへのマスコットとプロフィール実績表示、削除済み投稿の著者情報非表示、2画面2サイズの証跡 |
 | [unowned-card-rarity-463.md](unowned-card-rarity-463.md) | 実装・自動検証（実DB E2E未実施） | 強化D1。未所持カードのレアリティ表示と共通ラベルのカタカナ化、内容の非表示・並び順の回帰検証、2サイズの表示証跡 |
 | [unlock-experience-460.md](unlock-experience-460.md) | 実装・自動検証（実DB E2E未実施） | 強化C2。実績解除の共通演出・解除音、知識カード獲得音の統一、共通依存の配置と2画面2サイズの表示証跡 |
