@@ -50,7 +50,7 @@ function Presentation({ card, boundary, onDone, onEvent }: { card: AwardedCard; 
     if (stage !== "appearance") return;
     let remaining: number = spec.durations[1];
     let started = 0, timer: ReturnType<typeof setTimeout> | undefined;
-    const advance = () => { play("cardAcquired"); setStage("praise"); };
+    const advance = () => { play("achievementUnlocked"); setStage("praise"); };
     const resume = () => { started = performance.now(); timer = setTimeout(advance, remaining); };
     const visibility = () => {
       if (document.visibilityState === "hidden") { if (timer !== undefined) { clearTimeout(timer); remaining = Math.max(0, remaining - (performance.now() - started)); timer = undefined; } }

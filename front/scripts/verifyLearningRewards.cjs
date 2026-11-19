@@ -48,7 +48,7 @@ const plain=value=>JSON.parse(JSON.stringify(value));
  const {UnknownKnowledgeCard}=load(root+'/features/collection/UnknownKnowledgeCard.tsx');const hidden=renderToStaticMarkup(createElement(UnknownKnowledgeCard));assert(hidden.includes('？？？'));assert(hidden.includes('data-uncollected-card'));assert(!/<button|href=|title=/.test(hidden));
  const {FinalLearningRewards}=load(root+'/features/learning/rewards/FinalLearningRewards.tsx');const html=renderToStaticMarkup(createElement(FinalLearningRewards,{rewards:second}));assert(html.includes('この単元で獲得した実績'));assert(html.includes('data-achievement-id="phase"'));assert(html.includes('data-achievement-id="unit"'));assert(html.includes('/collection'));assert(html.includes('/achievements'));assert(html.includes('この単元で手に入れた知識カード'),'final result lists the earned cards');assert(html.includes('data-awarded-card="first"'));assert(html.includes('data-awarded-card="second"'));
  // #333: 結果画面のバンドは、そのフェーズで解除された分だけを見出し・題名・説明つきで出す。空なら何も出ない。
- const {AchievementBand,NewAchievementZone}=load(root+'/features/learning/rewards/AchievementPresentation.tsx');
+ const {AchievementBand,NewAchievementZone}=load(root+'/components/rewards/AchievementPresentation.tsx');
  const band=renderToStaticMarkup(createElement(AchievementBand,{items:[achievement],phaseKey:'check'}));
  assert(band.includes('data-achievement-band'));assert(band.includes('実績を獲得しました'));assert(band.includes('data-achievement-id="phase"'));assert(band.includes('確認できた役割'));assert(band.includes('初回の回答で確認'));
  assert.equal(renderToStaticMarkup(createElement(AchievementBand,{items:[]})),'','Band renders nothing without unlocks');
