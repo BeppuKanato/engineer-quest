@@ -36,6 +36,7 @@ assert(!vocabulary.some(entry => entry.firstStepId === "social-utility"));
 assert(content.intervalMs >= 2500);
 assert(!steps.slice(0, -1).some(step => /幅優先探索|BFS/u.test(step.caption)), "Name must not appear early");
 assert.match(steps.at(-1).caption, /幅優先探索/u);
+assert.match(steps.at(-1).caption, /同じグラフで1本の道を奥へ進む深さ優先探索/u);
 assert(steps.slice(0, -1).every(step => step.canvas.state.exit === null));
 assert.equal(steps.at(-1).canvas.state.exit.nextPhase, 2);
 assert(steps.every(step => (step.caption.match(/[。？]/gu) ?? []).length === 1), "One caption sentence per scene");

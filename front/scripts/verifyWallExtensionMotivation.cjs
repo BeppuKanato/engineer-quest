@@ -57,6 +57,7 @@ assert.deepEqual(plain(steps.map(step => step.id)), [
 ]);
 assert(steps.every(step => (step.caption.match(/[。？]/gu) ?? []).length === 1), "One sentence per scene");
 assert(!steps.some(step => /棒倒し法|フェーズ/u.test(step.caption)), "No algorithm name or developer terms in phase 1");
+assert.match(steps.at(-1).caption, /迷路を作る別の方法には穴掘り法/u);
 assert(steps.slice(0, -1).every(step => step.canvas.state.exit === null), "Exit only on the last scene");
 assert.deepEqual(plain(steps.at(-1).canvas.state.exit), { label: "動きの説明へ進む", nextPhase: 2 });
 assert.equal(content.vocabulary.length, new Set(content.vocabulary.map(entry => entry.concept)).size);

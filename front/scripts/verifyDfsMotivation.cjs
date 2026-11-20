@@ -38,6 +38,7 @@ assert.deepEqual(plain(steps.map(step => step.id)), [
 assert(steps.every(step => (step.caption.match(/[。？]/gu) ?? []).length === 1), "One sentence per scene");
 assert(!steps.slice(0, -1).some(step => /深さ優先探索|DFS|スタック|再帰/u.test(step.caption)));
 assert.match(steps.at(-1).caption, /深さ優先探索/u);
+assert.match(steps.at(-1).caption, /同じグラフを近い順に調べる幅優先探索/u);
 assert(!steps.some(step => /フェーズ|最短|最少|何歩|\d歩/u.test(step.caption)), "No developer terms or shortest-path claims");
 assert(steps.slice(0, -1).every(step => !step.canvas.state.exit));
 assert.equal(steps.at(-1).canvas.state.exit, true);
