@@ -98,6 +98,12 @@ export const getCreateQuests = (token: string): Promise<CreateQuest[]> =>
     staleTimeMs: 30_000,
     tags: [queryTags.works],
   });
+
+export type UnitCreateQuest = { id: string; title: string };
+/** 最終結果の導線に必要な公開クエスト名だけを取得する。 */
+export const getUnitCreateQuests = (token: string, courseId: string): Promise<{ items: UnitCreateQuest[] }> =>
+  fetcher(`/courses/${encodeURIComponent(courseId)}/create-quests`, { token });
+
 export const getCreateQuest = (token: string, questId: string): Promise<CreateQuest> =>
   fetcher<CreateQuest>(`/create-quests/${encodeURIComponent(questId)}`, { token });
 export const startCreateQuestAttempt = async (token: string, questId: string) => {

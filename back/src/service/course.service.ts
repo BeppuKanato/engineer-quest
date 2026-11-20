@@ -7,6 +7,15 @@ import {
   GetCoursesResponse,
 } from "../types/course.types";
 
+/** 関連コースの定義を逆引きする。所持カードや達成状況には依存しない読み取り専用の導線。 */
+export async function getRelatedCreateQuestsByCourseId(courseId: string) {
+  const items = await prisma.createQuest.findMany({
+    where: { isPublished: true, relatedCourses: { some: { courseId, course: { isPublished: true } } } },
+    select: { id: true, title: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+  });
+  return { items };
+}
+
 const toDifficulty = (difficulty: CourseDifficulty): Difficulty => {
   switch (difficulty) {
     case CourseDifficulty.EASY:

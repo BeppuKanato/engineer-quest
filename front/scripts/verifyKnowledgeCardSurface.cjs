@@ -5,6 +5,11 @@ const render=(Component,props)=>renderToStaticMarkup(React.createElement(Compone
 const {QuestCardList}=load(path.join(root,'features/collection/QuestKnowledgeCards.tsx'));
 const {RelatedQuestLinks}=load(path.join(root,'features/collection/RelatedQuestLinks.tsx'));
 const {UnitCardKeywordLinks}=load(path.join(root,'features/learning/rewards/UnitCardKeywords.tsx'));
+const {UnitCreateQuestLinks}=load(path.join(root,'features/learning/rewards/UnitCreateQuests.tsx'));
+assert.equal(render(UnitCreateQuestLinks,{quests:[]}), '');
+const unitLinks=render(UnitCreateQuestLinks,{quests:[{id:'quest/日本語',title:'今の単元を使うクエスト'}]});
+assert(unitLinks.includes('作るで試す')&&unitLinks.includes('今の単元を使うクエスト'));
+assert(unitLinks.includes('/create/quests/'+encodeURIComponent('quest/日本語')));
 const html=render(QuestCardList,{cards:[{id:'owned',rarity:'COMMON',isCollected:true,title:'所持タイトル',description:'所持説明',useCase:'使える状況'},{id:'hidden',rarity:'EPIC',isCollected:false,title:'秘密タイトル',description:'秘密説明',useCase:'秘密状況'}]});
 assert(html.includes('<details')&&html.includes('<summary'));
 for(const text of ['所持タイトル','所持説明','使える状況','コモン','エピック'])assert(html.includes(text));
@@ -28,6 +33,9 @@ assert(!detail.includes('google.com'));
 const screen=fs.readFileSync(path.join(root,'features/learning/app/LearningScreen.tsx'),'utf8');
 assert(screen.includes('renderRewards: (value: LearningRewards) => <><FinalLearningRewards'));
 assert.equal((screen.match(/<UnitCardKeywords /g)||[]).length,1);
+assert.equal((screen.match(/<UnitCreateQuests /g)||[]).length,1);
+assert(screen.includes('<UnitCreateQuests courseId={courseId} /><UnitCardKeywords courseId={courseId} />'));
+assert(!fs.readFileSync(path.join(root,'features/learning/app/feedback/FeedbackScreen.tsx'),'utf8').includes('UnitCreateQuests'));
 for(const unit of ['unit/LearningUnitPreview.tsx',...['binary-search','bubble-sort','maze-digging','wall-extension','greedy-coins'].map(name=>`${name}/unit/${{'binary-search':'BinarySearch','bubble-sort':'BubbleSort','maze-digging':'MazeDigging','wall-extension':'WallExtension','greedy-coins':'GreedyCoins'}[name]}UnitPreview.tsx`)]) {
  const source=fs.readFileSync(path.join(root,'features/learning',unit),'utf8');assert(source.includes('<UnitFinalResult')&&source.includes('renderRewards={renderRewards}'));
 }
