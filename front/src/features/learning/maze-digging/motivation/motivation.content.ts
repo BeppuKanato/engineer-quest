@@ -77,7 +77,7 @@ const sequence = defineLearningContent<MazeDiggingMotivationCanvasState>({
       ]),
     },
     {
-      id: "complete-and-exit", caption: "掘ることと、行き止まったら戻ることをくり返すだけで、毎回違う迷路が出来上がります。",
+      id: "complete-and-exit", caption: "掘ることと、行き止まったら戻ることをくり返すだけで、毎回違う迷路が出来上がり、迷路を作る別の方法には棒倒し法もあります。",
       canvas: scene(mazeDiggingMainSize, {
         walls: mainWalls, exit: { label: "動きの説明へ進む", nextPhase: 2 },
       }),

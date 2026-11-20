@@ -152,7 +152,7 @@ const sequence = defineLearningContent<MotivationCanvasState>({
       canvas: scene("graph", { showNames: true, distances }, entrance),
     },
     {
-      id: "name-and-exit", caption: "近い場所から順に調べるこの方法を、幅優先探索と呼びます。",
+      id: "name-and-exit", caption: "近い場所から順に調べるこの方法を、幅優先探索と呼び、同じグラフで1本の道を奥へ進む深さ優先探索という方法もあります。",
       canvas: scene("graph", {
         showNames: true, distances, exit: { label: "動きの説明へ進む", nextPhase: 2 },
       }, entrance),

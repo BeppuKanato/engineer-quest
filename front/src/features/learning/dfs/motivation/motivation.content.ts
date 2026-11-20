@@ -42,7 +42,7 @@ const sequence = defineLearningContent<DfsMotivationCanvasState>({
     { id: "utility-transition", caption: "この「奥まで進んで戻る」調べ方は、ほかの場面でも使われています。", canvas: graphEnd },
     { id: "utility-folder", caption: "パソコンのフォルダは、奥まで開けて戻りながらファイルを探せます。",
       canvas: scene("folders", { current: null, trail: [], movement: [], visited: [] }) },
-    { id: "name-and-exit", caption: "出発点から1本の道を奥へ進み、進めなくなったら戻るこの方法を、深さ優先探索と呼びます。",
+    { id: "name-and-exit", caption: "出発点から1本の道を奥へ進み、進めなくなったら戻るこの方法を、深さ優先探索と呼び、同じグラフを近い順に調べる幅優先探索とは進み方が異なります。",
       canvas: scene("graph", { showNames: true, exit: true }, [{ kind: "node", id: "B" }, { kind: "edge", id: "ab" }]) },
   ],
 }, validateDfsMotivationCanvas);

@@ -59,7 +59,7 @@ const sequence = defineLearningContent<WallExtensionMotivationCanvasState>({
       }),
     },
     {
-      id: "complete-and-exit", caption: "3つの手順をくり返すだけで、毎回違う迷路が出来上がります。",
+      id: "complete-and-exit", caption: "3つの手順をくり返すだけで、毎回違う迷路が出来上がり、迷路を作る別の方法には穴掘り法もあります。",
       canvas: scene(wallExtensionSmallSize, {
         walls: smallWalls, exit: { label: "動きの説明へ進む", nextPhase: 2 },
       }),

@@ -8,6 +8,8 @@ const root = path.resolve(__dirname, '../src/features/learning');
 const destination = path.resolve(__dirname, '../../back/src/learning/feedback/materials.json');
 const versionsPath = path.join(root, 'assessment/materialVersions.ts');
 const registry = load(path.join(root, 'app/unitRegistry.ts')).learningUnits;
+// #489で文章を変更した導入から版管理へ収録する。他単元の版はこの変更で更新しない。
+const versionedIntroductionKinds = new Set(['bfs', 'dfs', 'wall-extension', 'maze-digging']);
 const phasePurposes = [
  'この単元の問題設定と、アルゴリズムを使う目的を知る。',
  '図の状態を一手ずつ追い、アルゴリズムの手順と判断規則を確かめる。',
@@ -52,6 +54,9 @@ function build() {
    stepId:step.id, beforeStepId:execution.steps[execution.steps.indexOf(step)-1].id, ...step.prediction,
   }));
   const material = plain({courseId:unit.courseId,title:unit.title,intro:unit.intro,
+   ...(versionedIntroductionKinds.has(unit.kind) ? {motivationSteps:
+    objectWith(load(path.join(base,'motivation/motivation.content.ts')), 'steps').steps.map(step=>({id:step.id,caption:step.caption})),
+   } : {}),
    ...(executionPredictions.length ? {executionPredictions} : {}),
    phases:phases.map(p=>({...p,focusQuestions:assessments.find(a=>a.phase===({2:3,4:5}[p.phase]??p.phase))?.questions.map(q=>q.prompt)??[]})),assessments});
   const version = 'sha256:'+crypto.createHash('sha256').update(JSON.stringify(material)).digest('hex');
