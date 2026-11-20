@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [intro-sibling-references-489.md](intro-sibling-references-489.md) | 実装・自動検証・4単元2サイズ撮影済み | 強化接続1。BFSとDFS、棒倒し法と穴掘り法の導入文での相互言及、対象4単元の導入キャプションの教材版管理 |
 | [prediction-questions-bfs-487.md](prediction-questions-bfs-487.md) | 実装・自動検証・実プレビュー2サイズ撮影済み | 強化G1-a。フェーズ2の非採点の予想、BFS4か所、正誤・スキップ後の継続、教材版・採点記録の分離 |
 | [secret-achievements-485.md](secret-achievements-485.md) | 実装・自動検証（migration・seed未適用） | 強化C1-c。シークレット4件、受信反応・復習・エピック所持・自己ベストの判定、未解除の存在非表示と共通表示の証跡 |
 | [home-integration-483.md](home-integration-483.md) | 実装・自動検証・3状態2サイズ撮影済み | 強化B2。判断7の6節、評価器の実進捗、フェーズ再開、保存済みの次の一歩、月境界を含む学習週と空節非表示 |
