@@ -1,7 +1,7 @@
 # 学習プレイヤーの土台（Issue #68）
 
 - 目的: 新フロー教材の単品確認と、後続 #69〜#76 が使う再生契約の定義。
-- 適用範囲: ステップ表示・再生と教材 Canvas。状態: 現行。最終確認日: 2026-11-04。
+- 適用範囲: ステップ表示・再生と教材 Canvas。状態: 現行。最終確認日: 2026-11-20。
 - 正本: [教材指針全文](../../../../../docs/concept/learning-materials-guideline.md) §1 およびフェーズ1・2。
 - UI の正本: [学習プレイヤーUI定義](../../../../../docs/concept/learning-player-ui.md)。develop `5151f2e` を取り込んで適用した。
 - 初期実装の起点: develop `ab0d04a`。Mission / Activity への依存、DB、API、保存、ログ、入口導線は含まない。
@@ -73,6 +73,14 @@ const content = defineLearningContent<GraphCanvasState>({
 既存のステップ状態は確認問題の図や復習再生にも利用できるが、全フェーズを自動再生する形式にはしない。
 
 ## UI 定義の適用
+
+### 予想で止まる再生（Issue #487）
+
+フェーズ2の先頭以外のステップに任意の `prediction`（`prompt`、2〜4件の`choices`、`correctChoiceId`）を付けられる。到達時には対象ステップをまだ表示せず、直前の図と予想の選択肢を出す。1回の回答またはスキップで対象の動きを表示し、自動再生へ戻る。予想中は通常の再生操作を止め、スキップを常に用意する。
+
+回答・スキップ済みの場面は戻っても再出題しない。末尾の「最初から再生」は予想もリセットする。シークで途中へ入っても予想の直前の図を使い、末尾へ直接移動すれば予想の回答なしでも完了できる。非表示のプレイヤーではタイマー・回答操作を進めない。
+
+`predictionPlayback.ts`が純粋な状態遷移、`PredictionChoices.tsx`が選択肢の表示を受け持つ。`player_prediction_view`／`player_prediction_answer`／`player_prediction_skip`は任意の分析イベントで、評価記録や完了APIには接続しない。`npm run verify:prediction-playback`は正解・誤答・スキップ・シーク・再生し直しと、予想のない全7単元の既存再生を確認する。
 
 `player.tokens.ts` に閉じ、状態をアプリ全体の primary / success と共有しない。
 処理中=青 `#2563eb` / 枠 `#1d4ed8`、キュー待ち=ベージュ `#f5e7c1` / 枠 `#c9a227`、完了=グレー `#e5e7eb` / 枠 `#9ca3af`、未処理=白 / 枠 `#9ca3af`。
