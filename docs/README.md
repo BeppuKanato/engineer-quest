@@ -60,6 +60,7 @@
 
 | 文書 | 状態 | 用途 |
 | --- | --- | --- |
+| [secret-achievements-485.md](secret-achievements-485.md) | 実装・自動検証（migration・seed未適用） | 強化C1-c。シークレット4件、受信反応・復習・エピック所持・自己ベストの判定、未解除の存在非表示と共通表示の証跡 |
 | [home-integration-483.md](home-integration-483.md) | 実装・自動検証・3状態2サイズ撮影済み | 強化B2。判断7の6節、評価器の実進捗、フェーズ再開、保存済みの次の一歩、月境界を含む学習週と空節非表示 |
 | [knowledge-card-surface-482.md](knowledge-card-surface-482.md) | 実装・自動検証・3画面2サイズ撮影済み | 強化D3-b。作業中のカード参照、所持情報の非開示、使える場所、最終結果限定の外部検索とAPI契約 |
 | [knowledge-card-use-context-480.md](knowledge-card-use-context-480.md) | 実装・静的検証（migration・seed未適用） | 強化D3-a。全21枚の作業状況、関連クエストID、重複2枚の差し替えと所持キー保持、D3-b向け参照契約 |
