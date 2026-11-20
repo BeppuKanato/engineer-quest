@@ -5,11 +5,15 @@ import { deriveLevel, getProfileByUser } from "../service/profile.service";
 
 // DB不要のAPI契約検証。表示削除後も、統計・カレンダー・目標・プロフィール設定を保つ。
 const now = new Date();
-const achievement = { id: "a", title: "学習継続 3日", description: "3日連続の学習", rarity: "RARE", iconKey: "challenge", conditionType: "STREAK_DAYS", conditionValue: 3 };
+const achievement = { id: "a", title: "学習継続 3日", description: "3日連続の学習", category: "STREAK", rarity: "RARE", iconKey: "challenge", conditionType: "STREAK_DAYS", conditionValue: 3, userAchievements: [] };
 const award = { id: "ua", achievedAt: now, achievement };
 Object.assign(prisma.userAchievement, { count: async () => 6, findMany: async () => [award], findUnique: async () => award });
-Object.assign(prisma.achievement, { findFirst: async () => achievement });
-Object.assign(prisma.userKnowledgeCard, { count: async () => 9 });
+Object.assign(prisma.achievement, { findFirst: async () => achievement, findMany: async () => [achievement] });
+Object.assign(prisma.userKnowledgeCard, { count: async () => 9, findMany: async () => [] });
+Object.assign(prisma.course, { findMany: async () => [] });
+Object.assign(prisma.knowledgeCard, { findMany: async () => [] });
+Object.assign(prisma.feedbackV1, { findFirst: async () => null });
+Object.assign(prisma.questPost, { findMany: async () => [] });
 Object.assign(prisma.hexadResponse, { findUnique: async () => null });
 Object.assign(prisma.createQuestAttempt, { findMany: async () => [] });
 Object.assign(prisma.phaseLearningProgress, { findMany: async () => [{ completedAt: now }] });

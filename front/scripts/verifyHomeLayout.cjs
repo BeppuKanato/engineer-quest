@@ -1,73 +1,39 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-
-const srcRoot = path.resolve(__dirname, '../src');
-const read = (relative) => fs.readFileSync(path.join(srcRoot, relative), 'utf8');
-
-// 1. Progress overlay is shared: one implementation used by both the courses page and the home grid.
-const overlay = read('app/courses/courseProgress.ts');
-assert(overlay.includes('export async function withLearningProgress'), 'withLearningProgress must be exported from courseProgress');
-const coursesPage = read('app/courses/page.tsx');
-assert(coursesPage.includes('withLearningProgress'), 'courses page must use the shared overlay');
-assert(!coursesPage.includes('saved.phases.filter'), 'courses page must not keep an inline copy of the overlay');
-const homeGrid = read('features/learning/app/HomeUnitGrid.tsx');
-assert(homeGrid.includes('withLearningProgress'), 'home unit grid must use the shared overlay');
-assert(homeGrid.includes('getCourses'), 'home unit grid must list courses from the same source as the catalog');
-
-// 2. Course thumbnails: every current course has a signature figure, and CourseCard falls back to the category visual.
-const thumbnail = read('app/courses/component/courseThumbnail.tsx');
-for (const courseId of [
-  'course-algorithm-bubble-sort-v2',
-  'course-algorithm-binary-search-v1',
-  'course-algorithm-kmp-v1',
-  'course-algorithm-selection-sort-v1',
-  'course-algorithm-breadth-first-search-v1',
-  'course-algorithm-depth-first-search-v1',
-  'course-algorithm-merge-sort-v1',
-]) {
-  assert(thumbnail.includes(courseId), `thumbnail figure missing for ${courseId}`);
-}
-const courseCard = read('app/courses/component/courseCard.tsx');
-assert(courseCard.includes('CourseThumbnail'), 'CourseCard must render the course thumbnail');
-// 完了表示は StatusChip の「クリア済み」に一本化し、同じ意味のチップを重ねない（#176）。
-assert(!courseCard.includes('コースクリア'), 'CourseCard must not duplicate the completed badge');
-assert(courseCard.includes('<StatusChip status={status} />'), 'CourseCard keeps the shared status chip');
-assert(courseCard.includes('COURSE_VISUAL_STYLE'), 'CourseCard must keep the category visual as the fallback');
-
-// 3. Home unit grid: capped, personally ordered (in progress -> not started -> completed).
-assert(/HOME_UNIT_LIMIT = 6/.test(homeGrid), 'home unit grid must cap at 6');
-assert(homeGrid.includes('STATUS_ORDER'), 'home unit grid must order by learning status');
-assert(homeGrid.includes('CourseCard'), 'home unit grid must reuse CourseCard');
-
-// 4. Home page: the link-only "find other units" card is gone; the grid takes its place.
-const homePage = read('app/home/page.tsx');
-assert(!homePage.includes('ほかの単元を探す'), 'home page must not keep the duplicated find-units card');
-assert(homePage.includes('<HomeUnitGrid'), 'home page must render the unit grid');
-// 目標に設定した実績の進捗をホームにも出す（#183）。API は既に targetAchievement を返している。
-assert(homePage.includes('homeData.targetAchievement'), 'home must render the pinned target achievement when present');
-assert(homePage.includes('目標の実績'), 'home must label the target achievement card');
-assert(homePage.includes('factor.progress'), 'home must show per-factor progress toward the target');
-
-// 5. ContinueLearning: rich hero when a unit is in progress, nothing when none is.
-const cont = read('features/learning/app/ContinueLearning.tsx');
-assert(cont.includes('return null'), 'ContinueLearning must render nothing when no unit is in progress');
-// ホームの用語は「単元」に統一する（#177）。一覧ページ自体の表記は別途判断。
-assert(!homeGrid.includes('コース一覧へ'), 'home grid must not link with the old terminology');
-assert(homeGrid.includes('単元一覧へ'), 'home grid links to the unit list');
-assert(!cont.includes('コース一覧へ'), 'ContinueLearning must not link with the old terminology');
-assert(cont.includes('単元一覧へ'), 'ContinueLearning links to the unit list');
-assert(cont.includes('次は「'), 'ContinueLearning must name the next stage');
-assert(cont.includes('formalName'), 'ContinueLearning must derive the next stage name from the unit definition');
-assert(!cont.includes('コース一覧から学びたい単元を選びましょう'), 'ContinueLearning must not degrade into a catalog link card');
-
-// Issue #473: EXP専用表示を取り除き、他の情報と目標の進捗を維持する。
-const profilePage = read('app/profile/page.tsx');
-for (const page of [homePage, profilePage]) {
-  assert(!/user(?:Data)?\.(?:level|exp|rank)|levelProgress|requiredExperienceForLevel|レベルアップ|次のランク|>EXP</.test(page));
-}
-assert(homePage.includes('userData.continuationDays') && homePage.includes('buildCurrentWeek'));
-assert(homePage.includes('value={factor.goal'), 'target achievement progress bar remains');
-for (const field of ['completedCourseCount', 'completedMissionCount', 'collectedCount', 'achievedCount']) assert(profilePage.includes(field), field);
-for (const label of ['プロフィール設定', '代表実績', '実績解除通知']) assert(profilePage.includes(label), label);
-console.log('verifyHomeLayout: all contracts hold');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {loader,root,React,renderToStaticMarkup}=require('./dailyReviewTestHarness.cjs');
+const load=loader();
+const {HomeDashboard}=load(path.join(root,'features/home/HomeDashboard.tsx'));
+const day={date:'2027-01-01',label:'金',learned:true,isToday:true};
+const unit={id:'unit',title:'幅優先探索',group:'探索',status:'IN_PROGRESS',completedPhases:2,totalPhases:7,collectedCards:2,totalCards:3,href:'/courses/roadmap/unit',resumeHref:'/courses/roadmap/unit/learn?phase=bfs-check',nextPhase:'動きの確認問題'};
+const data={user:{displayName:'学び手',selectedMascotId:'red-panda'},overview:{completedUnits:1,totalUnits:7,collectedCards:5,totalCards:21,units:[unit]},today:{recommended:unit,nearAchievements:[{id:'a',title:'探索を進める',progress:2,goal:3,href:'/courses'}],nearCards:[unit]},resume:{...unit,nextStep:'次の一歩を確かめる'},hasInProgressUnit:true,week:{streakDays:3,days:[day]},questions:[{id:'q',title:'探索の順序を教えてください',createdAt:'2027-01-01T00:00:00Z',href:'/quest-board/q'}]};
+const render=data=>renderToStaticMarkup(React.createElement(HomeDashboard,{data,currentGoal:React.createElement('aside',{'data-big-goal':true},'いまの目標')}));
+const html=render(data);
+const japanese=render({...data,today:{...data.today,nearAchievements:[{...data.today.nearAchievements[0],title:'知識の発見者 Lv.2'}]}});assert(japanese.includes('知識の発見者 第2段階')&&!japanese.includes('Lv.2'));
+const sections=[...html.matchAll(/data-home-section="([^"]+)"/g)].map(match=>match[1]);
+assert.deepEqual(sections,['location','aim','resume','streak','questions']);
+for(const text of ['単元 1/7','カード 5/21','2 / 3','あと1枚','次の一歩を確かめる','/learn?phase=bfs-check','3日連続','data-learning-day="2027-01-01"','data-big-goal'])assert(html.includes(text),text);
+assert(html.includes('text-overflow:ellipsis'));
+const empty=render({...data,today:{recommended:null,nearAchievements:[],nearCards:[]},resume:null,hasInProgressUnit:false,questions:[]});
+for(const id of ['aim','resume','questions'])assert(!empty.includes(`data-home-section="${id}"`));assert(!empty.includes('data-big-goal'));
+const noFeedback=render({...data,resume:{...unit,nextStep:null}});assert(!noFeedback.includes('前回のフィードバックの次の一歩'));
+const dashboard=fs.readFileSync(path.join(root,'features/home/HomeDashboard.tsx'),'utf8');
+assert(dashboard.indexOf('{review}')>dashboard.indexOf('id="resume"'));assert(dashboard.indexOf('{review}')<dashboard.indexOf('id="streak"'));
+assert(dashboard.includes('data.hasInProgressUnit')&&dashboard.includes('{currentGoal}'));
+const daily=fs.readFileSync(path.join(root,'features/learning/daily-review/DailyReviewCard.tsx'),'utf8');assert(daily.includes('!review')&&daily.includes('return null'));
+const page=fs.readFileSync(path.join(root,'app/home/page.tsx'),'utf8');assert(page.includes('<HomeDashboard data={homeData} review={<DailyReviewCard />}'));
+assert(page.includes('homeData.hasInProgressUnit ? <BigGoalBanner currentOnly /> : undefined'));
+assert(!dashboard.includes('@/features/learning/'), 'Independent features are composed by the app through slots');
+for(const removed of ['<ContinueLearning','<HomeUnitGrid','目標の実績','エンジニア見習い'])assert(!page.includes(removed));
+for(const source of [page,dashboard,fs.readFileSync(path.join(root,'app/profile/page.tsx'),'utf8')])assert(!/user(?:Data)?\.(?:level|exp|rank)|レベルアップ|次のランク|>EXP</.test(source));
+const banner=fs.readFileSync(path.join(root,'features/learning/app/bigGoal/BigGoalBanner.tsx'),'utf8');assert(banner.includes('currentOnly ? Promise.resolve({ goals: [] })'));
+// ホームの旧グリッドは外しても、共通の単元一覧・サムネイルに対する既存の回帰検証は残す。
+const read=relative=>fs.readFileSync(path.join(root,relative),'utf8');
+assert(read('app/courses/courseProgress.ts').includes('export async function withLearningProgress'));
+const coursesPage=read('app/courses/page.tsx');assert(coursesPage.includes('withLearningProgress')&&!coursesPage.includes('saved.phases.filter'));
+const thumbnail=read('app/courses/component/courseThumbnail.tsx');
+for(const id of ['bubble-sort-v2','binary-search-v1','kmp-v1','selection-sort-v1','breadth-first-search-v1','depth-first-search-v1','merge-sort-v1'])assert(thumbnail.includes(`course-algorithm-${id}`));
+const courseCard=read('app/courses/component/courseCard.tsx');
+assert(courseCard.includes('CourseThumbnail')&&courseCard.includes('COURSE_VISUAL_STYLE')&&courseCard.includes('<StatusChip status={status} />')&&!courseCard.includes('コースクリア'));
+const profile=read('app/profile/page.tsx');
+for(const field of ['completedCourseCount','completedMissionCount','collectedCount','achievedCount'])assert(profile.includes(field));
+for(const label of ['プロフィール設定','代表実績','実績解除通知'])assert(profile.includes(label));
+console.log('verifyHomeLayout: six-section order, actual progress, phase resume, one-line feedback, empty sections hidden, conditional current goal, JST learning days and no EXP/rank passed.');

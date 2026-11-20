@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mock } from "node:test";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { getHomeByUser } from "../service/home.service";
+import { getHomeCalendar } from "../service/home.service";
 import { getHistoryByUserId } from "../service/history.service";
 
 const userId = "learning-day-test";
@@ -32,11 +32,10 @@ Object.assign(prisma.userAchievement, { count: async () => 0 });
 Object.assign(prisma.userAchievement, { findMany: async () => [] });
 Object.assign(prisma.userKnowledgeCard, { findMany: async () => [] });
 Object.assign(prisma.createQuestFeedback, { findMany: async () => [] });
-const homeUser = { id: userId, displayName: null, experience: 0, selectedMascotId: "test", selectedTargetAchievementId: null };
 const calendar = async (now: string) => {
   mock.timers.reset();
   mock.timers.enable({ apis: ["Date"], now: new Date(now).getTime() });
-  return (await getHomeByUser(homeUser)).calendar;
+  return (await getHomeCalendar(userId)).calendar;
 };
 
 async function main() {
