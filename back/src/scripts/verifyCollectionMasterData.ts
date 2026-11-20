@@ -111,11 +111,13 @@ const CARD_COURSES = [
 ] as const;
 
 // Issue #471: 単元21件・横断10件・作る19件と、狙える目標の条件を検証する。
-assert.equal(achievementSeed.length, 50);
+const normalAchievements = achievementSeed.filter(a => !a.isSecret);
+assert.equal(achievementSeed.length, 54);
+assert.equal(normalAchievements.length, 50);
 for (const [rarity, count] of [[Rarity.COMMON, 12], [Rarity.RARE, 18], [Rarity.EPIC, 18], [Rarity.LEGENDARY, 2]] as const) {
-  assert.equal(achievementSeed.filter((achievement) => achievement.rarity === rarity).length, count, rarity);
+  assert.equal(normalAchievements.filter((achievement) => achievement.rarity === rarity).length, count, rarity);
 }
-assert.equal(achievementSeed.filter((achievement) => achievement.category === "CREATE_QUEST").length, 19);
+assert.equal(normalAchievements.filter((achievement) => achievement.category === "CREATE_QUEST").length, 19);
 for (const course of CARD_COURSES) {
   const achievements = achievementSeed.filter((achievement) => achievement.courseId === course.courseId);
   assert.equal(achievements.length, 3, course.courseId);
@@ -127,7 +129,12 @@ for (const course of CARD_COURSES) {
   }
 }
 assert.equal(achievementSeed.some((achievement) => achievement.conditionType === Condition.PHASE_FIRST_ATTEMPT_PERFECT), false);
-assert.equal(achievementSeed.some((achievement) => achievement.isSecret), false);
+const secrets = achievementSeed.filter(a => a.isSecret);
+assert.equal(secrets.length, 4);
+assert.deepEqual(secrets.map(a => [a.conditionType, a.conditionValue, a.rarity, a.sortOrder]), [
+  [Condition.BOARD_SAVED_ME_COUNT, 1, Rarity.EPIC, 900], [Condition.DAILY_REVIEW_CORRECT_STREAK, 3, Rarity.RARE, 901],
+  [Condition.EPIC_KNOWLEDGE_CARD_COUNT, 1, Rarity.RARE, 902], [Condition.CREATE_QUEST_PERSONAL_BEST, 1, Rarity.RARE, 903],
+]);
 const allUnits = achievementSeed.find((achievement) => achievement.id === "ach-unit-count-lv3");
 assert.ok(allUnits);
 assert.equal(allUnits.title, "全単元制覇");

@@ -18,6 +18,8 @@ const conditionLabel = (achievement: Achievement) => {
     STREAK_DAYS: `${n}日連続で学習`, CREATE_QUEST_SCORE: `指定の作る課題で${n}点以上`,
     CREATE_QUEST_COMPLETED_COUNT: `作る課題を${n}個クリア`, CREATE_QUEST_OPTIONAL_REQUIREMENT_COUNT: `追加要件を累計${n}種類クリア`,
     CREATE_QUEST_PERFECT_COUNT: `作る課題で${n}回100点`, KNOWLEDGE_CARD_COUNT: `知識カードを${n}枚発見`,
+    BOARD_SAVED_ME_COUNT: `自分の投稿に「助かった」を${n}件もらう`, DAILY_REVIEW_CORRECT_STREAK: `今日の復習で${n}日連続正解`,
+    EPIC_KNOWLEDGE_CARD_COUNT: `エピックの知識カードを${n}枚獲得`, CREATE_QUEST_PERSONAL_BEST: "同じ作る課題への再提出で自己最高点を更新",
   };
   return labels[type] ?? "条件を達成";
 };
@@ -49,7 +51,7 @@ export const getCollectionByUser = async (user: { id: string; selectedProfileAch
       relatedQuests: unlocked ? relatedQuests.filter(quest => card.relatedCreateQuestIds.includes(quest.id)) : [],
     };
   });
-  const achievementItems = achievements.map((a) => {
+  const achievementItems = achievements.filter(a => !a.isSecret || a.userAchievements.length > 0).map((a) => {
     const achievedAt = a.userAchievements[0]?.achievedAt ?? null;
     const hidden = !achievedAt && a.isSecret;
     return {

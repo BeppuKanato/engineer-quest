@@ -30,9 +30,11 @@ db.knowledgeCard = readOnly({ findMany: async ({ where, select }: Prisma.Knowled
   assert.deepEqual(select?.userKnowledgeCards, { where: { userId: owner }, select: { id: true } });
   return knowledgeCardSeed.map(card => ({ courseId: card.courseId, userKnowledgeCards: populated && card.courseId === bfs.courseId && card.catalogNumber < 3 ? [{ id: String(card.id) }] : [] }));
 } });
-db.userKnowledgeCard = readOnly({ findMany: async ({ where }: Prisma.UserKnowledgeCardFindManyArgs) => { assert.equal(where?.userId, owner); return populated ? [{ knowledgeCard: { courseId: bfs.courseId } }, { knowledgeCard: { courseId: bfs.courseId } }] : []; } });
+db.userKnowledgeCard = readOnly({ count: async () => 0, findMany: async ({ where }: Prisma.UserKnowledgeCardFindManyArgs) => { assert.equal(where?.userId, owner); return populated ? [{ knowledgeCard: { courseId: bfs.courseId } }, { knowledgeCard: { courseId: bfs.courseId } }] : []; } });
+db.questReaction = readOnly({ count: async () => 0 });
+db.dailyReview = readOnly({ findMany: async () => populated ? [{ reviewDate: new Date("2026-12-30"), correct: true }, { reviewDate: new Date("2026-12-31"), correct: true }] : [] });
 db.createQuestAttempt = readOnly({ findMany: async ({ where }: Prisma.CreateQuestAttemptFindManyArgs) => { assert.equal(where?.userId, owner); return []; } });
-db.createQuestSubmission = readOnly({ findMany: async ({ where }: Prisma.CreateQuestSubmissionFindManyArgs) => { assert.deepEqual(where, { attempt: { userId: owner } }); return populated ? [{ results: [], submittedAt: new Date("2026-12-30T03:00:00Z") }] : []; } });
+db.createQuestSubmission = readOnly({ findMany: async ({ where, select }: Prisma.CreateQuestSubmissionFindManyArgs) => { assert.deepEqual(where, { attempt: { userId: owner } }); return select?.attempt ? [] : populated ? [{ results: [], submittedAt: new Date("2026-12-30T03:00:00Z") }] : []; } });
 db.achievement = readOnly({ findMany: async () => [...achievementSeed, { ...achievementSeed.find(a => a.id === "ach-streak-3")!, id: "secret", conditionValue: 3, isSecret: true }].map(a => ({ ...a, userAchievements: populated && a.id === "ach-streak-3" ? [{ achievedAt: now }] : [] })) });
 db.userAchievement = readOnly({ count: async () => 0 });
 db.feedbackV1 = readOnly({ findFirst: async ({ where, select }: Prisma.FeedbackV1FindFirstArgs) => {
@@ -56,6 +58,7 @@ async function main() {
     assert.ok(home.today.nearAchievements.length > 0 && home.today.nearAchievements.length <= 2);
     assert.ok(home.today.nearAchievements.every(a => a.progress > 0 && a.progress < a.goal));
     assert.ok(!home.today.nearAchievements.some(a => a.id === "ach-streak-3" || a.id === "secret"));
+    assert.ok(!JSON.stringify(home.today).includes("ach-secret-"), "復習が2/3でもシークレットを今日の狙いへ出さない");
     assert.ok(home.today.nearAchievements.every((a, i, list) => i === 0 || Math.min(1, list[i - 1].progress / list[i - 1].goal) >= Math.min(1, a.progress / a.goal)));
     assert.deepEqual(home.week.days.filter(day => day.learned).map(day => day.date), ["2026-12-30", "2026-12-31"]);
     assert.equal(home.week.streakDays, 2, "今日未学習でも昨日までの継続を保つ");
