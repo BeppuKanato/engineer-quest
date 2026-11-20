@@ -11,10 +11,18 @@ export type CanvasSnapshot = {
   readonly highlights: readonly object[];
 };
 
+/** フェーズ2の非採点の予想。答え合わせは対象ステップの再生で行う。 */
+export type StepPrediction = {
+  readonly prompt: string;
+  readonly choices: readonly { readonly id: string; readonly text: string }[];
+  readonly correctChoiceId: string;
+};
+
 export type LearningStep<TCanvas extends CanvasSnapshot> = {
   readonly id: string;
   readonly caption: string;
   readonly canvas: TCanvas;
+  readonly prediction?: StepPrediction;
   /**
    * 説明専用ステップ（教材指針 §2-6）。コードの実行単位には対応しない説明
    * （ルールの予告、反例の実演、別解の提示など）をフェーズ2に置くための印。
@@ -65,6 +73,16 @@ export function defineLearningContent<TCanvas extends CanvasSnapshot>(
       throw new Error("Steps need unique IDs and a single-line caption");
     }
     ids.add(step.id);
+    if (step.prediction) {
+      const { prompt, choices, correctChoiceId } = step.prediction;
+      if (content.phase !== 2 || step === content.steps[0] || !prompt.trim() ||
+        choices.length < 2 || choices.length > 4 ||
+        choices.some(choice => !choice.id.trim() || !choice.text.trim()) ||
+        new Set(choices.map(choice => choice.id)).size !== choices.length ||
+        !choices.some(choice => choice.id === correctChoiceId)) {
+        throw new Error("Predictions need a preceding phase-2 snapshot, a prompt and 2–4 unique choices with a valid answer");
+      }
+    }
     validateCanvas(step.canvas);
   }
   return content;

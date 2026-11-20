@@ -47,7 +47,12 @@ function build() {
    });
    assessments.push({id:content.id,phaseKey:content.id,phase:content.phase,questions});
   }
+  // 予想は非採点の教材版メタデータ。assessmentの問題数・概念対応には加えない。
+  const executionPredictions = execution.steps.filter(step=>step.prediction).map(step=>({
+   stepId:step.id, beforeStepId:execution.steps[execution.steps.indexOf(step)-1].id, ...step.prediction,
+  }));
   const material = plain({courseId:unit.courseId,title:unit.title,intro:unit.intro,
+   ...(executionPredictions.length ? {executionPredictions} : {}),
    phases:phases.map(p=>({...p,focusQuestions:assessments.find(a=>a.phase===({2:3,4:5}[p.phase]??p.phase))?.questions.map(q=>q.prompt)??[]})),assessments});
   const version = 'sha256:'+crypto.createHash('sha256').update(JSON.stringify(material)).digest('hex');
   units[version] = material;
