@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma";
 
 import { currentLearningStreak, learningDayKeys } from "./learningDays.service";
 import { unitGroupLabel, unitGroupProgress } from "./achievementConditions";
+import { personalBestImprovements, reviewCorrectStreak } from "./secretAchievementProgress";
 
 export type AchievementStatus = "achieved" | "visible_locked" | "secret_locked";
 
@@ -24,6 +25,10 @@ const categoryOrder: AchievementCategory[] = [
 const conditionLabel = (a: Achievement) => {
   const n = a.conditionValue ?? 0;
   switch (a.conditionType) {
+    case AchievementConditionType.BOARD_SAVED_ME_COUNT: return `自分の投稿に「助かった」を${n}件もらう`;
+    case AchievementConditionType.DAILY_REVIEW_CORRECT_STREAK: return `今日の復習で${n}日連続正解`;
+    case AchievementConditionType.EPIC_KNOWLEDGE_CARD_COUNT: return `エピックの知識カードを${n}枚獲得`;
+    case AchievementConditionType.CREATE_QUEST_PERSONAL_BEST: return "同じ作る課題への再提出で自己最高点を更新";
     case AchievementConditionType.MISSION_COUNT: return `Missionを${n}個完了`;
     case AchievementConditionType.SPECIFIC_MISSION_CLEAR: return "指定されたMissionを完了";
     case AchievementConditionType.COURSE_REQUIRED_MISSION_COMPLETE: return "Course内の必須Missionをすべて完了";
@@ -63,6 +68,7 @@ const targetLink = (a: Achievement) => {
 
 type PhaseStat = { status: string; summary: unknown };
 type Stats = {
+  savedMeCount: number; reviewStreak: number; epicCardCount: number; personalBests: number;
   streakDays: number;
   completedCourses: Set<string>;
   completedQuests: number; perfectQuests: number; optionalRequirements: number;
@@ -74,7 +80,13 @@ type Stats = {
 const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> =>
   Array.isArray(value) ? value.filter((v) => Boolean(v) && typeof v === "object" && !Array.isArray(v)) as Array<Record<string, unknown>> : [];
 
-const loadStats = async (userId: string): Promise<Stats> => {
+const loadStats = async (userId: string, conditions: ReadonlySet<AchievementConditionType>): Promise<Stats> => {
+  const [savedMeCount, reviews, epicCardCount, personalSubmissions] = await Promise.all([
+    conditions.has(AchievementConditionType.BOARD_SAVED_ME_COUNT) ? prisma.questReaction.count({ where: { post: { userId }, type: "SAVED_ME", userId: { not: userId } } }) : 0,
+    conditions.has(AchievementConditionType.DAILY_REVIEW_CORRECT_STREAK) ? prisma.dailyReview.findMany({ where: { userId, answeredAt: { not: null } }, select: { reviewDate: true, correct: true } }) : [],
+    conditions.has(AchievementConditionType.EPIC_KNOWLEDGE_CARD_COUNT) ? prisma.userKnowledgeCard.count({ where: { userId, knowledgeCard: { rarity: "EPIC" } } }) : 0,
+    conditions.has(AchievementConditionType.CREATE_QUEST_PERSONAL_BEST) ? prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { score: true, submittedAt: true, attempt: { select: { questId: true } } } }) : [],
+  ]);
   const [attempts, submissions, cards, unitProgress, phaseProgress] = await Promise.all([
     prisma.createQuestAttempt.findMany({ where: { userId }, select: { questId: true, status: true, bestScore: true } }),
     prisma.createQuestSubmission.findMany({ where: { attempt: { userId } }, select: { results: true, submittedAt: true } }),
@@ -91,6 +103,7 @@ const loadStats = async (userId: string): Promise<Stats> => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
   return {
+    savedMeCount, reviewStreak: reviewCorrectStreak(reviews), epicCardCount, personalBests: personalBestImprovements(personalSubmissions),
     streakDays: currentLearningStreak(learningDayKeys([...submissions.map(row => row.submittedAt), ...unitProgress.map(row => row.completedAt), ...phaseProgress.map(row => row.completedAt)])),
     // Course completion on the new flow means unit completion (#78 / #108).
     completedCourses: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
@@ -106,6 +119,10 @@ const loadStats = async (userId: string): Promise<Stats> => {
 const progressFor = async (a: Achievement, userId: string, s: Stats) => {
   const goal = a.conditionValue ?? 1;
   switch (a.conditionType) {
+    case AchievementConditionType.BOARD_SAVED_ME_COUNT: return { goal, progress: s.savedMeCount };
+    case AchievementConditionType.DAILY_REVIEW_CORRECT_STREAK: return { goal, progress: s.reviewStreak };
+    case AchievementConditionType.EPIC_KNOWLEDGE_CARD_COUNT: return { goal, progress: s.epicCardCount };
+    case AchievementConditionType.CREATE_QUEST_PERSONAL_BEST: return { goal, progress: s.personalBests };
     case AchievementConditionType.UNIT_COMPLETE: return { goal: 1, progress: a.courseId && s.completedUnits.has(a.courseId) ? 1 : 0 };
     case AchievementConditionType.UNIT_COMPLETED_COUNT: return { goal, progress: s.completedUnits.size };
     case AchievementConditionType.PHASE_COMPLETED: {
@@ -149,10 +166,11 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
 
 export const evaluateAchievementsForUser = async (userId: string) => {
   if (!await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })) throw new AppError(404, "USER_NOT_FOUND", "User not found");
-  const [achievements, owned, stats] = await Promise.all([
+  const [achievements, owned] = await Promise.all([
     prisma.achievement.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }] }),
-    prisma.userAchievement.findMany({ where: { userId }, select: { achievementId: true } }), loadStats(userId),
+    prisma.userAchievement.findMany({ where: { userId }, select: { achievementId: true } }),
   ]);
+  const stats = await loadStats(userId, new Set(achievements.map(a => a.conditionType)));
   const ownedIds = new Set(owned.map((x) => x.achievementId));
   const unlocked = [];
   for (const achievement of achievements) {
@@ -171,13 +189,11 @@ export const evaluateAchievementsForUser = async (userId: string) => {
 };
 
 export const getAchievementsByUser = async (user: { id: string; selectedTargetAchievementId: string | null; selectedProfileAchievementId?: string | null }) => {
-  const [achievements, stats] = await Promise.all([
-    prisma.achievement.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], include: { userAchievements: { where: { userId: user.id }, select: { achievedAt: true } } } }),
-    loadStats(user.id),
-  ]);
+  const achievements = await prisma.achievement.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], include: { userAchievements: { where: { userId: user.id }, select: { achievedAt: true } } } });
+  const stats = await loadStats(user.id, new Set(achievements.map(a => a.conditionType)));
   const groups = (await Promise.all(categoryOrder.map(async (category) => ({
     category, label: achievementCategoryLabel[category],
-    achievements: await Promise.all(achievements.filter((a) => a.category === category).map(async (a) => {
+    achievements: await Promise.all(achievements.filter((a) => a.category === category && (!a.isSecret || a.userAchievements.length > 0)).map(async (a) => {
       const achievedAt = a.userAchievements[0]?.achievedAt ?? null;
       const status: AchievementStatus = achievedAt ? "achieved" : a.isSecret ? "secret_locked" : "visible_locked";
       const hidden = status === "secret_locked";
