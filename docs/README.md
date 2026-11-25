@@ -56,6 +56,27 @@
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
 
+## 学習体験の再設計（2026-11）
+
+2026-11-19〜24 に確定した再設計の文書群。設計サンドボックス `engineer-quest-ui-brushup` で画面を実装して確定した内容を、実アプリへの実装仕様として起こしたもの。完成形の画像は `ui-targets/` に置く。この群と競合する旧文書（大目標系、unit-final-result-150、feedback-dedicated-screen-369）より、この群を優先する。
+
+| 文書 | 状態 | 用途 |
+| --- | --- | --- |
+| [redesign-overview-2026-11.md](redesign-overview-2026-11.md) | 正本（実装予定） | 再設計の全体仕様（ミッション駆動の2層構造、課題軸グルーピング、大目標の撤去と目標の再定義、作るの発展ミッション統合、フェーズ7自由実装、フィードバックの生成／提示分離、実験前スコープ、移植時の修正リスト、廃止・置換の一覧） |
+| [redesign-ui-policy-2026-11.md](redesign-ui-policy-2026-11.md) | 正本（実装予定） | 再設計の UI 提示ポリシー（色・文字・面・マスコット、結果とフィードバックの提示形、コース一覧と単元画面の確定形、ミッション提示、ヘッダー狭幅） |
+| [unit-result-staged-499.md](unit-result-staged-499.md) | 仕様（実装予定） | Issue #499 の単元リザルト2ステージ化の詳細仕様 |
+| [feedback-presentation-unify-500.md](feedback-presentation-unify-500.md) | 仕様（実装予定） | Issue #500 の結果・フィードバック提示統一の詳細仕様 |
+| [phase7-mission-ui-501.md](phase7-mission-ui-501.md) | 仕様（実装予定） | Issue #501 のフェーズ7画面刷新の詳細仕様 |
+| [courses-list-redesign-502.md](courses-list-redesign-502.md) | 仕様（実装予定） | Issue #502 のコース一覧刷新の詳細仕様 |
+| [unit-overview-redesign-503.md](unit-overview-redesign-503.md) | 仕様（実装予定） | Issue #503 の単元画面刷新の詳細仕様 |
+| [header-narrow-504.md](header-narrow-504.md) | 仕様（実装予定） | Issue #504 のヘッダー狭幅対応の詳細仕様 |
+| [mission-presentation-505.md](mission-presentation-505.md) | 仕様（実装予定） | Issue #505 のミッション提示（ストーリーゲート）の詳細仕様 |
+| [development-missions-507.md](development-missions-507.md) | 仕様（実装予定） | Issue #507 の発展ミッション実装の要件仕様（旧「作る」の統合、スコアとティア目標、作品と共有） |
+| [goal-home-connection-508.md](goal-home-connection-508.md) | 仕様（実装予定） | Issue #508 の学習者の目標のホーム接続の詳細仕様 |
+| [review-connection-509.md](review-connection-509.md) | 仕様（実装予定） | Issue #509 の復習への接続（リザルトの復習候補、デイリーレビューの選出規則）の詳細仕様 |
+| [knowledge-card-use-510.md](knowledge-card-use-510.md) | 仕様（実装予定） | Issue #510 の知識カードの使い道（発展ミッションでの参照）の詳細仕様 |
+| [story-phase-bridge-511.md](story-phase-bridge-511.md) | 仕様（実装予定） | Issue #511 のストーリーからフェーズ1への接続文の詳細仕様 |
+
 ## 実装報告
 
 | 文書 | 状態 | 用途 |
@@ -91,7 +112,7 @@
 | [answer-feedback-146.md](answer-feedback-146.md) | 記録 | Issue #146の共通正誤表示・既存効果音・一度きりのモーション、進行との分離、検証と各画面の確認手順 |
 | [phase-result-praise-144.md](phase-result-praise-144.md) | 記録 | Issue #144のフェーズ3・5共有リザルトの短い紙吹雪・到達モーション・初回成績別の称賛と検証・確認手順 |
 | [phase-result-visuals-165.md](phase-result-visuals-165.md) | 記録 | Issue #165のフェーズ系リザルト視覚強化（称賛文の削除、到達図とスコアドット、フェーズ6結果画面の行カード化と「診断」から「結果」への文言統一） |
-| [unit-final-result-150.md](unit-final-result-150.md) | 記録 | Issue #150の単元最終リザルト視覚強化（一段強い紙吹雪、全灯ミニマップ、要約タイル、実績のコンパクト要約、獲得カードのタイル表示） |
+| [unit-final-result-150.md](unit-final-result-150.md) | 記録 | Issue #150の単元最終リザルト視覚強化（一段強い紙吹雪、全灯ミニマップ、要約タイル、実績のコンパクト要約、獲得カードのタイル表示）。提示決定は redesign-ui-policy-2026-11.md の単元リザルト確定形に置換（Issue #499） |
 | [achievement-presentation-333.md](achievement-presentation-333.md) | 記録 | Issue #333の実績提示の再設計（解除されたフェーズの結果画面に実績バンド、最終リザルトに「新しい実績」ゾーン、切れ目ダイアログはカード専用化） |
 | [mainstream-layout-results-298.md](mainstream-layout-results-298.md) | 記録 | Issue #298の主流レイアウト移行 第1弾（結果・ブリッジ・最終結果のスクロールを単元コンテナのラッパーに一元化） |
 | [mainstream-layout-phase6-298.md](mainstream-layout-phase6-298.md) | 記録 | Issue #298の主流レイアウト移行 第2弾（フェーズ6の3段組化、図の固定高、Parsons窓の固定高368px、通知の固定ゾーン化） |
@@ -111,11 +132,11 @@
 | [feedback-learning-flow-202.md](feedback-learning-flow-202.md) | 記録 | Issue #202のフィードバックの学習フロー接続（トリガー・カタログ単元対応・先行生成） |
 | [feedback-model-terra-280.md](feedback-model-terra-280.md) | 記録 | Issue #280のフィードバック生成モデルの既定値変更（gpt-5.4-mini → gpt-6-luna、料金試算と判断根拠） |
 | [feedback-composition-332.md](feedback-composition-332.md) | 記録 | Issue #332のフィードバック構成の見直し（Sadler／Hattie & Timperley に照らした表示文章の要件・合計200〜300字の目安・reason の表示、purpose は内部用） |
-| [big-goal-model-365.md](big-goal-model-365.md) | 記録 | Issue #365の大目標データモデルと達成判定基盤（Prismaモデルとmigration、到達型・実績型・応用型の条件評価、進捗の部分充足計算、学習保存時へのフック） |
+| [big-goal-model-365.md](big-goal-model-365.md) | 記録 | Issue #365の大目標データモデルと達成判定基盤（Prismaモデルとmigration、到達型・実績型・応用型の条件評価、進捗の部分充足計算、学習保存時へのフック）。大目標システムは2026-11-22に撤去決定（redesign-overview-2026-11.md §2.3）。#366〜#370 の文書も同じ扱いとする |
 | [big-goal-proposal-366.md](big-goal-proposal-366.md) | 記録 | Issue #366の大目標の候補生成・適合度採点・提案API（タイミングA/Bのルール、gpt-6-luna固定の採点とコードブック、検証ログ、合意による確定と再検証） |
 | [big-goal-ui-367.md](big-goal-ui-367.md) | 記録 | Issue #367の大目標の設定UIとホーム表示（単元開始時の目標設定ゲート、本命＋2件の候補表示と合意操作、ホームのバナーと履歴表示、進捗はAPIの計算結果をそのまま表示） |
 | [feedback-big-goal-input-368.md](feedback-big-goal-input-368.md) | 記録 | Issue #368のフィードバック生成入力への大目標統合（分析段へ表示文・達成条件・進捗の内訳を渡し、currentStateを大目標に対する位置として書かせる。PROMPT_VERSION更新とverify追随） |
-| [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け） |
+| [feedback-dedicated-screen-369.md](feedback-dedicated-screen-369.md) | 記録 | Issue #369のフィードバック専用画面（結果画面の付属ボックスから独立した画面への移行、現在位置の図と大目標の進捗表示、保存レスポンスへの達成した大目標の追加と達成時の次の目標の提案（タイミングB）、#299の切り分け）。単独画面形は統合2ステージ形に拡張・置換（Issue #500） |
 | [big-goal-celebration-370.md](big-goal-celebration-370.md) | 記録 | Issue #370の大目標の称賛演出の統合（結果画面の紙吹雪・歓声を最大級へ引き上げる一元化、単元完了と重なる達成は最終リザルトへ統合、結果画面の無いフェーズからの持ち越し、達成バンド／ゾーンの提示） |
 | [binary-search-baseline-import-285.md](binary-search-baseline-import-285.md) | 記録 | Issue #285の二分探索単元の基準データ取り込み |
 | [greedy-coins-baseline-import-380.md](greedy-coins-baseline-import-380.md) | 記録 | Issue #380の貪欲法（硬貨問題）単元の基準データ取り込み |
