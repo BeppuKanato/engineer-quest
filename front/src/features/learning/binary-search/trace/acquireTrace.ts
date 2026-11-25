@@ -1,5 +1,5 @@
 import { disposePyodideRunner, preparePyodide, tracePythonFunction } from "../../../../lib/pyodideRunner";
-import { binarySearchImplementationContent } from "../implementation/implementation.content";
+import { binarySearchImplementationContent } from "../implementation-legacy/implementation.content";
 
 export const binarySearchTraceEventLimit = 500;
 /** 前の採点用入力を持ち込まず、毎回新しいWorkerへD1の引数だけを送る。 */
