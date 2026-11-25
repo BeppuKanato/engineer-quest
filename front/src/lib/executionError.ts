@@ -9,7 +9,27 @@
  * "<string>" フレームが、エラーが実際に起きた学習者コードの行である。
  */
 export type ExecutionErrorKind = "syntax" | "runtime" | "timeout";
-export type ExecutionErrorAnalysis = { readonly kind: ExecutionErrorKind; readonly line?: number };
+export type ExecutionErrorAnalysis = { readonly kind: ExecutionErrorKind; readonly line?: number; readonly exception?: string; readonly name?: string };
+
+/**
+ * トレースバック末尾の例外行（例：`NameError: name 'n' is not defined`）から
+ * 例外クラス名を取り出す。NameError のときは未定義の名前も拾う。
+ * 学習者向けの具体文（定型文）に差し替えるための材料で、LLMは使わない。
+ */
+export function extractException(message: string): { exception?: string; name?: string } {
+  const lines = message.split("\n").map(line => line.trim()).filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const match = /^([A-Za-z_][\w.]*?(?:Error|Exception|Exit|Interrupt|Iteration)):\s*(.*)$/u.exec(lines[i]);
+    if (!match) continue;
+    const exception = match[1].split(".").pop()!;
+    if (exception === "NameError") {
+      const nameMatch = /name '([^']+)' is not defined/u.exec(match[2]);
+      if (nameMatch) return { exception, name: nameMatch[1] };
+    }
+    return { exception };
+  }
+  return {};
+}
 
 /** pyodideRunner がタイムアウト時に投げる文言そのもの。この文字列と完全一致したときだけ timeout とする。 */
 const runnerTimeoutMessage = "Pythonの実行がタイムアウトしました。処理を見直してください。";
@@ -36,10 +56,12 @@ export function classifyExecutionError(error: unknown): ExecutionErrorKind {
   return /(?:SyntaxError|IndentationError|TabError):/u.test(message) ? "syntax" : "runtime";
 }
 
-/** エラーの種別と、取れる場合は学習者コード基準の行番号を返す。タイムアウトは行を持たない。 */
+/** エラーの種別と、取れる場合は学習者コード基準の行番号・例外名を返す。タイムアウトは行を持たない。 */
 export function analyzeExecutionError(error: unknown): ExecutionErrorAnalysis {
   const kind = classifyExecutionError(error);
   if (kind === "timeout") return { kind };
-  const line = extractExecutionErrorLine(executionErrorText(error));
-  return line === undefined ? { kind } : { kind, line };
+  const message = executionErrorText(error);
+  const line = extractExecutionErrorLine(message);
+  const { exception, name } = extractException(message);
+  return { kind, ...(line === undefined ? {} : { line }), ...(exception === undefined ? {} : { exception }), ...(name === undefined ? {} : { name }) };
 }

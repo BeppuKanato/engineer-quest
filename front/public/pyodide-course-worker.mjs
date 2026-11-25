@@ -27,6 +27,58 @@ self.onmessage = async ({ data }) => {
       self.postMessage({ id, done: true, trace: JSON.parse(traced) });
       return;
     }
+    // プログラム形式（標準入出力）の判定。ケースごとに入力を差し替え、
+    // 標準出力を捕捉して返す。エラーはケース別にトレースバック文字列で返す
+    // （呼び出し側が既存の例外解析で学習者向け文に変換する）。
+    if (kind === "runProgram") {
+      pyodide.setStdout({ batched: () => {} });
+      pyodide.setStderr({ batched: () => {} });
+      const harness = `
+import io
+import sys
+import json
+import traceback
+
+__eq_cases = json.loads(${JSON.stringify(JSON.stringify(data.cases ?? []))})
+__eq_results = []
+for __eq_case in __eq_cases:
+    __eq_stdout = io.StringIO()
+    __eq_old_stdout, __eq_old_stdin = sys.stdout, sys.stdin
+    sys.stdout = __eq_stdout
+    sys.stdin = io.StringIO(__eq_case.get("input", ""))
+    __eq_error = None
+    try:
+        exec(${JSON.stringify(code)}, {"__name__": "__main__"})
+    except BaseException:
+        __eq_error = traceback.format_exc()
+    finally:
+        sys.stdout, sys.stdin = __eq_old_stdout, __eq_old_stdin
+    __eq_results.append({"id": __eq_case["id"], "stdout": __eq_stdout.getvalue(), "error": __eq_error})
+json.dumps(__eq_results)
+`;
+      const result = await pyodide.runPythonAsync(harness);
+      self.postMessage({ id, done: true, results: JSON.parse(result) });
+      return;
+    }
+    // プログラム形式の試し実行。入力だけ差し替え、標準出力はそのまま流す。
+    if (kind === "runProgramFree") {
+      pyodide.setStdout({ batched: (text) => self.postMessage({ id, stdout: text }) });
+      pyodide.setStderr({ batched: (text) => self.postMessage({ id, stderr: text }) });
+      const harness = `
+import io
+import sys
+
+__eq_old_stdin = sys.stdin
+sys.stdin = io.StringIO(${JSON.stringify(data.input ?? "")})
+try:
+    exec(${JSON.stringify(code)}, {"__name__": "__main__"})
+finally:
+    sys.stdin = __eq_old_stdin
+`;
+      await pyodide.runPythonAsync(harness);
+      self.postMessage({ id, done: true });
+      return;
+    }
     pyodide.setStdout({ batched: (text) => self.postMessage({ id, stdout: text }) });
     pyodide.setStderr({ batched: (text) => self.postMessage({ id, stderr: text }) });
     const harness = kind === "runCreateQuest" ? `

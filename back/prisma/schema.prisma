@@ -42,6 +42,7 @@ model User {
   learningEvents    LearningEvent[]
   bigGoals          BigGoal[]
   bigGoalProposals  BigGoalProposal[]
+  developmentMissionAttempts DevelopmentMissionAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -891,4 +892,26 @@ model DailyReview {
 
   @@unique([userId, reviewDate])
   @@index([userId, correct, answeredAt])
+}
+
+// =========================
+// 発展ミッション（第2層・活用）
+// =========================
+// ミッションの定義（課題文・テスト・スコア基準）は教材データとしてフロントに持つ。
+// ここには挑戦の記録だけを保存する。スコアはクライアント側で決定的に計算され、
+// 自己ベストの更新が再挑戦の動機になる（Issue #507）。
+model DevelopmentMissionAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  missionId String
+  points    Int
+  count     Int
+  code      String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, missionId, createdAt])
+  @@index([userId, createdAt])
 }

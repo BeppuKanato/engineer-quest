@@ -37,6 +37,7 @@ import { FeedbackScreen } from "./feedback/FeedbackScreen";
 import { findUnitMission } from "./missionRegistry";
 import { hasSeenMissionStory } from "./missionStoryStore";
 import { MissionPresentation } from "./MissionPresentation";
+import { MissionUnlockNotice } from "./MissionUnlockNotice";
 
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
@@ -182,6 +183,8 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
       onProceed={nav.goBack} proceedLabel="結果に戻る"
       onUnavailable={() => { setFeedbackAvailability("unavailable"); nav.goBack(); }}>
       {unitAchievedGoals.length ? <BigGoalNextProposal achievedGoal={unitAchievedGoals[0]} getToken={getToken} /> : null}
+      {/* 発展ミッションへの導線：単元完了で解放されるミッションを、フィードバックの流れの中で出す（主導線）。 */}
+      <MissionUnlockNotice courseId={courseId} />
     </FeedbackScreen>
   ), [courseId, unitAchievedGoals, getToken]);
   // 最終リザルトの「次の実績」：単元保存が済んで解除分が確定してから、実績一覧で
