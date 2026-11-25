@@ -1,7 +1,7 @@
 "use client";
 
-import { ImplementationWorkspace, type ImplementationWorkspaceProps } from "../../bfs/implementation/BfsImplementationPreview";
-import { runFreeDisplayCase } from "../../bfs/implementation/freeExecution";
+import { ImplementationWorkspace, type ImplementationWorkspaceProps } from "../../bfs/implementation-legacy/BfsImplementationPreview";
+import { runFreeDisplayCase } from "../../bfs/implementation-legacy/freeExecution";
 import { dfsCode } from "../code-mapping/dfsCode";
 import { traceDfsCode } from "../trace/acquireTrace";
 import { convertDfsTrace } from "../trace/convertTrace";
