@@ -1,5 +1,6 @@
 import {
   Prisma,
+  QuestCommentReactionType,
   QuestPostCategory,
   QuestPostStatus,
   QuestReactionType,
@@ -98,6 +99,36 @@ const parseReactionType = (value: string): QuestReactionType => {
 
   throw new AppError(400, "INVALID_QUEST_REACTION_TYPE", "Invalid reaction");
 };
+
+const parseCommentReactionType = (value: string): QuestCommentReactionType => {
+  if (
+    Object.values(QuestCommentReactionType).includes(
+      value as QuestCommentReactionType
+    )
+  ) {
+    return value as QuestCommentReactionType;
+  }
+
+  throw new AppError(
+    400,
+    "INVALID_QUEST_COMMENT_REACTION_TYPE",
+    "Invalid comment reaction"
+  );
+};
+
+// 回答へのリアクションは {helpful, thanks, userTypes} の形で返す（フロントの表示単位に合わせる）。
+const commentReactionSummary = (
+  reactions: { type: QuestCommentReactionType; userId: string }[],
+  userId: string
+) => ({
+  helpful: reactions.filter((r) => r.type === QuestCommentReactionType.HELPFUL)
+    .length,
+  thanks: reactions.filter((r) => r.type === QuestCommentReactionType.THANKS)
+    .length,
+  userTypes: reactions
+    .filter((r) => r.userId === userId)
+    .map((r) => r.type),
+});
 
 const assertPostPayload = ({
   title,
@@ -331,6 +362,7 @@ export const getQuestPostByFirebaseUid = async ({
         orderBy: { createdAt: "asc" },
         include: {
           user: { select: authorSelect },
+          reactions: { select: { type: true, userId: true } },
         },
       },
       reactions: { select: { type: true, userId: true } },
@@ -350,13 +382,17 @@ export const getQuestPostByFirebaseUid = async ({
         },
         user.id
       ),
-      comments: post.comments.map((comment) => ({
-        id: comment.id,
-        body: comment.body,
-        ...authorInfo(comment.user),
-        createdAt: comment.createdAt.toISOString(),
-        updatedAt: comment.updatedAt.toISOString(),
-      })),
+      comments: [...post.comments]
+        .sort((a, b) => Number(b.isSolution) - Number(a.isSolution))
+        .map((comment) => ({
+          id: comment.id,
+          body: comment.body,
+          isSolution: comment.isSolution,
+          reactions: commentReactionSummary(comment.reactions, user.id),
+          ...authorInfo(comment.user),
+          createdAt: comment.createdAt.toISOString(),
+          updatedAt: comment.updatedAt.toISOString(),
+        })),
     },
     options: getQuestBoardOptions(),
   };
@@ -408,6 +444,8 @@ export const addQuestCommentByFirebaseUid = async ({
     comment: {
       id: comment.id,
       body: comment.body,
+      isSolution: comment.isSolution,
+      reactions: commentReactionSummary([], user.id),
       ...authorInfo(comment.user),
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
@@ -630,5 +668,155 @@ export const buildCreateQuestPostPayload = (body: unknown) => {
     code: normalizeNullableText(payload?.code),
     referenceUrl: normalizeNullableText(payload?.referenceUrl),
     courseId: normalizeNullableText(payload?.courseId),
+  };
+};
+
+export const markQuestCommentSolutionByFirebaseUid = async ({
+  firebaseUid,
+  postId,
+  commentId,
+}: {
+  firebaseUid: string;
+  postId: string;
+  commentId: string;
+}) => {
+  const user = await getUserByFirebaseUid(firebaseUid);
+  const post = await prisma.questPost.findFirst({
+    where: { id: postId, visibility: "PUBLIC" },
+    select: { id: true, userId: true, category: true, title: true, body: true },
+  });
+
+  if (!post) {
+    throw new AppError(404, "QUEST_POST_NOT_FOUND", "Quest post not found");
+  }
+
+  if (post.userId !== user.id) {
+    throw new AppError(
+      403,
+      "QUEST_POST_NOT_OWNER",
+      "Only owner can mark a solution"
+    );
+  }
+
+  if (post.title === deletedPostText && post.body === deletedPostText) {
+    throw new AppError(
+      400,
+      "QUEST_POST_DELETED",
+      "Deleted post cannot mark a solution"
+    );
+  }
+
+  if (
+    post.category !== QuestPostCategory.QUESTION &&
+    post.category !== QuestPostCategory.ERROR_HELP
+  ) {
+    throw new AppError(
+      400,
+      "QUEST_POST_STATUS_UNSUPPORTED",
+      "Only question and error help posts can mark a solution"
+    );
+  }
+
+  const comment = await prisma.questComment.findFirst({
+    where: { id: commentId, postId },
+    select: { id: true },
+  });
+
+  if (!comment) {
+    throw new AppError(
+      404,
+      "QUEST_COMMENT_NOT_FOUND",
+      "Quest comment not found"
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.questComment.updateMany({
+      where: { postId, isSolution: true },
+      data: { isSolution: false },
+    }),
+    prisma.questComment.update({
+      where: { id: commentId },
+      data: { isSolution: true },
+    }),
+    prisma.questPost.update({
+      where: { id: postId },
+      data: { status: QuestPostStatus.RESOLVED },
+    }),
+  ]);
+
+  return getQuestPostByFirebaseUid({ firebaseUid, postId });
+};
+
+export const toggleQuestCommentReactionByFirebaseUid = async ({
+  firebaseUid,
+  postId,
+  commentId,
+  type,
+}: {
+  firebaseUid: string;
+  postId: string;
+  commentId: string;
+  type: string;
+}) => {
+  const user = await getUserByFirebaseUid(firebaseUid);
+  const reactionType = parseCommentReactionType(type);
+
+  const comment = await prisma.questComment.findFirst({
+    where: { id: commentId, postId },
+    select: {
+      id: true,
+      post: { select: { title: true, body: true, visibility: true } },
+    },
+  });
+
+  if (!comment || comment.post.visibility !== "PUBLIC") {
+    throw new AppError(
+      404,
+      "QUEST_COMMENT_NOT_FOUND",
+      "Quest comment not found"
+    );
+  }
+
+  if (
+    comment.post.title === deletedPostText &&
+    comment.post.body === deletedPostText
+  ) {
+    throw new AppError(
+      400,
+      "QUEST_POST_DELETED",
+      "Deleted post cannot receive reactions"
+    );
+  }
+
+  const existing = await prisma.questCommentReaction.findUnique({
+    where: {
+      commentId_userId_type: {
+        commentId,
+        userId: user.id,
+        type: reactionType,
+      },
+    },
+  });
+
+  if (existing) {
+    await prisma.questCommentReaction.delete({ where: { id: existing.id } });
+  } else {
+    await prisma.questCommentReaction.create({
+      data: {
+        commentId,
+        userId: user.id,
+        type: reactionType,
+      },
+    });
+  }
+
+  const reactions = await prisma.questCommentReaction.findMany({
+    where: { commentId },
+    select: { type: true, userId: true },
+  });
+
+  return {
+    reactions: commentReactionSummary(reactions, user.id),
   };
 };

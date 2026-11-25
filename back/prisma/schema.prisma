@@ -32,6 +32,7 @@ model User {
   questPosts                QuestPost[]
   questComments             QuestComment[]
   questReactions            QuestReaction[]
+  questCommentReactions     QuestCommentReaction[]
   hexadResponse             HexadResponse?
   experimentAssignments     ExperimentAssignment[]
 
@@ -476,13 +477,16 @@ model QuestPost {
 }
 
 model QuestComment {
-  id     String @id @default(cuid())
-  postId String
-  userId String
-  body   String
+  id         String  @id @default(cuid())
+  postId     String
+  userId     String
+  body       String
+  isSolution Boolean @default(false)
 
   post QuestPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reactions QuestCommentReaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -504,6 +508,23 @@ model QuestReaction {
 
   @@unique([postId, userId, type])
   @@index([postId])
+  @@index([userId])
+  @@index([type])
+}
+
+model QuestCommentReaction {
+  id        String                   @id @default(cuid())
+  commentId String
+  userId    String
+  type      QuestCommentReactionType
+
+  comment QuestComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId, type])
+  @@index([commentId])
   @@index([userId])
   @@index([type])
 }
@@ -666,6 +687,11 @@ enum QuestReactionType {
   LIKE
   HELPFUL
   SAVED_ME
+}
+
+enum QuestCommentReactionType {
+  HELPFUL
+  THANKS
 }
 
 model FeedbackV1 {

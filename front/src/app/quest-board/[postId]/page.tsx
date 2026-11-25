@@ -1,26 +1,25 @@
 "use client";
 
 import { FeedbackDestination } from "@/app/component/feedbackV1";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CodeRoundedIcon from "@mui/icons-material/CodeRounded";
+import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
+import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import {
   Alert,
   Box,
   Button,
-  Chip,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
-  Link as MuiLink,
   InputLabel,
   MenuItem,
   Paper,
@@ -38,6 +37,8 @@ import {
   addQuestComment,
   deleteQuestPost,
   getQuestPost,
+  markQuestCommentSolution,
+  toggleQuestCommentReaction,
   toggleQuestReaction,
   updateQuestPost,
   updateQuestPostStatus,
@@ -48,10 +49,12 @@ import {
   type QuestReactionType,
 } from "@/api/questBoard.api";
 import { QuestBoardAuthor } from "../_components/QuestBoardAuthor";
+import { CategoryChip, CourseChip, MissionChip, StatusChip, isResolvableCategory } from "../_components/BoardChips";
 import { ActionButton } from "@/app/component/actionButton";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
+import { MascotFigure } from "@/app/component/mascotFigure";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import { fetchClientQuery, peekClientQueryData, queryTags, setClientQueryData } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
@@ -70,9 +73,6 @@ const formatDate = (value: string) =>
     hour: "2-digit",
     minute: "2-digit",
   });
-
-const isResolvableCategory = (post: QuestPostDetail) =>
-  post.category === "QUESTION" || post.category === "ERROR_HELP";
 
 const titleMinLength = 5;
 const titleMaxLength = 100;
@@ -218,10 +218,49 @@ export default function QuestPostDetailPage() {
     }
   };
 
+  const [copiedCode, setCopiedCode] = useState(false);
+  const handleCopyCode = async () => {
+    if (!post?.code) return;
+    try {
+      await navigator.clipboard.writeText(post.code);
+      setCopiedCode(true);
+      window.setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // コピーできない環境では何もしない（コードは選択してコピーできる）。
+    }
+  };
+
+  const handleMarkSolution = async (commentId: string) => {
+    if (!token || !post) return;
+    try {
+      const result = await markQuestCommentSolution(token, post.id, commentId);
+      setPost(result.post);
+      play("saveSuccess");
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("解決した回答を指定できませんでした。");
+    }
+  };
+
+  const handleCommentReaction = async (commentId: string, type: "HELPFUL" | "THANKS") => {
+    if (!token || !post) return;
+    try {
+      const result = await toggleQuestCommentReaction(token, post.id, commentId, type);
+      setPost({
+        ...post,
+        comments: post.comments.map((comment) =>
+          comment.id === commentId ? { ...comment, reactions: result.reactions } : comment
+        ),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleAddComment = async () => {
     if (!token || !post) return;
     if (commentBody.trim().length < 2) {
-      setErrorMessage("コメントは2文字以上で入力してください。");
+      setErrorMessage(`${isResolvableCategory(post.category) ? "回答" : "コメント"}は2文字以上で入力してください。`);
       return;
     }
 
@@ -238,11 +277,13 @@ export default function QuestPostDetailPage() {
       play("saveSuccess");
     } catch (error) {
       console.error(error);
-      setErrorMessage("コメントを投稿できませんでした。");
+      setErrorMessage(`${isResolvableCategory(post.category) ? "回答" : "コメント"}を投稿できませんでした。`);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const resolvable = post ? isResolvableCategory(post.category) : false;
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f7f8fc" }}>
@@ -250,182 +291,253 @@ export default function QuestPostDetailPage() {
       <Container maxWidth={false} sx={{ maxWidth: 1440, pt: { xs: 3, md: 4 } }}>
           <AppBreadcrumbs items={[{ label: "掲示板", href: "/quest-board" }, { label: post?.title ?? "投稿詳細" }]} />
         </Container>
-      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 4 }}>
+      <Container maxWidth={false} sx={{ maxWidth: 960, pt: 3, pb: 5 }}>
         <Stack spacing={3}>
 
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
           {isLoading || !post ? (
             <Stack spacing={2}>
-              <Skeleton variant="rounded" height={320} sx={{ borderRadius: 2 }} />
-              <Skeleton variant="rounded" height={160} sx={{ borderRadius: 2 }} />
+              <Skeleton variant="rounded" height={320} sx={{ borderRadius: 3 }} />
+              <Skeleton variant="rounded" height={160} sx={{ borderRadius: 3 }} />
             </Stack>
           ) : (
             <>
-              {post.isOwner && !post.isDeleted && (
-                <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <Button
-                    variant="outlined"
-                    startIcon={<EditIcon />}
-                    onClick={openEditDialog}
-                    sx={{ fontWeight: 900, borderRadius: 2 }}
-                  >
-                    編集
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => setDeleteOpen(true)}
-                    sx={{ fontWeight: 900, borderRadius: 2 }}
-                  >
-                    削除
-                  </Button>
-                </Stack>
-              )}
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#fff" }}>
                 <Stack spacing={2.5}>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" alignItems="center">
-                    <Chip label={post.categoryLabel} color="primary" sx={{ fontWeight: 900 }} />
-                    {isResolvableCategory(post) && (
-                      <Chip
-                        icon={post.status === "RESOLVED" ? <CheckCircleIcon /> : undefined}
-                        label={post.status === "RESOLVED" ? "解決済み" : "未解決"}
-                        color={post.status === "RESOLVED" ? "success" : "default"}
-                        sx={{ fontWeight: 900 }}
-                      />
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
+                    <CategoryChip category={post.category} label={post.categoryLabel} />
+                    {resolvable && <StatusChip status={post.status} commentCount={post.commentCount} />}
+                    {post.courseTitle && <CourseChip title={post.courseTitle} />}
+                    {post.missionTitle && <MissionChip title={post.missionTitle} />}
+                    <Box sx={{ flex: 1 }} />
+                    {post.isOwner && !post.isDeleted && (
+                      <>
+                        <Button variant="text" startIcon={<EditIcon />} onClick={openEditDialog} sx={{ fontWeight: 800, color: "#2563eb" }}>
+                          編集
+                        </Button>
+                        <Button variant="text" startIcon={<DeleteIcon />} onClick={() => setDeleteOpen(true)} sx={{ fontWeight: 800, color: "#111827" }}>
+                          削除
+                        </Button>
+                      </>
                     )}
-                    {post.courseTitle && <Chip label={post.courseTitle} variant="outlined" />}
-                  </Stack>
-
-                  <Box>
-                    <Typography variant="h4" fontWeight={900}>
-                      {post.title}
-                    </Typography>
-                    <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1 }}>
-                      <QuestBoardAuthor author={post} isDeleted={post.isDeleted} />
-                      <Typography variant="body2" color="text.secondary">{formatDate(post.createdAt)}</Typography>
-                    </Stack>
                   </Box>
 
-                  <Typography sx={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{post.body}</Typography>
+                  <Box>
+                    <Typography sx={{ fontSize: 22, fontWeight: 900, lineHeight: 1.5 }}>
+                      {post.title}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", mt: 1.25 }}>
+                      <QuestBoardAuthor author={post} isDeleted={post.isDeleted} />
+                      <Typography sx={{ fontSize: 14 }}>{formatDate(post.createdAt)}</Typography>
+                    </Box>
+                  </Box>
+
+                  <Typography sx={{ fontSize: 16, whiteSpace: "pre-wrap", lineHeight: 1.9 }}>{post.body}</Typography>
 
                   {post.code && (
-                    <Box
-                      component="pre"
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: "#0f172a",
-                        color: "#e2e8f0",
-                        overflowX: "auto",
-                        fontSize: 14,
-                        lineHeight: 1.7,
-                      }}
-                    >
-                      <code>{post.code}</code>
+                    <Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
+                        <CodeRoundedIcon sx={{ fontSize: 18, color: "#334155" }} />
+                        <Typography sx={{ fontSize: 14, fontWeight: 800 }}>コード</Typography>
+                        <Typography sx={{ fontSize: 14, fontWeight: 700, px: 1, py: 0.25, borderRadius: 1, bgcolor: "#f1f5f9" }}>Python</Typography>
+                        <Box sx={{ flex: 1 }} />
+                        <Button
+                          size="small"
+                          startIcon={<ContentCopyRoundedIcon sx={{ fontSize: 16 }} />}
+                          onClick={handleCopyCode}
+                          sx={{ fontWeight: 700, color: "#2563eb", minHeight: 32 }}
+                        >
+                          {copiedCode ? "コピーしました" : "コピー"}
+                        </Button>
+                      </Box>
+                      <Box
+                        sx={{
+                          p: 2, borderRadius: 2, bgcolor: "#0f172a", color: "#e2e8f0",
+                          overflowX: "auto", fontSize: 14, lineHeight: 1.7,
+                          fontFamily: "ui-monospace, SFMono-Regular, Consolas, monospace",
+                        }}
+                      >
+                        {post.code.split("\n").map((line, index) => (
+                          <Box key={index} sx={{ display: "flex", gap: 2 }}>
+                            <Box component="span" sx={{ width: 24, textAlign: "right", color: "#64748b", userSelect: "none", flexShrink: 0 }}>
+                              {index + 1}
+                            </Box>
+                            <Box component="span" sx={{ whiteSpace: "pre" }}>{line || " "}</Box>
+                          </Box>
+                        ))}
+                      </Box>
                     </Box>
                   )}
 
                   {post.referenceUrl && (
-                    <Typography>
-                      {post.category === "WORK_SHARE" && post.referenceUrl.startsWith("/my-works/")
-                        ? "元の制作記録"
-                        : "参考 URL"}
-                      :{" "}
-                      <MuiLink
-                        href={post.referenceUrl}
-                        target={post.referenceUrl.startsWith("/") ? undefined : "_blank"}
-                        rel={post.referenceUrl.startsWith("/") ? undefined : "noreferrer"}
-                      >
-                        {post.referenceUrl}
-                      </MuiLink>
-                    </Typography>
+                    <Box
+                      component="a"
+                      href={post.referenceUrl}
+                      target={post.referenceUrl.startsWith("/") ? undefined : "_blank"}
+                      rel={post.referenceUrl.startsWith("/") ? undefined : "noreferrer"}
+                      sx={{
+                        display: "flex", alignItems: "center", gap: 1.25, p: 2, borderRadius: 2,
+                        border: "1px solid #cbd5e1", bgcolor: "#fff", color: "inherit", textDecoration: "none",
+                        "&:hover": { borderColor: "#2563eb" },
+                      }}
+                    >
+                      <LinkRoundedIcon sx={{ color: "#2563eb" }} />
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography sx={{ fontSize: 14, fontWeight: 800 }}>
+                          {post.category === "WORK_SHARE" && post.referenceUrl.startsWith("/my-works/") ? "元の制作記録" : "参考リンク"}
+                        </Typography>
+                        <Typography sx={{ fontSize: 14, color: "#2563eb", overflowWrap: "anywhere" }}>{post.referenceUrl}</Typography>
+                      </Box>
+                    </Box>
                   )}
-
-                  <Divider />
 
                   {!post.isDeleted && (
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }}>
-                    {(Object.keys(reactionMeta) as QuestReactionType[]).map((type) => {
-                      const reacted = post.reactions.userReactedTypes.includes(type);
-                      return (
-                        <Button
-                          key={type}
-                          variant={reacted ? "contained" : "outlined"}
-                          startIcon={reactionMeta[type].icon}
-                          onClick={() => handleReaction(type)}
-                          sx={{ fontWeight: 900, borderRadius: 2 }}
-                        >
-                          {reactionMeta[type].label} {post.reactions.byType[type] ?? 0}
-                        </Button>
-                      );
-                    })}
-                  </Stack>
+                    <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap", pt: 0.5 }}>
+                      {(Object.keys(reactionMeta) as QuestReactionType[]).map((type) => {
+                        const reacted = post.reactions.userReactedTypes.includes(type);
+                        return (
+                          <Button
+                            key={type}
+                            variant={reacted ? "contained" : "outlined"}
+                            startIcon={reactionMeta[type].icon}
+                            onClick={() => handleReaction(type)}
+                            sx={{
+                              minHeight: 44, px: 2.5, borderRadius: 999, fontWeight: 800,
+                              ...(reacted
+                                ? { bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }
+                                : { color: "#111827", borderColor: "#cbd5e1", "&:hover": { borderColor: "#2563eb", bgcolor: "#eff6ff" } }),
+                            }}
+                          >
+                            {reactionMeta[type].label} {post.reactions.byType[type] ?? 0}
+                          </Button>
+                        );
+                      })}
+                    </Box>
                   )}
 
-                  {!post.isDeleted && post.canResolve && isResolvableCategory(post) && (
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-                      <Button
-                        variant={post.status === "RESOLVED" ? "contained" : "outlined"}
-                        color="success"
-                        onClick={() => handleStatusChange("RESOLVED")}
-                        disabled={post.status === "RESOLVED"}
-                      >
-                        解決済みにする
-                      </Button>
-                      <Button
-                        variant={post.status === "OPEN" ? "contained" : "outlined"}
-                        onClick={() => handleStatusChange("OPEN")}
-                        disabled={post.status === "OPEN"}
-                      >
-                        未解決に戻す
-                      </Button>
-                    </Stack>
+                  {!post.isDeleted && post.canResolve && resolvable && (
+                    post.status === "RESOLVED" ? (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 2, borderRadius: 2, bgcolor: "#f0fdf4", border: "1px solid #bbf7d0", flexWrap: "wrap" }}>
+                        <CheckCircleRoundedIcon sx={{ color: "#16a34a" }} />
+                        <Typography sx={{ fontSize: 16, fontWeight: 800, color: "#166534" }}>解決済みです</Typography>
+                        <Box sx={{ flex: 1 }} />
+                        <Button onClick={() => handleStatusChange("OPEN")} sx={{ fontWeight: 700, color: "#2563eb" }}>
+                          未解決に戻す
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 2, borderRadius: 2, border: "1px solid #e2e8f0", flexWrap: "wrap" }}>
+                        <Typography sx={{ fontSize: 16 }}>答えが見つかったら、解決済みにしましょう。</Typography>
+                        <Box sx={{ flex: 1 }} />
+                        <Button
+                          variant="contained" startIcon={<CheckCircleRoundedIcon />}
+                          onClick={() => handleStatusChange("RESOLVED")}
+                          sx={{ minHeight: 44, fontWeight: 800, borderRadius: 2, bgcolor: "#16a34a", "&:hover": { bgcolor: "#15803d" } }}
+                        >
+                          解決済みにする
+                        </Button>
+                      </Box>
+                    )
                   )}
                 </Stack>
               </Paper>
 
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e2e8f0" }}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: "1px solid #e2e8f0", bgcolor: "#fff" }}>
                 <Stack spacing={2.5}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <ChatBubbleOutlineIcon color="primary" />
-                    <Typography variant="h5" fontWeight={900}>
-                      コメント
-                    </Typography>
-                    <Chip label={post.commentCount} size="small" />
-                  </Stack>
+                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.25 }}>
+                    <Typography sx={{ fontSize: 18, fontWeight: 900 }}>{resolvable ? "回答" : "コメント"}</Typography>
+                    <Typography sx={{ fontSize: 14, fontWeight: 700 }}>{post.commentCount}件</Typography>
+                  </Box>
 
                   {post.comments.length === 0 ? (
-                    <Typography color="text.secondary">まだコメントはありません。</Typography>
+                    <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+                      <MascotFigure mascotId="red-panda" alt="マスコット" size="S" grounding="frame" presentation="circle" motion="none" />
+                      <Typography sx={{ fontSize: 16 }}>
+                        {resolvable
+                          ? "まだ回答がありません。分かったことがあれば、最初の回答を書いてみましょう。"
+                          : "まだコメントはありません。"}
+                      </Typography>
+                    </Box>
                   ) : (
-                    <Stack spacing={2}>
-                      {post.comments.map((comment) => (
-                        <Paper
+                    <Box>
+                      {post.comments.map((comment, index) => (
+                        <Box
                           key={comment.id}
-                          elevation={0}
-                          sx={{ p: 2, borderRadius: 2, border: "1px solid #e2e8f0", bgcolor: "#fff" }}
+                          sx={{
+                            pt: index === 0 ? 0 : 2, mt: index === 0 ? 0 : 2,
+                            borderTop: index === 0 ? "none" : "1px solid #e2e8f0",
+                            ...(comment.isSolution
+                              ? { bgcolor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 2, p: 2, mt: index === 0 ? 0 : 2 }
+                              : {}),
+                          }}
                         >
-                          <Typography sx={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                          <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
+                            <QuestBoardAuthor author={comment} />
+                            <Typography sx={{ fontSize: 14 }}>{formatDate(comment.createdAt)}</Typography>
+                            {comment.isSolution && (
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, px: 1.25, py: 0.4, borderRadius: 999, bgcolor: "#dcfce7" }}>
+                                <CheckCircleRoundedIcon sx={{ fontSize: 16, color: "#16a34a" }} />
+                                <Typography sx={{ fontSize: 14, fontWeight: 800, color: "#166534" }}>解決した回答</Typography>
+                              </Box>
+                            )}
+                          </Box>
+                          <Typography sx={{ fontSize: 16, whiteSpace: "pre-wrap", lineHeight: 1.8, mt: 1 }}>
                             {comment.body}
                           </Typography>
-                          <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1 }}>
-                            <QuestBoardAuthor author={comment} />
-                            <Typography variant="body2" color="text.secondary">{formatDate(comment.createdAt)}</Typography>
-                          </Stack>
-                        </Paper>
+                          <Box sx={{ display: "flex", gap: 1, mt: 1.25, flexWrap: "wrap", alignItems: "center" }}>
+                            {([
+                              { type: "HELPFUL" as const, label: "参考になった", count: comment.reactions?.helpful ?? 0 },
+                              { type: "THANKS" as const, label: "ありがとう", count: comment.reactions?.thanks ?? 0 },
+                            ]).map((item) => {
+                              const active = comment.reactions?.userTypes.includes(item.type) ?? false;
+                              return (
+                                <Button
+                                  key={item.type}
+                                  size="small"
+                                  variant={active ? "contained" : "outlined"}
+                                  onClick={() => handleCommentReaction(comment.id, item.type)}
+                                  sx={{
+                                    minHeight: 34, borderRadius: 999, fontWeight: 700,
+                                    ...(active
+                                      ? { bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }
+                                      : { color: "#111827", borderColor: "#cbd5e1", "&:hover": { borderColor: "#2563eb", bgcolor: "#eff6ff" } }),
+                                  }}
+                                >
+                                  {item.label} {item.count}
+                                </Button>
+                              );
+                            })}
+                            {resolvable && post.canResolve && !comment.isSolution && (
+                              <Button
+                                size="small"
+                                startIcon={<CheckCircleRoundedIcon sx={{ fontSize: 16 }} />}
+                                onClick={() => handleMarkSolution(comment.id)}
+                                sx={{ fontWeight: 700, color: "#166534", minHeight: 32 }}
+                              >
+                                解決した回答にする
+                              </Button>
+                            )}
+                          </Box>
+                        </Box>
                       ))}
-                    </Stack>
+                    </Box>
                   )}
 
-                  <Divider />
-
                   {post.isDeleted ? (
-                    <Alert severity="info">削除済み投稿のため、新しいコメントはできません。</Alert>
+                    <Alert severity="info">削除済み投稿のため、新しい{resolvable ? "回答" : "コメント"}はできません。</Alert>
                   ) : (
-                    <>
+                    <Box sx={{ borderTop: "1px solid #e2e8f0", pt: 2.5 }}>
+                      <Typography sx={{ fontSize: 14, fontWeight: 800, mb: 1 }}>
+                        {resolvable ? "あなたの回答" : "コメントを書く"}
+                      </Typography>
+                      {resolvable && (
+                        <Typography sx={{ fontSize: 14, mb: 1.5 }}>
+                          考え方や解決方法を共有しましょう。
+                        </Typography>
+                      )}
                       <TextField
-                        label="コメントを書く"
+                        label={resolvable ? "回答を書く" : "コメントを書く"}
                         id="reply"
                         value={commentBody}
                         onChange={(event) => setCommentBody(event.target.value)}
@@ -445,11 +557,11 @@ export default function QuestPostDetailPage() {
                         loadingLabel="投稿中..."
                         disabled={commentBody.trim().length < 2 || isSubmitting}
                         onClick={handleAddComment}
-                        sx={{ minHeight: 44, fontWeight: 900, borderRadius: 2, alignSelf: "flex-start" }}
+                        sx={{ minHeight: 44, fontWeight: 900, borderRadius: 2, alignSelf: "flex-start", mt: 1.5, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}
                       >
-                        コメントする
+                        {resolvable ? "回答する" : "コメントする"}
                       </ActionButton>
-                    </>
+                    </Box>
                   )}
                 </Stack>
               </Paper>
@@ -538,7 +650,7 @@ export default function QuestPostDetailPage() {
               <Dialog open={deleteOpen} onClose={() => !isDeleting && setDeleteOpen(false)}>
                 <DialogTitle fontWeight={900}>この投稿を削除しますか？</DialogTitle>
                 <DialogContent>
-                  <Typography color="text.secondary">
+                  <Typography>
                     削除後は元に戻せません。コメントは会話の流れを残すため保持されます。
                   </Typography>
                 </DialogContent>
