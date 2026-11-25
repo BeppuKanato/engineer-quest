@@ -71,6 +71,11 @@
 | [unit-overview-redesign-503.md](unit-overview-redesign-503.md) | 仕様（実装予定） | Issue #503 の単元画面刷新の詳細仕様 |
 | [header-narrow-504.md](header-narrow-504.md) | 仕様（実装予定） | Issue #504 のヘッダー狭幅対応の詳細仕様 |
 | [mission-presentation-505.md](mission-presentation-505.md) | 仕様（実装予定） | Issue #505 のミッション提示（ストーリーゲート）の詳細仕様 |
+| [development-missions-507.md](development-missions-507.md) | 仕様（実装予定） | Issue #507 の発展ミッション実装の要件仕様（旧「作る」の統合、スコアとティア目標、作品と共有） |
+| [goal-home-connection-508.md](goal-home-connection-508.md) | 仕様（実装予定） | Issue #508 の学習者の目標のホーム接続の詳細仕様 |
+| [review-connection-509.md](review-connection-509.md) | 仕様（実装予定） | Issue #509 の復習への接続（リザルトの復習候補、デイリーレビューの選出規則）の詳細仕様 |
+| [knowledge-card-use-510.md](knowledge-card-use-510.md) | 仕様（実装予定） | Issue #510 の知識カードの使い道（発展ミッションでの参照）の詳細仕様 |
+| [story-phase-bridge-511.md](story-phase-bridge-511.md) | 仕様（実装予定） | Issue #511 のストーリーからフェーズ1への接続文の詳細仕様 |
 
 ## 実装報告
 
