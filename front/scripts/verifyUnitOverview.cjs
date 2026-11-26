@@ -16,16 +16,20 @@ assert(geometry.includes('wavePoint'), 'node positions must derive from the wave
 assert(overview.includes('unitPathGeometry'), 'the overview must use the shared wave geometry');
 assert(overview.includes('motion.path'), 'the completed portion of the path must be drawn with entry motion');
 
-// 2. The map area is a border-only frame (no filled panel) with the unit figure as a faint backdrop.
-const mapSection = overview.slice(overview.indexOf('function UnitPathMap'), overview.indexOf('function UnitAchievements'));
+// 2. The bordered wave stays legible; the illustration belongs to the mission band.
+const mapSection = overview.slice(overview.indexOf('function UnitPathMap'), overview.indexOf('function UnitKnowledgeCards'));
 assert(mapSection.includes('border:'), 'the map area must have a border frame');
 assert(!mapSection.includes('bgcolor: tokens.surface'), 'the map area must not be a filled white panel');
-assert(mapSection.includes('CourseThumbnail'), 'the map backdrop must reuse the unit thumbnail figure');
+assert(!mapSection.includes('CourseThumbnail'), 'the wave must not place a thumbnail behind the labels');
+assert(overview.includes('missionThumbnailFor(unit.courseId) ?? <CourseThumbnail courseId={unit.courseId} />'), 'the mission band owns the illustration');
 
-// 3. No standalone start button: the current node is the only entry, marked with the chip.
-assert(!overview.includes('学習を始める'), 'the standalone start button must be gone');
-assert(!overview.includes('復習する'), 'the standalone review button must be gone');
-assert(overview.includes('ここから始める'), 'the current node must carry the start chip');
+// 3. The mission band offers the right CTA; the map retains phase review and mission entry.
+for (const label of ['学習を始める', '学習を進める', 'ミッションに挑戦する', '単元の結果を見る']) {
+  assert(overview.includes(label), `the mission band must offer: ${label}`);
+}
+assert(mapSection.includes('disabled={!reachable || starting}'), 'unreachable steps must not be actionable');
+assert(mapSection.includes('if (isMission) onMission(); else onStart(index, current);'), 'the map must route the final challenge and regular phases to the appropriate handler');
+assert(mapSection.includes('aria-current={current ? "step" : undefined}'), 'the current node must be identified');
 assert(overview.includes('スタート') && overview.includes('ゴール'), 'the path must have start and goal flags');
 
 // 4. Card awards stay recorded in the unit content, but stages must not advertise them:
@@ -34,8 +38,8 @@ const content = readFront('src/features/learning/bfs/unit/unit.content.ts');
 for (const rarity of ['RARE', 'COMMON', 'EPIC']) {
   assert(content.includes(`cardRarity: "${rarity}"`), `a phase must declare cardRarity ${rarity}`);
 }
-assert(!overview.includes('knowledgeCardTones'), 'stages must not render card-rarity badges');
-assert(!overview.includes('知識カードが手に入る'), 'stage labels must not promise a knowledge card');
+assert(!mapSection.includes('knowledgeCardTones'), 'stages must not render card-rarity badges');
+assert(!mapSection.includes('知識カードが手に入る'), 'stage labels must not promise a knowledge card');
 
 // 5. Achievements preview shows only this unit's achievements, via the API courseId.
 assert(overview.includes('getAchievements'), 'the overview must load achievements for the preview');
@@ -44,7 +48,7 @@ assert(readFront('src/api/achievements.api.ts').includes('courseId: string | nul
 assert(readRepo('back/src/service/achievement.service.ts').includes('courseId: a.courseId'), 'the achievements API must return courseId');
 const seed = readRepo('back/prisma/seedData/achievementSeed.ts');
 assert(seed.includes('ach-unit-bfs-complete') && seed.includes('courseId: BFS_COURSE_ID'), 'the BFS unit achievement remains tagged with its course');
-assert(overview.includes('<ConceptProgressMap courseId={courseId} />'), 'the overview always includes learner concept progress when progress is available');
+assert(overview.includes('<UnitKnowledgeCards courseId={courseId} />'), 'the overview includes the current unit’s knowledge cards');
 
 // 6. The unit intro comes from the content layer through the registry.
 assert(content.includes('bfsUnitIntro'), 'the unit content must define the intro line');
