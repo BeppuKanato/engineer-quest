@@ -31,10 +31,11 @@ assert(detail.includes('<RelatedQuestLinks quests={card.relatedQuests ?? []} />'
 assert(detail.includes('<Chip key={word} label={word} size="small" />'));
 assert(!detail.includes('google.com'));
 const screen=fs.readFileSync(path.join(root,'features/learning/app/LearningScreen.tsx'),'utf8');
-assert(screen.includes('renderRewards: (value: LearningRewards) => <><FinalLearningRewards'));
+assert(screen.includes('renderRewards: () => <UnitCardKeywords courseId={courseId} />'));
 assert.equal((screen.match(/<UnitCardKeywords /g)||[]).length,1);
-assert.equal((screen.match(/<UnitCreateQuests /g)||[]).length,1);
-assert(screen.includes('<UnitCreateQuests courseId={courseId} /><UnitCardKeywords courseId={courseId} />'));
+assert(!screen.includes('<UnitCreateQuests'));
+assert(!screen.includes('FinalLearningRewards'));
+assert(screen.includes('<NextAchievementRow'));
 assert(!fs.readFileSync(path.join(root,'features/learning/app/feedback/FeedbackScreen.tsx'),'utf8').includes('UnitCreateQuests'));
 for(const unit of ['unit/LearningUnitPreview.tsx',...['binary-search','bubble-sort','maze-digging','wall-extension','greedy-coins'].map(name=>`${name}/unit/${{'binary-search':'BinarySearch','bubble-sort':'BubbleSort','maze-digging':'MazeDigging','wall-extension':'WallExtension','greedy-coins':'GreedyCoins'}[name]}UnitPreview.tsx`)]) {
  const source=fs.readFileSync(path.join(root,'features/learning',unit),'utf8');assert(source.includes('<UnitFinalResult')&&source.includes('renderRewards={renderRewards}'));

@@ -11,6 +11,6 @@ const html=renderToStaticMarkup(React.createElement(ConceptProgressList,{data}))
 for(const label of ['到達','取り組み中','未確認','2/2問','1/3問','0/4問','0%（0/2問）','50%（1/2問）','—（初回の記録なし）'])assert(html.includes(label),label);
 for(const state of ['reached','in_progress','unconfirmed'])assert(html.includes(`data-concept-state="${state}"`));
 assert(html.includes('border-top:4px solid'),'states use color as well as text');
-const overview=fs.readFileSync(path.join(root,'features/learning/app/UnitOverview.tsx'),'utf8');assert(overview.includes('<ConceptProgressMap courseId={courseId} />'));
+const overview=fs.readFileSync(path.join(root,'features/learning/app/UnitOverview.tsx'),'utf8');assert(!overview.includes('<ConceptProgressMap'));
 const api=fs.readFileSync(path.join(root,'api/conceptProgress.api.ts'),'utf8');assert(api.includes('encodeURIComponent(courseId)'));assert(!/POST|completePhase|events\/batch|daily-review/.test(api));
-console.log('Concept progress UI: all three states, reached with 0% first accuracy, count/coverage, no-first placeholder, color+text, overview wiring and read-only API passed.');
+console.log('Concept progress UI: all three states, reached with 0% first accuracy, count/coverage, no-first placeholder, color+text, overview exclusion (removed by design) and read-only API passed.');
