@@ -12,9 +12,9 @@ export const implementationInputLevelText = {
   groupLabel: "書き方を選ぶ",
   note: "テストと完了の条件は、どの書き方でも同じです。切り替えても、書き方ごとの下書きはそれぞれ残ります。",
   levels: {
-    full: { label: "全部書く", description: "テンプレートは最小限です。全部を自分の手で書きます。" },
-    skeleton: { label: "骨格から書く", description: "ループや条件分岐の骨格は用意してあります。「ここを書く」の行を、自分のコードに置き換えて書きます。" },
-    "fill-in": { label: "穴埋めで書く", description: "ほとんどのコードは用意してあります。要点の「ここを書く」の行だけを書きます。" },
+    full: { label: "全部書く", description: "テンプレートは最小限です。全部を自分の手で書きます。", guide: "一から書けるか試したいとき" },
+    skeleton: { label: "骨格から書く", description: "ループや条件分岐の骨格は用意してあります。「ここを書く」の行を、自分のコードに置き換えて書きます。", guide: "処理の流れは分かるが、書き方に自信がないとき" },
+    "fill-in": { label: "穴埋めで書く", description: "ほとんどのコードは用意してあります。要点の「ここを書く」の行だけを書きます。", guide: "重要な処理に集中して実装したいとき" },
   },
 } as const;
 

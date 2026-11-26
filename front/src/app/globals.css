@@ -130,3 +130,12 @@
   width: 5px !important;
   margin-left: 3px;
 }
+
+.monaco-editor .eq-todo-line-highlight {
+  background-color: rgb(37 99 235 / 0.16);
+}
+.monaco-editor .eq-todo-line-marker {
+  background-color: rgb(37 99 235 / 0.6);
+  width: 5px !important;
+  margin-left: 3px;
+}

@@ -99,6 +99,16 @@ export const preparePyodide = async () => {
 export const runCourseMissionTests = (code: string, tests: PythonTestCase[], output?: PythonRunOutputOptions) =>
   request<{ done: true; results: PythonTestResult[]; stdout: string; stderr: string }>({ kind: "run", code, tests }, 15_000, output);
 
+/** プログラム形式（標準入出力）のテストケースと、その実行結果。 */
+export type ProgramTestCase = { id: string; input: string };
+export type ProgramTestResult = { id: string; stdout: string; error: string | null };
+
+export const runProgramTests = (code: string, cases: ProgramTestCase[]) =>
+  request<{ done: true; results: ProgramTestResult[] }>({ kind: "runProgram", code, cases }, 15_000);
+
+export const runProgramFree = (code: string, input: string, output?: PythonRunOutputOptions) =>
+  request<{ done: true; stdout: string; stderr: string }>({ kind: "runProgramFree", code, input }, 15_000, output);
+
 /** 既存と同じ15秒の実行上限。生のstdout/stderrはtrace経路では配信しない。 */
 export const tracePythonFunction = (options: PythonTraceRequest) =>
   request<{ done: true; trace: PythonTraceResult }>({ ...options, kind: "trace" });

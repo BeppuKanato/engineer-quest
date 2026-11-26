@@ -51,7 +51,7 @@
 | [BFS フェーズ5](../front/src/features/learning/bfs/code-check/README.md) | 現行 | Issue #73 の独立した穴埋め2問、共有コード表示・設問セッション・任意復習、結果と確認手順 |
 | [BFS フェーズ6](../front/src/features/learning/bfs/consolidation/README.md) | 現行 | Issue #74 の転移・境界ケース・Parsonsの5問、初回結果のタグ別診断、任意復習とソフトゲート。全単元のParsons誤答時の表示は [UI定義 §5.2](concept/learning-player-ui.md#52-質問画面の3段組)（#352） |
 | [BFS 視覚的デバッグ](../front/src/features/learning/bfs/trace/README.md) | 現行 | Issue #76 のD1限定トレース・共通キャンバス再生・停止／上限／最終状態と対応範囲 |
-| [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | Issue #75／PR #99 の5テスト・4段階ヒントと、Issue #110 のダークエディタ・D1フリー実行・確認手順 |
+| [BFS フェーズ7](../front/src/features/learning/bfs/implementation/README.md) | 現行 | プログラム形式（標準入出力）への置き換え（Issue #513）。旧・関数形は implementation-legacy に保存 |
 | [BFS 単元フロー](../front/src/features/learning/bfs/unit/README.md) | 現行 | Issue #77 のフェーズ1〜7の接続、遷移3類型、リザルト画面、単元内ナビゲーションと確認手順 |
 
 従来フロー（Course / Mission / Activity）の学習設計文書、概念・設計検討文書、コース設計記録は、2026-11-04 の判断で削除した。従来フローの現在の挙動と教材内容は、実行コード、Prisma schema、seed を正とする。
@@ -66,7 +66,7 @@
 | [redesign-ui-policy-2026-11.md](redesign-ui-policy-2026-11.md) | 正本（実装予定） | 再設計の UI 提示ポリシー（色・文字・面・マスコット、結果とフィードバックの提示形、コース一覧と単元画面の確定形、ミッション提示、ヘッダー狭幅） |
 | [unit-result-staged-499.md](unit-result-staged-499.md) | 仕様（実装予定） | Issue #499 の単元リザルト2ステージ化の詳細仕様 |
 | [feedback-presentation-unify-500.md](feedback-presentation-unify-500.md) | 仕様（実装予定） | Issue #500 の結果・フィードバック提示統一の詳細仕様 |
-| [phase7-mission-ui-501.md](phase7-mission-ui-501.md) | 仕様（実装予定） | Issue #501 のフェーズ7画面刷新の詳細仕様 |
+| [phase7-mission-ui-501.md](phase7-mission-ui-501.md) | 仕様（BFSは実装済み・他単元は実装予定） | Issue #501 のフェーズ7画面刷新の詳細仕様。BFS はプログラム形式で実装済み（DFS・二分探索は順次） |
 | [courses-list-redesign-502.md](courses-list-redesign-502.md) | 仕様（実装予定） | Issue #502 のコース一覧刷新の詳細仕様 |
 | [unit-overview-redesign-503.md](unit-overview-redesign-503.md) | 仕様（実装予定） | Issue #503 の単元画面刷新の詳細仕様 |
 | [header-narrow-504.md](header-narrow-504.md) | 仕様（実装予定） | Issue #504 のヘッダー狭幅対応の詳細仕様 |

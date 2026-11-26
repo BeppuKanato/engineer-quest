@@ -1,16 +1,26 @@
-import { Box } from "@mui/material";
-import { playerTokens } from "../../player/player.tokens";
-import { bfsImplementationContent as content } from "./implementation.content";
-import { distanceEntries, isDistanceMap } from "./implementation";
+import { Box, Typography } from "@mui/material";
 
-const labels = content.display;
-export const formatDistance = (value: unknown) => typeof value === "number" ? `${value}${labels.unit}` : typeof value === "string" ? `「${value}」（${labels.invalidValue}）` : labels.invalidValue;
-export function DistanceOutput({ expected, actual }: { expected: unknown; actual: unknown }) {
-  if (!isDistanceMap(actual)) return labels.invalid;
-  return <>{distanceEntries(expected, actual).map(entry => <Box component="span" key={entry.node} data-distance-state={entry.state}
-    sx={{ display: "inline-block", mr: 1, fontWeight: entry.state === "same" ? 400 : 700,
-      borderBottom: entry.state === "same" ? "none" : `2px solid ${playerTokens.focus}` }}>
-    {entry.node}：{entry.state === "missing" ? labels.missing : formatDistance(entry.actual)}
-    {entry.state === "different" ? `（${labels.different}・${labels.expectedLabel} ${formatDistance(entry.expected)}）` : entry.state === "extra" ? `（${labels.extra}）` : ""}
-  </Box>)}</>;
+/**
+ * 距離の並びを「場所：距離」のチップで見せる。expected を渡すと、
+ * 期待と違う場所を太枠＋×印で示す（色だけに頼らない）。
+ */
+export function DistanceValues({ nodes, values, expected }: {
+  nodes: readonly string[];
+  values: readonly number[];
+  expected?: readonly number[];
+}) {
+  return <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+    {nodes.map((node, index) => {
+      const value = values[index];
+      const different = expected !== undefined && expected[index] !== value;
+      return <Box key={node} sx={{
+        display: "inline-flex", alignItems: "center", gap: 0.5, px: 1, py: 0.5,
+        border: different ? "2px solid #111827" : "1px solid #cbd5e1", borderRadius: 1.5, bgcolor: "#fff",
+      }}>
+        <Typography component="span" sx={{ fontSize: 14, fontWeight: 800 }}>{node}</Typography>
+        <Typography component="span" sx={{ fontSize: 15, fontWeight: 700 }}>{value ?? "—"}</Typography>
+        {different && <Typography component="span" aria-label="期待と違います" sx={{ fontSize: 13, fontWeight: 900 }}>×</Typography>}
+      </Box>;
+    })}
+  </Box>;
 }
