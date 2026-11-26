@@ -18,7 +18,7 @@
 
 import { useState } from "react";
 
-import { Box, ButtonBase, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import { Box, Button, ButtonBase, Paper, Snackbar, Stack, Typography } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
@@ -598,6 +598,27 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
         </Box>
       )}
 
+      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${BORDER}` }}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography fontSize={18} fontWeight={900} color={TEXT}>
+              発展ミッション
+            </Typography>
+            <Typography fontSize={14} color={TEXT} sx={{ mt: 0.75, lineHeight: 1.7 }}>
+              単元で学んだアルゴリズムを、新しい課題で選んで使う挑戦です。正しい解き方ならクリアでき、良い解き方ほどスコアが上がります。
+            </Typography>
+          </Box>
+          <Button
+            component={Link}
+            href="/missions"
+            variant="contained"
+            disableElevation
+            sx={{ alignSelf: { xs: "flex-start", md: "center" }, fontSize: 16, fontWeight: 700, px: 3.5, py: 1.25, borderRadius: 2, bgcolor: PRIMARY }}
+          >
+            発展ミッションを見る
+          </Button>
+        </Stack>
+      </Paper>
       <Snackbar
         open={notice !== null}
         autoHideDuration={3000}
