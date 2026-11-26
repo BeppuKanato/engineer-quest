@@ -143,4 +143,6 @@ A*探索：①ダイクストラ法はゴールから外れたC/Eも確認した
 
 新規識別子案 dijkstra / astar、各phaseKeyは -motivation / -execution / -check / -code-mapping / -code-check / -consolidation / -implementation。course IDは既存seedの実値と照合後に確定する。概念タグ、教材バージョン、問題数、フィードバック入力、再開、カード・実績・大目標の候補を登録・検証する。カード候補はDijkstra: 重み付きグラフ、緩和、優先度付きキュー。A*: ヒューリスティック、許容性、整合性。既存の21枚のカード配布、研究対象集合、報酬条件を無断変更しない。
 
-未完了: UI実装、各問題選択肢の確定、Python参照解とランナー接続、教材版、概念登録、カタログ、DB適用、検証、2サイズの画面確認。これらを完了するまでは公開しない。
+フェーズ2の単品プレビュー実装済み（未実行）: /learning-preview/dijkstra-execution と /learning-preview/astar-execution。共通プレイヤーを使用。検証コマンド: front で node scripts/verifyWeightedSearch.cjs。
+
+未完了: フェーズ1・3〜7のUI、フェーズ2の実画面レビュー、各問題選択肢の確定、Python参照解とランナー接続、教材版、概念登録、カタログ、DB適用、検証、2サイズの画面確認。これらを完了するまでは公開しない。
