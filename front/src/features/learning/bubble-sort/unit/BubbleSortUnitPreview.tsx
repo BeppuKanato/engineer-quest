@@ -2,6 +2,7 @@
 
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckIcon from "@mui/icons-material/Check";
+import FlagIcon from "@mui/icons-material/Flag";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -13,6 +14,9 @@ import { AnswerFeedbackNotice } from "../../assessment/AnswerFeedback";
 import { PhaseBridgeScreen } from "../../bfs/unit/PhaseBridgeScreen";
 
 import { playerTokens } from "../../player/player.tokens";
+import { buildCorrectedScene } from "./CorrectedScene";
+import { buildCodeBlankScene } from "./CodeBlankScene";
+import { buildConsolidationScene } from "./ConsolidationScene";
 import { BubbleSortCheckPreview } from "../check/BubbleSortCheckPreview";
 import { BubbleSortCodeCheckPreview } from "../code-check/BubbleSortCodeCheckPreview";
 import { BubbleSortCodeMappingPreview } from "../code-mapping/BubbleSortCodeMappingPreview";
@@ -22,7 +26,7 @@ import { BubbleSortImplementationPreview } from "../implementation/BubbleSortImp
 import { BubbleSortMotivationPreview } from "../motivation/BubbleSortMotivationPreview";
 import { bubbleSortUnitPhases, nextPhaseLabel, bubbleSortUnitText, bubbleSortUnitTitle, type BubbleSortUnitPhase } from "./unit.content";
 import type { BubbleSortUnitPhaseSummary } from "./unit.types";
-import { UnitFinalResult, UnitResultScreen } from "./UnitResultScreens";
+import { PhaseResultHeader, PhaseResultSummaryLine, UnitFinalResult, UnitResultScreen, UnitResultSummaryLine } from "./UnitResultScreens";
 import { FeedbackPositionFigure } from "../../app/feedback/FeedbackPositionFigure";
 
 type Screen = { kind: "phase"; index: number } | { kind: "result"; index: number } | { kind: "bridge"; index: number } | { kind: "final" } | { kind: "feedback"; index: number } | { kind: "unitFeedback" };
@@ -54,6 +58,8 @@ export type BubbleSortUnitPreviewProps = {
   // 実績の提示（#333）。結果画面のバンドと最終リザルトの新着ゾーンの差し込み口。
   renderPhaseAchievements?: (phaseKey: string) => ReactNode;
   renderNewAchievements?: () => ReactNode;
+  /** 最終リザルトのステージ1ボタンに新着実績の件数を予告するための数。 */
+  finalUnlockCount?: number;
   // 大目標の達成の提示（#370）。結果画面のバンドと最終リザルトのゾーンの差し込み口。
   renderPhaseGoalAchievement?: (phaseKey: string) => ReactNode;
   renderFinalGoalAchievement?: () => ReactNode;
@@ -65,10 +71,10 @@ export type BubbleSortUnitPreviewProps = {
   onCheckPhaseCompleted?: (phaseKey: string, nextPhaseKey: string | null) => void;
   /** フィードバックがこの学習者に適用される見込みがあるか。false の間は結果画面の前進が従来のブリッジへ向かう。 */
   feedbackEnabled?: boolean;
-  renderPhaseFeedbackScreen?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => ReactNode;
-  renderUnitFeedbackScreen?: (nav: { goBack: () => void; figure: ReactNode }) => ReactNode;
+  renderPhaseFeedbackScreen?: (phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode; header?: ReactNode; summary?: ReactNode; scene?: ReactNode }) => ReactNode;
+  renderUnitFeedbackScreen?: (nav: { goBack: () => void; figure: ReactNode; summary?: ReactNode }) => ReactNode;
 };
-export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, renderPhaseGoalAchievement, renderFinalGoalAchievement, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: BubbleSortUnitPreviewProps = {}) {
+export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0, initialFurthestIndex, initialUnitComplete = false, initialCompletedPhases = [], initialSummaries = {}, codeDraftBaseKey, onCodeDraftError, onPhaseComplete, onFinalResult, onLearningEvent, rewards, renderRewards, renderPhaseAchievements, renderNewAchievements, finalUnlockCount, renderPhaseGoalAchievement, renderFinalGoalAchievement, onCheckPhaseCompleted, feedbackEnabled = false, renderPhaseFeedbackScreen, renderUnitFeedbackScreen }: BubbleSortUnitPreviewProps = {}) {
   const first = initialPhaseIndex === null ? null : Math.max(0, Math.min(initialPhaseIndex, bubbleSortUnitPhases.length - 1));
   const [screen, setScreen] = useState<Screen>(first === null ? { kind: "final" } : { kind: "phase", index: first });
   const screenRef = useRef(screen);
@@ -132,6 +138,10 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
     // 未完了として404になり、その画面では二度と表示されないため。#202）。
     if (phase.transitionOut === "result") {
       const retrying = failedRef.current?.index === index;
+      // この呼び出しで結果画面へ移ったか（再試行時は既に結果画面にいる）。
+      // 保存の await を挟むと screenRef の同期（useEffect）が間に合わない場合があるため、
+      // 遷移の事実はここで押さえ、保存後のフィードバック遷移の判定に使う。
+      const movedToResult = retrying || (screenRef.current.kind === "phase" && screenRef.current.index === index);
       busy.current = true; setSaving(true);
       if (!retrying) {
         observer.current?.({ eventType: "phase_complete", phaseKey: phase.id, payload: { summary } });
@@ -148,6 +158,15 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
           onCheckPhaseCompleted(phase.id, bubbleSortUnitPhases[index + 1]?.id ?? null);
         }
         setFailed(null);
+        // 保存が確定したら、独立した結果画面は経由せずフィードバック画面へ直接移る
+        // （称賛はフィードバック画面の頭のブロックが担う。2026-11-23 再設計）。
+        // 保存前にフィードバックをマウントすると未完了として404になるため、この順序を守る（#202）。
+        if (isCheckPhase(phase) && feedbackEnabled && renderPhaseFeedbackScreen) {
+          const now = screenRef.current;
+          const stillThere = (now.kind === "result" && now.index === index)
+            || (movedToResult && now.kind === "phase" && now.index === index);
+          if (stillThere) setScreen({ kind: "feedback", index });
+        }
       } catch { setFailed({ index, summary }); }
       finally { busy.current = false; setSaving(false); }
       return;
@@ -176,7 +195,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
       }
     } catch { setFailed({ index, summary }); }
     finally { busy.current = false; setSaving(false); }
-  }, [goToPhase, onPhaseComplete, onCheckPhaseCompleted]);
+  }, [goToPhase, onPhaseComplete, onCheckPhaseCompleted, feedbackEnabled, renderPhaseFeedbackScreen]);
 
   const completeHandlers = useMemo(
     () => bubbleSortUnitPhases.map((_, index) => (summary?: BubbleSortUnitPhaseSummary) => { void handleComplete(index, summary); }),
@@ -217,7 +236,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
           {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
           <Button disabled={!reachable} onClick={() => goToPhase(index)}
             aria-current={current ? "step" : undefined}
-            startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : undefined}
+            startIcon={completed ? <CheckIcon sx={{ fontSize: 16 }} /> : phase.transitionOut === "final" ? <FlagIcon sx={{ fontSize: 16 }} /> : undefined}
             sx={{
               minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
               color: current ? playerTokens.surface : playerTokens.text,
@@ -226,7 +245,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
               "&:hover": { bgcolor: current ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
               "&.Mui-disabled": { color: playerTokens.states.completed.stroke, borderColor: playerTokens.layers.layer1 },
             }}>
-            {phase.phase}. {phase.shortName}
+            {phase.transitionOut === "final" ? "最終チャレンジ" : `${phase.phase}. ${phase.shortName}`}
           </Button>
           </Fragment>;
         })}
@@ -273,6 +292,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
         ))}
         {screen.kind === "result" && (
           <UnitResultScreen phase={bubbleSortUnitPhases[screen.index]} summary={summaries[screen.index]}
+            nextLabel={isCheckPhase(bubbleSortUnitPhases[screen.index]) && feedbackEnabled && renderPhaseFeedbackScreen ? "フィードバックを見る" : undefined}
             onNext={isCheckPhase(bubbleSortUnitPhases[screen.index]) && feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed
               ? () => setScreen({ kind: "feedback", index: screen.index })
               : () => setScreen({ kind: "bridge", index: screen.index + 1 })}
@@ -284,17 +304,34 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
           goNext: () => setScreen({ kind: "bridge", index: screen.index + 1 }),
           goBack: () => setScreen({ kind: "result", index: screen.index }),
           figure: buildFeedbackFigure(screen.index, false),
+          // フェーズ6のリザルトは診断画面そのもの（教材側の設計）なので、
+          // 祝祭ヘッダーは付けない。要約行と場面だけをフィードバックに渡す。
+          header: isCheckPhase(bubbleSortUnitPhases[screen.index]) && bubbleSortUnitPhases[screen.index].phase !== 6 ? (
+            <PhaseResultHeader phase={bubbleSortUnitPhases[screen.index]} summary={summaries[screen.index]}
+              achievements={renderPhaseAchievements?.(bubbleSortUnitPhases[screen.index].id)}
+              goalAchievement={renderPhaseGoalAchievement?.(bubbleSortUnitPhases[screen.index].id)} />
+          ) : undefined,
+          summary: isCheckPhase(bubbleSortUnitPhases[screen.index]) ? (
+            <PhaseResultSummaryLine summary={summaries[screen.index]} />
+          ) : undefined,
+          // ログと結び付けた場面は、形が作れるフェーズ3だけ（5はコード行の形になる）
+          scene: screen.index === 2 ? buildCorrectedScene(summaries[screen.index]) ?? undefined
+            : screen.index === 4 ? buildCodeBlankScene(summaries[screen.index]) ?? undefined
+            : screen.index === 5 ? buildConsolidationScene(summaries[screen.index]) ?? undefined
+            : undefined,
         })}
         {screen.kind === "bridge" && (
           <PhaseBridgeScreen phase={bubbleSortUnitPhases[screen.index]} onProceed={() => proceedFromBridge(screen.index)} />
         )}
         {screen.kind === "final" && (
           <UnitFinalResult rewards={rewards} renderRewards={renderRewards} newAchievements={renderNewAchievements?.()} summaries={summaries} onReviewPhase={goToPhase}
+            staged={!(initialUnitComplete || first === null)} newAchievementCount={finalUnlockCount}
             onShowFeedback={feedbackEnabled && renderUnitFeedbackScreen ? () => setScreen({ kind: "unitFeedback" }) : undefined} goalAchievement={renderFinalGoalAchievement?.()} />
         )}
         {screen.kind === "unitFeedback" && renderUnitFeedbackScreen?.({
           goBack: () => setScreen({ kind: "final" }),
           figure: buildFeedbackFigure(bubbleSortUnitPhases.length - 1, true),
+          summary: <UnitResultSummaryLine summaries={summaries} />,
         })}
       </Box>
     </Box>

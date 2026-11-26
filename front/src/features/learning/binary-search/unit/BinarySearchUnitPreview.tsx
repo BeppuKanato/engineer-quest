@@ -2,6 +2,7 @@
 
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckIcon from "@mui/icons-material/Check";
+import FlagIcon from "@mui/icons-material/Flag";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -217,7 +218,7 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
           {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
           <Button disabled={!reachable} onClick={() => goToPhase(index)}
             aria-current={current ? "step" : undefined}
-            startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : undefined}
+            startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : phase.transitionOut === "final" ? <FlagIcon sx={{ fontSize: 16 }} /> : undefined}
             sx={{
               minHeight: 36, px: 1.25, whiteSpace: "nowrap", fontSize: 13.5, borderRadius: 999,
               color: current ? playerTokens.surface : playerTokens.text,
@@ -226,7 +227,7 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
               "&:hover": { bgcolor: current ? playerTokens.states.processing.stroke : playerTokens.layers.layer0 },
               "&.Mui-disabled": { color: playerTokens.states.completed.stroke, borderColor: playerTokens.layers.layer1 },
             }}>
-            {phase.phase}. {phase.shortName}
+            {phase.transitionOut === "final" ? "最終チャレンジ" : `${phase.phase}. ${phase.shortName}`}
           </Button>
           </Fragment>;
         })}

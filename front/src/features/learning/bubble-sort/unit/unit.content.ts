@@ -49,7 +49,7 @@ export const bubbleSortUnitPhases: readonly BubbleSortUnitPhase[] = [
   {
     phase: 3, id: "bubble-sort-check", shortName: "動きの確認", formalName: "動きの確認問題", transitionOut: "result",
     bridge: "今の動きがつかめたか、問題で確かめましょう。間違えても、その場で考え直せます。",
-    result: { heading: "動きの確認問題が終わりました" },
+    result: { heading: "動きの確認、クリア！" },
   },
   {
     phase: 4, id: "bubble-sort-code-mapping", shortName: "動きとコード", formalName: "動きとコードの対応", transitionOut: "bridge",
@@ -58,7 +58,7 @@ export const bubbleSortUnitPhases: readonly BubbleSortUnitPhase[] = [
   {
     phase: 5, id: "bubble-sort-code-check", shortName: "コードの確認", formalName: "コードの確認問題", transitionOut: "result", cardRarity: "COMMON",
     bridge: "コードの動きが読めるようになったか、空欄を埋めて確かめましょう。",
-    result: { heading: "コードの確認問題が終わりました" },
+    result: { heading: "コードの確認、クリア！" },
   },
   {
     phase: 6, id: "bubble-sort-consolidation", shortName: "応用問題", formalName: "応用問題", transitionOut: "result-in-phase",
@@ -79,6 +79,7 @@ export const nextPhaseLabel = (phase: BubbleSortUnitPhase): string => {
 export const bubbleSortUnitText = {
   navLabel: "この単元の流れ",
   finalChip: "単元リザルト",
+  finalHeading: "バブルソート修了！",
   summaryHeading: "この単元の到達状況",
   reviewNote: "気になる段階は、上のナビゲーションからいつでも戻って復習できます。",
   backToCourses: "コース一覧に戻る",

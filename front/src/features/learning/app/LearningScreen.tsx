@@ -2,12 +2,12 @@
 import { Alert, Box, Button, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AppHeader } from "@/app/component/appHeader";
 import { useUserSession } from "@/app/component/userSession";
 import { ApiError, fetcher } from "@/lib/fetcher";
 import { completeLearningPhase, completeLearningUnit, startLearningUnit, type AchievedBigGoal, type LearningProgress, type UnlockedAchievement } from "@/api/learning.api";
-import { getCurrentBigGoal, type BigGoal } from "@/api/bigGoal.api";
+import { getAchievements } from "@/api/achievements.api";
 import { FeedbackDestination } from "@/app/component/feedbackV1";
 import { auth } from "@/lib/firebase";
 import { BfsUnitPreview } from "../bfs/unit/BfsUnitPreview";
@@ -19,10 +19,8 @@ import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPrev
 import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";
 import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
-import { FinalLearningRewards } from "../rewards/FinalLearningRewards";
 import { UnitCardKeywords } from "../rewards/UnitCardKeywords";
-import { UnitCreateQuests } from "../rewards/UnitCreateQuests";
-import { AchievementBand, NewAchievementZone } from "../../../components/rewards/AchievementPresentation";
+import { AchievementBand, NewAchievementZone, NextAchievementRow } from "../../../components/rewards/AchievementPresentation";
 import { phaseResultAchievements } from "../rewards/presentation";
 import { useRewardBoundary } from "../rewards/useRewardBoundary";
 import { codeDraftKey, readCodeDraft, writeCodeDraft } from "./codeDraft";
@@ -35,17 +33,27 @@ import { useLearningLog } from "./useLearningLog";
 import { BigGoalGate } from "./bigGoal/BigGoalGate";
 import { BigGoalAchievementBand, BigGoalAchievementZone } from "./bigGoal/BigGoalAchievementBand";
 import { BigGoalNextProposal } from "./bigGoal/BigGoalNextProposal";
-import { bigGoalProgressFact } from "./bigGoal/bigGoalPresentation";
-import { FeedbackScreen, type FeedbackGoalSummary } from "./feedback/FeedbackScreen";
+import { FeedbackScreen } from "./feedback/FeedbackScreen";
+import { findUnitMission } from "./missionRegistry";
+import { hasSeenMissionStory } from "./missionStoryStore";
+import { MissionPresentation } from "./MissionPresentation";
+import { MissionUnlockNotice } from "./MissionUnlockNotice";
 
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
   const { progress, error, loading, reload, authenticated } = useLearningProgress(unit?.courseId);
+  // 単元ミッションの提示（2026-11-23 決定）：別URLにせず、段階1の初回開始時にプレイヤーの
+  // 殻の中で開く状態として出す。役割は枠付けの保証——開始前の入口（一覧・帯）で
+  // ストーリーを見た人は素通りし、未開始かつ未見の人だけに提示を通す。
+  const [gatePassed, setGatePassed] = useState(() => hasSeenMissionStory(courseId));
+  const mission = unit ? findUnitMission(courseId) : undefined;
+  const showGate = !gatePassed && !reviewPhaseKey && !!mission && !!progress && progress.unit === null;
   return <Box sx={{ height: "100dvh", minHeight: 0, display: "flex", flexDirection: "column" }}>
     <Box sx={{ flexShrink: 0 }}><AppHeader /></Box>
     <Box component={motion.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }} sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {!unit ? <Box sx={{ p: 3 }}><Typography>この単元は準備中です。</Typography><Button component={Link} href="/courses">コース一覧へ</Button></Box> : !authenticated && !loading ? <Button component={Link} href="/auth/login">ログインして学習する</Button> : error ?
         <Alert severity="error" action={<Button onClick={reload}>再読み込み</Button>}>{error}</Alert> : loading || !progress || !firebaseUser ? <ProgressLoadingSkeleton variant="screen" /> :
+          showGate && mission ? <MissionPresentation unit={unit} mission={mission} onStart={() => setGatePassed(true)} /> :
           <LearningRun key={`${firebaseUser.uid}:${courseId}`} unit={unit} progress={progress} reviewPhaseKey={reviewPhaseKey} />}
     </Box>
   </Box>;
@@ -86,14 +94,6 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const [phaseAchievedGoals, setPhaseAchievedGoals] = useState<Readonly<Record<string, readonly AchievedBigGoal[]>>>({});
   const [phaseGoalCelebrations, setPhaseGoalCelebrations] = useState<Readonly<Record<string, readonly AchievedBigGoal[]>>>({});
   const [unitAchievedGoals, setUnitAchievedGoals] = useState<readonly AchievedBigGoal[]>([]);
-  // 専用画面の大目標サマリ用。進捗の数値は API のコード計算をそのまま使う。
-  const [currentGoal, setCurrentGoal] = useState<BigGoal | null>(null);
-  const refreshCurrentGoal = useCallback(() => {
-    void getToken().then(token => getCurrentBigGoal(token)).then(({ goal }) => {
-      if (auth.currentUser?.uid === uid) setCurrentGoal(goal);
-    }).catch(() => undefined);
-  }, [getToken, uid]);
-  useEffect(() => { refreshCurrentGoal(); }, [refreshCurrentGoal]);
   useEffect(() => { setDraft({ code: readCodeDraft(courseId, uid) }); }, [courseId, uid]);
   useEffect(() => {
     let current = true;
@@ -138,10 +138,9 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
         setUnitAchievedGoals(current => [...current, ...achieved.filter(goal => !current.some(x => x.id === goal.id))]);
       }
     }
-    refreshCurrentGoal();
     // 切れ目ダイアログは知識カード専用（#333）。提示は遷移を待たせない（#147）。エラー時はここへ到達しない。
     if (result.awardedCard) present({ phaseKey });
-  }, [getToken, courseId, uid, unit, present, refreshCurrentGoal]);
+  }, [getToken, courseId, uid, unit, present]);
   // フィードバックの先行生成（#202）と専用画面（#369）。生成の成否は学習の進行に影響させない。
   // 先行生成の応答で適用可否が判明する：割り当てなし（409）・対象イベントなし（404）は
   // unavailable とし、結果画面の前進を従来のブリッジに戻して学習者を画面に留めない。
@@ -157,20 +156,15 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
   const onCheckPhaseCompleted = useCallback((phaseKey: string, nextPhaseKey: string | null) => {
     startFeedback("phase", phaseFeedbackEventId(phaseKey, nextPhaseKey));
   }, [startFeedback, phaseFeedbackEventId]);
-  const goalSummary: FeedbackGoalSummary | null = useMemo(() => currentGoal
-    ? {
-      displayText: currentGoal.displayText,
-      progress: currentGoal.progress,
-      fact: bigGoalProgressFact(currentGoal),
-      requirements: currentGoal.evaluation?.requirements ?? [],
-    }
-    : null, [currentGoal]);
-  const renderPhaseFeedbackScreen = useCallback((phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode }) => {
+  const renderPhaseFeedbackScreen = useCallback((phaseKey: string, nextPhaseKey: string | null, nav: { goToPhase: (phaseKey: string) => void; goNext: () => void; goBack: () => void; figure: ReactNode; header?: ReactNode; summary?: ReactNode; scene?: ReactNode }) => {
     const phase = unit.phases.find(item => item.id === phaseKey);
     const achieved = phaseAchievedGoals[phaseKey] ?? [];
     return <FeedbackScreen kind="phase" eventId={phaseFeedbackEventId(phaseKey, nextPhaseKey)}
       heading={phase ? `${phase.formalName}のフィードバック` : "フィードバック"}
-      figure={nav.figure} goalSummary={achieved.length ? null : goalSummary}
+      header={nav.header}
+      summary={nav.summary}
+      scene={nav.scene}
+      nextPhaseKey={nextPhaseKey}
       onAction={href => {
         if (!href) return false;
         const target = new URL(href, window.location.origin).searchParams.get("phase");
@@ -182,15 +176,21 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
       onUnavailable={() => { setFeedbackAvailability("unavailable"); nav.goNext(); }}>
       {achieved.length ? <BigGoalNextProposal achievedGoal={achieved[0]} getToken={getToken} /> : null}
     </FeedbackScreen>;
-  }, [phaseFeedbackEventId, goalSummary, phaseAchievedGoals, getToken, unit]);
-  const renderUnitFeedbackScreen = useCallback((nav: { goBack: () => void; figure: ReactNode }) => (
+  }, [phaseFeedbackEventId, phaseAchievedGoals, getToken, unit]);
+  const renderUnitFeedbackScreen = useCallback((nav: { goBack: () => void; figure: ReactNode; summary?: ReactNode }) => (
     <FeedbackScreen kind="unit" eventId={courseId} heading="単元のフィードバック"
-      figure={nav.figure} goalSummary={unitAchievedGoals.length ? null : goalSummary}
+      summary={nav.summary}
       onProceed={nav.goBack} proceedLabel="結果に戻る"
       onUnavailable={() => { setFeedbackAvailability("unavailable"); nav.goBack(); }}>
       {unitAchievedGoals.length ? <BigGoalNextProposal achievedGoal={unitAchievedGoals[0]} getToken={getToken} /> : null}
+      {/* 発展ミッションへの導線：単元完了で解放されるミッションを、フィードバックの流れの中で出す（主導線）。 */}
+      <MissionUnlockNotice courseId={courseId} />
     </FeedbackScreen>
-  ), [courseId, goalSummary, unitAchievedGoals, getToken]);
+  ), [courseId, unitAchievedGoals, getToken]);
+  // 最終リザルトの「次の実績」：単元保存が済んで解除分が確定してから、実績一覧で
+  // 最も達成に近い未獲得（進捗率最大）を1件選ぶ（2026-11-24）。
+  const [nextAchievement, setNextAchievement] = useState<{ id: string; title: string; description: string; rarity: string; progress: number; goal: number } | null>(null);
+  const nextAchievementRequested = useRef(false);
   const onFinalResult = useCallback(() => setFinalShown(true), []);
   useEffect(() => {
     if (!finalShown || unitSaved || completedUnitRequest.current) return;
@@ -206,12 +206,25 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
       if (result.achievedBigGoals?.length) {
         setUnitAchievedGoals(current => [...current, ...result.achievedBigGoals!.filter(goal => !current.some(x => x.id === goal.id))]);
       }
-      refreshCurrentGoal();
       log({ eventType: "unit_complete" });
       startFeedback("unit", courseId);
     }, () => { if (current) { completedUnitRequest.current = false; setUnitError(true); } });
     return () => { current = false; };
-  }, [finalShown, unitSaved, courseId, getToken, log, unitRevision, startFeedback, refreshCurrentGoal]);
+  }, [finalShown, unitSaved, courseId, getToken, log, unitRevision, startFeedback]);
+  useEffect(() => {
+    if (!unitSaved || !finalUnlocks.length || nextAchievementRequested.current) return;
+    nextAchievementRequested.current = true;
+    let current = true;
+    void getToken().then(token => getAchievements(token)).then(data => {
+      if (!current) return;
+      const unlockedIds = new Set(finalUnlocks.map(item => item.id));
+      const candidates = data.groups.flatMap(group => group.achievements)
+        .filter(item => item.status === "visible_locked" && !unlockedIds.has(item.id) && item.goal > 0);
+      const best = candidates.reduce<typeof candidates[number] | null>((acc, item) => (!acc || item.progress / item.goal > acc.progress / acc.goal ? item : acc), null);
+      if (best) setNextAchievement({ id: best.id, title: best.title, description: best.description, rarity: best.rarity, progress: best.progress, goal: best.goal });
+    }, () => { /* 実績一覧が取れなくても学習は止めない */ });
+    return () => { current = false; };
+  }, [unitSaved, finalUnlocks, getToken]);
   const saveCode = useCallback((code: string) => setDraftError(!writeCodeDraft(courseId, uid, code)), [courseId, uid]);
   const dismissAwardedCard = useCallback((cardId: string) => setRewards(current => ({ ...current, awardedCards: current.awardedCards.filter(item => item.card.id !== cardId) })), []);
   if (!draft) return <Typography role="status">学習を開いています。</Typography>;
@@ -233,12 +246,19 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     onFinalResult,
     onLearningEvent: log,
     rewards,
-    renderRewards: (value: LearningRewards) => <><FinalLearningRewards rewards={value} onEvent={log} /><UnitCreateQuests courseId={courseId} /><UnitCardKeywords courseId={courseId} /></>,
+    // 「この単元で獲得した実績」の行一覧は、新しい実績のカードゾーンと
+    // 同じ繰り返しになるため出さない（2026-11-24）。知識カードだけ残す。
+    renderRewards: () => <UnitCardKeywords courseId={courseId} />,
     renderPhaseAchievements: (phaseKey: string) => {
       const items = phaseUnlocks[phaseKey];
       return items?.length ? <AchievementBand items={items} phaseKey={phaseKey} onEvent={log} /> : null;
     },
-    renderNewAchievements: () => finalUnlocks.length ? <NewAchievementZone items={finalUnlocks} onEvent={log} /> : null,
+    renderNewAchievements: () => finalUnlocks.length ? (
+      <Box sx={{ width: "100%", maxWidth: 1060, display: "grid", gap: 1.5 }}>
+        <NewAchievementZone items={finalUnlocks} onEvent={log} />
+        {nextAchievement && <NextAchievementRow title={nextAchievement.title} description={nextAchievement.description} rarity={nextAchievement.rarity} progress={nextAchievement.progress} goal={nextAchievement.goal} />}
+      </Box>
+    ) : null,
     renderPhaseGoalAchievement: (phaseKey: string) => {
       const goals = phaseGoalCelebrations[phaseKey];
       return goals?.length ? <BigGoalAchievementBand goals={goals} phaseKey={phaseKey} onEvent={log} /> : null;

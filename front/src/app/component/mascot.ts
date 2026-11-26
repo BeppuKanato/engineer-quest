@@ -31,7 +31,8 @@ export type MascotState =
   | "thinking"
   | "surprise"
   | "celebrate"
-  | "face";
+  | "face"
+  | "point";
 
 export const defaultMascotId: MascotId = "red-panda";
 

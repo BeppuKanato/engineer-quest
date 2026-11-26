@@ -28,5 +28,7 @@ export type BubbleSortCodeCheckContent = Omit<CodeBlankAssessment, "questions"> 
 export type BubbleSortCodeCheckSummary = {
   assessmentEvidence?: ReturnType<typeof import("../../assessment/assessment").assessmentEvidence>;
   readonly firstAttemptCorrect: number;
+  /** 最終的に正解へ到達した問題数（解き直しを含む） */
+  readonly eventuallyCorrect?: number;
   readonly totalQuestions: number;
 };

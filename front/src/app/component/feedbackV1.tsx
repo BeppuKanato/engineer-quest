@@ -105,14 +105,16 @@ export function FeedbackV1({ kind, eventId, onAction }: {
   </Paper>;
 }
 
-export function FeedbackCandidates({ candidates, onAction }: { candidates: FeedbackCandidate[]; onAction?: (href: string | null) => boolean }) {
-  return <Stack spacing={1.5} aria-label="次の学習候補（実行は任意）">
-    <Typography variant="body2" color="text.secondary">取り組むかどうかは自分で選べます。そのまま次へ進むこともできます。</Typography>
+export function FeedbackCandidates({ candidates, onAction, framing = "choice", hideFirstAction = false }: { candidates: FeedbackCandidate[]; onAction?: (href: string | null) => boolean; framing?: "choice" | "next"; hideFirstAction?: boolean }) {
+  return <Stack spacing={1.5} aria-label={framing === "next" ? "次の学習" : "次の学習候補（実行は任意）"}>
+    <Typography sx={{ fontSize: 14 }}>{framing === "next"
+      ? "次の学習では、この内容に進みます。"
+      : "取り組むかどうかは自分で選べます。そのまま次へ進むこともできます。"}</Typography>
     {candidates.map((candidate,index)=><Paper component="article" variant="outlined" key={candidate.candidateId} data-feedback-candidate-id={candidate.candidateId} sx={{ p: 1.5, borderRadius: 2 }}>
       <Typography fontWeight={700} sx={{ overflowWrap: "anywhere" }}>{index+1}. {candidate.nextStep}</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>{candidate.reason}</Typography>
-      {candidate.actionHref && <Button component={Link} href={candidate.actionHref} variant={index === 0 ? "contained" : "outlined"}
-        sx={{ mt: 1, minHeight: 44, maxWidth: "100%", overflowWrap: "anywhere" }} onClick={event=>{if(onAction?.(candidate.actionHref)) event.preventDefault();}}>{candidate.actionLabel}</Button>}
+      <Typography variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>{candidate.reason}</Typography>
+      {candidate.actionHref && !(hideFirstAction && index === 0) && <Button component={Link} href={candidate.actionHref} variant={index === 0 ? "contained" : "outlined"}
+        sx={{ mt: 1, minHeight: framing === "next" && index === 0 ? 52 : 44, width: framing === "next" && index === 0 ? "100%" : undefined, maxWidth: "100%", overflowWrap: "anywhere" }} onClick={event=>{if(onAction?.(candidate.actionHref)) event.preventDefault();}}>{candidate.actionLabel}</Button>}
     </Paper>)}
   </Stack>;
 }

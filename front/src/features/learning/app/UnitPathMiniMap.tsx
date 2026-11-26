@@ -4,10 +4,18 @@ import { Box } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { playerTokens } from "../player/player.tokens";
-import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
+import { wavePath, wavePoint } from "./unitPathGeometry";
 
 /** 軌跡を描き切るまでの秒数。ノードは線が届いた順に灯る。 */
 const DRAW_SECONDS = 1.4;
+
+/** 中心 (cx, cy)・外径 r の五芒星の頂点列。 */
+const starPoints = (cx: number, cy: number, r: number) =>
+  Array.from({ length: 10 }, (_, i) => {
+    const radius = i % 2 === 0 ? r : r * 0.45;
+    const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+    return `${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`;
+  }).join(" ");
 
 /**
  * 単元完了時の全灯マップ。単元画面の UnitPathMap と同じ波形（unitPathGeometry）を使う。
@@ -16,7 +24,7 @@ const DRAW_SECONDS = 1.4;
  * 操作は持たず、内訳は下のフェーズ別行が担うため装飾として扱う。
  * 動きを減らす設定では最初から灯し切った状態を出す。
  */
-export function UnitPathMiniMap({ count }: { count: number }) {
+export function UnitPathMiniMap({ count, labels }: { count: number; labels?: readonly string[] }) {
   const reduced = useReducedMotion();
   if (count < 1) return null;
   const points = Array.from({ length: count }, (_, index) => wavePoint(count === 1 ? 0 : index / (count - 1)));
@@ -26,8 +34,8 @@ export function UnitPathMiniMap({ count }: { count: number }) {
     initial={{ scale: 1 }}
     animate={reduced ? { scale: 1 } : { scale: [1, 1.05, 1.03] }}
     transition={reduced ? { duration: 0 } : { duration: 0.6, delay: 0.15 + DRAW_SECONDS + 0.1, times: [0, 0.55, 1], ease: "easeOut", repeat: 0 }}
-    sx={{ width: "100%", maxWidth: 640 }}>
-    <svg viewBox={`0 0 ${WAVE.width} ${WAVE.height}`} width="100%" style={{ display: "block" }}>
+    sx={{ width: "100%", maxWidth: 1060 }}>
+    <svg viewBox="0 70 1200 350" width="100%" style={{ display: "block" }}>
       <path d={wavePath(1)} fill="none" stroke="#c3d4ec" strokeWidth={9} strokeLinecap="round" />
       <motion.path d={wavePath(1)} fill="none" stroke={playerTokens.focus} strokeWidth={9} strokeLinecap="round"
         initial={reduced ? false : { pathLength: 0 }} animate={{ pathLength: 1 }}
@@ -49,9 +57,27 @@ export function UnitPathMiniMap({ count }: { count: number }) {
           initial={reduced ? false : { opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: reduced ? 0 : 0.35, delay: reduced ? 0 : reachDelay(index), ease: "easeOut", repeat: 0 }}
           style={{ transformBox: "fill-box", transformOrigin: "center" }}>
-          <circle cx={point.x} cy={point.y} r={44} fill={playerTokens.focus} stroke={playerTokens.surface} strokeWidth={5} />
-          <text x={point.x} y={point.y} textAnchor="middle" dominantBaseline="central" fontSize={30} fontWeight={800} fill={playerTokens.surface}>{index + 1}</text>
+          <circle cx={point.x} cy={point.y} r={44} fill={index === points.length - 1 && points.length > 1 ? "#d97706" : playerTokens.focus} stroke={playerTokens.surface} strokeWidth={5} />
+          {index === points.length - 1 && points.length > 1 ? (
+            // ゴールのノードだけ数字ではなく星にし、金色で到達点として区別する
+            // （2026-11-24）。金は修了の象徴としてこのノードとリザルトのトロフィーに限る。
+            <polygon points={starPoints(point.x, point.y, 21)} fill={playerTokens.surface} />
+          ) : (
+            // 番号ではなくチェックを入れる（2026-11-24、Kanato の指定）。
+            // 何番の段階かはノード下のフェーズ名が担う。
+            <path d={`M ${point.x - 15} ${point.y} l 10 10 l 20 -22`} fill="none" stroke={playerTokens.surface} strokeWidth={7.5} strokeLinecap="round" strokeLinejoin="round" />
+          )}
         </motion.g>
+        {labels?.[index] && (
+          // 番号が何の段階かを示すフェーズ名（2026-11-24）。ノードの下に置き、
+          // 軌跡と重なる箇所は白の縁取りで文字を浮かせる。点灯に合わせて出す。
+          <motion.text x={point.x} y={point.y + 76} textAnchor="middle" fontSize={25} fontWeight={700}
+            fill={playerTokens.text} stroke="#ffffff" strokeWidth={6} strokeLinejoin="round" style={{ paintOrder: "stroke" }}
+            initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: reduced ? 0 : 0.3, delay: reduced ? 0 : reachDelay(index) }}>
+            {labels[index]}
+          </motion.text>
+        )}
       </g>)}
     </svg>
   </Box>;

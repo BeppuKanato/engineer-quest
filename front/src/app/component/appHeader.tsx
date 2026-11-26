@@ -3,7 +3,7 @@
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ArticleIcon from "@mui/icons-material/Article";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
-import CreateRoundedIcon from "@mui/icons-material/CreateRounded";
+import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -27,7 +27,7 @@ import { MascotFigure } from "./mascotFigure";
 const pages = [
   { label: "ホーム", href: "/home", icon: HomeRoundedIcon, match: ["/home"] },
   { label: "コース", href: "/courses", icon: MenuBookRoundedIcon, match: ["/courses"] },
-  { label: "作る", href: "/create", icon: CreateRoundedIcon, match: ["/create", "/my-works"] },
+  { label: "発展ミッション", href: "/missions", icon: FlagRoundedIcon, match: ["/missions", "/my-works"] },
   { label: "掲示板", href: "/quest-board", icon: SchoolRoundedIcon, match: ["/quest-board"] },
   { label: "履歴", href: "/history", icon: ArticleIcon, match: ["/history"] },
   {

@@ -27,7 +27,7 @@ export type FeedbackGoalSnapshot = {
 };
 export type FeedbackV1Result = { id: string; status: string; conceptSnapshot?: ConceptSnapshot | null;
   goalSnapshot?: FeedbackGoalSnapshot | null;
-  feedback: null | { currentState: string; explanation?: string | null; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
+  feedback: null | { praise?: string | null; praiseHeadline?: string | null; strength?: string | null; strengthHeadline?: string | null; improvement?: string | null; improvementHeadline?: string | null; currentState?: string | null; explanation?: string | null; nextGoal: string; nextStep: string; reason: string; actionLabel: string; actionHref: string | null; recommendations?: FeedbackCandidate[] } };
 export const getFeedbackV1 = (token: string, kind: string, eventId: string, method: string) =>
   fetcher<FeedbackV1Result>(`/feedback-v1/${kind}/${encodeURIComponent(eventId)}`, { token, method });
 /** Rebuild the same failed feedback; normal POST never restarts a FAILED result. */
