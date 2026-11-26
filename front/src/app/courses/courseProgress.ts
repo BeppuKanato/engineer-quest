@@ -14,10 +14,14 @@ export async function withLearningProgress(token: string, courses: Course[]): Pr
     if (!unit) return course;
     const saved = await getLearningProgress(token, course.id);
     const completed = saved.phases.filter((phase) => phase.status === "COMPLETED" && unit.phases.some((item) => item.id === phase.phaseKey)).length;
+    const nextPhase = unit.phases.find((item) => !saved.phases.some((phase) => phase.phaseKey === item.id && phase.status === "COMPLETED"));
     return {
       ...course,
       status: saved.unit?.status === "COMPLETED" ? "completed" as const : saved.unit ? "in_progress" as const : "not_started" as const,
       progressRate: (completed / unit.phases.length) * 100,
+      completedPhases: completed,
+      totalPhases: unit.phases.length,
+      ...(nextPhase ? { nextPhaseLabel: nextPhase.formalName } : {}),
     };
   }));
   return courses.map((course, index) => (progress[index].status === "fulfilled" ? progress[index].value : course));
