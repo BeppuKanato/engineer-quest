@@ -37,6 +37,7 @@
 | [concept/maze-digging-unit-baseline.md](concept/maze-digging-unit-baseline.md) | 正本 | 穴掘り法単元の基準データ設計書（9×9主教材の検証済みトレース、参照コード契約 maze-digging-v1、各フェーズの問題、グリッド描画基盤の再利用、知識カード案）。実装（#257 以降）は本書を正本として参照する |
 | [concept/binary-search-unit-baseline.md](concept/binary-search-unit-baseline.md) | 正本 | 二分探索単元の基準データ設計書（主教材 [3,7,12,19,25,31,42] で 25 を探す検証済みトレース、参照コード契約 binary-search-v1、各フェーズの問題、配列描画基盤の再利用、知識カード案）。実装（#286 以降）は本書を正本として参照する |
 | [concept/greedy-coins-unit-baseline.md](concept/greedy-coins-unit-baseline.md) | 正本 | 貪欲法（硬貨問題）単元の基準データ設計書（主教材 786円の検証済みトレース、参照コード契約 greedy-coins-v1、各フェーズの問題、硬貨描画基盤、知識カード）。実装（#380 以降）は本書を正本として参照する |
+| [concept/weighted-search-unit-baseline.md](concept/weighted-search-unit-baseline.md) | 設計案・フェーズ2プレビュー実装（未検証） | ダイクストラ法・A*探索の共通重み付きグラフ、実行トレース、7フェーズ教材案（#541）。未公開 |
 | [concept/app-ui-ux-guideline.md](concept/app-ui-ux-guideline.md) | 正本 |
 | [concept/mascot-presentation-guideline.md](concept/mascot-presentation-guideline.md) | 正本 | 相棒マスコットの提示指標（サイズ4段階、切り抜き、接地処理、配置場面、表情の使い分け、動き）。絵柄は現行を前提とし、学習導線には置かない | アプリ全体の UI/UX 方針（情報設計と入口導線、進捗表示、知識カード、演出とゲーム的な UI の定義、実績・報酬、色・トークン、骨格、フィードバック提示の境界）。#78 と旧フロー削除の設計前提 |
 | [学習プレイヤーの土台](../front/src/features/learning/player/README.md) | 現行 | Issue #68 の再生契約、局所トークン、仮教材と単品プレビューの確認方法 |
