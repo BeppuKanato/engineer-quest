@@ -55,8 +55,8 @@ export const AppHeader: React.FC = () => {
         boxShadow: "0 10px 28px rgba(0, 47, 140, 0.18)",
       }}
     >
-      <Container maxWidth={false} sx={{ px: { xs: 2, md: 4 } }}>
-        <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 78 }, gap: { xs: 1.5, md: 3 } }}>
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 2, lg: 4 } }}>
+        <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 78 }, gap: { xs: 1.5, md: 2, lg: 3 } }}>
           <Box
             component={Link}
             href="/home"
@@ -88,7 +88,7 @@ export const AppHeader: React.FC = () => {
               >
                 FIT
               </Typography>
-              <Typography component="div" sx={{ mt: 0.4, fontSize: { sm: 13, md: 16 }, fontWeight: 700 }}>
+              <Typography component="div" sx={{ display: { xs: "none", lg: "block" }, mt: 0.4, fontSize: { sm: 13, md: 16 }, fontWeight: 700 }}>
                 Engineer Quest
               </Typography>
             </Box>
@@ -101,7 +101,7 @@ export const AppHeader: React.FC = () => {
               flex: 1,
               display: "flex",
               justifyContent: "center",
-              gap: { xs: 0.5, md: 1.5, lg: 2 },
+              gap: { xs: 0.5, md: 1, lg: 2 },
               minWidth: 0,
               overflowX: { xs: "auto", lg: "visible" },
               scrollbarWidth: "none",
@@ -125,7 +125,7 @@ export const AppHeader: React.FC = () => {
                     justifyContent: "center",
                     gap: 0.8,
                     minWidth: "fit-content",
-                    px: { xs: 1.1, md: 1.4 },
+                    px: { xs: 1.1, md: 0.75, lg: 1.4 },
                     py: 1.2,
                     color: "white",
                     borderRadius: 2,
