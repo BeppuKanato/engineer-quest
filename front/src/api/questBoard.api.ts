@@ -42,6 +42,12 @@ export type QuestPostSummary = QuestBoardAuthorInfo & {
   status: QuestPostStatus;
   courseId: string | null;
   courseTitle: string | null;
+  /** 関連する発展ミッション（発展ミッション実装時にサーバーが返す。未実装の間は常に未設定）。 */
+  missionId?: string | null;
+  missionTitle?: string | null;
+  /** 作品共有に付く成果（スコアとランク）。 */
+  workScore?: number;
+  workRank?: string;
   commentCount: number;
   reactions: QuestBoardReactionSummary;
   canResolve: boolean;
@@ -51,9 +57,21 @@ export type QuestPostSummary = QuestBoardAuthorInfo & {
   updatedAt: string;
 };
 
+export type QuestCommentReactionType = "HELPFUL" | "THANKS";
+
+export type QuestCommentReactionSummary = {
+  helpful: number;
+  thanks: number;
+  userTypes: QuestCommentReactionType[];
+};
+
 export type QuestComment = QuestBoardAuthorInfo & {
   id: string;
   body: string;
+  /** 投稿者が「解決した回答」に指定した回答かどうか。 */
+  isSolution?: boolean;
+  /** 回答への評価（参考になった/ありがとう）。 */
+  reactions?: QuestCommentReactionSummary;
   createdAt: string;
   updatedAt: string;
 };
@@ -225,6 +243,35 @@ export const updateQuestPostStatus = async (
       token,
       body: JSON.stringify({ status }),
     }
+  );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
+};
+
+/** 回答を「解決した回答」に指定する。投稿は解決済みになり、更新後の詳細を返す。 */
+export const markQuestCommentSolution = async (
+  token: string,
+  postId: string,
+  commentId: string
+): Promise<QuestBoardDetailResponse> => {
+  const result = await fetcher<QuestBoardDetailResponse>(
+    `/quest-board/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}/solution`,
+    { method: "POST", token, body: JSON.stringify({}) }
+  );
+  invalidateClientQueries([queryTags.questBoard]);
+  return result;
+};
+
+/** 回答へのリアクション（参考になった/ありがとう）の切り替え。 */
+export const toggleQuestCommentReaction = async (
+  token: string,
+  postId: string,
+  commentId: string,
+  type: QuestCommentReactionType
+): Promise<{ reactions: QuestCommentReactionSummary }> => {
+  const result = await fetcher<{ reactions: QuestCommentReactionSummary }>(
+    `/quest-board/${encodeURIComponent(postId)}/comments/${encodeURIComponent(commentId)}/reactions`,
+    { method: "POST", token, body: JSON.stringify({ type }) }
   );
   invalidateClientQueries([queryTags.questBoard]);
   return result;

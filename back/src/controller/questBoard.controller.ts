@@ -7,7 +7,9 @@ import {
   createQuestPostByFirebaseUid,
   getQuestPostByFirebaseUid,
   listQuestPostsByFirebaseUid,
+  markQuestCommentSolutionByFirebaseUid,
   softDeleteQuestPostByFirebaseUid,
+  toggleQuestCommentReactionByFirebaseUid,
   toggleQuestReactionByFirebaseUid,
   updateQuestPostByFirebaseUid,
   updateQuestPostStatusByFirebaseUid,
@@ -178,6 +180,44 @@ export const updateQuestPostStatusController = async (
       firebaseUid: getFirebaseUid(req),
       postId: getParam(req, "postId"),
       status,
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const markQuestCommentSolutionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await markQuestCommentSolutionByFirebaseUid({
+      firebaseUid: getFirebaseUid(req),
+      postId: getParam(req, "postId"),
+      commentId: getParam(req, "commentId"),
+    });
+
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleQuestCommentReactionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const type = typeof req.body?.type === "string" ? req.body.type : "";
+    const data = await toggleQuestCommentReactionByFirebaseUid({
+      firebaseUid: getFirebaseUid(req),
+      postId: getParam(req, "postId"),
+      commentId: getParam(req, "commentId"),
+      type,
     });
 
     res.status(200).json(data);

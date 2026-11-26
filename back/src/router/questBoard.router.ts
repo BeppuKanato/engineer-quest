@@ -6,6 +6,8 @@ import {
   deleteQuestPostController,
   getQuestPostController,
   listQuestPostsController,
+  markQuestCommentSolutionController,
+  toggleQuestCommentReactionController,
   toggleQuestReactionController,
   updateQuestPostController,
   updateQuestPostStatusController,
@@ -22,5 +24,7 @@ router.delete("/:postId", verifyFirebaseToken, deleteQuestPostController);
 router.post("/:postId/comments", verifyFirebaseToken, addQuestCommentController);
 router.post("/:postId/reactions", verifyFirebaseToken, toggleQuestReactionController);
 router.post("/:postId/status", verifyFirebaseToken, updateQuestPostStatusController);
+router.post("/:postId/comments/:commentId/solution", verifyFirebaseToken, markQuestCommentSolutionController);
+router.post("/:postId/comments/:commentId/reactions", verifyFirebaseToken, toggleQuestCommentReactionController);
 
 export default router;
