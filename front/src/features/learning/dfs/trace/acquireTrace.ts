@@ -1,5 +1,5 @@
 import { disposePyodideRunner, preparePyodide, tracePythonFunction } from "../../../../lib/pyodideRunner";
-import { freeDisplayCase } from "../implementation/implementation.content";
+import { freeDisplayCase } from "../implementation-legacy/implementation.content";
 
 export const dfsTraceEventLimit = 500;
 
