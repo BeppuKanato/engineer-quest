@@ -41,6 +41,7 @@ import {
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { ActionButton } from "@/app/component/actionButton";
 import { AppSnackbar } from "@/app/component/appSnackbar";
+import { FeedbackAssignmentSetting } from "@/app/component/feedbackAssignmentSetting";
 import { AppHeader } from "@/app/component/appHeader";
 import { isMascotId, mascotOptions, type MascotId } from "@/app/component/mascot";
 import { MascotFigure } from "@/app/component/mascotFigure";
@@ -227,6 +228,8 @@ export default function ProfilePage() {
                 </Button>
               </Paper>
             )}
+
+            <FeedbackAssignmentSetting />
 
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) 0.9fr" }, gap: 3 }}>
               <RecentActivityCard items={history.slice(0, 5)} />
