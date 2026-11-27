@@ -169,7 +169,7 @@ export const binarySearchImplementationContent = {
   /** 単元ミッション（ミッションバンド表示用）。文言は単元ミッションの登録と一致させる。 */
   mission: {
     title: "ほしい商品を少ない回数で見つける",
-    successCondition: "範囲を正しく狭めて、目的の商品を見つけたとき達成",
+    successCondition: "目的の番号の位置（なければ -1）を正しく求めたとき達成",
   },
   /** 問題文（仕様）。入口の画面ではなく、作業画面の「問題」タブに常駐させる。 */
   statement: {
