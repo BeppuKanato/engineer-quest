@@ -27,8 +27,8 @@ db.unitLearningProgress = readOnly({ findMany: async ({ where }: Prisma.UnitLear
 db.phaseLearningProgress = readOnly({ findMany: async ({ where }: Prisma.PhaseLearningProgressFindManyArgs) => { assert.equal(where?.userId, owner); return phaseRows().filter(row => !where?.completedAt || row.completedAt); } });
 db.knowledgeCard = readOnly({ findMany: async ({ where, select }: Prisma.KnowledgeCardFindManyArgs) => {
   assert.equal(where?.isPublished, true); assert.deepEqual(where?.course, { isPublished: true });
-  assert.deepEqual(select?.userKnowledgeCards, { where: { userId: owner }, select: { id: true } });
-  return knowledgeCardSeed.map(card => ({ courseId: card.courseId, userKnowledgeCards: populated && card.courseId === bfs.courseId && card.catalogNumber < 3 ? [{ id: String(card.id) }] : [] }));
+  assert.deepEqual(select?.userKnowledgeCards, { where: { userId: owner }, select: { id: true, collectedAt: true } });
+  return knowledgeCardSeed.map(card => ({ courseId: card.courseId, label: card.label, title: card.title, rarity: card.rarity, userKnowledgeCards: populated && card.courseId === bfs.courseId && card.catalogNumber < 3 ? [{ id: String(card.id), collectedAt: new Date("2026-12-31T03:00:00Z") }] : [] }));
 } });
 db.userKnowledgeCard = readOnly({ count: async () => 0, findMany: async ({ where }: Prisma.UserKnowledgeCardFindManyArgs) => { assert.equal(where?.userId, owner); return populated ? [{ knowledgeCard: { courseId: bfs.courseId } }, { knowledgeCard: { courseId: bfs.courseId } }] : []; } });
 db.questReaction = readOnly({ count: async () => 0 });
@@ -42,9 +42,14 @@ db.feedbackV1 = readOnly({ findFirst: async ({ where, select }: Prisma.FeedbackV
   return populated ? { result: { selection: { candidates: [{ nextStep: "次の問題を\n確かめよう" }] } } } : null;
 } });
 db.questPost = readOnly({ findMany: async ({ where, take }: Prisma.QuestPostFindManyArgs) => {
-  assert.equal(where?.category, "QUESTION"); assert.equal(where.status, "OPEN"); assert.equal(where.visibility, "PUBLIC"); assert.equal(take, 3);
-  assert.deepEqual(where.createdAt, { gte: new Date(now.getTime() - 7 * 86400000), lte: now });
-  return populated ? [{ id: "question", title: "新しい質問", createdAt: now }] : [];
+  // 掲示板欄は「修了した単元の未解決の質問」だけを引く（自分の投稿は除く）。
+  assert.equal(where?.category, "QUESTION"); assert.equal(where.status, "OPEN"); assert.equal(where.visibility, "PUBLIC"); assert.equal(take, 10);
+  assert.deepEqual(where?.courseId, { in: [bfs.courseId, dfs.courseId] });
+  assert.deepEqual(where?.userId, { not: owner });
+  return populated ? [
+    { id: "answered", title: "回答のついた質問", body: "本文です", createdAt: new Date("2026-12-29T00:00:00Z"), course: { title: bfs.title }, user: { displayName: "先輩" }, _count: { comments: 2 } },
+    { id: "question", title: "新しい質問", body: "本文です", createdAt: now, course: { title: dfs.title }, user: { displayName: "仲間" }, _count: { comments: 0 } },
+  ] : [];
 } });
 async function main() {
   mock.timers.enable({ apis: ["Date"], now: now.getTime() });
@@ -62,17 +67,24 @@ async function main() {
     assert.ok(home.today.nearAchievements.every((a, i, list) => i === 0 || Math.min(1, list[i - 1].progress / list[i - 1].goal) >= Math.min(1, a.progress / a.goal)));
     assert.deepEqual(home.week.days.filter(day => day.learned).map(day => day.date), ["2026-12-30", "2026-12-31"]);
     assert.equal(home.week.streakDays, 2, "今日未学習でも昨日までの継続を保つ");
-    assert.equal(home.questions[0]?.href, "/quest-board/question");
+    assert.deepEqual(home.questions, [], "修了した単元がなければ掲示板欄は空");
+    const expectedLatest = knowledgeCardSeed.find(card => card.courseId === bfs.courseId && card.catalogNumber < 3)!;
+    assert.equal(home.latestCard?.title, expectedLatest.title); assert.equal(home.latestCard?.courseTitle, bfs.title);
     populated = false;
     const empty = await getHomeByUser(user);
     assert.equal(empty.resume, null); assert.equal(empty.hasInProgressUnit, false); assert.equal(empty.today.recommended?.id, definitions[0].courseId);
     assert.deepEqual(empty.today.nearAchievements, []); assert.deepEqual(empty.today.nearCards, []); assert.deepEqual(empty.questions, []);
+    assert.equal(empty.latestCard, null);
     assert.equal(empty.week.streakDays, 0); assert.ok(empty.week.days.every(day => !day.learned));
     populated = true; completed = true;
-    assert.notEqual((await getHomeByUser(user)).today.recommended?.id, bfs.courseId);
+    const done = await getHomeByUser(user);
+    assert.notEqual(done.today.recommended?.id, bfs.courseId);
+    assert.equal(done.questions[0]?.id, "question", "回答が少ない順に出す");
+    assert.equal(done.questions[0]?.commentCount, 0); assert.equal(done.questions[0]?.href, "/quest-board/question");
+    assert.equal(done.questions[0]?.courseTitle, dfs.title); assert.equal(done.questions[1]?.commentCount, 2);
     assert.equal(homeFeedbackStep({ selection: { nextStep: "旧形式の一歩" } }), "旧形式の一歩");
     assert.equal(homeFeedbackStep({ selection: { candidates: [{ nextStep: " " }] } }), null); assert.equal(homeFeedbackStep(null), null);
-    console.log("PASS: home integration read-only owner scopes, 9 units/27 cards, most recently updated phase resume, real evaluator progress, near cards, stored feedback, public recent questions, empty state, JST cross-month week and yesterday grace.");
+    console.log("PASS: home integration read-only owner scopes, 9 units/27 cards, most recently updated phase resume, real evaluator progress, near cards, stored feedback, latest collected card, unresolved questions in completed units ordered by fewest answers, empty state, JST cross-month week and yesterday grace.");
   } finally { mock.timers.reset(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
