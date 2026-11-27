@@ -75,7 +75,7 @@ async function main() {
   owned.set(user.id, new Set([first.knowledgeCardId]));
   const before = structuredClone(phases);
   const results = await Promise.all([restoreCompletedPhaseCards(user.id), restoreCompletedPhaseCards(user.id)]);
-  assert.equal(results.reduce((a, b) => a + b, 0), 20);
+  assert.equal(results.reduce((a, b) => a + b, 0), schedules.length - 1);
   assert.equal(owned.get(user.id)?.size, 27);
   assert.equal(await restoreCompletedPhaseCards(user.id), 0);
   assert.equal(await restoreCompletedPhaseCards("unfinished"), 0);
