@@ -190,7 +190,7 @@ assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.s
 assert.throws(() => validate({ ...middleExtension, state: { ...middleExtension.state, variables: { ...middleExtension.state.variables, dx: 2 } } }), /delta/u);
 assert.throws(() => defineWallExtensionCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-extend-4-4") }), /29/u);
 
-const renderer = fs.readFileSync(file(`${feature}/WallExtensionCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
 assert.match(renderer, /Math.max\(620/u);

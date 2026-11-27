@@ -166,7 +166,7 @@ assert.throws(() => validate({ ...firstSwap, state: { ...firstSwap.state, variab
 assert.throws(() => validate({ ...firstSwap, state: { ...firstSwap.state, variables: { ...firstSwap.state.variables, n: 4 } } }), /main teaching/u);
 assert.throws(() => defineBubbleSortCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-compare-1-0") }), /16/u);
 
-const renderer = fs.readFileSync(file(`${feature}/BubbleSortCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
 assert.match(renderer, /Math.max\(620/u);

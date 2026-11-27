@@ -123,7 +123,7 @@ assert.throws(() => validate({ ...marked, state: { ...marked.state, variables: {
 assert.throws(() => validate({ ...marked, state: { ...marked.state, variables: { ...marked.state.variables, visited: ["C", "A"] } } }), /canonical/u);
 assert.throws(() => defineDfsCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-pop-f") }), /17/u);
 const shared = fs.readFileSync(file("code/CodeDisplay.tsx"), "utf8");
-const renderer = fs.readFileSync(file(`${feature}/DfsCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(shared, /prefers-reduced-motion: reduce/u); assert.match(shared, /fontSize: "clamp\(16px/u);
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
