@@ -185,7 +185,7 @@ assert.throws(() => validate({ ...found, state: { ...found.state, variables: { .
 assert.throws(() => defineBinarySearchCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-probe-2-mid") }), /checkpoints/u);
 assert.throws(() => defineBinarySearchCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "else-larger-2") }), /Unvisited/u);
 
-const renderer = fs.readFileSync(file(`${feature}/BinarySearchCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
 assert.match(renderer, /Math.max\(620/u);

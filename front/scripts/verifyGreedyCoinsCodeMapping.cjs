@@ -165,7 +165,7 @@ assert.throws(() => validate({ ...returned, state: { ...returned.state, variable
 assert.throws(() => defineGreedyCoinsCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-select-4") }), /checkpoints/u);
 assert.throws(() => defineGreedyCoinsCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "return-result") }), /Unvisited/u);
 
-const renderer = fs.readFileSync(file(`${feature}/GreedyCoinsCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
 assert.match(renderer, /Math.max\(620/u);

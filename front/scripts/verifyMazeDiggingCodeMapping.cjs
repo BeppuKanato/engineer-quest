@@ -192,7 +192,7 @@ assert.throws(() => validate({ ...firstDig, state: { ...firstDig.state, variable
 assert.throws(() => validate({ ...firstDig, state: { ...firstDig.state, variables: { ...firstDig.state.variables, step: 99 } } }), /step/u);
 assert.throws(() => defineMazeDiggingCodeMappingContent({ ...content, steps: content.steps.filter(step => step.id !== "execution-dig-4") }), /21/u);
 
-const renderer = fs.readFileSync(file(`${feature}/MazeDiggingCodeMappingCanvas.tsx`), "utf8");
+const renderer = fs.readFileSync(file("player/CodeMappingStage.tsx"), "utf8");
 assert.match(renderer, /prefers-reduced-motion: reduce/u);
 assert.match(renderer, /bgcolor: changed \? playerTokens.focus : "transparent"/u);
 assert.match(renderer, /Math.max\(620/u);
