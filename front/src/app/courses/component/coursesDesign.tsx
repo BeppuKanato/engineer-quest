@@ -506,7 +506,7 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
     )
     // 表示順：学習中 → 未着手 → 完了。同じ状態の中では FLOW_ORDER（軸の隣接順）を保つ。
     .sort((a, b) => STATE_ORDER[a.status] - STATE_ORDER[b.status]);
-  const otherCourses = courses.filter((c) => !registeredUnitIds.has(c.id) && !OTHER_IDS.includes(c.id));
+  const otherCourses = courses.filter((c) => !isModernUnit(c.id) && !OTHER_IDS.includes(c.id));
   const otherOrdered = [...OTHER_IDS.filter(id=>!isModernUnit(id)).map((id) => courses.find((c) => c.id === id)).filter((c): c is Course => !!c), ...otherCourses];
   return (
     <Stack spacing={4}>
