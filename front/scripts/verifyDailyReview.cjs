@@ -30,7 +30,7 @@ for(const unit of definitions)for(const concept of unit.concepts)for(const quest
   if(question.questionId.startsWith('transfer-')) assert(html.includes('別のグラフ'),question.questionId);
  }
 }
-assert.equal(reviewMaterials.length,questions+excluded.length);assert.equal(questions,176);assert.deepEqual(excluded.sort(),["course-algorithm-breadth-first-search-v1/whole-code-order","course-algorithm-wall-extension-v1/whole-code-order"]);assert.equal(units.size,9);assert.deepEqual([...forms].sort(),['choice','code-blank','node','parsons']);assert(requires>0);
+assert.equal(reviewMaterials.length,questions+excluded.length);assert.equal(questions,178);assert.deepEqual(excluded.sort(),[]);assert.equal(units.size,9);assert.deepEqual([...forms].sort(),['choice','code-blank','node','parsons']);assert(requires>0);
 assert.equal(resolveReviewMaterial({courseId:'unknown',phaseKey:'none',assessmentId:'none',questionId:'none'}),null);
 // 新規フローの依存境界。既存の保存・観測コンポーネントを呼び込まない。
 const dir=path.join(root,'features/learning/daily-review');

@@ -89,7 +89,7 @@ export const bfsConsolidationContent: ConsolidationContent = {
     },
     {
       kind: "parsons", id: "whole-code-order", prompt: "幅優先探索のコードを、実行の流れに合う順序に並べてください。",
-      lineIds: ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"],
+      lineIds: ["initialize-queue", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "enqueue-neighbor", "for-neighbor"],
       correctAnswer: { kind: "order", lineIds: bfsCode.lines.map(line => line.id) }, requires: null,
       interchangeableLineGroups: [["initialize-distances", "initialize-queue"]],
       // フェード型: import・関数定義・ループの枠・return は固定し、初期化の対とループ本体の流れだけを並べ替える。
