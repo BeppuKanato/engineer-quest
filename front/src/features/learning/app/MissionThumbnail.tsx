@@ -15,7 +15,7 @@
 
 import { Box } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
-import { developmentMissionThumbnailFor } from "./DevelopmentMissionThumbnail";
+import { UnitStoryFigure } from "./UnitStoryFigure";
 
 /** BFS：広い倉庫で、たくさんの通路の前に困っている配送ロボット（幅の場面）。 */
 export const BfsMissionThumbnail: React.FC = () => (
@@ -667,7 +667,7 @@ export const missionThumbnailFor = (courseId: string): React.ReactNode => {
     case "course-algorithm-breadth-first-search-v1":
       return <BfsMissionThumbnail />;
     case "course-algorithm-depth-first-search-v1":
-      return <DfsMissionThumbnail />;
+      return <UnitStoryFigure kind="dfs" beat={0} label="迷路のどこに宝があるか分からないロボット" thumbnail/>;
     case "course-algorithm-maze-digging-v1":
       return <DiggingMissionThumbnail />;
     case "course-algorithm-wall-extension-v1":
@@ -679,9 +679,9 @@ export const missionThumbnailFor = (courseId: string): React.ReactNode => {
     case "course-algorithm-greedy-coins-v1":
       return <GreedyMissionThumbnail />;
     case "course-algorithm-dijkstra-v1":
-      return developmentMissionThumbnailFor("minimum-energy-delivery");
+      return <UnitStoryFigure kind="dijkstra" beat={0} label="消費エネルギーが異なる道を前に困る配送ロボット" thumbnail/>;
     case "course-algorithm-astar-v1":
-      return developmentMissionThumbnailFor("rescue-fastest-route");
+      return <UnitStoryFigure kind="astar" beat={0} label="広い地図の救助地点へ物資を届けたいドローン" thumbnail/>;
     default:
       return null;
   }

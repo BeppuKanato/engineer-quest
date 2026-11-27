@@ -14,21 +14,21 @@ export type UnitMission = {
 export const unitMissions: Record<string, UnitMission> = {
   "course-algorithm-breadth-first-search-v1": {
     courseId: "course-algorithm-breadth-first-search-v1",
-    title: "配送ロボットを最短経路で届ける",
+    title: "配送ロボットで荷物を最短経路で届ける",
     description: "倉庫の中を、荷物を積んだロボットが走る。通る道の本数がいちばん少なくなる行き方で、目的地まで届けよう。",
-    successCondition: "通る道の本数が最小のとき達成",
+    successCondition: "出発点から各場所までの最短距離を正しく求めたとき達成",
   },
   "course-algorithm-depth-first-search-v1": {
     courseId: "course-algorithm-depth-first-search-v1",
-    title: "迷路を抜けて出口にたどり着く",
-    description: "分かれ道では、一本の道を奥まで進む。行き止まりなら戻って、別の道を試す。出口までたどり着こう。",
-    successCondition: "出口にたどり着いたとき達成",
+    title: "迷路に隠れた宝を見落とさず探す",
+    description: "宝がどこにあるか分からない迷路を、たどり着ける場所を見落とさずに調べよう。",
+    successCondition: "たどり着ける場所をすべて調べ、正しい訪問順を記録できたとき達成",
   },
   "course-algorithm-binary-search-v1": {
     courseId: "course-algorithm-binary-search-v1",
     title: "ほしい商品を少ない回数で見つける",
-    description: "商品が何十個も並んでいる。1つずつ確認していたら、目当ての商品にたどり着くまで時間がかかりすぎる。範囲を半分ずつ絞って、少ない回数で見つけよう。",
-    successCondition: "範囲を正しく狭めて、目的の商品を見つけたとき達成",
+    description: "番号順に並んだ商品から、注文された番号の商品を少ない確認で見つけよう。",
+    successCondition: "目的の番号の位置（なければ -1）を正しく求めたとき達成",
   },
   "course-algorithm-maze-digging-v1": {
     courseId: "course-algorithm-maze-digging-v1",
@@ -51,11 +51,11 @@ export const unitMissions: Record<string, UnitMission> = {
   "course-algorithm-greedy-coins-v1": {
     courseId: "course-algorithm-greedy-coins-v1",
     title: "お釣りを硬貨の枚数最小で払う",
-    description: "金額に合わせて、そのつど使える一番大きい硬貨を選ぶ。硬貨の合計枚数をいちばん少なく払おう。",
+    description: "日本の硬貨を使って、同じ金額のお釣りをできるだけ少ない枚数で渡そう。",
     successCondition: "硬貨の合計枚数が最小のとき達成",
   },
-  "course-algorithm-dijkstra-v1": {"courseId":"course-algorithm-dijkstra-v1","title":"配送ロボットの省エネルギー経路","description":"配送ロボットを目的地に送る。床によって消費エネルギーが異なるため、通るマス数ではなく消費エネルギーを最小にしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
-  "course-algorithm-astar-v1": {"courseId":"course-algorithm-astar-v1","title":"救助ドローンの緊急ルート","description":"救助ドローンを地図上の出発点から救助地点へ送る。移動コストを最小にしながら、調べる地点も減らしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
+  "course-algorithm-dijkstra-v1": {"courseId":"course-algorithm-dijkstra-v1","title":"配送ロボットの省エネルギー経路","description":"配送ロボットを目的地に送る。通路によって消費エネルギーが異なるため、通る道の本数ではなく消費エネルギーの合計を最小にしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
+  "course-algorithm-astar-v1": {"courseId":"course-algorithm-astar-v1","title":"救助ドローンの緊急ルート","description":"救助ドローンを地図上の出発点から救助地点へ送る。移動時間が最小の経路を求めながら、調べる地点を減らしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
 };
 
 export const findUnitMission = (courseId: string): UnitMission | undefined => unitMissions[courseId];

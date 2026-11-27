@@ -8,11 +8,11 @@
  * （例：探す手間が困りごとで、並べ替えが解法なら、「並べば探すのが速くなる」を
  * 挟まないと並べ替える理由が成立しない）。コンピュータとの差は「できない」ではなく
  * 「曖昧な判断ができない・正確な手順が要る」で立てること。学習進捗には含めない。
- * 文案は下書き。ここではバブルソートだけ全ステップを用意し、他単元は
- * 1フレーム（場面＋ミッション文）で代替する。
+ * 全単元にコマごとの図とキャプションを用意する。バブルソートは既存版を維持する。
  */
 import type { ReactNode } from "react";
-import { findUnitMission } from "@/features/learning/app/missionRegistry";
+import { unitStoryCopy, type StoryCourseId } from "./unitStoryCopy";
+import { UnitStoryFigure } from "./UnitStoryFigure";
 import { missionThumbnailFor } from "./MissionThumbnail";
 
 export type MissionStoryStep = { caption: string; figure: ReactNode };
@@ -214,8 +214,10 @@ export function missionStoryFor(courseId: string): MissionStory | null {
       steps: bubbleSortStory.steps.map(step => step.figure ? step : { ...step, figure: scene }),
     };
   }
-  // 他単元は当面1フレーム（場面＋ミッション文）で代替する。
-  const mission = findUnitMission(courseId);
-  if (!mission || !scene) return null;
-  return { steps: [{ caption: mission.description, figure: scene }] };
+  const copy = unitStoryCopy[courseId as StoryCourseId];
+  if (!copy || !scene) return null;
+  return { steps: copy.captions.map((caption,index)=>({
+    caption,
+    figure:index===0 ? scene : <UnitStoryFigure kind={copy.kind} beat={index as 1|2|3|4|5} label={copy.labels[index]}/>,
+  })) };
 }
