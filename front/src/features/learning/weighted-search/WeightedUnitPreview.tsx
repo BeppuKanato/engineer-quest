@@ -1,6 +1,6 @@
 "use client";
 import { Alert, Box, Button, Typography, Stack, TextField } from "@mui/material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { LearningUnitPreview, type LearningUnitDefinition, type LearningUnitPreviewProps, type UnitPhaseView } from "../unit/LearningUnitPreview";
 import { weightedMaterials } from "./content";
 import { WeightedCanvas, WeightedCode, WeightedExecutionPreview, WeightedMappingCanvas, weightedContents } from "./WeightedExecutionPreview";
@@ -16,7 +16,7 @@ import { analyzeExecutionError } from "../../../lib/executionError";
 import { weightedTests, weightedTemplates, validWeightedResult } from "./implementation";
 import type { WeightedSearchMode } from "../graphs/weightedSearch";
 import { playerTokens } from "../player/player.tokens";
-type PhaseProps=Parameters<UnitPhaseView>[0];
+type PhaseProps=ComponentProps<UnitPhaseView>;
 type Stage="check"|"codeCheck"|"consolidation";
 const baseStyle={height:"100%",minHeight:0,overflow:"auto",p:2,color:playerTokens.text,display:"flex",flexDirection:"column",gap:1.5,alignItems:"center"} as const;
 function TransferFigure() {
