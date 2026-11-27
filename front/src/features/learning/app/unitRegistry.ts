@@ -8,6 +8,8 @@ import { greedyCoinsUnitIntro, greedyCoinsUnitPhases, greedyCoinsUnitTitle } fro
 import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../dfs/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";
 
+import { weightedMaterials } from "../weighted-search/content";
+
 export const learningUnits = [
   { courseId: "course-algorithm-breadth-first-search-v1", title: bfsUnitTitle, intro: bfsUnitIntro, kind: "bfs", phases: bfsUnitPhases },
   { courseId: "course-algorithm-depth-first-search-v1", title: dfsUnitTitle, intro: dfsUnitIntro, kind: "dfs", phases: dfsUnitPhases as readonly UnitPhase[] },
@@ -16,6 +18,8 @@ export const learningUnits = [
   { courseId: "course-algorithm-maze-digging-v1", title: mazeDiggingUnitTitle, intro: mazeDiggingUnitIntro, kind: "maze-digging", phases: mazeDiggingUnitPhases },
   { courseId: "course-algorithm-binary-search-v1", title: binarySearchUnitTitle, intro: binarySearchUnitIntro, kind: "binary-search", phases: binarySearchUnitPhases },
   { courseId: "course-algorithm-greedy-coins-v1", title: greedyCoinsUnitTitle, intro: greedyCoinsUnitIntro, kind: "greedy-coins", phases: greedyCoinsUnitPhases },
+  { courseId: weightedMaterials.dijkstra.courseId, title: weightedMaterials.dijkstra.title, intro: weightedMaterials.dijkstra.intro, kind: "dijkstra", phases: weightedMaterials.dijkstra.phases },
+  { courseId: weightedMaterials.astar.courseId, title: weightedMaterials.astar.title, intro: weightedMaterials.astar.intro, kind: "astar", phases: weightedMaterials.astar.phases },
 ] as const;
 export const findLearningUnit = (courseId: string) => learningUnits.find(unit => unit.courseId === courseId);
 export type LearningUnit = (typeof learningUnits)[number];

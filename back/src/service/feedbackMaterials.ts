@@ -1,5 +1,6 @@
 import { z } from "zod";
 import archiveData from "../learning/feedback/materials.json";
+import weightedArchive from "../learning/feedback/weighted-materials.json";
 
 const id = z.string().min(1);
 const answer = z.discriminatedUnion("kind", [
@@ -15,7 +16,7 @@ const unitSchema=z.object({courseId:id,title:id,intro:id,
   phases:z.array(z.object({id,phase:z.number(),name:id,goal:id,bridge:z.string().nullable(),focusQuestions:z.array(id).default([])})),
   assessments:z.array(z.object({id,phaseKey:id,phase:z.number(),questions:z.array(questionSchema)})),
 });
-const archive=z.object({schemaVersion:z.literal(1),current:z.record(id),revisions:z.record(unitSchema)}).parse(archiveData);
+const archive=z.object({schemaVersion:z.literal(1),current:z.record(id),revisions:z.record(unitSchema)}).parse({ schemaVersion: 1, current: { ...archiveData.current, ...weightedArchive.current }, revisions: { ...archiveData.revisions, ...weightedArchive.revisions } });
 export type MaterialQuestion=z.infer<typeof questionSchema>;
 export const currentMaterialVersion=(assessmentId:string)=>archive.current[assessmentId] ?? null;
 export function materialUnit(version:string) { return archive.revisions[version] ?? null; }

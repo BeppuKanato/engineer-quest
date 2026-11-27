@@ -1,0 +1,6173 @@
+{
+  "schemaVersion": 1,
+  "current": {
+    "dijkstra-check": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+    "dijkstra-code-check": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+    "dijkstra-consolidation": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+    "astar-check": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0",
+    "astar-code-check": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0",
+    "astar-consolidation": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0"
+  },
+  "revisions": {
+    "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c": {
+      "courseId": "course-algorithm-dijkstra-v1",
+      "title": "ダイクストラ法",
+      "intro": "道ごとに異なる移動コストを足し合わせ、最小コストの経路を見つける方法を学びます。",
+      "phases": [
+        {
+          "id": "dijkstra-motivation",
+          "phase": 1,
+          "name": "導入",
+          "goal": "この単元の問題設定と、アルゴリズムを使う目的を知る。",
+          "bridge": null,
+          "focusQuestions": []
+        },
+        {
+          "id": "dijkstra-execution",
+          "phase": 2,
+          "name": "動きの説明",
+          "goal": "図の状態を一手ずつ追い、アルゴリズムの手順と判断規則を確かめる。",
+          "bridge": "候補を選ぶ順番と移動コストの更新を追ってみましょう。",
+          "focusQuestions": [
+            "次に選ぶ場所をタップしてください。",
+            "CからEへ進むときに記録するコストはいくつですか？",
+            "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+            "BからEへ進むとき、Eのコストはいくつに更新されますか？"
+          ]
+        },
+        {
+          "id": "dijkstra-check",
+          "phase": 3,
+          "name": "動きの確認問題",
+          "goal": "図の問題で、次の操作と判断の理由を確認する。",
+          "bridge": "図を見て、次の操作と更新後のコストを確かめましょう。",
+          "focusQuestions": [
+            "次に選ぶ場所をタップしてください。",
+            "CからEへ進むときに記録するコストはいくつですか？",
+            "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+            "BからEへ進むとき、Eのコストはいくつに更新されますか？"
+          ]
+        },
+        {
+          "id": "dijkstra-code-mapping",
+          "phase": 4,
+          "name": "動きとコードの対応",
+          "goal": "図の動きとコードの各処理を対応づけて読む。",
+          "bridge": "今の動きがコードでどう表現されるか見てみましょう。",
+          "focusQuestions": [
+            "最小の優先値を持つ候補を選ぶコードを補ってください。",
+            "新しいコストが小さい場合だけ更新する条件を選んでください。",
+            "新しい移動コストを記録するコードを選んでください。",
+            "直前に通った場所を記録するコードを選んでください。",
+            "ゴールを選んだときに探索を終える条件を選んでください。"
+          ]
+        },
+        {
+          "id": "dijkstra-code-check",
+          "phase": 5,
+          "name": "コードの確認問題",
+          "goal": "コードの空欄を選び、各処理の役割と動作との対応を確認する。",
+          "bridge": "コードの空欄を埋めて、各処理の役割を確かめましょう。",
+          "focusQuestions": [
+            "最小の優先値を持つ候補を選ぶコードを補ってください。",
+            "新しいコストが小さい場合だけ更新する条件を選んでください。",
+            "新しい移動コストを記録するコードを選んでください。",
+            "直前に通った場所を記録するコードを選んでください。",
+            "ゴールを選んだときに探索を終える条件を選んでください。"
+          ]
+        },
+        {
+          "id": "dijkstra-consolidation",
+          "phase": 6,
+          "name": "応用問題",
+          "goal": "条件の異なる問題やコードの並べ替えに取り組み、手順を適用する。",
+          "bridge": "異なる地図や境界ケースで考え方を使ってみましょう。",
+          "focusQuestions": [
+            "この別のグラフでSからTまでの最小コストはいくつですか？",
+            "Yを経由するとXへのコスト8は何に更新されますか？",
+            "ゴールを選べないまま候補が空になったら、どう判断しますか？",
+            "ダイクストラ法で最短を保証するために必要な辺コストの条件は？",
+            "候補の選択から隣の更新まで、コードを正しい順番に並べてください。"
+          ]
+        },
+        {
+          "id": "dijkstra-implementation",
+          "phase": 7,
+          "name": "自分で実装",
+          "goal": "自分でコードを書き、実行結果をテストして確認・修正する。",
+          "bridge": "最後は最短経路を返すプログラムを自分で完成させましょう。",
+          "focusQuestions": []
+        }
+      ],
+      "assessments": [
+        {
+          "id": "dijkstra-check",
+          "phaseKey": "dijkstra-check",
+          "phase": 3,
+          "questions": [
+            {
+              "id": "next-first",
+              "prompt": "次に選ぶ場所をタップしてください。",
+              "stepId": "4-relax-A-C",
+              "nodeIds": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+              ],
+              "allowNone": false,
+              "correctAnswer": {
+                "kind": "node",
+                "nodeId": "C"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "5-select-C-none"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "優先値が最小の候補を選べました。",
+              "incorrectFeedback": "候補リストにある値を比べましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "A",
+                  "to": "C",
+                  "candidate": 1,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "C",
+                    "B"
+                  ],
+                  "selected": [
+                    "A"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "A",
+                    "to": "C"
+                  }
+                ]
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "5-select-C-none",
+                  "caption": "候補の中で移動コストが最小のC（1）を選びます。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "優先値が最小の候補を選べました。",
+                "incorrect": "候補リストにある値を比べましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "update-first",
+              "prompt": "CからEへ進むときに記録するコストはいくつですか？",
+              "stepId": "5-select-C-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "4"
+                },
+                {
+                  "id": "c2",
+                  "text": "6"
+                },
+                {
+                  "id": "c3",
+                  "text": "8"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-C-A"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "C",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "B"
+                  ],
+                  "selected": [
+                    "A",
+                    "C"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "6-keep-C-A",
+                  "caption": "Cを経由するとAへのコストは2となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "id": "next-second",
+              "prompt": "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+              "stepId": "7-relax-C-E",
+              "nodeIds": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+              ],
+              "allowNone": false,
+              "correctAnswer": {
+                "kind": "node",
+                "nodeId": "B"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "8-select-B-none"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "優先値が最小の候補を選べました。",
+              "incorrectFeedback": "候補リストにある値を比べましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "C",
+                  "to": "E",
+                  "candidate": 6,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": 6,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "C"
+                  },
+                  "frontier": [
+                    "B",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "C"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "C",
+                    "to": "E"
+                  }
+                ]
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "8-select-B-none",
+                  "caption": "候補の中で移動コストが最小のB（2）を選びます。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "優先値が最小の候補を選べました。",
+                "incorrect": "候補リストにある値を比べましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "update-second",
+              "prompt": "BからEへ進むとき、Eのコストはいくつに更新されますか？",
+              "stepId": "10-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "4"
+                },
+                {
+                  "id": "c2",
+                  "text": "6"
+                },
+                {
+                  "id": "c3",
+                  "text": "9"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "11-relax-B-E"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 6,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "C",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "11-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        },
+        {
+          "id": "dijkstra-code-check",
+          "phaseKey": "dijkstra-code-check",
+          "phase": 5,
+          "questions": [
+            {
+              "kind": "code-blank",
+              "id": "select-priority",
+              "prompt": "最小の優先値を持つ候補を選ぶコードを補ってください。",
+              "stepId": "5-select-C-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "-g[n]"
+                },
+                {
+                  "id": "c2",
+                  "text": "g[n]"
+                },
+                {
+                  "id": "c3",
+                  "text": "0"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-C-A"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "select-min",
+              "blank": {
+                "start": 41,
+                "length": 4
+              },
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "C",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "B"
+                  ],
+                  "selected": [
+                    "A",
+                    "C"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-C-A",
+                  "caption": "Cを経由するとAへのコストは2となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "relax-condition",
+              "prompt": "新しいコストが小さい場合だけ更新する条件を選んでください。",
+              "stepId": "10-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": ">"
+                },
+                {
+                  "id": "c2",
+                  "text": "=="
+                },
+                {
+                  "id": "c3",
+                  "text": "<"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c3"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "11-relax-B-E"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "relax-condition",
+              "blank": {
+                "start": 25,
+                "length": 1
+              },
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 6,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "C",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "11-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "update-g",
+              "prompt": "新しい移動コストを記録するコードを選んでください。",
+              "stepId": "10-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "w"
+                },
+                {
+                  "id": "c2",
+                  "text": "candidate"
+                },
+                {
+                  "id": "c3",
+                  "text": "g[u]"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "11-relax-B-E"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "update-distance",
+              "blank": {
+                "start": 23,
+                "length": 9
+              },
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 6,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "C",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "11-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "parent",
+              "prompt": "直前に通った場所を記録するコードを選んでください。",
+              "stepId": "11-relax-B-E",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "= v"
+                },
+                {
+                  "id": "c2",
+                  "text": "= goal"
+                },
+                {
+                  "id": "c3",
+                  "text": "= u"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c3"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "12-select-D-none"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "update-parent",
+              "blank": {
+                "start": 26,
+                "length": 3
+              },
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "E",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "B",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "E"
+                  }
+                ]
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "12-select-D-none",
+                  "caption": "候補の中で移動コストが最小のD（4）を選びます。",
+                  "codeFocus": [
+                    "while-frontier",
+                    "select-min",
+                    "remove"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "goal",
+              "prompt": "ゴールを選んだときに探索を終える条件を選んでください。",
+              "stepId": "19-select-F-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "u == goal"
+                },
+                {
+                  "id": "c2",
+                  "text": "u == start"
+                },
+                {
+                  "id": "c3",
+                  "text": "not frontier"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "20-finish-F-none"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "goal-check",
+              "blank": {
+                "start": 11,
+                "length": 9
+              },
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "F",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": 6
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "B",
+                    "D": "B",
+                    "F": "D"
+                  },
+                  "frontier": [],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B",
+                    "D",
+                    "E",
+                    "F"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "20-finish-F-none",
+                  "caption": "ゴールFから前の場所をたどると、最短経路A→B→D→F（コスト6）が分かります。",
+                  "codeFocus": [
+                    "goal-check",
+                    "path-start",
+                    "path-loop",
+                    "reconstruct",
+                    "return-path"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        },
+        {
+          "id": "dijkstra-consolidation",
+          "phaseKey": "dijkstra-consolidation",
+          "phase": 6,
+          "questions": [
+            {
+              "kind": "choice",
+              "id": "transfer-cost",
+              "prompt": "この別のグラフでSからTまでの最小コストはいくつですか？",
+              "stepId": "5-select-C-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "7"
+                },
+                {
+                  "id": "c2",
+                  "text": "10"
+                },
+                {
+                  "id": "c3",
+                  "text": "12"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-C-A"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "kind": "weighted-transfer",
+                "edges": [
+                  [
+                    "S",
+                    "X",
+                    8
+                  ],
+                  [
+                    "S",
+                    "Y",
+                    2
+                  ],
+                  [
+                    "Y",
+                    "X",
+                    2
+                  ],
+                  [
+                    "X",
+                    "T",
+                    3
+                  ],
+                  [
+                    "Y",
+                    "T",
+                    10
+                  ]
+                ],
+                "start": "S",
+                "goal": "T",
+                "heuristic": null
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-C-A",
+                  "caption": "Cを経由するとAへのコストは2となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "transfer-update",
+              "prompt": "Yを経由するとXへのコスト8は何に更新されますか？",
+              "stepId": "5-select-C-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "2"
+                },
+                {
+                  "id": "c2",
+                  "text": "4"
+                },
+                {
+                  "id": "c3",
+                  "text": "8"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-C-A"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "kind": "weighted-transfer",
+                "edges": [
+                  [
+                    "S",
+                    "X",
+                    8
+                  ],
+                  [
+                    "S",
+                    "Y",
+                    2
+                  ],
+                  [
+                    "Y",
+                    "X",
+                    2
+                  ],
+                  [
+                    "X",
+                    "T",
+                    3
+                  ],
+                  [
+                    "Y",
+                    "T",
+                    10
+                  ]
+                ],
+                "start": "S",
+                "goal": "T",
+                "heuristic": null
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-C-A",
+                  "caption": "Cを経由するとAへのコストは2となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "unreachable",
+              "prompt": "ゴールを選べないまま候補が空になったら、どう判断しますか？",
+              "stepId": "20-finish-F-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "到達不能"
+                },
+                {
+                  "id": "c2",
+                  "text": "最後の場所がゴール"
+                },
+                {
+                  "id": "c3",
+                  "text": "コスト0"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "20-finish-F-none"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "finish",
+                  "from": "F",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": 6
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "E": "B",
+                    "D": "B",
+                    "F": "D"
+                  },
+                  "frontier": [],
+                  "selected": [
+                    "A",
+                    "C",
+                    "B",
+                    "D",
+                    "E",
+                    "F"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "20-finish-F-none",
+                  "caption": "ゴールFから前の場所をたどると、最短経路A→B→D→F（コスト6）が分かります。",
+                  "codeFocus": [
+                    "goal-check",
+                    "path-start",
+                    "path-loop",
+                    "reconstruct",
+                    "return-path"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "nonnegative",
+              "prompt": "ダイクストラ法で最短を保証するために必要な辺コストの条件は？",
+              "stepId": "5-select-C-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "すべて同じ"
+                },
+                {
+                  "id": "c2",
+                  "text": "すべて非負"
+                },
+                {
+                  "id": "c3",
+                  "text": "すべて負"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-C-A"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "C",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "B"
+                  ],
+                  "selected": [
+                    "A",
+                    "C"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-C-A",
+                  "caption": "Cを経由するとAへのコストは2となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "parsons",
+              "id": "code-order",
+              "prompt": "候補の選択から隣の更新まで、コードを正しい順番に並べてください。",
+              "stepId": "5-select-C-none",
+              "lineIds": [
+                "for-neighbor",
+                "candidate",
+                "relax-condition",
+                "update-distance",
+                "update-parent",
+                "add-frontier",
+                "select-min",
+                "remove",
+                "goal-check",
+                "path-start",
+                "path-loop",
+                "reconstruct",
+                "return-path"
+              ],
+              "correctAnswer": {
+                "kind": "order",
+                "lineIds": [
+                  "select-min",
+                  "remove",
+                  "goal-check",
+                  "path-start",
+                  "path-loop",
+                  "reconstruct",
+                  "return-path",
+                  "for-neighbor",
+                  "candidate",
+                  "relax-condition",
+                  "update-distance",
+                  "update-parent",
+                  "add-frontier"
+                ]
+              },
+              "fixedLineIds": [
+                "path-start",
+                "path-loop",
+                "reconstruct",
+                "return-path"
+              ],
+              "requires": null,
+              "reviewStepIds": [
+                "5-select-C-none",
+                "10-relax-B-D"
+              ],
+              "tags": [
+                "flow"
+              ],
+              "correctFeedback": "探索の順番を正しく組み立てられました。",
+              "incorrectFeedback": "候補選択、終了判定、隣の更新の順で考えましょう。",
+              "scene": {
+                "data": {
+                  "mode": "dijkstra",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": null
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "C",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "B"
+                  ],
+                  "selected": [
+                    "A",
+                    "C"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "dijkstra-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def dijkstra(graph, start, goal):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "5-select-C-none",
+                  "caption": "候補の中で移動コストが最小のC（1）を選びます。",
+                  "codeFocus": [
+                    "while-frontier",
+                    "select-min",
+                    "remove"
+                  ]
+                },
+                {
+                  "id": "10-relax-B-D",
+                  "caption": "Bを経由するとDへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "探索の順番を正しく組み立てられました。",
+                "incorrect": "候補選択、終了判定、隣の更新の順で考えましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0": {
+      "courseId": "course-algorithm-astar-v1",
+      "title": "A*探索",
+      "intro": "ゴールまでの推定コストを利用し、最短経路を求めるA*探索を学びます。",
+      "phases": [
+        {
+          "id": "astar-motivation",
+          "phase": 1,
+          "name": "導入",
+          "goal": "この単元の問題設定と、アルゴリズムを使う目的を知る。",
+          "bridge": null,
+          "focusQuestions": []
+        },
+        {
+          "id": "astar-execution",
+          "phase": 2,
+          "name": "動きの説明",
+          "goal": "図の状態を一手ずつ追い、アルゴリズムの手順と判断規則を確かめる。",
+          "bridge": "候補を選ぶ順番と移動コストの更新を追ってみましょう。",
+          "focusQuestions": [
+            "次に選ぶ場所をタップしてください。",
+            "BからDへ進むときのg+hはいくつになりますか？",
+            "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+            "DからFへ進むときに記録する移動コストは？"
+          ]
+        },
+        {
+          "id": "astar-check",
+          "phase": 3,
+          "name": "動きの確認問題",
+          "goal": "図の問題で、次の操作と判断の理由を確認する。",
+          "bridge": "図を見て、次の操作と更新後のコストを確かめましょう。",
+          "focusQuestions": [
+            "次に選ぶ場所をタップしてください。",
+            "BからDへ進むときのg+hはいくつになりますか？",
+            "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+            "DからFへ進むときに記録する移動コストは？"
+          ]
+        },
+        {
+          "id": "astar-code-mapping",
+          "phase": 4,
+          "name": "動きとコードの対応",
+          "goal": "図の動きとコードの各処理を対応づけて読む。",
+          "bridge": "今の動きがコードでどう表現されるか見てみましょう。",
+          "focusQuestions": [
+            "最小の優先値を持つ候補を選ぶコードを補ってください。",
+            "新しいコストが小さい場合だけ更新する条件を選んでください。",
+            "新しい移動コストを記録するコードを選んでください。",
+            "直前に通った場所を記録するコードを選んでください。",
+            "ゴールを選んだときに探索を終える条件を選んでください。"
+          ]
+        },
+        {
+          "id": "astar-code-check",
+          "phase": 5,
+          "name": "コードの確認問題",
+          "goal": "コードの空欄を選び、各処理の役割と動作との対応を確認する。",
+          "bridge": "コードの空欄を埋めて、各処理の役割を確かめましょう。",
+          "focusQuestions": [
+            "最小の優先値を持つ候補を選ぶコードを補ってください。",
+            "新しいコストが小さい場合だけ更新する条件を選んでください。",
+            "新しい移動コストを記録するコードを選んでください。",
+            "直前に通った場所を記録するコードを選んでください。",
+            "ゴールを選んだときに探索を終える条件を選んでください。"
+          ]
+        },
+        {
+          "id": "astar-consolidation",
+          "phase": 6,
+          "name": "応用問題",
+          "goal": "条件の異なる問題やコードの並べ替えに取り組み、手順を適用する。",
+          "bridge": "異なる地図や境界ケースで考え方を使ってみましょう。",
+          "focusQuestions": [
+            "この別のグラフでSからTまでの最小コストはいくつですか？",
+            "Yを経由するとXへのコスト8は何に更新されますか？",
+            "ゴールを選べないまま候補が空になったら、どう判断しますか？",
+            "すべてのhが0なら、候補の選び方はどの方法と同じですか？",
+            "候補の選択から隣の更新まで、コードを正しい順番に並べてください。"
+          ]
+        },
+        {
+          "id": "astar-implementation",
+          "phase": 7,
+          "name": "自分で実装",
+          "goal": "自分でコードを書き、実行結果をテストして確認・修正する。",
+          "bridge": "最後は最短経路を返すプログラムを自分で完成させましょう。",
+          "focusQuestions": []
+        }
+      ],
+      "assessments": [
+        {
+          "id": "astar-check",
+          "phaseKey": "astar-check",
+          "phase": 3,
+          "questions": [
+            {
+              "id": "next-first",
+              "prompt": "次に選ぶ場所をタップしてください。",
+              "stepId": "4-relax-A-C",
+              "nodeIds": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+              ],
+              "allowNone": false,
+              "correctAnswer": {
+                "kind": "node",
+                "nodeId": "B"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "5-select-B-none"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "優先値が最小の候補を選べました。",
+              "incorrectFeedback": "候補リストにある値を比べましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "A",
+                  "to": "C",
+                  "candidate": 1,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "B",
+                    "C"
+                  ],
+                  "selected": [
+                    "A"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "A",
+                    "to": "C"
+                  }
+                ]
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "5-select-B-none",
+                  "caption": "候補の中で移動コストと残りの推定コストの合計が最小のB（6）を選びます。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "優先値が最小の候補を選べました。",
+                "incorrect": "候補リストにある値を比べましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "update-first",
+              "prompt": "BからDへ進むときのg+hはいくつになりますか？",
+              "stepId": "5-select-B-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "4"
+                },
+                {
+                  "id": "c2",
+                  "text": "6"
+                },
+                {
+                  "id": "c3",
+                  "text": "8"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-B-A"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "B",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "6-keep-B-A",
+                  "caption": "Bを経由するとAへのコストは4となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "id": "next-second",
+              "prompt": "隣を調べ終えたあと、次に選ぶ場所はどれですか？",
+              "stepId": "8-relax-B-E",
+              "nodeIds": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F"
+              ],
+              "allowNone": false,
+              "correctAnswer": {
+                "kind": "node",
+                "nodeId": "D"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "9-select-D-none"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "優先値が最小の候補を選べました。",
+              "incorrectFeedback": "候補リストにある値を比べましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "E",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B",
+                    "E": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "C",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "E"
+                  }
+                ]
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "9-select-D-none",
+                  "caption": "候補の中で移動コストと残りの推定コストの合計が最小のD（6）を選びます。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "優先値が最小の候補を選べました。",
+                "incorrect": "候補リストにある値を比べましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "update-second",
+              "prompt": "DからFへ進むときに記録する移動コストは？",
+              "stepId": "9-select-D-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "4"
+                },
+                {
+                  "id": "c2",
+                  "text": "6"
+                },
+                {
+                  "id": "c3",
+                  "text": "9"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "10-keep-D-B"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "D",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B",
+                    "E": "B"
+                  },
+                  "frontier": [
+                    "C",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "B",
+                    "D"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": null,
+              "reviewSteps": [
+                {
+                  "id": "10-keep-D-B",
+                  "caption": "Dを経由するとBへのコストは6となり、記録済みのコスト2より小さくないので更新しません。",
+                  "codeFocus": null
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        },
+        {
+          "id": "astar-code-check",
+          "phaseKey": "astar-code-check",
+          "phase": 5,
+          "questions": [
+            {
+              "kind": "code-blank",
+              "id": "select-priority",
+              "prompt": "最小の優先値を持つ候補を選ぶコードを補ってください。",
+              "stepId": "5-select-B-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "h[n]"
+                },
+                {
+                  "id": "c2",
+                  "text": "g[n] + h[n]"
+                },
+                {
+                  "id": "c3",
+                  "text": "g[n]"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-B-A"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "select-min",
+              "blank": {
+                "start": 41,
+                "length": 11
+              },
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "B",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-B-A",
+                  "caption": "Bを経由するとAへのコストは4となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "relax-condition",
+              "prompt": "新しいコストが小さい場合だけ更新する条件を選んでください。",
+              "stepId": "7-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": ">"
+                },
+                {
+                  "id": "c2",
+                  "text": "=="
+                },
+                {
+                  "id": "c3",
+                  "text": "<"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c3"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "8-relax-B-E"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "relax-condition",
+              "blank": {
+                "start": 25,
+                "length": 1
+              },
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "8-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "update-g",
+              "prompt": "新しい移動コストを記録するコードを選んでください。",
+              "stepId": "7-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "w"
+                },
+                {
+                  "id": "c2",
+                  "text": "candidate"
+                },
+                {
+                  "id": "c3",
+                  "text": "g[u]"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "8-relax-B-E"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "update-distance",
+              "blank": {
+                "start": 23,
+                "length": 9
+              },
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "8-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "parent",
+              "prompt": "直前に通った場所を記録するコードを選んでください。",
+              "stepId": "7-relax-B-D",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "= v"
+                },
+                {
+                  "id": "c2",
+                  "text": "= goal"
+                },
+                {
+                  "id": "c3",
+                  "text": "= u"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c3"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "8-relax-B-E"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "update-parent",
+              "blank": {
+                "start": 26,
+                "length": 3
+              },
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "relax",
+                  "from": "B",
+                  "to": "D",
+                  "candidate": 4,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B"
+                  },
+                  "frontier": [
+                    "D",
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": [
+                  {
+                    "from": "B",
+                    "to": "D"
+                  }
+                ]
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "8-relax-B-E",
+                  "caption": "Bを経由するとEへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "code-blank",
+              "id": "goal",
+              "prompt": "ゴールを選んだときに探索を終える条件を選んでください。",
+              "stepId": "12-select-F-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "u == goal"
+                },
+                {
+                  "id": "c2",
+                  "text": "u == start"
+                },
+                {
+                  "id": "c3",
+                  "text": "not frontier"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "13-finish-F-none"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "lineId": "goal-check",
+              "blank": {
+                "start": 11,
+                "length": 9
+              },
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "F",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": 6
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B",
+                    "E": "B",
+                    "F": "D"
+                  },
+                  "frontier": [
+                    "C",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "B",
+                    "D",
+                    "F"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "13-finish-F-none",
+                  "caption": "ゴールFから前の場所をたどると、最短経路A→B→D→F（コスト6）が分かります。",
+                  "codeFocus": [
+                    "goal-check",
+                    "path-start",
+                    "path-loop",
+                    "reconstruct",
+                    "return-path"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        },
+        {
+          "id": "astar-consolidation",
+          "phaseKey": "astar-consolidation",
+          "phase": 6,
+          "questions": [
+            {
+              "kind": "choice",
+              "id": "transfer-cost",
+              "prompt": "この別のグラフでSからTまでの最小コストはいくつですか？",
+              "stepId": "5-select-B-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "7"
+                },
+                {
+                  "id": "c2",
+                  "text": "10"
+                },
+                {
+                  "id": "c3",
+                  "text": "12"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-B-A"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "kind": "weighted-transfer",
+                "edges": [
+                  [
+                    "S",
+                    "X",
+                    8
+                  ],
+                  [
+                    "S",
+                    "Y",
+                    2
+                  ],
+                  [
+                    "Y",
+                    "X",
+                    2
+                  ],
+                  [
+                    "X",
+                    "T",
+                    3
+                  ],
+                  [
+                    "Y",
+                    "T",
+                    10
+                  ]
+                ],
+                "start": "S",
+                "goal": "T",
+                "heuristic": {
+                  "S": 4,
+                  "X": 2,
+                  "Y": 3,
+                  "T": 0
+                }
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-B-A",
+                  "caption": "Bを経由するとAへのコストは4となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "transfer-update",
+              "prompt": "Yを経由するとXへのコスト8は何に更新されますか？",
+              "stepId": "5-select-B-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "2"
+                },
+                {
+                  "id": "c2",
+                  "text": "4"
+                },
+                {
+                  "id": "c3",
+                  "text": "8"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-B-A"
+              ],
+              "tags": [
+                "relaxation"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "kind": "weighted-transfer",
+                "edges": [
+                  [
+                    "S",
+                    "X",
+                    8
+                  ],
+                  [
+                    "S",
+                    "Y",
+                    2
+                  ],
+                  [
+                    "Y",
+                    "X",
+                    2
+                  ],
+                  [
+                    "X",
+                    "T",
+                    3
+                  ],
+                  [
+                    "Y",
+                    "T",
+                    10
+                  ]
+                ],
+                "start": "S",
+                "goal": "T",
+                "heuristic": {
+                  "S": 4,
+                  "X": 2,
+                  "Y": 3,
+                  "T": 0
+                }
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-B-A",
+                  "caption": "Bを経由するとAへのコストは4となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "unreachable",
+              "prompt": "ゴールを選べないまま候補が空になったら、どう判断しますか？",
+              "stepId": "13-finish-F-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "到達不能"
+                },
+                {
+                  "id": "c2",
+                  "text": "最後の場所がゴール"
+                },
+                {
+                  "id": "c3",
+                  "text": "コスト0"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c1"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "13-finish-F-none"
+              ],
+              "tags": [
+                "path"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "finish",
+                  "from": "F",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": 4,
+                    "E": 4,
+                    "F": 6
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A",
+                    "D": "B",
+                    "E": "B",
+                    "F": "D"
+                  },
+                  "frontier": [
+                    "C",
+                    "E"
+                  ],
+                  "selected": [
+                    "A",
+                    "B",
+                    "D",
+                    "F"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "13-finish-F-none",
+                  "caption": "ゴールFから前の場所をたどると、最短経路A→B→D→F（コスト6）が分かります。",
+                  "codeFocus": [
+                    "goal-check",
+                    "path-start",
+                    "path-loop",
+                    "reconstruct",
+                    "return-path"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "choice",
+              "id": "zero-heuristic",
+              "prompt": "すべてのhが0なら、候補の選び方はどの方法と同じですか？",
+              "stepId": "5-select-B-none",
+              "choices": [
+                {
+                  "id": "c1",
+                  "text": "深さ優先探索"
+                },
+                {
+                  "id": "c2",
+                  "text": "ダイクストラ法"
+                },
+                {
+                  "id": "c3",
+                  "text": "貪欲最良優先探索"
+                }
+              ],
+              "correctAnswer": {
+                "kind": "choice",
+                "choiceId": "c2"
+              },
+              "requires": null,
+              "reviewStepIds": [
+                "6-keep-B-A"
+              ],
+              "tags": [
+                "priority"
+              ],
+              "correctFeedback": "その判断で合っています。",
+              "incorrectFeedback": "候補の値と更新条件をもう一度確認してみましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "B",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "6-keep-B-A",
+                  "caption": "Bを経由するとAへのコストは4となり、記録済みのコスト0より小さくないので更新しません。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "その判断で合っています。",
+                "incorrect": "候補の値と更新条件をもう一度確認してみましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            },
+            {
+              "kind": "parsons",
+              "id": "code-order",
+              "prompt": "候補の選択から隣の更新まで、コードを正しい順番に並べてください。",
+              "stepId": "5-select-B-none",
+              "lineIds": [
+                "for-neighbor",
+                "candidate",
+                "relax-condition",
+                "update-distance",
+                "update-parent",
+                "add-frontier",
+                "select-min",
+                "remove",
+                "goal-check",
+                "path-start",
+                "path-loop",
+                "reconstruct",
+                "return-path"
+              ],
+              "correctAnswer": {
+                "kind": "order",
+                "lineIds": [
+                  "select-min",
+                  "remove",
+                  "goal-check",
+                  "path-start",
+                  "path-loop",
+                  "reconstruct",
+                  "return-path",
+                  "for-neighbor",
+                  "candidate",
+                  "relax-condition",
+                  "update-distance",
+                  "update-parent",
+                  "add-frontier"
+                ]
+              },
+              "fixedLineIds": [
+                "path-start",
+                "path-loop",
+                "reconstruct",
+                "return-path"
+              ],
+              "requires": null,
+              "reviewStepIds": [
+                "5-select-B-none",
+                "7-relax-B-D"
+              ],
+              "tags": [
+                "flow"
+              ],
+              "correctFeedback": "探索の順番を正しく組み立てられました。",
+              "incorrectFeedback": "候補選択、終了判定、隣の更新の順で考えましょう。",
+              "scene": {
+                "data": {
+                  "mode": "astar",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "id": "A",
+                        "x": 0,
+                        "y": 0
+                      },
+                      {
+                        "id": "B",
+                        "x": 2,
+                        "y": 0
+                      },
+                      {
+                        "id": "C",
+                        "x": 0,
+                        "y": 1
+                      },
+                      {
+                        "id": "D",
+                        "x": 4,
+                        "y": 0
+                      },
+                      {
+                        "id": "E",
+                        "x": 3,
+                        "y": 1
+                      },
+                      {
+                        "id": "F",
+                        "x": 6,
+                        "y": 0
+                      }
+                    ],
+                    "edges": [
+                      {
+                        "from": "A",
+                        "to": "B",
+                        "weight": 2
+                      },
+                      {
+                        "from": "A",
+                        "to": "C",
+                        "weight": 1
+                      },
+                      {
+                        "from": "B",
+                        "to": "D",
+                        "weight": 2
+                      },
+                      {
+                        "from": "B",
+                        "to": "E",
+                        "weight": 2
+                      },
+                      {
+                        "from": "C",
+                        "to": "E",
+                        "weight": 5
+                      },
+                      {
+                        "from": "D",
+                        "to": "F",
+                        "weight": 2
+                      },
+                      {
+                        "from": "E",
+                        "to": "F",
+                        "weight": 5
+                      }
+                    ]
+                  },
+                  "heuristic": {
+                    "A": 6,
+                    "B": 4,
+                    "C": 7,
+                    "D": 2,
+                    "E": 4,
+                    "F": 0
+                  }
+                },
+                "state": {
+                  "operation": "select",
+                  "from": "B",
+                  "to": null,
+                  "candidate": null,
+                  "distances": {
+                    "A": 0,
+                    "B": 2,
+                    "C": 1,
+                    "D": null,
+                    "E": null,
+                    "F": null
+                  },
+                  "predecessors": {
+                    "B": "A",
+                    "C": "A"
+                  },
+                  "frontier": [
+                    "C"
+                  ],
+                  "selected": [
+                    "A",
+                    "B"
+                  ]
+                },
+                "highlights": []
+              },
+              "code": {
+                "id": "astar-v1",
+                "version": 1,
+                "language": "python",
+                "lines": [
+                  {
+                    "id": "define-function",
+                    "text": "def astar(graph, start, goal, h):"
+                  },
+                  {
+                    "id": "init-distance",
+                    "text": "    g = {start: 0}"
+                  },
+                  {
+                    "id": "init-parent",
+                    "text": "    parent = {}"
+                  },
+                  {
+                    "id": "init-frontier",
+                    "text": "    frontier = {start}"
+                  },
+                  {
+                    "id": "while-frontier",
+                    "text": "    while frontier:"
+                  },
+                  {
+                    "id": "select-min",
+                    "text": "        u = min(frontier, key=lambda n: (g[n] + h[n], n))"
+                  },
+                  {
+                    "id": "remove",
+                    "text": "        frontier.remove(u)"
+                  },
+                  {
+                    "id": "goal-check",
+                    "text": "        if u == goal:"
+                  },
+                  {
+                    "id": "path-start",
+                    "text": "            path = [u]"
+                  },
+                  {
+                    "id": "path-loop",
+                    "text": "            while path[0] != start:"
+                  },
+                  {
+                    "id": "reconstruct",
+                    "text": "                path.insert(0, parent[path[0]])"
+                  },
+                  {
+                    "id": "return-path",
+                    "text": "            return (g[u], path)"
+                  },
+                  {
+                    "id": "for-neighbor",
+                    "text": "        for v, w in graph[u]:"
+                  },
+                  {
+                    "id": "candidate",
+                    "text": "            candidate = g[u] + w"
+                  },
+                  {
+                    "id": "relax-condition",
+                    "text": "            if candidate < g.get(v, float('inf')):"
+                  },
+                  {
+                    "id": "update-distance",
+                    "text": "                g[v] = candidate"
+                  },
+                  {
+                    "id": "update-parent",
+                    "text": "                parent[v] = u"
+                  },
+                  {
+                    "id": "add-frontier",
+                    "text": "                frontier.add(v)"
+                  },
+                  {
+                    "id": "unreachable",
+                    "text": "    return (None, [])"
+                  }
+                ]
+              },
+              "reviewSteps": [
+                {
+                  "id": "5-select-B-none",
+                  "caption": "候補の中で移動コストと残りの推定コストの合計が最小のB（6）を選びます。",
+                  "codeFocus": [
+                    "while-frontier",
+                    "select-min",
+                    "remove"
+                  ]
+                },
+                {
+                  "id": "7-relax-B-D",
+                  "caption": "Bを経由するとDへのコストが4になるので、距離と前の場所を更新します。",
+                  "codeFocus": [
+                    "for-neighbor",
+                    "candidate",
+                    "relax-condition",
+                    "update-distance",
+                    "update-parent",
+                    "add-frontier"
+                  ]
+                }
+              ],
+              "explanation": {
+                "correct": "探索の順番を正しく組み立てられました。",
+                "incorrect": "候補選択、終了判定、隣の更新の順で考えましょう。",
+                "basis": "correctAnswer・scene・code・reviewStepsは画面教材の定義から取得。説明文が未定義ならnull。"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

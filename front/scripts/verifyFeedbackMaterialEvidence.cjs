@@ -4,7 +4,9 @@ const {load}=require('./learningModuleLoader.cjs');
 const root=path.resolve(__dirname,'../src/features/learning');
 const registry=load(path.join(root,'app/unitRegistry.ts')).learningUnits;
 const a=load(path.join(root,'assessment/assessment.ts'));
-const archive=require('../../back/src/learning/feedback/materials.json');
+const base=require('../../back/src/learning/feedback/materials.json');
+const weighted=require('../../back/src/learning/feedback/weighted-materials.json');
+const archive={current:{...base.current,...weighted.current}};
 let count=0;
 for(const unit of registry)for(const [dir,file] of [['check','check'],['code-check','codeCheck'],['consolidation','consolidation']]){
  const content=Object.values(load(path.join(root,unit.kind,dir,file+'.content.ts'))).find(v=>v?.questions);
@@ -17,5 +19,5 @@ for(const unit of registry)for(const [dir,file] of [['check','check'],['code-che
  assert.equal(saved.records.length,content.questions.length);
  count+=saved.records.length;
 }
-assert.equal(count,150);
-console.log('PASS: all 150 real UI questions persist answers with the exact material revision');
+assert.equal(count,178);
+console.log('PASS: all 178 real UI questions persist answers with the exact material revision');
