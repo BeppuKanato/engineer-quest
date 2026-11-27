@@ -169,7 +169,9 @@ export function FeedbackScreen({ kind, eventId, heading, header, summary, scene,
       timers.push(setTimeout(() => setBeat(s), (rowDelay(rowIndex) + 0.2) * 1000));
     if (praise && !hadSpotlightRef.current) at(0, "celebrate");
     const impIdx = sections.findIndex(s => s.label === "改善点");
-    if (impIdx >= 0) at(impIdx + rowOffset, "thinking");
+    // 「次の一歩」は称賛の直後（index = rowOffset）に移ったため（2026-11-27 配置変更・案A）、
+    // 節の行番号は +1 ずれる。point への復帰は出現列の最後に置く。
+    if (impIdx >= 0) at(impIdx + rowOffset + 1, "thinking");
     at(sections.length + rowOffset, "point");
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,14 +256,11 @@ export function FeedbackScreen({ kind, eventId, heading, header, summary, scene,
                     {scene}
                   </motion.div>
                 </RevealRow>}
-                {sections.map((section, i) => (
-                  <RevealRow key={`${section.label}-${fastForward}`} index={i + rowOffset} fast={fastForward}>
-                    <Box sx={{ maxWidth: 760 }}>
-                      <FeedbackCard label={section.label} body={section.body} headline={section.headline} />
-                    </Box>
-                  </RevealRow>
-                ))}
-                <RevealRow key={`next-${fastForward}`} index={sections.length + rowOffset} last fast={fastForward}>
+                {/* 配置変更・案A（2026-11-27）：「次の一歩」を称賛カードの直後へ移す。
+                    フレーミングの信号がある唯一の文（推薦の理由文）が読みの経路の
+                    最後尾・最小文字に埋もれていたため、文面は変えず位置だけを前に出す。
+                    節カードの順序（できていること→改善点→次の目標）はそのまま。 */}
+                <RevealRow key={`next-${fastForward}`} index={rowOffset} fast={fastForward}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
                     <ArrowForwardIcon sx={{ fontSize: 20, color: playerTokens.focus }} />
                     <Typography sx={{ fontSize: 16, fontWeight: 800, color: playerTokens.control }}>次の一歩</Typography>
@@ -270,6 +269,13 @@ export function FeedbackScreen({ kind, eventId, heading, header, summary, scene,
                     <FeedbackCandidates candidates={feedbackCandidates(f)} onAction={onAction} framing={actionIsNext ? "next" : "choice"} hideFirstAction={showActionBar} />
                   </Box>
                 </RevealRow>
+                {sections.map((section, i) => (
+                  <RevealRow key={`${section.label}-${fastForward}`} index={i + rowOffset + 1} last={i === sections.length - 1} fast={fastForward}>
+                    <Box sx={{ maxWidth: 760 }}>
+                      <FeedbackCard label={section.label} body={section.body} headline={section.headline} />
+                    </Box>
+                  </RevealRow>
+                ))}
               </Box>
               )}
             </Box>}
@@ -281,7 +287,7 @@ export function FeedbackScreen({ kind, eventId, heading, header, summary, scene,
     </AnimatePresence>
     {showActionBar && topCandidate && <motion.div
       initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: reduce || fastForward ? 0 : rowDelay(sections.length + rowOffset), duration: 0.35 }}
+      transition={{ delay: reduce || fastForward ? 0 : rowDelay(rowOffset), duration: 0.35 }}
       style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 30, backgroundColor: "#fff", borderTop: "1px solid #dbe3ef", boxShadow: "0 -4px 16px rgba(15, 23, 42, 0.06)" }}>
       <Box sx={{ maxWidth: 1060, mx: "auto", px: 2, py: 1.5, display: "flex", alignItems: "center", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>

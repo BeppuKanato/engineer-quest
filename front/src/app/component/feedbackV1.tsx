@@ -112,7 +112,9 @@ export function FeedbackCandidates({ candidates, onAction, framing = "choice", h
       : "取り組むかどうかは自分で選べます。そのまま次へ進むこともできます。"}</Typography>
     {candidates.map((candidate,index)=><Paper component="article" variant="outlined" key={candidate.candidateId} data-feedback-candidate-id={candidate.candidateId} sx={{ p: 1.5, borderRadius: 2 }}>
       <Typography fontWeight={700} sx={{ overflowWrap: "anywhere" }}>{index+1}. {candidate.nextStep}</Typography>
-      <Typography variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>{candidate.reason}</Typography>
+      {/* 理由文は「次に何をするかの判断の根拠」で節の本文と同格（2026-11-27 配置変更・案A）。
+          画面で最も小さい body2（14px）から、節の本文と同じ 16px に上げる。 */}
+      <Typography sx={{ fontSize: 16, lineHeight: 1.8, mt: 0.5, overflowWrap: "anywhere" }}>{candidate.reason}</Typography>
       {candidate.actionHref && !(hideFirstAction && index === 0) && <Button component={Link} href={candidate.actionHref} variant={index === 0 ? "contained" : "outlined"}
         sx={{ mt: 1, minHeight: framing === "next" && index === 0 ? 52 : 44, width: framing === "next" && index === 0 ? "100%" : undefined, maxWidth: "100%", overflowWrap: "anywhere" }} onClick={event=>{if(onAction?.(candidate.actionHref)) event.preventDefault();}}>{candidate.actionLabel}</Button>}
     </Paper>)}
