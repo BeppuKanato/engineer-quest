@@ -17,6 +17,7 @@ import { DfsUnitPreview } from "../dfs/unit/DfsUnitPreview";
 import { WallExtensionUnitPreview } from "../wall-extension/unit/WallExtensionUnitPreview";
 import { MazeDiggingUnitPreview } from "../maze-digging/unit/MazeDiggingUnitPreview";
 import { BinarySearchUnitPreview } from "../binary-search/unit/BinarySearchUnitPreview";
+import { WeightedUnitPreview } from "../weighted-search/WeightedUnitPreview";
 import { GreedyCoinsUnitPreview } from "../greedy-coins/unit/GreedyCoinsUnitPreview";
 import { LearningRewardBoundary } from "../rewards/LearningRewardBoundary";
 import { UnitCardKeywords } from "../rewards/UnitCardKeywords";
@@ -276,7 +277,7 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
     <BigGoalGate courseId={courseId} unitTitle={unit.title} getToken={getToken}>
-      {unit.kind === "dfs" ? <DfsUnitPreview {...unitPreviewProps} /> : unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : unit.kind === "greedy-coins" ? <GreedyCoinsUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
+      {unit.kind === "dijkstra" || unit.kind === "astar" ? <WeightedUnitPreview {...unitPreviewProps} mode={unit.kind} /> : unit.kind === "dfs" ? <DfsUnitPreview {...unitPreviewProps} /> : unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : unit.kind === "greedy-coins" ? <GreedyCoinsUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     </BigGoalGate>
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
   </LearningRewardsContext.Provider>;
