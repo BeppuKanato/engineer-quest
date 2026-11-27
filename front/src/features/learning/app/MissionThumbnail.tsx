@@ -492,7 +492,7 @@ export const BinarySearchMissionThumbnail: React.FC = () => {
       <g transform="rotate(-6 84 172)">
         <rect x="70" y="152" width="29" height="38" rx="2" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.5" />
         <text x="84" y="176" textAnchor="middle" fontSize="14" fontWeight="900" fill="#1e3a8a">
-          19
+          58
         </text>
       </g>
       <QuestionBubble x={122} y={146} tail="M110 156 L96 166 L114 160 Z" />

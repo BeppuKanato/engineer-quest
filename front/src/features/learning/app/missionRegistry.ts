@@ -52,7 +52,7 @@ export const unitMissions: Record<string, UnitMission> = {
     courseId: "course-algorithm-greedy-coins-v1",
     title: "お釣りを硬貨の枚数最小で払う",
     description: "日本の硬貨を使って、同じ金額のお釣りをできるだけ少ない枚数で渡そう。",
-    successCondition: "硬貨の合計枚数が最小のとき達成",
+    successCondition: "指定された金額を、学んだ硬貨の選び方で正しく払えたとき達成（日本の硬貨では枚数最小）",
   },
   "course-algorithm-dijkstra-v1": {"courseId":"course-algorithm-dijkstra-v1","title":"配送ロボットの省エネルギー経路","description":"配送ロボットを目的地に送る。通路によって消費エネルギーが異なるため、通る道の本数ではなく消費エネルギーの合計を最小にしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
   "course-algorithm-astar-v1": {"courseId":"course-algorithm-astar-v1","title":"救助ドローンの緊急ルート","description":"救助ドローンを地図上の出発点から救助地点へ送る。移動時間が最小の経路を求めながら、調べる地点を減らしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},

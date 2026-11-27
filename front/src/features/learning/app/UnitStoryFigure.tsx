@@ -14,14 +14,14 @@ const roadNodes=[{x:80,y:104},{x:162,y:53},{x:162,y:155},{x:260,y:53},{x:260,y:1
 const roads=[[0,1,2],[0,2,1],[1,3,2],[1,4,2],[2,4,5],[3,5,2],[4,5,5]] as const;
 function RouteScene({kind,beat}:{kind:"bfs"|"dfs"|"dijkstra"|"astar";beat:Beat}){
  const weighted=kind==="dijkstra"||kind==="astar", rescue=kind==="astar", dfs=kind==="dfs";
- const active=beat===1?dfs?[0,2,0,2]:[0,2,4,5]:[];
+ const active=beat===1?dfs?[0,2,0,2]:rescue?[]:weighted?[0,2,4,5]:[0,2,4,1,3,5]:[];
  const path=active.map(i=>roadNodes[i]).map(p=>`${p.x},${p.y}`).join(" ");
  return <>
   <rect x="8" y="25" width="444" height="177" rx="12" fill={rescue?"#dce9e6":dfs?"#dbe3ef":"#e5e7eb"}/>
   {rescue&&<g fill="#9ab5a1"><path d="M18 45l23 -21 24 21z M380 48l20 -22 20 22z M388 180l20 -26 20 26z"/><path d="M98 28Q125 75 113 185" stroke="#91b6da" strokeWidth="8" fill="none"/></g>}
   {roads.map(([a,b,w],i)=>{const p=roadNodes[a],q=roadNodes[b];return <g key={i}><line x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke={weighted&&w===5?"#b08968":"#94a3b8"} strokeWidth="15" strokeLinecap="round"/><line x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke="#f8fafc" strokeDasharray="5 6" strokeWidth="2"/>{weighted&&<g><rect x={(p.x+q.x)/2-11} y={(p.y+q.y)/2-9} width="22" height="18" rx="4" fill="#fff" stroke="#94a3b8"/><text x={(p.x+q.x)/2} y={(p.y+q.y)/2+4} fontSize="12" fill={ink} fontWeight="bold" textAnchor="middle">{w}</text></g>}</g>})}
   {beat===1&&<polyline points={path} fill="none" stroke={orange} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray={dfs?"5 3":undefined}/>}
-  {rescue&&beat===1&&<g fill="#fef3c7" stroke={orange} strokeWidth="2">{[1,2,3,4].map(i=><circle key={i} cx={roadNodes[i].x} cy={roadNodes[i].y} r="22" strokeDasharray="4 3"/>)}</g>}
+  {rescue&&beat===1&&<g fill="none" stroke={orange} strokeWidth="2">{[1,2,3,4].map(i=><circle key={i} cx={roadNodes[i].x} cy={roadNodes[i].y} r="22" strokeDasharray="4 3"/>)}</g>}
   {roadNodes.map((p,i)=><g key={i}><circle cx={p.x} cy={p.y} r="12" fill={beat===5&&dfs?"#dcfce7":"white"} stroke={beat===5&&dfs?green:ink} strokeWidth="2"/><text x={p.x} y={p.y+4} textAnchor="middle" fontSize="11" fontWeight="bold" fill={ink}>{String.fromCharCode(65+i)}</text>{dfs&&i!==0&&i!==5&&beat!==5&&<text x={p.x+12} y={p.y-15} fontSize="15" fill={orange}>?</text>}</g>)}
   {dfs?<g transform="translate(378 90)"><rect width="43" height="29" rx="3" fill="#b08968" stroke={ink}/><path d="M0 10h43M17 10v10h9V10" stroke={ink} fill="#fbbf24"/></g>:<Flag x={374} y={81}/>}
   {rescue?<g transform="translate(32 98)"><path d="M0 0h40M4 -15h32M4 15h32M4 -15v30M36 -15v30" stroke={blue} strokeWidth="4"/><rect x="12" y="-8" width="16" height="16" rx="4" fill={blue}/><rect x="13" y="10" width="14" height="10" fill="#b08968"/></g>:<><Robot x={15} y={113} question={beat===4} done={beat===5}/>{kind!=="dfs"&&<rect x="23" y="150" width="23" height="19" rx="2" fill="#b08968" stroke={ink}/>}</>}
@@ -34,12 +34,12 @@ function RouteScene({kind,beat}:{kind:"bfs"|"dfs"|"dijkstra"|"astar";beat:Beat})
  </>;
 }
 function ShelfScene({beat}:{beat:Beat}){
- const values=[10,15,20,25,30,35,40,45,50];return <>
- <rect x="18" y="127" width="424" height="9" rx="3" fill="#8a6a52"/>{values.map((n,i)=><g key={n}><rect x={26+i*46} y={64+(i%3)*8} width="39" height={63-(i%3)*8} rx="4" fill={beat===5&&n===40?"#15803d":["#7d8ca3","#a98a6d","#82a37d"][i%3]} opacity={beat===1&&i<6?.5:1}/><text x={45+i*46} y="109" fill="white" textAnchor="middle" fontWeight="bold" fontSize="16">{n}</text></g>)}
- <Note x={160} y={12} width={140}>注文：40番の商品</Note>
- {beat===1&&<><path d="M42 45H321l-10 -6m10 6l-10 6" fill="none" stroke={orange} strokeWidth="4"/><Note x={150} y={167} width={210}>一つずつ確認するのは大変</Note></>}
+ const values=[3,7,12,19,25,31,42,50,58,66];return <>
+ <rect x="18" y="127" width="424" height="9" rx="3" fill="#8a6a52"/>{values.map((n,i)=><g key={n}><rect x={24+i*43} y={64+(i%3)*8} width="38" height={63-(i%3)*8} rx="4" fill={beat===5&&n===58?"#15803d":["#7d8ca3","#a98a6d","#82a37d"][i%3]} opacity={beat===1&&i<6?.5:1}/><text x={43+i*43} y="109" fill="white" textAnchor="middle" fontWeight="bold" fontSize="16">{n}</text></g>)}
+ <Note x={160} y={12} width={140}>注文：58番の商品</Note>
+ {beat===1&&<><path d="M42 45H363l-10 -6m10 6l-10 6" fill="none" stroke={orange} strokeWidth="4"/><Note x={150} y={167} width={210}>一つずつ確認するのは大変</Note></>}
  {beat===2&&<Note x={120} y={168} width={220}>番号順を活かして確認を減らす</Note>}
- {beat===3&&<><Person x={35} y={165}/><path d="M90 163 Q230 120 337 145" stroke={blue} fill="none" strokeDasharray="5 5" strokeWidth="3"/><Note x={150} y={167} width={225}>ありそうな場所に当たりをつける</Note></>}
+ {beat===3&&<><Person x={35} y={155}/><path d="M90 163 Q230 120 383 145" stroke={blue} fill="none" strokeDasharray="5 5" strokeWidth="3"/><Note x={150} y={167} width={225}>ありそうな場所に当たりをつける</Note></>}
  {beat===4&&<><Robot x={20} y={164} question/><Note x={137} y={167} width={210}>次に確かめる番号は？</Note></>}
  {beat===5&&<><Robot x={25} y={163} done/><Note x={151} y={167} width={185}>目的の商品が見つかった！</Note></>}
  </>;
@@ -60,8 +60,8 @@ function MazeScene({kind,beat}:{kind:"maze-digging"|"wall-extension";beat:Beat})
 }
 function Coin({x,y,value,r=16}:{x:number;y:number;value:number;r?:number}){return <g><circle cx={x} cy={y} r={r} fill={value===500?"#e6c875":value===10?"#b08968":"#cbd5e1"} stroke="#64748b" strokeWidth="1.5"/><text x={x} y={y+4} textAnchor="middle" fontSize={r<13?9:13} fontWeight="bold" fill={ink}>{value}</text></g>}
 function CoinsScene({beat}:{beat:Beat}){
- return <><rect x="12" y="145" width="436" height="50" rx="6" fill="#a98a6d"/><rect x="22" y="20" width="125" height="62" rx="8" fill="#475569"/><rect x="32" y="30" width="105" height="42" rx="4" fill="#dcfce7"/><text x="84" y="57" textAnchor="middle" fontSize="17" fontWeight="bold" fill={ink}>お釣り 500円</text>
- {beat===1||beat===3?<>{Array.from({length:24},(_,i)=><Coin key={i} x={183+(i%8)*22} y={37+Math.floor(i/8)*22} value={1} r={10}/>)}<Note x={175} y={109} width={177}>1円玉 × 500枚</Note>{beat===3&&<><Coin x={402} y={83} value={500} r={24}/><text x="401" y="123" textAnchor="middle" fontSize="12" fontWeight="bold">1枚</text></>}</>:beat===2||beat===5?<><Coin x={257} y={85} value={500} r={33}/><Note x={186} y={125} width={160}>同じ金額・少ない枚数</Note></>:<>{[500,100,50,10,5,1].map((v,i)=><Coin key={v} x={170+(i%3)*88} y={42+Math.floor(i/3)*63} value={v} r={21}/>)}<Note x={174} y={127} width={220}>どの硬貨を使う？</Note></>}
+ return <><rect x="12" y="145" width="436" height="50" rx="6" fill="#a98a6d"/><rect x="22" y="20" width="125" height="62" rx="8" fill="#475569"/><rect x="32" y="30" width="105" height="42" rx="4" fill="#dcfce7"/><text x="84" y="57" textAnchor="middle" fontSize="17" fontWeight="bold" fill={ink}>お釣り 786円</text>
+ {beat===1||beat===3?<>{beat===3&&<Note x={170} y={7} width={170}>500円分を比較</Note>}{Array.from({length:24},(_,i)=><Coin key={i} x={183+(i%8)*22} y={45+Math.floor(i/8)*20} value={1} r={10}/>)}<Note x={175} y={109} width={177}>{beat===1?"1円玉 × 786枚":"1円玉 × 500枚"}</Note>{beat===3&&<><Coin x={402} y={83} value={500} r={24}/><text x="401" y="123" textAnchor="middle" fontSize="12" fontWeight="bold">1枚</text></>}</>:beat===2||beat===5?<><path d="M200 63h118l-10 66H210Z" fill="#fff" stroke={ink} strokeWidth="2"/><rect x="220" y="78" width="78" height="29" rx="6" fill="#dcfce7"/><text x="259" y="98" textAnchor="middle" fontSize="15" fontWeight="bold" fill={green}>786円</text><Note x={172} y={130} width={195}>{beat===5?"お釣りの用意ができた":"同じ金額・少ない枚数"}</Note></>:<>{[500,100,50,10,5,1].map((v,i)=><Coin key={v} x={170+(i%3)*88} y={42+Math.floor(i/3)*63} value={v} r={21}/>)}<Note x={174} y={127} width={220}>どの硬貨を使う？</Note></>}
  {beat===3?<Person x={24} y={155}/>:<Robot x={31} y={158} question={beat===4} done={beat===5}/>}
  </>;
 }

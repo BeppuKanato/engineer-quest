@@ -7,7 +7,12 @@ const {learningUnits}=load(path.join(app,'unitRegistry.ts'));
 const {missionStoryFor}=load(path.join(app,'missionStories.tsx'));
 const {findUnitMission}=load(path.join(app,'missionRegistry.ts'));
 const {missionThumbnailFor}=load(path.join(app,'MissionThumbnail.tsx'));
+const {unitFlowOrder,GROUP_LABEL,FEATURE_TEXT,isModernUnit}=load(path.join(app,'unitCatalog.ts'));
 assert.equal(learningUnits.length,9);
+assert.deepEqual([...unitFlowOrder].sort(),learningUnits.map(u=>u.courseId).sort());
+for(const unit of learningUnits) assert(isModernUnit(unit.courseId)&&GROUP_LABEL[unit.courseId]&&FEATURE_TEXT[unit.courseId],unit.courseId);
+for(const mode of ['astar','dijkstra']) assert.equal(GROUP_LABEL['course-algorithm-'+mode+'-v1'],'グラフ探索');
+for(const id of ['kmp','selection-sort','merge-sort']) assert(!isModernUnit('course-algorithm-'+id+'-v1'));
 for(const unit of learningUnits){
  const story=missionStoryFor(unit.courseId), mission=findUnitMission(unit.courseId);
  assert(mission?.title&&mission?.successCondition,unit.courseId);
