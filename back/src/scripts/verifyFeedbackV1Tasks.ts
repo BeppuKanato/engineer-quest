@@ -7,6 +7,7 @@ import type { Input } from "../service/feedbackV1.engine";
 import type { generate } from "../service/feedbackV1.engine";
 import * as contextModule from "../service/feedbackV1.context";
 import * as taskModule from "../service/feedbackV1.tasks";
+import { feedbackTaskSchema } from "../router/feedbackV1Task.router";
 
 async function main() {
   process.env.FEEDBACK_TASKS_ENABLED = "true";
@@ -105,6 +106,10 @@ async function main() {
   assert.equal(await processFeedbackV1Task({ ...permanent, retryCount: 1 },good),"done");
   assert.equal(rows.get("f-2")?.status,"COMPLETED");
   assert.equal((await retryFailedFeedbackV1("uid", "mission", "event-3")).status,"COMPLETED","successful feedback remains immutable");
+  // The handler must accept exactly what the service enqueues: the strict
+  // router schema once rejected every task because it did not list retryCount.
+  // recoveryAttempt is a stub-side bookkeeping field, never in the real body.
+  for (const task of enqueued) assert.doesNotThrow(() => feedbackTaskSchema.parse({ feedbackId: task.feedbackId, kind: task.kind, eventId: task.eventId, retryCount: task.retryCount }), "enqueued task must pass the router schema");
   assert.equal(logs.length,4); // prior 2 + manual_retry audit + new generation
   console.log("PASS: Cloud Tasks generation keys, old task rejection, user-triggered retry and preserved completed results");
 }
