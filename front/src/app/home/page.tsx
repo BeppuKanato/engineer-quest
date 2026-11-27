@@ -1,6 +1,7 @@
 "use client";
-import { Alert, Box, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Container, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import FlagIcon from "@mui/icons-material/Flag";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHome, type HomeResponse } from "@/api/home.api";
 import { AppHeader } from "@/app/component/appHeader";
@@ -9,7 +10,9 @@ import { useUserSession } from "@/app/component/userSession";
 import { HomeDashboard } from "@/features/home/HomeDashboard";
 import { useGoalCourseId } from "@/features/learning/app/goalStore";
 import { findUnitMission } from "@/features/learning/app/missionRegistry";
-import { DailyReviewCard } from "@/features/learning/daily-review/DailyReviewCard";
+import { DailyReviewCardContent } from "@/features/learning/daily-review/DailyReviewCard";
+import { resolveReviewMaterial } from "@/features/learning/daily-review/reviewMaterials";
+import { useDailyReview } from "@/features/learning/daily-review/useDailyReview";
 import { peekClientQueryData } from "@/lib/clientQueryCache";
 
 const PRIMARY = "#2563eb";
@@ -18,14 +21,29 @@ const HAIRLINE = "#e3e9f4";
 
 /**
  * 目標帯（2026-11-27 確定）：大目標（LLM生成）は廃止され、目標は学習者が自分で
- * 設定した単元ミッション（goalStore の旗）を表示する。目標が未設定なら帯は出ない。
+ * 設定した単元ミッション（goalStore の旗）を表示する。目標は「場所・目標」なので
+ * 未設定でも帯は消さず、設定への促す形で出す（2026-11-27 の空状態方針）。
  * 進み具合はその単元の段階の完了量（緑）で示す。
  */
 function GoalBand({ data }: { data: HomeResponse }) {
   const goalCourseId = useGoalCourseId();
   const unit = goalCourseId ? data.overview.units.find(item => item.id === goalCourseId) : undefined;
   const mission = goalCourseId ? findUnitMission(goalCourseId) : undefined;
-  if (!unit || !mission) return null;
+  if (!unit || !mission) {
+    return (
+      <Paper component="section" data-home-section="goal" aria-label="目標" elevation={0} sx={{ borderRadius: "18px", border: `1px solid ${HAIRLINE}`, boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.06)", px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <FlagIcon sx={{ color: PRIMARY, fontSize: 20 }} />
+          <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em" }}>目標</Typography>
+        </Box>
+        <Typography sx={{ fontSize: 22, fontWeight: 900, lineHeight: 1.4, mt: 1 }}>目標はまだ設定されていません</Typography>
+        <Typography sx={{ fontSize: 16, lineHeight: 1.7, mt: 0.25 }}>コース一覧や単元画面で旗を立てると、ここに単元ミッションと進み具合が表示されます</Typography>
+        <Button component={Link} href="/courses" variant="outlined" sx={{ mt: 2, fontSize: 16, fontWeight: 900, px: 2.5, py: 1, borderRadius: "12px", color: PRIMARY, borderColor: PRIMARY }}>
+          コース一覧で目標を設定する
+        </Button>
+      </Paper>
+    );
+  }
   const percent = unit.totalPhases > 0 ? Math.round((unit.completedPhases / unit.totalPhases) * 100) : 0;
   return (
     <Paper component="section" data-home-section="goal" aria-label="目標" elevation={0} sx={{ borderRadius: "18px", border: `1px solid ${HAIRLINE}`, boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.06)", px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
@@ -49,6 +67,10 @@ function GoalBand({ data }: { data: HomeResponse }) {
 
 export default function HomePage() {
   const { status, token } = useUserSession();
+  // 復習は「進捗データ」：割り当てが無い日は枠ごと出さず、狙いを広げる。
+  // 有無をここで判定し、ある時だけ中身をスロットに渡す（カード側の null 判定と同条件）。
+  const { review } = useDailyReview();
+  const reviewReady = review && resolveReviewMaterial(review) ? review : null;
   const [cachedHome] = useState(() => peekClientQueryData<HomeResponse>("home"));
   const [homeData, setHomeData] = useState<HomeResponse | null>(cachedHome ?? null);
   const [isLoading, setIsLoading] = useState(!cachedHome);
@@ -64,7 +86,7 @@ export default function HomePage() {
     <AppHeader /><FeedbackDestination failed={!!errorMessage} ready={!isLoading && !!homeData && !errorMessage} />
     <Container maxWidth={false} sx={{ maxWidth: 1440, py: { xs: 3, md: 4 } }}>
       {errorMessage && <Alert severity={homeData ? "warning" : "error"} sx={{ mb: 3 }}>{errorMessage}</Alert>}
-      {homeData ? <HomeDashboard data={homeData} review={<DailyReviewCard />} goalBand={<GoalBand data={homeData} />} /> : isLoading ? <Stack spacing={3}><Skeleton variant="rounded" height={260} /><Skeleton variant="rounded" height={180} /></Stack> : null}
+      {homeData ? <HomeDashboard data={homeData} review={reviewReady ? <DailyReviewCardContent review={reviewReady} /> : undefined} goalBand={<GoalBand data={homeData} />} /> : isLoading ? <Stack spacing={3}><Skeleton variant="rounded" height={260} /><Skeleton variant="rounded" height={180} /></Stack> : null}
     </Container>
   </Box>;
 }

@@ -17,8 +17,9 @@ import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOu
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import type { HomeResponse } from "@/api/home.api";
+import type { HomeResponse, HomeUnit } from "@/api/home.api";
 import { RobotBust } from "@/app/component/robotBust";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { knowledgeCardTones } from "@/components/rewards/rarity.tokens";
 
 const TEXT = "#111827";
@@ -43,6 +44,53 @@ const FeedbackQuote: React.FC<{ nextStep: string }> = ({ nextStep }) => (
   </Box>
 );
 
+/** 狙いの単元の「いまの位置」をアルドが伝える吹き出し（続きが別単元でフィードバックの
+ * 台詞が無い時）。素の見出し＋ボタンだけの枠にしない（2026-11-27 の空状態方針）。 */
+const PositionQuote: React.FC<{ unit: HomeUnit }> = ({ unit }) => (
+  <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
+    <RobotBust state="point" width={190} height={140} />
+    <Box sx={{ flex: 1, minWidth: 0, border: `1px solid ${HAIRLINE}`, borderRadius: "14px", px: 2, py: 1.5, bgcolor: "#fbfcfe", position: "relative", "&::before": { content: "\"\"", position: "absolute", left: -7, bottom: 26, width: 12, height: 12, bgcolor: "#fbfcfe", borderLeft: `1px solid ${HAIRLINE}`, borderBottom: `1px solid ${HAIRLINE}`, transform: "rotate(45deg)" } }}>
+      <Typography sx={{ fontSize: 16, fontWeight: 700, lineHeight: 1.7 }}>
+        {unit.status === "COMPLETED"
+          ? "この単元は修了済み。復習でもう一度、動きを確かめられるよ"
+          : unit.status === "IN_PROGRESS"
+            ? `学習ステップは${unit.totalPhases}つ中${unit.completedPhases}つ終わっているよ。今日はこの続きからいこう`
+            : "まだ手つかずの単元。最初の一歩から、いっしょに進めよう"}
+      </Typography>
+    </Box>
+  </Box>
+);
+
+/** 初回（学習記録が何もない）の狙いの置き場所：単元の開始ボタンは置かず、
+ * コース一覧への誘導にする（選ぶのはコース一覧の仕事）。アルドの自己紹介は
+ * 種別ではなく名前＋役割で言う。 */
+const FreshStartCard: React.FC<{ units: HomeUnit[] }> = ({ units }) => (
+  <Paper component="section" data-home-section="aim" aria-label="はじめよう" elevation={0} sx={{ ...S1, border: `2px solid ${PRIMARY}`, p: { xs: 2.5, md: 3.5 } }}>
+    <Box sx={{ bgcolor: "#f1f5fb", borderLeft: `4px solid ${PRIMARY}`, borderRadius: 2, px: 2, py: 1.5 }}>
+      <Typography sx={{ fontSize: 18, lineHeight: 1.6 }}>
+        アルドはあいまいな判断ができないけど、キミのコードがあれば動ける。学習の一歩を、いっしょに踏み出そう。
+      </Typography>
+    </Box>
+    <Box sx={{ display: "flex", gap: 3, mt: 2.5, alignItems: "center", flexWrap: "wrap" }}>
+      <RobotFigure alt="" state="happy" size="XL" grounding="shadow" sx={{ width: 131, height: 140 }} />
+      <Box sx={{ flex: 1, minWidth: 260 }}>
+        <Typography component="h2" sx={{ fontSize: { xs: 24, md: 28 }, fontWeight: 900, lineHeight: 1.3 }}>学ぶ単元を選ぼう</Typography>
+        <Typography sx={{ fontSize: 16, lineHeight: 1.7, mt: 1 }}>
+          全{units.length}単元。どの単元にも、困っている場面とミッションがある。最初は「{units[0]?.title}」がおすすめ。
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 1.5 }}>
+          {units.map(unit => (
+            <Chip key={unit.id} label={unit.title} sx={{ fontSize: 14, fontWeight: 700, bgcolor: "#eef2f7" }} />
+          ))}
+        </Box>
+        <Button component={Link} href="/courses" variant="contained" endIcon={<ArrowForwardIcon />} sx={{ mt: 2, bgcolor: PRIMARY, fontSize: 16, fontWeight: 900, px: 3, py: 1.25, borderRadius: "12px", boxShadow: "none", "&:hover": { bgcolor: PRIMARY, boxShadow: "none" } }}>
+          コース一覧を見る
+        </Button>
+      </Box>
+    </Box>
+  </Paper>
+);
+
 export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; review?: ReactNode; goalBand?: ReactNode }) {
   const { overview, today, resume, week, questions, latestCard } = data;
   const current = today.recommended;
@@ -50,15 +98,19 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
   const sameUnit = !!(resume && current && resume.id === current.id);
   const boardQuestions = questions.slice(0, 2);
   const latestTone = latestCard ? knowledgeCardTones[latestCard.rarity as keyof typeof knowledgeCardTones] : undefined;
+  const isFresh = !resume && overview.completedUnits === 0 && !data.hasInProgressUnit && current?.status === "NOT_STARTED";
 
   return (
     <Stack spacing={3}>
       {goalBand}
 
-      {/* 今日の行動：左＝今日の狙い、右＝今日の復習 */}
+      {/* 今日の行動：左＝今日の狙い、右＝今日の復習。復習は「進捗データ」なので
+          無い日は詰めて狙いを広げる（場所・目標系は常設、という方針と対の扱い） */}
       {(current || review) && (
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 7fr) minmax(0, 5fr)" }, gap: 3, alignItems: "stretch" }}>
-          {current ? (
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: review ? "minmax(0, 7fr) minmax(0, 5fr)" : "1fr" }, gap: 3, alignItems: "stretch" }}>
+          {isFresh && current ? (
+            <FreshStartCard units={overview.units} />
+          ) : current ? (
             <Paper component="section" data-home-section="aim" aria-label="今日の狙い" elevation={0} sx={{ ...S1, border: `2px solid ${PRIMARY}`, p: { xs: 2.5, md: 3.5 }, display: "flex", flexDirection: "column" }}>
               <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em", color: PRIMARY }}>今日の狙い</Typography>
               <Typography component="h2" sx={{ fontSize: { xs: 24, md: 28 }, fontWeight: 900, lineHeight: 1.3, mt: 0.5 }}>{current.title}</Typography>
@@ -67,8 +119,8 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
                   <FeedbackQuote nextStep={resume.nextStep} />
                 </Box>
               ) : (
-                <Box sx={{ display: "flex", alignItems: "flex-end", mt: 1 }}>
-                  <RobotBust state="point" width={190} height={140} />
+                <Box sx={{ mt: 2 }}>
+                  <PositionQuote unit={current} />
                 </Box>
               )}
               <Box sx={{ flex: 1 }} />
@@ -78,7 +130,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
               </Button>
             </Paper>
           ) : <Box />}
-          <Box data-home-section="review" sx={{ "& > *": { height: "100%", mb: "0 !important" } }}>{review}</Box>
+          {review && <Box data-home-section="review" sx={{ "& > *": { height: "100%", mb: "0 !important" } }}>{review}</Box>}
         </Box>
       )}
 
@@ -100,7 +152,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
       {/* 最近の状況：左＝ストリーク／次の実績／知識カード、右＝学んだ知識を活かそう */}
       <Paper component="section" data-home-section="status" aria-label="最近の状況" elevation={0} sx={{ ...S1, p: { xs: 2.5, md: 3.5 } }}>
         <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em" }}>最近の状況</Typography>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: boardQuestions.length ? "minmax(0, 7fr) minmax(0, 5fr)" : "1fr" }, gap: { xs: 3, lg: 5 }, mt: 1 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 7fr) minmax(0, 5fr)" }, gap: { xs: 3, lg: 5 }, mt: 1 }}>
           <Stack spacing={3.5}>
             <Box component="section" aria-label="学習ストリーク">
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, flexWrap: "wrap" }}>
@@ -161,7 +213,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
             </Box>
           </Stack>
 
-          {boardQuestions.length > 0 && (
+          {boardQuestions.length > 0 ? (
             <Box component="section" aria-label="学んだ知識を活かそう">
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <ForumOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
@@ -187,6 +239,22 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
                   </Box>
                 ))}
               </Stack>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+                <MuiLink component={Link} href="/quest-board" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>掲示板へ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
+              </Box>
+            </Box>
+          ) : (
+            <Box component="section" aria-label="掲示板">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <ForumOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                <Typography sx={{ fontSize: 18, fontWeight: 900 }}>掲示板</Typography>
+              </Box>
+              <Typography sx={{ fontSize: 16, fontWeight: 900, mt: 1.25 }}>学んだ知識を活かそう</Typography>
+              <Typography sx={{ fontSize: 14, lineHeight: 1.7, mt: 0.5 }}>
+                {overview.completedUnits > 0
+                  ? "いま答えられる質問はありません。"
+                  : "単元を修了すると、その単元で仲間がしている質問に、ここから答えられるようになります"}
+              </Typography>
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
                 <MuiLink component={Link} href="/quest-board" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>掲示板へ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
               </Box>
