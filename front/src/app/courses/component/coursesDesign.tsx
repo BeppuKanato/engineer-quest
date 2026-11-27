@@ -26,6 +26,7 @@ import Link from "next/link";
 
 import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
 import type { Course } from "@/app/courses/type";
+import { GROUP_LABEL, FEATURE_TEXT, unitFlowOrder, OTHER_IDS, isModernUnit } from "@/features/learning/app/unitCatalog";
 import { findUnitMission } from "@/features/learning/app/missionRegistry";
 import { missionThumbnailFor } from "@/features/learning/app/MissionThumbnail";
 import { GoalFlag } from "@/features/learning/app/GoalFlag";
@@ -52,16 +53,6 @@ const GREEN = "#16a34a";
 // 課題軸のグループ（2026-11-21 決定）。カードのラベルに使う。
 // 貪欲法は手法の名前なので、解く問題の側の名前「最適化問題」をカテゴリにする
 // （2026-11-23、GPTの分類粒度の指摘を受けた Kanato の判断。カテゴリは問題軸で統一）。
-const GROUP_LABEL: Record<string, string> = {
-  "course-algorithm-breadth-first-search-v1": "グラフ探索",
-  "course-algorithm-depth-first-search-v1": "グラフ探索",
-  "course-algorithm-maze-digging-v1": "迷路生成",
-  "course-algorithm-wall-extension-v1": "迷路生成",
-  "course-algorithm-bubble-sort-v2": "並び替え",
-  "course-algorithm-binary-search-v1": "配列の検索",
-  "course-algorithm-greedy-coins-v1": "最適化問題",
-};
-
 /** 軸のアイコン（24×24、線と点の最小限の絵）。色は使わず、形で軸を区別する。 */
 const GroupGlyph: React.FC<{ label: string }> = ({ label }) => {
   const common = { width: 20, height: 20, viewBox: "0 0 24 24", "aria-hidden": true } as const;
@@ -234,33 +225,6 @@ const STATE_ORDER: Record<string, number> = { IN_PROGRESS: 0, NOT_STARTED: 1, CO
  * この説明＝どうやって解決するかの仕組みを学ぶ、という文（GPT案を Kanato が採用）。
  * 目的を説明側にも書くと題と重なるため、説明は仕組み＋学びに寄せる。
  */
-const FEATURE_TEXT: Record<string, string> = {
-  "course-algorithm-breadth-first-search-v1": "近い場所から順に調べていくことで、最短ルートを見つける仕組みを学びます",
-  "course-algorithm-depth-first-search-v1": "一本道を深く進み、行き止まりで戻ることで、道を見つける仕組みを学びます",
-  "course-algorithm-maze-digging-v1": "壁を掘って通路を伸ばしていくことで、迷路を作る仕組みを学びます",
-  "course-algorithm-wall-extension-v1": "柱から壁を倒して伸ばすことで、迷路を作る仕組みを学びます",
-  "course-algorithm-bubble-sort-v2": "隣同士を比べて交換を繰り返すことで、並べ替える仕組みを学びます",
-  "course-algorithm-binary-search-v1": "調べる範囲を半分ずつ絞り込むことで、効率よく探す仕組みを学びます",
-  "course-algorithm-greedy-coins-v1": "その場で最良の選択を繰り返すことで、答えを出す考え方を学びます",
-};
-
-// 流す順序：同じ軸の単元を隣り合わせ、組が行の途中で割れないようにする。
-const FLOW_ORDER = [
-  "course-algorithm-breadth-first-search-v1",
-  "course-algorithm-depth-first-search-v1",
-  "course-algorithm-bubble-sort-v2",
-  "course-algorithm-maze-digging-v1",
-  "course-algorithm-wall-extension-v1",
-  "course-algorithm-binary-search-v1",
-  "course-algorithm-greedy-coins-v1",
-];
-
-const OTHER_IDS = [
-  "course-algorithm-kmp-v1",
-  "course-algorithm-selection-sort-v1",
-  "course-algorithm-merge-sort-v1",
-];
-
 /**
  * 状態の印：バッジは学習中だけに付ける（2026-11-23、GPT指摘を受けた Kanato の判断）。
  * 完了のメダルバッジは外した。完了が学習中より目立ってしまう逆転が起きるのと、
@@ -516,7 +480,7 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
     totalPhases: course.totalPhases ?? 0,
     ...(course.nextPhaseLabel ? { nextPhase: course.nextPhaseLabel } : {}),
   });
-  const unitById = new Map(courses.filter((c) => FLOW_ORDER.includes(c.id)).map((c) => [c.id, toView(c)]));
+  const unitById = new Map(courses.filter((c) => isModernUnit(c.id)).map((c) => [c.id, toView(c)]));
   const units = [...unitById.values()];
   const totalUnits = units.length;
   const completedUnits = units.filter((u) => u.status === "COMPLETED").length;
@@ -533,7 +497,7 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
   for (const u of units) {
     stateCounts[u.status] = (stateCounts[u.status] ?? 0) + 1;
   }
-  const visibleUnits = FLOW_ORDER.map((id) => unitById.get(id))
+  const visibleUnits = unitFlowOrder.map((id) => unitById.get(id))
     .filter(
       (u): u is UnitView =>
         !!u &&
@@ -542,8 +506,8 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
     )
     // 表示順：学習中 → 未着手 → 完了。同じ状態の中では FLOW_ORDER（軸の隣接順）を保つ。
     .sort((a, b) => STATE_ORDER[a.status] - STATE_ORDER[b.status]);
-  const otherCourses = courses.filter((c) => !FLOW_ORDER.includes(c.id) && !OTHER_IDS.includes(c.id));
-  const otherOrdered = [...OTHER_IDS.map((id) => courses.find((c) => c.id === id)).filter((c): c is Course => !!c), ...otherCourses];
+  const otherCourses = courses.filter((c) => !isModernUnit(c.id) && !OTHER_IDS.includes(c.id));
+  const otherOrdered = [...OTHER_IDS.filter(id=>!isModernUnit(id)).map((id) => courses.find((c) => c.id === id)).filter((c): c is Course => !!c), ...otherCourses];
   return (
     <Stack spacing={4}>
       <Box>
