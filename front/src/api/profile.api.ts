@@ -11,7 +11,3 @@ export type ProfileResponse = {
   history: ProfileHistoryItem[];
 };
 export const getProfile = (token: string): Promise<ProfileResponse> => fetchClientQuery("profile", () => fetcher<ProfileResponse>("/profile", { method: "GET", token }), { staleTimeMs: 15_000, tags: [queryTags.profile] });
-export const updateProfileMascot = async (token: string, mascotId: string) => {
-  const result = await fetcher<{ selectedMascotId: string }>("/profile/mascot", { method: "PATCH", token, body: JSON.stringify({ mascotId }) });
-  invalidateClientQueries([queryTags.profile, queryTags.home]); return result;
-};
