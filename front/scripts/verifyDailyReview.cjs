@@ -39,7 +39,7 @@ for(const file of fs.readdirSync(dir)){
  assert(!/completeLearningPhase|completePhase|onLearningEvent|useAssessmentObservation|useAssessmentCompletion|assessmentEvidence\(|useLearningVisit|feedbackV1/.test(source),file);
 }
 const api=fs.readFileSync(path.join(root,'api/dailyReview.api.ts'),'utf8');assert(!/learning\/|events\/|feedback/.test(api));
-const home=fs.readFileSync(path.join(root,'app/home/page.tsx'),'utf8');assert(home.includes('<DailyReviewCard />'));
+const home=fs.readFileSync(path.join(root,'app/home/page.tsx'),'utf8');assert(home.includes('useDailyReview')&&home.includes('<DailyReviewCardContent review={reviewReady} />'));
 const {DailyReviewCardContent}=load(path.join(dir,'DailyReviewCard.tsx'));
 const base={id:'fixture',date:'2026-11-19',...reviewMaterials[0],selectedAt:'2026-11-19T00:00:00Z',answeredAt:null,correct:null};
 for(const correct of [true,false]){
