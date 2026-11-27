@@ -20,5 +20,11 @@ export default {
   "binary-search-consolidation": "sha256:b671037c56fe135cccf2e78295f08b73e52da7e6a7e0663bc04055f73728862b",
   "greedy-coins-check": "sha256:2f278447f113b2990a85eecadaa842179fba3c6eed179a5a59951ef7c48ca8eb",
   "greedy-coins-code-check": "sha256:2f278447f113b2990a85eecadaa842179fba3c6eed179a5a59951ef7c48ca8eb",
-  "greedy-coins-consolidation": "sha256:2f278447f113b2990a85eecadaa842179fba3c6eed179a5a59951ef7c48ca8eb"
+  "greedy-coins-consolidation": "sha256:2f278447f113b2990a85eecadaa842179fba3c6eed179a5a59951ef7c48ca8eb",
+  "dijkstra-check": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+  "dijkstra-code-check": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+  "dijkstra-consolidation": "sha256:00afa545eaa7f7467e0a818455ead1ed0f784c510159e3e9c31756e1d6ee8b6c",
+  "astar-check": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0",
+  "astar-code-check": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0",
+  "astar-consolidation": "sha256:ced9447e7e8bcfcc600bbe2daac2c655abc3b4526c26a220a3d9bac9d8c891d0"
 } as const;

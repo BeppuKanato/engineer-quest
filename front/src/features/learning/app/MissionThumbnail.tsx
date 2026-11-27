@@ -15,6 +15,7 @@
 
 import { Box } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
+import { developmentMissionThumbnailFor } from "./DevelopmentMissionThumbnail";
 
 /** BFS：広い倉庫で、たくさんの通路の前に困っている配送ロボット（幅の場面）。 */
 export const BfsMissionThumbnail: React.FC = () => (
@@ -677,6 +678,10 @@ export const missionThumbnailFor = (courseId: string): React.ReactNode => {
       return <BinarySearchMissionThumbnail />;
     case "course-algorithm-greedy-coins-v1":
       return <GreedyMissionThumbnail />;
+    case "course-algorithm-dijkstra-v1":
+      return developmentMissionThumbnailFor("minimum-energy-delivery");
+    case "course-algorithm-astar-v1":
+      return developmentMissionThumbnailFor("rescue-fastest-route");
     default:
       return null;
   }

@@ -64,7 +64,7 @@ async function main() {
       assert.equal(result.awardedCard?.id, entry.knowledgeCardId);
       assert.equal((await completePhaseByUser(user, entry.courseId, entry.phaseKey)).awardedCard, null);
     }
-    assert.equal(owned.get(user.id)?.size, 21);
+    assert.equal(owned.get(user.id)?.size, 27);
   }
   const first = schedules[0];
   assert.equal((await completePhaseByUser({ id: "no-legacy-number" }, first.courseId, first.phaseKey)).awardedCard?.id, first.knowledgeCardId);
@@ -75,8 +75,8 @@ async function main() {
   owned.set(user.id, new Set([first.knowledgeCardId]));
   const before = structuredClone(phases);
   const results = await Promise.all([restoreCompletedPhaseCards(user.id), restoreCompletedPhaseCards(user.id)]);
-  assert.equal(results.reduce((a, b) => a + b, 0), 20);
-  assert.equal(owned.get(user.id)?.size, 21);
+  assert.equal(results.reduce((a, b) => a + b, 0), schedules.length - 1);
+  assert.equal(owned.get(user.id)?.size, 27);
   assert.equal(await restoreCompletedPhaseCards(user.id), 0);
   assert.equal(await restoreCompletedPhaseCards("unfinished"), 0);
   assert.equal(await restoreCompletedPhaseCards("no-progress"), 0);
@@ -93,7 +93,7 @@ async function main() {
   owned.set(user.id, new Set());
   db.knowledgeCard = { findMany: async () => [] }; db.achievement = { findMany: async () => [] };
   evaluations = 0;
-  await getCollectionByUser(user); assert.equal(owned.get(user.id)?.size, 21); assert.equal(evaluations, 1);
+  await getCollectionByUser(user); assert.equal(owned.get(user.id)?.size, 27); assert.equal(evaluations, 1);
   await getCollectionByUser(user); assert.equal(evaluations, 1);
   // 新規登録にランダム番号は指定せず、互換列のDB既定値だけを使う。
   db.user = { upsert: async ({ create }: { create: Record<string, unknown> }) => {
@@ -101,6 +101,6 @@ async function main() {
     return { id: "new", ...create, experience: 0, knowledgeCardTableNumber: 1, hexadResponse: null };
   } };
   await ensureUserService({ firebaseUid: "fixture" });
-  console.log("PASS: all 15 legacy numbers and numberless users receive the same 21 cards; legacy rows ignored; concurrent/repeat rescue fills only missing cards; collection triggers rescue/evaluation; phase/evidence unchanged; registration no longer random.");
+  console.log("PASS: all 15 legacy numbers and numberless users receive the same 27 cards; legacy rows ignored; concurrent/repeat rescue fills only missing cards; collection triggers rescue/evaluation; phase/evidence unchanged; registration no longer random.");
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

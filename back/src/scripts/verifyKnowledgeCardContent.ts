@@ -12,9 +12,11 @@ const groups = [
   ["binary-search-v1", "binary-search", ["halving-range", "compare-middle", "logarithmic-time"]],
   ["depth-first-search-v1", "dfs", ["topological-sort", "list-stack", "backtracking"]],
   ["greedy-coins-v1", "greedy-coins", ["greedy-choice", "remaining", "not-always-optimal"]],
+  ["dijkstra-v1", "dijkstra", ["weighted-graph","relaxation","priority-queue"]],
+  ["astar-v1", "astar", ["heuristic","admissibility","consistency"]],
 ] as const;
-assert.equal(knowledgeCardSeed.length, 21);
-assert.equal(new Set(knowledgeCardSeed.map(card => card.title)).size, 21, "カードのタイトルが重複している");
+assert.equal(knowledgeCardSeed.length, 27);
+assert.equal(new Set(knowledgeCardSeed.map(card => card.title)).size, 27, "カードのタイトルが重複している");
 const rarity = [KnowledgeCardRarity.RARE, KnowledgeCardRarity.COMMON, KnowledgeCardRarity.EPIC];
 const phases = ["execution", "code-check", "implementation"];
 for (const [groupIndex, [course, prefix, suffixes]] of groups.entries()) {
@@ -48,4 +50,4 @@ assert.equal(title("dfs-list-stack"), "リストで作るスタック");
 assert.equal(title("dfs-backtracking"), "枝刈り");
 assert.equal(title("maze-digging-backtracking"), "バックトラッキング");
 assert.equal(title("maze-digging-stack"), "再帰呼び出し");
-console.log(`PASS: 知識カード21枚の所持キー・取得位置・レアリティ保持、タイトル重複なし、作業状況と関連クエストIDの整合性（対応あり${knowledgeCardSeed.filter(card => card.relatedCreateQuestIds.length > 0).length}枚）。`);
+console.log(`PASS: 知識カード27枚の所持キー・取得位置・レアリティ保持、タイトル重複なし、作業状況と関連クエストIDの整合性（対応あり${knowledgeCardSeed.filter(card => card.relatedCreateQuestIds.length > 0).length}枚）。`);

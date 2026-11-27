@@ -2128,5 +2128,443 @@
         "questions": []
       }
     ]
+  },
+  {
+    "courseId": "course-algorithm-dijkstra-v1",
+    "kind": "dijkstra",
+    "title": "ダイクストラ法",
+    "phases": [
+      {
+        "id": "dijkstra-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "dijkstra-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "dijkstra-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "dijkstra-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "dijkstra-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "dijkstra-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "dijkstra-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "dijkstra:priority",
+        "label": "最小コストの候補選択",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dijkstra-check",
+            "assessmentId": "dijkstra-check",
+            "questionId": "next-first",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "次に選ぶ場所をタップしてください。"
+          },
+          {
+            "phaseKey": "dijkstra-check",
+            "assessmentId": "dijkstra-check",
+            "questionId": "next-second",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "隣を調べ終えたあと、次に選ぶ場所はどれですか？"
+          },
+          {
+            "phaseKey": "dijkstra-code-check",
+            "assessmentId": "dijkstra-code-check",
+            "questionId": "select-priority",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "最小の優先値を持つ候補を選ぶコードを補ってください。"
+          },
+          {
+            "phaseKey": "dijkstra-consolidation",
+            "assessmentId": "dijkstra-consolidation",
+            "questionId": "nonnegative",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "ダイクストラ法で最短を保証するために必要な辺コストの条件は？"
+          }
+        ]
+      },
+      {
+        "conceptId": "dijkstra:relaxation",
+        "label": "距離の更新",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dijkstra-check",
+            "assessmentId": "dijkstra-check",
+            "questionId": "update-first",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "CからEへ進むときに記録するコストはいくつですか？"
+          },
+          {
+            "phaseKey": "dijkstra-check",
+            "assessmentId": "dijkstra-check",
+            "questionId": "update-second",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "BからEへ進むとき、Eのコストはいくつに更新されますか？"
+          },
+          {
+            "phaseKey": "dijkstra-code-check",
+            "assessmentId": "dijkstra-code-check",
+            "questionId": "relax-condition",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "新しいコストが小さい場合だけ更新する条件を選んでください。"
+          },
+          {
+            "phaseKey": "dijkstra-code-check",
+            "assessmentId": "dijkstra-code-check",
+            "questionId": "update-g",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "新しい移動コストを記録するコードを選んでください。"
+          },
+          {
+            "phaseKey": "dijkstra-consolidation",
+            "assessmentId": "dijkstra-consolidation",
+            "questionId": "transfer-cost",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "この別のグラフでSからTまでの最小コストはいくつですか？"
+          },
+          {
+            "phaseKey": "dijkstra-consolidation",
+            "assessmentId": "dijkstra-consolidation",
+            "questionId": "transfer-update",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "Yを経由するとXへのコスト8は何に更新されますか？"
+          }
+        ]
+      },
+      {
+        "conceptId": "dijkstra:path",
+        "label": "経路の復元と終了条件",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dijkstra-code-check",
+            "assessmentId": "dijkstra-code-check",
+            "questionId": "parent",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "直前に通った場所を記録するコードを選んでください。"
+          },
+          {
+            "phaseKey": "dijkstra-code-check",
+            "assessmentId": "dijkstra-code-check",
+            "questionId": "goal",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "ゴールを選んだときに探索を終える条件を選んでください。"
+          },
+          {
+            "phaseKey": "dijkstra-consolidation",
+            "assessmentId": "dijkstra-consolidation",
+            "questionId": "unreachable",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "ゴールを選べないまま候補が空になったら、どう判断しますか？"
+          }
+        ]
+      },
+      {
+        "conceptId": "dijkstra:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "dijkstra-consolidation",
+            "assessmentId": "dijkstra-consolidation",
+            "questionId": "code-order",
+            "tags": [
+              "flow"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "候補の選択から隣の更新まで、コードを正しい順番に並べてください。"
+          }
+        ]
+      },
+      {
+        "conceptId": "dijkstra:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "dijkstra-implementation",
+        "questions": []
+      }
+    ]
+  },
+  {
+    "courseId": "course-algorithm-astar-v1",
+    "kind": "astar",
+    "title": "A*探索",
+    "phases": [
+      {
+        "id": "astar-motivation",
+        "phase": 1,
+        "formalName": "導入"
+      },
+      {
+        "id": "astar-execution",
+        "phase": 2,
+        "formalName": "動きの説明"
+      },
+      {
+        "id": "astar-check",
+        "phase": 3,
+        "formalName": "動きの確認問題"
+      },
+      {
+        "id": "astar-code-mapping",
+        "phase": 4,
+        "formalName": "動きとコードの対応"
+      },
+      {
+        "id": "astar-code-check",
+        "phase": 5,
+        "formalName": "コードの確認問題"
+      },
+      {
+        "id": "astar-consolidation",
+        "phase": 6,
+        "formalName": "応用問題"
+      },
+      {
+        "id": "astar-implementation",
+        "phase": 7,
+        "formalName": "自分で実装"
+      }
+    ],
+    "concepts": [
+      {
+        "conceptId": "astar:priority",
+        "label": "推定コストと優先値",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "astar-check",
+            "assessmentId": "astar-check",
+            "questionId": "next-first",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "次に選ぶ場所をタップしてください。"
+          },
+          {
+            "phaseKey": "astar-check",
+            "assessmentId": "astar-check",
+            "questionId": "update-first",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "BからDへ進むときのg+hはいくつになりますか？"
+          },
+          {
+            "phaseKey": "astar-check",
+            "assessmentId": "astar-check",
+            "questionId": "next-second",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "隣を調べ終えたあと、次に選ぶ場所はどれですか？"
+          },
+          {
+            "phaseKey": "astar-code-check",
+            "assessmentId": "astar-code-check",
+            "questionId": "select-priority",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "最小の優先値を持つ候補を選ぶコードを補ってください。"
+          },
+          {
+            "phaseKey": "astar-consolidation",
+            "assessmentId": "astar-consolidation",
+            "questionId": "zero-heuristic",
+            "tags": [
+              "priority"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "すべてのhが0なら、候補の選び方はどの方法と同じですか？"
+          }
+        ]
+      },
+      {
+        "conceptId": "astar:relaxation",
+        "label": "距離の更新",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "astar-check",
+            "assessmentId": "astar-check",
+            "questionId": "update-second",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "動きの確認問題",
+            "questionLabel": "DからFへ進むときに記録する移動コストは？"
+          },
+          {
+            "phaseKey": "astar-code-check",
+            "assessmentId": "astar-code-check",
+            "questionId": "relax-condition",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "新しいコストが小さい場合だけ更新する条件を選んでください。"
+          },
+          {
+            "phaseKey": "astar-code-check",
+            "assessmentId": "astar-code-check",
+            "questionId": "update-g",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "新しい移動コストを記録するコードを選んでください。"
+          },
+          {
+            "phaseKey": "astar-consolidation",
+            "assessmentId": "astar-consolidation",
+            "questionId": "transfer-cost",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "この別のグラフでSからTまでの最小コストはいくつですか？"
+          },
+          {
+            "phaseKey": "astar-consolidation",
+            "assessmentId": "astar-consolidation",
+            "questionId": "transfer-update",
+            "tags": [
+              "relaxation"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "Yを経由するとXへのコスト8は何に更新されますか？"
+          }
+        ]
+      },
+      {
+        "conceptId": "astar:path",
+        "label": "経路の復元と終了条件",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "astar-code-check",
+            "assessmentId": "astar-code-check",
+            "questionId": "parent",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "直前に通った場所を記録するコードを選んでください。"
+          },
+          {
+            "phaseKey": "astar-code-check",
+            "assessmentId": "astar-code-check",
+            "questionId": "goal",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "コードの確認問題",
+            "questionLabel": "ゴールを選んだときに探索を終える条件を選んでください。"
+          },
+          {
+            "phaseKey": "astar-consolidation",
+            "assessmentId": "astar-consolidation",
+            "questionId": "unreachable",
+            "tags": [
+              "path"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "ゴールを選べないまま候補が空になったら、どう判断しますか？"
+          }
+        ]
+      },
+      {
+        "conceptId": "astar:flow",
+        "label": "コード全体の流れ",
+        "kind": "assessment",
+        "questions": [
+          {
+            "phaseKey": "astar-consolidation",
+            "assessmentId": "astar-consolidation",
+            "questionId": "code-order",
+            "tags": [
+              "flow"
+            ],
+            "stageLabel": "応用問題",
+            "questionLabel": "候補の選択から隣の更新まで、コードを正しい順番に並べてください。"
+          }
+        ]
+      },
+      {
+        "conceptId": "astar:implementation",
+        "label": "実装と動作確認",
+        "kind": "implementation",
+        "phaseKey": "astar-implementation",
+        "questions": []
+      }
+    ]
   }
 ]

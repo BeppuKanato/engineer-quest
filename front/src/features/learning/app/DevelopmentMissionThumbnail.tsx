@@ -172,6 +172,12 @@ export const FirstBrokenThumbnail: React.FC = () => {
   );
 };
 
+const WeightedRouteThumbnail = () => <Box component="svg" viewBox="0 0 460 210" sx={{width:"100%",height:"100%"}} role="img" aria-label="移動コストの違う地図と目的地">
+  <rect width="460" height="210" fill="#eef4fc"/>
+  {Array.from({length: 24}, (_, i) => <g key={i}><rect x={75+(i%8)*43} y={35+Math.floor(i/8)*45} width="39" height="41" rx="5" fill={i===0?"#2563eb":i===7?"#d97706":[2,3,4,5,11].includes(i)?"#fecaca":"#e2e8f0"}/><text x={94+(i%8)*43} y={62+Math.floor(i/8)*45} textAnchor="middle" fontWeight="bold" fill="#111827">{i===0?"S":i===7?"G":[2,3,4,5,11].includes(i)?"9":"1"}</text></g>)}
+  <SceneRobot x={15} y={151}/><QuestionBubble x={70} y={143} tail="M58 153 L44 163 L62 159 Z"/>
+</Box>;
+
 export const developmentMissionThumbnailFor = (missionId: string): React.ReactNode => {
   switch (missionId) {
     case "dungeon-escape":
@@ -180,6 +186,9 @@ export const developmentMissionThumbnailFor = (missionId: string): React.ReactNo
       return <IslandCountThumbnail />;
     case "first-broken-version":
       return <FirstBrokenThumbnail />;
+    case "minimum-energy-delivery":
+    case "rescue-fastest-route":
+      return <WeightedRouteThumbnail />;
     default:
       return null;
   }

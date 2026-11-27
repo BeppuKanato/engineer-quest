@@ -8,7 +8,7 @@ let questions=0,requires=0;const excluded=[];const forms=new Set(),units=new Set
 for(const unit of definitions)for(const concept of unit.concepts)for(const question of concept.questions){
  const material=resolveReviewMaterial({courseId:unit.courseId,...question});if (!material) {
   const source=reviewMaterials.find(m=>m.courseId===unit.courseId&&m.phaseKey===question.phaseKey&&m.questionId===question.questionId);
-  assert(source&&unsupportedReviewReason(source));excluded.push(`${unit.courseId}/${question.questionId}`);continue;
+  assert(source&&unsupportedReviewReason(source), `${unit.courseId}/${question.questionId}: missing or unsupported review material`);excluded.push(`${unit.courseId}/${question.questionId}`);continue;
  }
  units.add(unit.courseId);questions++;
  const before=JSON.stringify(material.question);requires+=Number(!!material.question.requires);
@@ -17,9 +17,20 @@ for(const unit of definitions)for(const concept of unit.concepts)for(const quest
  assert.equal(state.records.length,1);assert.equal(state.records[0].attempts.length,1);assert.equal(state.records[0].attempts[0].correct,true);
  assert.equal(before,JSON.stringify(material.question),'Source question must be unchanged');
  const kind=material.question.kind??'node';forms.add(kind);
- assert(renderToStaticMarkup(material.render({disabled:false,onAnswer(){throw new Error('SSR must not submit');}})).length>0);
+ const html=renderToStaticMarkup(material.render({disabled:false,onAnswer(){throw new Error('SSR must not submit');}}));
+ assert(html.length>0);
+ if (/course-algorithm-(dijkstra|astar)-v1/.test(unit.courseId)) {
+  if(kind==='node') assert(html.includes('role="button"')&&html.includes('を選ぶ'),question.questionId);
+  if(kind==='code-blank') assert(html.includes('＿＿＿'),question.questionId);
+  if(kind==='parsons') {
+   assert(!unsupportedReviewReason(material),question.questionId);
+   assert(!engine.sameAnswer({kind:'order',lineIds:material.question.lineIds},material.question.correctAnswer),'initial arrangement must not be solved');
+   assert(html.includes('data-parsons-fixed="true"'),question.questionId);
+  }
+  if(question.questionId.startsWith('transfer-')) assert(html.includes('別のグラフ'),question.questionId);
+ }
 }
-assert.equal(reviewMaterials.length,questions+excluded.length);assert.equal(questions,148);assert.deepEqual(excluded.sort(),["course-algorithm-breadth-first-search-v1/whole-code-order","course-algorithm-wall-extension-v1/whole-code-order"]);assert.equal(units.size,7);assert.deepEqual([...forms].sort(),['choice','code-blank','node','parsons']);assert(requires>0);
+assert.equal(reviewMaterials.length,questions+excluded.length);assert.equal(questions,176);assert.deepEqual(excluded.sort(),["course-algorithm-breadth-first-search-v1/whole-code-order","course-algorithm-wall-extension-v1/whole-code-order"]);assert.equal(units.size,9);assert.deepEqual([...forms].sort(),['choice','code-blank','node','parsons']);assert(requires>0);
 assert.equal(resolveReviewMaterial({courseId:'unknown',phaseKey:'none',assessmentId:'none',questionId:'none'}),null);
 // 新規フローの依存境界。既存の保存・観測コンポーネントを呼び込まない。
 const dir=path.join(root,'features/learning/daily-review');

@@ -59,6 +59,9 @@ import { GreedyCoinsConsolidationPreview } from "@/features/learning/greedy-coin
 import { GreedyCoinsImplementationPreview } from "@/features/learning/greedy-coins/implementation/GreedyCoinsImplementationPreview";
 import { GreedyCoinsUnitPreview } from "@/features/learning/greedy-coins/unit/GreedyCoinsUnitPreview";
 
+import { WeightedUnitPreview } from "@/features/learning/weighted-search/WeightedUnitPreview";
+import { WeightedExecutionPreview } from "@/features/learning/weighted-search/WeightedExecutionPreview";
+
 export const metadata: Metadata = {
   title: "学習プレイヤー プレビュー",
   robots: { index: false, follow: false },
@@ -66,6 +69,14 @@ export const metadata: Metadata = {
 
 export default async function LearningPreviewPage({ params }: { params: Promise<{ contentId: string }> }) {
   const { contentId } = await params;
+  if (contentId === "dijkstra-unit") return <WeightedUnitPreview mode="dijkstra" />;
+  if (contentId === "astar-unit") return <WeightedUnitPreview mode="astar" />;
+  if (contentId === "dijkstra-motivation") return <WeightedExecutionPreview mode="dijkstra" stage="motivation" />;
+  if (contentId === "astar-motivation") return <WeightedExecutionPreview mode="astar" stage="motivation" />;
+  if (contentId === "dijkstra-code-mapping") return <WeightedExecutionPreview mode="dijkstra" stage="mapping" />;
+  if (contentId === "astar-code-mapping") return <WeightedExecutionPreview mode="astar" stage="mapping" />;
+  if (contentId === "dijkstra-execution") return <WeightedExecutionPreview mode="dijkstra" />;
+  if (contentId === "astar-execution") return <WeightedExecutionPreview mode="astar" />;
   if (contentId === "bubble-sort-unit") return <BubbleSortUnitPreview />;
   if (contentId === "bubble-sort-motivation") return <BubbleSortMotivationPreview />;
   if (contentId === "bubble-sort-execution") return <BubbleSortExecutionPreview />;

@@ -50,7 +50,7 @@ async function main() {
   mock.timers.enable({ apis: ["Date"], now: now.getTime() });
   try {
     const home = await getHomeByUser(user);
-    assert.equal(home.overview.totalUnits, 7); assert.equal(home.overview.totalCards, 21); assert.equal(home.overview.collectedCards, 2);
+    assert.equal(home.overview.totalUnits, 9); assert.equal(home.overview.totalCards, 27); assert.equal(home.overview.collectedCards, 2);
     assert.equal(home.resume?.id, dfs.courseId, "開始日ではなく最近更新した単元に戻る");
     assert.equal(home.resume?.nextPhase, dfs.phases[2].formalName); assert.ok(home.resume?.resumeHref.endsWith(`?phase=${dfs.phases[2].id}`));
     assert.equal(home.resume?.nextStep, "次の問題を 確かめよう"); assert.equal(home.today.recommended?.id, dfs.courseId);
@@ -72,7 +72,7 @@ async function main() {
     assert.notEqual((await getHomeByUser(user)).today.recommended?.id, bfs.courseId);
     assert.equal(homeFeedbackStep({ selection: { nextStep: "旧形式の一歩" } }), "旧形式の一歩");
     assert.equal(homeFeedbackStep({ selection: { candidates: [{ nextStep: " " }] } }), null); assert.equal(homeFeedbackStep(null), null);
-    console.log("PASS: home integration read-only owner scopes, 7 units/21 cards, most recently updated phase resume, real evaluator progress, near cards, stored feedback, public recent questions, empty state, JST cross-month week and yesterday grace.");
+    console.log("PASS: home integration read-only owner scopes, 9 units/27 cards, most recently updated phase resume, real evaluator progress, near cards, stored feedback, public recent questions, empty state, JST cross-month week and yesterday grace.");
   } finally { mock.timers.reset(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -203,6 +203,212 @@ export const developmentMissions: DevMission[] = [
     relatedCardIds: ["knowledge-card-binary-search-halving-range", "knowledge-card-binary-search-logarithmic-time"],
     starterCode: "# ここを書く：版の状態を受け取り、最初に壊れた版の番号と、確認した版の数を出力するプログラム\n# 入力は2行で、1行目に版の数、2行目に状態が並んでいます\n",
   },
+  {
+    "id": "minimum-energy-delivery",
+    "title": "配送ロボットの省エネルギー経路",
+    "problem": "配送ロボットを目的地に送る。床によって消費エネルギーが異なるため、通るマス数ではなく消費エネルギーを最小にしたい。",
+    "successCondition": "最小の移動コストと、確定したマスの数を出力する",
+    "unlockUnitName": "ダイクストラ法",
+    "unlockCourseId": "course-algorithm-dijkstra-v1",
+    "statement": {
+      "inputFormat": "1行目にタテとヨコのマス数、続く行に地図を入力します。Sは出発、Gは目的地、#は壁、1〜9はそのマスに入るコストです。",
+      "outputFormat": "1行目に最小コスト（到達不能なら -1）、2行目に候補から確定した異なるマス数（出発点・ゴールを含む）を出力してください。",
+      "conditions": [
+        "上下左右に移動できます。SとGに入るコストは1、開始時のコストは0です。",
+        "ゴールを候補から選択した時点で探索を終えます。計測数は自己申告で、同じマスの二重計上はしません。"
+      ]
+    },
+    "inputVisual": {
+      "kind": "grid",
+      "firstLine": "1行目：タテとヨコ（2 4）",
+      "rows": [
+        "S99G",
+        "1111"
+      ],
+      "legend": [
+        {
+          "mark": "S",
+          "label": "出発",
+          "bg": "#2563eb",
+          "fg": "#fff"
+        },
+        {
+          "mark": "G",
+          "label": "目的地",
+          "bg": "#d97706",
+          "fg": "#fff"
+        },
+        {
+          "mark": "#",
+          "label": "壁",
+          "bg": "#64748b",
+          "fg": "#fff"
+        },
+        {
+          "mark": "1",
+          "label": "移動コスト1",
+          "bg": "#e2e8f0",
+          "fg": "#111827"
+        },
+        {
+          "mark": "9",
+          "label": "移動コスト9",
+          "bg": "#fee2e2",
+          "fg": "#991b1b"
+        }
+      ]
+    },
+    "outputExample": [
+      {
+        "value": "5",
+        "label": "最小移動コスト"
+      },
+      {
+        "value": "6",
+        "label": "確定したマス数の一例"
+      }
+    ],
+    "countLabel": "確定したマス数",
+    "scoring": {
+      "best": 11,
+      "plain": 15
+    },
+    "tests": [
+      {
+        "id": "dijkstra-1",
+        "label": "基本の地図",
+        "input": "2 4\nS99G\n1111",
+        "expectedAnswer": "5"
+      },
+      {
+        "id": "dijkstra-2",
+        "label": "到達不能",
+        "input": "2 3\nS#G\n###",
+        "expectedAnswer": "-1"
+      },
+      {
+        "id": "dijkstra-3",
+        "label": "スコア計測の地図",
+        "input": "3 5\nS999G\n11111\n11111",
+        "expectedAnswer": "6",
+        "scoring": true
+      }
+    ],
+    "hints": [
+      "マスに入るコストを足して、これまでの記録より小さければ更新します。",
+      "候補から累積コストが最小のマスを選びます。",
+      "ゴールに着いた時点でコストを確定します。"
+    ],
+    "relatedCardIds": [
+      "knowledge-card-dijkstra-weighted-graph",
+      "knowledge-card-dijkstra-relaxation",
+      "knowledge-card-dijkstra-priority-queue"
+    ],
+    "starterCode": "# 地図を読み取り、最小移動コストと確定したマス数を2行で出力しよう。\nrows, cols = map(int, input().split())\ngrid = [input() for _ in range(rows)]\n"
+  },
+  {
+    "id": "rescue-fastest-route",
+    "title": "救助ドローンの緊急ルート",
+    "problem": "救助ドローンを地図上の出発点から救助地点へ送る。移動コストを最小にしながら、調べる地点も減らしたい。",
+    "successCondition": "最小の移動コストと、確定したマスの数を出力する",
+    "unlockUnitName": "A*探索",
+    "unlockCourseId": "course-algorithm-astar-v1",
+    "statement": {
+      "inputFormat": "1行目にタテとヨコのマス数、続く行に地図を入力します。Sは出発、Gは目的地、#は壁、1〜9はそのマスに入るコストです。",
+      "outputFormat": "1行目に最小コスト（到達不能なら -1）、2行目に候補から確定した異なるマス数（出発点・ゴールを含む）を出力してください。",
+      "conditions": [
+        "上下左右に移動できます。SとGに入るコストは1、開始時のコストは0です。",
+        "ゴールを候補から選択した時点で探索を終えます。計測数は自己申告で、同じマスの二重計上はしません。"
+      ]
+    },
+    "inputVisual": {
+      "kind": "grid",
+      "firstLine": "1行目：タテとヨコ（2 4）",
+      "rows": [
+        "S11G",
+        "1111"
+      ],
+      "legend": [
+        {
+          "mark": "S",
+          "label": "出発",
+          "bg": "#2563eb",
+          "fg": "#fff"
+        },
+        {
+          "mark": "G",
+          "label": "目的地",
+          "bg": "#d97706",
+          "fg": "#fff"
+        },
+        {
+          "mark": "#",
+          "label": "壁",
+          "bg": "#64748b",
+          "fg": "#fff"
+        },
+        {
+          "mark": "1",
+          "label": "移動コスト1",
+          "bg": "#e2e8f0",
+          "fg": "#111827"
+        },
+        {
+          "mark": "9",
+          "label": "移動コスト9",
+          "bg": "#fee2e2",
+          "fg": "#991b1b"
+        }
+      ]
+    },
+    "outputExample": [
+      {
+        "value": "3",
+        "label": "最小移動コスト"
+      },
+      {
+        "value": "4",
+        "label": "確定したマス数の一例"
+      }
+    ],
+    "countLabel": "確定したマス数",
+    "scoring": {
+      "best": 7,
+      "plain": 21
+    },
+    "tests": [
+      {
+        "id": "astar-1",
+        "label": "基本の地図",
+        "input": "2 4\nS11G\n1111",
+        "expectedAnswer": "3"
+      },
+      {
+        "id": "astar-2",
+        "label": "到達不能",
+        "input": "2 3\nS#G\n###",
+        "expectedAnswer": "-1"
+      },
+      {
+        "id": "astar-3",
+        "label": "スコア計測の地図",
+        "input": "5 7\nS11111G\n1111111\n1111111\n1111111\n1111111",
+        "expectedAnswer": "6",
+        "scoring": true
+      }
+    ],
+    "hints": [
+      "今までのコストと、ゴールまでのマンハッタン距離を足した値を使えます。",
+      "移動コストはすべて1以上なのでマンハッタン距離は残りコストの下界です。",
+      "目的地は候補に入った時ではなく、最小優先値で選んだ時に確定します。"
+    ],
+    "relatedCardIds": [
+      "knowledge-card-astar-heuristic",
+      "knowledge-card-astar-admissibility",
+      "knowledge-card-astar-consistency"
+    ],
+    "starterCode": "# 地図を読み取り、最小移動コストと確定したマス数を2行で出力しよう。\nrows, cols = map(int, input().split())\ngrid = [input() for _ in range(rows)]\n"
+  },
 ];
 
 export const findDevelopmentMission = (id: string): DevMission | undefined =>
