@@ -3,7 +3,8 @@ import { Alert, Box, Button, Typography, Stack, TextField } from "@mui/material"
 import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { LearningUnitPreview, type LearningUnitDefinition, type LearningUnitPreviewProps, type UnitPhaseView } from "../unit/LearningUnitPreview";
 import { weightedMaterials } from "./content";
-import { WeightedCanvas, WeightedCode, WeightedExecutionPreview, WeightedMappingCanvas, weightedContents } from "./WeightedExecutionPreview";
+import { WeightedQuestionFigure } from "./WeightedQuestionFigure";
+import { WeightedCanvas, WeightedExecutionPreview, WeightedMappingCanvas, weightedContents } from "./WeightedExecutionPreview";
 import { activeQuestion, advanceAssessment, answerQuestion, assessmentComplete, assessmentEvidence, createAssessmentState, type AssessmentAnswer, type AssessmentContent, type ParsonsQuestion } from "../assessment/assessment";
 import { useAssessmentObservation } from "../instrumentation/useAssessmentObservation";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../assessment/AnswerFeedback";
@@ -19,12 +20,6 @@ import { playerTokens } from "../player/player.tokens";
 type PhaseProps=ComponentProps<UnitPhaseView>;
 type Stage="check"|"codeCheck"|"consolidation";
 const baseStyle={height:"100%",minHeight:0,overflow:"auto",p:2,color:playerTokens.text,display:"flex",flexDirection:"column",gap:1.5,alignItems:"center"} as const;
-function TransferFigure() {
-  return <svg viewBox="0 0 440 170" width="100%" style={{maxHeight:170}} role="img" aria-label="別のグラフ：S-X 8、S-Y 2、Y-X 2、X-T 3、Y-T 10">
-    {[[40,85,200,32,8],[40,85,200,138,2],[200,138,200,32,2],[200,32,400,85,3],[200,138,400,85,10]].map(([x1,y1,x2,y2,w],i)=><g key={i}><line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#64748b" strokeWidth="2"/><rect x={(x1+x2)/2-12} y={(y1+y2)/2-11} width="24" height="22" fill="white"/><text x={(x1+x2)/2} y={(y1+y2)/2+5} fontSize="14" textAnchor="middle">{w}</text></g>)}
-    {[["S",40,85],["X",200,32],["Y",200,138],["T",400,85]].map(([id,x,y])=><g key={id}><circle cx={x} cy={y} r="19" fill="#fff" stroke="#64748b" strokeWidth="2"/><text x={x} y={Number(y)+5} textAnchor="middle" fontWeight="bold">{id}</text></g>)}
-  </svg>;
-}
 function Assessment({mode,stage,active=true,onLearningEvent,onComplete,advancePending}:PhaseProps & {mode:WeightedSearchMode;stage:Stage}) {
   const raw=weightedMaterials[mode][stage],content:AssessmentContent=raw;
   const [session,setSession]=useState(()=>createAssessmentState(content));
@@ -37,17 +32,12 @@ function Assessment({mode,stage,active=true,onLearningEvent,onComplete,advancePe
   useAssessmentFeedback(content,session,active);
   useEffect(()=>{if(complete&&!reported.current&&active){reported.current=true;onComplete({firstAttemptCorrect:session.records.filter(r=>r.firstCorrect).length,totalQuestions:content.questions.length,assessmentEvidence:assessmentEvidence(content,session)});}if(!complete)reported.current=false;},[complete,active,content,session,onComplete]);
   const source=weightedContents[mode][stage==="check"?"execution":"mapping"];
-  const scene=source.steps.find(s=>s.id===question?.stepId)?.canvas;
   const answer=(answer:AssessmentAnswer)=>{if(question&&active&&!advancePending&&!record?.solved)setSession(s=>answerQuestion(content,s,question.id,answer));};
   if(!question)return <Box sx={baseStyle}><Typography variant="h6">確認問題が終わりました</Typography><Typography>初回正解：{session.records.filter(r=>r.firstCorrect).length} / {content.questions.length}</Typography><Button onClick={()=>setSession(createAssessmentState(content))} disabled={advancePending}>もう一度解く</Button></Box>;
-  const qKind="kind" in question?question.kind:"node";
   return <Box sx={baseStyle}>
     <Typography color="text.secondary">{(session.position??0)+1} / {content.questions.length}</Typography>
     <Typography component="h2" fontSize={20} fontWeight={700} textAlign="center">{question.prompt}</Typography>
-    {stage==="check"&&scene&&<Box sx={{width:"100%",height:300,flexShrink:0}}><WeightedCanvas canvas={scene} onNode={qKind==="node"&&"nodeIds" in question&&!record?.solved?id=>answer({kind:"node",nodeId:id}):undefined} selectable={"nodeIds" in question?question.nodeIds:[]}/></Box>}
-    {stage==="consolidation"&&question.id.startsWith("transfer-")&&<Box sx={{width:"100%",maxWidth:540}}><TransferFigure/></Box>}
-    {qKind==="code-blank"&&"lineId" in question&&<Box sx={{width:"100%",maxWidth:760}}><WeightedCode mode={mode} focused={[question.lineId]} blank={{lineId:question.lineId,...question.blank}}/></Box>}
-    {qKind==="parsons"&&"kind" in question&&question.kind==="parsons"&&<Box sx={{width:"100%",maxWidth:780}}><ParsonsBoard key={question.id} question={{...question,lineIds:question.correctAnswer.lineIds.flatMap((id,i,ids)=>{if(i===0)return ids.slice(0,3).reverse();if(i<3)return [];if(i===7)return ids.slice(7).reverse();if(i>7)return [];return [id];})}} code={weightedMaterials[mode].code} disabled={!!record?.solved||advancePending} onAnswer={answer}/></Box>}
+    <WeightedQuestionFigure mode={mode} stage={stage} question={question} disabled={!!record?.solved||advancePending} onAnswer={answer}/>
     {"choices" in question&&<Stack direction="row" flexWrap="wrap" justifyContent="center" gap={1}>{question.choices.map(c=><Button key={c.id} variant="outlined" disabled={!!record?.solved||advancePending} onClick={()=>answer({kind:"choice",choiceId:c.id})}>{c.text}</Button>)}</Stack>}
     {"nodeIds" in question&&<Stack direction="row" flexWrap="wrap" justifyContent="center" gap={1}>{question.nodeIds.map(id=><Button key={id} variant="outlined" disabled={!!record?.solved||advancePending} onClick={()=>answer({kind:"node",nodeId:id})}>{id}</Button>)}</Stack>}
     <AnswerFeedbackNotice assessmentId={content.id}/>

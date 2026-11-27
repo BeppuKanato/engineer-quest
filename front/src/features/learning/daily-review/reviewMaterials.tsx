@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { weightedMaterials } from "../weighted-search/content";
+import { WeightedQuestionFigure, weightedParsonsQuestion, type WeightedAssessmentStage } from "../weighted-search/WeightedQuestionFigure";
+import type { WeightedSearchMode } from "../graphs/weightedSearch";
 import type { DailyReview } from "@/api/dailyReview.api";
 import type { AssessmentAnswer, AssessmentContent } from "../assessment/assessment";
 import { getLearningStep } from "../review/reviewContent";
@@ -48,6 +51,15 @@ export type ReviewMaterial = {
 function entries<T extends AssessmentContent>(courseId: string, content: T, render: (question: T["questions"][number], input: Input) => ReactNode): ReviewMaterial[] {
   return content.questions.map(question => ({ courseId, phaseKey: content.id, assessmentId: content.id, questionId: question.id, question, render: input => render(question, input) }));
 }
+function weightedEntries(mode: WeightedSearchMode): ReviewMaterial[] {
+  const stages: readonly WeightedAssessmentStage[] = ["check", "codeCheck", "consolidation"];
+  return stages.flatMap(stage => {
+    const content: AssessmentContent = weightedMaterials[mode][stage];
+    return entries("course-algorithm-" + mode + "-v1", content, (question, input) => <WeightedQuestionFigure mode={mode} stage={stage} question={question} {...input}/>)
+      .map(material => "kind" in material.question && material.question.kind === "parsons"
+        ? { ...material, question: weightedParsonsQuestion(material.question) } : material);
+  });
+}
 // 教材・図は元の定義を参照。単元ごとの画面や保存フックは取り込まない。
 export const reviewMaterials: ReviewMaterial[] = [
   ...entries("course-algorithm-breadth-first-search-v1", bfsCheckContent, (q, input) => <BfsCheckCanvas canvas={getLearningStep(bfsExecutionContent, q.stepId).canvas} questionId={"nodeIds" in q ? q.id : undefined} nodeIds={"nodeIds" in q ? q.nodeIds : undefined} allowNone={"allowNone" in q && q.allowNone} {...input} />),
@@ -85,6 +97,8 @@ export const reviewMaterials: ReviewMaterial[] = [
   ...entries("course-algorithm-greedy-coins-v1", greedyCoinsConsolidationContent, (q, input) => "kind" in q && q.kind === "parsons"
     ? <ParsonsBoard question={q} code={greedyCoinsConsolidationContent.code} {...input} scrollable instruction={q.instruction} />
     : <GreedyCoinsCheckCanvas canvas={q.scene} questionId={"nodeIds" in q ? q.id : undefined} cellIds={"nodeIds" in q ? q.nodeIds : undefined} {...input} />),
+  ...weightedEntries("dijkstra"),
+  ...weightedEntries("astar"),
  ];
 /** 固定行をまたいでしか正解にできない初期配置は、既存部品の制約上出題しない。 */
 export function unsupportedReviewReason(material: ReviewMaterial): string | null {

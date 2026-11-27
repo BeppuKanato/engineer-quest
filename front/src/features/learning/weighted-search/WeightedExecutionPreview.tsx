@@ -20,7 +20,7 @@ const point = (id: WeightedNodeId) => {
   if (!node) throw new Error("Unknown node");
   return { x: 70 + node.x * 83, y: 65 + node.y * 165 };
 };
-export function WeightedCanvas({ canvas, onNode, selectable = [] }: { canvas: WeightedCanvasState; onNode?: (id: WeightedNodeId) => void; selectable?: readonly string[] }) {
+export function WeightedCanvas({ canvas, onNode, selectable = [], questionMode = false }: { canvas: WeightedCanvasState; onNode?: (id: WeightedNodeId) => void; selectable?: readonly string[]; questionMode?: boolean }) {
   const { state, data: { mode } } = canvas;
   const intro = canvas.data.introStage;
   const path = canvas.data.introPath?.length ? canvas.data.introPath : state.operation === "finish" ? reconstructWeightedPath(state) : [];
@@ -42,8 +42,8 @@ export function WeightedCanvas({ canvas, onNode, selectable = [] }: { canvas: We
         })}
       </Box>
       {(!intro || intro >= 4) && <Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: 1 }}>
-        <Box component="span" sx={{ fontWeight: 600 }}>{mode === "astar" ? "候補（g+hの小さい順）" : "候補（gの小さい順）"}</Box>
-        {state.frontier.length ? state.frontier.map(id => <Box key={id} component="span" sx={{ border: "1px solid", borderColor: playerTokens.states.queued.stroke, bgcolor: playerTokens.states.queued.fill, px: 1.5, py: 0.5, borderRadius: 1 }}>{id}: {priority(mode,state,id)}</Box>) : <Box component="span">なし</Box>}
+        <Box component="span" sx={{ fontWeight: 600 }}>{questionMode ? "候補" : mode === "astar" ? "候補（g+hの小さい順）" : "候補（gの小さい順）"}</Box>
+        {state.frontier.length ? (questionMode ? [...state.frontier].sort() : state.frontier).map(id => <Box key={id} component="span" sx={{ border: "1px solid", borderColor: playerTokens.states.queued.stroke, bgcolor: playerTokens.states.queued.fill, px: 1.5, py: 0.5, borderRadius: 1 }}>{id}: {priority(mode,state,id)}</Box>) : <Box component="span">なし</Box>}
       </Box>}
       {!intro && <Box sx={{ fontSize: 14, textAlign: "center" }}>選択順：{state.selected.join(" → ") || "—"}</Box>}
       {!intro && <Box sx={{ fontSize: 14, textAlign: "center" }}>前の場所：{weightedNodes.filter(({id}) => state.predecessors[id]).map(({id}) => `${id}←${state.predecessors[id]}`).join("　") || "—"}</Box>}
