@@ -2,15 +2,13 @@
 
 import { Paper, Stack, Typography } from "@mui/material";
 
-import { useUserMascot } from "@/app/component/mascot";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { RobotFigure } from "@/app/component/robotFigure";
 
 export const MascotHint = ({ text }: { text: string }) => {
-  const mascotId = useUserMascot();
 
   return (
     <Stack direction="row" alignItems="center" spacing={1.5}>
-      <MascotFigure mascotId={mascotId} state="cheer" alt="マスコット" size="M" grounding="disc" />
+      <RobotFigure state="cheer" alt="マスコット" size="M" grounding="disc" />
       <Paper
         elevation={0}
         sx={{

@@ -18,7 +18,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { HomeResponse } from "@/api/home.api";
-import { MascotBust } from "@/app/component/mascotBust";
+import { RobotBust } from "@/app/component/robotBust";
 import { knowledgeCardTones } from "@/components/rewards/rarity.tokens";
 
 const TEXT = "#111827";
@@ -33,9 +33,9 @@ const S1 = { borderRadius: "18px", border: `1px solid ${HAIRLINE}`, boxShadow: "
 const achievementTitle = (title: string) => title.replace(/\s*Lv\.?\s*(\d+)/gi, " 第$1段階").replace(/\s+/g, " ").trim();
 
 /** 前回のフィードバックの「次の一歩」の引用。マスコットのバストアップと並べる。 */
-const FeedbackQuote: React.FC<{ mascotId: string; nextStep: string }> = ({ mascotId, nextStep }) => (
+const FeedbackQuote: React.FC<{ nextStep: string }> = ({ nextStep }) => (
   <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
-    <MascotBust mascotId={mascotId} state="normal" width={148} height={102} imgSize={182} />
+    <RobotBust state="normal" width={148} height={102} />
     <Box sx={{ flex: 1, minWidth: 0, border: `1px solid ${HAIRLINE}`, borderRadius: "14px", px: 2, py: 1.5, bgcolor: "#fbfcfe", position: "relative", "&::before": { content: "\"\"", position: "absolute", left: -7, bottom: 26, width: 12, height: 12, bgcolor: "#fbfcfe", borderLeft: `1px solid ${HAIRLINE}`, borderBottom: `1px solid ${HAIRLINE}`, transform: "rotate(45deg)" } }}>
       <Typography sx={{ fontSize: 14, fontWeight: 900, color: PRIMARY }}>次の一歩</Typography>
       <Typography sx={{ fontSize: 16, fontWeight: 700, lineHeight: 1.7 }}>{nextStep}</Typography>
@@ -64,11 +64,11 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
               <Typography component="h2" sx={{ fontSize: { xs: 24, md: 28 }, fontWeight: 900, lineHeight: 1.3, mt: 0.5 }}>{current.title}</Typography>
               {sameUnit && resume?.nextStep ? (
                 <Box sx={{ mt: 2 }}>
-                  <FeedbackQuote mascotId={data.user.selectedMascotId} nextStep={resume.nextStep} />
+                  <FeedbackQuote nextStep={resume.nextStep} />
                 </Box>
               ) : (
                 <Box sx={{ display: "flex", alignItems: "flex-end", mt: 1 }}>
-                  <MascotBust mascotId={data.user.selectedMascotId} state="point" width={190} height={140} imgSize={235} />
+                  <RobotBust state="point" width={190} height={140} />
                 </Box>
               )}
               <Box sx={{ flex: 1 }} />
@@ -87,7 +87,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
         <Paper component="section" data-home-section="resume" aria-label="前回の続き" elevation={0} sx={{ ...S1, p: { xs: 2.5, md: 3.5 } }}>
           <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em" }}>前回の続き</Typography>
           <Typography component="h2" sx={{ fontSize: 22, fontWeight: 900, lineHeight: 1.35, mt: 0.5 }}>{resume.title}</Typography>
-          {resume.nextStep && <Box sx={{ mt: 2 }}><FeedbackQuote mascotId={data.user.selectedMascotId} nextStep={resume.nextStep} /></Box>}
+          {resume.nextStep && <Box sx={{ mt: 2 }}><FeedbackQuote nextStep={resume.nextStep} /></Box>}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", mt: 2 }}>
             {resume.nextPhase && <Typography sx={{ fontSize: 16 }}>次は『{resume.nextPhase}』から</Typography>}
             <Button component={Link} href={resume.resumeHref} variant="outlined" endIcon={<ArrowRightAltIcon />} sx={{ fontSize: 16, fontWeight: 900, px: 2.5, py: 1, borderRadius: "12px", color: PRIMARY, borderColor: PRIMARY }}>

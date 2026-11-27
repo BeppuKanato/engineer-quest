@@ -5,15 +5,15 @@ import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import { Box, CircularProgress, Paper, Typography, keyframes } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { useUserMascot, type MascotState } from "./mascot";
-import { MascotFigure } from "./mascotFigure";
+import type { RobotState } from "./robotFigure";
+import { RobotFigure } from "./robotFigure";
 
 type BlockingProcessOverlayProps = {
   open: boolean;
   title: string;
   description?: string;
   delayMs?: number;
-  mascotState?: Exclude<MascotState, "face" | "surprise" | "celebrate">;
+  mascotState?: Exclude<RobotState, "face" | "surprise" | "celebrate">;
 };
 
 const sparkle = keyframes`
@@ -29,7 +29,6 @@ export const BlockingProcessOverlay = ({
   mascotState = "cheer",
 }: BlockingProcessOverlayProps) => {
   const [visible, setVisible] = useState(false);
-  const mascotId = useUserMascot();
 
   useEffect(() => {
     if (!open) {
@@ -76,7 +75,7 @@ export const BlockingProcessOverlay = ({
               placeItems: "center",
             }}
           >
-            <MascotFigure mascotId={mascotId} state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="bounce" />
+            <RobotFigure state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="bounce" />
             <AutoAwesomeRoundedIcon
               sx={{
                 position: "absolute",

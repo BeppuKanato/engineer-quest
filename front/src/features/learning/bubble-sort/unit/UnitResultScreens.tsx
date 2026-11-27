@@ -14,7 +14,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { BubbleSortMissionThumbnail, BubbleSortSolvedAnimatedThumbnail } from "@/features/learning/app/MissionThumbnail";
 
 import { PhaseNextButton } from "../../app/PhaseNextButton";
@@ -153,7 +153,7 @@ function ResultMascotReaction({ tier, reacted, remainingCount }: {
       onAnimationComplete={() => { if (reacted && !jumped) setJumped(true); }}>
       <motion.div key={state} initial={reduce ? false : { opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-        <MascotFigure mascotId="red-panda" alt="相棒" size="L" motion="none" grounding="shadow" state={state} />
+        <RobotFigure alt="相棒" size="L" motion="none" grounding="shadow" state={state} />
       </motion.div>
     </motion.div>
     {reacted && <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -368,7 +368,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
           1.3倍に拡大する。 */}
       <Box sx={{ display: "flex", alignItems: "center", width: "100%", maxWidth: 880 }}>
         <Box sx={{ position: "relative", zIndex: 1, flexShrink: 0 }}>
-          <MascotFigure mascotId="red-panda" alt="相棒" size="XL" state="celebrate" motion="float" grounding="shadow" sx={{ width: { xs: 240, md: 300 }, height: { xs: 240, md: 300 } }} />
+          <RobotFigure alt="相棒" size="XL" state="celebrate" motion="float" grounding="shadow" sx={{ width: { xs: 240, md: 300 }, height: { xs: 240, md: 300 } }} />
         </Box>
         <Box sx={{ ml: -3.5, bgcolor: "#fff", border: "2px solid #f3d9a4", borderRadius: "18px", px: 2.5, py: 1.75, boxShadow: "0 6px 18px rgba(217, 119, 6, 0.14)" }}>
           <Typography sx={{ fontSize: 20, fontWeight: 700 }}>動きを理解するところから、<Box component="span" sx={{ fontWeight: 900, color: "#b45309" }}>自分でコードを書ける</Box>ところまで到達したね！</Typography>
@@ -463,7 +463,7 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
         得られるものを一文で伝え、白ピルのボタンで受ける。画面の出口はこれ一つ。 */}
     {onShowFeedback && <Box sx={{ width: "100%", maxWidth: 1060, borderRadius: 2, p: 2.5, mb: 2, display: "flex", alignItems: "center", gap: 2,
       background: "linear-gradient(90deg, #2563eb, #1d4ed8)", color: "#fff" }}>
-      <MascotFigure mascotId="red-panda" alt="相棒" size="L" state="point" motion="none" grounding="shadow" sx={{ width: 110, height: 110 }} />
+      <RobotFigure alt="相棒" size="L" state="point" motion="none" grounding="shadow" sx={{ width: 110, height: 110 }} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography component="p" sx={{ fontSize: 20, fontWeight: 900 }}>今回の成長を振り返ろう！</Typography>
         <Typography component="p" sx={{ fontSize: 14, mt: 0.5 }}>できるようになったことや、次に挑戦するとよいことを確認しよう。</Typography>

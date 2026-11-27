@@ -23,6 +23,7 @@ import { runBinarySearchFreeCode, type FreeExecutionResult } from "./freeExecuti
 import { binarySearchEditorText as text } from "./editor.content";
 import { editorTokens as colors } from "./editor.tokens";
 import { ImplementationHintContent } from "./ImplementationHints";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { ProgramResults } from "./ProgramResults";
 import { binarySearchExampleProgram, binarySearchImplementationContent as content } from "./implementation.content";
 import { IndexFigure } from "./IndexFigure";
@@ -436,7 +437,7 @@ export function BinarySearchImplementationPreview({ embedded = false, onComplete
       </Box>}
       {complete && !celebrationDismissed && <Box data-completion-celebration sx={{ position: "absolute", inset: 0, zIndex: 8, display: "grid", placeItems: "center", bgcolor: "rgba(238, 244, 252, 0.55)", p: 2 }}>
         <Box sx={{ bgcolor: "#fff", border: "2px solid #2563eb", borderRadius: 4, px: 4, py: 3.5, maxWidth: 760, width: "100%", textAlign: "center", boxShadow: 6 }}>
-          <Box component="img" src="/images/mascots/red-panda/celebrate.png" alt="" sx={{ width: 120, height: 120, objectFit: "contain", mx: "auto", display: "block" }} />
+          <Box sx={{ display: "flex", justifyContent: "center" }}><RobotFigure alt="" state="celebrate" size="L" grounding="shadow" sx={{ width: 103, height: 110 }} /></Box>
           <Typography component="p" sx={{ fontSize: 24, fontWeight: 900, mt: 0.5 }}>{content.result.celebrationHeading}</Typography>
           <Box sx={{ maxWidth: 520, mx: "auto", mt: 1.5, borderRadius: 2, overflow: "hidden" }}>
             <BinarySearchFoundCelebration />

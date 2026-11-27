@@ -54,7 +54,7 @@ import { ActionButton } from "@/app/component/actionButton";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { BlockingProcessOverlay } from "@/app/component/blockingProcessOverlay";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { useSoundEffect } from "@/app/component/soundFeedback";
 import { fetchClientQuery, peekClientQueryData, queryTags, setClientQueryData } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
@@ -452,7 +452,7 @@ export default function QuestPostDetailPage() {
 
                   {post.comments.length === 0 ? (
                     <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                      <MascotFigure mascotId="red-panda" alt="マスコット" size="S" grounding="frame" presentation="circle" motion="none" />
+                      <RobotFigure alt="マスコット" size="S" grounding="frame" presentation="circle" motion="none" />
                       <Typography sx={{ fontSize: 16 }}>
                         {resolvable
                           ? "まだ回答がありません。分かったことがあれば、最初の回答を書いてみましょう。"

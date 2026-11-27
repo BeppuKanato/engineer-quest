@@ -3,7 +3,7 @@
 // 発展ミッション挑戦画面の下書き（2026-11-25、Issue #507）。
 // 土台はフェーズ7の自由実装の枠（プログラム形式）を流用し、スコアパネルと
 // 関連知識カードの参照要素（Issue #510）を足したもの。
-import { MascotBust } from "@/app/component/mascotBust";
+import { RobotBust } from "@/app/component/robotBust";
 import { developmentMissionThumbnailFor } from "@/features/learning/app/DevelopmentMissionThumbnail";
 import { KnowledgeCardFace } from "@/features/learning/app/KnowledgeCardFace";
 import { MissionExampleTrace, MissionInputVisual } from "@/features/learning/app/MissionInputVisual";
@@ -37,7 +37,7 @@ const missionCourseIds: Record<string, string> = {
   "first-broken-version": "course-algorithm-binary-search-v1",
 };
 
-/** マスコットのバストアップは共通部品（@/app/component/mascotBust）を使う。 */
+/** アルドのバストアップは共通部品（@/app/component/robotBust）を使う。 */
 
 /** ランクの進捗バー：C→B→A→S の物差しの上に、現在のベストの位置を示す。 */
 const RankLadder: React.FC<{ points: number | null }> = ({ points }) => (
@@ -237,7 +237,7 @@ export function MissionChallengeDraft({ missionId, initialBest, allCards, ownedC
             </Typography>
             <Box sx={{ position: "absolute", right: -7, bottom: 18, width: 14, height: 14, bgcolor: "#eef4fc", borderRight: "1.5px solid #bfdbfe", borderTop: "1.5px solid #bfdbfe", transform: "rotate(45deg)" }} />
           </Box>
-          <MascotBust state={sessionBest ? "cheer" : "point"} width={148} height={102} imgSize={182} />
+          <RobotBust state={sessionBest ? "cheer" : "point"} width={148} height={102} />
         </Box>
       </Box>
 
@@ -306,7 +306,7 @@ export function MissionChallengeDraft({ missionId, initialBest, allCards, ownedC
         {result && (
           <Box>
             <Box sx={{ bgcolor: "#fffbeb", px: 3, pt: 2, pb: 2.5, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-              <MascotBust state="celebrate" width={230} height={158} imgSize={290} />
+              <RobotBust state="celebrate" width={230} height={158} />
               <Typography component="p" sx={{ fontSize: 24, fontWeight: 900, mt: 0.5 }}>{isRecordUpdate ? "自己ベスト更新！" : "ミッション達成！"}</Typography>
               <Typography component="p" sx={{ fontSize: 16, fontWeight: 700, mt: 0.5 }}>{isRecordUpdate ? "前回の自分を超えたね。" : "自分の解き方で課題を解き切ったね。"}</Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}>
