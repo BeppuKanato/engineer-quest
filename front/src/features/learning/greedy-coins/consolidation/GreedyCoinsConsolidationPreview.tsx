@@ -2,7 +2,6 @@
 import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -14,9 +13,8 @@ import { ParsonsBoard, parsonsQuestionBodySx } from "../../bfs/consolidation/Par
 import { useAssessmentObservation } from "../../instrumentation/useAssessmentObservation";
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { playerTokens } from "../../player/player.tokens";
+import { DiagnosisResult } from "../../app/DiagnosisResult";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
-import { ResultConfetti } from "../../app/ResultConfetti";
-import { ResultTagRow } from "../../app/ResultTagRow";
 import { AssessmentReviewButton } from "../../review/AssessmentReviewButton";
 import { LearningReviewDialog } from "../../review/LearningReviewDialog";
 import { GreedyCoinsCheckCanvas } from "../check/GreedyCoinsCheckCanvas";
@@ -24,28 +22,6 @@ import { GreedyCoinsCodeMappingCanvas } from "../code-mapping/GreedyCoinsCodeMap
 import { greedyCoinsCodeMappingContent } from "../code-mapping/codeMapping.content";
 import { greedyCoinsConsolidationContent as content } from "./consolidation.content";
 import type { GreedyCoinsConsolidationParsonsQuestion, GreedyCoinsConsolidationQuestion, GreedyCoinsConsolidationSummary } from "./consolidation.types";
-
-/** 結果のスコア表示（二分探索フェーズ6と同じ）。 */
-function DiagnosisScore({ correct, total }: { correct: number; total: number }) {
-  const reduced = useReducedMotion();
-  const progress = useMotionValue(reduced ? 1 : 0);
-  const count = useTransform(progress, value => Math.round(value * correct));
-  const width = useTransform(progress, value => `${total > 0 ? (value * correct / total) * 100 : 0}%`);
-  useEffect(() => {
-    if (reduced) { progress.set(1); return; }
-    const controls = animate(progress, 1, { duration: 0.9, delay: 0.25, ease: "easeOut" });
-    return () => controls.stop();
-  }, [progress, reduced]);
-  return <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, mt: 1 }}>
-    <Typography component="p" sx={{ fontSize: 15 }}>初回正解</Typography>
-    <Typography component="p" sx={{ fontSize: 44, fontWeight: 800, lineHeight: 1, color: playerTokens.focus }}>
-      <motion.span>{count}</motion.span> / {total}<Typography component="span" sx={{ fontSize: 20, fontWeight: 700 }}> 問</Typography>
-    </Typography>
-    <Box aria-hidden sx={{ width: "min(420px, 80%)", height: 10, borderRadius: 999, overflow: "hidden", bgcolor: playerTokens.states.completed.fill }}>
-      <Box component={motion.div} style={{ width }} sx={{ height: "100%", bgcolor: playerTokens.focus }} />
-    </Box>
-  </Box>;
-}
 
 const isParsons = (question: GreedyCoinsConsolidationQuestion): question is GreedyCoinsConsolidationParsonsQuestion => "kind" in question && question.kind === "parsons";
 const isChoice = (question: GreedyCoinsConsolidationQuestion): question is Extract<GreedyCoinsConsolidationQuestion, { kind: "choice" }> => "kind" in question && question.kind === "choice";
@@ -121,17 +97,8 @@ export function GreedyCoinsConsolidationPreview({ embedded = false, onLearningEv
             }}
             orderFeedback={{ solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups, active: (record?.attemptCount ?? 0) > 0, submittedLineIds: attempt?.answer.kind === "order" ? attempt.answer.lineIds : undefined }} />}
         </>}
-        {diagnosis && <>
-          <ResultConfetti />
-          <DiagnosisScore correct={diagnosis.correct} total={diagnosis.total} />
-          <Box component="ul" aria-label="論点ごとの結果" sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
-            {diagnosis.tags.map((result, index) => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag} index={index}
-              passed={result.passed} correct={result.correct} total={result.total}
-              reviewAction={!result.passed ? <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`}
-                onClick={() => setReview(content.questions.find(q => q.tags.includes(result.tag))!)} label={content.reviewLabel} /> : undefined} />)}
-          </Box>
-          <Typography component="p" sx={{ textAlign: "center", fontWeight: 700 }}>{content.completion}</Typography>
-        </>}
+        {diagnosis && <DiagnosisResult diagnosis={diagnosis} reviewLabel={content.reviewLabel} completion={content.completion}
+          onReviewTag={tag => setReview(content.questions.find(question => question.tags.includes(tag))!)} />}
       </Box>
       {question && !isParsons(question) && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
         {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}

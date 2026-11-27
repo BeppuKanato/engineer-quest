@@ -3,7 +3,7 @@ import { assessmentEvidence } from "../../assessment/assessment";
 
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ResultTagRow } from "../../app/ResultTagRow";
+import { DiagnosisResult } from "../../app/DiagnosisResult";
 import { PhaseNextButton } from "../../app/PhaseNextButton";
 import { AnswerFeedbackNotice, useAssessmentFeedback } from "../../assessment/AnswerFeedback";
 import { useAssessmentCompletion } from "../../assessment/useAssessmentCompletion";
@@ -57,7 +57,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
   return <Box component={embedded ? "div" : "main"} aria-label={content.stageName}
     sx={{ minHeight: embedded ? 0 : "100dvh", height: embedded ? "100%" : undefined, display: "grid", placeItems: "center", bgcolor: playerTokens.background, color: playerTokens.text }}>
     <Box component="section" aria-label={complete ? "応用問題の結果" : "DFSの応用問題"}
-      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minWidth: 0, boxSizing: "border-box", p: 1, display: "flex", flexDirection: "column" }}>
+      sx={{ width: embedded ? "100%" : "84vw", height: embedded ? "100%" : "84dvh", minHeight: embedded ? 0 : 500, p: 1, display: "flex", flexDirection: "column" }}>
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column",
         ...(question?.kind === "parsons" ? parsonsQuestionBodySx : {}) }}>
         <Typography ref={captionRef} component="p" tabIndex={-1} aria-live="polite" aria-atomic="true"
@@ -74,7 +74,7 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
           <Typography component="p" sx={{ textAlign: "center", fontSize: 16, fontWeight: 700, flexShrink: 0, my: 1 }}>{question.instruction}</Typography>
           {question.kind === "choice" && <Box role="group" aria-label="解答の選択肢"
             sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-            {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple disabled={record?.solved}
+            {question.choices.map(choice => <Button key={choice.id} type="button" variant="outlined" disableRipple disabled={record?.solved} data-choice-id={choice.id}
               onClick={() => submit({ kind: "choice", choiceId: choice.id })}
               sx={{ border: `2px solid ${playerTokens.focus}`, borderRadius: 999, color: playerTokens.text, bgcolor: playerTokens.surface,
                 fontSize: 16, fontWeight: 700, minHeight: 48, px: 2,
@@ -93,38 +93,27 @@ export function DfsConsolidationPreview({ embedded = false, active = true, onLea
             solutionLineIds: question.correctAnswer.lineIds, interchangeableLineGroups: question.interchangeableLineGroups,
             active: !!attempt, submittedLineIds: attempt?.answer.kind === "order" ? attempt.answer.lineIds : undefined,
           }} />}
-        {diagnosis && <>
-          <Typography component="p" sx={{ textAlign: "center", fontSize: "clamp(20px, 2.4vw, 32px)", fontWeight: 800 }}>
-            初回正解 {diagnosis.correct} / {diagnosis.total} 問
-          </Typography>
-          <Box component="ul" aria-label="論点ごとの結果"
-            sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gap: 1, width: "100%", maxWidth: 720, mx: "auto", mt: 2 }}>
-            {diagnosis.tags.map((result, index) => <ResultTagRow key={result.tag} dataTag={result.tag} label={result.tag} index={index}
-              passed={result.passed} correct={result.correct} total={result.total}
-              reviewAction={!result.passed && <AssessmentReviewButton ariaLabel={`${result.tag}を復習する`} label={content.reviewLabel}
-                onClick={() => setReview(content.questions.find(item => item.tags.includes(result.tag)) ?? null)} />} />)}
-          </Box>
+        {diagnosis && <DiagnosisResult diagnosis={diagnosis} reviewLabel={content.reviewLabel}
+          onReviewTag={tag => setReview(content.questions.find(item => item.tags.includes(tag)) ?? null)}>
           {achievements}
-        </>}
+        </DiagnosisResult>}
       </Box>
-      {(diagnosis || (question && question.kind !== "parsons" && attempt)) &&
-        <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
-          {question && attempt?.correct === false && <Typography component="p" sx={{ textAlign: "center", mt: 1 }}>
-            再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。
-          </Typography>}
-          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1, mt: 1 }}>
-            {question && attempt?.correct === false && <AssessmentReviewButton label={content.reviewLabel} onClick={() => setReview(question)} />}
-            {diagnosis
-              ? <>
-                <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))} sx={{ minHeight: 48 }}>もう一度解く</Button>
-                {onNext && <PhaseNextButton label={nextLabel ?? "次へ進む"} disabled={advancePending} onClick={onNext} />}
-              </>
-              : <Button variant="contained" onClick={advance} sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700,
-                bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
-                {advanceLabel}
-              </Button>}
-          </Box>
-        </Box>}
+      {/* 下部の固定ゾーン（#298、他単元と共通）: 回答中は再回答の注記と進行操作、診断後は解き直しと次への導線を置く。 */}
+      {question && question.kind !== "parsons" && attempt && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1 }}>
+        {!attempt.correct && <Typography component="p" sx={{ textAlign: "center", mt: 1, flexShrink: 0 }}>再回答するか、正解していなくても次へ進めます。結果には初回の回答を使います。</Typography>}
+        <Box sx={{ mt: 1, flexShrink: 0, display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
+          {!attempt.correct && <AssessmentReviewButton label={content.reviewLabel} onClick={() => setReview(question)} />}
+          <Button variant="contained" onClick={advance} sx={{ minHeight: 48, px: 3, fontSize: 16, fontWeight: 700,
+            bgcolor: playerTokens.focus, color: playerTokens.surface, "&:hover": { bgcolor: playerTokens.states.processing.stroke } }}>
+            {advanceLabel}
+          </Button>
+        </Box>
+      </Box>}
+      {diagnosis && <Box sx={{ flexShrink: 0, borderTop: `1px solid ${playerTokens.layers.layer1}`, mt: 1, pt: 1, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+        <Button variant="outlined" onClick={() => setSession(createAssessmentState(content))}
+          sx={{ color: playerTokens.text, borderColor: playerTokens.control, minHeight: 48 }}>もう一度解く</Button>
+        {onNext && <PhaseNextButton label={nextLabel ?? "次へ進む"} disabled={advancePending} onClick={onNext} />}
+      </Box>}
     </Box>
     {active && review && <LearningReviewDialog content={dfsCodeMappingContent} stepIds={review.reviewStepIds} onLearningEvent={onLearningEvent}
       renderCanvas={canvas => <DfsCodeMappingCanvas canvas={canvas} />} onClose={() => setReview(null)} />}
