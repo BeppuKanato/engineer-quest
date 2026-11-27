@@ -89,6 +89,12 @@ export const getHomeByUser = async (user: {
   const achievements = achievementData.groups.flatMap(group => group.achievements);
   const nearAchievements = achievements.filter(item => item.status === "visible_locked" && item.progress > 0 && item.progress < item.goal)
     .sort((a, b) => Math.min(1, b.progress / b.goal) - Math.min(1, a.progress / a.goal) || (a.id === user.selectedTargetAchievementId ? -1 : b.id === user.selectedTargetAchievementId ? 1 : a.id.localeCompare(b.id))).slice(0, 2);
+  // 進みかけの実績が無い（初回など）場合も「次の実績」の置き場所は消さない（2026-11-27 の空状態方針：
+  // 場所と目標は常設し、空なら促す形にする）。進捗0の未達成実績から、目標に設定したものを優先して出す。
+  if (nearAchievements.length === 0) {
+    nearAchievements.push(...achievements.filter(item => item.status === "visible_locked" && item.progress < item.goal)
+      .sort((a, b) => (a.id === user.selectedTargetAchievementId ? -1 : b.id === user.selectedTargetAchievementId ? 1 : a.id.localeCompare(b.id))).slice(0, 2));
+  }
   const selected = achievements.find(item => item.id === user.selectedTargetAchievementId && item.status === "visible_locked");
   return {
     user: { displayName: user.displayName, selectedMascotId: user.selectedMascotId, completedMissionNum: 0, completedAchievementNum: completedAchievementCount,

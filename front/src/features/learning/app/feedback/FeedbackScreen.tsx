@@ -18,7 +18,7 @@ import {
   type FeedbackV1Kind,
 } from "@/app/component/feedbackV1";
 import { feedbackCandidates } from "@/api/feedbackV1.api";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { playerTokens } from "../../player/player.tokens";
 
 const headingSx = {
@@ -341,7 +341,7 @@ function FeedbackDelivery({ state = "point" }: { state?: "point" | "celebrate" |
   return <motion.div initial={reduce ? false : { opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.35 }}
     style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-    <MascotFigure mascotId="red-panda" alt="相棒" size="M" state={state} motion="float" grounding="shadow" />
+    <RobotFigure alt="相棒" size="M" state={state} motion="float" grounding="shadow" />
     <Box sx={{ bgcolor: "#fff", border: "1px solid #dbe3ef", borderRadius: "14px", px: 2, py: 1.25 }}>
       <Typography sx={{ fontSize: 18, fontWeight: 700 }}>フィードバック、持ってきたよ。</Typography>
     </Box>
@@ -360,7 +360,7 @@ function FeedbackGenerating() {
     return () => clearTimeout(timer);
   }, []);
   return <Box role="status" sx={{ display: "flex", alignItems: "center", gap: 2, maxWidth: 640, py: 2 }}>
-    <MascotFigure mascotId="red-panda" alt="相棒" size="M" state="thinking" motion="float" grounding="shadow" />
+    <RobotFigure alt="相棒" size="M" state="thinking" motion="float" grounding="shadow" />
     <Box>
       <Typography sx={{ fontSize: 16, fontWeight: 700 }}>
         {step === 0 ? "学習の記録を確認しているよ。" : "次の一歩を考えているよ。"}

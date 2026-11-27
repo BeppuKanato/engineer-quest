@@ -16,12 +16,22 @@ const other=render({...data,resume:{...unit,id:'other',title:'深さ優先探索
 assert.deepEqual([...other.matchAll(/data-home-section="([^"]+)"/g)].map(match=>match[1]),['aim','review','resume','status']);
 assert(other.includes('前回の続き')&&other.includes('この単元を再開する'));
 const empty=render({...data,today:{recommended:null,nearAchievements:[],nearCards:[]},resume:null,hasInProgressUnit:false,questions:[],latestCard:null});
-for(const id of ['aim','resume'])assert(!empty.includes(`data-home-section="${id}"`));assert(!empty.includes('学んだ知識を活かそう'));assert(empty.includes('data-home-section="status"'));
+for(const id of ['aim','resume'])assert(!empty.includes(`data-home-section="${id}"`));assert(empty.includes('data-home-section="status"'));
+// 掲示板は「場所」なので、答えられる質問が無くても見出しと促しは残る（空状態方針）。
+assert(empty.includes('掲示板')&&empty.includes('学んだ知識を活かそう')&&empty.includes('いま答えられる質問はありません'));
+// 初回（記録なし）は狙いカードではなく、コース一覧への誘導カードになる。
+const freshUnit={...unit,status:'NOT_STARTED',completedPhases:0,nextPhase:null};
+const fresh=render({...data,overview:{...data.overview,completedUnits:0,units:[freshUnit]},today:{...data.today,recommended:freshUnit},resume:null,hasInProgressUnit:false});
+assert(fresh.includes('data-home-section="aim"')&&fresh.includes('学ぶ単元を選ぼう')&&fresh.includes('アルドはあいまいな判断ができないけど')&&fresh.includes('コース一覧を見る')&&!fresh.includes('学習をはじめる'));
+// 復習は「進捗データ」：無い日はスロットごと消えて狙いが広がる。
+const noReview=renderToStaticMarkup(React.createElement(HomeDashboard,{data,goalBand:React.createElement('aside',{'data-goal-band':true},'目標帯')}));
+assert.deepEqual([...noReview.matchAll(/data-home-section="([^"]+)"/g)].map(match=>match[1]),['aim','status']);
 const noFeedback=render({...data,resume:{...unit,nextStep:null}});assert(!noFeedback.includes('次の一歩'));
 const dashboard=fs.readFileSync(path.join(root,'features/home/HomeDashboard.tsx'),'utf8');
 assert(dashboard.includes('{goalBand}')&&dashboard.includes('{review}'));
 const daily=fs.readFileSync(path.join(root,'features/learning/daily-review/DailyReviewCard.tsx'),'utf8');assert(daily.includes('!review')&&daily.includes('return null'));
-const page=fs.readFileSync(path.join(root,'app/home/page.tsx'),'utf8');assert(page.includes('<HomeDashboard data={homeData} review={<DailyReviewCard />} goalBand={<GoalBand data={homeData} />}'));
+const page=fs.readFileSync(path.join(root,'app/home/page.tsx'),'utf8');assert(page.includes('review={reviewReady ? <DailyReviewCardContent review={reviewReady} /> : undefined}')&&page.includes('goalBand={<GoalBand data={homeData} />}'));
+assert(page.includes('目標はまだ設定されていません')&&page.includes('コース一覧で目標を設定する'));
 assert(!page.includes('BigGoalBanner'));
 assert(page.includes('useGoalCourseId')&&page.includes('findUnitMission'));
 assert(!dashboard.includes('@/features/learning/'), 'Independent features are composed by the app through slots');
@@ -38,4 +48,4 @@ assert(courseCard.includes('CourseThumbnail')&&courseCard.includes('COURSE_VISUA
 const profile=read('app/profile/page.tsx');
 for(const field of ['completedCourseCount','completedMissionCount','collectedCount','achievedCount'])assert(profile.includes(field));
 for(const label of ['プロフィール設定','代表実績','実績解除通知'])assert(profile.includes(label));
-console.log('verifyHomeLayout: goal band slot, aim/review grid, conditional resume section, status panel (streak, next achievement, latest card), completed-unit board questions, empty sections hidden, JST learning days and no EXP/rank passed.');
+console.log('verifyHomeLayout: goal band slot (incl. unset invitation), aim/review grid (review collapses when absent), fresh start card, conditional resume section, status panel (streak, next achievement, latest card), board questions or board invitation, JST learning days and no EXP/rank passed.');

@@ -4,15 +4,15 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { Box, LinearProgress, Paper, Typography, keyframes } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { useUserMascot, type MascotState } from "./mascot";
-import { MascotFigure } from "./mascotFigure";
+import type { RobotState } from "./robotFigure";
+import { RobotFigure } from "./robotFigure";
 
 type PageTransitionOverlayProps = {
   open: boolean;
   title?: string;
   description?: string;
   message?: string;
-  mascotState?: Exclude<MascotState, "face" | "surprise" | "celebrate">;
+  mascotState?: Exclude<RobotState, "face" | "surprise" | "celebrate">;
   delayMs?: number;
 };
 
@@ -30,7 +30,6 @@ export const PageTransitionOverlay = ({
   delayMs = 450,
 }: PageTransitionOverlayProps) => {
   const [visible, setVisible] = useState(false);
-  const mascotId = useUserMascot();
 
   useEffect(() => {
     if (!open) {
@@ -82,7 +81,7 @@ export const PageTransitionOverlay = ({
         />
         <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "96px 1fr", gap: 2.5, alignItems: "center" }}>
           <Box sx={{ position: "relative", display: "grid", placeItems: "center" }}>
-            <MascotFigure mascotId={mascotId} state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="float" />
+            <RobotFigure state={mascotState} alt="相棒マスコット" size="M" grounding="shadow" motion="float" />
             {[0, 1, 2].map((index) => (
               <AutoAwesomeRoundedIcon
                 key={index}

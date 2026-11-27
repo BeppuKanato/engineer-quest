@@ -12,7 +12,6 @@ import {
   Box,
   Container,
   IconButton,
-  Skeleton,
   Toolbar,
   Tooltip,
   Typography,
@@ -21,8 +20,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { useUserMascotState } from "./mascot";
-import { MascotFigure } from "./mascotFigure";
+import { RobotFigure } from "./robotFigure";
 
 const pages = [
   { label: "ホーム", href: "/home", icon: HomeRoundedIcon, match: ["/home"] },
@@ -41,7 +39,6 @@ const pages = [
 
 export const AppHeader: React.FC = () => {
   const pathname = usePathname();
-  const { mascotId, isLoading: isMascotLoading } = useUserMascotState();
 
   return (
     <AppBar
@@ -174,19 +171,7 @@ export const AppHeader: React.FC = () => {
                   "&:hover": { backgroundColor: "rgba(255,255,255,0.24)" },
                 }}
               >
-                {isMascotLoading || !mascotId ? (
-                  <Skeleton
-                    variant="circular"
-                    animation="wave"
-                    sx={{
-                      width: { xs: 38, md: 48 },
-                      height: { xs: 38, md: 48 },
-                      bgcolor: "rgba(255,255,255,0.38)",
-                    }}
-                  />
-                ) : (
-                  <MascotFigure mascotId={mascotId} alt="ユーザーアイコン" size="S" presentation="circle" />
-                )}
+                <RobotFigure alt="ユーザーアイコン" size="S" presentation="circle" />
               </IconButton>
             </Tooltip>
           </Box>

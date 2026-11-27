@@ -9,8 +9,7 @@ import StarsIcon from "@mui/icons-material/Stars";
 import { Box, Stack, Typography } from "@mui/material";
 
 import type { QuestBoardAuthorInfo } from "@/api/questBoard.api";
-import { isMascotId } from "@/app/component/mascot";
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { RobotFigure } from "@/app/component/robotFigure";
 
 const achievementIcons = {
   build: BuildIcon, course: SchoolIcon, challenge: FlagIcon,
@@ -25,7 +24,7 @@ export function QuestBoardAuthor({ author, isDeleted = false }: { author: QuestB
   const Icon = achievement && Object.hasOwn(achievementIcons, achievement.iconKey)
     ? achievementIcons[achievement.iconKey as keyof typeof achievementIcons] : EmojiEventsIcon;
   return <Stack data-board-author direction="row" gap={1} alignItems="center" flexWrap="wrap" sx={{ minWidth: 0, maxWidth: "100%" }}>
-    <MascotFigure mascotId={isMascotId(author.authorMascotId) ? author.authorMascotId : "red-panda"}
+    <RobotFigure
       alt={`${author.authorName}のマスコット`} size="S" grounding="frame" presentation="circle" motion="none" />
     <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>{author.authorName}</Typography>
     {achievement && <Box data-profile-achievement sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, px: 1, py: 0.5, borderRadius: 1.5, bgcolor: "#eaf2ff", color: "#0052d9", minWidth: 0, maxWidth: "100%" }}>
