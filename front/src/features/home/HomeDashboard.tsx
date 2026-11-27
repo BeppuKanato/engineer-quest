@@ -1,79 +1,199 @@
 "use client";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Box, Button, Chip, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+
+// ホームの確定形（2026-11-25 決定群＋2026-11-27 の目標帯の確定）。
+// 上から：目標（学習者が自分で設定した単元ミッション。page がスロットで渡す）→
+// 今日の行動（左＝今日の狙い、右＝今日の復習）→ 前回の続き（再開単元が今日の狙いと
+// 違うときだけ）→ 最近の状況（左＝ストリーク／次の実績／知識カード、右＝学んだ知識を
+// 活かそう）。単元一覧はコース一覧の仕事なのでホームには置かない。
+// 色の意味：青＝行動と現在地、緑＝完了した量、グレー＝操作できない状態だけ。
+import { Box, Button, Chip, Link as MuiLink, Paper, Stack, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import StyleOutlinedIcon from "@mui/icons-material/StyleOutlined";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import Link from "next/link";
-import type { HomeResponse } from "@/api/home.api";
-import { isMascotId } from "@/app/component/mascot";
-import { MascotFigure } from "@/app/component/mascotFigure";
 import type { ReactNode } from "react";
 
-function Section({ title, id, children }: { title: string; id: string; children: ReactNode }) {
-  return <Paper component="section" aria-labelledby={`home-${id}`} data-home-section={id} elevation={0} sx={{ p: { xs: 2.5, md: 3 }, border: "1px solid #dbe3ef", borderRadius: 3, minWidth: 0 }}>
-    <Typography id={`home-${id}`} component="h2" variant="h5" fontWeight={900} sx={{ mb: 2 }}>{title}</Typography>{children}
-  </Paper>;
-}
-const unitStatus = { NOT_STARTED: "未開始", IN_PROGRESS: "学習中", COMPLETED: "完了" };
-const achievementTitle = (title: string) => title.replace(/Lv\.(\d+)/g, "第$1段階");
+import type { HomeResponse } from "@/api/home.api";
+import { MascotBust } from "@/app/component/mascotBust";
+import { knowledgeCardTones } from "@/components/rewards/rarity.tokens";
 
-export function HomeDashboard({ data, review, currentGoal }: { data: HomeResponse; review?: ReactNode; currentGoal?: ReactNode }) {
-  const { overview, today, resume, week, questions } = data;
-  const groups = [...new Set(overview.units.map(unit => unit.group))];
-  const hasAim = today.recommended || today.nearAchievements.length || today.nearCards.length;
-  return <Stack spacing={3}>
-    <Section id="location" title="現在地">
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems={{ sm: "center" }}>
-        <MascotFigure mascotId={isMascotId(data.user.selectedMascotId) ? data.user.selectedMascotId : "red-panda"} state="normal" alt="ユーザーの相棒" size="L" grounding="disc" />
-        <Box sx={{ flex: 1 }}>
-          <Typography color="text.secondary">{data.user.displayName?.trim() || "エンジニア"}さんの進み具合</Typography>
-          <Stack direction="row" gap={3} flexWrap="wrap" sx={{ mt: 1 }}><Typography fontSize={24} fontWeight={900}>単元 {overview.completedUnits}/{overview.totalUnits}</Typography><Typography fontSize={24} fontWeight={900}>カード {overview.collectedCards}/{overview.totalCards}</Typography></Stack>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>好きな単元から取り組めます。</Typography>
+const TEXT = "#111827";
+const PRIMARY = "#2563eb";
+const GREEN = "#16a34a";
+const STREAK_ORANGE = "#ea580c";
+const HAIRLINE = "#e3e9f4";
+
+const S1 = { borderRadius: "18px", border: `1px solid ${HAIRLINE}`, boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.06)" } as const;
+
+/** 実績の段階表記は「第N段階」で統一する（Lv.表記は出さない）。 */
+const achievementTitle = (title: string) => title.replace(/\s*Lv\.?\s*(\d+)/gi, " 第$1段階").replace(/\s+/g, " ").trim();
+
+/** 前回のフィードバックの「次の一歩」の引用。マスコットのバストアップと並べる。 */
+const FeedbackQuote: React.FC<{ mascotId: string; nextStep: string }> = ({ mascotId, nextStep }) => (
+  <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
+    <MascotBust mascotId={mascotId} state="normal" width={148} height={102} imgSize={182} />
+    <Box sx={{ flex: 1, minWidth: 0, border: `1px solid ${HAIRLINE}`, borderRadius: "14px", px: 2, py: 1.5, bgcolor: "#fbfcfe", position: "relative", "&::before": { content: "\"\"", position: "absolute", left: -7, bottom: 26, width: 12, height: 12, bgcolor: "#fbfcfe", borderLeft: `1px solid ${HAIRLINE}`, borderBottom: `1px solid ${HAIRLINE}`, transform: "rotate(45deg)" } }}>
+      <Typography sx={{ fontSize: 14, fontWeight: 900, color: PRIMARY }}>次の一歩</Typography>
+      <Typography sx={{ fontSize: 16, fontWeight: 700, lineHeight: 1.7 }}>{nextStep}</Typography>
+    </Box>
+  </Box>
+);
+
+export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; review?: ReactNode; goalBand?: ReactNode }) {
+  const { overview, today, resume, week, questions, latestCard } = data;
+  const current = today.recommended;
+  const achievement = today.nearAchievements[0];
+  const sameUnit = !!(resume && current && resume.id === current.id);
+  const boardQuestions = questions.slice(0, 2);
+  const latestTone = latestCard ? knowledgeCardTones[latestCard.rarity as keyof typeof knowledgeCardTones] : undefined;
+
+  return (
+    <Stack spacing={3}>
+      {goalBand}
+
+      {/* 今日の行動：左＝今日の狙い、右＝今日の復習 */}
+      {(current || review) && (
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 7fr) minmax(0, 5fr)" }, gap: 3, alignItems: "stretch" }}>
+          {current ? (
+            <Paper component="section" data-home-section="aim" aria-label="今日の狙い" elevation={0} sx={{ ...S1, border: `2px solid ${PRIMARY}`, p: { xs: 2.5, md: 3.5 }, display: "flex", flexDirection: "column" }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em", color: PRIMARY }}>今日の狙い</Typography>
+              <Typography component="h2" sx={{ fontSize: { xs: 24, md: 28 }, fontWeight: 900, lineHeight: 1.3, mt: 0.5 }}>{current.title}</Typography>
+              {sameUnit && resume?.nextStep ? (
+                <Box sx={{ mt: 2 }}>
+                  <FeedbackQuote mascotId={data.user.selectedMascotId} nextStep={resume.nextStep} />
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", alignItems: "flex-end", mt: 1 }}>
+                  <MascotBust mascotId={data.user.selectedMascotId} state="point" width={190} height={140} imgSize={235} />
+                </Box>
+              )}
+              <Box sx={{ flex: 1 }} />
+              {current.nextPhase && <Typography sx={{ fontSize: 16, mt: 2 }}>次は『{current.nextPhase}』です</Typography>}
+              <Button component={Link} href={current.resumeHref} variant="contained" endIcon={<ArrowForwardIcon />} sx={{ mt: 1.5, alignSelf: "flex-start", bgcolor: PRIMARY, fontSize: 16, fontWeight: 900, px: 3, py: 1.25, borderRadius: "12px", boxShadow: "none", "&:hover": { bgcolor: PRIMARY, boxShadow: "none" } }}>
+                {current.status === "IN_PROGRESS" ? "学習を再開する" : current.status === "COMPLETED" ? "復習する" : "学習をはじめる"}
+              </Button>
+            </Paper>
+          ) : <Box />}
+          <Box data-home-section="review" sx={{ "& > *": { height: "100%", mb: "0 !important" } }}>{review}</Box>
         </Box>
-        <Button component={Link} href="/courses" variant="outlined">単元一覧へ</Button>
-      </Stack>
-      {groups.length > 0 && <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" }, gap: 2, mt: 2.5 }}>{groups.map(group => <Box key={group}>
-        <Typography fontWeight={900} color="text.secondary" sx={{ mb: 1 }}>{group}</Typography>
-        <Stack spacing={1}>{overview.units.filter(unit => unit.group === group).map(unit => <Box key={unit.id} component={Link} href={unit.href} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, p: 1.25, minHeight: 44, border: "1px solid #dbe3ef", borderRadius: 2, textDecoration: "none", color: "inherit", bgcolor: unit.status === "COMPLETED" ? "#eff6ff" : "#fff" }}>
-          <Typography fontSize={14} fontWeight={800} sx={{ overflowWrap: "anywhere" }}>{unit.title}</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>{unitStatus[unit.status]}</Typography>
-        </Box>)}</Stack>
-      </Box>)}</Box>}
-    </Section>
+      )}
 
-    {!!hasAim && <Section id="aim" title="今日の狙い">
-      {today.recommended && <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} alignItems={{ sm: "center" }}>
-        <Box><Typography color="text.secondary">{today.recommended.status === "IN_PROGRESS" ? "学習中の単元を進めよう" : "次におすすめの単元"}</Typography><Typography variant="h6" fontWeight={900}>{today.recommended.title}</Typography>{today.recommended.nextPhase && <Typography>次は「{today.recommended.nextPhase}」</Typography>}</Box>
-        <Button component={Link} href={today.recommended.status === "IN_PROGRESS" ? today.recommended.resumeHref : today.recommended.href} variant="contained">{today.recommended.status === "IN_PROGRESS" ? "続きから学ぶ" : "単元を見る"}</Button>
-      </Stack>}
-      {(today.nearAchievements.length > 0 || today.nearCards.length > 0) && <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }, gap: 2, mt: today.recommended ? 2.5 : 0 }}>
-        {today.nearAchievements.map(achievement => <Box key={achievement.id} sx={{ p: 2, borderRadius: 2, bgcolor: "#f4f7fc" }}>
-          <Typography variant="caption" fontWeight={800}>あと少しで届く実績</Typography><Typography fontWeight={900} sx={{ mt: 0.5 }}>{achievementTitle(achievement.title)}</Typography>
-          <Typography variant="body2" sx={{ my: 1 }}>{achievement.progress} / {achievement.goal}</Typography>
-          <LinearProgress aria-label={`${achievementTitle(achievement.title)}の進捗`} variant="determinate" value={Math.min(100, achievement.progress / achievement.goal * 100)} sx={{ height: 8, borderRadius: 9 }} />
-          <Button component={Link} href={achievement.href} size="small" sx={{ mt: 1 }}>実績に向けて進める</Button>
-        </Box>)}
-        {today.nearCards.map(unit => <Box key={unit.id} sx={{ p: 2, borderRadius: 2, bgcolor: "#f4f7fc" }}><Typography variant="caption" fontWeight={800}>あと1枚でカードが揃う</Typography><Typography fontWeight={900} sx={{ mt: 0.5 }}>{unit.title}</Typography><Typography variant="body2" sx={{ mt: 1 }}>{unit.collectedCards} / {unit.totalCards}枚</Typography><Button component={Link} href={unit.href} size="small">単元の進み具合を見る</Button></Box>)}
-      </Box>}
-      {data.hasInProgressUnit && currentGoal && <Box sx={{ mt: 2 }}>{currentGoal}</Box>}
-    </Section>}
+      {/* 前回の続き：再開単元が今日の狙いと違うときだけ */}
+      {resume && !sameUnit && (
+        <Paper component="section" data-home-section="resume" aria-label="前回の続き" elevation={0} sx={{ ...S1, p: { xs: 2.5, md: 3.5 } }}>
+          <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em" }}>前回の続き</Typography>
+          <Typography component="h2" sx={{ fontSize: 22, fontWeight: 900, lineHeight: 1.35, mt: 0.5 }}>{resume.title}</Typography>
+          {resume.nextStep && <Box sx={{ mt: 2 }}><FeedbackQuote mascotId={data.user.selectedMascotId} nextStep={resume.nextStep} /></Box>}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", mt: 2 }}>
+            {resume.nextPhase && <Typography sx={{ fontSize: 16 }}>次は『{resume.nextPhase}』から</Typography>}
+            <Button component={Link} href={resume.resumeHref} variant="outlined" endIcon={<ArrowRightAltIcon />} sx={{ fontSize: 16, fontWeight: 900, px: 2.5, py: 1, borderRadius: "12px", color: PRIMARY, borderColor: PRIMARY }}>
+              この単元を再開する
+            </Button>
+          </Box>
+        </Paper>
+      )}
 
-    {resume && <Section id="resume" title="前回の続き">
-      <Typography variant="h6" fontWeight={900}>{resume.title}</Typography><Typography sx={{ mt: 1 }}>再開するフェーズ：{resume.nextPhase ?? "単元の最終結果"}</Typography>
-      {resume.nextStep && <Typography data-home-next-step noWrap title={resume.nextStep} sx={{ mt: 1.5, maxWidth: "100%", color: "#475569" }}>前回のフィードバックの次の一歩：{resume.nextStep}</Typography>}
-      <Button component={Link} href={resume.resumeHref} variant="contained" sx={{ mt: 2 }}>前回の続きに戻る</Button>
-    </Section>}
+      {/* 最近の状況：左＝ストリーク／次の実績／知識カード、右＝学んだ知識を活かそう */}
+      <Paper component="section" data-home-section="status" aria-label="最近の状況" elevation={0} sx={{ ...S1, p: { xs: 2.5, md: 3.5 } }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 900, letterSpacing: "0.08em" }}>最近の状況</Typography>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: boardQuestions.length ? "minmax(0, 7fr) minmax(0, 5fr)" : "1fr" }, gap: { xs: 3, lg: 5 }, mt: 1 }}>
+          <Stack spacing={3.5}>
+            <Box component="section" aria-label="学習ストリーク">
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, flexWrap: "wrap" }}>
+                <LocalFireDepartmentIcon sx={{ color: STREAK_ORANGE, fontSize: 22, alignSelf: "center" }} />
+                <Typography sx={{ fontSize: 18, fontWeight: 900 }}>学習ストリーク</Typography>
+                <Typography sx={{ fontSize: 16, fontWeight: 900, color: STREAK_ORANGE }}>{week.streakDays}日連続</Typography>
+                <Box sx={{ flex: 1 }} />
+                <MuiLink component={Link} href="/history" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>履歴を見る<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
+              </Box>
+              <Box sx={{ display: "flex", gap: 1, mt: 1.5 }} role="list" aria-label="今週の学習">
+                {week.days.map(day => (
+                  <Box key={day.date} role="listitem" data-learning-day={day.date} sx={{ flex: 1, textAlign: "center" }}>
+                    <Box sx={{ height: 44, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: day.learned ? "#fff7ed" : "#f1f5f9", border: day.isToday ? `2px solid ${PRIMARY}` : `1px solid ${HAIRLINE}` }}>
+                      {day.learned
+                        ? <LocalFireDepartmentIcon sx={{ color: STREAK_ORANGE, fontSize: 24 }} />
+                        : <Typography sx={{ fontSize: 16, fontWeight: 800, color: TEXT }}>{Number(day.date.slice(8))}</Typography>}
+                    </Box>
+                    <Typography sx={{ fontSize: 14, fontWeight: day.isToday ? 900 : 700, mt: 0.5 }}>{day.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
 
-    {review}
+            {achievement && (
+              <Box component="section" aria-label="次の実績">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <WorkspacePremiumOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                  <Typography sx={{ fontSize: 18, fontWeight: 900 }}>次の実績</Typography>
+                  <Box sx={{ flex: 1 }} />
+                  <MuiLink component={Link} href="/achievements" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>実績一覧へ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
+                </Box>
+                <Typography sx={{ fontSize: 16, fontWeight: 800, mt: 1.25 }}>{achievementTitle(achievement.title)}</Typography>
+                {achievement.conditionLabel && <Typography sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, mt: 0.25 }}>{achievement.conditionLabel}</Typography>}
+                <Box sx={{ display: "flex", gap: 0.75, mt: 1 }} role="img" aria-label={`${achievement.goal}のうち${achievement.progress}まで進んでいます`}>
+                  {Array.from({ length: achievement.goal }, (_, index) => (
+                    <Box key={index} sx={{ flex: 1, height: 10, borderRadius: "999px", bgcolor: index < achievement.progress ? GREEN : "#e5eaf3" }} />
+                  ))}
+                </Box>
+                <Typography sx={{ fontSize: 14, mt: 0.75 }}>あと{achievement.goal - achievement.progress}で達成</Typography>
+              </Box>
+            )}
 
-    <Section id="streak" title="学習ストリーク">
-      <Stack direction={{ xs: "column", sm: "row" }} gap={3} justifyContent="space-between" alignItems={{ sm: "center" }}>
-        <Box><Typography fontWeight={900} fontSize={28}>{week.streakDays}日連続</Typography><Typography variant="body2" color="text.secondary">今週の学習日</Typography></Box>
-        <Stack direction="row" gap={{ xs: 1, sm: 2 }}>{week.days.map(day => <Stack key={day.date} alignItems="center" spacing={0.75}>
-          <Typography variant="caption" fontWeight={800}>{day.label}</Typography><Box aria-label={`${day.date} ${day.learned ? "学習済み" : "学習記録なし"}${day.isToday ? " 今日" : ""}`} data-learning-day={day.learned ? day.date : undefined} sx={{ width: 36, height: 36, display: "grid", placeItems: "center", borderRadius: "50%", bgcolor: day.learned ? "#0057e7" : "#f1f5f9", color: day.learned ? "#fff" : "#475569", border: day.isToday ? "2px solid #0057e7" : "2px solid transparent" }}>{day.learned ? <CheckCircleIcon sx={{ fontSize: 20 }} /> : Number(day.date.slice(8))}</Box>
-          {day.isToday && <Chip label="今日" size="small" sx={{ height: 20, fontSize: 10 }} />}
-        </Stack>)}</Stack>
-      </Stack>
-    </Section>
+            <Box component="section" aria-label="知識カード">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <StyleOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                <Typography sx={{ fontSize: 18, fontWeight: 900 }}>知識カード</Typography>
+                <Typography sx={{ fontSize: 16, fontWeight: 900 }}>{overview.collectedCards} / {overview.totalCards}枚</Typography>
+                <Box sx={{ flex: 1 }} />
+                <MuiLink component={Link} href="/collection" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>コレクションへ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
+              </Box>
+              {latestCard && latestTone && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mt: 1.5, border: `1px solid ${latestTone.border}`, bgcolor: latestTone.bgcolor, borderRadius: "12px", px: 1.75, py: 1.25 }}>
+                  <Chip label={latestTone.label} size="small" sx={{ bgcolor: "#ffffff", color: latestTone.color, border: `1px solid ${latestTone.border}`, fontWeight: 900, fontSize: 14, height: 26 }} />
+                  <Typography sx={{ fontSize: 16, fontWeight: 900 }}>{latestCard.title}</Typography>
+                  <Typography sx={{ fontSize: 14 }}>{latestCard.label}{latestCard.courseTitle ? `（${latestCard.courseTitle}で獲得）` : ""}</Typography>
+                </Box>
+              )}
+            </Box>
+          </Stack>
 
-    {questions.length > 0 && <Section id="questions" title="掲示板の新着質問"><Stack spacing={1.5}>{questions.map(question => <Box key={question.id} component={Link} href={question.href} sx={{ display: "block", textDecoration: "none", color: "inherit", p: 1.5, border: "1px solid #dbe3ef", borderRadius: 2 }}><Typography fontWeight={800}>{question.title}</Typography><Typography variant="caption" color="text.secondary">{new Date(question.createdAt).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}</Typography></Box>)}</Stack></Section>}
-  </Stack>;
+          {boardQuestions.length > 0 && (
+            <Box component="section" aria-label="学んだ知識を活かそう">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <ForumOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                <Typography sx={{ fontSize: 18, fontWeight: 900 }}>学んだ知識を活かそう</Typography>
+              </Box>
+              <Typography sx={{ fontSize: 14, mt: 0.75 }}>あなたが修了した単元で、仲間が質問しています</Typography>
+              <Stack spacing={1.5} sx={{ mt: 1.5 }}>
+                {boardQuestions.map(question => (
+                  <Box key={question.id} sx={{ border: `1px solid ${HAIRLINE}`, borderRadius: "14px", p: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                      {question.courseTitle && <Chip label={question.courseTitle} size="small" sx={{ fontSize: 14, fontWeight: 800, height: 26, bgcolor: "#eef4ff", color: PRIMARY }} />}
+                      <Typography sx={{ fontSize: 14, fontWeight: 800, color: question.commentCount === 0 ? PRIMARY : TEXT }}>
+                        {question.commentCount === 0 ? "まだ回答がありません" : `回答 ${question.commentCount}件・まだ解決していません`}
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ fontSize: 16, fontWeight: 900, lineHeight: 1.5, mt: 0.75 }}>{question.title}</Typography>
+                    <Typography sx={{ fontSize: 14, lineHeight: 1.7, mt: 0.25, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{question.excerpt}</Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.25 }}>
+                      {question.authorName && <Typography sx={{ fontSize: 14 }}>{question.authorName} さん</Typography>}
+                      <Box sx={{ flex: 1 }} />
+                      <Button component={Link} href={question.href} variant="outlined" sx={{ fontSize: 14, fontWeight: 900, px: 2, py: 0.75, borderRadius: "10px", color: PRIMARY, borderColor: PRIMARY }}>回答してみる</Button>
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+                <MuiLink component={Link} href="/quest-board" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>掲示板へ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </Paper>
+    </Stack>
+  );
 }

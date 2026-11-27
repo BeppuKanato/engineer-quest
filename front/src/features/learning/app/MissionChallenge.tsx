@@ -3,7 +3,7 @@
 // 発展ミッション挑戦画面の下書き（2026-11-25、Issue #507）。
 // 土台はフェーズ7の自由実装の枠（プログラム形式）を流用し、スコアパネルと
 // 関連知識カードの参照要素（Issue #510）を足したもの。
-import { MascotFigure } from "@/app/component/mascotFigure";
+import { MascotBust } from "@/app/component/mascotBust";
 import { developmentMissionThumbnailFor } from "@/features/learning/app/DevelopmentMissionThumbnail";
 import { KnowledgeCardFace } from "@/features/learning/app/KnowledgeCardFace";
 import { MissionExampleTrace, MissionInputVisual } from "@/features/learning/app/MissionInputVisual";
@@ -37,17 +37,7 @@ const missionCourseIds: Record<string, string> = {
   "first-broken-version": "course-algorithm-binary-search-v1",
 };
 
-/**
- * マスコットの見せ方（2026-11-25）：全身を小さく置くのではなく、
- * 大きく切り取って（バストアップ）感情が伝わる大きさで出す。
- */
-const MascotBust: React.FC<{ state: "cheer" | "point" | "celebrate" | "happy"; width?: number; height?: number; imgSize?: number }> = ({ state, width = 168, height = 128, imgSize = 215 }) => (
-  <Box sx={{ width, height, overflow: "hidden", flexShrink: 0, position: "relative" }} aria-hidden>
-    <Box sx={{ position: "absolute", left: "50%", top: -14, transform: "translateX(-50%)", width: imgSize, height: imgSize }}>
-      <MascotFigure mascotId="red-panda" alt="" state={state} size="XL" grounding="shadow" sx={{ width: imgSize, height: imgSize }} />
-    </Box>
-  </Box>
-);
+/** マスコットのバストアップは共通部品（@/app/component/mascotBust）を使う。 */
 
 /** ランクの進捗バー：C→B→A→S の物差しの上に、現在のベストの位置を示す。 */
 const RankLadder: React.FC<{ points: number | null }> = ({ points }) => (
