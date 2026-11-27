@@ -30,6 +30,28 @@ export const getHexadResponse = (token: string) =>
     { staleTimeMs: 5 * 60_000, tags: [queryTags.hexad] }
   );
 
+export type FeedbackAssignmentSlot = 1 | 2 | 3;
+
+export const getFeedbackAssignment = (token: string) =>
+  fetchClientQuery(
+    "hexad-assignment",
+    () => fetcher<{ slot: FeedbackAssignmentSlot }>("/hexad/assignment", { method: "GET", token }),
+    { staleTimeMs: 60_000, tags: [queryTags.hexad] }
+  );
+
+export const updateFeedbackAssignment = async (
+  token: string,
+  slot: FeedbackAssignmentSlot
+) => {
+  const result = await fetcher<{ slot: FeedbackAssignmentSlot }>("/hexad/assignment", {
+    method: "PUT",
+    token,
+    body: JSON.stringify({ slot }),
+  });
+  setClientQueryData("hexad-assignment", result, [queryTags.hexad]);
+  return result;
+};
+
 export const submitHexadResponse = async (
   token: string,
   answers: Record<string, number>
