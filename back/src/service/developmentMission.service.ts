@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 
 // フロントの教材データ（developmentMissions）と対応する、実在するミッションの id。
 // 定義そのものはフロントが正本で、ここでは記録の受け入れ可否だけを判定する。
-export const DEVELOPMENT_MISSION_IDS = ["dungeon-escape", "island-count", "first-broken-version"] as const;
+export const DEVELOPMENT_MISSION_IDS = ["dungeon-escape", "island-count", "first-broken-version", "minimum-energy-delivery", "rescue-fastest-route"] as const;
 
 export type DevelopmentMissionBest = {
   missionId: string;

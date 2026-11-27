@@ -54,6 +54,8 @@ export const unitMissions: Record<string, UnitMission> = {
     description: "金額に合わせて、そのつど使える一番大きい硬貨を選ぶ。硬貨の合計枚数をいちばん少なく払おう。",
     successCondition: "硬貨の合計枚数が最小のとき達成",
   },
+  "course-algorithm-dijkstra-v1": {"courseId":"course-algorithm-dijkstra-v1","title":"配送ロボットの省エネルギー経路","description":"配送ロボットを目的地に送る。床によって消費エネルギーが異なるため、通るマス数ではなく消費エネルギーを最小にしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
+  "course-algorithm-astar-v1": {"courseId":"course-algorithm-astar-v1","title":"救助ドローンの緊急ルート","description":"救助ドローンを地図上の出発点から救助地点へ送る。移動コストを最小にしながら、調べる地点も減らしたい。","successCondition":"最小の移動コストで目的地に到達できたとき達成"},
 };
 
 export const findUnitMission = (courseId: string): UnitMission | undefined => unitMissions[courseId];
@@ -79,6 +81,8 @@ export const developmentLinks: Record<string, DevelopmentMissionLink[]> = {
   "course-algorithm-binary-search-v1": [
     { missionId: "first-broken-version", title: "バグが入った版を特定する", status: "この単元を終えると挑戦できる", ready: false },
   ],
+  "course-algorithm-dijkstra-v1": [{ missionId: "minimum-energy-delivery", title: "配送ロボットの省エネルギー経路", status: "この単元を終えると挑戦できる", ready: false }],
+  "course-algorithm-astar-v1": [{ missionId: "rescue-fastest-route", title: "救助ドローンの緊急ルート", status: "この単元を終えると挑戦できる", ready: false }],
 };
 
 export const findDevelopmentLinks = (courseId: string): DevelopmentMissionLink[] => developmentLinks[courseId] ?? [];
