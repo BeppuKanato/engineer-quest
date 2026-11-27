@@ -78,7 +78,7 @@ export function MissionPresentation({ unit, mission, onStart }: {
                       {mission.successCondition}
                     </Typography>
                     <Button variant="contained" size="large" onClick={onStart}
-                      sx={{ minWidth: 260, height: 54, fontSize: 16, fontWeight: 800, borderRadius: 2 }}>
+                      sx={{ minWidth: 260, height: 54, fontSize: 16, fontWeight: 800, borderRadius: 2, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>
                       学習を始める
                     </Button>
                   </Box>
@@ -95,7 +95,7 @@ export function MissionPresentation({ unit, mission, onStart }: {
               <Typography sx={{ fontSize: 16 }}>{mission.description}</Typography>
               <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
                 <Button variant="contained" size="large" onClick={onStart}
-                  sx={{ minWidth: 260, height: 54, fontSize: 16, fontWeight: 800, borderRadius: 2 }}>
+                  sx={{ minWidth: 260, height: 54, fontSize: 16, fontWeight: 800, borderRadius: 2, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>
                   学習を始める
                 </Button>
               </Box>

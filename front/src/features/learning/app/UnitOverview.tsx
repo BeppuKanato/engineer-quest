@@ -122,14 +122,17 @@ export function UnitOverview({ courseId }: { courseId: string }) {
                   <Typography sx={{ mt: 1, fontSize: 14 }}>達成の条件：{mission.successCondition}</Typography>
                 </Box>
                 <Stack spacing={1.5} sx={{ width: { xs: "100%", md: 260 }, flexShrink: 0 }}>
+                  {/* 主ボタンはアプリの主色 #2563eb を明示する。テーマ未設定のため
+                      variant="contained" だけだと MUI 既定色（#1976d2）になり、
+                      他画面の主ボタンより薄く見える（2026-11-28 レビュー指摘）。 */}
                   {missionDone ? (
-                    <Button variant="contained" component={Link} href={learnUrl(courseId)} sx={{ fontWeight: 800 }}>単元の結果を見る</Button>
+                    <Button variant="contained" component={Link} href={learnUrl(courseId)} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>単元の結果を見る</Button>
                   ) : missionReady ? (
-                    <Button variant="contained" onClick={goMission} sx={{ fontWeight: 800 }}>ミッションに挑戦する</Button>
+                    <Button variant="contained" onClick={goMission} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>ミッションに挑戦する</Button>
                   ) : (
                     <>
                       {nextPhase && <Typography sx={{ fontSize: 14, fontWeight: 700 }}>次は『{nextPhase.formalName}』</Typography>}
-                      <Button variant="contained" onClick={() => void start()} disabled={starting} sx={{ fontWeight: 800 }}>{progress.unit ? "学習を進める" : "学習を始める"}</Button>
+                      <Button variant="contained" onClick={() => void start()} disabled={starting} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>{progress.unit ? "学習を進める" : "学習を始める"}</Button>
                     </>
                   )}
                   {/* ストーリーの入口（選ぶ動機・見直し）：帯からいつでも開ける（2026-11-23）。 */}
