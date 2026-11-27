@@ -272,7 +272,14 @@ const MazeDiggingFigure = () => {
   );
 };
 
+const WeightedGraphFigure = ({ heuristic = false }: { heuristic?: boolean }) => <g>
+  {[[24,60,66,25,2],[24,60,66,94,1],[66,25,126,25,2],[66,25,126,94,2],[66,94,126,94,5],[126,25,176,60,2],[126,94,176,60,5]].map(([x1,y1,x2,y2,w],i)=><g key={i}><line x1={x1} y1={y1} x2={x2} y2={y2} stroke={INK} strokeWidth="2"/><rect x={(x1+x2)/2-6} y={(y1+y2)/2-7} width="12" height="14" fill="white"/><text x={(x1+x2)/2} y={(y1+y2)/2+4} textAnchor="middle" fontSize="10" fill={INK}>{w}</text></g>)}
+  {[["A",24,60],["B",66,25],["C",66,94],["D",126,25],["E",126,94],["F",176,60]].map(([id,x,y])=><g key={id}><circle cx={x} cy={y} r="10" fill={id==="A"||id==="F"?ACCENT:"white"} stroke={INK} strokeWidth="1.5"/><text x={x} y={Number(y)+4} fontSize="10" textAnchor="middle" fill={id==="A"||id==="F"?"white":INK}>{id}</text></g>)}
+  {heuristic&&<text x="100" y="118" fontSize="11" textAnchor="middle" fill={INK}>g + h</text>}
+</g>;
 const FIGURES: Record<string, React.ReactElement> = {
+  "course-algorithm-dijkstra-v1": <WeightedGraphFigure />,
+  "course-algorithm-astar-v1": <WeightedGraphFigure heuristic />,
   "course-algorithm-wall-extension-v1": <MazeFigure />,
   "course-algorithm-maze-digging-v1": <MazeDiggingFigure />,
   "course-algorithm-breadth-first-search-v1": <GraphFigure dfs={false} />,

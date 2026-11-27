@@ -116,6 +116,26 @@ export const courseSeed: CourseSeedEntry[] = [
     version: 1,
     categories: [CourseCategoryType.ALGORITHM],
   },
+  {
+    id: "course-algorithm-dijkstra-v1",
+    title: "ダイクストラ法",
+    description: "道ごとに異なる移動コストを足し合わせ、最小コストの経路を求める。",
+    difficulty: CourseDifficulty.NORMAL,
+    isInitiallyUnlocked: true,
+    isPublished: true,
+    version: 1,
+    categories: [CourseCategoryType.GRAPH, CourseCategoryType.SEARCH],
+  },
+  {
+    id: "course-algorithm-astar-v1",
+    title: "A*探索",
+    description: "ゴールまでの推定コストを利用し、最短経路を効率よく探索する。",
+    difficulty: CourseDifficulty.NORMAL,
+    isInitiallyUnlocked: true,
+    isPublished: true,
+    version: 1,
+    categories: [CourseCategoryType.GRAPH, CourseCategoryType.SEARCH],
+  },
 ];
 
 /**

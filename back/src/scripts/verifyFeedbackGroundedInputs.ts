@@ -55,10 +55,10 @@ for(const definition of conceptDefinitions) {
   }
  }
 }
-assert.equal(questionCount,150);
+assert.equal(questionCount,178);
 assert.equal(globalConceptId("bubble-sort:flow"),null);
 assert.equal(globalConceptId("binary-search:flow"),null,"matching suffix does not mean equivalent learning goal");
 assert.deepEqual(relatedCourseIds(conceptDefinitions[0].courseId,conceptDefinitions),[conceptDefinitions[1].courseId]);
 const linked=selectRelatedEvidence({conceptSnapshot:{concepts:[{conceptId:"bfs:discovered"}]}},{conceptSnapshot:{courseId:"dfs",concepts:[{conceptId:"dfs:discovered",evidence:[{questionId:"same-rule",attempts:[{correct:false}]}]},{conceptId:"dfs:order",evidence:[{questionId:"different-rule",attempts:[{correct:false}]}]}]}});
 assert.equal(linked.length,1);assert.equal(linked[0].question.questionId,"same-rule");
-console.log("PASS: 7 units/150 questions, versioned answers/materials, invalid-reference and correctness rejection, both LLM stages, immutable saved inputs and explicit cross-unit mapping");
+console.log("PASS: 9 units/178 questions, versioned answers/materials, invalid-reference and correctness rejection, both LLM stages, immutable saved inputs and explicit cross-unit mapping");

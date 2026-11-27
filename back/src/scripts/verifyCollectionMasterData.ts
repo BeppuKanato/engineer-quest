@@ -14,6 +14,10 @@ import {
   DFS_CARD_PHASE_SLOTS,
   DFS_COURSE_ID,
   GREEDY_COINS_CARD_PHASE_SLOTS,
+  DIJKSTRA_COURSE_ID,
+  DIJKSTRA_CARD_PHASE_SLOTS,
+  ASTAR_COURSE_ID,
+  ASTAR_CARD_PHASE_SLOTS,
   GREEDY_COINS_COURSE_ID,
   MAZE_DIGGING_CARD_PHASE_SLOTS,
   MAZE_DIGGING_COURSE_ID,
@@ -27,7 +31,7 @@ const fail = (message: string): never => { throw new Error(message); };
 const courseIds = new Set(courseSeed.map((course) => course.id));
 const questIds = new Set<string>(createQuestSeed.map((quest) => quest.id));
 
-if (courseSeed.length !== 10) fail(`Expected 10 courses, found ${courseSeed.length}`);
+if (courseSeed.length !== 12) fail(`Expected 12 courses, found ${courseSeed.length}`);
 if (new Set(achievementSeed.map((a) => a.id)).size !== achievementSeed.length) fail("Duplicate achievement ids");
 
 // フェーズキー（front の単元コンテンツが正本。seed 側の参照整合性のためにここで固定する）
@@ -100,6 +104,7 @@ const GREEDY_COINS_PHASE_KEYS: readonly string[] = [
 ];
 
 /** カードを持つ単元ごとの、カード配布スロットとフェーズキー。 */
+const weightedPhaseKeys = (kind: string) => ["motivation","execution","check","code-mapping","code-check","consolidation","implementation"].map(suffix => kind+"-"+suffix);
 const CARD_COURSES = [
   { courseId: BFS_COURSE_ID, slots: BFS_CARD_PHASE_SLOTS, phaseKeys: BFS_PHASE_KEYS },
   { courseId: DFS_COURSE_ID, slots: DFS_CARD_PHASE_SLOTS, phaseKeys: DFS_PHASE_KEYS },
@@ -108,13 +113,15 @@ const CARD_COURSES = [
   { courseId: MAZE_DIGGING_COURSE_ID, slots: MAZE_DIGGING_CARD_PHASE_SLOTS, phaseKeys: MAZE_DIGGING_PHASE_KEYS },
   { courseId: BINARY_SEARCH_COURSE_ID, slots: BINARY_SEARCH_CARD_PHASE_SLOTS, phaseKeys: BINARY_SEARCH_PHASE_KEYS },
   { courseId: GREEDY_COINS_COURSE_ID, slots: GREEDY_COINS_CARD_PHASE_SLOTS, phaseKeys: GREEDY_COINS_PHASE_KEYS },
+  { courseId: DIJKSTRA_COURSE_ID, slots: DIJKSTRA_CARD_PHASE_SLOTS, phaseKeys: weightedPhaseKeys("dijkstra") },
+  { courseId: ASTAR_COURSE_ID, slots: ASTAR_CARD_PHASE_SLOTS, phaseKeys: weightedPhaseKeys("astar") },
 ] as const;
 
 // Issue #471: 単元21件・横断10件・作る19件と、狙える目標の条件を検証する。
 const normalAchievements = achievementSeed.filter(a => !a.isSecret);
-assert.equal(achievementSeed.length, 54);
-assert.equal(normalAchievements.length, 50);
-for (const [rarity, count] of [[Rarity.COMMON, 12], [Rarity.RARE, 18], [Rarity.EPIC, 18], [Rarity.LEGENDARY, 2]] as const) {
+assert.equal(achievementSeed.length, 60);
+assert.equal(normalAchievements.length, 56);
+for (const [rarity, count] of [[Rarity.COMMON, 14], [Rarity.RARE, 20], [Rarity.EPIC, 20], [Rarity.LEGENDARY, 2]] as const) {
   assert.equal(normalAchievements.filter((achievement) => achievement.rarity === rarity).length, count, rarity);
 }
 assert.equal(normalAchievements.filter((achievement) => achievement.category === "CREATE_QUEST").length, 19);

@@ -13,6 +13,8 @@ export const WALL_EXTENSION_COURSE_ID = "course-algorithm-wall-extension-v1";
 export const BUBBLE_SORT_COURSE_ID = "course-algorithm-bubble-sort-v2";
 export const MAZE_DIGGING_COURSE_ID = "course-algorithm-maze-digging-v1";
 export const BINARY_SEARCH_COURSE_ID = "course-algorithm-binary-search-v1";
+export const DIJKSTRA_COURSE_ID = "course-algorithm-dijkstra-v1";
+export const ASTAR_COURSE_ID = "course-algorithm-astar-v1";
 export const GREEDY_COINS_COURSE_ID = "course-algorithm-greedy-coins-v1";
 
 // 全カードに対応の有無を明示し、preserve seedでも配列を丸ごと置換できるようにする。
@@ -385,6 +387,96 @@ export const knowledgeCardSeed: KnowledgeCardSeed[] = [
     sortOrder: 21,
     isPublished: true,
   },
+  {
+    id: "knowledge-card-dijkstra-weighted-graph",
+    courseId: DIJKSTRA_COURSE_ID,
+    label: "考え方",
+    title: "重み付きグラフ",
+    description: "辺の重みが距離や時間、消費量などの移動コストを表すグラフ。",
+    connection: "同じ本数の辺でも重みの合計が違えば、最適な経路が変わる。",
+    useCase: "道路ごとに異なる所要時間を考慮して配送経路を選ぶときに使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["重み付きグラフ","weighted graph"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 22,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-dijkstra-relaxation",
+    courseId: DIJKSTRA_COURSE_ID,
+    label: "判断",
+    title: "緩和",
+    description: "新しい経路のコストが現在の記録より小さいとき、その記録を更新する操作。",
+    connection: "ダイクストラ法は候補を確定しながら隣の距離を緩和する。",
+    useCase: "別の経路を見つけたときに、より小さい到達コストを記録する処理に使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["緩和","relaxation"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 23,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-dijkstra-priority-queue",
+    courseId: DIJKSTRA_COURSE_ID,
+    label: "応用",
+    title: "優先度付きキュー",
+    description: "優先値が最小の要素などを効率よく取り出すデータ構造。",
+    connection: "ダイクストラ法では候補の移動コストを優先値にして探索を高速化できる。",
+    useCase: "大きなグラフから最小コストの候補を何度も取り出すときに使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["優先度付きキュー","heapq"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 24,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-astar-heuristic",
+    courseId: ASTAR_COURSE_ID,
+    label: "考え方",
+    title: "ヒューリスティック",
+    description: "ゴールまでの残りコストを推定する関数。",
+    connection: "A*探索は移動済みコストgに推定値hを加えて候補を選ぶ。",
+    useCase: "地図の座標から残りの距離を見積もり、調べる場所を減らしたいときに使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["ヒューリスティック","heuristic","A*"],
+    catalogNumber: 1,
+    rarity: KnowledgeCardRarity.RARE,
+    sortOrder: 25,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-astar-admissibility",
+    courseId: ASTAR_COURSE_ID,
+    label: "判断",
+    title: "許容的ヒューリスティック",
+    description: "実際の最小残りコストを過大評価しない推定関数。",
+    connection: "最短経路を保証するため、推定コストが実際より大きくならないようにする。",
+    useCase: "最短経路の保証を失わず、目的地までの推定値を活用したいときに使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["許容性","admissible heuristic"],
+    catalogNumber: 2,
+    rarity: KnowledgeCardRarity.COMMON,
+    sortOrder: 26,
+    isPublished: true,
+  },
+  {
+    id: "knowledge-card-astar-consistency",
+    courseId: ASTAR_COURSE_ID,
+    label: "応用",
+    title: "整合的ヒューリスティック",
+    description: "隣の場所への移動コストとその場所の推定値の合計を超えない推定関数。",
+    connection: "整合性があれば、A*で最小優先値の候補を確定した後に再び開く必要がない。",
+    useCase: "確定済みの候補を再処理せずに最短経路を探索する条件を確認するときに使える。",
+    relatedCreateQuestIds: [],
+    searchKeywords: ["整合性","consistent heuristic"],
+    catalogNumber: 3,
+    rarity: KnowledgeCardRarity.EPIC,
+    sortOrder: 27,
+    isPublished: true,
+  },
 ];
 
 /** フェーズ完了のタイミングとカードの対応（この対応が「そのフェーズで理解できる関連概念」）。 */
@@ -435,6 +527,18 @@ export const GREEDY_COINS_CARD_PHASE_SLOTS = [
   { phaseKey: "greedy-coins-implementation", knowledgeCardId: "knowledge-card-greedy-coins-not-always-optimal" },
 ] as const;
 
+export const DIJKSTRA_CARD_PHASE_SLOTS = [
+  { phaseKey: "dijkstra-execution", knowledgeCardId: "knowledge-card-dijkstra-weighted-graph" },
+  { phaseKey: "dijkstra-code-check", knowledgeCardId: "knowledge-card-dijkstra-relaxation" },
+  { phaseKey: "dijkstra-implementation", knowledgeCardId: "knowledge-card-dijkstra-priority-queue" },
+] as const;
+
+export const ASTAR_CARD_PHASE_SLOTS = [
+  { phaseKey: "astar-execution", knowledgeCardId: "knowledge-card-astar-heuristic" },
+  { phaseKey: "astar-code-check", knowledgeCardId: "knowledge-card-astar-admissibility" },
+  { phaseKey: "astar-implementation", knowledgeCardId: "knowledge-card-astar-consistency" },
+] as const;
+
 type CardPhaseSlot = { phaseKey: string; knowledgeCardId: string };
 const buildCardPhaseSchedule = (courseId: string, idPrefix: string, slots: readonly CardPhaseSlot[]): Array<Prisma.KnowledgeCardPhaseScheduleEntryUncheckedCreateInput & { id: string }> => {
     const courseVersion = courseSeed.find(course => course.id === courseId)?.version;
@@ -455,4 +559,6 @@ export const knowledgeCardPhaseScheduleSeed: Array<
   ...buildCardPhaseSchedule(BINARY_SEARCH_COURSE_ID, "binary-search", BINARY_SEARCH_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(DFS_COURSE_ID, "dfs", DFS_CARD_PHASE_SLOTS),
   ...buildCardPhaseSchedule(GREEDY_COINS_COURSE_ID, "greedy-coins", GREEDY_COINS_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(DIJKSTRA_COURSE_ID, "dijkstra", DIJKSTRA_CARD_PHASE_SLOTS),
+  ...buildCardPhaseSchedule(ASTAR_COURSE_ID, "astar", ASTAR_CARD_PHASE_SLOTS),
 ];
