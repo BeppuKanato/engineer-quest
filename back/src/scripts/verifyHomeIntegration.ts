@@ -73,7 +73,9 @@ async function main() {
     populated = false;
     const empty = await getHomeByUser(user);
     assert.equal(empty.resume, null); assert.equal(empty.hasInProgressUnit, false); assert.equal(empty.today.recommended?.id, definitions[0].courseId);
-    assert.deepEqual(empty.today.nearAchievements, []); assert.deepEqual(empty.today.nearCards, []); assert.deepEqual(empty.questions, []);
+    // 初回でも「次の実績」は消さない（空状態方針：場所と目標は常設）。進捗0の未達成実績から出す。
+    assert.deepEqual(empty.today.nearAchievements.map(a => [a.id, a.progress]), [["ach-create-complete-lv1", 0], ["ach-create-complete-lv2", 0]]);
+    assert.deepEqual(empty.today.nearCards, []); assert.deepEqual(empty.questions, []);
     assert.equal(empty.latestCard, null);
     assert.equal(empty.week.streakDays, 0); assert.ok(empty.week.days.every(day => !day.learned));
     populated = true; completed = true;
