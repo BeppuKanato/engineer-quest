@@ -36,16 +36,35 @@ export const getHomeByUser = async (user: {
   id: string; displayName: string | null; selectedMascotId: string; selectedTargetAchievementId: string | null;
 }) => {
   const now = new Date(), courseIds = definitions.map(unit => unit.courseId);
-  const [courses, units, phases, cards, achievementData, dates, feedback, questions, completedAchievementCount] = await Promise.all([
+  const [courses, units, phases, cards, achievementData, dates, feedback, completedAchievementCount] = await Promise.all([
     prisma.course.findMany({ where: { id: { in: courseIds }, isPublished: true }, select: { id: true, title: true } }),
     prisma.unitLearningProgress.findMany({ where: { userId: user.id }, select: { courseId: true, status: true, lastPhaseKey: true, updatedAt: true, startedAt: true } }),
     prisma.phaseLearningProgress.findMany({ where: { userId: user.id }, select: { courseId: true, phaseKey: true, status: true, updatedAt: true } }),
-    prisma.knowledgeCard.findMany({ where: { isPublished: true, courseId: { in: courseIds }, course: { isPublished: true } }, select: { courseId: true, userKnowledgeCards: { where: { userId: user.id }, select: { id: true } } } }),
+    prisma.knowledgeCard.findMany({ where: { isPublished: true, courseId: { in: courseIds }, course: { isPublished: true } }, select: { courseId: true, label: true, title: true, rarity: true, userKnowledgeCards: { where: { userId: user.id }, select: { id: true, collectedAt: true } } } }),
     getAchievementsByUser(user), getHomeCalendar(user.id, now),
     prisma.feedbackV1.findFirst({ where: { userId: user.id, status: "COMPLETED" }, orderBy: [{ generatedAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }, { id: "desc" }], select: { result: true } }),
-    prisma.questPost.findMany({ where: { category: "QUESTION", status: "OPEN", visibility: "PUBLIC", createdAt: { gte: new Date(now.getTime() - 7 * 86400000), lte: now } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 3, select: { id: true, title: true, createdAt: true } }),
     prisma.userAchievement.count({ where: { userId: user.id } }),
   ]);
+  // ホームの掲示板欄は「学んだ知識を活かそう」（2026-11-25 決定）：新着順ではなく、
+  // 自分が修了した単元の未解決の質問を、回答が少ない順に出す。自分の投稿は除く。
+  const completedCourseIds = units.filter(row => row.status === "COMPLETED").map(row => row.courseId);
+  const questionRows = completedCourseIds.length ? await prisma.questPost.findMany({
+    where: { category: "QUESTION", status: "OPEN", visibility: "PUBLIC", courseId: { in: completedCourseIds }, userId: { not: user.id } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 10,
+    select: { id: true, title: true, body: true, createdAt: true, course: { select: { title: true } }, user: { select: { displayName: true } }, _count: { select: { comments: true } } },
+  }) : [];
+  const questions = questionRows
+    .sort((a, b) => a._count.comments - b._count.comments || b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, 3)
+    .map(question => ({ id: question.id, title: question.title, excerpt: question.body.replace(/\s+/g, " ").trim().slice(0, 120),
+      courseTitle: question.course?.title ?? null, commentCount: question._count.comments, authorName: question.user.displayName,
+      createdAt: question.createdAt.toISOString(), href: `/quest-board/${encodeURIComponent(question.id)}` }));
+  // 最近手に入れた知識カード（ホームの知識カード欄の代表1枚）。
+  const heldCards = cards.flatMap(card => card.userKnowledgeCards.map(held => ({ card, collectedAt: held.collectedAt })))
+    .sort((a, b) => b.collectedAt.getTime() - a.collectedAt.getTime());
+  const latestHeld = heldCards[0];
+  const latestCard = latestHeld ? { title: latestHeld.card.title, label: latestHeld.card.label, rarity: latestHeld.card.rarity,
+    courseTitle: courses.find(course => course.id === latestHeld.card.courseId)?.title ?? null } : null;
   const overviewUnits = definitions.flatMap(definition => {
     const course = courses.find(row => row.id === definition.courseId); if (!course) return [];
     const progress = units.find(row => row.courseId === course.id);
@@ -80,10 +99,11 @@ export const getHomeByUser = async (user: {
     ...dates,
     overview: { completedUnits: overviewUnits.filter(unit => unit.status === "COMPLETED").length, totalUnits: overviewUnits.length,
       collectedCards: overviewUnits.reduce((sum, unit) => sum + unit.collectedCards, 0), totalCards: overviewUnits.reduce((sum, unit) => sum + unit.totalCards, 0), units: overviewUnits },
-    today: { recommended, nearAchievements: nearAchievements.map(({ id, title, progress, goal, href }) => ({ id, title, progress, goal, href })),
+    today: { recommended, nearAchievements: nearAchievements.map(({ id, title, progress, goal, href, conditionLabel }) => ({ id, title, progress, goal, href, conditionLabel: conditionLabel ?? null })),
       nearCards: overviewUnits.filter(unit => unit.collectedCards > 0 && unit.collectedCards === unit.totalCards - 1) },
     resume: resume ? { ...resume, nextStep: feedback ? homeFeedbackStep(feedback.result) : null } : null,
     hasInProgressUnit: active.length > 0,
-    questions: questions.map(question => ({ id: question.id, title: question.title, createdAt: question.createdAt.toISOString(), href: `/quest-board/${encodeURIComponent(question.id)}` })),
+    latestCard,
+    questions,
   };
 };

@@ -9,11 +9,12 @@ export type HomeUnit = {
 };
 export type HomeResponse = {
   overview: { completedUnits: number; totalUnits: number; collectedCards: number; totalCards: number; units: HomeUnit[] };
-  today: { recommended: HomeUnit | null; nearAchievements: { id: string; title: string; progress: number; goal: number; href: string }[]; nearCards: HomeUnit[] };
+  today: { recommended: HomeUnit | null; nearAchievements: { id: string; title: string; progress: number; goal: number; href: string; conditionLabel: string | null }[]; nearCards: HomeUnit[] };
   resume: (HomeUnit & { nextStep: string | null }) | null;
   hasInProgressUnit: boolean;
   week: { streakDays: number; days: { date: string; label: string; learned: boolean; isToday: boolean }[] };
-  questions: { id: string; title: string; createdAt: string; href: string }[];
+  latestCard: { title: string; label: string; rarity: string; courseTitle: string | null } | null;
+  questions: { id: string; title: string; excerpt: string; courseTitle: string | null; commentCount: number; authorName: string | null; createdAt: string; href: string }[];
   user: {
     displayName: string | null;
     selectedMascotId: string;
