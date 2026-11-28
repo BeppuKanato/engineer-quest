@@ -29,7 +29,7 @@ async function main() {
     return [{id:"answer",courseId,phaseKey:"bfs-check",targetId:"take-next",sessionId:"tab",eventType:"answer_attempt",clientTimestamp:new Date(1000),serverTimestamp:new Date(1000),
       payload:{correct:false,attempt:1,assessmentId:"bfs-check",assessmentSessionId:"s",assessmentStartedAt:1}}];
   }};
-  for (const name of ["createQuest","knowledgeCard","achievement","questPost","feedbackV1","createQuestFeedback"]) db[name]={findMany:async()=>[]};
+  for (const name of ["createQuest","knowledgeCard","achievement","questPost","feedbackV1","createQuestFeedback","aiConsultation"]) db[name]={findMany:async()=>[]};
   let postQueries=0;
   db.questPost={findMany:async({where}:{where:{visibility:string;courseId:string;createdAt:{lte:Date}}})=>{
     postQueries++;assert.equal(where.visibility,"PUBLIC");assert.equal(where.courseId,courseId);assert(where.createdAt.lte instanceof Date);
@@ -54,6 +54,7 @@ async function main() {
   assert.equal(postQueries,0,"phase feedback must not fetch board posts");
   assert.equal(materialLearning.materialContext.phases.length,7);
   assert.equal(materialLearning.relatedConceptHistory.length,1);
+  assert.ok(!("aiConsultations" in materialLearning),"no consultations means the field itself is absent (input unchanged)");
   assert.deepEqual(materialLearning.referencePosts,[]);
   assert(standard.input.evidenceSources?.some(e=>e.sourceId==="related-answer"));
   condition="PERSONALIZED";
