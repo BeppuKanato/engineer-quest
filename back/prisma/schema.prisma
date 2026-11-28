@@ -44,6 +44,7 @@ model User {
   bigGoals          BigGoal[]
   bigGoalProposals  BigGoalProposal[]
   developmentMissionAttempts DevelopmentMissionAttempt[]
+  aiConsultations           AiConsultation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -939,5 +940,30 @@ model DevelopmentMissionAttempt {
   createdAt DateTime @default(now())
 
   @@index([userId, missionId, createdAt])
+  @@index([userId, createdAt])
+}
+
+// =========================
+// AI 相談（ステージ1）
+// =========================
+// 学習プレイヤー常駐の相談ログ。誰が・どの単元で・どのフェーズで・いつ・
+// 何を聞き何が返ったかを保存し、後段（フィードバック入力・実績判定）の入力になる。
+// blocked は事後チェックで解法コードらしい応答を差し替えた記録。
+// context には文脈として渡したコード・テスト結果とプロンプト版を残す。
+model AiConsultation {
+  id               String  @id @default(cuid())
+  userId           String
+  courseId         String
+  phaseKey         String?
+  userMessage      String
+  assistantMessage String
+  blocked          Boolean @default(false)
+  context          Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, courseId, createdAt])
   @@index([userId, createdAt])
 }

@@ -42,6 +42,7 @@
     "verify:feedback-v1-context": "ts-node src/scripts/verifyFeedbackV1Context.ts",
     "seed:preserve": "ts-node prisma/seed.ts --preserve-existing",
     "verify:seed-preservation": "ts-node src/scripts/verifyPreservingSeed.ts",
+    "verify:ai-consultation": "ts-node src/scripts/verifyAiConsultation.ts",
     "verify:big-goal": "ts-node src/scripts/verifyBigGoal.ts",
     "verify:big-goal-proposal": "ts-node src/scripts/verifyBigGoalProposal.ts",
     "verify:feedback-concepts": "ts-node src/scripts/verifyFeedbackConcepts.ts",
