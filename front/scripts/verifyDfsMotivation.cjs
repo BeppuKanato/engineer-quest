@@ -52,7 +52,7 @@ for (const step of [...steps].reverse()) {
   validate(step.canvas);
   assert.equal(step.canvas.data.graph, graph);
   assert.equal(step.canvas.data.maze, maze);
-  assert.equal(step.canvas.data.treasure, "C");
+  assert.deepEqual(plain(step.canvas.data.treasures), ["F", "C"]);
   assert.equal(step.canvas.data.graph.layers.length, 0);
 }
 for (const a of maze.places) for (const b of maze.places) {
@@ -87,14 +87,16 @@ assert.equal(get("map-to-graph").data.view, "maze", "Label concrete places befor
 assert(get("label-maze").state.showNames && get("map-to-graph").state.annotations);
 assert(get("return-trail").state.returnTrail);
 assert.equal(get("return-trail").state.current, "C", "The reference scene shows the trail, not an invented backtrack");
-assert(steps.slice(0, 7).every(step => !step.canvas.state.treasureVisible));
-assert.equal(get("dive-five").state.treasureVisible, true);
+// 宝は複数で、迷路・グラフの場面では最初から見えている（2026-11-28 の仕様変更）。フォルダの場面だけ宝なし。
+assert(steps.filter(step => step.canvas.data.view !== "folders").every(step => step.canvas.state.treasureVisible));
+assert.equal(get("utility-folder").state.treasureVisible, false);
+assert.deepEqual(plain(get("dive-two").highlights), [{ kind: "edge", id: "be" }], "The fork scene shows the branch that was not taken");
 assert.deepEqual(plain(get("name-and-exit").highlights), [{ kind: "node", id: "B" }, { kind: "edge", id: "ab" }]);
 
-// 実描画でも宝を先に露出せず、グラフ・格子は共通描画、実用例は図で見せる。
+// 実描画でも宝は迷路・グラフの全場面で2つとも見え、グラフ・格子は共通描画、実用例は図で見せる。
 for (const step of steps) {
   const html = renderToStaticMarkup(createElement(DfsMotivationCanvas, { canvas: step.canvas }));
-  assert.equal(html.includes("見つけた宝"), step.canvas.state.treasureVisible);
+  assert.equal((html.match(/data-treasure-place=/g) ?? []).length, step.canvas.state.treasureVisible ? 2 : 0);
   assert(!html.includes("フェーズ"));
   if (step.canvas.data.view !== "folders") assert(html.includes('viewBox="0 0 600 450"') && html.includes('preserveAspectRatio="xMidYMid meet"'));
   if (step.canvas.data.view === "maze") assert.equal((html.match(/data-maze-place=/g) ?? []).length, 6);
@@ -119,6 +121,7 @@ assert(fs.readFileSync(path.resolve(__dirname, "../src/app/learning-preview/[con
 const first = steps[0].canvas;
 assert.throws(() => validate({ ...first, data: { ...first.data, graph: { ...graph, nodes: [] } } }), /canonical/);
 assert.throws(() => validate({ ...first, state: { ...first.state, trail: ["A", "F"], current: "F" } }), /Disconnected/);
-assert.throws(() => validate({ ...first, state: { ...first.state, treasureVisible: true } }), /Treasure/);
+assert.throws(() => validate({ ...first, state: { ...first.state, treasureVisible: false } }), /Treasures must be visible/);
+assert.throws(() => validate({ ...first, data: { ...first.data, treasures: ["F", "F"] } }), /Duplicate treasure/);
 assert.throws(() => validate({ ...first, highlights: [{ kind: "edge", id: "missing" }] }), /highlight/);
-console.log("DFS motivation: 18 scenes, canonical shared maze/graph, A-B-D-F-E-C walks, hidden treasure, vocabulary, cue, folder illustration, snapshots and standalone exit passed.");
+console.log("DFS motivation: 18 scenes, canonical shared maze/graph, A-B-D-F-E-C walks, two treasures visible from the start, vocabulary, cue, folder illustration, snapshots and standalone exit passed.");
