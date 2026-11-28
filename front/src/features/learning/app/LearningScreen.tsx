@@ -38,6 +38,7 @@ import { findUnitMission } from "./missionRegistry";
 import { hasSeenMissionStory } from "./missionStoryStore";
 import { MissionPresentation } from "./MissionPresentation";
 import { MissionUnlockNotice } from "./MissionUnlockNotice";
+import { AiConsultationPanel } from "./AiConsultationPanel";
 
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
@@ -280,5 +281,14 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
         目標は学習者が単元ミッションに立てる単一フラグ（GoalFlag）に一本化される。 */}
     {unit.kind === "dijkstra" || unit.kind === "astar" ? <WeightedUnitPreview {...unitPreviewProps} mode={unit.kind} /> : unit.kind === "dfs" ? <DfsUnitPreview {...unitPreviewProps} /> : unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : unit.kind === "greedy-coins" ? <GreedyCoinsUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
+    {/* AI 相談（ステージ1）はプレイヤーの殻に常駐させる。全フェーズから開ける導線で、
+        フェーズ画面そのものにはアルドを出さない決めは維持し、パネル内でのみ相談相手として出す。 */}
+    <AiConsultationPanel
+      courseId={courseId}
+      phaseKey={renderedPhase?.phaseKey ?? (initialPhase !== null ? unit.phases[initialPhase].id : null)}
+      phaseLabel={unit.phases.find(phase => phase.id === (renderedPhase?.phaseKey ?? (initialPhase !== null ? unit.phases[initialPhase].id : null)))?.formalName ?? null}
+      code={draft.code}
+      getToken={getToken}
+    />
   </LearningRewardsContext.Provider>;
 }
