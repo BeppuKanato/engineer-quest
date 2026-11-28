@@ -113,7 +113,7 @@ assert.equal(qNew2.choices.find(choice => choice.id === qNew2.correctAnswer.choi
 const canonicalIds = plain(bfsCode.lines.map(line => line.id));
 assert.deepEqual([...q5.lineIds].sort(), [...canonicalIds].sort());
 assert.notDeepEqual(plain(q5.lineIds), canonicalIds);
-assert.deepEqual(plain(q5.lineIds), ["enqueue-neighbor", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "initialize-queue", "for-neighbor"]);
+assert.deepEqual(plain(q5.lineIds), ["initialize-queue", "initialize-distances", "while-queue", "return-distances", "dequeue-node", "import-deque", "assign-distance", "define-function", "if-undiscovered", "enqueue-neighbor", "for-neighbor"]);
 assert.deepEqual(plain(q5.correctAnswer.lineIds), canonicalIds);
 assert.deepEqual(plain(q5.interchangeableLineGroups), [["initialize-distances", "initialize-queue"]]);
 for (const question of content.questions) {
