@@ -61,3 +61,34 @@ export const goalStore = {
 
 export const useGoalCourseId = (): string | null =>
   useSyncExternalStore(goalStore.subscribe, goalStore.get, () => null);
+
+// 目標の達成記録（2026-11-28）。目標の単元が完了していたら、ホームで達成を
+// 記録して目標を取り消し、称賛と「取り消した」ことの通知を出すために使う。
+// 記録は学習者が閉じるまで残る。目標そのものとは別キーで持つ（取り消した後も
+// 「何を達成したか」を表示する必要があるため）。
+export type GoalAchievement = { courseId: string; missionTitle: string; unitTitle: string };
+
+const ACHIEVED_KEY = "engineer-quest:goal-achieved";
+
+export const goalAchievement = {
+  read: (): GoalAchievement | null => {
+    try {
+      const raw = localStorage.getItem(ACHIEVED_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as GoalAchievement;
+      return parsed && typeof parsed.courseId === "string" ? parsed : null;
+    } catch {
+      return null;
+    }
+  },
+  record: (achievement: GoalAchievement) => {
+    try {
+      localStorage.setItem(ACHIEVED_KEY, JSON.stringify(achievement));
+    } catch { /* 保存できなくても取り消し自体は行う */ }
+  },
+  clear: () => {
+    try {
+      localStorage.removeItem(ACHIEVED_KEY);
+    } catch { /* 表示側の状態で閉じる */ }
+  },
+};
