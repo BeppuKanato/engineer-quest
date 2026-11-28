@@ -12,6 +12,7 @@ import { getActiveBigGoal, loadBigGoalFacts } from "./bigGoal.service";
 import type { BigGoalParams } from "./bigGoal.types";
 import type { Action, BigGoalInput, Input, Target } from "./feedbackV1.engine";
 import { currentMaterialUnit, enrichLearningMaterials, phaseLearningDescription,record, relatedCourseIds, selectRelatedEvidence } from "./feedbackMaterials";
+import { buildFeedbackAiConsultations } from "./feedbackConsultationInput";
 
 /**
  * 分析段へ渡す大目標ブロックを組み立てる（Issue #368、実装仕様6.1）。
@@ -283,7 +284,13 @@ export async function buildFeedbackV1Context(firebaseUid: string, kind: "mission
       const other=enrichLearningMaterials({unit:{id:otherId},conceptSnapshot:aggregateConcepts(otherId,events,phaseRows,`related:${otherId}`)});
       related.push(...selectRelatedEvidence(learning,other));
     }
-    learning={...record(learning),relatedConceptHistory:related,relatedHistoryStatus:related.length?"observed":"no-related-answer-evidence",
+    // AI 相談ログ（ステージ3、Kanato の 2026-11-28 の明示指示による入力仕様の
+    // 変更）: この単元について cutoff 以前の相談を learning.aiConsultations に
+    // 含める。打ち切り規則は feedbackConsultationInput.ts が正本。相談が無い
+    // 場合はフィールド自体を付けず、入力は従来と完全に同一になる。
+    const consultationRows=await prisma.aiConsultation.findMany({where:{userId:user.id,courseId,createdAt:{lte:cutoff}},orderBy:[{createdAt:"asc"},{id:"asc"}],select:{phaseKey:true,userMessage:true,assistantMessage:true,blocked:true,createdAt:true}});
+    const aiConsultations=buildFeedbackAiConsultations(consultationRows);
+    learning={...record(learning),...(aiConsultations?{aiConsultations}:{}),relatedConceptHistory:related,relatedHistoryStatus:related.length?"observed":"no-related-answer-evidence",
       referencePosts:kind==="unit"?unitPosts.map(p=>({id:p.id,courseId:p.courseId,title:p.title,body:p.body,code:p.code,
         comments:p.comments.map(c=>({body:c.body})),role:"参考資料。本人の理解の証拠ではない。"})):[],
       referencePostsStatus:kind!=="unit"?"excluded-during-unit":unitPosts.length?"available":"no-public-posts",

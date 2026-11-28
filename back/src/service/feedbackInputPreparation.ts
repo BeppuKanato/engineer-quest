@@ -31,6 +31,10 @@ export function prepareSavedFeedbackInput(input:Input,assumeCurrentMaterials=fal
       learningContent:phaseLearningDescription(targetCourse,phase)??targetCourseUnit?.intro??quest?.description as string??achievement?.description as string??t.learningContent??action?.purpose};
   })]));
   const learning={...record(enrichLearningMaterials(original,assumeCurrentMaterials?legacyVersion:undefined)),
+    // AI 相談ログ（ステージ3）: enrichLearningMaterials のスプレッドでも残るが、
+    // 保存済み入力の変換で落ちないよう明示的に引き継ぐ。保存時に無かった
+    // 入力へは付けない（従来入力の形を変えない）。
+    ...(original.aiConsultations!==undefined?{aiConsultations:original.aiConsultations}:{}),
     inputPreparation:{assumedCurrentMaterials:assumeCurrentMaterials,
       warning:assumeCurrentMaterials?"教材版が記録されていない回答について、操作者の指定により現在の教材を補った。当時の教材との一致を証明するものではない。":null},
     relatedHistoryStatus:original.relatedHistoryStatus??"not-collected-in-saved-input",
