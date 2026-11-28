@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 
 import { OrderValues } from "./OrderOutput";
 import { GraphFigure, graphFromInput } from "../../bfs/implementation/GraphFigure";
-import { dfsImplementationContent as content } from "./implementation.content";
+import { dfsImplementationContent as content, graphInputText } from "./implementation.content";
 import { resultKinds, type TestOutcome } from "./implementation";
 
 const labels = content.display;
@@ -98,7 +98,7 @@ export function ProgramResults({ outcomes, diagnostics = outcomes, stale = false
       const outcome = outcomes.find(item => item.id === test.id);
       const status = statusOf(outcome);
       const actual = outcome && !outcome.error && isStringList(outcome.actual) ? outcome.actual : null;
-      const graph = graphFromInput(test.inputText);
+      const graph = graphFromInput(graphInputText(test.inputText));
       const expandable = test.visibility === "display" && Boolean(outcome) && !outcome!.error;
       const expanded = Boolean(outcome) && !outcome!.passed && test.visibility === "display"
         || expandedPassed.has(test.id);
@@ -122,6 +122,16 @@ export function ProgramResults({ outcomes, diagnostics = outcomes, stale = false
               <GraphFigure nodes={graph.nodes} edges={graph.edges} start={graph.start} label={`${test.label}の入力`} />
             </Box>
             <Box component="pre" sx={{ m: 0, mt: 0.75, p: 1.25, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 14 }}>{test.inputText}</Box>
+          </Box>
+          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+            <Box>
+              <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mb: 0.5 }}>{labels.expectedCountLabel}</Typography>
+              <Typography component="p" sx={{ fontSize: 16, fontWeight: 800 }}>{test.expectedCount}{labels.countUnit}</Typography>
+            </Box>
+            {outcome?.actualCount !== undefined && <Box>
+              <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mb: 0.5 }}>{labels.actualCountLabel}</Typography>
+              <Typography component="p" sx={{ fontSize: 16, fontWeight: 800 }}>{outcome.actualCount}{labels.countUnit}{outcome.actualCount !== test.expectedCount ? "（期待と違います）" : ""}</Typography>
+            </Box>}
           </Box>
           <Box>
             <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mb: 0.5 }}>{labels.expectedLabel}</Typography>

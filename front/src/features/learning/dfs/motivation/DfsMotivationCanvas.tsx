@@ -47,7 +47,7 @@ export function DfsMotivationCanvas({ canvas, onExit }: { canvas: DfsMotivationC
   const states: Record<string, PlayerStatus> = Object.fromEntries(data.graph.nodes.map(node => [node.id,
     node.id === state.current ? "processing" : state.visited.includes(node.id) ? "completed" : "idle"]));
   const points = (ids: readonly string[]) => ids.map(id => { const p = point(id); return `${p.x},${p.y}`; }).join(" ");
-  const treasure = point(data.treasure);
+  const treasurePoints = data.treasures.map(id => ({ id, ...point(id) }));
   return <Box sx={{ height: "100%", minHeight: 220, position: "relative" }}>
     <GraphViewport label={isMaze ? "宝を探す迷路と現在地" : "AからFの場所と探索の道筋"}>
       {isMaze && <MotivationMazeTiles maze={data.maze} states={Object.fromEntries(Object.entries(states).map(([id, status]) => [id, status === "processing" ? "idle" : status]))} />}
@@ -70,10 +70,10 @@ export function DfsMotivationCanvas({ canvas, onExit }: { canvas: DfsMotivationC
           <text y={7} textAnchor="middle" fill={states[node.id] === "processing" ? playerTokens.surface : playerTokens.text} fontWeight={700} fontSize={24}>{node.id}</text>
         </g>;
       })}
-      {state.treasureVisible && <g role="img" aria-label="見つけた宝" transform={`translate(${treasure.x} ${treasure.y - 47})`}>
+      {state.treasureVisible && treasurePoints.map(treasure => <g key={treasure.id} role="img" aria-label="宝" data-treasure-place={treasure.id} transform={`translate(${treasure.x} ${treasure.y - 47})`}>
         <path d="M-18 0V-12Q0-25 18-12V0ZM-18 0H18V18H-18Z" fill={playerTokens.states.queued.fill} stroke={playerTokens.text} strokeWidth={2} />
         <rect x={-4} y={-3} width={8} height={9} fill={playerTokens.focus} />
-      </g>}
+      </g>)}
       {state.returnTrail && <>
         <defs><marker id={returnArrow} markerWidth={9} markerHeight={9} refX={8} refY={4} orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke={playerTokens.text} /></marker></defs>
         <polyline points={points([...state.trail].reverse())} fill="none" stroke={playerTokens.text} strokeWidth={2} strokeDasharray="7 5" markerEnd={`url(#${returnArrow})`} />

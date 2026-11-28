@@ -20,9 +20,9 @@ export const unitMissions: Record<string, UnitMission> = {
   },
   "course-algorithm-depth-first-search-v1": {
     courseId: "course-algorithm-depth-first-search-v1",
-    title: "迷路に隠れた宝を見落とさず探す",
-    description: "宝がどこにあるか分からない迷路を、たどり着ける場所を見落とさずに調べよう。",
-    successCondition: "たどり着ける場所をすべて調べ、正しい訪問順を記録できたとき達成",
+    title: "迷路の宝を見落とさず探す",
+    description: "迷路のあちこちに宝が置かれている。たどり着ける場所を見落とさずに調べて、全部の宝にたどり着こう。",
+    successCondition: "たどり着けた宝の数と正しい訪問順を報告できたとき達成",
   },
   "course-algorithm-binary-search-v1": {
     courseId: "course-algorithm-binary-search-v1",

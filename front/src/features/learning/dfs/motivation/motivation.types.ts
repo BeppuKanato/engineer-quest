@@ -10,7 +10,8 @@ export type DfsMotivationCanvasState = {
     readonly view: "maze" | "graph" | "folders";
     readonly graph: GraphCanvasState["data"];
     readonly maze: MazeLayout;
-    readonly treasure: string;
+    /** 宝のある場所（複数）。迷路・グラフの場面では最初から見せておく。 */
+    readonly treasures: readonly string[];
   };
   readonly state: {
     readonly current: string | null;
@@ -46,7 +47,9 @@ export function validateDfsMotivationCanvas(canvas: DfsMotivationCanvasState): v
   };
   if (data.kind !== "dfs-motivation" || !["maze", "graph", "folders"].includes(data.view)) throw new Error("Unknown DFS motivation view");
   if (data.graph.layers.length !== 0) throw new Error("DFS does not have distance layers");
-  node(data.treasure);
+  if (data.treasures.length === 0) throw new Error("DFS motivation needs at least one treasure");
+  if (new Set(data.treasures).size !== data.treasures.length) throw new Error("Duplicate treasure place");
+  data.treasures.forEach(node);
   if (state.current !== null) node(state.current);
   path(state.trail); path(state.movement); state.visited.forEach(node);
   if (new Set(state.visited).size !== state.visited.length) throw new Error("Duplicate visited place");
@@ -55,7 +58,9 @@ export function validateDfsMotivationCanvas(canvas: DfsMotivationCanvasState): v
   }
   if (state.trail.length && state.trail[0] !== "A") throw new Error("DFS walk must start at A");
   if ([...state.trail, ...state.movement].some(id => !state.visited.includes(id))) throw new Error("DFS path must contain visited places");
-  if (state.treasureVisible && !state.visited.includes(data.treasure)) throw new Error("Treasure cannot appear before it is visited");
+  // 宝は「隠れているもの」ではなく、最初から場所を共有しておく前提（2026-11-28 の仕様変更）。
+  // 迷路・グラフの場面では宝が見えていることを保証し、フォルダの場面では宝を出さない。
+  if (data.view !== "folders" && !state.treasureVisible) throw new Error("Treasures must be visible in maze and graph scenes");
   if (data.view === "folders" && (state.current !== null || state.trail.length || state.movement.length || state.treasureVisible)) throw new Error("Folders cannot retain a maze actor");
   for (const target of highlights) {
     if (target.kind === "node" ? !ids.has(target.id) : !data.graph.edges.some(edge => edge.id === target.id)) throw new Error("Unknown DFS highlight");

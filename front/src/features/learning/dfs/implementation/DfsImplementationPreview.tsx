@@ -32,7 +32,7 @@ import { editorTokens as colors } from "./editor.tokens";
 import { ImplementationHintContent } from "./ImplementationHints";
 import { RobotFigure } from "@/app/component/robotFigure";
 import { ProgramResults } from "./ProgramResults";
-import { dfsExampleProgram, dfsImplementationContent as content } from "./implementation.content";
+import { dfsExampleProgram, dfsImplementationContent as content, expectedOutputText, graphInputText } from "./implementation.content";
 import { GraphFigure, graphFromInput } from "../../bfs/implementation/GraphFigure";
 import { allNamedTestsPassed, runAutoTests, runImplementationTests, recordHintUsage, runningMessage, type DfsImplementationSummary, type HintLevel, type HintUsage, type TestOutcome } from "./implementation";
 
@@ -40,7 +40,7 @@ import { allNamedTestsPassed, runAutoTests, runImplementationTests, recordHintUs
 function DfsOrderCelebration() {
   const sample = content.tests.find(test => test.id === "D1");
   if (!sample) return null;
-  const graph = graphFromInput(sample.inputText);
+  const graph = graphFromInput(graphInputText(sample.inputText));
   const visitIndex = Object.fromEntries(sample.expected.map((node, index) => [node, index + 1]));
   return <GraphFigure nodes={graph.nodes} edges={graph.edges} start={graph.start}
     distances={visitIndex} animate label="訪れた順に場所が広がる図" />;
@@ -253,7 +253,7 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
       {(() => {
         const mission = content.mission;
         const bandTest = content.tests.find(test => test.id === "D1");
-        const bandGraph = bandTest ? graphFromInput(bandTest.inputText) : null;
+        const bandGraph = bandTest ? graphFromInput(graphInputText(bandTest.inputText)) : null;
         return <Box sx={{ flexShrink: 0, border: "2px solid #2563eb", borderRadius: 3, bgcolor: "#fff", px: 2, py: 1.25 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {bandGraph && <Box aria-hidden sx={{ width: 96, height: 96, flexShrink: 0, borderRadius: 1.5, overflow: "hidden" }}>
@@ -311,7 +311,7 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
             </Box>
             <Box>
               <Typography component="p" sx={{ fontSize: 14, fontWeight: 700 }}>{content.statement.exampleOutputLabel}</Typography>
-              <Box component="pre" sx={{ m: 0, mt: 0.5, p: 1.5, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 15 }}>{sampleTest.expected.join(" ")}</Box>
+              <Box component="pre" sx={{ m: 0, mt: 0.5, p: 1.5, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 15 }}>{expectedOutputText(sampleTest)}</Box>
             </Box>
           </Box>}
         </Box>
@@ -413,14 +413,14 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
               <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mt: 1.5 }}>{content.statement.exampleInputLabel}</Typography>
               <Box component="pre" sx={{ m: 0, mt: 0.5, p: 1.5, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 15 }}>{sampleTest.inputText}</Box>
               <Box aria-hidden sx={{ height: 190, mt: 1, border: "1px solid #e5e7eb", borderRadius: 1, overflow: "hidden" }}>
-                <GraphFigure {...graphFromInput(sampleTest.inputText)} label={content.statement.exampleInputLabel} />
+                <GraphFigure {...graphFromInput(graphInputText(sampleTest.inputText))} label={content.statement.exampleInputLabel} />
               </Box>
               <Typography component="p" sx={{ fontSize: 16, fontWeight: 900, mt: 2.5 }}>{content.statement.outputLabel}</Typography>
               <Typography component="p" sx={{ fontSize: 15, lineHeight: 1.8, mt: 0.5 }}>{content.statement.outputFormat}</Typography>
               <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, mt: 1.5 }}>{content.statement.exampleOutputLabel}</Typography>
-              <Box component="pre" sx={{ m: 0, mt: 0.5, p: 1.5, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 15 }}>{sampleTest.expected.join(" ")}</Box>
+              <Box component="pre" sx={{ m: 0, mt: 0.5, p: 1.5, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 15 }}>{expectedOutputText(sampleTest)}</Box>
               <Box aria-hidden sx={{ height: 190, mt: 1, border: "1px solid #e5e7eb", borderRadius: 1, overflow: "hidden" }}>
-                <GraphFigure {...graphFromInput(sampleTest.inputText)} distances={Object.fromEntries(sampleTest.expected.map((node, index) => [node, index + 1]))} label={content.statement.exampleOutputLabel} />
+                <GraphFigure {...graphFromInput(graphInputText(sampleTest.inputText))} distances={Object.fromEntries(sampleTest.expected.map((node, index) => [node, index + 1]))} label={content.statement.exampleOutputLabel} />
               </Box>
             </>}
             <Typography component="p" sx={{ fontSize: 16, fontWeight: 900, mt: 2.5 }}>{content.statement.constraintsLabel}</Typography>
