@@ -2,6 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { LearningUnitPreview, type LearningUnitDefinition, type LearningUnitPreviewProps, type UnitPhaseView } from "../../unit/LearningUnitPreview";
+import { bridgeOptionalPhaseId } from "../../unit/optionalPhases";
 import { DfsCheckPreview } from "../check/DfsCheckPreview";
 import { DfsCodeCheckPreview } from "../code-check/DfsCodeCheckPreview";
 import { DfsCodeMappingPreview } from "../code-mapping/DfsCodeMappingPreview";
@@ -36,6 +37,9 @@ const dfsUnit = {
     "dfs-implementation": DfsImplementationPreview,
   } satisfies Record<(typeof dfsUnitPhases)[number]["id"], UnitPhaseView>,
   resultFigure: <DfsResultFigure />,
+  // 実装の橋渡し（6.5）はフェーズ7画面内ダイアログとして中身があるため、
+  // 上部の流れにも要素を出す（カタログの宣言）。
+  optionalPhaseIds: [bridgeOptionalPhaseId],
   firstAttemptResult: true,
   finalResult: dfsImplementationContent.result,
 } satisfies LearningUnitDefinition;

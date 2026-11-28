@@ -110,7 +110,7 @@ assert.match(figureSource, /runMazeDigging/, "The figure derives walls from the 
 assert.match(figureSource, /solveMazeDiggingPath/, "The figure reuses the phase-1 route for the start-to-goal path");
 assert.match(figureSource, /validateMazeDiggingCanvas/, "The figure validates with the unit-side validator");
 
-// 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
+// 単元リザルトは専用スクロールを持たない。出口はフィードバックのみ（2026-11-24決定。#150 のコース一覧への終了導線は廃止）。
 const resultScreensSource = read(`${root}/maze-digging/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
@@ -127,8 +127,8 @@ assert.match(finalResultOnly, /<UnitPathMiniMap/, "final result shows the fully-
 assert.match(finalResultOnly, /data-final-stats/, "final result shows summary stat tiles");
 assert.match(finalResultOnly, /<DrawnCheck/, "final result mark uses the same drawn check as phase results");
 assert.match(finalResultOnly, /data-final-result-mark/, "final result mark pops in like the phase mark");
-assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
-assert.equal(mazeDiggingUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
+assert.doesNotMatch(finalResultOnly, /href="\/courses"/, "final result has no course-list exit (2026-11-24: feedback is the only exit)");
+assert.match(finalResultOnly, /onShowFeedback/, "final result exits to the feedback screen");
 const phaseResultSource = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitResultScreen"), resultScreensSource.indexOf("function summaryLine"));
 assert.match(phaseResultSource, /<UnitResultCelebration heading=\{phase\.result\.heading\}/);
 assert.doesNotMatch(phaseResultSource, /phaseResultPraise|data-phase-result-praise/, "Phase results carry no standalone praise copy");

@@ -1,6 +1,7 @@
 "use client";
 
 import { LearningUnitPreview, type LearningUnitDefinition, type LearningUnitPreviewProps } from "../../unit/LearningUnitPreview";
+import { bridgeOptionalPhaseId } from "../../unit/optionalPhases";
 import { BfsCheckPreview } from "../check/BfsCheckPreview";
 import { BfsCodeCheckPreview } from "../code-check/BfsCodeCheckPreview";
 import { BfsCodeMappingPreview } from "../code-mapping/BfsCodeMappingPreview";
@@ -25,6 +26,9 @@ const bfsUnit = {
     "bfs-implementation": BfsImplementationPreview,
   },
   resultFigure: <BfsResultFigure />,
+  // 実装の橋渡し（6.5）はフェーズ7画面内ダイアログとして中身があるため、
+  // 上部の流れにも要素を出す（カタログの宣言）。
+  optionalPhaseIds: [bridgeOptionalPhaseId],
   finalResult: bfsImplementationContent.result,
   keepHiddenPlayersRunning: true,
 } satisfies LearningUnitDefinition;
