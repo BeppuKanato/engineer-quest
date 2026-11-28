@@ -8,6 +8,7 @@ function Robot({x,y,question=false,done=false}:{x:number;y:number;question?:bool
  return <g transform={`translate(${x} ${y})`}><line x1="18" y1="-7" x2="18" y2="-19" stroke={blue} strokeWidth="3"/><circle cx="18" cy="-20" r="4" fill={blue}/><rect width="38" height="32" rx="8" fill={blue}/><rect x="6" y="5" width="26" height="17" rx="4" fill="#dbeafe"/><circle cx="13" cy="12" r="2.5" fill={ink}/><circle cx="25" cy="12" r="2.5" fill={ink}/><path d={done?"M13 17 Q19 23 25 17":"M13 19 Q19 15 25 19"} stroke={ink} fill="none" strokeWidth="2"/>{question&&<g><circle cx="53" cy="-8" r="13" fill="white" stroke={blue} strokeWidth="2"/><text x="53" y="-3" textAnchor="middle" fontSize="17" fontWeight="bold" fill={blue}>?</text></g>}</g>;
 }
 function Flag({x,y}:{x:number;y:number}){return <g transform={`translate(${x} ${y})`}><path d="M0 27V0 L24 7 L0 15" stroke={orange} fill="#fbbf24" strokeWidth="3" strokeLinejoin="round"/></g>}
+function Chest({x,y}:{x:number;y:number}){return <g transform={`translate(${x} ${y})`}><rect width="34" height="23" rx="3" fill="#b08968" stroke={ink}/><path d="M0 8h34M13 8v8h8V8" stroke={ink} fill="#fbbf24"/></g>}
 function Note({x,y,children,width=110}:{x:number;y:number;children:ReactNode;width?:number}){return <g><rect x={x} y={y} width={width} height="25" rx="6" fill="white" stroke="#94a3b8"/><text x={x+width/2} y={y+17} fill={ink} fontSize="12" textAnchor="middle" fontWeight="700">{children}</text></g>}
 function Person({x,y}:{x:number;y:number}){return <g transform={`translate(${x} ${y})`}><circle cx="18" cy="0" r="12" fill="#e6bd97" stroke={ink} strokeWidth="1.5"/><path d="M6 -3 Q10 -16 25 -12 L30 -2" fill="#475569"/><path d="M0 37V25 Q18 7 36 25V37Z" fill="#82a37d" stroke={ink} strokeWidth="1.5"/><path d="M30 24L54 12" stroke={ink} strokeWidth="3" strokeLinecap="round"/></g>}
 const roadNodes=[{x:80,y:104},{x:162,y:53},{x:162,y:155},{x:260,y:53},{x:260,y:155},{x:354,y:104}];
@@ -23,14 +24,14 @@ function RouteScene({kind,beat}:{kind:"bfs"|"dfs"|"dijkstra"|"astar";beat:Beat})
   {beat===1&&<polyline points={path} fill="none" stroke={orange} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray={dfs?"5 3":undefined}/>}
   {rescue&&beat===1&&<g fill="none" stroke={orange} strokeWidth="2">{[1,2,3,4].map(i=><circle key={i} cx={roadNodes[i].x} cy={roadNodes[i].y} r="22" strokeDasharray="4 3"/>)}</g>}
   {roadNodes.map((p,i)=><g key={i}><circle cx={p.x} cy={p.y} r="12" fill={beat===5&&dfs?"#dcfce7":"white"} stroke={beat===5&&dfs?green:ink} strokeWidth="2"/><text x={p.x} y={p.y+4} textAnchor="middle" fontSize="11" fontWeight="bold" fill={ink}>{String.fromCharCode(65+i)}</text>{dfs&&i!==0&&i!==5&&beat!==5&&<text x={p.x+12} y={p.y-15} fontSize="15" fill={orange}>?</text>}</g>)}
-  {dfs?<g transform="translate(378 90)"><rect width="43" height="29" rx="3" fill="#b08968" stroke={ink}/><path d="M0 10h43M17 10v10h9V10" stroke={ink} fill="#fbbf24"/></g>:<Flag x={374} y={81}/>}
+  {dfs?<><Chest x={368} y={74}/><Chest x={114} y={140}/></>:<Flag x={374} y={81}/>}
   {rescue?<g transform="translate(32 98)"><path d="M0 0h40M4 -15h32M4 15h32M4 -15v30M36 -15v30" stroke={blue} strokeWidth="4"/><rect x="12" y="-8" width="16" height="16" rx="4" fill={blue}/><rect x="13" y="10" width="14" height="10" fill="#b08968"/></g>:<><Robot x={15} y={113} question={beat===4} done={beat===5}/>{kind!=="dfs"&&<rect x="23" y="150" width="23" height="19" rx="2" fill="#b08968" stroke={ink}/>}</>}
-  {beat===0&&<Note x={120} y={4} width={220}>{rescue?"救助地点へ物資を届けたい":dfs?"どこに宝がある？":weighted?"通路ごとに消費量が違う":"届け先までの道を探す"}</Note>}
+  {beat===0&&<Note x={120} y={4} width={220}>{rescue?"救助地点へ物資を届けたい":dfs?"宝を全部見つけたい":weighted?"通路ごとに消費量が違う":"届け先までの道を探す"}</Note>}
   {beat===1&&<Note x={110} y={178} width={240}>{rescue?"確認する場所が増えていく":dfs?"同じ場所を往復…":weighted?"遠回りでも消費が少ないことがある":"余分な道を通ってしまう"}</Note>}
   {beat===2&&<Note x={105} y={5} width={250}>{rescue?"移動時間は最小・探索の負担は小さく":dfs?"すべての場所を見落とさない":weighted?"消費エネルギーを最小に":"通る道の本数を最小に"}</Note>}
   {beat===3&&<><Person x={18} y={30}/>{rescue?<line x1="162" y1="155" x2="354" y2="104" stroke={blue} strokeWidth="3" strokeDasharray="6 5"/>:<Note x={175} y={4} width={190}>{dfs?"訪問済みの記録":weighted?"通った道の消費量を比較":"いくつかの行き方を比較"}</Note>}{dfs&&[0,2].map(i=><text key={i} x={roadNodes[i].x+15} y={roadNodes[i].y+18} fontSize="18" fill={green}>✓</text>)}</>}
   {beat===4&&<><Note x={136} y={5} width={190}>{rescue?"見積もりをどう使う？":dfs?"次はどこを調べる？":"どの場所を選ぶ？"}</Note><circle cx="162" cy="53" r="19" stroke={blue} strokeDasharray="4 4" strokeWidth="2" fill="none"/><circle cx="162" cy="155" r="19" stroke={blue} strokeDasharray="4 4" strokeWidth="2" fill="none"/></>}
-  {beat===5&&<Note x={100} y={5} width={260}>{dfs?"訪問順の記録が完成":rescue?"最短経路の計画を完成":weighted?"消費が最小の経路を計画":"各届け先までの最短距離"}</Note>}
+  {beat===5&&<Note x={100} y={5} width={260}>{dfs?"宝の数と訪問順を記録":rescue?"最短経路の計画を完成":weighted?"消費が最小の経路を計画":"各届け先までの最短距離"}</Note>}
  </>;
 }
 function ShelfScene({beat}:{beat:Beat}){

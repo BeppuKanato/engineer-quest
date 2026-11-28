@@ -667,7 +667,7 @@ export const missionThumbnailFor = (courseId: string): React.ReactNode => {
     case "course-algorithm-breadth-first-search-v1":
       return <BfsMissionThumbnail />;
     case "course-algorithm-depth-first-search-v1":
-      return <UnitStoryFigure kind="dfs" beat={0} label="迷路のどこに宝があるか分からないロボット" thumbnail/>;
+      return <UnitStoryFigure kind="dfs" beat={0} label="迷路の宝を全部見つけたいロボット" thumbnail/>;
     case "course-algorithm-maze-digging-v1":
       return <DiggingMissionThumbnail />;
     case "course-algorithm-wall-extension-v1":
