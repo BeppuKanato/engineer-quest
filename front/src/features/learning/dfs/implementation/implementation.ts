@@ -6,7 +6,7 @@ import { dfsAutoTests, dfsImplementationContent as content, type ProgramTest } f
 export type HintLevel = 1 | 2 | 3 | 4;
 export type HintUsage = readonly [number, number, number, number];
 export type FormatIssue = "empty" | "nonNumeric" | "length";
-export type TestOutcome = { readonly id: string; readonly passed: boolean; readonly actual?: unknown; readonly error?: "syntax" | "runtime" | "timeout"; readonly errorLine?: number; readonly errorException?: string; readonly errorName?: string; readonly autoPassed?: number; readonly autoTotal?: number; readonly formatIssue?: FormatIssue };
+export type TestOutcome = { readonly id: string; readonly passed: boolean; readonly actual?: unknown; readonly actualCount?: number; readonly error?: "syntax" | "runtime" | "timeout"; readonly errorLine?: number; readonly errorException?: string; readonly errorName?: string; readonly autoPassed?: number; readonly autoTotal?: number; readonly formatIssue?: FormatIssue };
 
 /** 単元フロー接続時に渡す要約。集計はテスト実行とヒント利用から導く。 */
 export type DfsImplementationSummary = {
@@ -37,17 +37,20 @@ export function allNamedTestsPassed(tests: readonly ProgramTest[], outcomes: rea
 }
 
 /**
- * プログラムの標準出力を、場所の並び（訪問順）として読む。
- * 空・場所でないもの混入や重複・個数の不一致は、実行エラーとは別の
- * 「出力の形」の問題として返す。
+ * プログラムの標準出力を、「宝の数＋場所の並び（訪問順）」として読む。
+ * 先頭のトークンが宝の数（数字）、残りが訪問順。空・形の崩れや重複・
+ * 個数の不一致は、実行エラーとは別の「出力の形」の問題として返す。
  */
-export function parseProgramOutput(stdout: string, nodes: readonly string[], expectedLength: number): { values: string[] } | { issue: FormatIssue } {
+export function parseProgramOutput(stdout: string, nodes: readonly string[], expectedLength: number): { count: number; values: string[] } | { issue: FormatIssue } {
   const tokens = stdout.split(/\s+/u).filter(token => token.length > 0);
   if (tokens.length === 0) return { issue: "empty" };
+  if (!/^\d+$/u.test(tokens[0])) return { issue: "nonNumeric" };
+  const count = Number.parseInt(tokens[0], 10);
+  const values = tokens.slice(1);
   const nodeSet = new Set(nodes);
-  if (tokens.some(token => !nodeSet.has(token)) || new Set(tokens).size !== tokens.length) return { issue: "nonNumeric" };
-  if (tokens.length !== expectedLength) return { issue: "length" };
-  return { values: tokens };
+  if (values.some(token => !nodeSet.has(token)) || new Set(values).size !== values.length) return { issue: "nonNumeric" };
+  if (values.length !== expectedLength) return { issue: "length" };
+  return { count, values };
 }
 
 const arraysEqual = (a: readonly string[], b: readonly string[]): boolean =>
@@ -60,7 +63,8 @@ function outcomeFromResult(test: ProgramTest, stdout: string, error: string | nu
   }
   const parsed = parseProgramOutput(stdout, test.nodes, test.expected.length);
   if ("issue" in parsed) return { id: test.id, passed: false, formatIssue: parsed.issue };
-  return { id: test.id, passed: arraysEqual(parsed.values, test.expected), ...(test.visibility === "display" ? { actual: parsed.values } : {}) };
+  const passed = parsed.count === test.expectedCount && arraysEqual(parsed.values, test.expected);
+  return { id: test.id, passed, ...(test.visibility === "display" ? { actual: parsed.values, actualCount: parsed.count } : {}) };
 }
 
 /** 例外でも他のケースを試すため、テストは1件ずつ実行する。判定用の生の標準出力はUI状態に渡さない。 */
@@ -93,7 +97,7 @@ export async function runAutoTests(code: string): Promise<TestOutcome> {
       if (!result) continue;
       if (result.error !== null) { if (firstError === null) firstError = result.error; continue; }
       const parsed = parseProgramOutput(result.stdout, test.nodes, test.expected.length);
-      if (!("issue" in parsed) && arraysEqual(parsed.values, test.expected)) passedCount++;
+      if (!("issue" in parsed) && parsed.count === test.expectedCount && arraysEqual(parsed.values, test.expected)) passedCount++;
     }
     if (firstError !== null && passedCount === 0) {
       const analysis = analyzeExecutionError(new Error(firstError));

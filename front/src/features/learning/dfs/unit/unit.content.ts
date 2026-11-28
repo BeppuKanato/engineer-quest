@@ -29,6 +29,6 @@ export const dfsUnitPhases = [
   },
   {
     phase: 7, id: "dfs-implementation", shortName: "自分で実装", formalName: "自分で実装", transitionOut: "final", cardRarity: "EPIC",
-    bridge: "訪れた順を返す深さ優先探索のコードを、自分で書いてテストしましょう。",
+    bridge: "宝の数と訪れた順を返す深さ優先探索のコードを、自分で書いてテストしましょう。",
   },
 ] as const satisfies readonly UnitPhase[];

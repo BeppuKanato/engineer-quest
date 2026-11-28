@@ -29,7 +29,7 @@ export async function runDfsFreeCode(code: string, onPrepared: () => void = () =
     });
     const parsed = parseProgramOutput(stdout, freeDisplayCase.nodes, freeDisplayCase.expected.length);
     if ("issue" in parsed) return { stdout, outputTruncated, returned: true, actual: null, error: "mismatch" };
-    const passed = parsed.values.every((value, index) => value === freeDisplayCase.expected[index]);
+    const passed = parsed.count === freeDisplayCase.expectedCount && parsed.values.every((value, index) => value === freeDisplayCase.expected[index]);
     return { stdout, outputTruncated, returned: true, actual: parsed.values, error: passed ? null : "mismatch" };
   } catch (error) {
     if (isCurrent()) disposePyodideRunner();
