@@ -14,6 +14,8 @@ import { AnswerFeedbackNotice } from "../assessment/AnswerFeedback";
 
 import { playerTokens } from "../player/player.tokens";
 import { unitText } from "./unit.content";
+import { findOptionalPhase } from "./optionalPhases";
+import { OptionalPhaseChip } from "./OptionalPhaseNote";
 import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
@@ -71,6 +73,12 @@ type UnitPhaseViewProps = LearningInstrumentation & {
   codeDraftBaseKey?: string;
   onCodeDraftError?: (failed: boolean) => void;
   onShowFinalResult: () => void;
+  /**
+   * 任意フェーズ（unit/optionalPhases のカタログ）に滞在していることを
+   * 上部の区別表示へ知らせる。任意フェーズの中身を持つ画面だけが、
+   * 開いている間はその ID を、閉じたら null を渡す。
+   */
+  onOptionalPhaseActive?: (optionalPhaseId: string | null) => void;
 };
 export type UnitPhaseView = ComponentType<UnitPhaseViewProps>;
 export type LearningUnitDefinition = {
@@ -94,6 +102,10 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   const [summaries, setSummaries] = useState<Readonly<Record<number, UnitPhaseSummary>>>(initialSummaries);
   const [completed, setCompleted] = useState(() => new Set(initialCompletedPhases));
   const [unitComplete, setUnitComplete] = useState(initialUnitComplete || first === null);
+  // 任意フェーズに滞在中かどうかは、上部の流れ表示に同格ノードを足さず、
+  // 滞在中だけ区別チップを出すためにここで持つ（2026-11-28）。
+  const [activeOptionalPhaseId, setActiveOptionalPhaseId] = useState<string | null>(null);
+  const activeOptionalPhase = findOptionalPhase(activeOptionalPhaseId);
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
   const reviewCounts = useRef<Record<string, number>>({});
@@ -219,6 +231,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
       advancePending={saving}
       achievements={visible && phase.transitionOut === "result-in-phase" ? renderPhaseAchievements?.(phase.id) : undefined}
       codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
+      onOptionalPhaseActive={setActiveOptionalPhaseId}
       onShowFinalResult={() => { if (!busy.current && unitComplete) setScreen({ kind: "final" }); }} />;
   };
 
@@ -272,6 +285,16 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
           </Button>
         </>}
       </Box>
+      {/* 任意フェーズに滞在している間だけ出す区別表示。流れの列には同格の
+          ノードを足さない（進捗の数え方と現在地の読みを乱さないため）。 */}
+      {activeOptionalPhase && (
+        <Box role="status" sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+          <OptionalPhaseChip />
+          <Typography sx={{ fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap" }}>
+            {activeOptionalPhase.name}（段階{activeOptionalPhase.anchorPhase}のあと）
+          </Typography>
+        </Box>
+      )}
     </Box>
     {/* 保存中は busy ガードで移動・完了が実際に止まるのに、見た目は押せるままだった。
         実態に合わせ、保存中は段階ボタン無効＋本文 inert＋その旨を文で出す（保存処理自体は不変）。

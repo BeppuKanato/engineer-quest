@@ -54,4 +54,15 @@ assert(overview.includes('<UnitKnowledgeCards courseId={courseId} />'), 'the ove
 assert(content.includes('bfsUnitIntro'), 'the unit content must define the intro line');
 assert(readFront('src/features/learning/app/unitRegistry.ts').includes('intro: bfsUnitIntro'), 'the registry must expose the intro');
 
+// 7. Optional phases are read from the shared definition catalog
+//    (unit/optionalPhases.ts), never hardcoded in display components
+//    (2026-11-28 generalization: no 1.5/6.5-specific display code).
+const optionalCatalog = readFront('src/features/learning/unit/optionalPhases.ts');
+assert(optionalCatalog.includes('anchorPhase: 1') && optionalCatalog.includes('anchorPhase: 6'), 'the catalog must anchor optional phases to required phases');
+assert(overview.includes('unitOptionalPhases'), 'the wave map must read the optional-phase catalog');
+assert(!mapSection.includes('予測・実験') && !mapSection.includes('実装の橋渡し'), 'the wave map must not hardcode optional-phase names');
+assert(overview.includes('OptionalPhaseChip'), 'the wave map must mark optional nodes with the shared chip');
+assert(readFront('src/features/learning/unit/LearningUnitPreview.tsx').includes('findOptionalPhase'), 'the player header must resolve the active optional phase from the catalog');
+assert(readFront('src/app/component/feedbackV1.tsx').includes('findOptionalPhase'), 'feedback candidates must resolve optional-phase targets from the catalog');
+
 console.log('verifyUnitOverview: all contracts hold');
