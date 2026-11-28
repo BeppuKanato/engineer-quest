@@ -144,7 +144,7 @@ const loadStats = async (userId: string, conditions: ReadonlySet<AchievementCond
   submissions.flatMap((s) => asResultArray(s.results)).forEach((r) => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
-  const phases = new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }]));
+  const phases: Map<string, PhaseStat> = new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }] as [string, PhaseStat]));
   const completedUnitIds = unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId);
   // 実績として数えられる単元の集合。実装フェーズに clears がある単元では、
   // 解法例を見ていない clear がある単元だけを数える。clears が無い単元・履歴は
