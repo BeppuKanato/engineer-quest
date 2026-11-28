@@ -12,6 +12,11 @@ import { disposePyodideRunner, preparePyodide } from "../../../../lib/pyodideRun
 import type { LearningInstrumentation } from "../../instrumentation/useLearningVisit";
 import { implementationInputLevels, implementationInputLevelText, type ImplementationInputLevel } from "../../implementation/inputLevel";
 import { useImplementationInputLevel } from "../../implementation/useImplementationInputLevel";
+import { courseIdFromDraftKey, SOLUTION_REVEAL_FAILURE_THRESHOLD, type ImplementationClearRecord } from "../../implementation/answerReveal";
+import { checkUsedAiConsultation } from "../../implementation/checkAiConsultation";
+import { useSolutionRevealAttempt } from "../../implementation/useSolutionRevealAttempt";
+import { SolutionRevealDialog, SolutionRevealValve } from "../../implementation/SolutionReveal";
+import { useUserSession } from "@/app/component/userSession";
 import { bridgeOptionalPhaseId, findOptionalPhase } from "../../unit/optionalPhases";
 import { OptionalPhaseNote } from "../../unit/OptionalPhaseNote";
 
@@ -75,12 +80,17 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
   // 入口では書き方の量を選ぶ（旧画面の選択ゲートを、プログラム形に合わせて残す）。
   const [started, setStarted] = useState(false);
   const [bridgeOpen, setBridgeOpen] = useState(false);
+  const [solutionOpen, setSolutionOpen] = useState(false);
+  // 解法例の解放バルブ（ステージ2）。失敗回数・閲覧・試行開始時刻は永続化され、画面を閉じても同じ試行として続く。
+  const { attempt, unlocked: solutionUnlocked, recordFailure, markViewedSolution, resetAttempt } = useSolutionRevealAttempt(draftBaseKey);
+  const failedRuns = attempt.failedRuns;
+  const attemptRef = useRef(attempt); attemptRef.current = attempt;
+  const pendingClearRef = useRef<ImplementationClearRecord | null>(null);
+  const { firebaseUser } = useUserSession();
   // 任意フェーズ（実装の橋渡し）に滞在していることを、プレイヤー上部の
   // 区別表示へ知らせる（2026-11-28、任意フェーズの汎用仕組み）。
   useEffect(() => { onOptionalPhaseActive?.(bridgeOpen ? bridgeOptionalPhaseId : null); }, [bridgeOpen, onOptionalPhaseActive]);
   const bridgeOptionalPhase = findOptionalPhase(bridgeOptionalPhaseId);
-  const [showExample, setShowExample] = useState(false);
-  const [failedRuns, setFailedRuns] = useState(0);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [celebrationDismissed, setCelebrationDismissed] = useState(false);
   const freeRunning = freeStatus !== "idle";
@@ -141,13 +151,26 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
     const timer = setTimeout(() => setConfettiReady(true), 1850);
     return () => clearTimeout(timer);
   }, [complete, reduceMotion]);
+  const buildClearRecord = useCallback(async (): Promise<ImplementationClearRecord> => {
+    const current = attemptRef.current;
+    const usedAiConsultation = await checkUsedAiConsultation(async () => {
+      if (!firebaseUser) throw new Error("unauthenticated");
+      return firebaseUser.getIdToken();
+    }, courseIdFromDraftKey(draftBaseKey), current.startedAt);
+    return { completedAt: new Date().toISOString(), viewedSolution: current.viewedSolution, usedAiConsultation, usedHint: usage.some(count => count > 0), inputLevel: level };
+  }, [firebaseUser, draftBaseKey, usage, level]);
   useEffect(() => {
     if (complete && !completedRef.current) {
       completedRef.current = true;
-      onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level, code });
+      void (async () => {
+        const record = pendingClearRef.current ?? await buildClearRecord();
+        pendingClearRef.current = null;
+        onComplete?.({ testRuns: runs, hintUsage: usage, inputLevel: level, code, clears: [record] });
+        resetAttempt();
+      })();
     }
     if (!complete) { completedRef.current = false; setCelebrationDismissed(false); }
-  }, [complete, onComplete, runs, usage, level, code]);
+  }, [complete, onComplete, runs, usage, level, code, buildClearRecord, resetAttempt]);
   useEffect(() => {
     const passedCount = outcomes.filter(outcome => outcome.passed).length;
     if (passedCount > prevPassedRef.current) play("answerCorrect");
@@ -188,9 +211,13 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
       setOutcomes(result); setLastOutcomes(result);
       setErrorLine(result.find(outcome => outcome.errorLine !== undefined)?.errorLine);
       const succeeded = allNamedTestsPassed(content.tests, result) && auto.passed;
-      if (!succeeded) setFailedRuns(count => count + 1);
+      if (!succeeded) recordFailure();
       onLearningEvent?.({ eventType: "implementation_test_result", payload: { count: runs + 1, code, level, results: result.map(item => ({ id: item.id, passed: item.passed, error: item.error ?? (item.passed ? null : "mismatch") })) } });
-      if (succeeded) onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, code, level } });
+      if (succeeded) {
+        const record = await buildClearRecord();
+        pendingClearRef.current = record;
+        onLearningEvent?.({ eventType: "implementation_complete", payload: { testRuns: runs + 1, hintUsage: usage, code, level, viewedSolution: record.viewedSolution, usedAiConsultation: record.usedAiConsultation, usedHint: record.usedHint, inputLevel: record.inputLevel } });
+      }
     } finally {
       lock.current = false;
       if (current === generation.current) setRunning(false);
@@ -212,6 +239,7 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
     onLearningEvent?.({ eventType: "hint_open", payload: { level, count: usage[level - 1] + 1 } });
     setUsage(current => recordHintUsage(current, level)); setHint(level);
   };
+  const openSolution = () => { markViewedSolution(); setSolutionOpen(true); };
   const changeLevel = (next: ImplementationInputLevel) => {
     if (busy || next === level) return;
     onLearningEvent?.({ eventType: "implementation_level_select", payload: { level: next, previousLevel: level } });
@@ -321,21 +349,22 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
       {started && !complete && <Box sx={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 1, flexWrap: "wrap" }}>
         <Typography component="p" sx={{ fontSize: 15 }}>書き方：<Box component="span" sx={{ fontWeight: 800 }}>{level === "full" ? content.freeForm.modeFree : `${content.freeForm.bridgeLabel}（${implementationInputLevelText.levels[level].label}）`}</Box></Typography>
         {level === "full"
-          ? <Button size="small" onClick={() => { setShowExample(false); setBridgeOpen(true); }} sx={{ minHeight: 36, color: playerTokens.focus, fontWeight: 700 }}>{content.freeForm.bridgeButton}</Button>
+          ? <Button size="small" onClick={() => { setBridgeOpen(true); }} sx={{ minHeight: 36, color: playerTokens.focus, fontWeight: 700 }}>{content.freeForm.bridgeButton}</Button>
           : <>
               <Button size="small" onClick={() => changeLevel("full")} sx={{ minHeight: 36, color: playerTokens.focus, fontWeight: 700 }}>{content.freeForm.bridgeBackButton}</Button>
-              <Button size="small" onClick={() => { setShowExample(false); setBridgeOpen(true); }} sx={{ minHeight: 36, color: playerTokens.focus, fontWeight: 700 }}>{content.freeForm.bridgeChangeButton}</Button>
+              <Button size="small" onClick={() => { setBridgeOpen(true); }} sx={{ minHeight: 36, color: playerTokens.focus, fontWeight: 700 }}>{content.freeForm.bridgeChangeButton}</Button>
             </>}
       </Box>}
       {/* 支援のエスカレーション：テストに2回つまずいたら、橋渡し（型）を一度だけ提案する。 */}
       {started && !complete && level === "full" && failedRuns >= 2 && !bannerDismissed && (
         <Box role="status" sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1.5, border: "2px solid #2563eb", borderRadius: 2, bgcolor: "#fff", px: 2, py: 1 }}>
           <Typography component="p" sx={{ fontSize: 15, fontWeight: 700, flex: 1 }}>{content.freeForm.bannerText}</Typography>
-          <Button variant="contained" size="small" onClick={() => { setShowExample(false); setBridgeOpen(true); }}
+          <Button variant="contained" size="small" onClick={() => { setBridgeOpen(true); }}
             sx={{ minHeight: 40, fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>{content.freeForm.bridgeButton}</Button>
           <Button size="small" onClick={() => setBannerDismissed(true)} sx={{ minHeight: 40, color: colors.text, fontWeight: 700 }}>{content.freeForm.bannerDismiss}</Button>
         </Box>
       )}
+      {started && !complete && solutionUnlocked && <SolutionRevealValve onOpen={openSolution} />}
       {started && <Box data-editor-workspace sx={{ flex: 1, minHeight: 0, overflowY: { xs: "auto", md: "hidden" }, display: { xs: "block", md: "grid" }, gridTemplateColumns: "minmax(0, 1.5fr) minmax(340px, 1fr)", gap: 2 }}>
         <Box aria-label={text.code} sx={{ minWidth: 0, minHeight: { xs: 360, md: 0 }, height: { xs: "70dvh", md: "100%" }, display: "flex", flexDirection: "column", border: "2px solid #dbe3ef", "&:focus-within": { borderColor: "#2563eb" }, borderRadius: 1.5, overflow: "hidden", bgcolor: colors.panel,
           "& .monaco-editor .monaco-scrollable-element, & .monaco-editor .view-lines, & .monaco-editor .inputarea": { cursor: learningEditorTextCursor } }}>
@@ -496,21 +525,16 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
             <Box aria-hidden sx={{ width: 22, height: 8, borderRadius: 999, bgcolor: "#fff", border: "1.6px dashed #2563eb" }} />自分で書く
           </Box>
         </Box>
-        {(failedRuns >= 3 || level !== "full") && <Box sx={{ mt: 3, borderTop: "1px solid #dbe3ef", pt: 2 }}>
-          {!showExample
-            ? <Button onClick={() => setShowExample(true)} sx={{ minHeight: 44, fontWeight: 800, color: "#2563eb" }}>{content.freeForm.exampleButton}</Button>
-            : <>
-                <Typography component="p" sx={{ fontSize: 16, fontWeight: 900, mb: 0.5 }}>{content.freeForm.exampleTitle}</Typography>
-                <Typography component="p" sx={{ fontSize: 14, mb: 1.5 }}>{content.freeForm.exampleNote}</Typography>
-                <Box component="pre" sx={{ m: 0, p: 2, bgcolor: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: 1.5, fontFamily: "monospace", fontSize: 14, lineHeight: 1.7, whiteSpace: "pre", overflowX: "auto", color: colors.text }}>
-                  {dfsExampleProgram}
-                </Box>
-              </>}
-        </Box>}
+        <Box sx={{ mt: 3, borderTop: "1px solid #dbe3ef", pt: 2 }}>
+          {solutionUnlocked
+            ? <Button onClick={() => { setBridgeOpen(false); openSolution(); }} sx={{ minHeight: 44, fontWeight: 800, color: "#2563eb" }}>{content.freeForm.exampleButton}</Button>
+            : <Typography component="p" sx={{ fontSize: 14 }}>解法例は、テストに{SOLUTION_REVEAL_FAILURE_THRESHOLD}回つまずくと見られるようになります（現在{failedRuns}回）。ヒントと橋渡しは、いつでも使えます。</Typography>}
+        </Box>
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2.5 }}>
           <Button onClick={() => setBridgeOpen(false)} sx={{ minHeight: 44, fontWeight: 700, color: colors.text }}>閉じる</Button>
         </Box>
       </DialogContent>
     </Dialog>
+    <SolutionRevealDialog open={solutionOpen} onClose={() => setSolutionOpen(false)} title={content.freeForm.exampleTitle} note={content.freeForm.exampleNote} program={dfsExampleProgram} />
   </Box>;
 }

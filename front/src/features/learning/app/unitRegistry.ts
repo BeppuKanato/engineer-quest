@@ -7,6 +7,7 @@ import { binarySearchUnitIntro, binarySearchUnitPhases, binarySearchUnitTitle } 
 import { greedyCoinsUnitIntro, greedyCoinsUnitPhases, greedyCoinsUnitTitle } from "../greedy-coins/unit/unit.content";
 import { dfsUnitIntro, dfsUnitPhases, dfsUnitTitle } from "../dfs/unit/unit.content";
 import type { LearningProgress } from "../../../api/learning.api";
+import { parseImplementationClears } from "../implementation/answerReveal";
 
 import { weightedMaterials } from "../weighted-search/content";
 
@@ -37,6 +38,9 @@ export function savedPhaseSummaries(unit: LearningUnit, progress: LearningProgre
       if (typeof value[key] === "number" && Number.isInteger(value[key]) && value[key] >= 0) result[key] = value[key];
     }
     if (Array.isArray(value.hintUsage) && value.hintUsage.every(count => Number.isInteger(count) && count >= 0)) result.hintUsage = value.hintUsage;
+    if (typeof value.inputLevel === "string" && ["full", "skeleton", "fill-in"].includes(value.inputLevel)) result.inputLevel = value.inputLevel as UnitPhaseSummary["inputLevel"];
+    const clears = parseImplementationClears(value.clears);
+    if (clears.length) result.clears = clears;
     return [[index, result]];
   }));
 }
