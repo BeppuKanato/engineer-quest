@@ -652,6 +652,7 @@ enum AchievementConditionType {
   PHASE_COMPLETED
   PHASE_FIRST_ATTEMPT_PERFECT
   PHASE_NO_HINT_COMPLETE
+  PHASE_FULL_NO_HINT_COMPLETE
 }
 
 enum AchievementRarity {
