@@ -118,22 +118,27 @@ const CARD_COURSES = [
 ] as const;
 
 // Issue #471: 単元21件・横断10件・作る19件と、狙える目標の条件を検証する。
+// ステージ4（実績の再構成）: 単元ごとに4種（単元完了／最終ミッションクリア／
+// ノーヒントクリア／ほぼ自力でノーヒントクリア）となり、総数は 60 → 69 件。
 const normalAchievements = achievementSeed.filter(a => !a.isSecret);
-assert.equal(achievementSeed.length, 60);
-assert.equal(normalAchievements.length, 56);
-for (const [rarity, count] of [[Rarity.COMMON, 14], [Rarity.RARE, 20], [Rarity.EPIC, 20], [Rarity.LEGENDARY, 2]] as const) {
+assert.equal(achievementSeed.length, 69);
+assert.equal(normalAchievements.length, 65);
+for (const [rarity, count] of [[Rarity.COMMON, 14], [Rarity.RARE, 20], [Rarity.EPIC, 29], [Rarity.LEGENDARY, 2]] as const) {
   assert.equal(normalAchievements.filter((achievement) => achievement.rarity === rarity).length, count, rarity);
 }
 assert.equal(normalAchievements.filter((achievement) => achievement.category === "CREATE_QUEST").length, 19);
 for (const course of CARD_COURSES) {
   const achievements = achievementSeed.filter((achievement) => achievement.courseId === course.courseId);
-  assert.equal(achievements.length, 3, course.courseId);
-  for (const [condition, rarity] of [[Condition.UNIT_COMPLETE, Rarity.COMMON], [Condition.PHASE_COMPLETED, Rarity.RARE], [Condition.PHASE_NO_HINT_COMPLETE, Rarity.EPIC]] as const) {
+  assert.equal(achievements.length, 4, course.courseId);
+  for (const [condition, rarity] of [[Condition.UNIT_COMPLETE, Rarity.COMMON], [Condition.PHASE_COMPLETED, Rarity.RARE], [Condition.PHASE_NO_HINT_COMPLETE, Rarity.EPIC], [Condition.PHASE_FULL_NO_HINT_COMPLETE, Rarity.EPIC]] as const) {
     const achievement = achievements.find((item) => item.conditionType === condition);
     assert.ok(achievement, `${course.courseId}: ${condition}`);
     assert.equal(achievement.rarity, rarity);
     if (condition !== Condition.UNIT_COMPLETE) assert.equal(achievement.phaseKey, course.phaseKeys[6]);
   }
+  assert.equal(achievements.find((item) => item.conditionType === Condition.PHASE_COMPLETED)?.title, "最終ミッションクリア");
+  assert.equal(achievements.find((item) => item.conditionType === Condition.PHASE_FULL_NO_HINT_COMPLETE)?.title, "ほぼ自力でノーヒントクリア");
+  assert.ok(achievements.find((item) => item.conditionType === Condition.PHASE_NO_HINT_COMPLETE)?.description.includes("AI"), `${course.courseId}: nohint description must mention AI consultation`);
 }
 assert.equal(achievementSeed.some((achievement) => achievement.conditionType === Condition.PHASE_FIRST_ATTEMPT_PERFECT), false);
 const secrets = achievementSeed.filter(a => a.isSecret);
