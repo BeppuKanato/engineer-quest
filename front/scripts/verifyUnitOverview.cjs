@@ -56,9 +56,12 @@ assert(readFront('src/features/learning/app/unitRegistry.ts').includes('intro: b
 
 // 7. Optional phases are read from the shared definition catalog
 //    (unit/optionalPhases.ts), never hardcoded in display components
-//    (2026-11-28 generalization: no 1.5/6.5-specific display code).
+//    (2026-11-28 generalization: no 6.5-specific display code).
+//    1.5 "prediction" was abolished as an optional phase the same day:
+//    prediction lives inside phase 2, so the catalog must not carry it.
 const optionalCatalog = readFront('src/features/learning/unit/optionalPhases.ts');
-assert(optionalCatalog.includes('anchorPhase: 1') && optionalCatalog.includes('anchorPhase: 6'), 'the catalog must anchor optional phases to required phases');
+assert(optionalCatalog.includes('anchorPhase: 6'), 'the catalog must anchor optional phases to required phases');
+assert(!optionalCatalog.includes('optional-prediction'), 'the catalog must not carry the abolished 1.5 prediction phase');
 assert(overview.includes('unitOptionalPhases'), 'the wave map must read the optional-phase catalog');
 assert(!mapSection.includes('予測・実験') && !mapSection.includes('実装の橋渡し'), 'the wave map must not hardcode optional-phase names');
 assert(overview.includes('OptionalPhaseChip'), 'the wave map must mark optional nodes with the shared chip');

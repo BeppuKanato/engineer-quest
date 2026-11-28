@@ -10,14 +10,15 @@ import type { UnitOptionalPhase } from "./unit.types";
  * 1.5 / 6.5 専用の分岐を表示側に書かない。
  *
  * 中身の用意状況（2026-11-28 時点）:
- * - 予測・実験（1.5）: 独立した画面・遷移先はまだ無い。予測の設問は
- *   BFS のフェーズ2のステップ内にのみある（G1-a の仕組み）。
- *   波マップの置き場所と推薦の受け口だけが先行してある。
  * - 実装の橋渡し（6.5）: フェーズ7の画面内ダイアログとして BFS・DFS・
  *   二分探索にのみある。他単元のフェーズ7にはまだ無い。
+ *
+ * 1.5「予測・実験」は 2026-11-28 の Kanato の決定で、任意フェーズとしての
+ * 概念自体を廃止した。予測は独立フェーズに切り出さず、フェーズ2内の
+ * 予測パートとして全単元に実装する方針に変わったため、カタログにも
+ * 載せない（波マップ・流れ・推薦のどこにも 1.5 は出ない）。
  */
 export const unitOptionalPhases: readonly UnitOptionalPhase[] = [
-  { id: "optional-prediction", name: "予測・実験", anchorPhase: 1, side: "above", timing: "予想してみよう", icon: "prediction", availability: "always" },
   { id: "optional-bridge", name: "実装の橋渡し", anchorPhase: 6, side: "below", timing: "段階6のあと", icon: "bridge", availability: "mission" },
 ];
 

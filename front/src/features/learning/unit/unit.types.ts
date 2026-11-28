@@ -30,7 +30,7 @@ export type UnitPhaseSummary = {
 export type UnitTransition = "bridge" | "result" | "result-in-phase" | "final";
 
 /** 任意フェーズのアイコン種別。実アイコンへの引き当ては表示側（単元画面）が持つ。 */
-export type OptionalPhaseIcon = "prediction" | "bridge";
+export type OptionalPhaseIcon = "bridge";
 
 /**
  * 任意フェーズの定義（2026-11-28、汎用化）。
@@ -44,7 +44,7 @@ export type UnitOptionalPhase = {
   id: string;
   /** 表示名 */
   name: string;
-  /** この任意フェーズがぶら下がる必須フェーズの番号（1.5 なら 1、6.5 なら 6） */
+  /** この任意フェーズがぶら下がる必須フェーズの番号（6.5 なら 6） */
   anchorPhase: number;
   /** 波マップで本線のどちら側に逃がすか */
   side: "above" | "below";

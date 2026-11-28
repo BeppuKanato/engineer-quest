@@ -7,7 +7,6 @@ import FlagIcon from "@mui/icons-material/Flag";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
-import ScienceIcon from "@mui/icons-material/Science";
 import BuildIcon from "@mui/icons-material/Build";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
@@ -220,7 +219,7 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, missionR
   // 置き場所はアンカー（ぶら下がる必須フェーズの番号）から波の位置を計算し、
   // 本線の上／下への逃がし量だけを側ごとの既定値で持つ。本線の上に置くと
   // 前後の段階ラベルと重なるため、側はカタログ側で決める。
-  const optionalIcons = { prediction: ScienceIcon, bridge: BuildIcon } as const;
+  const optionalIcons = { bridge: BuildIcon } as const;
   const optionalOffsets = { above: { dx: -14, dy: -60 }, below: { dx: -95, dy: 126 } } as const;
   const optionals =
     count >= 7
