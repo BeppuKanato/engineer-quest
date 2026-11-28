@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Button, Chip, Typography } from "@mui/material";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { developmentMissionThumbnailFor } from "@/features/learning/app/DevelopmentMissionThumbnail";
 import { developmentMissions, type DevMission } from "@/features/learning/app/developmentMissions";
@@ -15,17 +16,28 @@ export const missionsUnlockedByUnit = (courseId: string): DevMission[] =>
  * 同一性は一覧・挑戦画面と同じ場面イラストで運ぶ。
  */
 export function MissionUnlockNotice({ courseId }: { courseId: string }) {
+  const reduced = useReducedMotion();
   const missions = missionsUnlockedByUnit(courseId);
   if (missions.length === 0) return null;
   return (
-    <Box sx={{ maxWidth: 760, mt: 4 }}>
+    <Box
+      component={motion.div}
+      initial={reduced ? false : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduced ? 0 : 0.45, ease: "easeOut", delay: reduced ? 0 : 0.2 }}
+      sx={{ maxWidth: 760, mt: 4 }}
+    >
       <Typography component="p" sx={{ fontSize: 16, fontWeight: 800, mb: 1 }}>
         新しい挑戦が開きました
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        {missions.map((mission) => {
+        {missions.map((mission, index) => {
           return (
             <Box
+              component={motion.div}
+              initial={reduced ? false : { opacity: 0, scale: 0.97, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: reduced ? 0 : 0.4, ease: "easeOut", delay: reduced ? 0 : 0.3 + index * 0.12 }}
               key={mission.id}
               sx={{
                 display: "flex",

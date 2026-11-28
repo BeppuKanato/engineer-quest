@@ -26,6 +26,11 @@ const TEXT = "#111827";
 const PRIMARY = "#2563eb";
 const GREEN = "#16a34a";
 const STREAK_ORANGE = "#ea580c";
+// 実績・知識カードのシンボル色は、各コレクション画面で使われている色にそろえる
+// （実績＝金 #d97706：実績画面のトロフィー、知識カード＝紫 #7e22ce：コレクションのカード）。
+// ストリークの炎（オレンジ）と同じく「対象を表す色」であり、青＝行動／緑＝完了の意味とは分ける。
+const ACHIEVEMENT_GOLD = "#d97706";
+const CARD_PURPLE = "#7e22ce";
 const HAIRLINE = "#e3e9f4";
 
 const S1 = { borderRadius: "18px", border: `1px solid ${HAIRLINE}`, boxShadow: "0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.06)" } as const;
@@ -179,7 +184,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
             {achievement && (
               <Box component="section" aria-label="次の実績">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <WorkspacePremiumOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                  <WorkspacePremiumOutlinedIcon sx={{ color: ACHIEVEMENT_GOLD, fontSize: 22 }} />
                   <Typography sx={{ fontSize: 18, fontWeight: 900 }}>次の実績</Typography>
                   <Box sx={{ flex: 1 }} />
                   <MuiLink component={Link} href="/achievements" underline="hover" sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY, display: "inline-flex", alignItems: "center", gap: 0.25 }}>実績一覧へ<ArrowOutwardIcon sx={{ fontSize: 15 }} /></MuiLink>
@@ -197,7 +202,7 @@ export function HomeDashboard({ data, review, goalBand }: { data: HomeResponse; 
 
             <Box component="section" aria-label="知識カード">
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <StyleOutlinedIcon sx={{ color: TEXT, fontSize: 22 }} />
+                <StyleOutlinedIcon sx={{ color: CARD_PURPLE, fontSize: 22 }} />
                 <Typography sx={{ fontSize: 18, fontWeight: 900 }}>知識カード</Typography>
                 <Typography sx={{ fontSize: 16, fontWeight: 900 }}>{overview.collectedCards} / {overview.totalCards}枚</Typography>
                 <Box sx={{ flex: 1 }} />

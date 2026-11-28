@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { PageTransitionOverlay } from "@/app/component/pageTransitionOverlay";
+import { RobotFigure } from "@/app/component/robotFigure";
 import { useNavigationFeedback } from "@/hooks/useNavigationFeedback";
 import { ensureUser } from "@/api/auth.api";
 import { useUserSession } from "@/app/component/userSession";
@@ -97,12 +98,19 @@ export default function Login() {
       >
         <CardContent>
           <Stack spacing={3}>
-            <Typography
-              variant="h4"
-              sx={{ fontWeight: "bold", textAlign: "center" }}
-            >
-              ログイン
-            </Typography>
+            {/* 相棒アルドを添えて、ログイン画面にもアプリらしさを出す（フォームの挙動は変えない）。 */}
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+              <RobotFigure state="happy" alt="アルド" size="M" grounding="shadow" />
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: "bold", textAlign: "center" }}
+              >
+                ログイン
+              </Typography>
+              <Typography sx={{ textAlign: "center", fontSize: 14 }}>
+                おかえりなさい。アルドと一緒に、今日の学習をはじめよう
+              </Typography>
+            </Box>
 
             <TextField
               label="Email"

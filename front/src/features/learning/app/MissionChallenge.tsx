@@ -3,6 +3,7 @@
 // 発展ミッション挑戦画面の下書き（2026-11-25、Issue #507）。
 // 土台はフェーズ7の自由実装の枠（プログラム形式）を流用し、スコアパネルと
 // 関連知識カードの参照要素（Issue #510）を足したもの。
+import { AppHeader } from "@/app/component/appHeader";
 import { RobotBust } from "@/app/component/robotBust";
 import { developmentMissionThumbnailFor } from "@/features/learning/app/DevelopmentMissionThumbnail";
 import { KnowledgeCardFace } from "@/features/learning/app/KnowledgeCardFace";
@@ -613,6 +614,8 @@ export function MissionChallengePage({ missionId }: { missionId: string }) {
   const unlocked = progress?.unit?.status === "COMPLETED";
   return (
     <Box sx={{ height: "100dvh", display: "flex", flexDirection: "column", bgcolor: "#f5f8fc" }}>
+      {/* 他画面と共通のヘッダーを付ける（一覧画面にはあるのに挑戦画面だけ無かった）。 */}
+      <AppHeader />
       <Box sx={{ flexShrink: 0, px: 2.5, pt: 2, display: "flex", alignItems: "center", gap: 2 }}>
         <Button onClick={() => { window.location.href = "/missions"; }} sx={{ fontWeight: 800, px: 0 }}>← 発展ミッション一覧へ</Button>
         <Typography component="p" sx={{ fontSize: 14 }}>発展ミッション／{mission?.title ?? ""}</Typography>
