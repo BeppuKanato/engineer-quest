@@ -8,7 +8,6 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import FlagIcon from "@mui/icons-material/Flag";
 import HistoryIcon from "@mui/icons-material/History";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
   Alert,
@@ -20,8 +19,6 @@ import {
   DialogActions,
   DialogContent,
   Paper,
-  Radio,
-  RadioGroup,
   Skeleton,
   Stack,
   Typography,
@@ -41,11 +38,6 @@ import { ActionButton } from "@/app/component/actionButton";
 import { FeedbackAssignmentSetting } from "@/app/component/feedbackAssignmentSetting";
 import { AppHeader } from "@/app/component/appHeader";
 import { RobotFigure } from "@/app/component/robotFigure";
-import { useSoundEffect } from "@/app/component/soundFeedback";
-import {
-  useAchievementNotificationMode,
-  type AchievementNotificationMode,
-} from "@/hooks/useAchievementNotificationMode";
 import { auth } from "@/lib/firebase";
 import { fetchClientQuery, peekClientQueryData, queryTags } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
@@ -84,11 +76,6 @@ const formatDateTime = (value: string) =>
 
 
 export default function ProfilePage() {
-  const { play } = useSoundEffect();
-  const {
-    mode: achievementNotificationMode,
-    setMode: setAchievementNotificationMode,
-  } = useAchievementNotificationMode();
   const { status, token } = useUserSession();
   const [cachedProfile] = useState(() => peekClientQueryData<ProfileResponse>("profile"));
   const [cachedCollection] = useState(() => peekClientQueryData<CollectionResponse>("collection"));
@@ -176,13 +163,6 @@ export default function ProfilePage() {
                       value={profile.selectedAchievement?.title ?? "未設定"}
                       href="/achievements"
                     />
-                    <AchievementNotificationSetting
-                      value={achievementNotificationMode}
-                      onChange={(mode) => {
-                        setAchievementNotificationMode(mode);
-                        play("uiSelect");
-                      }}
-                    />
                   </Stack>
                 </Paper>
               </Box>
@@ -261,78 +241,6 @@ const SettingRow = ({
   </Paper>
 );
 
-const achievementNotificationOptions: {
-  value: AchievementNotificationMode;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "modal",
-    label: "モーダル",
-    description: "実績解除時に、大きな演出画面を表示します。",
-  },
-  {
-    value: "snackbar",
-    label: "スナックバー",
-    description: "実績解除時に、画面上へ小さな通知を表示します。",
-  },
-  {
-    value: "none",
-    label: "通知なし",
-    description: "実績は解除されますが、即時通知は表示しません。",
-  },
-];
-
-const AchievementNotificationSetting = ({
-  value,
-  onChange,
-}: {
-  value: AchievementNotificationMode;
-  onChange: (mode: AchievementNotificationMode) => void;
-}) => (
-  <Paper
-    elevation={0}
-    sx={{ p: 1.5, borderRadius: 2, border: "1px solid #dbe3ef", bgcolor: "#fff" }}
-  >
-    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-      <Box sx={{ width: 34, color: "#0052d9", display: "grid", placeItems: "center" }}>
-        <NotificationsActiveIcon />
-      </Box>
-      <Typography fontWeight={800}>実績解除通知</Typography>
-    </Stack>
-    <RadioGroup
-      value={value}
-      onChange={(event) =>
-        onChange(event.target.value as AchievementNotificationMode)
-      }
-      aria-label="実績解除通知"
-    >
-      {achievementNotificationOptions.map((option) => (
-        <Paper
-          component="label"
-          key={option.value}
-          elevation={0}
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            p: 1,
-            borderRadius: 2,
-            cursor: "pointer",
-            bgcolor: value === option.value ? "#eff6ff" : "transparent",
-          }}
-        >
-          <Radio value={option.value} size="small" sx={{ mt: -0.5 }} />
-          <Box>
-            <Typography fontWeight={900}>{option.label}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-              {option.description}
-            </Typography>
-          </Box>
-        </Paper>
-      ))}
-    </RadioGroup>
-  </Paper>
-);
 const RecentActivityCard = ({ items }: { items: ProfileHistoryItem[] }) => (
   <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3, border: "1px solid #dbe3ef", bgcolor: "#fff" }}>
     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>

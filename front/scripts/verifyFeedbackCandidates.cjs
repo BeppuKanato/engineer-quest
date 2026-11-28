@@ -26,6 +26,9 @@ vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleK
     if(name==='firebase/auth')return {};
     if(name==='@/lib/fetcher')return {fetcher:async(url,options)=>{records.push(JSON.parse(options.body));}};
     if(name==='@/api/feedbackV1.api')return {};
+    // 任意フェーズのカタログ引き（2026-11-28）はフィクスチャの対象キーでは該当なしとして扱う。
+    if(name==='@/features/learning/unit/optionalPhases')return {findOptionalPhase:()=>undefined};
+    if(name==='@/features/learning/unit/OptionalPhaseNote')return {OptionalPhaseNote:()=>null,OptionalPhaseChip:()=>null};
     if(name==='next/link')return {__esModule:true,default:({children,...props})=>React.createElement('a',props,children)};
     return require(name);
   },
