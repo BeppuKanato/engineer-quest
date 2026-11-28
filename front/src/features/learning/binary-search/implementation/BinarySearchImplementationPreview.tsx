@@ -17,6 +17,8 @@ import { checkUsedAiConsultation } from "../../implementation/checkAiConsultatio
 import { useSolutionRevealAttempt } from "../../implementation/useSolutionRevealAttempt";
 import { SolutionRevealDialog, SolutionRevealValve } from "../../implementation/SolutionReveal";
 import { useUserSession } from "@/app/component/userSession";
+import { bridgeOptionalPhaseId, findOptionalPhase } from "../../unit/optionalPhases";
+import { OptionalPhaseNote } from "../../unit/OptionalPhaseNote";
 
 import { ResultConfetti } from "../../app/ResultConfetti";
 import { useSoundEffect } from "../../../../app/component/soundFeedback";
@@ -63,7 +65,7 @@ function LevelFillIllustration({ level }: { level: ImplementationInputLevel }) {
  * 選択ゲートをプログラム形のテンプレートで残した）。問題文は作業画面の
  * 「問題」タブにも常駐する。旧・関数形は implementation-legacy に保存。
  */
-export function BinarySearchImplementationPreview({ embedded = false, onComplete, onLearningEvent, codeDraftBaseKey, onCodeDraftError, onShowFinalResult }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BinarySearchImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void }) {
+export function BinarySearchImplementationPreview({ embedded = false, onComplete, onLearningEvent, codeDraftBaseKey, onCodeDraftError, onShowFinalResult, onOptionalPhaseActive }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: BinarySearchImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void; onOptionalPhaseActive?: (optionalPhaseId: string | null) => void }) {
   // 下書きキーはプログラム形式専用にする（関数形の下書きと混ざらない）。
   const draftBaseKey = `${codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`}:program`;
   const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
@@ -82,6 +84,10 @@ export function BinarySearchImplementationPreview({ embedded = false, onComplete
   const attemptRef = useRef(attempt); attemptRef.current = attempt;
   const pendingClearRef = useRef<ImplementationClearRecord | null>(null);
   const { firebaseUser } = useUserSession();
+  // 任意フェーズ（実装の橋渡し）に滞在していることを、プレイヤー上部の
+  // 区別表示へ知らせる（2026-11-28、任意フェーズの汎用仕組み）。
+  useEffect(() => { onOptionalPhaseActive?.(bridgeOpen ? bridgeOptionalPhaseId : null); }, [bridgeOpen, onOptionalPhaseActive]);
+  const bridgeOptionalPhase = findOptionalPhase(bridgeOptionalPhaseId);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [celebrationDismissed, setCelebrationDismissed] = useState(false);
   const freeRunning = freeStatus !== "idle";
@@ -485,6 +491,7 @@ export function BinarySearchImplementationPreview({ embedded = false, onComplete
     <Dialog open={bridgeOpen} onClose={() => setBridgeOpen(false)} maxWidth="md" fullWidth>
       <DialogTitle sx={{ fontSize: 20, fontWeight: 900 }}>{content.freeForm.bridgeDialogTitle}</DialogTitle>
       <DialogContent>
+        {bridgeOptionalPhase && <Box sx={{ mb: 2 }}><OptionalPhaseNote phase={bridgeOptionalPhase} /></Box>}
         <Typography component="p" sx={{ fontSize: 15, lineHeight: 1.7, mb: 2 }}>{content.freeForm.bridgeDialogLead}</Typography>
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }, gap: 2 }}>
           {(["skeleton", "fill-in"] as const).map(candidate => (
