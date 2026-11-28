@@ -31,7 +31,6 @@ import { emptyLearningRewards, mergeLearningRewards, type LearningRewards } from
 import { findLearningUnit, resumePhaseIndex, savedPhaseSummaries, type LearningUnit } from "./unitRegistry";
 import { learningErrorMessage, useLearningProgress } from "./useLearningProgress";
 import { useLearningLog } from "./useLearningLog";
-import { BigGoalGate } from "./bigGoal/BigGoalGate";
 import { BigGoalAchievementBand, BigGoalAchievementZone } from "./bigGoal/BigGoalAchievementBand";
 import { BigGoalNextProposal } from "./bigGoal/BigGoalNextProposal";
 import { FeedbackScreen } from "./feedback/FeedbackScreen";
@@ -39,6 +38,7 @@ import { findUnitMission } from "./missionRegistry";
 import { hasSeenMissionStory } from "./missionStoryStore";
 import { MissionPresentation } from "./MissionPresentation";
 import { MissionUnlockNotice } from "./MissionUnlockNotice";
+import { AiConsultationPanel } from "./AiConsultationPanel";
 
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
@@ -276,9 +276,19 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     {entryError && <Alert severity="warning" action={<Button onClick={() => setEntryRevision(value => value + 1)}>再試行</Button>}>学習の開始を記録できませんでした。学習は続けられます。{entryError}</Alert>}
     {draftError && <Alert severity="warning">このブラウザにコード下書きを保存できませんでした。</Alert>}
     {finalShown && !unitSaved && (unitError ? <Alert severity="error" action={<Button onClick={() => setUnitRevision(value => value + 1)}>再試行</Button>}>単元の完了を保存できませんでした。再試行してください。</Alert> : <Typography role="status">単元の完了を保存しています。</Typography>)}
-    <BigGoalGate courseId={courseId} unitTitle={unit.title} getToken={getToken}>
-      {unit.kind === "dijkstra" || unit.kind === "astar" ? <WeightedUnitPreview {...unitPreviewProps} mode={unit.kind} /> : unit.kind === "dfs" ? <DfsUnitPreview {...unitPreviewProps} /> : unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : unit.kind === "greedy-coins" ? <GreedyCoinsUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
-    </BigGoalGate>
+    {/* 旧・大目標の開始時ゲート（BigGoalGate）は 2026-11-22 の撤去決定により外した。
+        bigGoal 配下の部品は削除せず dormant で残す（ホーム #546 と同じ扱い）。
+        目標は学習者が単元ミッションに立てる単一フラグ（GoalFlag）に一本化される。 */}
+    {unit.kind === "dijkstra" || unit.kind === "astar" ? <WeightedUnitPreview {...unitPreviewProps} mode={unit.kind} /> : unit.kind === "dfs" ? <DfsUnitPreview {...unitPreviewProps} /> : unit.kind === "wall-extension" ? <WallExtensionUnitPreview {...unitPreviewProps} /> : unit.kind === "bubble-sort" ? <BubbleSortUnitPreview {...unitPreviewProps} /> : unit.kind === "maze-digging" ? <MazeDiggingUnitPreview {...unitPreviewProps} /> : unit.kind === "binary-search" ? <BinarySearchUnitPreview {...unitPreviewProps} /> : unit.kind === "greedy-coins" ? <GreedyCoinsUnitPreview {...unitPreviewProps} /> : <BfsUnitPreview {...unitPreviewProps} />}
     {boundary && <LearningRewardBoundary boundary={boundary} onDone={finish} onEvent={event => log({ ...event, phaseKey: typeof event.payload?.phaseKey === "string" ? event.payload.phaseKey : boundary.phaseKey })} />}
+    {/* AI 相談（ステージ1）はプレイヤーの殻に常駐させる。全フェーズから開ける導線で、
+        フェーズ画面そのものにはアルドを出さない決めは維持し、パネル内でのみ相談相手として出す。 */}
+    <AiConsultationPanel
+      courseId={courseId}
+      phaseKey={renderedPhase?.phaseKey ?? (initialPhase !== null ? unit.phases[initialPhase].id : null)}
+      phaseLabel={unit.phases.find(phase => phase.id === (renderedPhase?.phaseKey ?? (initialPhase !== null ? unit.phases[initialPhase].id : null)))?.formalName ?? null}
+      code={draft.code}
+      getToken={getToken}
+    />
   </LearningRewardsContext.Provider>;
 }

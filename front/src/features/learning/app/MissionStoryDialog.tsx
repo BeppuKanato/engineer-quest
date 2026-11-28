@@ -13,10 +13,16 @@ import { missionStoryFor } from "./missionStories";
 import { markMissionStorySeen } from "./missionStoryStore";
 import { MissionStoryPlayer } from "./MissionStoryPlayer";
 
-export function MissionStoryDialog({ courseId, open, onClose }: {
+export function MissionStoryDialog({ courseId, open, onClose, onStart, startLabel, startDisabled }: {
   courseId: string | null;
   open: boolean;
   onClose: () => void;
+  // 末尾の主ボタン（学習開始）。呼び出し側の既存の開始処理をそのまま渡す
+  // （単元画面では UnitOverview の start() 系、一覧では単元画面への遷移）。
+  // 渡されない場合は従来どおり「閉じる」だけを出す。
+  onStart?: () => void;
+  startLabel?: string;
+  startDisabled?: boolean;
 }) {
   const unit = courseId ? findLearningUnit(courseId) : undefined;
   const mission = courseId ? findUnitMission(courseId) : undefined;
@@ -46,10 +52,23 @@ export function MissionStoryDialog({ courseId, open, onClose }: {
                       <Box component="span" sx={{ fontWeight: 800 }}>達成の条件：</Box>
                       {mission.successCondition}
                     </Typography>
-                    <Button variant="contained" size="large" onClick={onClose}
-                      sx={{ minWidth: 200, height: 48, fontSize: 16, fontWeight: 800 }}>
-                      閉じる
-                    </Button>
+                    {onStart ? (
+                      <>
+                        <Button variant="contained" size="large" onClick={onStart} disabled={startDisabled}
+                          sx={{ minWidth: 240, height: 52, fontSize: 16, fontWeight: 800 }}>
+                          {startLabel ?? "学習を始める"}
+                        </Button>
+                        <Button variant="text" size="large" onClick={onClose}
+                          sx={{ minWidth: 200, height: 48, fontSize: 16, fontWeight: 700 }}>
+                          閉じる
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="contained" size="large" onClick={onClose}
+                        sx={{ minWidth: 200, height: 48, fontSize: 16, fontWeight: 800 }}>
+                        閉じる
+                      </Button>
+                    )}
                   </Box>
                 )}
               />

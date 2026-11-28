@@ -1,7 +1,8 @@
 "use client";
 
 import { FeedbackDestination } from "@/app/component/feedbackV1";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { getCourses } from "@/api/courses.api";
@@ -85,6 +86,18 @@ export default function CoursesPage() {
               <Typography fontWeight={900} color="error">
                 {errorMessage}
               </Typography>
+              {/* セッション期限切れ・未ログインのときは、文だけで終わらせず
+                  ログイン画面へ進める主ボタンを出す（2026-11-28 レビュー指摘）。 */}
+              {(errorMessage.includes("有効期限") || errorMessage.includes("ログインが必要")) && (
+                <Button
+                  component={Link}
+                  href="/auth/login"
+                  variant="contained"
+                  sx={{ mt: 2.5, minHeight: 48, px: 3.5, fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}
+                >
+                  ログイン画面へ進む
+                </Button>
+              )}
             </Box>
           ) : (
             <CoursesDesign courses={courses} />

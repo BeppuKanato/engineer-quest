@@ -234,7 +234,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
           const reachable = index <= furthest;
           return <Fragment key={phase.id}>
           {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
-          <Button disabled={!reachable} onClick={() => goToPhase(index)}
+          <Button disabled={!reachable || saving} onClick={() => goToPhase(index)}
             aria-current={current ? "step" : undefined}
             startIcon={completed ? <CheckIcon sx={{ fontSize: 16 }} /> : phase.transitionOut === "final" ? <FlagIcon sx={{ fontSize: 16 }} /> : undefined}
             sx={{
@@ -269,7 +269,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
     {saving && (
       <Paper role="status" elevation={6} sx={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 1250, display: "flex", alignItems: "center", gap: 1.25, px: 2.25, py: 1.25, borderRadius: 999, pointerEvents: "none" }}>
         <CircularProgress size={18} thickness={5} />
-        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…</Typography>
+        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…（保存が終わるまで操作できません）</Typography>
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
@@ -283,7 +283,7 @@ export function BubbleSortUnitPreview({ embedded = false, initialPhaseIndex = 0,
     {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
         はみ出して描かれないようにする（#303）。背景色もこの箱が担う。
         結果・ブリッジ・最終結果では、この箱が唯一のスクロール領域になる（#298）。 */}
-    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
+    <Box inert={!!failed || saving || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "phase" ? "100%" : "auto", minHeight: "100%", display: "flex", flexDirection: "column" }}>
         {bubbleSortUnitPhases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>

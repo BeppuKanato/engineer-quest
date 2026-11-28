@@ -36,6 +36,19 @@ import {
 } from "@/api/achievements.api";
 import { fetchClientQuery, peekClientQueryData, queryTags, updateClientQueryData } from "@/lib/clientQueryCache";
 import { useUserSession } from "@/app/component/userSession";
+import { learningUnits } from "@/features/learning/app/unitRegistry";
+
+/** 単元に紐づく実績の「対象単元」名。カード面で単元を区別するために使う。 */
+const unitTitleFor = (courseId: string | null) =>
+  courseId ? learningUnits.find((unit) => unit.courseId === courseId)?.title : undefined;
+
+/**
+ * 「単元ごとの共通実績」の判定（表示専用）：同じカテゴリ・条件種別・題名で、
+ * 対象単元だけが違うシリーズが2つ以上あるものを共通実績としてまとめて見せる。
+ * 実績の定義・解除条件・進捗計算には触らない。
+ */
+const commonSeriesKey = (series: AchievementSeries) =>
+  `${series.category}:${series.displayLevel.conditionType}:${series.title}`;
 import { AppBreadcrumbs } from "@/app/component/appBreadcrumbs";
 import { AppHeader } from "@/app/component/appHeader";
 import { AppSnackbar } from "@/app/component/appSnackbar";
@@ -46,6 +59,7 @@ type AchievementSeries = {
   key: string;
   category: string;
   categoryLabel: string;
+  courseId: string | null;
   title: string;
   levels: AchievementItem[];
   currentLevel: number;
@@ -94,6 +108,7 @@ const toSeries = (groups: AchievementCategoryGroup[]) =>
         key: achievement.seriesKey,
         category: achievement.category,
         categoryLabel: group.label,
+        courseId: achievement.courseId,
         title: achievement.seriesTitle,
         levels: [achievement],
         currentLevel: 0,
@@ -223,6 +238,33 @@ function AchievementsPageContent() {
     [allSeries, selectedSeriesKey, shownSeries]
   );
 
+  // 共通実績のまとめ表示：全シリーズの中で、対象単元の異なる同名シリーズが
+  // 2件以上あるものを「共通実績」とし、一覧では専用のまとまりで見せる。
+  const commonCourseCounts = useMemo(() => {
+    const counts = new Map<string, Set<string>>();
+    for (const series of allSeries) {
+      if (!series.courseId) continue;
+      const key = commonSeriesKey(series);
+      const set = counts.get(key) ?? new Set<string>();
+      set.add(series.courseId);
+      counts.set(key, set);
+    }
+    return counts;
+  }, [allSeries]);
+  const isCommonSeries = (series: AchievementSeries) =>
+    !!series.courseId && (commonCourseCounts.get(commonSeriesKey(series))?.size ?? 0) >= 2;
+  const standaloneSeries = shownSeries.filter((series) => !isCommonSeries(series));
+  const commonGroups = useMemo(() => {
+    const map = new Map<string, AchievementSeries[]>();
+    for (const series of shownSeries) {
+      if (!isCommonSeries(series)) continue;
+      const key = commonSeriesKey(series);
+      map.set(key, [...(map.get(key) ?? []), series]);
+    }
+    return [...map.values()];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shownSeries, commonCourseCounts]);
+
   useEffect(() => {
     if (!selectedSeriesKey && shownSeries[0]) {
       setSelectedSeriesKey(shownSeries[0].key);
@@ -351,18 +393,47 @@ function AchievementsPageContent() {
                   {shownSeries.length === 0 ? (
                     <Alert severity="info">表示できる実績がありません。</Alert>
                   ) : (
-                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 2 }}>
-                      {shownSeries.map((series) => (
-                        <AchievementCard
-                          key={series.key}
-                          series={series}
-                          selected={selectedSeries?.key === series.key}
-                          isTarget={targetSeriesKey === series.key}
-                          isNew={series.levels.some((level) => newlyUnlockedAchievementIds.has(level.id))}
-                          onClick={() => setSelectedSeriesKey(series.key)}
-                        />
+                    <>
+                      {standaloneSeries.length > 0 && (
+                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 2 }}>
+                          {standaloneSeries.map((series) => (
+                            <AchievementCard
+                              key={series.key}
+                              series={series}
+                              selected={selectedSeries?.key === series.key}
+                              isTarget={targetSeriesKey === series.key}
+                              isNew={series.levels.some((level) => newlyUnlockedAchievementIds.has(level.id))}
+                              onClick={() => setSelectedSeriesKey(series.key)}
+                            />
+                          ))}
+                        </Box>
+                      )}
+                      {commonGroups.map((group) => (
+                        <Box key={commonSeriesKey(group[0])} component="section" aria-label={`${group[0].title}（単元ごとの共通実績）`}>
+                          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: standaloneSeries.length > 0 || commonGroups[0] !== group ? 1 : 0, mb: 0.5 }}>
+                            <Typography variant="h5" fontWeight={900}>
+                              {group[0].title}
+                            </Typography>
+                            <Chip label={`${group.length}単元に共通`} size="small" sx={{ fontWeight: 900, bgcolor: "#eef2f7" }} />
+                          </Stack>
+                          <Typography color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
+                            同じ条件の実績が単元ごとにあります。対象の単元は各カードに表示しています。
+                          </Typography>
+                          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 2 }}>
+                            {group.map((series) => (
+                              <AchievementCard
+                                key={series.key}
+                                series={series}
+                                selected={selectedSeries?.key === series.key}
+                                isTarget={targetSeriesKey === series.key}
+                                isNew={series.levels.some((level) => newlyUnlockedAchievementIds.has(level.id))}
+                                onClick={() => setSelectedSeriesKey(series.key)}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
                       ))}
-                    </Box>
+                    </>
                   )}
                 </Stack>
 
@@ -482,6 +553,9 @@ const AchievementCard = ({
           <Typography variant="h6" fontWeight={900} sx={{ lineHeight: 1.35 }}>
             {formatSeriesDisplayTitle(series)}
           </Typography>
+          {unitTitleFor(series.courseId) && (
+            <Chip label={unitTitleFor(series.courseId)} size="small" sx={{ mt: 0.75, fontWeight: 800, bgcolor: "#eef2f7" }} />
+          )}
           <Typography color="text.secondary" sx={{ mt: 0.5, lineHeight: 1.6, fontSize: 14 }}>
             {nextText}
           </Typography>
@@ -543,6 +617,9 @@ const AchievementDetailPanel = ({
             <Typography variant="h3" fontWeight={900} sx={{ fontSize: 34 }}>
               {formatSeriesDisplayTitle(series)}
             </Typography>
+            {unitTitleFor(series.courseId) && (
+              <Chip label={unitTitleFor(series.courseId)} size="small" sx={{ mt: 1, fontWeight: 800, bgcolor: "#eef2f7" }} />
+            )}
             <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.8 }}>
               {series.displayLevel.description}
             </Typography>

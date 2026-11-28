@@ -202,8 +202,8 @@ export const bfsImplementationContent = {
   templates: levelTemplates,
   /** 単元ミッション（ミッションバンド表示用）。文言は単元ミッションの登録と一致させる。 */
   mission: {
-    title: "配送ロボットを最短経路で届ける",
-    successCondition: "通る道の本数が最小のとき達成",
+    title: "配送ロボットで荷物を最短経路で届ける",
+    successCondition: "出発点から各場所までの最短距離を正しく求めたとき達成",
   },
   /** 問題文（仕様）。入口の画面ではなく、作業画面の「問題」タブに常駐させる。 */
   statement: {

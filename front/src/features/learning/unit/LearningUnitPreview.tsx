@@ -14,6 +14,8 @@ import { AnswerFeedbackNotice } from "../assessment/AnswerFeedback";
 
 import { playerTokens } from "../player/player.tokens";
 import { unitText } from "./unit.content";
+import { findOptionalPhase } from "./optionalPhases";
+import { OptionalPhaseChip } from "./OptionalPhaseNote";
 import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
@@ -71,6 +73,12 @@ type UnitPhaseViewProps = LearningInstrumentation & {
   codeDraftBaseKey?: string;
   onCodeDraftError?: (failed: boolean) => void;
   onShowFinalResult: () => void;
+  /**
+   * 任意フェーズ（unit/optionalPhases のカタログ）に滞在していることを
+   * 上部の区別表示へ知らせる。任意フェーズの中身を持つ画面だけが、
+   * 開いている間はその ID を、閉じたら null を渡す。
+   */
+  onOptionalPhaseActive?: (optionalPhaseId: string | null) => void;
 };
 export type UnitPhaseView = ComponentType<UnitPhaseViewProps>;
 export type LearningUnitDefinition = {
@@ -94,6 +102,10 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   const [summaries, setSummaries] = useState<Readonly<Record<number, UnitPhaseSummary>>>(initialSummaries);
   const [completed, setCompleted] = useState(() => new Set(initialCompletedPhases));
   const [unitComplete, setUnitComplete] = useState(initialUnitComplete || first === null);
+  // 任意フェーズに滞在中かどうかは、上部の流れ表示に同格ノードを足さず、
+  // 滞在中だけ区別チップを出すためにここで持つ（2026-11-28）。
+  const [activeOptionalPhaseId, setActiveOptionalPhaseId] = useState<string | null>(null);
+  const activeOptionalPhase = findOptionalPhase(activeOptionalPhaseId);
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
   const reviewCounts = useRef<Record<string, number>>({});
@@ -219,6 +231,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
       advancePending={saving}
       achievements={visible && phase.transitionOut === "result-in-phase" ? renderPhaseAchievements?.(phase.id) : undefined}
       codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
+      onOptionalPhaseActive={setActiveOptionalPhaseId}
       onShowFinalResult={() => { if (!busy.current && unitComplete) setScreen({ kind: "final" }); }} />;
   };
 
@@ -241,7 +254,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
           const reachable = index <= furthest;
           return <Fragment key={phase.id}>
           {index > 0 && <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />}
-          <Button disabled={!reachable} onClick={() => goToPhase(index)}
+          <Button disabled={!reachable || saving} onClick={() => goToPhase(index)}
             aria-current={current ? "step" : undefined}
             startIcon={completed && !current ? <CheckIcon sx={{ fontSize: 16 }} /> : phase.transitionOut === "final" ? <FlagIcon sx={{ fontSize: 16 }} /> : undefined}
             sx={{
@@ -272,11 +285,24 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
           </Button>
         </>}
       </Box>
+      {/* 任意フェーズに滞在している間だけ出す区別表示。流れの列には同格の
+          ノードを足さない（進捗の数え方と現在地の読みを乱さないため）。 */}
+      {activeOptionalPhase && (
+        <Box role="status" sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+          <OptionalPhaseChip />
+          <Typography sx={{ fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap" }}>
+            {activeOptionalPhase.name}（段階{activeOptionalPhase.anchorPhase}のあと）
+          </Typography>
+        </Box>
+      )}
     </Box>
+    {/* 保存中は busy ガードで移動・完了が実際に止まるのに、見た目は押せるままだった。
+        実態に合わせ、保存中は段階ボタン無効＋本文 inert＋その旨を文で出す（保存処理自体は不変）。
+        他の単元プレビュー（コピー群）にも同じ直しを入れている。 */}
     {saving && (
       <Paper role="status" elevation={6} sx={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 1250, display: "flex", alignItems: "center", gap: 1.25, px: 2.25, py: 1.25, borderRadius: 999, pointerEvents: "none" }}>
         <CircularProgress size={18} thickness={5} />
-        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…</Typography>
+        <Typography sx={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>進捗を保存しています…（保存が終わるまで操作できません）</Typography>
       </Paper>
     )}
     {failed && <Alert severity="error" action={<Button onClick={() => void handleComplete(failed.index, failed.summary)}>再試行</Button>}>進捗を保存できませんでした。再試行してから次へ進んでください。</Alert>}
@@ -290,7 +316,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
     {/* 画面より高い内容はこの中でスクロールさせ、白い画面の外（body のグレー背景）へ
         はみ出して描かれないようにする（#303）。背景色もこの箱が担う。
         結果・ブリッジ・最終結果では、この箱が唯一のスクロール領域になる（#298）。 */}
-    <Box inert={!!failed || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
+    <Box inert={!!failed || saving || undefined} sx={{ flex: 1, minHeight: 0, display: "flex", justifyContent: "center", overflowY: "auto", bgcolor: playerTokens.background }}>
       <Box sx={{ width: screen.kind === "phase" && screen.index === 6 ? "100%" : "84vw", height: screen.kind === "phase" ? "100%" : "auto", minHeight: "100%", display: "flex", flexDirection: "column" }}>
         {phases.map((phase, index) => visited.has(index) && (
           <Box key={phase.id} sx={{ display: screen.kind === "phase" && screen.index === index ? "flex" : "none", flexDirection: "column", flex: 1, minHeight: 0 }}>

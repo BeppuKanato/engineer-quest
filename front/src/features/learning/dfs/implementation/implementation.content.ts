@@ -227,8 +227,8 @@ export const dfsImplementationContent = {
   templates: levelTemplates,
   /** 単元ミッション（ミッションバンド表示用）。文言は単元ミッションの登録と一致させる。 */
   mission: {
-    title: "迷路を抜けて出口にたどり着く",
-    successCondition: "出口にたどり着いたとき達成",
+    title: "迷路に隠れた宝を見落とさず探す",
+    successCondition: "たどり着ける場所をすべて調べ、正しい訪問順を記録できたとき達成",
   },
   /** 問題文（仕様）。入口の画面ではなく、作業画面の「問題」タブに常駐させる。 */
   statement: {

@@ -23,6 +23,32 @@ export type UnitPhaseSummary = {
 
 export type UnitTransition = "bridge" | "result" | "result-in-phase" | "final";
 
+/** 任意フェーズのアイコン種別。実アイコンへの引き当ては表示側（単元画面）が持つ。 */
+export type OptionalPhaseIcon = "prediction" | "bridge";
+
+/**
+ * 任意フェーズの定義（2026-11-28、汎用化）。
+ * 必須フェーズの列（UnitPhase[]）には入れない。進捗・再開位置・到達範囲の
+ * 計算は必須フェーズだけで行い、任意フェーズは「どの必須フェーズの後に
+ * ぶら下がるか（anchorPhase）」を持つ脇の定義として読む。
+ * カタログの実体は unit/optionalPhases.ts に置き、表示側はすべてそこを読む。
+ */
+export type UnitOptionalPhase = {
+  /** 識別子。推薦リンク（?phase=）の対象キーと一致させる */
+  id: string;
+  /** 表示名 */
+  name: string;
+  /** この任意フェーズがぶら下がる必須フェーズの番号（1.5 なら 1、6.5 なら 6） */
+  anchorPhase: number;
+  /** 波マップで本線のどちら側に逃がすか */
+  side: "above" | "below";
+  /** 「いつ取り組めるか」の一言（「任意」の表示はチップが担うので含めない） */
+  timing: string;
+  icon: OptionalPhaseIcon;
+  /** 取り組める条件。mission = 最終チャレンジに挑戦できる状態になってから */
+  availability: "always" | "mission";
+};
+
 export type UnitPhase = {
   /** フェーズ番号（1〜7） */
   phase: number;

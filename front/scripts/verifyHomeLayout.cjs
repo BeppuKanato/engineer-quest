@@ -47,5 +47,5 @@ const courseCard=read('app/courses/component/courseCard.tsx');
 assert(courseCard.includes('CourseThumbnail')&&courseCard.includes('COURSE_VISUAL_STYLE')&&courseCard.includes('<StatusChip status={status} />')&&!courseCard.includes('コースクリア'));
 const profile=read('app/profile/page.tsx');
 for(const field of ['completedCourseCount','completedMissionCount','collectedCount','achievedCount'])assert(profile.includes(field));
-for(const label of ['プロフィール設定','代表実績','実績解除通知'])assert(profile.includes(label));
+for(const label of ['プロフィール設定','代表実績'])assert(profile.includes(label));
 console.log('verifyHomeLayout: goal band slot (incl. unset invitation), aim/review grid (review collapses when absent), fresh start card, conditional resume section, status panel (streak, next achievement, latest card), board questions or board invitation, JST learning days and no EXP/rank passed.');

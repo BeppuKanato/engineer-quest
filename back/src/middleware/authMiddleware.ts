@@ -3,6 +3,7 @@
 import { NextFunction, Request, Response } from "express";
 import admin from "../firebase";
 import { prisma } from "../lib/prisma";
+import { ensureUserService } from "../service/auth.service";
 
 const extractBearerToken = (authorizationHeader?: string): string | null => {
   if (!authorizationHeader) {
@@ -123,7 +124,24 @@ export const verifyFirebaseToken = async (
 
     req.firebaseUser = decoded;
 
-    const foundUser = await setAuthUserByFirebaseUid(req, decoded.uid);
+    let foundUser = await setAuthUserByFirebaseUid(req, decoded.uid);
+
+    if (!foundUser) {
+      // Provisioning is otherwise only done by POST /api/auth/ensure, which
+      // the front end calls only when the login / signup form is submitted.
+      // A Firebase user whose DB row was never created (e.g. signup was
+      // interrupted after the Firebase account was created) or was deleted
+      // can therefore never recover through the restored-session flow
+      // (GET /api/auth/me and every other authenticated route returned 401).
+      // Create the row here, on the first authenticated API access, using
+      // the same upsert as /ensure.
+      await ensureUserService({
+        firebaseUid: decoded.uid,
+        displayName: decoded.name ?? null,
+      });
+
+      foundUser = await setAuthUserByFirebaseUid(req, decoded.uid);
+    }
 
     if (!foundUser) {
       return res.status(401).json({

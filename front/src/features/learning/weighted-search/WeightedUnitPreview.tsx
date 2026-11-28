@@ -46,11 +46,11 @@ function Assessment({mode,stage,active=true,onLearningEvent,onComplete,advancePe
     {review&&<LearningReviewDialog content={source} stepIds={question.reviewStepIds} renderCanvas={canvas=>stage==="check"?<WeightedCanvas canvas={canvas}/>:<WeightedMappingCanvas canvas={canvas}/>} onClose={()=>setReview(false)} onLearningEvent={onLearningEvent} active={active}/>}
   </Box>;
 }
-const hintTexts=["距離表g、前の場所parent、未選択の候補frontierを使います。","最小の候補を選び、ゴールであれば経路を復元し、そうでなければ隣のコストを比較します。","while frontier と if candidate < g.get(v, float('inf')) を使い、条件を満たすときだけ更新します。"];
+const hintTexts=["距離表g、前の場所parent、未選択の候補frontierを使います。","最小の候補を選び、ゴールであれば経路を復元し、そうでなければ隣のコストを比較します。","while frontier と if candidate < g.get(v, float('inf')) を使い、条件を満たすときだけ更新します。","経路の復元は、ゴールからparentを逆にたどります。基本のグラフでゴールFに着いたとき、たどる順は F → D → B → A です。まず path = [F] とし、先頭がスタートAになるまで、先頭の場所のparentをpathの先頭に足していくと、[F] → [D, F] → [B, D, F] → [A, B, D, F] と変わります。この最後のpathが、スタートからゴールまでの経路です。"];
 function Implementation({mode,active=true,onLearningEvent,onComplete,onShowFinalResult,codeDraftBaseKey,onCodeDraftError,advancePending}:PhaseProps&{mode:WeightedSearchMode}){
   const templates=useMemo(()=>weightedTemplates(mode),[mode]),tests=useMemo(()=>weightedTests(mode),[mode]);
   const {level,code,setCode,selectLevel}=useImplementationInputLevel({draftBaseKey:codeDraftBaseKey??"preview:"+mode,templates,onDraftError:onCodeDraftError});
-  const [running,setRunning]=useState(false),[ready,setReady]=useState<"loading"|"ready"|"error">("loading"),[outcomes,setOutcomes]=useState<{id:string;passed:boolean;actual?:unknown;error?:string}[]>([]),[runs,setRuns]=useState(0),[hints,setHints]=useState<number[]>([0,0,0,0]),[openHint,setOpenHint]=useState<number|null>(null),[passedCode,setPassedCode]=useState<string|null>(null);
+  const [running,setRunning]=useState(false),[ready,setReady]=useState<"loading"|"ready"|"error">("loading"),[outcomes,setOutcomes]=useState<{id:string;passed:boolean;actual?:unknown;error?:string}[]>([]),[runs,setRuns]=useState(0),[hints,setHints]=useState<number[]>([0,0,0,0,0]),[openHint,setOpenHint]=useState<number|null>(null),[passedCode,setPassedCode]=useState<string|null>(null);
   const busy=useRef(false), mounted=useRef(true);
   const [loadRevision,setLoadRevision]=useState(0);
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
@@ -78,8 +78,8 @@ function Implementation({mode,active=true,onLearningEvent,onComplete,onShowFinal
     </Box>
     {ready==="error"&&<Alert severity="error" action={<Button onClick={()=>{setReady("loading");setLoadRevision(x=>x+1);}}>再読込</Button>}>Python実行環境の読み込みに失敗しました。</Alert>}
     <Button variant="contained" disabled={ready!=="ready"||running||completed||advancePending} onClick={()=>void run()}>{running?"テストを実行中":ready==="loading"?"Pythonを読み込み中":"テストを実行する"}</Button>
-    <Stack direction="row" flexWrap="wrap" gap={1}>{[0,1,2,3].map(n=><Button key={n} disabled={running||completed||(n>0&&hints[n-1]===0)} onClick={()=>hint(n)}>ヒント{n+1}</Button>)}</Stack>
-    {openHint!==null&&<Box sx={{width:"100%",maxWidth:800,p:1,border:"1px solid #e5e7eb"}}>{openHint<3?<Typography>{hintTexts[openHint]}{mode==="astar"&&openHint===1?" 優先値はg+hです。":""}</Typography>:p&&<ParsonsBoard question={{...p,fixedLineIds:undefined}} code={weightedMaterials[mode].code} onAnswer={answer=>{setOpenHint(null);onLearningEvent?.({eventType:"hint_parsons_answer",payload:{correct:answer.lineIds.join()===p.correctAnswer.lineIds.join()}});}}/>}<Button onClick={()=>setOpenHint(null)}>閉じる</Button></Box>}
+    <Stack direction="row" flexWrap="wrap" gap={1}>{[0,1,2,3,4].map(n=><Button key={n} disabled={running||completed||(n>0&&hints[n-1]===0)} onClick={()=>hint(n)}>ヒント{n+1}</Button>)}</Stack>
+    {openHint!==null&&<Box sx={{width:"100%",maxWidth:800,p:1,border:"1px solid #e5e7eb"}}>{openHint<4?<Typography>{hintTexts[openHint]}{mode==="astar"&&openHint===1?" 優先値はg+hです。":""}</Typography>:p&&<ParsonsBoard question={{...p,fixedLineIds:undefined}} code={weightedMaterials[mode].code} onAnswer={answer=>{setOpenHint(null);onLearningEvent?.({eventType:"hint_parsons_answer",payload:{correct:answer.lineIds.join()===p.correctAnswer.lineIds.join()}});}}/>}<Button onClick={()=>setOpenHint(null)}>閉じる</Button></Box>}
     {completed&&<Alert severity="success">すべてのテストを通過しました。</Alert>}
     {completed&&<Button variant="contained" disabled={advancePending} onClick={onShowFinalResult}>単元の結果を見る</Button>}
   </Box>;

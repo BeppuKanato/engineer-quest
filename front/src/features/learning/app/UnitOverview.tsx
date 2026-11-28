@@ -25,6 +25,8 @@ import { startLearningUnit } from "@/api/learning.api";
 import { appLearningTokens as tokens } from "./appLearning.tokens";
 import { findLearningUnit, learnUrl, resumePhaseIndex, type LearningUnit } from "./unitRegistry";
 import { learningPhaseIcons } from "./learningPhaseIcons";
+import { unitOptionalPhases } from "../unit/optionalPhases";
+import { OptionalPhaseChip } from "../unit/OptionalPhaseNote";
 import { WAVE, wavePath, wavePoint } from "./unitPathGeometry";
 import { useLearningProgress, learningErrorMessage } from "./useLearningProgress";
 import { ProgressLoadingSkeleton } from "./ProgressLoadingSkeleton";
@@ -122,14 +124,17 @@ export function UnitOverview({ courseId }: { courseId: string }) {
                   <Typography sx={{ mt: 1, fontSize: 14 }}>達成の条件：{mission.successCondition}</Typography>
                 </Box>
                 <Stack spacing={1.5} sx={{ width: { xs: "100%", md: 260 }, flexShrink: 0 }}>
+                  {/* 主ボタンはアプリの主色 #2563eb を明示する。テーマ未設定のため
+                      variant="contained" だけだと MUI 既定色（#1976d2）になり、
+                      他画面の主ボタンより薄く見える（2026-11-28 レビュー指摘）。 */}
                   {missionDone ? (
-                    <Button variant="contained" component={Link} href={learnUrl(courseId)} sx={{ fontWeight: 800 }}>単元の結果を見る</Button>
+                    <Button variant="contained" component={Link} href={learnUrl(courseId)} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>単元の結果を見る</Button>
                   ) : missionReady ? (
-                    <Button variant="contained" onClick={goMission} sx={{ fontWeight: 800 }}>ミッションに挑戦する</Button>
+                    <Button variant="contained" onClick={goMission} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>ミッションに挑戦する</Button>
                   ) : (
                     <>
                       {nextPhase && <Typography sx={{ fontSize: 14, fontWeight: 700 }}>次は『{nextPhase.formalName}』</Typography>}
-                      <Button variant="contained" onClick={() => void start()} disabled={starting} sx={{ fontWeight: 800 }}>{progress.unit ? "学習を進める" : "学習を始める"}</Button>
+                      <Button variant="contained" onClick={() => void start()} disabled={starting} sx={{ fontWeight: 800, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>{progress.unit ? "学習を進める" : "学習を始める"}</Button>
                     </>
                   )}
                   {/* ストーリーの入口（選ぶ動機・見直し）：帯からいつでも開ける（2026-11-23）。 */}
@@ -140,7 +145,18 @@ export function UnitOverview({ courseId }: { courseId: string }) {
               </Stack>
             </Box>
           )}
-          <MissionStoryDialog courseId={courseId} open={storyOpen} onClose={() => setStoryOpen(false)} />
+          {/* ストーリー末尾の主ボタンは、帯の開始ボタンと同じ状態・文言・処理にそろえる。
+              押すとダイアログを閉じてから既存の開始経路（start / goMission / 結果表示）を
+              そのまま使うので、二重開始にはならない。 */}
+          <MissionStoryDialog courseId={courseId} open={storyOpen} onClose={() => setStoryOpen(false)}
+            startDisabled={starting}
+            startLabel={missionDone ? "単元の結果を見る" : missionReady ? "ミッションに挑戦する" : progress.unit ? "学習を進める" : "学習を始める"}
+            onStart={() => {
+              setStoryOpen(false);
+              if (missionDone) router.push(learnUrl(courseId));
+              else if (missionReady) void goMission();
+              else void start();
+            }} />
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 2.5 }}>
             <Typography sx={{ fontWeight: 700 }}>学習段階 {completed} / 6 完了</Typography>
             <Chip
@@ -200,14 +216,21 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, missionR
   const xDen = vertical ? WAVE.height : WAVE.width;
   const yDen = vertical ? WAVE.width : WAVE.height;
   const viewBox = vertical ? `0 0 ${WAVE.height} ${WAVE.width}` : `0 0 ${WAVE.width} ${WAVE.height}`;
-  // 任意フェーズの置き場所（波の座標系でのずらし）：1.5 は本線の上、6.5 は本線の下に逃がし、
-  // 破線で本線とつなぐ。本線の上に置くと前後の段階ラベルと重なるため。
+  // 任意フェーズは定義カタログ（unit/optionalPhases）から読む（2026-11-28 汎用化）。
+  // 置き場所はアンカー（ぶら下がる必須フェーズの番号）から波の位置を計算し、
+  // 本線の上／下への逃がし量だけを側ごとの既定値で持つ。本線の上に置くと
+  // 前後の段階ラベルと重なるため、側はカタログ側で決める。
+  const optionalIcons = { prediction: ScienceIcon, bridge: BuildIcon } as const;
+  const optionalOffsets = { above: { dx: -14, dy: -60 }, below: { dx: -95, dy: 126 } } as const;
   const optionals =
     count >= 7
-      ? [
-          { t: 0.5 / (count - 1), dx: -14, dy: -60, label: "予測・実験", Icon: ScienceIcon, labelSide: "above" as const, timing: "任意・予想してみよう", needsGoal: false },
-          { t: 5.5 / (count - 1), dx: -95, dy: 126, label: "実装の橋渡し", Icon: BuildIcon, labelSide: "below" as const, timing: "任意・段階6のあと", needsGoal: true },
-        ]
+      ? unitOptionalPhases.map(o => ({
+          ...o,
+          t: (o.anchorPhase - 0.5) / (count - 1),
+          ...optionalOffsets[o.side],
+          labelSide: o.side,
+          Icon: optionalIcons[o.icon],
+        }))
       : [];
   const optionalPos = (o: (typeof optionals)[number]) => {
     const wave = wavePoint(o.t);
@@ -301,7 +324,7 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, missionR
           const wave = wavePoint(o.t);
           const from = vertical ? { x: wave.y, y: wave.x } : { x: wave.x, y: wave.y };
           const to = optionalPos(o);
-          return <line key={o.label} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={o.needsGoal && !missionReady && !missionDone ? "#cbd5e1" : tokens.progress.next} strokeWidth={2.5} strokeDasharray="5 6" />;
+          return <line key={o.id} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={o.availability === "mission" && !missionReady && !missionDone ? "#cbd5e1" : tokens.progress.next} strokeWidth={2.5} strokeDasharray="5 6" />;
         })}
       </svg>
       {unit.phases.map((phase, index) => {
@@ -384,20 +407,21 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, missionR
           </Box>
         );
       })}
-      {/* 任意フェーズ（2026-11-23「置く」と決定）：1.5＝予測・実験（段階1と2の間）、
-          6.5＝実装の橋渡し（段階6とミッション挑戦の間）。本線から少し離して破線でつなぎ、
-          本線の円より小さく破線の輪で「任意」を表す。進捗の分母（6）には入れない。 */}
+      {/* 任意フェーズ（2026-11-23「置く」と決定）：定義カタログの各エントリを、
+          アンカーの位置で本線から少し離して破線でつなぎ、本線の円より小さく
+          破線の輪で表す。進捗の分母（6）には入れない。 */}
       {optionals.map((o) => {
         const pos = optionalPos(o);
         const size = 80;
         const Icon = o.Icon;
-        // 取り組めるタイミングを形と文で出す（2026-11-23、GPT指摘）：橋渡しは段階6を
-        // 終えるまで対象外なので、色を落として「まだ」を表す。
-        const locked = o.needsGoal && !missionReady && !missionDone;
+        // 取り組めるタイミングを形と文で出す（2026-11-23、GPT指摘）：利用条件が
+        // ミッション挑戦可能になってから（availability: mission）の任意フェーズは、
+        // 条件を満たすまで色を落として「まだ」を表す。
+        const locked = o.availability === "mission" && !missionReady && !missionDone;
         return (
           <Box
-            key={o.label}
-            aria-label={`任意フェーズ：${o.label}（${o.timing}）`}
+            key={o.id}
+            aria-label={`任意フェーズ：${o.name}（${o.timing}）`}
             sx={{ position: "absolute", left: `${(pos.x / xDen) * 100}%`, top: `${(pos.y / yDen) * 100}%`, transform: "translate(-50%, -50%)", width: size, height: size }}
           >
             <Box sx={{ width: size, height: size, borderRadius: "50%", border: `2.5px dashed ${locked ? "#cbd5e1" : tokens.progress.next}`, bgcolor: locked ? "#f8fafc" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: locked ? "#94a3b8" : tokens.progress.next }}>
@@ -421,7 +445,10 @@ function UnitPathMap({ unit, next, completedIds, hasProgress, starting, missionR
                 pointerEvents: "none",
               }}
             >
-              <Typography sx={{ fontSize: 14, fontWeight: 700 }}>{o.label}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75 }}>
+                <OptionalPhaseChip muted={locked} />
+                <Typography sx={{ fontSize: 14, fontWeight: 700 }}>{o.name}</Typography>
+              </Box>
               <Typography sx={{ fontSize: 14, color: "text.primary" }}>{o.timing}</Typography>
             </Box>
           </Box>
