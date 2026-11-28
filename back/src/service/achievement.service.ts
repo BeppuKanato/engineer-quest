@@ -46,7 +46,8 @@ const conditionLabel = (a: Achievement) => {
     case AchievementConditionType.UNIT_COMPLETED_COUNT: return `単元を${n}個完了`;
     case AchievementConditionType.PHASE_COMPLETED: return "指定されたフェーズを完了";
     case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT: return "確認問題を初回で全問正解";
-    case AchievementConditionType.PHASE_NO_HINT_COMPLETE: return "ヒントを使わずにフェーズを完了";
+    case AchievementConditionType.PHASE_NO_HINT_COMPLETE: return "ヒントとAIへの相談を使わずにフェーズを完了";
+    case AchievementConditionType.PHASE_FULL_NO_HINT_COMPLETE: return "最終ミッションを「全部書く」で始めて、ヒントとAIへの相談を使わずに完了";
     case AchievementConditionType.STREAK_DAYS: return `${n}日連続で学習`;
     case AchievementConditionType.UNIT_GROUP_COMPLETE: return unitGroupLabel(a);
   }
@@ -75,8 +76,49 @@ type Stats = {
   cardCount: number; questScores: Map<string, number>;
   cardsByCourse: Map<string, number>;
   completedUnits: Set<string>;
+  countableUnits: Set<string>;
   phases: Map<string, PhaseStat>;
 };
+
+/**
+ * フェーズ7（実装フェーズ）の summary.clears（ステージ2で記録）の1件分。
+ * 実績判定はこの clear 単位で行う。解法例を見た clear は実績の対象にしない。
+ */
+type ImplementationClear = {
+  viewedSolution: boolean;
+  usedAiConsultation: boolean;
+  usedHint: boolean;
+  inputLevel: string;
+};
+
+/**
+ * summary から clears を取り出す。clears が無い・空・形が違う場合は null を返し、
+ * 呼び出し側は従来判定へフォールバックする（clears の無い単元・履歴を壊さない）。
+ */
+const parseImplementationClears = (summary: unknown): ImplementationClear[] | null => {
+  if (!summary || typeof summary !== "object" || Array.isArray(summary)) return null;
+  const clears = (summary as { clears?: unknown }).clears;
+  if (!Array.isArray(clears) || clears.length === 0) return null;
+  const parsed = clears.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    if (typeof record.viewedSolution !== "boolean" || typeof record.usedAiConsultation !== "boolean"
+      || typeof record.usedHint !== "boolean" || typeof record.inputLevel !== "string") return [];
+    return [{
+      viewedSolution: record.viewedSolution,
+      usedAiConsultation: record.usedAiConsultation,
+      usedHint: record.usedHint,
+      inputLevel: record.inputLevel,
+    }];
+  });
+  return parsed.length ? parsed : null;
+};
+
+const hasSolutionUnseenClear = (clears: ImplementationClear[]) => clears.some((c) => !c.viewedSolution);
+const hasNoHintClear = (clears: ImplementationClear[]) =>
+  clears.some((c) => !c.viewedSolution && !c.usedHint && !c.usedAiConsultation);
+const hasFullNoHintClear = (clears: ImplementationClear[]) =>
+  clears.some((c) => !c.viewedSolution && !c.usedHint && !c.usedAiConsultation && c.inputLevel === "full");
 const asResultArray = (value: Prisma.JsonValue): Array<Record<string, unknown>> =>
   Array.isArray(value) ? value.filter((v) => Boolean(v) && typeof v === "object" && !Array.isArray(v)) as Array<Record<string, unknown>> : [];
 
@@ -102,13 +144,30 @@ const loadStats = async (userId: string, conditions: ReadonlySet<AchievementCond
   submissions.flatMap((s) => asResultArray(s.results)).forEach((r) => {
     if (r.kind === "OPTIONAL" && r.passed === true && typeof r.requirementId === "string") optionalIds.add(r.requirementId);
   });
+  const phases: Map<string, PhaseStat> = new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }] as [string, PhaseStat]));
+  const completedUnitIds = unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId);
+  // 実績として数えられる単元の集合。実装フェーズに clears がある単元では、
+  // 解法例を見ていない clear がある単元だけを数える。clears が無い単元・履歴は
+  // 従来どおり単元完了だけで数える（grandfather）。進行上の完了とは切り離す。
+  const countableUnits = new Set<string>();
+  for (const courseId of completedUnitIds) {
+    let clears: ImplementationClear[] | null = null;
+    for (const [key, stat] of phases) {
+      const separator = key.indexOf(":");
+      if (key.slice(0, separator) === courseId && key.slice(separator + 1).endsWith("-implementation")) {
+        clears = parseImplementationClears(stat.summary);
+      }
+    }
+    if (!clears || hasSolutionUnseenClear(clears)) countableUnits.add(courseId);
+  }
   return {
     savedMeCount, reviewStreak: reviewCorrectStreak(reviews), epicCardCount, personalBests: personalBestImprovements(personalSubmissions),
     streakDays: currentLearningStreak(learningDayKeys([...submissions.map(row => row.submittedAt), ...unitProgress.map(row => row.completedAt), ...phaseProgress.map(row => row.completedAt)])),
     // Course completion on the new flow means unit completion (#78 / #108).
-    completedCourses: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
-    completedUnits: new Set(unitProgress.filter((u) => u.status === "COMPLETED").map((u) => u.courseId)),
-    phases: new Map(phaseProgress.map((p) => [`${p.courseId}:${p.phaseKey}`, { status: p.status, summary: p.summary }])),
+    completedCourses: new Set(completedUnitIds),
+    completedUnits: new Set(completedUnitIds),
+    countableUnits,
+    phases,
     completedQuests: attempts.filter((a) => a.status === "COMPLETED").length,
     perfectQuests: attempts.filter((a) => a.bestScore >= 100).length,
     optionalRequirements: optionalIds.size, cardCount: cards.length, cardsByCourse,
@@ -123,11 +182,15 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
     case AchievementConditionType.DAILY_REVIEW_CORRECT_STREAK: return { goal, progress: s.reviewStreak };
     case AchievementConditionType.EPIC_KNOWLEDGE_CARD_COUNT: return { goal, progress: s.epicCardCount };
     case AchievementConditionType.CREATE_QUEST_PERSONAL_BEST: return { goal, progress: s.personalBests };
-    case AchievementConditionType.UNIT_COMPLETE: return { goal: 1, progress: a.courseId && s.completedUnits.has(a.courseId) ? 1 : 0 };
-    case AchievementConditionType.UNIT_COMPLETED_COUNT: return { goal, progress: s.completedUnits.size };
+    case AchievementConditionType.UNIT_COMPLETE: return { goal: 1, progress: a.courseId && s.countableUnits.has(a.courseId) ? 1 : 0 };
+    case AchievementConditionType.UNIT_COMPLETED_COUNT: return { goal, progress: s.countableUnits.size };
     case AchievementConditionType.PHASE_COMPLETED: {
       if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
-      return { goal: 1, progress: s.phases.get(`${a.courseId}:${a.phaseKey}`)?.status === "COMPLETED" ? 1 : 0 };
+      const phase = s.phases.get(`${a.courseId}:${a.phaseKey}`);
+      if (phase?.status !== "COMPLETED") return { goal: 1, progress: 0 };
+      // clears がある単元では、解法例を見ていない clear がある場合だけ対象にする。
+      const clears = parseImplementationClears(phase.summary);
+      return { goal: 1, progress: !clears || hasSolutionUnseenClear(clears) ? 1 : 0 };
     }
     case AchievementConditionType.PHASE_FIRST_ATTEMPT_PERFECT: {
       if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
@@ -141,9 +204,22 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
     case AchievementConditionType.PHASE_NO_HINT_COMPLETE: {
       if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
       const phase = s.phases.get(`${a.courseId}:${a.phaseKey}`);
-      const hintUsage = (phase?.summary as { hintUsage?: number[] } | null | undefined)?.hintUsage;
-      const noHint = phase?.status === "COMPLETED" && (!hintUsage || hintUsage.every((count) => count === 0));
+      if (phase?.status !== "COMPLETED") return { goal: 1, progress: 0 };
+      // clears がある単元では clears を正とし、ヒント・AI相談・解法例の
+      // いずれも使っていない clear がある場合だけ対象にする（レベルは不問）。
+      const clears = parseImplementationClears(phase.summary);
+      if (clears) return { goal: 1, progress: hasNoHintClear(clears) ? 1 : 0 };
+      const hintUsage = (phase.summary as { hintUsage?: number[] } | null | undefined)?.hintUsage;
+      const noHint = !hintUsage || hintUsage.every((count) => count === 0);
       return { goal: 1, progress: noHint ? 1 : 0 };
+    }
+    case AchievementConditionType.PHASE_FULL_NO_HINT_COMPLETE: {
+      if (!a.courseId || !a.phaseKey) return { goal: 1, progress: 0 };
+      const phase = s.phases.get(`${a.courseId}:${a.phaseKey}`);
+      if (phase?.status !== "COMPLETED") return { goal: 1, progress: 0 };
+      // clears が無い単元・履歴では判定材料が無いため獲得できない。
+      const clears = parseImplementationClears(phase.summary);
+      return { goal: 1, progress: clears && hasFullNoHintClear(clears) ? 1 : 0 };
     }
     // Legacy mission/activity/exam-based conditions can no longer progress.
     case AchievementConditionType.MISSION_COUNT:
@@ -160,7 +236,7 @@ const progressFor = async (a: Achievement, userId: string, s: Stats) => {
     case AchievementConditionType.CREATE_QUEST_PERFECT_COUNT: return { goal, progress: s.perfectQuests };
     case AchievementConditionType.KNOWLEDGE_CARD_COUNT: return { goal, progress: a.courseId ? s.cardsByCourse.get(a.courseId) ?? 0 : s.cardCount };
     case AchievementConditionType.STREAK_DAYS: return { goal, progress: s.streakDays };
-    case AchievementConditionType.UNIT_GROUP_COMPLETE: return unitGroupProgress(a, s.completedUnits);
+    case AchievementConditionType.UNIT_GROUP_COMPLETE: return unitGroupProgress(a, s.countableUnits);
   }
 };
 
