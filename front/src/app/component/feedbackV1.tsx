@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Alert, Button, Paper, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Stack, Typography } from "@mui/material";
 import Link from "next/link";
+import { findOptionalPhase } from "@/features/learning/unit/optionalPhases";
+import { OptionalPhaseNote } from "@/features/learning/unit/OptionalPhaseNote";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getFeedbackV1, retryFeedbackV1, feedbackCandidates, type FeedbackCandidate, type FeedbackV1Result } from "@/api/feedbackV1.api";
@@ -110,14 +112,17 @@ export function FeedbackCandidates({ candidates, onAction, framing = "choice", h
     <Typography sx={{ fontSize: 14 }}>{framing === "next"
       ? "次の学習では、この内容に進みます。"
       : "取り組むかどうかは自分で選べます。そのまま次へ進むこともできます。"}</Typography>
-    {candidates.map((candidate,index)=><Paper component="article" variant="outlined" key={candidate.candidateId} data-feedback-candidate-id={candidate.candidateId} sx={{ p: 1.5, borderRadius: 2 }}>
+    {candidates.map((candidate,index)=>{const optionalPhase = findOptionalPhase(candidate.actionHref ? new URL(candidate.actionHref, "http://localhost").searchParams.get("phase") : null); return <Paper component="article" variant="outlined" key={candidate.candidateId} data-feedback-candidate-id={candidate.candidateId} sx={{ p: 1.5, borderRadius: 2 }}>
       <Typography fontWeight={700} sx={{ overflowWrap: "anywhere" }}>{index+1}. {candidate.nextStep}</Typography>
       {/* 理由文は「次に何をするかの判断の根拠」で節の本文と同格（2026-11-27 配置変更・案A）。
           画面で最も小さい body2（14px）から、節の本文と同じ 16px に上げる。 */}
       <Typography sx={{ fontSize: 16, lineHeight: 1.8, mt: 0.5, overflowWrap: "anywhere" }}>{candidate.reason}</Typography>
+      {/* 推薦先が任意フェーズなら、定義カタログを引いてその旨をその場で出す
+          （任意であること・位置・進捗に数えないこと。2026-11-28）。 */}
+      {optionalPhase && <Box sx={{ mt: 1 }}><OptionalPhaseNote phase={optionalPhase} /></Box>}
       {candidate.actionHref && !(hideFirstAction && index === 0) && <Button component={Link} href={candidate.actionHref} variant={index === 0 ? "contained" : "outlined"}
         sx={{ mt: 1, minHeight: framing === "next" && index === 0 ? 52 : 44, width: framing === "next" && index === 0 ? "100%" : undefined, maxWidth: "100%", overflowWrap: "anywhere" }} onClick={event=>{if(onAction?.(candidate.actionHref)) event.preventDefault();}}>{candidate.actionLabel}</Button>}
-    </Paper>)}
+    </Paper>;})}
   </Stack>;
 }
 
