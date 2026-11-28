@@ -15,8 +15,8 @@ import { AnswerFeedbackNotice } from "../assessment/AnswerFeedback";
 import { playerTokens } from "../player/player.tokens";
 import { unitText } from "./unit.content";
 import { findOptionalPhase } from "./optionalPhases";
-import { OptionalPhaseChip } from "./OptionalPhaseNote";
-import type { UnitPhase, UnitPhaseSummary } from "./unit.types";
+import { OptionalPhaseChip, OptionalPhaseFlowButton } from "./OptionalPhaseNote";
+import type { UnitOptionalPhase, UnitPhase, UnitPhaseSummary } from "./unit.types";
 import { PhaseBridgeScreen } from "../bfs/unit/PhaseBridgeScreen";
 import { UnitFinalResult, UnitResultScreen } from "../bfs/unit/UnitResultScreens";
 import { FeedbackPositionFigure } from "../app/feedback/FeedbackPositionFigure";
@@ -79,6 +79,12 @@ type UnitPhaseViewProps = LearningInstrumentation & {
    * 開いている間はその ID を、閉じたら null を渡す。
    */
   onOptionalPhaseActive?: (optionalPhaseId: string | null) => void;
+  /**
+   * 上部の流れの任意フェーズ要素を押したときの「開く」要求。
+   * 任意フェーズの中身を持つ画面だけが、seq の変化を見て自分を開く。
+   * 要求は対象フェーズの画面へ遷移した直後に届く（未訪問なら初回マウント時）。
+   */
+  optionalPhaseOpenRequest?: { phaseId: string; seq: number } | null;
 };
 export type UnitPhaseView = ComponentType<UnitPhaseViewProps>;
 export type LearningUnitDefinition = {
@@ -86,6 +92,12 @@ export type LearningUnitDefinition = {
   readonly phases: readonly UnitPhase[];
   readonly views: Readonly<Record<string, UnitPhaseView>>;
   readonly resultFigure: ReactNode;
+  /**
+   * この単元に中身がある任意フェーズのカタログ ID（unit/optionalPhases）。
+   * 宣言した単元だけ、上部の流れにその任意フェーズの要素が出て、
+   * 押すと中身へ直接移動できる。中身の無い任意フェーズは宣言しない。
+   */
+  readonly optionalPhaseIds?: readonly string[];
   readonly firstAttemptResult?: boolean;
   readonly finalResult: { readonly title: string; readonly closing: string };
   /** BFS の単品プレビューは従来のバックグラウンド再生を維持する。 */
@@ -102,10 +114,17 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
   const [summaries, setSummaries] = useState<Readonly<Record<number, UnitPhaseSummary>>>(initialSummaries);
   const [completed, setCompleted] = useState(() => new Set(initialCompletedPhases));
   const [unitComplete, setUnitComplete] = useState(initialUnitComplete || first === null);
-  // 任意フェーズに滞在中かどうかは、上部の流れ表示に同格ノードを足さず、
-  // 滞在中だけ区別チップを出すためにここで持つ（2026-11-28）。
+  // 任意フェーズに滞在中かどうかは、流れの要素の状態表示と、上部の
+  // 区別チップのためにここで持つ（2026-11-28）。
   const [activeOptionalPhaseId, setActiveOptionalPhaseId] = useState<string | null>(null);
   const activeOptionalPhase = findOptionalPhase(activeOptionalPhaseId);
+  // 上部の流れに出す任意フェーズ。この単元に中身があるものだけを単元定義が
+  // 宣言し、名前・位置はカタログから引く（表示側に直書きしない）。
+  const flowOptionalPhases = useMemo(
+    () => (unit.optionalPhaseIds ?? []).map(id => findOptionalPhase(id)).filter((o): o is UnitOptionalPhase => !!o),
+    [unit.optionalPhaseIds],
+  );
+  const [optionalOpenRequest, setOptionalOpenRequest] = useState<{ phaseId: string; seq: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
   const reviewCounts = useRef<Record<string, number>>({});
@@ -141,6 +160,15 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
     setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
     setScreen({ kind: "phase", index });
   }, [phases]);
+
+  // 流れの任意フェーズ要素を押したとき: 中身を持つフェーズ（アンカーの次の
+  // フェーズ）へ移動し、その画面へ「開く」要求を渡す。進捗の計算には含めない。
+  const openOptionalPhase = useCallback((optional: UnitOptionalPhase) => {
+    const target = phases.findIndex(p => p.phase === optional.anchorPhase + 1);
+    if (target < 0) return;
+    goToPhase(target);
+    setOptionalOpenRequest(current => ({ phaseId: optional.id, seq: (current?.seq ?? 0) + 1 }));
+  }, [phases, goToPhase]);
 
   // ブリッジからの前進は phase_move（forward）として記録し、対象フェーズを開く。
   const proceedFromBridge = useCallback((index: number) => {
@@ -232,6 +260,7 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
       achievements={visible && phase.transitionOut === "result-in-phase" ? renderPhaseAchievements?.(phase.id) : undefined}
       codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError}
       onOptionalPhaseActive={setActiveOptionalPhaseId}
+      optionalPhaseOpenRequest={optionalOpenRequest}
       onShowFinalResult={() => { if (!busy.current && unitComplete) setScreen({ kind: "final" }); }} />;
   };
 
@@ -267,6 +296,19 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
             }}>
             {phase.transitionOut === "final" ? "最終チャレンジ" : `${phase.phase}. ${phase.shortName}`}
           </Button>
+          {flowOptionalPhases.filter(optional => optional.anchorPhase === phase.phase).map(optional => {
+            const target = phases.findIndex(p => p.phase === optional.anchorPhase + 1);
+            if (target < 0) return null;
+            // availability: "mission" は、中身を持つフェーズ（最終チャレンジ）に
+            // 挑戦できる状態になってから押せる。進捗の到達範囲（furthest）で判定する。
+            const available = optional.availability === "always" || target <= furthest;
+            return <Fragment key={optional.id}>
+              <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
+              <OptionalPhaseFlowButton phase={optional} disabled={!available || saving}
+                active={activeOptionalPhaseId === optional.id}
+                onOpen={() => openOptionalPhase(optional)} />
+            </Fragment>;
+          })}
           </Fragment>;
         })}
         {unitComplete && <>
@@ -285,8 +327,8 @@ export function LearningUnitPreview({ unit, embedded = false, initialPhaseIndex 
           </Button>
         </>}
       </Box>
-      {/* 任意フェーズに滞在している間だけ出す区別表示。流れの列には同格の
-          ノードを足さない（進捗の数え方と現在地の読みを乱さないため）。 */}
+      {/* 任意フェーズに滞在している間だけ出す区別表示。流れの列の要素は
+          破線の下位要素として出し、滞在先の名前と位置はここでも示す。 */}
       {activeOptionalPhase && (
         <Box role="status" sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
           <OptionalPhaseChip />

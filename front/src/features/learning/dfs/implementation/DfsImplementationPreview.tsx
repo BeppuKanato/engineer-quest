@@ -68,7 +68,7 @@ function LevelFillIllustration({ level }: { level: ImplementationInputLevel }) {
  * 選択ゲートをプログラム形のテンプレートで残した）。問題文は作業画面の
  * 「問題」タブにも常駐する。旧・関数形は implementation-legacy に保存。
  */
-export function DfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, codeDraftBaseKey, onCodeDraftError, onShowFinalResult, onOptionalPhaseActive }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: DfsImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void; onOptionalPhaseActive?: (optionalPhaseId: string | null) => void }) {
+export function DfsImplementationPreview({ embedded = false, onComplete, onLearningEvent, codeDraftBaseKey, onCodeDraftError, onShowFinalResult, onOptionalPhaseActive, optionalPhaseOpenRequest }: LearningInstrumentation & { embedded?: boolean; onComplete?: (summary: DfsImplementationSummary) => void; codeDraftBaseKey?: string; onCodeDraftError?: (failed: boolean) => void; onShowFinalResult?: () => void; onOptionalPhaseActive?: (optionalPhaseId: string | null) => void; optionalPhaseOpenRequest?: { phaseId: string; seq: number } | null }) {
   // 下書きキーはプログラム形式専用にする（関数形の下書きと混ざらない）。
   const draftBaseKey = `${codeDraftBaseKey ?? `engineer-quest:learning-code:preview:${content.id}`}:program`;
   const { level, code, setCode, selectLevel } = useImplementationInputLevel({ draftBaseKey, templates: content.templates, onDraftError: onCodeDraftError });
@@ -90,6 +90,11 @@ export function DfsImplementationPreview({ embedded = false, onComplete, onLearn
   // 任意フェーズ（実装の橋渡し）に滞在していることを、プレイヤー上部の
   // 区別表示へ知らせる（2026-11-28、任意フェーズの汎用仕組み）。
   useEffect(() => { onOptionalPhaseActive?.(bridgeOpen ? bridgeOptionalPhaseId : null); }, [bridgeOpen, onOptionalPhaseActive]);
+  // プレイヤー上部の流れの要素から「実装の橋渡しを開く」要求が来たら、
+  // 既存の橋渡しダイアログをそのまま開く（開閉の仕組みは一本のまま）。
+  useEffect(() => {
+    if (optionalPhaseOpenRequest?.phaseId === bridgeOptionalPhaseId) setBridgeOpen(true);
+  }, [optionalPhaseOpenRequest]);
   const bridgeOptionalPhase = findOptionalPhase(bridgeOptionalPhaseId);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [celebrationDismissed, setCelebrationDismissed] = useState(false);

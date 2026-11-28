@@ -14,6 +14,8 @@ import { AnswerFeedbackNotice } from "../../assessment/AnswerFeedback";
 import { PhaseBridgeScreen } from "../../bfs/unit/PhaseBridgeScreen";
 
 import { playerTokens } from "../../player/player.tokens";
+import { bridgeOptionalPhaseId, findOptionalPhase } from "../../unit/optionalPhases";
+import { OptionalPhaseChip, OptionalPhaseFlowButton } from "../../unit/OptionalPhaseNote";
 import { BinarySearchCheckPreview } from "../check/BinarySearchCheckPreview";
 import { BinarySearchCodeCheckPreview } from "../code-check/BinarySearchCodeCheckPreview";
 import { BinarySearchCodeMappingPreview } from "../code-mapping/BinarySearchCodeMappingPreview";
@@ -78,6 +80,12 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
   const [summaries, setSummaries] = useState<Readonly<Record<number, BinarySearchUnitPhaseSummary>>>(initialSummaries);
   const [completed, setCompleted] = useState(() => new Set(initialCompletedPhases));
   const [unitComplete, setUnitComplete] = useState(initialUnitComplete || first === null);
+  // 任意フェーズ（実装の橋渡し）の滞在表示と、流れからの「開く」要求。
+  // 共有コンテナ（LearningUnitPreview）と同じ仕組みをこの単元にも配線する。
+  const [activeOptionalPhaseId, setActiveOptionalPhaseId] = useState<string | null>(null);
+  const activeOptionalPhase = findOptionalPhase(activeOptionalPhaseId);
+  const [optionalOpenRequest, setOptionalOpenRequest] = useState<{ phaseId: string; seq: number } | null>(null);
+  const bridgeOptionalPhase = findOptionalPhase(bridgeOptionalPhaseId);
   const [saving, setSaving] = useState(false);
   const busy = useRef(false);
   const reviewCounts = useRef<Record<string, number>>({});
@@ -113,6 +121,16 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
     setVisited(current => (current.has(index) ? current : new Set(current).add(index)));
     setScreen({ kind: "phase", index });
   }, []);
+
+  // 流れの任意フェーズ要素を押したとき: 中身を持つフェーズ（アンカーの次の
+  // フェーズ）へ移動し、その画面へ「開く」要求を渡す。進捗の計算には含めない。
+  const openOptionalPhase = useCallback(() => {
+    if (!bridgeOptionalPhase) return;
+    const target = binarySearchUnitPhases.findIndex(p => p.phase === bridgeOptionalPhase.anchorPhase + 1);
+    if (target < 0) return;
+    goToPhase(target);
+    setOptionalOpenRequest(current => ({ phaseId: bridgeOptionalPhase.id, seq: (current?.seq ?? 0) + 1 }));
+  }, [bridgeOptionalPhase, goToPhase]);
 
   // ブリッジからの前進は phase_move（forward）として記録し、対象フェーズを開く。
   const proceedFromBridge = useCallback((index: number) => {
@@ -192,7 +210,7 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
       case 3: return <BinarySearchCodeMappingPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 3} onLearningEvent={onLearningEvent ? phaseObservers[3] : undefined} onComplete={completeHandlers[3]} nextLabel={nextPhaseLabel(binarySearchUnitPhases[3])} />;
       case 4: return <BinarySearchCodeCheckPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 4} onLearningEvent={onLearningEvent ? phaseObservers[4] : undefined} onComplete={completeHandlers[4]} />;
       case 5: return <BinarySearchConsolidationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 5} onLearningEvent={onLearningEvent ? phaseObservers[5] : undefined} onComplete={completeHandlers[5]} onNext={() => { if (feedbackEnabled && renderPhaseFeedbackScreen && !saving && !failed) setScreen({ kind: "feedback", index: 5 }); else setScreen({ kind: "bridge", index: 6 }); }} nextLabel={nextPhaseLabel(binarySearchUnitPhases[5])} />;
-      case 6: return <BinarySearchImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} />;
+      case 6: return <BinarySearchImplementationPreview embedded active={!onLearningEvent || screen.kind === "phase" && screen.index === 6} onLearningEvent={onLearningEvent ? phaseObservers[6] : undefined} codeDraftBaseKey={codeDraftBaseKey} onCodeDraftError={onCodeDraftError} onComplete={completeHandlers[6]} onShowFinalResult={() => setScreen({ kind: "final" })} onOptionalPhaseActive={setActiveOptionalPhaseId} optionalPhaseOpenRequest={optionalOpenRequest} />;
       default: return null;
     }
   };
@@ -229,6 +247,17 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
             }}>
             {phase.transitionOut === "final" ? "最終チャレンジ" : `${phase.phase}. ${phase.shortName}`}
           </Button>
+          {bridgeOptionalPhase && phase.phase === bridgeOptionalPhase.anchorPhase && (() => {
+            const target = binarySearchUnitPhases.findIndex(p => p.phase === bridgeOptionalPhase.anchorPhase + 1);
+            if (target < 0) return null;
+            const available = bridgeOptionalPhase.availability === "always" || target <= furthest;
+            return <Fragment>
+              <ArrowForwardIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0, color: playerTokens.states.completed.stroke }} />
+              <OptionalPhaseFlowButton phase={bridgeOptionalPhase} disabled={!available || saving}
+                active={activeOptionalPhaseId === bridgeOptionalPhase.id}
+                onOpen={openOptionalPhase} />
+            </Fragment>;
+          })()}
           </Fragment>;
         })}
         {unitComplete && <>
@@ -247,6 +276,15 @@ export function BinarySearchUnitPreview({ embedded = false, initialPhaseIndex = 
           </Button>
         </>}
       </Box>
+      {/* 任意フェーズに滞在している間だけ出す区別表示（共有コンテナと同じ）。 */}
+      {activeOptionalPhase && (
+        <Box role="status" sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}>
+          <OptionalPhaseChip />
+          <Typography sx={{ fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap" }}>
+            {activeOptionalPhase.name}（段階{activeOptionalPhase.anchorPhase}のあと）
+          </Typography>
+        </Box>
+      )}
     </Box>
     {saving && (
       <Paper role="status" elevation={6} sx={{ position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)", zIndex: 1250, display: "flex", alignItems: "center", gap: 1.25, px: 2.25, py: 1.25, borderRadius: 999, pointerEvents: "none" }}>
