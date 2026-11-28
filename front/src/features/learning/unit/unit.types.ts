@@ -1,3 +1,4 @@
+import type { ImplementationClearRecord } from "../implementation/answerReveal";
 import type { ImplementationInputLevel } from "../implementation/inputLevel";
 
 /**
@@ -19,6 +20,11 @@ export type UnitPhaseSummary = {
   hintUsage?: readonly number[];
   /** 完了時点の入力量レベル（フェーズ7、Issue #328） */
   inputLevel?: ImplementationInputLevel;
+  /**
+   * フェーズ7の完了ごとの試行フラグ（ステージ2、ステージ4の実績判定の正本）。
+   * 完了のたびに1件追記され、上限は IMPLEMENTATION_CLEARS_LIMIT。
+   */
+  clears?: readonly ImplementationClearRecord[];
 };
 
 export type UnitTransition = "bridge" | "result" | "result-in-phase" | "final";

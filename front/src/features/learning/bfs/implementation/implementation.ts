@@ -1,6 +1,7 @@
 import { runProgramTests } from "../../../../lib/pyodideRunner";
 import { analyzeExecutionError } from "../../../../lib/executionError";
 import type { ImplementationInputLevel } from "../../implementation/inputLevel";
+import type { ImplementationClearRecord } from "../../implementation/answerReveal";
 import { bfsAutoTests, bfsImplementationContent as content, type ProgramTest } from "./implementation.content";
 
 export type HintLevel = 1 | 2 | 3 | 4;
@@ -15,6 +16,8 @@ export type BfsImplementationSummary = {
   readonly hintUsage: HintUsage;
   /** 完了時点の書き方（自由／橋渡しの型）。テストと完了条件は書き方によらず同一。 */
   readonly inputLevel: ImplementationInputLevel;
+  /** フェーズ7の完了ごとの試行フラグ（ステージ2）。この完了分は1件だけ入れ、既存分への追記は保存側（LearningScreen）が担う。 */
+  readonly clears?: readonly ImplementationClearRecord[];
 };
 
 export const recordHintUsage = (usage: HintUsage, level: HintLevel): HintUsage => {

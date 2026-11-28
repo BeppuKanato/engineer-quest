@@ -1,3 +1,4 @@
+import { parsonsMovableLineIds, parsonsMovableSegments } from "../bfs/consolidation/parsonsOrderFeedback";
 import materialVersions from "./materialVersions";
 /** 実装済みの入力形式だけを扱う。ノード・選択肢・コード穴埋め・Parsons。 */
 export type NodeAnswer = { readonly kind: "node"; readonly nodeId: string } | { readonly kind: "none" };
@@ -159,6 +160,16 @@ export function validateAssessment(content: AssessmentContent): void {
       const fixedLineIds = question.fixedLineIds ?? [];
       if (new Set(fixedLineIds).size !== fixedLineIds.length || fixedLineIds.some(id => !question.lineIds.includes(id)) ||
         fixedLineIds.some(id => grouped.has(id)) || fixedLineIds.length >= question.lineIds.length) throw new Error("Invalid fixed line set");
+      // フェード型では可動行は固定行で区切られたセグメントの中でしか動けない。
+      // 初期並びがセグメントを跨いで行を置いていると正解へ到達できないため、ここで弾く。
+      // 到達可能性の計算は盤面（ParsonsBoard）と同じ parsonsMovableSegments を使う。
+      const movableInitial = parsonsMovableLineIds(question.lineIds, fixedLineIds);
+      let segmentOffset = 0;
+      for (const segment of parsonsMovableSegments(question.correctAnswer.lineIds, fixedLineIds)) {
+        const initialSegment = movableInitial.slice(segmentOffset, segmentOffset + segment.length);
+        segmentOffset += segment.length;
+        if (initialSegment.length !== segment.length || segment.some(id => !initialSegment.includes(id))) throw new Error("Invalid Parsons initial order");
+      }
     } else if (content.kind === "code-blank-check" || !question.nodeIds.length || new Set(question.nodeIds).size !== question.nodeIds.length) {
       throw new Error("Invalid node-tap question");
     }

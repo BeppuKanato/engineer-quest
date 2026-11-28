@@ -166,11 +166,11 @@ incorrectFeedback: "不正解。柱は2マスおきに立ちます。11×11で�
 {
 kind: "parsons", id: "whole-code-order", prompt: "迷路を作るコードを、実行の流れに合う順序に並べてください。",
 lineIds: [
-"write-wall", "for-pillar-row", "border-left", "define-function", "allowed-three",
-"initialize-grid", "append-pillar", "for-border", "return-grid", "if-first-row",
-"place-pillar", "border-top", "for-extension", "lookup-delta", "initialize-pillars",
-"define-directions", "border-right", "for-pillar-column", "allowed-four", "border-bottom",
-"else-branch",
+"border-left", "for-pillar-row", "border-top", "define-function", "border-bottom",
+"initialize-grid", "border-right", "for-border", "return-grid", "append-pillar",
+"place-pillar", "lookup-delta", "for-extension", "write-wall", "initialize-pillars",
+"define-directions", "allowed-four", "for-pillar-column", "else-branch", "if-first-row",
+"allowed-three",
 ],
 correctAnswer: { kind: "order", lineIds: wallExtensionCode.lines.map((line) => line.id)}, requires: null,
 // 外周の4つの書き込みは互いに独立で、順序を入れ替えても迷路は変わらない（BFSの初期化2行と同じ扱い）。

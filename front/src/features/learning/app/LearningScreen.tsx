@@ -39,6 +39,7 @@ import { hasSeenMissionStory } from "./missionStoryStore";
 import { MissionPresentation } from "./MissionPresentation";
 import { MissionUnlockNotice } from "./MissionUnlockNotice";
 import { AiConsultationPanel } from "./AiConsultationPanel";
+import { appendImplementationClear, parseImplementationClears } from "../implementation/answerReveal";
 
 export function LearningScreen({ courseId, reviewPhaseKey }: { courseId: string; reviewPhaseKey?: string }) {
   const unit = findLearningUnit(courseId), { firebaseUser } = useUserSession();
@@ -108,8 +109,23 @@ function LearningRun({ unit, progress, reviewPhaseKey }: { unit: LearningUnit; p
     }, error => { if (current) setEntryError(learningErrorMessage(error)); });
     return () => { current = false; };
   }, [getToken, courseId, unit, initialPhase, log, progress.unit, entryRevision]);
+  // フェーズ7の clears は完了ごとに追記する配列（ステージ2）。保存済み summary から
+  // 初期値を読み、セッション中の再完了でも既存分を読み取って追記してから送る。
+  const clearsByPhase = useRef<Readonly<Record<string, readonly import("../implementation/answerReveal").ImplementationClearRecord[]>>>(
+    Object.fromEntries(progress.phases.flatMap(phase => {
+      if (!phase.summary || typeof phase.summary !== "object" || Array.isArray(phase.summary)) return [];
+      const clears = parseImplementationClears((phase.summary as Record<string, unknown>).clears);
+      return clears.length ? [[phase.phaseKey, clears]] : [];
+    })),
+  );
   const completePhase = useCallback(async (phaseKey: string, summary?: UnitPhaseSummary) => {
-    const result = await completeLearningPhase(await getToken(), courseId, phaseKey, summary);
+    let outgoing = summary;
+    if (summary?.clears?.length) {
+      const merged = appendImplementationClear(clearsByPhase.current[phaseKey], summary.clears.at(-1)!);
+      clearsByPhase.current = { ...clearsByPhase.current, [phaseKey]: merged };
+      outgoing = { ...summary, clears: merged };
+    }
+    const result = await completeLearningPhase(await getToken(), courseId, phaseKey, outgoing);
     if (auth.currentUser?.uid !== uid) return;
     setRewards(current => mergeLearningRewards(current, result));
     // 実績は解除されたフェーズの結果画面で提示する（#333）。最終フェーズ分は最終リザルトの新着へ。
