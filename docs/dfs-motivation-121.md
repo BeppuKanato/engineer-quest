@@ -1,5 +1,7 @@
 # DFS「導入」の単品プレビュー（Issue #121）
 
+> 2026-11-28 追記: 宝の扱いは本書の記録（宝は C の1つ、到着する場面8まで非公開）から変更された。現在の正本は [DFS基準データ §3](concept/dfs-unit-baseline.md)（2026-11-28 改訂）で、宝は F と C の2つを最初から見せておく。本書の「宝の非公開」に関する記述・検証項目・確認手順は旧仕様の記録として残す。
+
 - 目的: 深さ優先探索の「場所が分からない宝を漏れなく探す」という導入を、迷路からグラフ・実用例へつながる場面列として提示する。
 - 適用範囲: DFSの導入データ・描画・単品ページ・verify。状態: 実装記録。最終確認日: 2026-11-06。
 - 正本: [Issue #121](https://github.com/BeppuKanato/engineer-quest/issues/121)、[DFS基準データ §0.1・3](concept/dfs-unit-baseline.md)、[教材指針](concept/learning-materials-guideline.md)、[プレイヤーUI定義](concept/learning-player-ui.md)。
