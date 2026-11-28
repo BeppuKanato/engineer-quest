@@ -23,6 +23,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { CourseThumbnail } from "@/app/courses/component/courseThumbnail";
 import type { Course } from "@/app/courses/type";
@@ -471,6 +472,7 @@ const CardGrid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
+  const router = useRouter();
   const toView = (course: Course): UnitView => ({
     id: course.id,
     title: course.title,
@@ -590,7 +592,11 @@ export const CoursesDesign: React.FC<{ courses: Course[] }> = ({ courses }) => {
         message={notice ?? ""}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
-      <MissionStoryDialog courseId={storyCourseId} open={storyCourseId !== null} onClose={() => setStoryCourseId(null)} />
+      {/* 一覧側に開始処理はないため、主ボタンは単元画面への遷移にする（開始は単元画面の start() が担う）。
+          文言は単元画面の開始ボタンにそろえ、状態はカードの UnitView から取る。 */}
+      <MissionStoryDialog courseId={storyCourseId} open={storyCourseId !== null} onClose={() => setStoryCourseId(null)}
+        startLabel={(() => { const s = storyCourseId ? unitById.get(storyCourseId)?.status : undefined; return s === "COMPLETED" ? "単元の結果を見る" : s === "IN_PROGRESS" ? "学習を進める" : "学習を始める"; })()}
+        onStart={() => { const id = storyCourseId; setStoryCourseId(null); if (id) router.push(`/courses/roadmap/${id}`); }} />
     </Stack>
   );
 };

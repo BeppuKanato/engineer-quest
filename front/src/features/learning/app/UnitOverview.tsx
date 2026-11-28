@@ -143,7 +143,18 @@ export function UnitOverview({ courseId }: { courseId: string }) {
               </Stack>
             </Box>
           )}
-          <MissionStoryDialog courseId={courseId} open={storyOpen} onClose={() => setStoryOpen(false)} />
+          {/* ストーリー末尾の主ボタンは、帯の開始ボタンと同じ状態・文言・処理にそろえる。
+              押すとダイアログを閉じてから既存の開始経路（start / goMission / 結果表示）を
+              そのまま使うので、二重開始にはならない。 */}
+          <MissionStoryDialog courseId={courseId} open={storyOpen} onClose={() => setStoryOpen(false)}
+            startDisabled={starting}
+            startLabel={missionDone ? "単元の結果を見る" : missionReady ? "ミッションに挑戦する" : progress.unit ? "学習を進める" : "学習を始める"}
+            onStart={() => {
+              setStoryOpen(false);
+              if (missionDone) router.push(learnUrl(courseId));
+              else if (missionReady) void goMission();
+              else void start();
+            }} />
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 2.5 }}>
             <Typography sx={{ fontWeight: 700 }}>学習段階 {completed} / 6 完了</Typography>
             <Chip
