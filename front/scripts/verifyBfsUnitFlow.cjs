@@ -91,7 +91,7 @@ assert.match(container, /ArrowForwardIcon/, "phase nav chips are connected by ar
 assert.match(read(`${root}/app/UnitOverview.tsx`), /AppBreadcrumbs/, "unit overview uses the shared breadcrumbs");
 assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /AppBreadcrumbs/, "learning screen has no breadcrumbs inside the material");
 assert.doesNotMatch(read(`${root}/app/LearningScreen.tsx`), /単元画面へ戻る/, "learning screen has no back link inside the material");
-// 単元リザルトは専用スクロールを持たず、終了導線はコース一覧へ向ける（#150）。
+// 単元リザルトは専用スクロールを持たない。出口はフィードバックのみ（2026-11-24決定。#150 のコース一覧への終了導線は廃止）。
 const resultScreensSource = read(`${root}/bfs/unit/UnitResultScreens.tsx`);
 const finalResultOnly = resultScreensSource.slice(resultScreensSource.indexOf("export function UnitFinalResult"));
 assert.doesNotMatch(finalResultOnly, /overflowY: "auto"/, "final result does not own an inner scroll area");
@@ -112,8 +112,8 @@ const miniMapSource = read(`${root}/app/UnitPathMiniMap.tsx`);
 assert.match(miniMapSource, /motion\.path/, "mini map draws its path with motion");
 assert.match(miniMapSource, /pathLength/, "mini map path draws in over time");
 assert.match(miniMapSource, /scale: \[1, 1\.05, 1\.03\]/, "mini map grows once the path completes");
-assert.match(resultScreensSource, /href="\/courses"/, "final result exits to the course list");
-assert.equal(bfsUnitText.backToCourses, "コース一覧に戻る", "final result exit label");
+assert.doesNotMatch(finalResultOnly, /href="\/courses"/, "final result has no course-list exit (2026-11-24: feedback is the only exit)");
+assert.match(finalResultOnly, /onShowFeedback/, "final result exits to the feedback screen");
 // 独立した称賛文は置かない（#165）。フェーズリザルトに残すのは事実文と紙吹雪だけ。
 assert.ok(!fs.existsSync(`${root}/bfs/unit/unitResult.presentation.ts`), "Praise copy module is removed");
 

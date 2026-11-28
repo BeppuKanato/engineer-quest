@@ -3,7 +3,6 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Button, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "framer-motion";
-import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { DrawnCheck } from "../../app/DrawnCheck";
@@ -142,9 +141,8 @@ export function UnitFinalResult({ summaries, onReviewPhase, rewards, renderRewar
     {goalAchievement}
     {rewards && renderRewards?.(rewards)}
     <Typography component="p" sx={{ textAlign: "center", fontSize: 15 }}>{binarySearchUnitText.reviewNote}</Typography>
-    {onShowFeedback ? <>
-      <Button variant="contained" onClick={onShowFeedback} sx={{ ...nextButtonSx, minHeight: 48, px: 3, fontSize: 16, fontWeight: 700 }}>フィードバックへ進む</Button>
-      <Button variant="text" component={Link} href="/courses" sx={{ mb: 2, minHeight: 44, fontWeight: 700, color: playerTokens.control }}>{binarySearchUnitText.backToCourses}</Button>
-    </> : <Button variant="contained" component={Link} href="/courses" sx={{ ...nextButtonSx, mb: 2 }}>{binarySearchUnitText.backToCourses}</Button>}
+    {/* 出口はフィードバックのみ（2026-11-24決定）：コース一覧への戻りは置かず、
+        フィードバックを必ず通る形にする（バブルソートの確定形に合わせる）。 */}
+    {onShowFeedback && <Button variant="contained" onClick={onShowFeedback} sx={{ ...nextButtonSx, minHeight: 48, px: 3, fontSize: 16, fontWeight: 700, mb: 2 }}>フィードバックへ進む</Button>}
   </Box>;
 }
